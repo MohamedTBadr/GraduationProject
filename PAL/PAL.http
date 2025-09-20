@@ -1,0 +1,6 @@
+@PAL_HostAddress = http://localhost:5249
+
+GET {{PAL_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
