@@ -4,9 +4,9 @@ using System.Text.Json;
 using Common.Exceptions;
 namespace PAL.Middlewares
 {
-    public class CustomExceptionHandlerMiddleware(RequestDelegate next, ILogger<CustomExceptionHandlerMiddleware> _logger) : IMiddleware
+    public class CustomExceptionHandlerMiddleware(RequestDelegate next, ILogger<CustomExceptionHandlerMiddleware> _logger)
     {
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {

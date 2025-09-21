@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Common.Exceptions
 {
-    public class RateLimitExceededException:Exception
+    public class RateLimitExceededException(string msg ="Too Many Requests"):Exception(msg)
     {
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Common.Exceptions
 {
-    public class UnauthorizedException:Exception
+    public class UnauthorizedException(string msg="Unauthorized Access") :Exception(msg)
     {
     }
 }

@@ -11,10 +11,11 @@ namespace BLL
 {
     public static class BusiniessLayerRegistrationService
     {
-        public static void AddBusinessLayerServices(this IServiceCollection services)
+        public static IServiceCollection AddBusinessLayerServices(this IServiceCollection services)
         {
             services.AddScoped<IEmailSender, EmailSenderService>();
             services.AddScoped<ICacheService, CacheService>();
+            return services;
         }
     }
 }

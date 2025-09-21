@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Common.Exceptions
 {
-    public class NotFoundException: Exception
+    public class NotFoundException(string msg): Exception(msg)
     {
     }
 }
