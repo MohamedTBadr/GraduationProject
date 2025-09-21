@@ -10,15 +10,6 @@ The API is built with **ASP.NET Core Web API** and serves as the foundation of t
 - 🔐 **User Authentication & Authorization**  
   Secure login, registration, and role-based access control.  
 
-- ⚙️ **Business Logic Implementation**  
-  Core functionality and workflows for the system.  
-
-- 🗄️ **Database Access & Management**  
-  Efficient handling of data using Entity Framework Core.  
-
-- 🌐 **RESTful Endpoints**  
-  Provides APIs consumed by the frontend application.  
-
 - ⚡ **Caching**  
   Improves performance and reduces database load.  
 
@@ -38,4 +29,11 @@ The API is built with **ASP.NET Core Web API** and serves as the foundation of t
 ---
 
 ## 📂 Project Structure
+- ⚙️ **Business Logic Implementation**  
+  Core functionality and workflows for the system.  
 
+- 🗄️ **Database Access & Management**  
+  Efficient handling of data using Entity Framework Core.  
+
+- 🌐 **RESTful Endpoints**  
+  Provides APIs consumed by the frontend application.  
