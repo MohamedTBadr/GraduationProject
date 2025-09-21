@@ -1,4 +1,6 @@
 
+using BLL;
+
 namespace PAL
 {
     public class Program
@@ -10,6 +12,14 @@ namespace PAL
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+
+            BusiniessLayerRegistrationService.AddBusinessLayerServices(builder.Services);
+
+
+
+
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

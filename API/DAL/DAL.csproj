@@ -10,7 +10,10 @@
     <Folder Include="Context\" />
     <Folder Include="Entities\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Repositories\Interfaces\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.9.17" />
   </ItemGroup>
 
 </Project>
