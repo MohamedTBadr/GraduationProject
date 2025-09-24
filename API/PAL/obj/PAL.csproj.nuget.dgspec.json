@@ -33,6 +33,9 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
+              "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Common.csproj": {
+                "projectPath": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Common.csproj"
+              },
               "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\DAL\\DAL.csproj": {
                 "projectPath": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\DAL\\DAL.csproj"
               }
@@ -58,6 +61,22 @@
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.20, )"
+            },
+            "Microsoft.AspNetCore.WebUtilities": {
+              "target": "Package",
+              "version": "[8.0.20, )"
+            },
+            "Microsoft.Extensions.Identity.Core": {
+              "target": "Package",
+              "version": "[8.0.20, )"
+            },
+            "Microsoft.IdentityModel.JsonWebTokens": {
+              "target": "Package",
+              "version": "[8.14.0, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.14.0, )"
             }
           },
           "imports": [
@@ -193,6 +212,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.20, )"
+            },
             "Microsoft.Extensions.Configuration.Abstractions": {
               "target": "Package",
               "version": "[8.0.0, )"
