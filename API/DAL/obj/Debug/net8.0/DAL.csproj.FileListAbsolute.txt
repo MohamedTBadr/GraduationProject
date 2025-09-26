@@ -11,3 +11,5 @@ C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\DAL\obj\Debug\net
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\DAL\obj\Debug\net8.0\refint\DAL.dll
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\DAL\obj\Debug\net8.0\DAL.pdb
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\DAL\obj\Debug\net8.0\ref\DAL.dll
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\DAL\bin\Debug\net8.0\DAL.runtimeconfig.json
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\DAL\obj\Debug\net8.0\DAL.genruntimeconfig.cache

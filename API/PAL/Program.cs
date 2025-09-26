@@ -1,24 +1,38 @@
 
 using BLL;
+using BLL.DTOs.AuthenticationDTOs;
 using Common.Exceptions;
 using DAL;
+using DAL.Context;
+using DAL.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using PAL.Middlewares;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using System.Threading.RateLimiting;
+using System.Threading.Tasks;
 
 namespace PAL
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
 
             builder.Services.AddControllers();
+           await DataLayerRegistrationService.AddDataLayerRegistrationService(builder.Services,builder.Configuration);
+            await    BusiniessLayerRegistrationService.AddBusinessLayerServices(builder.Services,builder.Configuration);
+ 
 
-            DataLayerRegistrationService.AddDataLayerRegistrationService(builder.Services,builder.Configuration);
-            BusiniessLayerRegistrationService.AddBusinessLayerServices(builder.Services);
+            //Configure Identity with your ApplicationUser
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
 
 
 
@@ -42,6 +56,10 @@ namespace PAL
                 };
             });
 
+
+            
+     
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -55,12 +73,13 @@ namespace PAL
                 app.UseSwaggerUI();
             }
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseHttpsRedirection();
             app.UseRateLimiter();
 
-            app.UseAuthorization();
-            app.UseAuthentication();
+
             app.UseStaticFiles();
 
 

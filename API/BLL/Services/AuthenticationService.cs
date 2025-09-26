@@ -26,19 +26,25 @@ namespace BLL.Services
             throw new UnauthorizedException();
         }
         public async Task<bool> CheckIfEmailExists(string email) =>( await userManager.FindByEmailAsync(email)) != null;
-        public Task<UserResponse> SignUp(SignUpRequest signUpRequest)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public async Task<UserResponse> RegisterAsync(SignUpRequest request)
         {
+
+            if (await userManager.FindByNameAsync(request.name) != null)
+            {
+                throw new UserAlreadyExistException(request.name);
+            }
+            if (await userManager.FindByEmailAsync(request.email) != null)
+            {
+                throw new UserAlreadyExistException(request.email);
+            }
+
             var User = new ApplicationUser
             {
                 Email = request.email,
                 UserName = request.name
             };
-
             var Result = await userManager.CreateAsync(User, request.password);
             if (Result.Succeeded) return new(request.email, request.password, await GenerateTokenAsync(User));
             var errors = Result.Errors.Select(e => e.Description).ToList();
@@ -110,8 +116,8 @@ namespace BLL.Services
             var jwt = options.Value;
             var Claims = new List<Claim>()
             {
-                new(ClaimTypes.Email , User.Email),
                 new(ClaimTypes.Name ,User.UserName),
+                new(ClaimTypes.Email , User.Email),
 
             };
             var Roles= await userManager.GetRolesAsync(User);
@@ -119,6 +125,11 @@ namespace BLL.Services
             {
                 Claims.Add(new(ClaimTypes.Role, item));
             }
+            foreach (var c in Claims)
+            {
+                Console.WriteLine($"{c.Type} = {c.Value}");
+            }
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -134,6 +145,18 @@ namespace BLL.Services
 
 
 
+        }
+
+
+        public async Task<UserResponse> GenerateRefreshToken(string email)
+        {
+            var User=await userManager.FindByEmailAsync(email);
+
+
+            return new UserResponse(User.UserName,
+                 User.Email,
+               await GenerateTokenAsync(User));
+          
         }
     }
 }

@@ -31,6 +31,7 @@ namespace PAL.Middlewares
             //context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.StatusCode = ex switch
             {
+                UserAlreadyExistException =>(int)HttpStatusCode.Conflict,
                 NotFoundException => (int)HttpStatusCode.NotFound,
                 RateLimitExceededException => (int)HttpStatusCode.TooManyRequests,
                 UnauthorizedException => (int)HttpStatusCode.Unauthorized,

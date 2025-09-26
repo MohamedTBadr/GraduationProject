@@ -3,36 +3,28 @@
   "WorkspaceRootPath": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\businiesslayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\businiesslayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\common\\exceptions\\unauthorizedexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|solutionrelative:common\\exceptions\\unauthorizedexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\common\\exceptions\\notfoundexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|solutionrelative:common\\exceptions\\notfoundexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\common\\exceptions\\ratelimitexceededexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|solutionrelative:common\\exceptions\\ratelimitexceededexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\controllers\\authenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\controllers\\authenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\middlewares\\customexceptionhandlermiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\middlewares\\customexceptionhandlermiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{12357D34-2A02-1ECD-BC6C-D84ADDC1A72E}|DAL\\DAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\dal\\datalayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{12357D34-2A02-1ECD-BC6C-D84ADDC1A72E}|DAL\\DAL.csproj|solutionrelative:dal\\datalayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\businiesslayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\businiesslayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\bll.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\bll.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+      "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\controllers\\apicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\controllers\\apicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,7 +34,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -50,100 +42,81 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "UnauthorizedException.cs",
-              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\UnauthorizedException.cs",
-              "RelativeDocumentMoniker": "Common\\Exceptions\\UnauthorizedException.cs",
-              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\UnauthorizedException.cs",
-              "RelativeToolTip": "Common\\Exceptions\\UnauthorizedException.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-21T23:16:03.114Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "NotFoundException.cs",
-              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\NotFoundException.cs",
-              "RelativeDocumentMoniker": "Common\\Exceptions\\NotFoundException.cs",
-              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\NotFoundException.cs",
-              "RelativeToolTip": "Common\\Exceptions\\NotFoundException.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAA6AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-21T23:15:40.242Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "RateLimitExceededException.cs",
-              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\RateLimitExceededException.cs",
-              "RelativeDocumentMoniker": "Common\\Exceptions\\RateLimitExceededException.cs",
-              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\RateLimitExceededException.cs",
-              "RelativeToolTip": "Common\\Exceptions\\RateLimitExceededException.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-21T23:15:08.793Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "CustomExceptionHandlerMiddleware.cs",
-              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
-              "RelativeDocumentMoniker": "PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
-              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
-              "RelativeToolTip": "PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
-              "ViewState": "AgIAABcAAAAAAAAAAAAAACIAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-21T23:14:26.514Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "DataLayerRegistrationService.cs",
-              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\DAL\\DataLayerRegistrationService.cs",
-              "RelativeDocumentMoniker": "DAL\\DataLayerRegistrationService.cs",
-              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\DAL\\DataLayerRegistrationService.cs",
-              "RelativeToolTip": "DAL\\DataLayerRegistrationService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAA/AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-21T22:53:52.666Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 0,
               "Title": "BusiniessLayerRegistrationService.cs",
               "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\BusiniessLayerRegistrationService.cs",
               "RelativeDocumentMoniker": "BLL\\BusiniessLayerRegistrationService.cs",
               "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\BusiniessLayerRegistrationService.cs",
               "RelativeToolTip": "BLL\\BusiniessLayerRegistrationService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAcAAAAAAAAAA==",
+              "ViewState": "AgIAABgAAAAAAAAAAAAuwBwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-21T22:53:02.854Z"
+              "WhenOpened": "2025-09-26T11:42:30.057Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
+              "Title": "CustomExceptionHandlerMiddleware.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
+              "RelativeDocumentMoniker": "PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
+              "RelativeToolTip": "PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-26T11:44:32.413Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\appsettings.json",
+              "RelativeDocumentMoniker": "PAL\\appsettings.json",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\appsettings.json",
+              "RelativeToolTip": "PAL\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-09-26T11:43:56.51Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Program.cs",
               "RelativeDocumentMoniker": "PAL\\Program.cs",
               "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Program.cs",
               "RelativeToolTip": "PAL\\Program.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAAACAAAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAABIAAAAAAAAAAAAqwBwAAABPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-21T22:35:48.377Z",
+              "WhenOpened": "2025-09-26T11:38:51.672Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "BLL.csproj",
-              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\BLL.csproj",
-              "RelativeDocumentMoniker": "BLL\\BLL.csproj",
-              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\BLL.csproj",
-              "RelativeToolTip": "BLL\\BLL.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-09-21T22:47:35.865Z"
+              "DocumentIndex": 2,
+              "Title": "AuthenticationController.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\AuthenticationController.cs",
+              "RelativeDocumentMoniker": "PAL\\Controllers\\AuthenticationController.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\AuthenticationController.cs",
+              "RelativeToolTip": "PAL\\Controllers\\AuthenticationController.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAAABkAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-26T11:27:23.728Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "APIController.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\APIController.cs",
+              "RelativeDocumentMoniker": "PAL\\Controllers\\APIController.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\APIController.cs",
+              "RelativeToolTip": "PAL\\Controllers\\APIController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-26T11:26:37.675Z",
+              "EditorCaption": ""
             }
           ]
         }

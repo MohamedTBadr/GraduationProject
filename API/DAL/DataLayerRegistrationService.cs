@@ -1,5 +1,7 @@
-﻿using DAL.Repositories;
+﻿using DAL.Context;
+using DAL.Repositories;
 using DAL.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -18,6 +20,10 @@ namespace DAL
         {
             services.AddScoped<ICacheRepository, CacheRepository>();
             services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
+            // 1. Configure DbContext with SQL Server
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                   configuration.GetConnectionString("DefaultConnection")));
 
             return services;
         } 

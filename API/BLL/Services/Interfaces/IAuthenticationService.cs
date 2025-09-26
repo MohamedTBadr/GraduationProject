@@ -12,5 +12,8 @@ namespace BLL.Services.Interfaces
         Task<UserResponse> LogIn(LoginRequest loginRequest);
 
         Task<UserResponse> RegisterAsync(SignUpRequest request);
+        Task<bool> CheckIfEmailExists(string email);
+        Task<UserResponse> GenerateRefreshToken(string email); 
+        Task ForgetPassword(string email);
     }
 }

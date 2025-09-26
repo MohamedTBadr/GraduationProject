@@ -14,3 +14,5 @@ C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\BLL\obj\Debug\net
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\BLL\obj\Debug\net8.0\refint\BLL.dll
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\BLL\obj\Debug\net8.0\BLL.pdb
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\BLL\obj\Debug\net8.0\ref\BLL.dll
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\BLL\bin\Debug\net8.0\Common.dll
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\BLL\bin\Debug\net8.0\Common.pdb
