@@ -125,10 +125,7 @@ namespace BLL.Services
             {
                 Claims.Add(new(ClaimTypes.Role, item));
             }
-            foreach (var c in Claims)
-            {
-                Console.WriteLine($"{c.Type} = {c.Value}");
-            }
+            
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
