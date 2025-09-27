@@ -37,3 +37,7 @@ The API is built with **ASP.NET Core Web API** and serves as the foundation of t
 
 - 🌐 **RESTful Endpoints**  
   Provides APIs consumed by the frontend application.  
+---
+## Postman Workspace
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/join-team?invite_code=9a9e9337fe6fa205768e9c88d945ccfc693a62b62ae493fce4feb04d130b0821&target_code=2d19661ffb3baf6b698f9fed38ac1443)
