@@ -50,8 +50,7 @@
               "RelativeToolTip": "BLL\\BusiniessLayerRegistrationService.cs",
               "ViewState": "AgIAABgAAAAAAAAAAAAuwBwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-26T11:42:30.057Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-26T11:42:30.057Z"
             },
             {
               "$type": "Document",
@@ -63,8 +62,7 @@
               "RelativeToolTip": "PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
               "ViewState": "AgIAAAgAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-26T11:44:32.413Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-26T11:44:32.413Z"
             },
             {
               "$type": "Document",
@@ -76,8 +74,7 @@
               "RelativeToolTip": "PAL\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-09-26T11:43:56.51Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-26T11:43:56.51Z"
             },
             {
               "$type": "Document",
@@ -89,8 +86,7 @@
               "RelativeToolTip": "PAL\\Program.cs",
               "ViewState": "AgIAABIAAAAAAAAAAAAqwBwAAABPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-26T11:38:51.672Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-26T11:38:51.672Z"
             },
             {
               "$type": "Document",
@@ -100,7 +96,7 @@
               "RelativeDocumentMoniker": "PAL\\Controllers\\AuthenticationController.cs",
               "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\AuthenticationController.cs",
               "RelativeToolTip": "PAL\\Controllers\\AuthenticationController.cs",
-              "ViewState": "AgIAABYAAAAAAAAAAAA1wB8AAABGAAAAAAAAAA==",
+              "ViewState": "AgIAABcAAAAAAAAAAAAQwB8AAABGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-26T11:27:23.728Z",
               "EditorCaption": ""
@@ -115,8 +111,7 @@
               "RelativeToolTip": "PAL\\Controllers\\APIController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAuwAQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-26T11:26:37.675Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-26T11:26:37.675Z"
             }
           ]
         }

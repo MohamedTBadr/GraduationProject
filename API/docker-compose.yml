@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aspnet8-app
+    ports:
+      - "5000:8080"   # http://localhost:5000
+    depends_on:
+      - db
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=AppDb;User=sa;Password=MyPass@word;TrustServerCertificate=True;
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=MyPass@word   # SQL Server needs some password, can't run without it
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+volumes:
+  sql_data:

@@ -19,7 +19,7 @@ namespace BLL
         {
             services.AddScoped<IEmailSender, EmailSenderService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
-
+            services.AddScoped<IAttachmentService, AttachmentService>();
             services.AddScoped<ICacheService, CacheService>();
             services.Configure<JWTOptions>(
   configuration.GetSection("JWTOptions"));
