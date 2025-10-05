@@ -1,5 +1,6 @@
 ﻿using BLL.DTOs.AuthenticationDTOs;
 using BLL.Services.Interfaces;
+using IdempotentAPI.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -16,6 +17,7 @@ namespace PAL.Controllers
         public async Task<IActionResult> Login(LoginRequest loginRequest) => Ok(await authenticationService.LogIn(loginRequest));
 
         [HttpPost("Register")]
+        [Idempotent(ExpireHours =1)]
         public async Task<IActionResult> Register(SignUpRequest request) => Ok(await authenticationService.RegisterAsync(request));
 
 

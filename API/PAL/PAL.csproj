@@ -8,10 +8,16 @@
 
   <ItemGroup>
 	  
+    <PackageReference Include="IdempotentAPI" Version="2.6.0" />
+	  
+    <PackageReference Include="IdempotentAPI.Cache.DistributedCache" Version="2.2.0" />
+	  
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.20">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+	  
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.20" />
 	  
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>

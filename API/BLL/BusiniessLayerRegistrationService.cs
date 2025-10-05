@@ -39,7 +39,7 @@ namespace BLL
                 config.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = jwt.Issuer,
+                    ValidIssuer = jwt!.Issuer,
 
                     ValidateAudience = true,
                     ValidAudience = jwt.Audience,

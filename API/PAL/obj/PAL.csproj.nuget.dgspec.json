@@ -323,9 +323,21 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "IdempotentAPI": {
+              "target": "Package",
+              "version": "[2.6.0, )"
+            },
+            "IdempotentAPI.Cache.DistributedCache": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.20, )"
+            },
+            "Microsoft.Extensions.Caching.StackExchangeRedis": {
               "target": "Package",
               "version": "[8.0.20, )"
             },
