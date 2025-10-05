@@ -16,6 +16,9 @@ The API is built with **ASP.NET Core Web API** and serves as the foundation of t
 - 📧 **Email Sending**  
   Integrated email service for account verification, password reset, and notifications.  
 
+- 🔄 **Idempotent API**  
+  Ensures safe retry of requests (e.g., duplicate submissions, network retries) by preventing unintended side effects.  
+
 - 🐳 **Dockerized Deployment**  
   Containerized backend for easy deployment and scalability.  
 
@@ -28,6 +31,7 @@ The API is built with **ASP.NET Core Web API** and serves as the foundation of t
 - **SQL Server**  
 - **Caching (In-Memory / Distributed)**  
 - **SMTP / Email Sender Service**  
+- **Idempotent API Middleware**  
 - **Docker / Docker Compose**  
 
 ---
@@ -43,8 +47,10 @@ The API is built with **ASP.NET Core Web API** and serves as the foundation of t
 - 🌐 **RESTful Endpoints**  
   Provides APIs consumed by the frontend application.  
 
+- 🔄 **Idempotent Middleware**  
+  Protects API endpoints against accidental duplicate requests.  
+
 - 🐳 **Dockerfile & Docker Compose**  
   Enables running the API in a containerized environment.  
 
 ---
-
