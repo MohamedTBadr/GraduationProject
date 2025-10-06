@@ -2132,6 +2132,10 @@
       "Common/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "IdempotentAPI": "2.6.0",
+          "IdempotentAPI.Cache.DistributedCache": "2.2.0"
+        },
         "compile": {
           "bin/placeholder/Common.dll": {}
         },
@@ -5309,8 +5313,6 @@
     "net8.0": [
       "BLL >= 1.0.0",
       "Common >= 1.0.0",
-      "IdempotentAPI >= 2.6.0",
-      "IdempotentAPI.Cache.DistributedCache >= 2.2.0",
       "Microsoft.EntityFrameworkCore.Design >= 8.0.20",
       "Microsoft.Extensions.Caching.StackExchangeRedis >= 8.0.20",
       "Swashbuckle.AspNetCore >= 6.6.2"
@@ -5374,14 +5376,6 @@
       "net8.0": {
         "targetAlias": "net8.0",
         "dependencies": {
-          "IdempotentAPI": {
-            "target": "Package",
-            "version": "[2.6.0, )"
-          },
-          "IdempotentAPI.Cache.DistributedCache": {
-            "target": "Package",
-            "version": "[2.2.0, )"
-          },
           "Microsoft.EntityFrameworkCore.Design": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "suppressParent": "All",

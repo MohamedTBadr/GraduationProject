@@ -11,6 +11,7 @@
           "BLL": "1.0.0",
           "Common": "1.0.0",
           "Microsoft.EntityFrameworkCore.Design": "8.0.20",
+          "Microsoft.Extensions.Caching.StackExchangeRedis": "8.0.20",
           "Swashbuckle.AspNetCore": "6.6.2"
         },
         "runtime": {
@@ -49,6 +50,61 @@
           "lib/net6.0/Humanizer.dll": {
             "assemblyVersion": "2.14.0.0",
             "fileVersion": "2.14.1.48190"
+          }
+        }
+      },
+      "IdempotentAPI/2.6.0": {
+        "dependencies": {
+          "IdempotentAPI.AccessCache": "2.2.0",
+          "Newtonsoft.Json": "13.0.1"
+        },
+        "runtime": {
+          "lib/netstandard2.1/IdempotentAPI.dll": {
+            "assemblyVersion": "2.6.0.0",
+            "fileVersion": "2.6.0.0"
+          }
+        }
+      },
+      "IdempotentAPI.AccessCache/2.2.0": {
+        "dependencies": {
+          "IdempotentAPI.Cache.Abstractions": "2.2.0",
+          "IdempotentAPI.DistributedAccessLock.Abstractions": "2.1.0"
+        },
+        "runtime": {
+          "lib/netstandard2.1/IdempotentAPI.AccessCache.dll": {
+            "assemblyVersion": "2.2.0.0",
+            "fileVersion": "2.2.0.0"
+          }
+        }
+      },
+      "IdempotentAPI.Cache.Abstractions/2.2.0": {
+        "runtime": {
+          "lib/netstandard2.1/IdempotentAPI.Cache.Abstractions.dll": {
+            "assemblyVersion": "2.2.0.0",
+            "fileVersion": "2.2.0.0"
+          }
+        }
+      },
+      "IdempotentAPI.Cache.DistributedCache/2.2.0": {
+        "dependencies": {
+          "IdempotentAPI.Cache.Abstractions": "2.2.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
+        },
+        "runtime": {
+          "lib/netstandard2.1/IdempotentAPI.Cache.DistributedCache.dll": {
+            "assemblyVersion": "2.2.0.0",
+            "fileVersion": "2.2.0.0"
+          }
+        }
+      },
+      "IdempotentAPI.DistributedAccessLock.Abstractions/2.1.0": {
+        "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "6.0.0"
+        },
+        "runtime": {
+          "lib/netstandard2.1/IdempotentAPI.DistributedAccessLock.Abstractions.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
           }
         }
       },
@@ -442,13 +498,26 @@
       "Microsoft.Extensions.Caching.Memory/8.0.1": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2",
-          "Microsoft.Extensions.Logging.Abstractions": "8.0.2",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
           "Microsoft.Extensions.Options": "8.0.2"
         },
         "runtime": {
           "lib/net8.0/Microsoft.Extensions.Caching.Memory.dll": {
             "assemblyVersion": "8.0.0.0",
             "fileVersion": "8.0.1024.46610"
+          }
+        }
+      },
+      "Microsoft.Extensions.Caching.StackExchangeRedis/8.0.20": {
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "Microsoft.Extensions.Options": "8.0.2",
+          "StackExchange.Redis": "2.9.17"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.Caching.StackExchangeRedis.dll": {
+            "assemblyVersion": "8.0.20.0",
+            "fileVersion": "8.0.2025.42002"
           }
         }
       },
@@ -507,7 +576,7 @@
       "Microsoft.Extensions.Logging/8.0.1": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection": "8.0.1",
-          "Microsoft.Extensions.Logging.Abstractions": "8.0.2",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
           "Microsoft.Extensions.Options": "8.0.2"
         },
         "runtime": {
@@ -517,14 +586,14 @@
           }
         }
       },
-      "Microsoft.Extensions.Logging.Abstractions/8.0.2": {
+      "Microsoft.Extensions.Logging.Abstractions/8.0.3": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
         },
         "runtime": {
           "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
             "assemblyVersion": "8.0.0.0",
-            "fileVersion": "8.0.1024.46610"
+            "fileVersion": "8.0.1325.6609"
           }
         }
       },
@@ -618,7 +687,7 @@
       },
       "Microsoft.IdentityModel.Tokens/8.14.0": {
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "8.0.2",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
           "Microsoft.IdentityModel.Logging": "8.14.0"
         },
         "runtime": {
@@ -679,6 +748,14 @@
           }
         }
       },
+      "Newtonsoft.Json/13.0.1": {
+        "runtime": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "13.0.0.0",
+            "fileVersion": "13.0.1.25517"
+          }
+        }
+      },
       "Pipelines.Sockets.Unofficial/2.2.8": {
         "runtime": {
           "lib/net5.0/Pipelines.Sockets.Unofficial.dll": {
@@ -689,7 +766,7 @@
       },
       "StackExchange.Redis/2.9.17": {
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "8.0.2",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
           "Pipelines.Sockets.Unofficial": "2.2.8"
         },
         "runtime": {
@@ -956,6 +1033,10 @@
         }
       },
       "Common/1.0.0": {
+        "dependencies": {
+          "IdempotentAPI": "2.6.0",
+          "IdempotentAPI.Cache.DistributedCache": "2.2.0"
+        },
         "runtime": {
           "Common.dll": {
             "assemblyVersion": "1.0.0.0",
@@ -1004,6 +1085,41 @@
       "sha512": "sha512-lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw==",
       "path": "humanizer.core/2.14.1",
       "hashPath": "humanizer.core.2.14.1.nupkg.sha512"
+    },
+    "IdempotentAPI/2.6.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ajWJezext8lXBVfugSYhLF43WQgBp/26PzwUW+vek+uQfBZm0i29O3rgB4ll3pxxNWXLURNPj2BGGfqjt5Iajg==",
+      "path": "idempotentapi/2.6.0",
+      "hashPath": "idempotentapi.2.6.0.nupkg.sha512"
+    },
+    "IdempotentAPI.AccessCache/2.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2QNSpupYIs+JU/JC7y3Ddg/MXvlmLEfYwcE3vlOJLqMSPrvUZD87SEuXeIsvYYUKI/y434jDxHLYsD3DECB7CQ==",
+      "path": "idempotentapi.accesscache/2.2.0",
+      "hashPath": "idempotentapi.accesscache.2.2.0.nupkg.sha512"
+    },
+    "IdempotentAPI.Cache.Abstractions/2.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kDT8J727Ys/HwP8U1MyErXXYaOtENpT/y9N6MrPolUQrnI/ZbVyk7cOmpwepFmYOuJkodPmdp+046XsAN0+3oQ==",
+      "path": "idempotentapi.cache.abstractions/2.2.0",
+      "hashPath": "idempotentapi.cache.abstractions.2.2.0.nupkg.sha512"
+    },
+    "IdempotentAPI.Cache.DistributedCache/2.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-QEIyTIUurNy+L5FGJWf+xXY2ZL5vlhc0PBBLg2ir2FSjJbLfxWTKDaRIlipA1GTsw6j88hx0ADGWbavRPX9iRQ==",
+      "path": "idempotentapi.cache.distributedcache/2.2.0",
+      "hashPath": "idempotentapi.cache.distributedcache.2.2.0.nupkg.sha512"
+    },
+    "IdempotentAPI.DistributedAccessLock.Abstractions/2.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-fvt5G53QtNtI01PiCtvOGnnWw7Lvz/0ORs/TWgBVRmxX0A2ofaDFiS3V7EZ+HFmeTf5jCbvDthO5oH3xpaQAew==",
+      "path": "idempotentapi.distributedaccesslock.abstractions/2.1.0",
+      "hashPath": "idempotentapi.distributedaccesslock.abstractions.2.1.0.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Authentication.JwtBearer/8.0.20": {
       "type": "package",
@@ -1131,6 +1247,13 @@
       "path": "microsoft.extensions.caching.memory/8.0.1",
       "hashPath": "microsoft.extensions.caching.memory.8.0.1.nupkg.sha512"
     },
+    "Microsoft.Extensions.Caching.StackExchangeRedis/8.0.20": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-X6pBeU2ARaOqxxqqq9I5HmhtciULikdzr74uLM+Ri95epbk6yh3JQcjvC/7d40mzKrg4G2EjbKqbmSoZhCZJFg==",
+      "path": "microsoft.extensions.caching.stackexchangeredis/8.0.20",
+      "hashPath": "microsoft.extensions.caching.stackexchangeredis.8.0.20.nupkg.sha512"
+    },
     "Microsoft.Extensions.DependencyInjection/8.0.1": {
       "type": "package",
       "serviceable": true,
@@ -1173,12 +1296,12 @@
       "path": "microsoft.extensions.logging/8.0.1",
       "hashPath": "microsoft.extensions.logging.8.0.1.nupkg.sha512"
     },
-    "Microsoft.Extensions.Logging.Abstractions/8.0.2": {
+    "Microsoft.Extensions.Logging.Abstractions/8.0.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-nroMDjS7hNBPtkZqVBbSiQaQjWRDxITI8Y7XnDs97rqG3EbzVTNLZQf7bIeUJcaHOV8bca47s1Uxq94+2oGdxA==",
-      "path": "microsoft.extensions.logging.abstractions/8.0.2",
-      "hashPath": "microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512"
+      "sha512": "sha512-dL0QGToTxggRLMYY4ZYX5AMwBb+byQBd/5dMiZE07Nv73o6I5Are3C7eQTh7K2+A4ct0PVISSr7TZANbiNb2yQ==",
+      "path": "microsoft.extensions.logging.abstractions/8.0.3",
+      "hashPath": "microsoft.extensions.logging.abstractions.8.0.3.nupkg.sha512"
     },
     "Microsoft.Extensions.Options/8.0.2": {
       "type": "package",
@@ -1277,6 +1400,13 @@
       "sha512": "sha512-KZYeKBET/2Z0gY1WlTAK7+RHTl7GSbtvTLDXEZZojUdAPqpQNDL6tHv7VUpqfX5VEOh+uRGKaZXkuD253nEOBQ==",
       "path": "mono.texttemplating/2.2.1",
       "hashPath": "mono.texttemplating.2.2.1.nupkg.sha512"
+    },
+    "Newtonsoft.Json/13.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A==",
+      "path": "newtonsoft.json/13.0.1",
+      "hashPath": "newtonsoft.json.13.0.1.nupkg.sha512"
     },
     "Pipelines.Sockets.Unofficial/2.2.8": {
       "type": "package",

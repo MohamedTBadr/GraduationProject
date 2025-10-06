@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace PAL.Controllers
@@ -7,6 +9,10 @@ namespace PAL.Controllers
     [ApiController]
     public abstract class APIController : ControllerBase
     {
-        protected string GetEmailFromToken() => User.FindFirstValue(ClaimTypes.Email);
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        protected string GetEmailFromToken()
+        {
+            return User.FindFirstValue(ClaimTypes.Email);
+        }
     }
 }

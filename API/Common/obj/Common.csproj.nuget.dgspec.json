@@ -50,6 +50,16 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "IdempotentAPI": {
+              "target": "Package",
+              "version": "[2.6.0, )"
+            },
+            "IdempotentAPI.Cache.DistributedCache": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

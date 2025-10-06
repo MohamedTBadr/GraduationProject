@@ -39,8 +39,7 @@ namespace BLL.Services
             {
                 throw new UserAlreadyExistException(request.email);
             }
-
-            var User = new ApplicationUser
+                      var User = new ApplicationUser
             {
                 Email = request.email,
                 UserName = request.name

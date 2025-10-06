@@ -2,6 +2,8 @@
 using System.Net;
 using System.Text.Json;
 using Common.Exceptions;
+using IdempotentAPI.Core;
+using Microsoft.AspNetCore.Http.HttpResults;
 namespace PAL.Middlewares
 {
     public class CustomExceptionHandlerMiddleware(RequestDelegate next, ILogger<CustomExceptionHandlerMiddleware> _logger)
@@ -35,6 +37,9 @@ namespace PAL.Middlewares
                 NotFoundException => (int)HttpStatusCode.NotFound,
                 RateLimitExceededException => (int)HttpStatusCode.TooManyRequests,
                 UnauthorizedException => (int)HttpStatusCode.Unauthorized,
+                IdempotencyKeyMissingException => (int)HttpStatusCode.BadRequest,
+                IdempotencyKeyDuplicateException=>(int)HttpStatusCode.NotAcceptable,
+                BadRequestException => (int)HttpStatusCode.BadRequest,
                 _ => (int)HttpStatusCode.InternalServerError
             };
 

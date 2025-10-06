@@ -27,10 +27,14 @@ namespace PAL
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
-           await DataLayerRegistrationService.AddDataLayerRegistrationService(builder.Services,builder.Configuration);
+            builder.Services.AddControllers()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = true;
+                });
+            await DataLayerRegistrationService.AddDataLayerRegistrationService(builder.Services,builder.Configuration);
             await    BusiniessLayerRegistrationService.AddBusinessLayerServices(builder.Services,builder.Configuration);
- 
+            await PresentationRegistrationService.AddPresentationRegistrationServices(builder.Services, builder.Configuration);
 
             //Configure Identity with your ApplicationUser
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -40,55 +44,8 @@ namespace PAL
 
 
 
-            builder.Services.AddRateLimiter(options =>
-            {
-                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-                    RateLimitPartition.GetFixedWindowLimiter(
-                        partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
-                        factory: partition => new FixedWindowRateLimiterOptions
-                        {
-                            AutoReplenishment = true,
-                            PermitLimit = 20,
-                            QueueLimit = 0,
-                            Window = TimeSpan.FromMinutes(1)
-                        }));
 
-                options.OnRejected = async (context, token) =>
-                {
-                    throw new RateLimitExceededException();
-                };
-            });
-
-
-            // 1) Register an IDistributedCache implementation first
-            //    (in dev: in-memory; in prod: use StackExchange.Redis)
-            // 1) Register Redis as IDistributedCache
-            builder.Services.AddStackExchangeRedisCache(options =>
-            {
-                // Your Redis connection string should be in appsettings.json
-                // e.g. "Redis": "localhost:6379"
-                options.Configuration = builder.Configuration.GetConnectionString("Redis");
-                options.InstanceName = "MyApp_"; // optional prefix for Redis keys
-            });
-
-            // 2) Create Idempotency options and register the core with them
-            var idempotencyOptions = new IdempotencyOptions
-            {
-                // prefer ExpiresInMilliseconds (ExpireHours is marked obsolete in README)
-                ExpiresInMilliseconds = TimeSpan.FromHours(24).TotalMilliseconds,
-                HeaderKeyName = "Idempotency-Key",
-                DistributedCacheKeysPrefix = "IdempAPI_",
-                CacheOnlySuccessResponses = true,
-                DistributedLockTimeoutMilli = 2000 // ms (only required if using distributed locks)
-            };
-
-            // Register core idempotency using the options (controller-based)
-            builder.Services.AddIdempotentAPI(idempotencyOptions);
-
-            // 3) Register the library's DistributedCache implementation
-            //    (this extension lives in the IdempotentAPI.Cache.DistributedCache package)
-            builder.Services.AddIdempotentAPIUsingDistributedCache(); // README shows this usage. :contentReference[oaicite:2]{index=2}
-
+    
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -103,6 +60,19 @@ namespace PAL
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.MapWhen(
+    context => (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method))&&(
+    
+        context.Request.Path.StartsWithSegments("/api/register")
+
+//       || the rest coming soon
+    ),
+    builder =>
+    {
+        builder.UseMiddleware<IdempotencyCustomMiddleware>();
+    });
+
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();

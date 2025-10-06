@@ -3,16 +3,52 @@
   "WorkspaceRootPath": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\businiesslayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\businiesslayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\services\\interfaces\\iattachmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\services\\interfaces\\iattachmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\middlewares\\idempotencycustommiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\middlewares\\idempotencycustommiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\services\\attachmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\services\\attachmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\controllers\\authenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\controllers\\authenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\controllers\\apicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\controllers\\apicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\dtos\\authenticationdtos\\loginrequest.cs||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\dtos\\authenticationdtos\\loginrequest.cs||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\common\\exceptions\\badrequestexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|solutionrelative:common\\exceptions\\badrequestexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\dtos\\authenticationdtos\\signuprequest.cs||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\dtos\\authenticationdtos\\signuprequest.cs||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\middlewares\\customexceptionhandlermiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\middlewares\\customexceptionhandlermiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\common\\exceptions\\idempotencykeyduplicateexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|solutionrelative:common\\exceptions\\idempotencykeyduplicateexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\common\\exceptions\\idempotencyexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|solutionrelative:common\\exceptions\\idempotencyexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\services\\authenticationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\services\\authenticationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\common\\exceptions\\idempotencykeymissingexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E15E491A-E872-91D8-DF7A-CA59C792F064}|Common\\Common.csproj|solutionrelative:common\\exceptions\\idempotencykeymissingexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,7 +58,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,41 +66,158 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "BusiniessLayerRegistrationService.cs",
-              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\BusiniessLayerRegistrationService.cs",
-              "RelativeDocumentMoniker": "BLL\\BusiniessLayerRegistrationService.cs",
-              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\BusiniessLayerRegistrationService.cs",
-              "RelativeToolTip": "BLL\\BusiniessLayerRegistrationService.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAABUAAABIAAAAAAAAAA==",
+              "DocumentIndex": 3,
+              "Title": "APIController.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\APIController.cs",
+              "RelativeDocumentMoniker": "PAL\\Controllers\\APIController.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\APIController.cs",
+              "RelativeToolTip": "PAL\\Controllers\\APIController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-01T20:39:54.1Z",
+              "WhenOpened": "2025-10-06T11:32:39.545Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "IAttachmentService.cs",
-              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\Interfaces\\IAttachmentService.cs",
-              "RelativeDocumentMoniker": "BLL\\Services\\Interfaces\\IAttachmentService.cs",
-              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\Interfaces\\IAttachmentService.cs",
-              "RelativeToolTip": "BLL\\Services\\Interfaces\\IAttachmentService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAArAAAAAAAAAA==",
+              "DocumentIndex": 6,
+              "Title": "SignUpRequest.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\DTOs\\AuthenticationDTOs\\SignUpRequest.cs",
+              "RelativeDocumentMoniker": "BLL\\DTOs\\AuthenticationDTOs\\SignUpRequest.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\DTOs\\AuthenticationDTOs\\SignUpRequest.cs",
+              "RelativeToolTip": "BLL\\DTOs\\AuthenticationDTOs\\SignUpRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-01T20:38:55.196Z",
+              "WhenOpened": "2025-10-06T11:10:56.153Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "AttachmentService.cs",
-              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\AttachmentService.cs",
-              "RelativeDocumentMoniker": "BLL\\Services\\AttachmentService.cs",
-              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\AttachmentService.cs",
-              "RelativeToolTip": "BLL\\Services\\AttachmentService.cs",
-              "ViewState": "AgIAACIAAAAAAAAAAAAQwDgAAAAZAAAAAAAAAA==",
+              "Title": "AuthenticationController.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\AuthenticationController.cs",
+              "RelativeDocumentMoniker": "PAL\\Controllers\\AuthenticationController.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\AuthenticationController.cs",
+              "RelativeToolTip": "PAL\\Controllers\\AuthenticationController.cs",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAAwE4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-01T20:38:37.498Z",
+              "WhenOpened": "2025-10-06T11:09:09.27Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "IdempotencyException.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\IdempotencyException.cs",
+              "RelativeDocumentMoniker": "Common\\Exceptions\\IdempotencyException.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\IdempotencyException.cs",
+              "RelativeToolTip": "Common\\Exceptions\\IdempotencyException.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T10:35:11.468Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "IdempotencyKeyDuplicateException.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\IdempotencyKeyDuplicateException.cs",
+              "RelativeDocumentMoniker": "Common\\Exceptions\\IdempotencyKeyDuplicateException.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\IdempotencyKeyDuplicateException.cs",
+              "RelativeToolTip": "Common\\Exceptions\\IdempotencyKeyDuplicateException.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T10:31:26.065Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Program.cs",
+              "RelativeDocumentMoniker": "PAL\\Program.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Program.cs*",
+              "RelativeToolTip": "PAL\\Program.cs*",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAAAEQAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-05T21:10:06.913Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "IdempotencyCustomMiddleware.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Middlewares\\IdempotencyCustomMiddleware.cs",
+              "RelativeDocumentMoniker": "PAL\\Middlewares\\IdempotencyCustomMiddleware.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Middlewares\\IdempotencyCustomMiddleware.cs",
+              "RelativeToolTip": "PAL\\Middlewares\\IdempotencyCustomMiddleware.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAuwBkAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T10:08:43.759Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "BadRequestException.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\BadRequestException.cs",
+              "RelativeDocumentMoniker": "Common\\Exceptions\\BadRequestException.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\BadRequestException.cs",
+              "RelativeToolTip": "Common\\Exceptions\\BadRequestException.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T11:13:58.951Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "LoginRequest.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\DTOs\\AuthenticationDTOs\\LoginRequest.cs",
+              "RelativeDocumentMoniker": "BLL\\DTOs\\AuthenticationDTOs\\LoginRequest.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\DTOs\\AuthenticationDTOs\\LoginRequest.cs",
+              "RelativeToolTip": "BLL\\DTOs\\AuthenticationDTOs\\LoginRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T11:31:08.742Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "CustomExceptionHandlerMiddleware.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
+              "RelativeDocumentMoniker": "PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
+              "RelativeToolTip": "PAL\\Middlewares\\CustomExceptionHandlerMiddleware.cs",
+              "ViewState": "AgIAABoAAAAAAAAAAAAYwDEAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T10:12:31.712Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "AuthenticationService.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\AuthenticationService.cs",
+              "RelativeDocumentMoniker": "BLL\\Services\\AuthenticationService.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\AuthenticationService.cs",
+              "RelativeToolTip": "BLL\\Services\\AuthenticationService.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAACkAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T11:09:15.307Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "IdempotencyKeyMissingException.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\IdempotencyKeyMissingException.cs",
+              "RelativeDocumentMoniker": "Common\\Exceptions\\IdempotencyKeyMissingException.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\Common\\Exceptions\\IdempotencyKeyMissingException.cs",
+              "RelativeToolTip": "Common\\Exceptions\\IdempotencyKeyMissingException.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T10:10:25.617Z",
               "EditorCaption": ""
             }
           ]

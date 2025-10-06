@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="IdempotentAPI" Version="2.6.0" />
+
+		<PackageReference Include="IdempotentAPI.Cache.DistributedCache" Version="2.2.0" />
+
+	</ItemGroup>
 </Project>
