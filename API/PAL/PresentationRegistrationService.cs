@@ -17,7 +17,7 @@ namespace PAL
             {
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                     RateLimitPartition.GetFixedWindowLimiter(
-                        partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
+                        partitionKey: httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString()??"Unkown",
                         factory: partition => new FixedWindowRateLimiterOptions
                         {
                             AutoReplenishment = true,
@@ -26,7 +26,7 @@ namespace PAL
                             Window = TimeSpan.FromMinutes(1)
                         }));
 
-                options.OnRejected = async (context, token) =>
+                options.OnRejected = async (_,_) =>
                 {
                     throw new RateLimitExceededException();
                 };

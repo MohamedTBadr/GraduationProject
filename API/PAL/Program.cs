@@ -62,16 +62,13 @@ namespace PAL
             }
 
             app.MapWhen(
-    context => (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method))&&(
-    
-        context.Request.Path.StartsWithSegments("/api/register")
-
+                      context => (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method))&&(context.Request.Path.StartsWithSegments("/api/register")
 //       || the rest coming soon
-    ),
-    builder =>
-    {
-        builder.UseMiddleware<IdempotencyCustomMiddleware>();
-    });
+                            ),
+                            builder =>
+                            {
+                                builder.UseMiddleware<IdempotencyCustomMiddleware>();
+                            });
 
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseAuthentication();
