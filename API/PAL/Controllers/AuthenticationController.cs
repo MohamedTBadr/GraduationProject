@@ -13,7 +13,7 @@ namespace PAL.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthenticationController(IAuthenticationService authenticationService):APIController
+    public class AuthenticationController(IServiceManager serviceManager):APIController
     {
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
@@ -32,7 +32,7 @@ namespace PAL.Controllers
                 throw new BadRequestException(errors);
             }
 
-            return Ok(await authenticationService.LogIn(loginRequest));
+            return Ok(await serviceManager.AuthenticationService.LogIn(loginRequest));
         }
 
         [HttpPost("Register")]
@@ -53,7 +53,7 @@ namespace PAL.Controllers
                 throw new BadRequestException(errors);
             }
 
-            return Ok(await authenticationService.RegisterAsync(request));
+            return Ok(await serviceManager.AuthenticationService.RegisterAsync(request));
         }
 
         [HttpPost("CheckIfEmailExists")]
@@ -73,7 +73,7 @@ namespace PAL.Controllers
                 throw new BadRequestException(errors);
             }
 
-            return Ok(await authenticationService.CheckIfEmailExists(email));
+            return Ok(await serviceManager.AuthenticationService.CheckIfEmailExists(email));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -82,7 +82,7 @@ namespace PAL.Controllers
         public async Task<IActionResult> RefreshToken()
         {
             var email = GetEmailFromToken();
-            return Ok(await authenticationService.GenerateRefreshToken(email));
+            return Ok(await serviceManager.AuthenticationService.GenerateRefreshToken(email));
         }
     }
 }
