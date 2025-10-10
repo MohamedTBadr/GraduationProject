@@ -3,6 +3,22 @@
   "WorkspaceRootPath": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\businiesslayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\businiesslayerregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\controllers\\authenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\controllers\\authenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\services\\servicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\services\\servicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\bll\\services\\interfaces\\iservicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5875EBB1-01BE-2D17-3613-D0BAD09CBB40}|BLL\\BLL.csproj|solutionrelative:bll\\services\\interfaces\\iservicemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|c:\\users\\tarek\\source\\repos\\mohamedtbadr\\graduationproject\\api\\pal\\presentationregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F297E6DA-7E76-8B9D-B205-527D7E93E463}|PAL\\PAL.csproj|solutionrelative:pal\\presentationregistrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -14,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -22,13 +38,65 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AuthenticationController.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\AuthenticationController.cs",
+              "RelativeDocumentMoniker": "PAL\\Controllers\\AuthenticationController.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\Controllers\\AuthenticationController.cs",
+              "RelativeToolTip": "PAL\\Controllers\\AuthenticationController.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAgwFgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T08:45:06.002Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "BusiniessLayerRegistrationService.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\BusiniessLayerRegistrationService.cs",
+              "RelativeDocumentMoniker": "BLL\\BusiniessLayerRegistrationService.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\BusiniessLayerRegistrationService.cs",
+              "RelativeToolTip": "BLL\\BusiniessLayerRegistrationService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T08:44:33.893Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ServiceManager.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\ServiceManager.cs",
+              "RelativeDocumentMoniker": "BLL\\Services\\ServiceManager.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\ServiceManager.cs",
+              "RelativeToolTip": "BLL\\Services\\ServiceManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T08:42:10.278Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IServiceManager.cs",
+              "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\Interfaces\\IServiceManager.cs",
+              "RelativeDocumentMoniker": "BLL\\Services\\Interfaces\\IServiceManager.cs",
+              "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\BLL\\Services\\Interfaces\\IServiceManager.cs",
+              "RelativeToolTip": "BLL\\Services\\Interfaces\\IServiceManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T08:42:00.219Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "PresentationRegistrationService.cs",
               "DocumentMoniker": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\PresentationRegistrationService.cs",
               "RelativeDocumentMoniker": "PAL\\PresentationRegistrationService.cs",
               "ToolTip": "C:\\Users\\tarek\\source\\repos\\MohamedTBadr\\GraduationProject\\API\\PAL\\PresentationRegistrationService.cs",
               "RelativeToolTip": "PAL\\PresentationRegistrationService.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAqwEQAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-08T09:16:51.503Z",
               "EditorCaption": ""
