@@ -14,6 +14,7 @@ namespace DAL.Context
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+
         }
 
     }

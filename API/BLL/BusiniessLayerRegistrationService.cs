@@ -51,8 +51,8 @@ namespace BLL
 
                     ValidateLifetime=true
 
+                    
                     ,
-
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey=new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey))
                 };

@@ -1,4 +1,4 @@
-
+﻿
 using BLL;
 using BLL.DTOs.AuthenticationDTOs;
 using Common.Exceptions;
@@ -36,16 +36,33 @@ namespace PAL
             await    BusiniessLayerRegistrationService.AddBusinessLayerServices(builder.Services,builder.Configuration);
             await PresentationRegistrationService.AddPresentationRegistrationServices(builder.Services, builder.Configuration);
 
+
             //Configure Identity with your ApplicationUser
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
 
+          
+            // Configure Identity options (AFTER AddIdentity)
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                // ✅ Allow letters, digits, and spaces
+                options.User.AllowedUserNameCharacters =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
+                // Optional: require unique email
+                options.User.RequireUniqueEmail = true;
+
+                // Optional: tweak password settings
+                options.Password.RequireDigit = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 6;
+            });
 
 
 
-    
+
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

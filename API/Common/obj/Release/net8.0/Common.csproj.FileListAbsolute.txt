@@ -1,0 +1,13 @@
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\bin\Release\net8.0\Common.deps.json
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\bin\Release\net8.0\Common.dll
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\bin\Release\net8.0\Common.pdb
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\Common.csproj.AssemblyReference.cache
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\Common.AssemblyInfoInputs.cache
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\Common.AssemblyInfo.cs
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\Common.csproj.CoreCompileInputs.cache
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\Common.sourcelink.json
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\Common.dll
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\refint\Common.dll
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\Common.pdb
+C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\Common\obj\Release\net8.0\ref\Common.dll
