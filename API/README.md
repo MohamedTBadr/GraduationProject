@@ -22,6 +22,12 @@ The API is built with **ASP.NET Core Web API** and serves as the foundation of t
 - 🐳 **Dockerized Deployment**  
   Containerized backend for easy deployment and scalability.  
 
+- 🔗 **HTTPS Reverse Proxy (YARP)**  
+  - API is accessible via an **HTTPS reverse proxy** running on `https://localhost:5000`.  
+  - Forwards requests to multiple backend servers (load-balanced) running on `http://localhost:5001`, `5002`, `5003`.  
+  - Supports routing all paths (e.g., `/api/...`) securely and transparently.  
+  - Central entry point for API requests and load balancing.  
+
 ---
 
 ## 🛠️ Tech Stack
@@ -33,6 +39,7 @@ The API is built with **ASP.NET Core Web API** and serves as the foundation of t
 - **SMTP / Email Sender Service**  
 - **Idempotent API Middleware**  
 - **Docker / Docker Compose**  
+- **YARP Reverse Proxy**  
 
 ---
 
@@ -50,7 +57,25 @@ The API is built with **ASP.NET Core Web API** and serves as the foundation of t
 - 🔄 **Idempotent Middleware**  
   Protects API endpoints against accidental duplicate requests.  
 
+- 🔗 **Reverse Proxy Configuration**  
+  - Centralizes API routing and enables HTTPS access.  
+  - Load balances requests across multiple backend servers.  
+  - Configured via `appsettings.json` for easy modification.  
+
 - 🐳 **Dockerfile & Docker Compose**  
   Enables running the API in a containerized environment.  
 
 ---
+
+## 🔧 Usage (Reverse Proxy)
+
+1. **Trust the dev certificate** (required for HTTPS):
+
+```bash
+dotnet dev-certs https --trust
+then run servers
+dotnet run --PORT=5001
+dotnet run --PORT=5002
+dotnet run --PORT=5003
+ then proxy
+dotnet run
