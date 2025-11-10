@@ -95,12 +95,12 @@ namespace PAL
             app.UseRateLimiter();
 
 
-            app.UseStaticFiles();
+            //app.UseStaticFiles();
 
 
             app.MapControllers();
 
-            app.Run();
+            app.Run($"https://localhost:{builder.Configuration["PORT"]}");
         }
     }
 }

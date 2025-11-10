@@ -50,7 +50,6 @@ C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\PAL\obj\Debug\net
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\PAL\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\PAL\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\PAL\obj\Debug\net8.0\swae.build.ex.cache
-C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\PAL\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\PAL\obj\Debug\net8.0\PAL.csproj.Up2Date
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\PAL\obj\Debug\net8.0\PAL.dll
 C:\Users\tarek\source\repos\MohamedTBadr\GraduationProject\API\PAL\obj\Debug\net8.0\refint\PAL.dll
