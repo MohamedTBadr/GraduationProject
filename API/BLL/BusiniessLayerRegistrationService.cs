@@ -28,6 +28,7 @@ namespace BLL
             services.Configure<JWTOptions>(
   configuration.GetSection("JWTOptions"));
          ConfigureJWT(services, configuration);
+         
             return services;
         }
 

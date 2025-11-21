@@ -1,8 +1,4 @@
 ﻿using BLL.DTOs.AuthenticationDTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BLL.Services.Interfaces
@@ -12,8 +8,13 @@ namespace BLL.Services.Interfaces
         Task<UserResponse> LogIn(LoginRequest loginRequest);
 
         Task<UserResponse> RegisterAsync(SignUpRequest request);
+
         Task<bool> CheckIfEmailExists(string email);
-        Task<UserResponse> GenerateRefreshToken(string email); 
+
+        // 🚨 ENHANCEMENT: Changed method name and signature for secure Refresh Token flow.
+        // It now accepts a DTO containing the old refresh token and returns new tokens.
+        Task<UserResponse> RefreshTokenAsync(RefreshTokenRequest request);
+
         Task ForgetPassword(string email);
     }
 }

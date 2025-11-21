@@ -10,6 +10,7 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenLocalhost(5000, listenOptions =>
     {
         listenOptions.UseHttps(); // Uses the dev certificate
+        
     });
 });
 

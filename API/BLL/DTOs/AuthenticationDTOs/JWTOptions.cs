@@ -12,5 +12,6 @@ namespace BLL.DTOs.AuthenticationDTOs
         public string Issuer { get; set; }
         public string Audience { get; set; }
         public double DurationDays { get; set; }
+        
     }
 }

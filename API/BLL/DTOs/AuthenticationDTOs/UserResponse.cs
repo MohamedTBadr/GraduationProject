@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace BLL.DTOs.AuthenticationDTOs
 {
-    public record UserResponse(string name,string email,string Token);
+    public record UserResponse(string name,string email,string AccessToken,string RefreshToken);
     
 }

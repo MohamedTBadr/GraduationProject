@@ -76,13 +76,31 @@ namespace PAL.Controllers
             return Ok(await serviceManager.AuthenticationService.CheckIfEmailExists(email));
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
-        [HttpGet("RefreshToken")]
-        public async Task<IActionResult> RefreshToken()
+        [HttpPost("RefreshToken")]
+        [ProducesResponseType(200, Type = typeof(UserResponse))]
+        [ProducesResponseType(401)]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
-            var email = GetEmailFromToken();
-            return Ok(await serviceManager.AuthenticationService.GenerateRefreshToken(email));
+            if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
+            {
+                return BadRequest("Refresh token is required.");
+            }
+
+            try
+            {
+                // Call the secure service method with the token provided by the client
+                var response = await serviceManager.AuthenticationService.RefreshTokenAsync(request);
+
+                // The UserResponse now contains the new AccessToken and the new RefreshToken
+                return Ok(response);
+            }
+            catch (UnauthorizedException ex)
+            {
+                // Handles cases where the refresh token is invalid, expired, or not found.
+                return Unauthorized(new { message = ex.Message });
+            }
         }
     }
 }
