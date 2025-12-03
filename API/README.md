@@ -1,81 +1,110 @@
 # 📌 Graduation Project – API
 
-This repository contains the **backend implementation** of the graduation project.  
-The API is built with **ASP.NET Core Web API** and serves as the foundation of the system.
+This repository contains the **backend implementation** of the graduation project.
+The API is built with **ASP.NET Core Web API** and serves as the core backend of the entire system.
 
 ---
 
 ## 🚀 Features
 
-- 🔐 **User Authentication & Authorization**  
-  Secure login, registration, and role-based access control.  
+* 🔐 **User Authentication & Authorization**
+  Secure login, registration, JWT authentication, and role-based access control.
 
-- ⚡ **Caching**  
-  Improves performance and reduces database load.  
+* ⚡ **Caching**
+  Improves performance and reduces database load using in-memory or distributed caching.
 
-- 📧 **Email Sending**  
-  Integrated email service for account verification, password reset, and notifications.  
+* 📧 **Email Sending**
+  Integrated email service for verification, notifications, and password recovery.
 
-- 🔄 **Idempotent API**  
-  Ensures safe retry of requests (e.g., duplicate submissions, network retries) by preventing unintended side effects.  
+* 🔄 **Idempotent API**
+  Prevents duplicate processing of network retries or repeated submissions.
 
-- 🐳 **Dockerized Deployment**  
-  Containerized backend for easy deployment and scalability.  
+* 🤖 **Gemini AI Model Integration**
+  The API integrates with **Google Gemini** for AI-powered features such as:
 
-- 🔗 **HTTPS Reverse Proxy (YARP)**  
-  - API is accessible via an **HTTPS reverse proxy** running on `https://localhost:5000`.  
-  - Forwards requests to multiple backend servers (load-balanced) running on `http://localhost:5001`, `5002`, `5003`.  
-  - Supports routing all paths (e.g., `/api/...`) securely and transparently.  
-  - Central entry point for API requests and load balancing.  
+  * Text generation
+  * Classification
+  * Summarization
+  * Idea generation
+  * Intelligent recommendations
+    The AI layer follows a clean architecture design to ensure easy replacement or scaling of future models.
+
+* 🐳 **Dockerized Deployment**
+  Containerized backend for reliable and portable deployments.
+
+* 🔗 **HTTPS Reverse Proxy (YARP)**
+
+  * API exposed through a secure **HTTPS reverse proxy** at `https://localhost:5000`
+  * Requests load-balanced across backend instances running at:
+
+    * `http://localhost:5001`
+    * `http://localhost:5002`
+    * `http://localhost:5003`
+  * Supports routing for all paths (e.g., `/api/...`)
+  * Centralized gateway for request routing and load balancing.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **ASP.NET Core Web API**  
-- **Entity Framework Core**  
-- **SQL Server**  
-- **Caching (In-Memory / Distributed)**  
-- **SMTP / Email Sender Service**  
-- **Idempotent API Middleware**  
-- **Docker / Docker Compose**  
-- **YARP Reverse Proxy**  
+* **ASP.NET Core Web API**
+* **Entity Framework Core**
+* **SQL Server**
+* **Caching (In-Memory / Distributed)**
+* **SMTP Email Service**
+* **Idempotent Middleware**
+* **Google Gemini AI Integration**
+* **Docker / Docker Compose**
+* **YARP Reverse Proxy**
 
 ---
 
 ## 📂 Project Structure
 
-- ⚙️ **Business Logic Implementation**  
-  Core functionality and workflows for the system.  
+* ⚙️ **Business Logic Layer**
+  Implements domain rules and workflows.
 
-- 🗄️ **Database Access & Management**  
-  Efficient handling of data using Entity Framework Core.  
+* 🗄️ **Data Access Layer**
+  Manages interaction with SQL Server using EF Core.
 
-- 🌐 **RESTful Endpoints**  
-  Provides APIs consumed by the frontend application.  
+* 🌐 **RESTful API Endpoints**
+  Exposes all functionalities to the frontend.
 
-- 🔄 **Idempotent Middleware**  
-  Protects API endpoints against accidental duplicate requests.  
+* 🔄 **Idempotent Middleware**
+  Ensures safe retriable operations.
 
-- 🔗 **Reverse Proxy Configuration**  
-  - Centralizes API routing and enables HTTPS access.  
-  - Load balances requests across multiple backend servers.  
-  - Configured via `appsettings.json` for easy modification.  
+* 🤖 **AI Integration Layer**
+  Encapsulates communication with the Gemini API using clean service abstractions.
 
-- 🐳 **Dockerfile & Docker Compose**  
-  Enables running the API in a containerized environment.  
+* 🔗 **Reverse Proxy Configuration**
+  Handles secure HTTPS traffic and distributes workload across backend instances.
+
+* 🐳 **Dockerfile & Docker Compose**
+  Supports running the API in isolated containers for Dev/Prod.
 
 ---
 
-## 🔧 Usage (Reverse Proxy)
+## 🔧 Usage (Reverse Proxy Setup)
 
-1. **Trust the dev certificate** (required for HTTPS):
+1. **Trust the development certificate** (necessary for HTTPS):
 
 ```bash
 dotnet dev-certs https --trust
-then run servers
+```
+
+2. **Run the backend servers**
+
+```bash
 dotnet run --PORT=5001
 dotnet run --PORT=5002
 dotnet run --PORT=5003
- then proxy
+```
+
+3. **Run the reverse proxy**
+
+```bash
 dotnet run
+```
+
+---
+
