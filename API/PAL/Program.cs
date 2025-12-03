@@ -68,7 +68,9 @@ namespace PAL
                 // Retrieve the API Key securely from configuration, environment variables, etc.
                 // For this example, we'll try an environment variable first.
 
-                var apiKey = builder.Configuration["Gemini:ApiKey"]; 
+                var apiKey = builder.Configuration["Gemini:ApiKey"];
+
+             
 
                 if (string.IsNullOrEmpty(apiKey))
                 {
