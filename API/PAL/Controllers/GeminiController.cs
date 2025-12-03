@@ -3,7 +3,7 @@ using Google.GenAI.Types;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class GeminiController : ControllerBase
 {
     private readonly Client _geminiClient;
@@ -17,29 +17,36 @@ public class GeminiController : ControllerBase
     [HttpGet("generate-text")]
     public async Task<IActionResult> GenerateText(string prompt)
     {
-        if (string.IsNullOrEmpty(prompt))
+        // ... initial checks ...
+
+        var response = await _geminiClient.Models.GenerateContentAsync(
+            model: "gemini-2.5-flash",
+            contents: prompt
+        );
+
+        // --- Safety and Content Check ---
+
+        // 1. Check if the response was blocked by safety settings or generated no candidates
+        if (response.Candidates == null || response.Candidates.Count == 0)
         {
-            return BadRequest("Prompt cannot be empty.");
+            // Check for rejection reason, if available
+            var reason = response.PromptFeedback?.BlockReason.ToString() ?? "Unknown";
+            return StatusCode(400, $"Request failed or was blocked by the safety system. Reason: {reason}.");
         }
 
-        try
-        {
-            // Call the generateContent API
-            var response = await _geminiClient.Models.GenerateContentAsync(
-                model: "gemini-2.5-flash", // Use a model like 'gemini-2.5-flash'
-                contents: prompt
-            );
+        // 2. Check if the primary candidate contains valid text parts
+        var candidate = response.Candidates[0];
 
-            // Extract the generated text from the response
-            var generatedText = response.Candidates[0].Content.Parts[0].Text;
-
-            return Ok(generatedText);
-        }
-        catch (Exception ex)
+        if (candidate.Content == null || candidate.Content.Parts.Count == 0 || string.IsNullOrEmpty(candidate.Content.Parts[0].Text))
         {
-            // Log the error and return a server error status
-            Console.WriteLine($"Error calling Gemini API: {ex.Message}");
-            return StatusCode(500, "An error occurred while generating content.");
+            // The candidate may have been blocked or just returned no content
+            var finishReason = candidate.FinishReason.ToString();
+            return StatusCode(400, $"The model did not generate a usable response. Finish Reason: {finishReason}");
         }
+
+        // --- Successful Extraction ---
+        var generatedText = candidate.Content.Parts[0].Text;
+
+        return Ok(generatedText);
     }
 }
