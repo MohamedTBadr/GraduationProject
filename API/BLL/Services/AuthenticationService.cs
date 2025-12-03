@@ -109,6 +109,20 @@ namespace BLL.Services
             // 5) send email (use your IEmailSender implementation)
             await emailSender.SendEmailAsync(user.Email!, subject, body);
         }
+        public async Task ResetPassword(ResetPasswordRequest request)
+        {
+            var user = await userManager.FindByEmailAsync(request.email) ?? throw new UserNotFoundException(request.email);
+            // 1) decode the token from URL
+            var decodedTokenBytes = WebEncoders.Base64UrlDecode(request.token);
+            var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+            // 2) reset password
+            var result = await userManager.ResetPasswordAsync(user, decodedToken, request.newPassword);
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description).ToList();
+                throw new BadRequestException(errors);
+            }
+        }
 
         // 💡 NEW SECURE REFRESH LOGIC
         public async Task<UserResponse> RefreshTokenAsync(RefreshTokenRequest request)

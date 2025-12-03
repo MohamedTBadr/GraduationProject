@@ -5,6 +5,7 @@ using Common.Exceptions;
 using DAL;
 using DAL.Context;
 using DAL.Entities;
+using Google.GenAI;
 using IdempotentAPI.Cache.DistributedCache.Extensions.DependencyInjection;
 using IdempotentAPI.Core;
 using IdempotentAPI.Extensions.DependencyInjection;
@@ -61,8 +62,21 @@ namespace PAL
             });
 
 
+            //Gemini Configuration
+            builder.Services.AddSingleton(provider =>
+            {
+                // Retrieve the API Key securely from configuration, environment variables, etc.
+                // For this example, we'll try an environment variable first.
 
+                var apiKey = builder.Configuration["Gemini:ApiKey"]; 
 
+                if (string.IsNullOrEmpty(apiKey))
+                {
+                    throw new InvalidOperationException("Gemini API Key is not configured.");
+                }
+
+                return new Client(apiKey: apiKey);
+            });
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -100,7 +114,8 @@ namespace PAL
 
             app.MapControllers();
 
-            app.Run($"https://localhost:{builder.Configuration["PORT"]}");
+            //app.Run($"https://localhost:{builder.Configuration["PORT"]}");
+            await app.RunAsync();
         }
     }
 }

@@ -50,6 +50,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Google.GenAI": {
+              "target": "Package",
+              "version": "[0.6.0, )"
+            },
             "IdempotentAPI": {
               "target": "Package",
               "version": "[2.6.0, )"

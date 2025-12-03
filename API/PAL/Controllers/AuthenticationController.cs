@@ -13,7 +13,7 @@ namespace PAL.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthenticationController(IServiceManager serviceManager):APIController
+    public class AuthenticationController(IServiceManager serviceManager) : APIController
     {
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
@@ -41,14 +41,14 @@ namespace PAL.Controllers
         {
             if (!ModelState.IsValid)
             {
-              
-                    var errors = ModelState
-                        .Where(x => x.Value?.Errors.Count > 0)
-                        .SelectMany(x => x.Value!.Errors)
-                        .Select(e => e.ErrorMessage)
-                        .ToList();
 
-                
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .SelectMany(x => x.Value!.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+
 
                 throw new BadRequestException(errors);
             }
@@ -102,5 +102,40 @@ namespace PAL.Controllers
                 return Unauthorized(new { message = ex.Message });
             }
         }
+
+
+        [HttpPost("ForgetPassword")]
+        public async Task<IActionResult> ForgetPassword([FromQuery][Required] string email)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .SelectMany(x => x.Value!.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                throw new BadRequestException(errors);
+            }
+            await serviceManager.AuthenticationService.ForgetPassword(email);
+            return Ok();
+
+
+        }
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .SelectMany(x => x.Value!.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                throw new BadRequestException(errors);
+            }
+            await serviceManager.AuthenticationService.ResetPassword(request);
+            return Ok();
+        }
+
     }
 }

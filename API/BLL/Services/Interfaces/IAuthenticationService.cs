@@ -16,5 +16,6 @@ namespace BLL.Services.Interfaces
         Task<UserResponse> RefreshTokenAsync(RefreshTokenRequest request);
 
         Task ForgetPassword(string email);
+        Task ResetPassword(ResetPasswordRequest request);
     }
 }
