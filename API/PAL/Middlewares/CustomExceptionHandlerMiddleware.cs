@@ -40,6 +40,7 @@ namespace PAL.Middlewares
                 IdempotencyKeyMissingException => (int)HttpStatusCode.BadRequest,
                 IdempotencyKeyDuplicateException=>(int)HttpStatusCode.NotAcceptable,
                 BadRequestException => (int)HttpStatusCode.BadRequest,
+                GeminiException => (int)HttpStatusCode.BadRequest,
                 _ => (int)HttpStatusCode.InternalServerError
             };
 

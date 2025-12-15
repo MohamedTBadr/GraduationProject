@@ -12,6 +12,7 @@ using IdempotentAPI.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using PAL.Middlewares;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -38,61 +39,61 @@ namespace PAL
             await PresentationRegistrationService.AddPresentationRegistrationServices(builder.Services, builder.Configuration);
 
 
-            //Configure Identity with your ApplicationUser
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-
-
-          
-            // Configure Identity options (AFTER AddIdentity)
-            builder.Services.Configure<IdentityOptions>(options =>
-            {
-                // ✅ Allow letters, digits, and spaces
-                options.User.AllowedUserNameCharacters =
-                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
-                // Optional: require unique email
-                options.User.RequireUniqueEmail = true;
-
-                // Optional: tweak password settings
-                options.Password.RequireDigit = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredLength = 6;
-            });
-
-
-            //Gemini Configuration
-            builder.Services.AddSingleton(provider =>
-            {
-                // Retrieve the API Key securely from configuration, environment variables, etc.
-                // For this example, we'll try an environment variable first.
-
-                var apiKey = builder.Configuration["Gemini:ApiKey"];
-
-             
-
-                if (string.IsNullOrEmpty(apiKey))
-                {
-                    throw new InvalidOperationException("Gemini API Key is not configured.");
-                }
-
-                return new Client(apiKey: apiKey);
-            });
-
+      
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Graduation Project V1", Version = "v1" });
+
+                // Define the security scheme
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer abc123\""
+                });
+
+                // Apply the security globally to all endpoints
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                      {
+                        new OpenApiSecurityScheme
+                        {
+                           Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                         },
+                         new string[] {}
+                       }
+                });
+             });
+
 
             var app = builder.Build();
-
+            app.UseStaticFiles();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment() || true)
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Graduation Project V1");
+                    options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+                    options.DocumentTitle = "Graduation Project V1";
+                    options.EnablePersistAuthorization();
+                    options.DisplayRequestDuration();
+                    //options.RoutePrefix = string.Empty; // Serve Swagger UI at the app's root
+                    //options.InjectStylesheet("/swagger-ui/style.css");
+
+                });
             }
+
+
+
 
             app.MapWhen(
                       context => (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method))&&(context.Request.Path.StartsWithSegments("/api/register")

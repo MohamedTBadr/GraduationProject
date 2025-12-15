@@ -1,7 +1,11 @@
 ﻿using Common.Exceptions;
+using DAL.Context;
+using DAL.Entities;
+using Google.GenAI;
 using IdempotentAPI.Cache.DistributedCache.Extensions.DependencyInjection;
 using IdempotentAPI.Core;
 using IdempotentAPI.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity;
 using System.Threading.RateLimiting;
 
 namespace PAL
@@ -65,6 +69,55 @@ namespace PAL
             // 3) Register the library's DistributedCache implementation
             //    (this extension lives in the IdempotentAPI.Cache.DistributedCache package)
             services.AddIdempotentAPIUsingDistributedCache(); // README shows this usage. :contentReference[oaicite:2]{index=2}
+            #endregion
+
+
+
+
+            #region Identity
+            //Configure Identity with your ApplicationUser
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+
+
+            // Configure Identity options (AFTER AddIdentity)
+           services.Configure<IdentityOptions>(options =>
+            {
+                // ✅ Allow letters, digits, and spaces
+                options.User.AllowedUserNameCharacters =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
+                // Optional: require unique email
+                options.User.RequireUniqueEmail = true;
+
+                // Optional: tweak password settings
+                options.Password.RequireDigit = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 6;
+            });
+            #endregion
+
+
+            #region GeminiAI
+            //Gemini Configuration
+            services.AddSingleton(provider =>
+            {
+                // Retrieve the API Key securely from configuration, environment variables, etc.
+                // For this example, we'll try an environment variable first.
+
+                var apiKey = configuration["Gemini:ApiKey"];
+
+
+
+                if (string.IsNullOrEmpty(apiKey))
+                {
+                    throw new InvalidOperationException("Gemini API Key is not configured.");
+                }
+
+                return new Client(apiKey: apiKey);
+            });
             #endregion
 
             return services;

@@ -16,6 +16,7 @@ namespace PAL.Controllers
     public class AuthenticationController(IServiceManager serviceManager) : APIController
     {
         [HttpPost("Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
