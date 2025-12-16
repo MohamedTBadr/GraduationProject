@@ -1,4 +1,5 @@
 ﻿using BLL.DTOs.AuthenticationDTOs;
+using BLL.DTOs.PaymobDTOs;
 using BLL.Services;
 using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,7 +29,16 @@ namespace BLL
             services.Configure<JWTOptions>(
   configuration.GetSection("JWTOptions"));
          ConfigureJWT(services, configuration);
-         
+
+
+
+            services.Configure<PaymobOptions>(
+    configuration.GetSection("Paymob"));
+
+            services.AddHttpClient<PaymobService>();
+
+
+
             return services;
         }
 
