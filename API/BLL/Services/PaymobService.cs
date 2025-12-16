@@ -61,19 +61,20 @@ namespace BLL.Services
                 {
                     amount_cents = (int)(amount * 100),
                     currency = "EGP",
-                    delivery_needed = true,
+                    delivery_needed = false,
                     items = Array.Empty<object>()
                 });
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Paymob Order Error: {error}");
+            }
 
             var data = await response.Content.ReadFromJsonAsync<OrderResponse>();
-
-            // Persist Paymob Order ID here
-            // SaveOrder(data.id, amount);
-
-            return data.id;
+            return data.id.ToString();
         }
+
 
         // -------------------------------
         // PAYMENT KEY
@@ -108,14 +109,15 @@ namespace BLL.Services
         // -------------------------------
         // WEBHOOK HANDLING
         // -------------------------------
-        public async Task HandleWebhookAsync(dynamic payload)
+        public async Task HandleWebhookAsync(PaymobWebhookPayload payload)
         {
-            bool success = payload.obj.success;
-            string orderId = payload.obj.order.id;
+            bool success = payload.Success;
+            long orderId = payload.Order.Id;
 
             if (success)
             {
                 // Update DB: Status = Paid
+                Console.WriteLine("Success");
             }
             else
             {

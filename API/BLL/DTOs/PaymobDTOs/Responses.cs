@@ -13,7 +13,7 @@ namespace BLL.DTOs.PaymobDTOs
 
     public record OrderResponse
     {
-        public string id { get; set; }
+        public long id { get; set; }
     }
 
     public record PaymentKeyResponse
