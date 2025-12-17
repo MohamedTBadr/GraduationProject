@@ -112,7 +112,7 @@ namespace BLL.Services
         public async Task HandleWebhookAsync(PaymobWebhookPayload payload)
         {
             bool success = payload.Success;
-            long orderId = payload.Order.Id;
+            long orderId = payload.Order;
 
             if (success)
             {

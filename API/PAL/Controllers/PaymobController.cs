@@ -26,8 +26,9 @@ namespace PAL.Controllers
         }
 
         [HttpPost("paymob/webhook")]
-        public async Task<IActionResult> Webhook([FromBody] dynamic payload)
+        public async Task<IActionResult> Webhook([FromQuery] PaymobWebhookPayload payload)
         {
+            var raw = Request.Body; // optionally read as string to log raw payload
             await _paymob.HandleWebhookAsync(payload);
             return Ok();
         }

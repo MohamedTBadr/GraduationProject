@@ -1,10 +1,23 @@
-﻿namespace BLL.DTOs.PaymobDTOs
+﻿    using System.Text.Json.Serialization;
+namespace BLL.DTOs.PaymobDTOs
 {
+
     public class PaymobWebhookPayload
-{
-    public long Id { get; set; } // transaction ID
-    public bool Success { get; set; }
-    public int AmountCents { get; set; }
-    public PaymobOrder Order { get; set; }
-}
+    {
+        [JsonPropertyName("id")]
+        public long Id { get; set; }
+
+        [JsonPropertyName("success")]
+        public bool Success { get; set; }
+
+        [JsonPropertyName("amount_cents")]
+        public int Amount_Cents { get; set; }
+
+        [JsonPropertyName("order")]
+        public long Order { get; set; }
+
+        [JsonPropertyName("hmac")]
+        public string Hmac { get; set; }
+    }
+
 }
