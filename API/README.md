@@ -1,47 +1,132 @@
 # 📌 Graduation Project – API
 
 This repository contains the **backend implementation** of the graduation project.
-The API is built with **ASP.NET Core Web API** and serves as the core backend of the entire system.
+The API is built with **ASP.NET Core Web API** and serves as the **core backend and gateway** for the entire system.
+
+The architecture is **production-oriented**, focusing on scalability, security, idempotency, and financial correctness.
 
 ---
 
 ## 🚀 Features
 
-* 🔐 **User Authentication & Authorization**
-  Secure login, registration, JWT authentication, and role-based access control.
+### 🔐 Authentication & Authorization
 
-* ⚡ **Caching**
-  Improves performance and reduces database load using in-memory or distributed caching.
+* Secure user registration and login
+* JWT-based authentication
+* Role-based access control (RBAC)
+* Token expiration and refresh handling
 
-* 📧 **Email Sending**
-  Integrated email service for verification, notifications, and password recovery.
+---
 
-* 🔄 **Idempotent API**
-  Prevents duplicate processing of network retries or repeated submissions.
+### ⚡ Caching Layer
 
-* 🤖 **Gemini AI Model Integration**
-  The API integrates with **Google Gemini** for AI-powered features such as:
+* In-memory caching for high-frequency reads
+* Optional distributed caching (Redis-ready)
+* Reduces database load and improves response time
 
-  * Text generation
-  * Classification
-  * Summarization
-  * Idea generation
-  * Intelligent recommendations
-    The AI layer follows a clean architecture design to ensure easy replacement or scaling of future models.
+---
 
-* 🐳 **Dockerized Deployment**
-  Containerized backend for reliable and portable deployments.
+### 📧 Email Services
 
-* 🔗 **HTTPS Reverse Proxy (YARP)**
+* SMTP-based email delivery
+* Email verification
+* Password reset and recovery
+* System notifications
 
-  * API exposed through a secure **HTTPS reverse proxy** at `https://localhost:5000`
-  * Requests load-balanced across backend instances running at:
+---
 
-    * `http://localhost:5001`
-    * `http://localhost:5002`
-    * `http://localhost:5003`
-  * Supports routing for all paths (e.g., `/api/...`)
-  * Centralized gateway for request routing and load balancing.
+### 🔄 Idempotent API Design
+
+* Prevents duplicate processing of:
+
+  * Network retries
+  * Payment callbacks
+  * Client resubmissions
+* Ensures **financial and business data consistency**
+
+---
+
+### 💳 Paymob Payment Gateway Integration (NEW)
+
+The system includes a **full Paymob payment integration** designed according to real-world financial standards.
+
+#### Supported Capabilities
+
+* Card payments (3-D Secure / SCA supported)
+* Wallet & InstaPay ready (extensible)
+* Secure server-side payment initiation
+* Webhook-based payment confirmation
+* Refund and reconciliation support
+
+#### Payment Flow
+
+1. Business order is created internally
+2. Backend creates a Paymob payment intent (order)
+3. Payment key is generated securely
+4. User is redirected to Paymob hosted payment iframe
+5. Paymob sends webhook callbacks
+6. Backend validates and updates payment state
+
+> ⚠️ Frontend never communicates with Paymob directly
+
+#### Payment Architecture Highlights
+
+* Order ≠ Payment ≠ Transaction separation
+* Append-only transaction history
+* Idempotent webhook handling
+* Future-ready for multiple payment providers
+
+---
+
+### 🤖 Gemini AI Integration
+
+The API integrates with **Google Gemini AI** to provide intelligent features:
+
+* Text generation
+* Classification
+* Summarization
+* Idea generation
+* Recommendation logic
+
+The AI layer follows **Clean Architecture principles**, allowing:
+
+* Easy model replacement
+* Scalability for future AI providers
+* Clear separation from business logic
+
+---
+
+### 🔗 HTTPS Reverse Proxy (YARP)
+
+A centralized **YARP reverse proxy** exposes the API securely:
+
+* HTTPS endpoint:
+
+  ```
+  https://localhost:5000
+  ```
+
+* Load-balanced backend instances:
+
+  * [http://localhost:5001](http://localhost:5001)
+  * [http://localhost:5002](http://localhost:5002)
+  * [http://localhost:5003](http://localhost:5003)
+
+#### Capabilities
+
+* Centralized routing (`/api/*`)
+* HTTPS termination
+* Load balancing across instances
+* Single entry point for frontend clients
+
+---
+
+### 🐳 Dockerized Deployment
+
+* Fully containerized backend
+* Dockerfile for API services
+* Docker Compose for local orchestration
+* Environment-based configuration support
 
 ---
 
@@ -50,61 +135,125 @@ The API is built with **ASP.NET Core Web API** and serves as the core backend of
 * **ASP.NET Core Web API**
 * **Entity Framework Core**
 * **SQL Server**
+* **JWT Authentication**
 * **Caching (In-Memory / Distributed)**
 * **SMTP Email Service**
+* **Paymob Payment Gateway**
+* **Google Gemini AI**
 * **Idempotent Middleware**
-* **Google Gemini AI Integration**
-* **Docker / Docker Compose**
 * **YARP Reverse Proxy**
+* **Docker & Docker Compose**
 
 ---
 
 ## 📂 Project Structure
 
-* ⚙️ **Business Logic Layer**
-  Implements domain rules and workflows.
-
-* 🗄️ **Data Access Layer**
-  Manages interaction with SQL Server using EF Core.
-
-* 🌐 **RESTful API Endpoints**
-  Exposes all functionalities to the frontend.
-
-* 🔄 **Idempotent Middleware**
-  Ensures safe retriable operations.
-
-* 🤖 **AI Integration Layer**
-  Encapsulates communication with the Gemini API using clean service abstractions.
-
-* 🔗 **Reverse Proxy Configuration**
-  Handles secure HTTPS traffic and distributes workload across backend instances.
-
-* 🐳 **Dockerfile & Docker Compose**
-  Supports running the API in isolated containers for Dev/Prod.
+```
+├── Api
+│   ├── Controllers
+│   ├── Middlewares
+│   └── Filters
+│
+├── Application
+│   ├── Services
+│   │   ├── Payment
+│   │   ├── Email
+│   │   ├── AI
+│   │   └── Authentication
+│   └── Interfaces
+│
+├── Domain
+│   ├── Entities
+│   │   ├── Order
+│   │   ├── Payment
+│   │   ├── PaymentTransaction
+│   │   └── Refund
+│   └── Enums
+│
+├── Infrastructure
+│   ├── Data
+│   ├── Repositories
+│   ├── Paymob
+│   ├── Gemini
+│   └── Email
+│
+├── ReverseProxy
+│   └── YarpConfig
+│
+├── Docker
+│   ├── Dockerfile
+│   └── docker-compose.yml
+│
+└── README.md
+```
 
 ---
 
-## 🔧 Usage (Reverse Proxy Setup)
+## 🗄️ Database Design (Payments)
 
-1. **Trust the development certificate** (necessary for HTTPS):
+The payment system is designed to handle **all edge cases**:
+
+* Multiple payment attempts
+* Webhook duplication
+* Refunds and partial refunds
+* Auditing and reconciliation
+
+Core tables:
+
+* `orders`
+* `payments`
+* `payment_transactions`
+* `payment_webhooks`
+* `refunds`
+
+> Financial data is append-only and webhook-driven
+
+---
+
+## 🔧 Usage – Reverse Proxy Setup
+
+### 1️⃣ Trust HTTPS Development Certificate
 
 ```bash
 dotnet dev-certs https --trust
 ```
 
-2. **Run the backend servers**
+---
+
+### 2️⃣ Run Backend Instances
 
 ```bash
-dotnet run --PORT=5001
-dotnet run --PORT=5002
-dotnet run --PORT=5003
-```
-
-3. **Run the reverse proxy**
-
-```bash
-dotnet run
+dotnet run --urls=http://localhost:5001
+dotnet run --urls=http://localhost:5002
+dotnet run --urls=http://localhost:5003
 ```
 
 ---
 
+### 3️⃣ Run Reverse Proxy
+
+```bash
+dotnet run --project ReverseProxy
+```
+
+---
+
+## ✅ Design Goals Achieved
+
+* Secure and scalable architecture
+* Financially correct payment handling
+* Clean separation of concerns
+* Production-ready deployment
+* Extensible for future services
+
+---
+
+## 📌 Notes
+
+* All sensitive operations (payments, AI, email) are server-side only
+* Webhook endpoints are idempotent and auditable
+* Payment logic is provider-agnostic
+
+---
+
+If this repository is used for evaluation or demonstration, it reflects **real-world backend engineering practices**, not tutorial-level implementations.
