@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PAL.Hubs;
 using PAL.Middlewares;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -116,6 +117,7 @@ namespace PAL
 
 
             app.MapControllers();
+            app.MapHub<ChatHub>("/chatHub");
 
             //app.Run($"https://localhost:{builder.Configuration["PORT"]}");
             await app.RunAsync();
