@@ -35,6 +35,48 @@ The architecture is **production-oriented**, focusing on scalability, security, 
 
 ---
 
+### 💬 Real-Time Chat (SignalR Hubs)
+
+The system supports **real-time communication** using **ASP.NET Core SignalR**.
+
+#### Capabilities
+
+* One-to-one and group chat support
+* Real-time message delivery
+* User connection and presence tracking
+* Scalable hub-based architecture
+
+#### Design Highlights
+
+* SignalR Hubs isolated from business logic
+* Authentication integrated with JWT
+* Ready for scale-out using Redis backplane
+* Clean separation between Chat domain and API layer
+
+---
+
+### 📦 File Storage – AWS S3
+
+The API integrates with **Amazon S3** for secure and scalable file storage.
+
+#### Supported Features
+
+* Upload and download files securely
+* Pre-signed URLs for controlled client access
+* Public and private bucket support
+* Metadata and content-type preservation
+
+#### Storage Architecture
+
+* Files are stored outside the application server
+* Database stores only file metadata and references
+* S3 access handled via server-side credentials
+* Environment-based bucket configuration
+
+> ⚠️ Large files never pass through the database
+
+---
+
 ### 🔄 Idempotent API Design
 
 * Prevents duplicate processing of:
@@ -133,11 +175,13 @@ A centralized **YARP reverse proxy** exposes the API securely:
 ## 🛠️ Tech Stack
 
 * **ASP.NET Core Web API**
+* **SignalR (Real-Time Communication)**
 * **Entity Framework Core**
 * **SQL Server**
 * **JWT Authentication**
 * **Caching (In-Memory / Distributed)**
 * **SMTP Email Service**
+* **AWS S3 File Storage**
 * **Paymob Payment Gateway**
 * **Google Gemini AI**
 * **Idempotent Middleware**
@@ -151,6 +195,7 @@ A centralized **YARP reverse proxy** exposes the API securely:
 ```
 ├── Api
 │   ├── Controllers
+│   ├── Hubs
 │   ├── Middlewares
 │   └── Filters
 │
@@ -159,6 +204,7 @@ A centralized **YARP reverse proxy** exposes the API securely:
 │   │   ├── Payment
 │   │   ├── Email
 │   │   ├── AI
+│   │   ├── Chat
 │   │   └── Authentication
 │   └── Interfaces
 │
@@ -167,7 +213,8 @@ A centralized **YARP reverse proxy** exposes the API securely:
 │   │   ├── Order
 │   │   ├── Payment
 │   │   ├── PaymentTransaction
-│   │   └── Refund
+│   │   ├── Refund
+│   │   └── ChatMessage
 │   └── Enums
 │
 ├── Infrastructure
@@ -175,7 +222,9 @@ A centralized **YARP reverse proxy** exposes the API securely:
 │   ├── Repositories
 │   ├── Paymob
 │   ├── Gemini
-│   └── Email
+│   ├── Email
+│   └── Storage
+│       └── S3
 │
 ├── ReverseProxy
 │   └── YarpConfig
@@ -189,22 +238,7 @@ A centralized **YARP reverse proxy** exposes the API securely:
 
 ---
 
-## 🗄️ Database Design (Payments)
 
-The payment system is designed to handle **all edge cases**:
-
-* Multiple payment attempts
-* Webhook duplication
-* Refunds and partial refunds
-* Auditing and reconciliation
-
-Core tables:
-
-* `orders`
-* `payments`
-* `payment_transactions`
-* `payment_webhooks`
-* `refunds`
 
 > Financial data is append-only and webhook-driven
 
@@ -250,9 +284,10 @@ dotnet run --project ReverseProxy
 
 ## 📌 Notes
 
-* All sensitive operations (payments, AI, email) are server-side only
+* All sensitive operations (payments, AI, email, storage) are server-side only
 * Webhook endpoints are idempotent and auditable
-* Payment logic is provider-agnostic
+* File storage is externalized via AWS S3
+* Chat system is real-time and horizontally scalable
 
 ---
 
