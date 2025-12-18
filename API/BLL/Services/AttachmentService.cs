@@ -1,8 +1,17 @@
-﻿using BLL.Services.Interfaces;
+﻿using Amazon.S3;
+using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
+using BLL.DTOs;
+using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +19,17 @@ namespace BLL.Services
 {
     public class AttachmentService : IAttachmentService
     {
+
+
+        private readonly IAmazonS3 _s3;
+        private readonly AwsSettings _settings;
+
+        public AttachmentService(IAmazonS3 s3, IOptions<AwsSettings> settings)
+        {
+            _s3 = s3;
+            _settings = settings.Value;
+        }
+
         public List<string> allowedExtensions = new List<string>()
         {
             ".jpg",
@@ -21,50 +41,53 @@ namespace BLL.Services
 
 
 
-        public async Task<string> Upload(IFormFile file, string folderName)
+        public async Task<string> UploadFileAsync(IFormFile file, string folderName)
         {
-            // 1-Get Extension& validation
-            var extension = Path.GetExtension(file.FileName);
-            if (!allowedExtensions.Contains(extension)) return null;
-            //2-size
-            if (file.Length > maxAllowed) return null;
-
-            //3. get located folder path
-            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\Attachments", folderName);
 
 
-            //4. SET UNIQUE FILE NAME   
-            var fileName = $"{Guid.NewGuid()}{extension}";
 
 
-            //5. Get file path
-            var filePath = Path.Combine(folderPath, fileName);
+            var key = $"uploads/{Guid.NewGuid()}_{file.FileName}";
 
+            using var stream = file.OpenReadStream();
 
-            //6. save file as stream
-            using var fileStream = new FileStream(filePath, FileMode.Create);
-
-            //7. copy file path to stream
-            await file.CopyToAsync(fileStream);
-
-
-            //8.return file name
-
-            return fileName;
-
-        }
-
-        public async Task<bool> Delete(string filePath)
-        {
-            //validate if file exists
-            if (File.Exists(filePath))
+            var uploadRequest = new TransferUtilityUploadRequest
             {
+                InputStream = stream,
+                Key = key,
+                BucketName = _settings.BucketName,
+                ContentType = file.ContentType
+            };
 
-                File.Delete(filePath);
-                return true;
-            }
-            return false;
+            var transferUtility = new TransferUtility(_s3);
+            await transferUtility.UploadAsync(uploadRequest);
+
+            var url = $"https://{_settings.BucketName}.s3.amazonaws.com/{key}";
+  
+
+            return url;
+
+
         }
 
+ 
+public async Task DeleteFileAsync(string key)
+    {
+        var client = new AmazonS3Client(
+            _settings.AccessKey,
+            _settings.SecretKey,
+            Amazon.RegionEndpoint.EUWest1
+        );
+
+        var request = new DeleteObjectRequest
+        {
+            BucketName = "graduation-project-api-bucket",
+            Key = key
+        };
+
+        await client.DeleteObjectAsync(request);
     }
+
+
+}
 }
