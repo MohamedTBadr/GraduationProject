@@ -1,10 +1,13 @@
-﻿using BLL.DTOs.AuthenticationDTOs;
+﻿using Amazon.S3;
+using BLL.DTOs;
+using BLL.DTOs.AuthenticationDTOs;
 using BLL.DTOs.PaymobDTOs;
 using BLL.Services;
 using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -30,6 +33,22 @@ namespace BLL
   configuration.GetSection("JWTOptions"));
          ConfigureJWT(services, configuration);
 
+
+
+
+            services.Configure<AwsSettings>(
+    configuration.GetSection("AWS"));
+
+            services.AddSingleton<IAmazonS3>(sp =>
+            {
+                var config = sp.GetRequiredService<IOptions<AwsSettings>>().Value;
+
+                return new AmazonS3Client(
+                    config.AccessKey,
+                    config.SecretKey,
+                    Amazon.RegionEndpoint.GetBySystemName(config.Region)
+                );
+            });
 
 
             services.Configure<PaymobOptions>(

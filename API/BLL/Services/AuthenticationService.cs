@@ -183,7 +183,7 @@ namespace BLL.Services
                 audience: jwt.Audience,
                 claims: claims,
                 // Access Token duration from configuration
-                expires: DateTime.UtcNow.AddDays(jwt.DurationDays),
+                expires: DateTime.UtcNow.AddMinutes(jwt.DurationDays * 8),
                 signingCredentials: creds
             );
 
