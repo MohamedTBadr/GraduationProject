@@ -72,7 +72,9 @@ namespace PAL
             #endregion
 
 
-
+            #region SignalR
+            services.AddSignalR();
+            #endregion
 
             #region Identity
             //Configure Identity with your ApplicationUser

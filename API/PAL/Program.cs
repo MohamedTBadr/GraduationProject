@@ -73,7 +73,8 @@ namespace PAL
                 });
              });
 
-
+            
+         
             var app = builder.Build();
             app.UseStaticFiles();
             // Configure the HTTP request pipeline.
@@ -96,15 +97,9 @@ namespace PAL
 
 
 
-            app.MapWhen(
-                      context => (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method))&&(context.Request.Path.StartsWithSegments("/api/register")
-//       || the rest coming soon
-                            ),
-                            builder =>
-                            {
-                                builder.UseMiddleware<IdempotencyCustomMiddleware>();
-                            });
+   
 
+            app.UseMiddleware<IdempotencyCustomMiddleware>();
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -114,7 +109,7 @@ namespace PAL
 
 
             //app.UseStaticFiles();
-
+            
 
             app.MapControllers();
             app.MapHub<ChatHub>("/chatHub");
