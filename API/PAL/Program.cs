@@ -11,11 +11,13 @@ using IdempotentAPI.Core;
 using IdempotentAPI.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PAL.Hubs;
 using PAL.Middlewares;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO.Compression;
 using System.Text;
 using System.Threading.RateLimiting;
 using System.Threading.Tasks;
@@ -40,40 +42,8 @@ namespace PAL
             await PresentationRegistrationService.AddPresentationRegistrationServices(builder.Services, builder.Configuration);
 
 
+
       
-
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Graduation Project V1", Version = "v1" });
-
-                // Define the security scheme
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer abc123\""
-                });
-
-                // Apply the security globally to all endpoints
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                      {
-                        new OpenApiSecurityScheme
-                        {
-                           Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-                         },
-                         new string[] {}
-                       }
-                });
-             });
-
-            
          
             var app = builder.Build();
             app.UseStaticFiles();
@@ -103,6 +73,7 @@ namespace PAL
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseResponseCompression();
 
             app.UseHttpsRedirection();
             app.UseRateLimiter();

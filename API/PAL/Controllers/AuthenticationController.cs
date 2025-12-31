@@ -30,7 +30,7 @@ namespace PAL.Controllers
 
 
 
-                throw new BadRequestException(errors);
+                throw new UnprocessableContentException(errors);
             }
 
             return Ok(await serviceManager.AuthenticationService.LogIn(loginRequest));

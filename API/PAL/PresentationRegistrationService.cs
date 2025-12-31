@@ -6,6 +6,9 @@ using IdempotentAPI.Cache.DistributedCache.Extensions.DependencyInjection;
 using IdempotentAPI.Core;
 using IdempotentAPI.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.OpenApi.Models;
+using System.IO.Compression;
 using System.Threading.RateLimiting;
 
 namespace PAL
@@ -73,7 +76,10 @@ namespace PAL
 
 
             #region SignalR
+
             services.AddSignalR();
+            
+            
             #endregion
 
             #region Identity
@@ -120,6 +126,56 @@ namespace PAL
 
                 return new Client(apiKey: apiKey);
             });
+            #endregion
+
+
+            #region Enhancment 
+
+            // Enable compression
+            services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true; // compress HTTPS responses
+                options.Providers.Add<GzipCompressionProvider>();
+                // options.Providers.Add<BrotliCompressionProvider>(); // optional, more efficient
+            });
+
+            // Configure compression levels
+            services.Configure<GzipCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Fastest; // or Optimal
+            });
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            services.AddEndpointsApiExplorer();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Graduation Project V1", Version = "v1" });
+
+                // Define the security scheme
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer abc123\""
+                });
+
+                // Apply the security globally to all endpoints
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                      {
+                        new OpenApiSecurityScheme
+                        {
+                           Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                         },
+                         new string[] {}
+                       }
+                });
+            });
+
+
             #endregion
 
             return services;

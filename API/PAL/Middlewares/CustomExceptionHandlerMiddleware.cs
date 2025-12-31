@@ -37,10 +37,11 @@ namespace PAL.Middlewares
                 NotFoundException => (int)HttpStatusCode.NotFound,
                 RateLimitExceededException => (int)HttpStatusCode.TooManyRequests,
                 UnauthorizedException => (int)HttpStatusCode.Unauthorized,
-                IdempotencyKeyMissingException => (int)HttpStatusCode.BadRequest,
-                IdempotencyKeyDuplicateException=>(int)HttpStatusCode.NotAcceptable,
+                UnprocessableContentException => (int)HttpStatusCode.UnprocessableEntity,
+                IdempotencyKeyDuplicateException =>(int)HttpStatusCode.NotAcceptable,
+                IdempotencyKeyMissingException => (int)HttpStatusCode.UnprocessableEntity,
                 BadRequestException => (int)HttpStatusCode.BadRequest,
-                GeminiException => (int)HttpStatusCode.BadRequest,
+                GeminiException => (int)HttpStatusCode.UnprocessableEntity,
                 _ => (int)HttpStatusCode.InternalServerError
             };
 
