@@ -1,26 +1,9 @@
 ﻿
 using BLL;
-using BLL.DTOs.AuthenticationDTOs;
-using Common.Exceptions;
 using DAL;
-using DAL.Context;
-using DAL.Entities;
-using Google.GenAI;
-using IdempotentAPI.Cache.DistributedCache.Extensions.DependencyInjection;
-using IdempotentAPI.Core;
-using IdempotentAPI.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using PAL.Hubs;
 using PAL.Middlewares;
-using System.IdentityModel.Tokens.Jwt;
-using System.IO.Compression;
-using System.Text;
-using System.Threading.RateLimiting;
-using System.Threading.Tasks;
 
 namespace PAL
 {
@@ -37,14 +20,17 @@ namespace PAL
                 {
                     options.SuppressModelStateInvalidFilter = true;
                 });
-            await DataLayerRegistrationService.AddDataLayerRegistrationService(builder.Services,builder.Configuration);
-            await    BusiniessLayerRegistrationService.AddBusinessLayerServices(builder.Services,builder.Configuration);
+
+
+
+            await DataLayerRegistrationService.AddDataLayerRegistrationService(builder.Services, builder.Configuration);
+            await BusiniessLayerRegistrationService.AddBusinessLayerServices(builder.Services, builder.Configuration);
             await PresentationRegistrationService.AddPresentationRegistrationServices(builder.Services, builder.Configuration);
 
 
 
-      
-         
+
+
             var app = builder.Build();
             app.UseStaticFiles();
             // Configure the HTTP request pipeline.
@@ -65,9 +51,9 @@ namespace PAL
             }
 
 
+            //app.Logger.LogInformation("Application Starting Up");
 
 
-   
 
             app.UseMiddleware<IdempotencyCustomMiddleware>();
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
@@ -80,10 +66,11 @@ namespace PAL
 
 
             //app.UseStaticFiles();
-            
+
 
             app.MapControllers();
-            app.MapHub<ChatHub>("/chatHub");
+            app.MapHub<ChatHub>("Hub/chatHub");
+            app.MapHub<NotificationHub>("Hub/notifications");
 
             //app.Run($"https://localhost:{builder.Configuration["PORT"]}");
             await app.RunAsync();

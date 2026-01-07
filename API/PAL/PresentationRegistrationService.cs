@@ -1,4 +1,5 @@
-﻿using Common.Exceptions;
+﻿using BLL.Services.Interfaces;
+using Common.Exceptions;
 using DAL.Context;
 using DAL.Entities;
 using Google.GenAI;
@@ -8,6 +9,7 @@ using IdempotentAPI.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.OpenApi.Models;
+using PAL.Notifications;
 using System.IO.Compression;
 using System.Threading.RateLimiting;
 
@@ -18,7 +20,9 @@ namespace PAL
 
         public async static Task<IServiceCollection>AddPresentationRegistrationServices(IServiceCollection services ,IConfiguration configuration)
         {
-          
+            services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
+
+
             #region RateLimiter
             services.AddRateLimiter(options =>
             {
