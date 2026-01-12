@@ -19,8 +19,7 @@ namespace DAL
         public static async Task<IServiceCollection> AddDataLayerRegistrationService(this IServiceCollection services,IConfiguration configuration)
         {
             services.AddScoped<IDbIntialize, DbIntialize>();
-            services.AddScoped<MemoryCacheRepository>();
-            services.AddScoped<CacheRepository>(); // Redis
+       
 
             services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             // 1. Configure DbContext with SQL Server

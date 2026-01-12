@@ -11,6 +11,6 @@ namespace BLL.Services.Interfaces
         IAttachmentService AttachmentService { get; }
         IEmailSender EmailSender { get; }
         IAuthenticationService AuthenticationService { get; }
-        ICacheService CacheService { get; }
+        
     }
 }

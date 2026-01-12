@@ -1,4 +1,4 @@
-﻿namespace PAL.Hubs
+﻿namespace Common.Hubs
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.SignalR;

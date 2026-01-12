@@ -1,5 +1,4 @@
-﻿using BLL.Services.Interfaces;
-using Common.Exceptions;
+﻿using Common.Exceptions;
 using DAL.Context;
 using DAL.Entities;
 using Google.GenAI;
@@ -13,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using PAL.Notifications;
 using System.IO.Compression;
 using System.Threading.RateLimiting;
+using PAL.Notifications;
 
 namespace PAL
 {
