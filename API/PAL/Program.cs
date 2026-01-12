@@ -2,6 +2,7 @@
 using BLL;
 using DAL;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Hybrid;
 using PAL.Hubs;
 using PAL.Middlewares;
 
@@ -20,7 +21,6 @@ namespace PAL
                 {
                     options.SuppressModelStateInvalidFilter = true;
                 });
-
 
 
             await DataLayerRegistrationService.AddDataLayerRegistrationService(builder.Services, builder.Configuration);
@@ -54,7 +54,7 @@ namespace PAL
             //app.Logger.LogInformation("Application Starting Up");
 
 
-
+            
             app.UseMiddleware<IdempotencyCustomMiddleware>();
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseAuthentication();

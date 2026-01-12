@@ -8,6 +8,7 @@ using IdempotentAPI.Core;
 using IdempotentAPI.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.OpenApi.Models;
 using PAL.Notifications;
 using System.IO.Compression;
@@ -21,7 +22,7 @@ namespace PAL
         public async static Task<IServiceCollection>AddPresentationRegistrationServices(IServiceCollection services ,IConfiguration configuration)
         {
             services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
-
+            
 
             #region RateLimiter
             services.AddRateLimiter(options =>
@@ -129,6 +130,31 @@ namespace PAL
                 }
 
                 return new Client(apiKey: apiKey);
+            });
+            #endregion
+
+
+
+            #region Hybrid Cache
+
+
+
+            services.AddHybridCache(options =>
+            {
+                options.MaximumKeyLength = 512;
+                options.MaximumPayloadBytes = 1024 * 1024 * 10;
+
+                options.DefaultEntryOptions = new HybridCacheEntryOptions
+                {
+                    Expiration = TimeSpan.FromMinutes(30),
+                    LocalCacheExpiration = TimeSpan.FromMinutes(30)
+                };
+            });
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = configuration.GetConnectionString("Redis");
+                options.InstanceName = "HybridCache_";
             });
             #endregion
 
