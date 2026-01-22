@@ -1,4 +1,5 @@
-﻿using Common.Exceptions;
+﻿using BLL.Services;
+using Common.Exceptions;
 using DAL.Context;
 using DAL.Entities;
 using Google.GenAI;
@@ -9,10 +10,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.OpenApi.Models;
-using PAL.Notifications;
+//using PAL.Notifications;
 using System.IO.Compression;
 using System.Threading.RateLimiting;
-using PAL.Notifications;
+//using PAL.Notifications;
 
 namespace PAL
 {
@@ -21,7 +22,7 @@ namespace PAL
 
         public async static Task<IServiceCollection>AddPresentationRegistrationServices(IServiceCollection services ,IConfiguration configuration)
         {
-            services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
+            //services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
             
 
             #region RateLimiter
@@ -131,6 +132,7 @@ namespace PAL
 
                 return new Client(apiKey: apiKey);
             });
+            services.AddScoped<GeminiService>();
             #endregion
 
 

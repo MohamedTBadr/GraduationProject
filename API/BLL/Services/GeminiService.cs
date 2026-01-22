@@ -11,7 +11,7 @@ public class GeminiService(Client _geminiClient)
   
 
    
-    public async Task<string?> GenerateText(string prompt)
+    public async Task<string?> SendMessageAsync(string prompt)
     {
         // ... initial checks ...
 
