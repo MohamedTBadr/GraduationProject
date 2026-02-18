@@ -290,5 +290,24 @@ dotnet run --project ReverseProxy
 * Chat system is real-time and horizontally scalable
 
 ---
+<div align="center">
 
+# 🚀 Interactive API Playground
+
+Stop manual testing and **start collaborating**.  
+Join our official Postman Workspace for instant access to pre-configured collections, environment variables, and documentation.
+
+<br>
+
+<a href="https://app.getpostman.com/join-team?invite_code=a545087eeefb497e352e99484f2e99d3fce6402cec5d39107de64f9b765b154b&target_code=aace9867947f2b0034869f3790b48615">
+  <img src="https://img.shields.io/badge/🚀_JOIN_WORKSPACE-FF6C37?style=for-the-badge&logo=postman&logoColor=white" alt="Join Workspace" width="300">
+</a>
+
+<br>
+
+<sub>✨ Pre-concluded collections • Environment variables • Live docs</sub>
+
+</div>
+
+---
 If this repository is used for evaluation or demonstration, it reflects **real-world backend engineering practices**, not tutorial-level implementations.
