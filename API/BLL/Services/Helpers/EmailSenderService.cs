@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Mail;
 
-namespace BLL.Services
+namespace BLL.Services.Helpers
 {
     public class EmailSenderService(IConfiguration _config) : IEmailSender
         {

@@ -11,6 +11,8 @@ namespace BLL.Services.Interfaces
         IAttachmentService AttachmentService { get; }
         IEmailSender EmailSender { get; }
         IAuthenticationService AuthenticationService { get; }
-        
+        IServiceTypeService ServiceTypeService { get; }
+        ICategoryService CategoryService { get; }
+
     }
 }

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BLL.Services
+namespace BLL.Services.Helpers
 {
     public class HybridCacheService : ICacheService
     {

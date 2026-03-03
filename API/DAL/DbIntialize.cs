@@ -31,15 +31,15 @@ namespace DAL
 
         private async Task ProductSeeding()
         {
-            if (!context.Set<Product>().Any())
+            if (!context.Set<Vendor>().Any())
             {
                 var data = await File.ReadAllTextAsync(@"../Infrastructure\Presistence\Seeding\brands.json");
 
-                var Products = JsonSerializer.Deserialize<List<Product>>(data);
+                var Products = JsonSerializer.Deserialize<List<Vendor>>(data);
 
                 if (Products is not null && Products.Any())
                 {
-                    context.Set<Product>().AddRange(Products);
+                    context.Set<Vendor>().AddRange(Products);
                     await context.SaveChangesAsync();
                 }
             }

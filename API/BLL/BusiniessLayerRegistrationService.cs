@@ -3,7 +3,10 @@ using BLL.DTOs;
 using BLL.DTOs.AuthenticationDTOs;
 using BLL.DTOs.PaymobDTOs;
 using BLL.Services;
+using BLL.Services.Helpers;
 using BLL.Services.Interfaces;
+using DAL.Repositories;
+using DAL.Repositories.Contracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +29,9 @@ namespace BLL
             services.AddScoped<IAttachmentService, AttachmentService>();
             services.AddScoped<IServiceManager, ServiceManager>();
 
-
+            services.AddScoped<IServiceTypeService,ServiceTypeService>();
+            services.AddScoped<ICategoryService,CategoryService>();
+            services.AddAutoMapper(typeof(AssemblyReference).Assembly);
 
             services.Configure<JWTOptions>(
   configuration.GetSection("JWTOptions"));

@@ -1,4 +1,4 @@
-﻿using BLL.Services;
+﻿using BLL.Services.Helpers;
 using Common.Exceptions;
 using DAL.Context;
 using DAL.Entities;
@@ -89,8 +89,8 @@ namespace PAL
             #endregion
 
             #region Identity
-            //Configure Identity with your ApplicationUser
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            //Configure Identity with your ApplicationUser (use Guid keys)
+            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 

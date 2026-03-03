@@ -3,7 +3,7 @@ using Google.GenAI;
 using Google.GenAI.Types;
 
 
-namespace BLL.Services;
+namespace BLL.Services.Helpers;
 
 
 public class GeminiService(Client _geminiClient)

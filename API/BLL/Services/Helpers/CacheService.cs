@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BLL.Services
+namespace BLL.Services.Helpers
 {
     internal class CacheService(ICacheRepository cacheRepository) : ICacheService
     {

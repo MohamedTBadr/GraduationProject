@@ -1,6 +1,6 @@
 ﻿
 using BLL;
-using BLL.Services;
+using BLL.Services.Helpers;
 using DAL;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +29,7 @@ namespace PAL
             await BusiniessLayerRegistrationService.AddBusinessLayerServices(builder.Services, builder.Configuration);
             await PresentationRegistrationService.AddPresentationRegistrationServices(builder.Services, builder.Configuration);
 
+           
 
 
 
@@ -69,7 +70,7 @@ namespace PAL
 
             //app.UseStaticFiles();
 
-            app.MapGet("/AI-Chat", async ([FromServices] GeminiService geminiService) =>
+            app.MapPost("/AI-Chat", async ([FromServices] GeminiService geminiService) =>
             {
                 var budget = 3000;
                 var products = new[]

@@ -15,7 +15,7 @@ using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BLL.Services
+namespace BLL.Services.Helpers
 {
     public class AttachmentService : IAttachmentService
     {

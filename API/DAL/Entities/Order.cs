@@ -20,9 +20,11 @@ namespace DAL.Entities
     public string PaymentStatus { get; set; } = "Pending";
 
     public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? Appointment { get; set; }
 
-}
+
+        public Address ShippingAddress { get; set; } = new Address();
+    }
 
 
 }
