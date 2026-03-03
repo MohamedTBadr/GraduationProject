@@ -2,6 +2,8 @@
 using BLL;
 using BLL.Services.Helpers;
 using DAL;
+using DAL.Context;
+using DAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -29,7 +31,11 @@ namespace PAL
             await BusiniessLayerRegistrationService.AddBusinessLayerServices(builder.Services, builder.Configuration);
             await PresentationRegistrationService.AddPresentationRegistrationServices(builder.Services, builder.Configuration);
 
-           
+//            builder.Services
+//.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
+//.AddEntityFrameworkStores<ApplicationDbContext>();
+
+
 
 
 
@@ -53,11 +59,13 @@ namespace PAL
                 });
             }
 
+            await SeedingScope(app);
+
 
             //app.Logger.LogInformation("Application Starting Up");
 
 
-            
+
             app.UseMiddleware<IdempotencyCustomMiddleware>();
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseAuthentication();
@@ -153,6 +161,24 @@ Return an array named ""enriched_recommendations"". Only JSON.
 
             //app.Run($"https://localhost:{builder.Configuration["PORT"]}");
             await app.RunAsync();
+        }
+
+        private static async Task SeedingScope(WebApplication app)
+        {
+            // ✅ Run DB seeders at startup
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var initializer = services.GetRequiredService<IDbIntialize>();
+                    await initializer.IntializeAsync(); // seeds Vendors, Roles, Categories
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Seeding failed: {ex.Message}");
+                }
+            }
         }
     }
 }

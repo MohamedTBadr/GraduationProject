@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.OpenApi.Models;
+using PAL.Controllers.Attributes;
+
 //using PAL.Notifications;
 using System.IO.Compression;
 using System.Threading.RateLimiting;
@@ -23,8 +25,11 @@ namespace PAL
         public async static Task<IServiceCollection>AddPresentationRegistrationServices(IServiceCollection services ,IConfiguration configuration)
         {
             //services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
-            
 
+            services.AddControllers(options =>
+            {
+                options.Filters.Add<ResultFilter>(); // ← applies to all controllers
+            });
             #region RateLimiter
             services.AddRateLimiter(options =>
             {
@@ -84,12 +89,12 @@ namespace PAL
             #region SignalR
 
             services.AddSignalR();
-            
-            
+
+
             #endregion
 
             #region Identity
-            //Configure Identity with your ApplicationUser (use Guid keys)
+            ////Configure Identity with your ApplicationUser (use Guid keys)
             services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();

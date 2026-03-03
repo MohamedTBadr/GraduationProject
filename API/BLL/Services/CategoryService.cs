@@ -19,7 +19,7 @@ namespace BLL.Services
         {
             var category = await categoryRepository.GetCategoryByIdAsync(id);
 
-            if (category == null) return Result<CategoryDTO>.Failure(ErrorType.NotFound);
+            if (category == null) return Result<CategoryDTO>.NotFound("Category not found");
 
             var categoryDTO = mapper.Map<CategoryDTO>(category);
             return Result<CategoryDTO>.Success(categoryDTO);
@@ -27,13 +27,15 @@ namespace BLL.Services
         public async Task AddCategoryAsync(CreateCategoryRequest category)
         {
             // mapper 
+            
             var newCategory = mapper.Map<Category>(category);
+
             await categoryRepository.AddCategoryAsync(newCategory);
         }
         public async Task<Result<CategoryDTO>> DeleteCategoryAsync(Guid id)
         {
             var category = await categoryRepository.GetCategoryByIdAsync(id);
-            if (category == null) return Result<CategoryDTO>.Failure(ErrorType.NotFound);
+            if (category == null) return Result<CategoryDTO>.NotFound("Category not found");
 
             await categoryRepository.DeleteCategoryAsync(category);
             return Result<CategoryDTO>.Success(mapper.Map<CategoryDTO>(category));
@@ -42,7 +44,7 @@ namespace BLL.Services
         public async Task<Result<CategoryDTO>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request)
         {
             var existingCategory = await categoryRepository.GetCategoryByIdAsync(id);
-            if (existingCategory == null) return Result<CategoryDTO>.Failure(ErrorType.NotFound);
+            if (existingCategory == null) return Result<CategoryDTO>.NotFound("Category not found");
 
             var categoryMapped = mapper.Map(request, existingCategory);
             await categoryRepository.UpdateCategoryAsync(categoryMapped);

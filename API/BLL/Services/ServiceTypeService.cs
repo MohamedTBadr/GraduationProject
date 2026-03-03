@@ -23,7 +23,7 @@ namespace BLL.Services
             var type = await repository.GetServiceTypeByIdAsync(id);
             if (type == null)
             {
-                return Result<ServiceTypeDTO>.Failure(ErrorType.NotFound);
+                return Result<ServiceTypeDTO>.NotFound("Service type not found");
             }
 
             await repository.DeleteTypeAsync(id);
@@ -43,7 +43,7 @@ namespace BLL.Services
             var type = repository.GetServiceTypeByIdAsync(id);
             if (type == null)
             {
-                return Result<ServiceTypeDTO>.Failure(ErrorType.NotFound);
+                return Result<ServiceTypeDTO>.NotFound("Service type not found");
             }
             return Result<ServiceTypeDTO>.Success(mapper.Map<ServiceTypeDTO>(type));
         }
@@ -53,7 +53,7 @@ namespace BLL.Services
             var existingType = repository.GetServiceTypeByIdAsync(id);
             if (existingType == null)
             {
-                return Result<ServiceTypeDTO>.Failure(ErrorType.NotFound);
+                return Result<ServiceTypeDTO>.NotFound("Service type not found");
             }
 
             await repository.UpdateTypeAsync(mapper.Map<ServiceType>(type));

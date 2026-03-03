@@ -3,6 +3,7 @@ using BLL.DTOs.CategoryDTOs;
 using BLL.DTOs.ProductDTOs;
 using BLL.DTOs.ServiceTypesDTOs;
 using BLL.DTOs.UserDTOs;
+using BLL.DTOs.VendorDTOs;
 using DAL.Entities;
 using System;
 using System.Collections.Generic;
@@ -20,10 +21,7 @@ namespace BLL.Services.Helpers
             #endregion
 
 
-            #region Product
-            CreateMap<ProductDTO, Product>().ReverseMap();
-            CreateMap<CreateProductRequest, Product>().ReverseMap();
-            #endregion
+         
 
 
             #region User
@@ -33,6 +31,30 @@ namespace BLL.Services.Helpers
             #region ServiceType
             CreateMap<CreateServiceTypeRequest, ServiceType>().ReverseMap();
             CreateMap<ServiceTypeDTO, ServiceType>().ReverseMap();
+            #endregion
+
+
+
+
+            #region Product
+            // Entity → Read DTO
+            CreateMap<Product, ProductDTO>()
+                .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category.Name))
+                .ForMember(d => d.VendorName, o => o.MapFrom(s => s.Vendor.BusinessName))
+                .ForMember(d => d.ServiceTypeName, o => o.MapFrom(s => s.ServiceType.Name));
+
+            // Create DTO → Entity
+            CreateMap<CreateProductRequest, Product>();
+
+            // Update DTO → Entity
+            CreateMap<UpdateProductDTO, Product>();
+            #endregion
+
+            #region Vendor
+            CreateMap<VendorDetailsDTO, Vendor>().ReverseMap();
+            CreateMap<CreateVendorRequest, Vendor>().ReverseMap();
+            CreateMap<VendorListDTO, Vendor>().ReverseMap();
+
             #endregion
         }
     }

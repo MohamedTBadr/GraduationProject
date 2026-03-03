@@ -1,37 +1,89 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BLL;
+using BLL.DTOs;
+using BLL.DTOs.ProductDTOs;
+using BLL.Services.Interfaces;
+using Common;
 using Microsoft.AspNetCore.Mvc;
-namespace PAL.Controllers
+
+namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductController(): APIController
+    public class ProductsController(IProductService productService) : ControllerBase
     {
+        // GET api/products
         [HttpGet]
-        public IActionResult GetAllProducts()
+        public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request)
         {
-            return Ok(new List<string> { "Product 1", "Product 2", "Product 3" });
+            var result = await productService.GetAllAsync(request);
+            return Ok(result);
         }
 
-
-        [HttpGet("{id}")]
-        public IActionResult GetProductById(int id)
+        // GET api/products/{id}
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetByIdAsync(Guid id)
         {
-            var product = $"Product {id}";
-            return Ok(product);
+            var result = await productService.GetByIdAsync(id);
+            return Ok(result);
         }
-        //roles= admin,vendor,user
+
+        // GET api/products/by-category/{categoryId}
+        [HttpGet("by-category/{categoryId:guid}")]
+        public async Task<IActionResult> GetByCategoryAsync(Guid categoryId, [FromQuery] PaginatedRequest request)
+        {
+            var result = await productService.GetByCategoryIdAsync(categoryId, request);
+            return Ok(result);
+        }
+
+        // GET api/products/by-vendor/{vendorId}
+        [HttpGet("by-vendor/{vendorId:guid}")]
+        public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request)
+        {
+            var result = await productService.GetByVendorIdAsync(vendorId, request);
+            return Ok(result);
+        }
+
+        // GET api/products/by-service-type/{serviceTypeId}
+        [HttpGet("by-service-type/{serviceTypeId:guid}")]
+        public async Task<IActionResult> GetByServiceTypeAsync(Guid serviceTypeId, [FromQuery] PaginatedRequest request)
+        {
+            var result = await productService.GetByServiceTypeIdAsync(serviceTypeId, request);
+            return Ok(result);
+        }
+
+        // POST api/products
         [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public IActionResult CreateProduct([FromBody] string product)
+        public async Task<IActionResult> CreateAsync([FromBody] CreateProductRequest dto)
         {
-            return CreatedAtAction(nameof(GetProductById), new { id = 1 }, product);
+            var result = await productService.CreateAsync(dto);
+
+            if (result.IsSuccess)
+                return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Value.Id }, result);
+
+            return Ok(result); // filter handles the failure
         }
 
-        //[HttpDelete("{id}")]
-        //[Authorize(Roles = "Admin")]
-        //public IActionResult DeleteProduct(Guid id)
-        //{
-            
-        //}
+        // PUT api/products/{id}
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateProductDTO dto)
+        {
+            if (id != dto.Id)
+                return BadRequest(Error.Validation("Product.IdMismatch", "Route id and body id do not match."));
+
+            var result = await productService.UpdateAsync(dto);
+            return Ok(result);
+        }
+
+        // DELETE api/products/{id}
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteAsync(Guid id)
+        {
+            var result = await productService.DeleteAsync(id);
+
+            if (result.IsSuccess)
+                return NoContent();
+
+            return Ok(result); // filter handles the failure
+        }
     }
 }

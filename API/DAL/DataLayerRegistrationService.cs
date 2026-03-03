@@ -1,8 +1,10 @@
 ﻿using DAL.Context;
+using DAL.Entities;
 using DAL.Repositories;
 using DAL.Repositories.Caching;
 using DAL.Repositories.Caching.Interfaces;
 using DAL.Repositories.Contracts;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,9 +32,7 @@ namespace DAL
                 options.UseSqlServer(
                    configuration.GetConnectionString("DefaultConnection")));
 
-
-
-
+        
 
 
 

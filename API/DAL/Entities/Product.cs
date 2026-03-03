@@ -17,7 +17,10 @@ namespace DAL.Entities
 
         public Guid CategoryId { get; set; } 
 
-        
+
+        public Vendor Vendor { get; set; }
+        public Guid VendorId { get; set; }
+
 
 
     }
