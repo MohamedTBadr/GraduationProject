@@ -1,0 +1,529 @@
+﻿/* ----------------------------------- */
+/* Swagger UI - Ultimate Dark Pro Theme */
+/* Supercharged with glass morphism, dynamic gradients, animations, ripple effects, and immersive visuals */
+/* Optimized for performance, accessibility, and readability */
+/* ----------------------------------- */
+
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-glow: rgba(99, 102, 241, 0.4);
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #06b6d4;
+    --dark-1: #0a0a0a;
+    --dark-2: #121212;
+    --dark-3: #1a1a1a;
+    --dark-4: #242424;
+    --dark-5: #2d2d2d;
+    --light-1: #ffffff;
+    --light-2: #f3f4f6;
+    --light-3: #d1d5db;
+    --accent-glow: rgba(99, 102, 241, 0.15);
+    --glass-bg: rgba(30, 30, 30, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-deep: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, var(--dark-1) 0%, var(--dark-2) 50%, #1e1b4b 100%);
+    color: var(--light-2);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    min-height: 220vh;
+    background-attachment: fixed;
+    overflow-x: hidden;
+    animation: backgroundShift 20s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ----------------- Topbar ----------------- */
+.swagger-ui .topbar {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 1.5rem 0;
+    box-shadow: var(--shadow-deep);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+.swagger-ui .topbar a span {
+    background: linear-gradient(90deg, #8b5cf6, var(--primary), #06b6d4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 900;
+    font-size: 2rem;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: textGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+    0% {
+        filter: drop-shadow(0 0 5px rgba(99,102,241,0.5));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 15px rgba(99,102,241,0.8));
+    }
+}
+
+.swagger-ui .topbar .download-url-wrapper {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    padding: 8px;
+    transition: var(--transition-smooth);
+}
+
+    .swagger-ui .topbar .download-url-wrapper:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+/* ----------------- Operation Blocks ----------------- */
+.swagger-ui .opblock {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(15px);
+    transition: var(--transition-smooth);
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-subtle);
+}
+
+    .swagger-ui .opblock::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--primary), var(--info), transparent);
+        opacity: 0;
+        transition: var(--transition-smooth);
+    }
+
+    .swagger-ui .opblock::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(6,182,212,0.05));
+        opacity: 0;
+        transition: var(--transition-smooth);
+        pointer-events: none;
+    }
+
+    .swagger-ui .opblock:hover {
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: var(--shadow-deep), 0 0 0 1px var(--primary-glow);
+        border-color: rgba(99,102,241,0.5);
+    }
+
+        .swagger-ui .opblock:hover::before,
+        .swagger-ui .opblock:hover::after {
+            opacity: 1;
+        }
+
+/* ----------------- Method Tags ----------------- */
+.swagger-ui .opblock-summary-method {
+    min-width: 90px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 14px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow-subtle);
+    transition: var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+    .swagger-ui .opblock-summary-method::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .swagger-ui .opblock-summary-method:hover::before {
+        left: 100%;
+    }
+
+.swagger-ui .opblock-get .opblock-summary-method {
+    background: linear-gradient(135deg,#10b981,#059669);
+    color: white;
+    animation: pulseGreen 2s infinite;
+}
+
+@keyframes pulseGreen {
+    0%,100% {
+        box-shadow: 0 0 0 0 rgba(16,185,129,0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(16,185,129,0);
+    }
+}
+
+.swagger-ui .opblock-post .opblock-summary-method {
+    background: linear-gradient(135deg,#3b82f6,#1d4ed8);
+    color: white;
+    animation: pulseBlue 2s infinite;
+}
+
+@keyframes pulseBlue {
+    0%,100% {
+        box-shadow: 0 0 0 0 rgba(59,130,246,0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(59,130,246,0);
+    }
+}
+
+.swagger-ui .opblock-put .opblock-summary-method,
+.swagger-ui .opblock-patch .opblock-summary-method {
+    background: linear-gradient(135deg,#f59e0b,#d97706);
+    color: white;
+    animation: pulseOrange 2s infinite;
+}
+
+@keyframes pulseOrange {
+    0%,100% {
+        box-shadow: 0 0 0 0 rgba(245,158,11,0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(245,158,11,0);
+    }
+}
+
+.swagger-ui .opblock-delete .opblock-summary-method {
+    background: linear-gradient(135deg,#ef4444,#dc2626);
+    color: white;
+    animation: pulseRed 2s infinite;
+}
+
+@keyframes pulseRed {
+    0%,100% {
+        box-shadow: 0 0 0 0 rgba(239,68,68,0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(239,68,68,0);
+    }
+}
+
+/* ----------------- Operation Summary ----------------- */
+.swagger-ui .opblock-summary {
+    background: var(--glass-bg);
+    border-radius: 16px 16px 0 0;
+    padding: 24px;
+    border-bottom: 1px solid var(--glass-border);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+    .swagger-ui .opblock-summary:hover {
+        background: rgba(52,52,52,0.9);
+        transform: translateX(2px);
+    }
+
+/* ----------------- Operation Body ----------------- */
+.swagger-ui .opblock-body {
+    background: var(--glass-bg);
+    border-radius: 0 0 16px 16px;
+    padding: 28px;
+    animation: slideDownFade 0.4s ease-out;
+    backdrop-filter: blur(10px);
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ----------------- Parameters ----------------- */
+.swagger-ui .parameters {
+    background: var(--glass-bg);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+    transition: var(--transition-smooth);
+}
+
+    .swagger-ui .parameters:hover {
+        box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+.swagger-ui .parameters-col_description input,
+.swagger-ui .parameters-col_description select,
+.swagger-ui .parameters-col_description textarea {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--light-2);
+    padding: 12px 16px;
+    transition: var(--transition-fast);
+    font-size: 15px;
+    backdrop-filter: blur(8px);
+}
+
+    .swagger-ui .parameters-col_description input:focus,
+    .swagger-ui .parameters-col_description select:focus,
+    .swagger-ui .parameters-col_description textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px var(--accent-glow),0 0 20px var(--primary-glow);
+        background: rgba(42,42,42,0.95);
+        transform: scale(1.02);
+    }
+
+/* ----------------- Responses ----------------- */
+.swagger-ui .responses-wrapper {
+    background: var(--glass-bg);
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+    transition: var(--transition-smooth);
+}
+
+    .swagger-ui .responses-wrapper:hover {
+        box-shadow: 0 0 25px var(--accent-glow);
+    }
+
+.swagger-ui .response-col_status {
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 12px;
+    min-width: 90px;
+    text-align: center;
+    transition: var(--transition-fast);
+}
+
+.swagger-ui .response-200 .response-col_status {
+    background: rgba(16,185,129,0.15);
+    color: #10b981;
+    border: 1px solid rgba(16,185,129,0.3);
+    animation: statusPulse 3s infinite;
+}
+
+@keyframes statusPulse {
+    0%,100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* ----------------- Buttons ----------------- */
+.swagger-ui .btn {
+    background: linear-gradient(135deg, var(--dark-4), var(--dark-5));
+    color: var(--light-2);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+    .swagger-ui .btn::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        background: rgba(255,255,255,0.2);
+        transition: transform 0.5s, opacity 1s;
+        pointer-events: none;
+    }
+
+    .swagger-ui .btn:active::after {
+        transform: scale(4);
+        opacity: 0;
+        transition: transform 0.3s, opacity 0.5s;
+    }
+
+    .swagger-ui .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-deep);
+        border-color: var(--primary);
+        background: linear-gradient(135deg,var(--dark-5),#363636);
+    }
+
+    .swagger-ui .btn.execute {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        color: white;
+        box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+        .swagger-ui .btn.execute:hover {
+            box-shadow: 0 8px 25px var(--primary-glow);
+            transform: translateY(-3px);
+        }
+
+/* ----------------- Code Blocks ----------------- */
+.swagger-ui pre, .swagger-ui code {
+    background: var(--glass-bg);
+    color: #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    font-size: 15px;
+    font-family: 'JetBrains Mono','Fira Code',Consolas,Monaco,'Courier New',monospace;
+    border: 1px solid var(--glass-border);
+    overflow-x: auto;
+    line-height: 1.6;
+    backdrop-filter: blur(12px);
+    transition: var(--transition-smooth);
+}
+
+    .swagger-ui pre:hover {
+        box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .swagger-ui pre::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg,var(--primary),var(--info),var(--success),var(--warning));
+        border-radius: 16px 16px 0 0;
+    }
+
+/* ----------------- Tabs ----------------- */
+.swagger-ui .tab {
+    background: var(--glass-bg);
+    border-radius: 16px;
+    padding: 6px;
+    display: inline-flex;
+    gap: 6px;
+    backdrop-filter: blur(10px);
+}
+
+    .swagger-ui .tab li a {
+        color: var(--light-3);
+        background: transparent;
+        border-radius: 12px;
+        padding: 12px 24px;
+        transition: var(--transition-fast);
+        font-weight: 500;
+    }
+
+        .swagger-ui .tab li a:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--light-2);
+            transform: translateY(-1px);
+        }
+
+        .swagger-ui .tab li a.active {
+            background: linear-gradient(135deg, var(--dark-4), var(--dark-5));
+            color: var(--light-2);
+            font-weight: 600;
+            box-shadow: var(--shadow-subtle);
+        }
+
+/* ----------------- Models/Schemas ----------------- */
+.swagger-ui .model-box {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 10px 0;
+    backdrop-filter: blur(10px);
+    transition: var(--transition-smooth);
+}
+
+    .swagger-ui .model-box:hover {
+        transform: translateX(4px);
+        box-shadow: var(--shadow-deep);
+    }
+
+.swagger-ui .model {
+    color: var(--light-3);
+}
+
+.swagger-ui .model-title {
+    color: var(--light-2);
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* ----------------- Scrollbar ----------------- */
+.swagger-ui ::-webkit-scrollbar {
+    width: 22px;
+    height: 22px;
+}
+
+.swagger-ui ::-webkit-scrollbar-track {
+    background: var(--glass-bg);
+    border-radius: 12px;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg,var(--primary),var(--info),var(--success));
+    border-radius: 12px;
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+    .swagger-ui ::-webkit-scrollbar-thumb:hover {
+        box-shadow: 0 0 20px var(--primary-glow);
+    }
