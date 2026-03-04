@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EpicHub — SRS</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bl:#2563EB;--bl2:#1D4ED8;--sky:#38BDF8;--grn:#10B981;--rose:#F43F5E;--amb:#F59E0B;--tr:.28s cubic-bezier(.4,0,.2,1);--r:8px;}
+[data-theme="dark"]{--bg:#050A14;--bg2:#09111F;--bg3:#101D30;--bg4:#172440;--bdr:rgba(37,99,235,.1);--bdr2:rgba(37,99,235,.22);--bdr3:rgba(37,99,235,.38);--txt:#D6E4FF;--txt2:#7B9FD4;--txt3:#334F7A;--ac:#2563EB;--acs:rgba(37,99,235,.1);--nav:rgba(5,10,20,.92);}
+[data-theme="light"]{--bg:#F0F5FF;--bg2:#E4EDFF;--bg3:#C7DAFF;--bg4:#A5C0F5;--bdr:rgba(30,64,175,.08);--bdr2:rgba(30,64,175,.16);--bdr3:rgba(30,64,175,.3);--txt:#0D1B3E;--txt2:#1E3A6E;--txt3:#5B7AB8;--ac:#1D4ED8;--acs:rgba(29,78,216,.09);--nav:rgba(240,245,255,.93);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt);line-height:1.7;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+::selection{background:var(--bl);color:#fff;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--bdr3);border-radius:99px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 50% at 10% 20%,rgba(37,99,235,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 60% at 90% 80%,rgba(56,189,248,.04) 0%,transparent 55%);}
+#prog{position:fixed;top:0;left:0;height:2px;z-index:9999;width:0%;background:linear-gradient(90deg,var(--bl),var(--sky));box-shadow:0 0 10px rgba(37,99,235,.5);transition:width .08s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--nav);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr2);}
+.ni{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:56px;gap:1.5rem;}
+.nlogo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--txt);font-family:'IBM Plex Serif',serif;font-size:1rem;font-weight:600;flex-shrink:0;}
+.nlm{width:26px;height:26px;border-radius:5px;background:var(--bl);display:grid;place-items:center;font-size:.55rem;font-weight:500;color:#fff;font-family:'IBM Plex Mono',monospace;}
+.ndoc{font-size:.57rem;padding:2px 8px;border-radius:3px;background:var(--acs);border:1px solid var(--bdr2);color:var(--ac);font-family:'IBM Plex Mono',monospace;letter-spacing:.08em;}
+.nlinks{display:flex;gap:1.25rem;list-style:none;align-items:center;}
+.nlinks a{font-size:.68rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--txt3);text-decoration:none;transition:color var(--tr);}
+.nlinks a:hover{color:var(--ac);}
+.nright{display:flex;align-items:center;gap:8px;}
+.ttog{width:38px;height:19px;border-radius:99px;background:var(--bg4);border:1px solid var(--bdr2);cursor:pointer;position:relative;}
+.ttog::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:var(--bl);transition:transform var(--tr);}
+[data-theme="light"] .ttog::after{transform:translateX(19px);}
+.twrap{display:flex;align-items:center;gap:6px;font-size:.65rem;color:var(--txt3);}
+.hburg{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:3px;}
+.hburg span{width:18px;height:1.5px;background:var(--txt);border-radius:2px;}
+.mnav{display:none;position:fixed;inset:56px 0 0 0;background:var(--bg);z-index:99;padding:1.5rem;flex-direction:column;gap:1rem;border-top:1px solid var(--bdr2);overflow-y:auto;}
+.mnav.open{display:flex;}
+.mnav a{font-size:.9rem;color:var(--txt);text-decoration:none;padding:.5rem 0;border-bottom:1px solid var(--bdr);}
+
+/* HERO */
+.hero{min-height:82vh;display:flex;align-items:center;padding:96px 2rem 50px;position:relative;z-index:1;}
+.hinner{max-width:1440px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
+.heye{display:inline-flex;align-items:center;gap:8px;background:var(--acs);border:1px solid var(--bdr2);border-radius:3px;padding:4px 12px;font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:1.25rem;animation:up .5s ease both;}
+h1{font-family:'IBM Plex Serif',serif;font-size:clamp(2rem,4.5vw,3.5rem);font-weight:700;line-height:1.1;letter-spacing:-.02em;margin-bottom:.85rem;animation:up .5s ease .1s both;}
+h1 span{color:var(--sky);}
+.hsub{font-size:.88rem;color:var(--txt2);line-height:1.8;max-width:460px;animation:up .5s ease .2s both;}
+.htags{display:flex;flex-wrap:wrap;gap:6px;margin-top:1.25rem;animation:up .5s ease .3s both;}
+.htag{background:var(--bg3);border:1px solid var(--bdr2);border-radius:3px;padding:3px 10px;font-size:.7rem;color:var(--txt2);font-weight:500;}
+.htag.a{background:var(--acs);border-color:var(--bdr2);color:var(--ac);}
+/* meta table */
+.meta-table{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);overflow:hidden;animation:up .5s ease .15s both;}
+.mt-row{display:grid;grid-template-columns:1fr 1.5fr;border-bottom:1px solid var(--bdr);}
+.mt-row:last-child{border-bottom:none;}
+.mt-k{padding:.7rem 1rem;background:var(--bg3);font-size:.7rem;font-weight:500;color:var(--txt3);font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;}
+.mt-v{padding:.7rem 1rem;font-size:.78rem;color:var(--txt2);}
+.mt-v strong{color:var(--txt);}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* LAYOUT */
+.layout{max-width:1440px;margin:0 auto;padding:0 2rem;display:flex;gap:2.5rem;}
+.toc{width:210px;flex-shrink:0;position:sticky;top:76px;height:fit-content;background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:1rem;}
+.toc h4{font-size:.57rem;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);font-weight:500;margin-bottom:.75rem;font-family:'IBM Plex Mono',monospace;}
+.toc ul{list-style:none;display:flex;flex-direction:column;gap:1px;}
+.toc ul li a{display:block;font-size:.7rem;color:var(--txt2);text-decoration:none;padding:4px 8px;border-radius:3px;border-left:2px solid transparent;transition:background var(--tr),color var(--tr),border-color var(--tr);}
+.toc ul li a:hover,.toc ul li a.active{background:var(--acs);color:var(--ac);border-left-color:var(--ac);}
+.toc ul li.sub a{padding-left:1.2rem;font-size:.65rem;}
+.main{flex:1;min-width:0;padding:3rem 0 7rem;}
+section{margin-bottom:4rem;scroll-margin-top:86px;}
+.stag{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);font-weight:500;margin-bottom:.4rem;display:flex;align-items:center;gap:8px;}
+.stag::after{content:'';width:28px;height:1px;background:var(--ac);opacity:.4;}
+h2{font-family:'IBM Plex Serif',serif;font-size:clamp(1.4rem,2.8vw,2rem);font-weight:600;line-height:1.15;letter-spacing:-.015em;margin-bottom:.65rem;}
+h3{font-family:'IBM Plex Serif',serif;font-size:1.1rem;font-weight:600;margin:1.75rem 0 .75rem;letter-spacing:-.01em;}
+p{color:var(--txt2);margin-bottom:.9rem;font-size:.88rem;}
+strong{color:var(--txt);font-weight:600;}
+.sdesc{font-size:.86rem;color:var(--txt2);line-height:1.78;max-width:700px;margin-bottom:1.25rem;}
+.div{height:1px;background:linear-gradient(90deg,transparent,var(--bdr3),transparent);margin:3rem 0;}
+
+/* FR ITEMS */
+.fr-list{display:flex;flex-direction:column;gap:.6rem;margin:1.25rem 0;}
+.fr{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);display:grid;grid-template-columns:auto auto 1fr auto;gap:1rem;padding:.95rem 1.1rem;align-items:flex-start;transition:border-color var(--tr),background var(--tr);}
+.fr:hover{border-color:var(--bdr2);background:var(--bg3);}
+.fr-id{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--ac);background:var(--acs);border:1px solid var(--bdr2);border-radius:3px;padding:2px 7px;white-space:nowrap;align-self:flex-start;margin-top:2px;}
+.fr-pri{align-self:flex-start;margin-top:2px;}
+.fr-body h4{font-size:.86rem;font-weight:600;margin-bottom:3px;}
+.fr-body p{font-size:.8rem;margin:0;color:var(--txt2);line-height:1.55;}
+.fr-body .fr-uc{font-size:.7rem;font-family:'IBM Plex Mono',monospace;color:var(--txt3);margin-top:.4rem;}
+.pr{font-size:.58rem;padding:2px 7px;border-radius:99px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;}
+.pr-m{background:rgba(244,63,94,.12);color:#F87171;}
+.pr-s{background:rgba(245,158,11,.12);color:#FCD34D;}
+.pr-c{background:rgba(56,189,248,.12);color:#7DD3FC;}
+.pr-w{background:rgba(100,116,139,.12);color:#94A3B8;}
+
+/* USE CASE TABLE */
+.uctable{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bdr2);margin:1.25rem 0;}
+table{width:100%;border-collapse:collapse;font-size:.81rem;}
+thead tr{background:var(--bg3);}
+thead th{padding:.65rem 1rem;text-align:left;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);font-weight:500;white-space:nowrap;font-family:'IBM Plex Mono',monospace;}
+tbody tr{border-top:1px solid var(--bdr);transition:background .12s;}
+tbody tr:hover{background:var(--acs);}
+tbody td{padding:.75rem 1rem;color:var(--txt2);vertical-align:top;line-height:1.5;}
+tbody td:first-child{font-family:'IBM Plex Mono',monospace;font-size:.73rem;color:var(--txt);font-weight:500;}
+
+/* SPEC BOX */
+.specbox{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);overflow:hidden;margin:1.25rem 0;}
+.specbox-h{padding:.8rem 1.1rem;background:var(--bg3);border-bottom:1px solid var(--bdr2);font-size:.65rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--txt2);font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:8px;}
+.specbox-b{padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.7rem;}
+.specitem{display:flex;gap:1rem;align-items:flex-start;font-size:.8rem;}
+.specitem-id{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--ac);background:var(--acs);border-radius:3px;padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.specitem p{margin:0;color:var(--txt2);line-height:1.55;}
+.specitem .spec-val{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--sky);display:inline-block;margin-top:3px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:3px;padding:1px 7px;}
+
+/* INTERFACE CARD */
+.ifcards{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.25rem 0;}
+.ifc{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:1.2rem;transition:border-color var(--tr);}
+.ifc:hover{border-color:var(--bdr2);}
+.ifc-head{display:flex;align-items:center;gap:8px;margin-bottom:.7rem;}
+.ifc-ico{font-size:1.3rem;}
+.ifc h4{font-size:.86rem;font-weight:600;}
+.ifc p{font-size:.78rem;color:var(--txt2);margin:0;}
+
+/* NOTE */
+.note{background:var(--acs);border:1px solid var(--bdr2);border-radius:var(--r);padding:1.1rem 1.4rem;margin:1.25rem 0;}
+.note-tag{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);font-weight:700;margin-bottom:.35rem;display:block;}
+.note p{color:var(--txt);font-size:.85rem;margin:0;}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease;}
+.rv.in{opacity:1;transform:none;}
+
+footer{border-top:1px solid var(--bdr2);padding:1.5rem 2rem;background:var(--bg2);}
+.fi{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.ftags{display:flex;gap:5px;flex-wrap:wrap;}
+.ftag{background:var(--bg3);border:1px solid var(--bdr2);border-radius:3px;padding:2px 8px;font-size:.6rem;color:var(--txt3);font-family:'IBM Plex Mono',monospace;}
+
+@media(max-width:1100px){.toc{display:none;}.layout{padding:0 1.5rem;}.hinner{grid-template-columns:1fr;}.ifcards{grid-template-columns:1fr;}}
+@media(max-width:768px){.nlinks{display:none;}.hburg{display:flex;}.hero{padding:86px 1.25rem 36px;}.layout{padding:0 1rem;}.fr{grid-template-columns:auto 1fr;}.fr-pri{display:none;}}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<nav>
+  <div class="ni">
+    <a href="#" class="nlogo"><div class="nlm">EH</div>EpicHub<span class="ndoc">SRS</span></a>
+    <ul class="nlinks">
+      <li><a href="#intro">Intro</a></li><li><a href="#overview">Overview</a></li><li><a href="#functional">Functional Req.</a></li><li><a href="#nfr">Non-Functional</a></li><li><a href="#interfaces">Interfaces</a></li><li><a href="#constraints">Constraints</a></li>
+    </ul>
+    <div class="nright">
+      <div class="twrap"><span id="ti">🌙</span><button class="ttog" id="tt"></button></div>
+      <div class="hburg" id="hb"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</nav>
+<nav class="mnav" id="mn">
+  <a href="#intro">01 Introduction</a><a href="#overview">02 System Overview</a><a href="#functional">03 Functional Requirements</a><a href="#nfr">04 Non-Functional Requirements</a><a href="#interfaces">05 Interface Requirements</a><a href="#constraints">06 System Constraints</a>
+</nav>
+
+<div class="hero">
+  <div class="hinner">
+    <div>
+      <div class="heye">Software Requirements Specification</div>
+      <h1>EpicHub <span>SRS</span><br>Document</h1>
+      <p class="hsub">Defines the <em>what</em> of EpicHub — the complete functional and non-functional requirements the system must satisfy. Written for developers, QA, and project stakeholders to ensure shared alignment on system behavior.</p>
+      <div class="htags">
+        <span class="htag a">Version 1.0</span><span class="htag a">Phase 1</span><span class="htag">IEEE 830 Format</span><span class="htag">.NET 8 + Angular 17</span>
+      </div>
+    </div>
+    <div class="meta-table">
+      <div class="mt-row"><div class="mt-k">Document ID</div><div class="mt-v"><strong>EH-SRS-001</strong></div></div>
+      <div class="mt-row"><div class="mt-k">Version</div><div class="mt-v">1.0 — Phase 1</div></div>
+      <div class="mt-row"><div class="mt-k">Status</div><div class="mt-v" style="color:var(--grn);font-weight:600;">Draft — Under Review</div></div>
+      <div class="mt-row"><div class="mt-k">System</div><div class="mt-v">EpicHub Event Marketplace</div></div>
+      <div class="mt-row"><div class="mt-k">Backend</div><div class="mt-v">ASP.NET Core (.NET 8) + EF Core</div></div>
+      <div class="mt-row"><div class="mt-k">Frontend</div><div class="mt-v">Angular 17 + TypeScript + NgRx</div></div>
+      <div class="mt-row"><div class="mt-k">Database</div><div class="mt-v">SQL Server + Redis</div></div>
+      <div class="mt-row"><div class="mt-k">Auth</div><div class="mt-v">JWT + OAuth 2.0 + ASP.NET Identity</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="toc">
+    <h4>Contents</h4>
+    <ul>
+      <li><a href="#intro">01 Introduction</a></li>
+      <li class="sub"><a href="#intro">Purpose & Scope</a></li>
+      <li class="sub"><a href="#intro">Definitions</a></li>
+      <li><a href="#overview">02 System Overview</a></li>
+      <li class="sub"><a href="#overview">Product Perspective</a></li>
+      <li class="sub"><a href="#overview">User Classes</a></li>
+      <li><a href="#functional">03 Functional Req.</a></li>
+      <li class="sub"><a href="#fr-auth">Authentication</a></li>
+      <li class="sub"><a href="#fr-search">Search & Discovery</a></li>
+      <li class="sub"><a href="#fr-event">Event Planning</a></li>
+      <li class="sub"><a href="#fr-booking">Booking & Payment</a></li>
+      <li class="sub"><a href="#fr-vendor">Vendor Portal</a></li>
+      <li class="sub"><a href="#fr-ops">Ops & CRM</a></li>
+      <li><a href="#nfr">04 Non-Functional Req.</a></li>
+      <li><a href="#interfaces">05 Interfaces</a></li>
+      <li><a href="#constraints">06 Constraints</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+
+    <!-- INTRO -->
+    <section id="intro">
+      <div class="stag">01</div>
+      <h2>Introduction</h2>
+      <p class="sdesc">This Software Requirements Specification defines the functional and non-functional requirements for EpicHub — a two-sided event vendor marketplace for the Egypt and MENA region. It follows IEEE 830 structure and serves as the primary reference for development, testing, and project sign-off.</p>
+
+      <h3>1.1 Purpose</h3>
+      <p>The purpose of this document is to describe the behavior of the EpicHub system in sufficient detail that development teams can build it, QA teams can test it, and stakeholders can validate it. Requirements in this document are the <strong>source of truth</strong> for what the system must and must not do.</p>
+
+      <h3>1.2 Scope</h3>
+      <p>This SRS covers the Phase 1 EpicHub platform — the customer-facing marketplace, vendor portal, and internal operations CMS. It does not cover the corporate enterprise module, mobile native applications, or Arabic RTL interface (all deferred to Phase 2).</p>
+
+      <h3>1.3 Definitions & Abbreviations</h3>
+      <div class="uctable rv">
+        <table>
+          <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+          <tbody>
+            <tr><td>ApplicationUser</td><td>The .NET Identity user entity — extended with RefreshToken fields. Shared base for all user types.</td></tr>
+            <tr><td>Vendor</td><td>A business entity providing event services (photography, catering, etc.) on the platform.</td></tr>
+            <tr><td>Event</td><td>A customer-created planning container with a date, type, and budget. Can hold many EventItems.</td></tr>
+            <tr><td>EventItem</td><td>A single draft service (Product or Package) added to an Event. Price is snapshotted at add time.</td></tr>
+            <tr><td>Order</td><td>The financial record created when a customer checks out from an Event. Links back to the Event via EventId FK.</td></tr>
+            <tr><td>OrderItem</td><td>A financial line item within an Order. Snapshots name and price from the corresponding EventItem.</td></tr>
+            <tr><td>Escrow</td><td>Payment held by the platform from booking confirmation until delivery confirmation.</td></tr>
+            <tr><td>GMV</td><td>Gross Merchandise Value — total value of all transactions processed through the platform.</td></tr>
+            <tr><td>FR</td><td>Functional Requirement — a statement of required system behavior.</td></tr>
+            <tr><td>NFR</td><td>Non-Functional Requirement — a quality attribute of the system (performance, security, etc.).</td></tr>
+            <tr><td>UC</td><td>Use Case — a numbered scenario describing actor-system interaction.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <div class="stag">02</div>
+      <h2>System Overview</h2>
+
+      <h3>2.1 Product Perspective</h3>
+      <p>EpicHub is a standalone web application consisting of three logical sub-systems: the <strong>Customer Portal</strong> (Angular SPA), the <strong>Vendor Portal</strong> (Angular SPA, separate route domain), and the <strong>Operations CMS</strong> (Angular SPA, admin subdomain). All three consume a shared <strong>ASP.NET Core REST API</strong> backend with a single SQL Server database and Redis cache layer.</p>
+      <div class="note rv">
+        <span class="note-tag">System Boundary</span>
+        <p>The EpicHub system boundary includes: the Angular frontends, the .NET 8 API, the SQL Server database, the Redis cache, the SignalR real-time hub, and all integration adapters (payment gateway, email, SMS, chatbot). It excludes: the payment gateway itself, the email/SMS providers, and the AI model provider (OpenAI).</p>
+      </div>
+
+      <h3>2.2 User Classes & Characteristics</h3>
+      <div class="uctable rv">
+        <table>
+          <thead><tr><th>User Class</th><th>Role</th><th>Access Level</th><th>Technical Skill</th></tr></thead>
+          <tbody>
+            <tr><td>Customer</td><td>Searches, plans events, and books vendor services</td><td>Authenticated — Customer role</td><td>Low — consumer-facing UI required</td></tr>
+            <tr><td>Vendor</td><td>Manages services, calendar, and incoming bookings</td><td>Authenticated — Vendor role</td><td>Medium — dashboard power user</td></tr>
+            <tr><td>Ops Admin</td><td>Approves vendors, manages disputes, monitors platform</td><td>Authenticated — Admin role</td><td>High — internal tooling</td></tr>
+            <tr><td>Guest</td><td>Browses public vendor profiles without booking</td><td>Unauthenticated</td><td>Low — read-only access</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>2.3 Operating Environment</h3>
+      <p>The system must operate on: Chrome ≥ 110, Firefox ≥ 110, Safari ≥ 16, Edge ≥ 110 on desktop. Chrome ≥ 110, Safari ≥ 16 on mobile. Backend hosted on Azure App Service (.NET 8, Linux). Database on Azure SQL. Frontend on Azure Static Web Apps with CDN.</p>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- FUNCTIONAL REQUIREMENTS -->
+    <section id="functional">
+      <div class="stag">03</div>
+      <h2>Functional Requirements</h2>
+      <p class="sdesc">All functional requirements are uniquely identified and assigned a MoSCoW priority. Each requirement is atomic — it describes exactly one system behavior. Requirements trace to Use Cases where applicable.</p>
+
+      <!-- AUTH -->
+      <div id="fr-auth"><h3>3.1 Authentication & Authorization</h3></div>
+      <div class="fr-list rv">
+        <div class="fr"><div class="fr-id">FR-A01</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>User Registration</h4><p>The system shall allow users to register with email and password. Passwords must be hashed using ASP.NET Identity's BCrypt pipeline. A verification email shall be sent upon registration.</p><div class="fr-uc">UC-01: New User Registration</div></div></div>
+        <div class="fr"><div class="fr-id">FR-A02</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>JWT Authentication</h4><p>The system shall issue a JWT access token (15-minute expiry) and a refresh token (7-day expiry) upon successful login. Refresh tokens are stored server-side and invalidated on logout.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-A03</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Role-Based Authorization</h4><p>The system shall enforce role-based access control with three roles: Customer, Vendor, and Admin. API endpoints are decorated with role-specific authorization attributes. A user may hold one role only.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-A04</div><div class="fr-pri"><span class="pr pr-s">SHOULD</span></div><div class="fr-body"><h4>OAuth 2.0 Social Login</h4><p>The system shall support Google OAuth 2.0 as an external login provider. Social accounts are linked to a locally created ApplicationUser record.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-A05</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Password Reset</h4><p>The system shall support a password reset flow: user requests reset by email → receives time-limited token → submits new password. Tokens expire after 1 hour and are single-use.</p></div></div>
+      </div>
+
+      <!-- SEARCH -->
+      <div id="fr-search"><h3>3.2 Search & Discovery</h3></div>
+      <div class="fr-list rv">
+        <div class="fr"><div class="fr-id">FR-S01</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Vendor Search with Filtering</h4><p>The system shall allow customers to search vendors by: category (FK to Category), event type, location string, date range, and price range. Results shall be returned within 2 seconds. Pagination: 20 results per page.</p><div class="fr-uc">UC-05: Customer searches for vendors</div></div></div>
+        <div class="fr"><div class="fr-id">FR-S02</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Availability Filter</h4><p>The search endpoint shall accept an event date parameter and exclude vendors who have blocked that date on their availability calendar. Availability data is read from Redis cache (TTL: 60 seconds).</p></div></div>
+        <div class="fr"><div class="fr-id">FR-S03</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Matchmaking Score</h4><p>Search results shall be ranked by a computed matchmaking score: availability match (40%) + vendor rating (35%) + category match (25%). Score is computed server-side. Customers cannot see the raw score.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-S04</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Vendor Profile Page</h4><p>The system shall serve a public vendor profile page displaying: BusinessName, Description, IsVerified badge, VendorRatings, portfolio images (from Azure Blob), service list with prices, and a 30-day availability calendar preview. This page is accessible to unauthenticated users.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-S05</div><div class="fr-pri"><span class="pr pr-s">SHOULD</span></div><div class="fr-body"><h4>Shortlist Feature</h4><p>Authenticated customers shall be able to add up to 5 vendors per category to a persistent shortlist stored in the database. A comparison view shall display up to 5 shortlisted vendors side by side.</p></div></div>
+      </div>
+
+      <!-- EVENT PLANNING -->
+      <div id="fr-event"><h3>3.3 Event Planning Layer</h3></div>
+      <div class="fr-list rv">
+        <div class="fr"><div class="fr-id">FR-E01</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Create Event</h4><p>Authenticated customers shall be able to create named Event records with: Title (required), EventType (enum), EventDate (required, must be future date), Location (required), TotalBudget (optional), GuestCount (optional), Notes (optional). Multiple Events per user are supported simultaneously.</p><div class="fr-uc">UC-10: Customer creates an event plan</div></div></div>
+        <div class="fr"><div class="fr-id">FR-E02</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Add EventItem to Event</h4><p>Customers shall be able to add a Product OR a Package (never both) to an Event as an EventItem. Upon creation, the system shall snapshot SnapshotName, SnapshotPrice, and SnapshotVendorName from the live record. A CHECK constraint enforces exactly one of ProductId or PackageId is non-null.</p><div class="fr-uc">UC-11: Customer adds service to event plan</div></div></div>
+        <div class="fr"><div class="fr-id">FR-E03</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Event Persistence Post-Order</h4><p>The system shall retain the Event record with Status = Confirmed after an Order is placed. The Order links to the Event via a nullable EventId FK. Deleting an Order shall not cascade to the Event.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-E04</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>EventItem Status Transitions</h4><p>EventItem.Status shall transition from Draft → Ordered when included in a placed Order, in the same database transaction as Order creation. An EventItem with Status = Ordered cannot be re-added to a new Order unless the original Order is cancelled.</p></div></div>
+      </div>
+
+      <!-- BOOKING -->
+      <div id="fr-booking"><h3>3.4 Booking & Payment</h3></div>
+      <div class="fr-list rv">
+        <div class="fr"><div class="fr-id">FR-B01</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Checkout & Order Creation</h4><p>The system shall allow customers to check out all Draft EventItems in an Event in a single transaction. An Order record is created with Status = Pending. EventId is set on the Order. All included EventItems transition to Ordered. Event.Status transitions to Confirmed.</p><div class="fr-uc">UC-12: Customer checks out from event plan</div></div></div>
+        <div class="fr"><div class="fr-id">FR-B02</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Payment via Gateway</h4><p>The system shall initiate a payment intent via the Paymob API. On webhook confirmation of payment success, Order.PaymentStatus is updated to Paid and Order.PaymentIntentId is stored. All payment processing is handled server-side. The frontend never handles raw card data.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-B03</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Escrow Hold</h4><p>Upon payment success, funds shall be held in escrow. The system shall record the escrow status in the Order. Vendor payout is not triggered until FR-B05 (delivery confirmation) or FR-B06 (auto-release) is triggered.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-B04</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Booking Confirmation Notification</h4><p>Within 60 seconds of payment confirmation, the system shall send: (a) email confirmation to the customer via SendGrid, (b) SMS notification to the customer via Twilio, (c) in-platform notification to the vendor via SignalR. Both customer and vendor notification records shall be persisted in the database.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-B05</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Delivery Confirmation & Payout</h4><p>Customers shall confirm service delivery via a platform UI action post-event. This triggers escrow release. The system shall initiate vendor payout via the payment gateway within 72 hours. Commission is deducted before disbursement. A payout record with net/gross breakdown is created.</p><div class="fr-uc">UC-15: Customer confirms delivery</div></div></div>
+        <div class="fr"><div class="fr-id">FR-B06</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Auto-Release Escrow</h4><p>A background job shall run every hour. If an Order's event date has passed by ≥ 48 hours, no dispute exists, and delivery has not been confirmed, the system shall auto-release escrow and trigger vendor payout. Auto-releases are logged as such in the payout record.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-B07</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Cancellation Policy Enforcement</h4><p>The system shall enforce cancellation rules at the application layer: Free if &gt;7 days before event. 25% fee if 2–7 days. Non-refundable if &lt;48 hours. Vendor-initiated cancellation within 7 days triggers full refund + 10% credit. Refund is processed via the payment gateway reverse payment API.</p></div></div>
+      </div>
+
+      <!-- VENDOR -->
+      <div id="fr-vendor"><h3>3.5 Vendor Portal</h3></div>
+      <div class="fr-list rv">
+        <div class="fr"><div class="fr-id">FR-V01</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Vendor Onboarding Submission</h4><p>The system shall provide a multi-step vendor onboarding form allowing submission of: BusinessName, Address, Description, PortfolioLink, YearsInBusiness, service categories, Products/Packages with pricing, and business license document (PDF upload to Azure Blob). Submitted vendors are created with IsVerified = false and invisible to customers until ops approval.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-V02</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Availability Calendar Management</h4><p>Authenticated vendors shall be able to mark dates on their calendar as Available, Booked, or Blocked. Calendar updates are written to the database and the Redis availability cache. Cache invalidation must occur within 60 seconds of any calendar change. Double-booking of the same date is prevented at the database constraint level.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-V03</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Booking Acceptance / Decline</h4><p>Vendors shall receive a real-time SignalR notification upon new booking. The vendor dashboard shall display a pending booking queue. Vendors shall accept, decline (with mandatory reason field), or request modification within 24 hours. Expiry of the acceptance window with no action auto-accepts the booking.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-V04</div><div class="fr-pri"><span class="pr pr-s">SHOULD</span></div><div class="fr-body"><h4>Vendor Analytics Dashboard</h4><p>For Standard and Premium subscription tier vendors, the system shall expose a dashboard endpoint returning: booking count (30/60/90 day), profile view count, revenue earned (gross/net), average rating trend, and conversion rate (profile views to bookings).</p></div></div>
+        <div class="fr"><div class="fr-id">FR-V05</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Subscription Tier Management</h4><p>The system shall allow vendors to select, upgrade, or downgrade their subscription tier. Subscription billing is managed via the payment gateway's recurring billing API. Tier changes take effect at the next billing cycle. Features available per tier are enforced server-side on API responses.</p></div></div>
+      </div>
+
+      <!-- OPS -->
+      <div id="fr-ops"><h3>3.6 Operations & CRM</h3></div>
+      <div class="fr-list rv">
+        <div class="fr"><div class="fr-id">FR-O01</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Vendor Review & Approval CMS</h4><p>Admin-role users shall be able to view all pending vendor submissions in an internal dashboard. For each submission they can: approve (sets IsVerified = true, profile goes live), reject (with reason, vendor notified by email), or request additional information. All actions are audit-logged.</p><div class="fr-uc">UC-20: Ops approves a vendor</div></div></div>
+        <div class="fr"><div class="fr-id">FR-O02</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>AI Chatbot Integration</h4><p>The customer portal shall embed an AI chatbot powered by the OpenAI API. The chatbot context includes EpicHub policy, FAQ, and the authenticated user's active bookings. Responses with confidence below threshold (configurable, default 0.75) shall be flagged for escalation to the human agent queue via SignalR.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-O03</div><div class="fr-pri"><span class="pr pr-m">MUST</span></div><div class="fr-body"><h4>Dispute Management</h4><p>The system shall allow customers to raise a dispute within 48 hours of the event date. A dispute record is created, escrow is frozen, and both parties are notified. Admin users can view dispute details, attached evidence files (uploaded to Azure Blob), and issue a resolution decision. Resolution triggers the appropriate payment action.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-O04</div><div class="fr-pri"><span class="pr pr-s">SHOULD</span></div><div class="fr-body"><h4>Loyalty Points Engine</h4><p>The system shall credit loyalty points to a customer's account upon delivery confirmation (not booking). Point balance is stored in the database. Points expire after 12 months via a scheduled background job. Point redemption is applied as a discount at checkout, capped at 30% of booking value combined with any promo code.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-O05</div><div class="fr-pri"><span class="pr pr-s">SHOULD</span></div><div class="fr-body"><h4>Post-Event Survey</h4><p>A background job shall trigger a survey notification to customers 24 hours after the event date for all completed bookings. Survey responses (star rating + text) are stored and linked to the booking. A review is created from the survey response after admin moderation. One review per booking maximum.</p></div></div>
+        <div class="fr"><div class="fr-id">FR-O06</div><div class="fr-pri"><span class="pr pr-s">SHOULD</span></div><div class="fr-body"><h4>Promotions Engine</h4><p>Admin users shall be able to create promotional campaigns via the CMS with: discount percentage or fixed amount, applicable categories, eligible user segment, start/end datetime, and maximum redemption count. No developer deployment is required to activate or deactivate a promotion.</p></div></div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- NFR -->
+    <section id="nfr">
+      <div class="stag">04</div>
+      <h2>Non-Functional Requirements</h2>
+      <p class="sdesc">Non-functional requirements define quality attributes — measurable, testable system properties. Each NFR has an associated acceptance test in the Process Documentation.</p>
+
+      <div class="specbox rv">
+        <div class="specbox-h">⚡ Performance</div>
+        <div class="specbox-b">
+          <div class="specitem"><span class="specitem-id">NFR-P01</span><p>Customer-facing pages must achieve Time to Interactive (TTI) on a simulated 4G mobile connection. <span class="spec-val">≤ 3 seconds</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-P02</span><p>Search API endpoint (/api/v1/vendors/search) must return results under standard load (100 concurrent users). <span class="spec-val">≤ 2 seconds P95</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-P03</span><p>Booking confirmation flow (payment → order creation → notification dispatch) must complete end-to-end. <span class="spec-val">≤ 5 seconds</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-P04</span><p>Vendor calendar availability change must propagate to customer-facing search results. <span class="spec-val">≤ 60 seconds</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-P05</span><p>Lighthouse Performance score on customer homepage and search results page. <span class="spec-val">≥ 80</span></p></div>
+        </div>
+      </div>
+
+      <div class="specbox rv">
+        <div class="specbox-h">🔒 Security</div>
+        <div class="specbox-b">
+          <div class="specitem"><span class="specitem-id">NFR-SEC01</span><p>All data at rest in SQL Server and Azure Blob storage must use encryption. <span class="spec-val">AES-256</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-SEC02</span><p>All client–server communication must use TLS protocol. <span class="spec-val">TLS 1.3</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-SEC03</span><p>JWT access token expiry. Refresh token stored as httpOnly cookie. <span class="spec-val">15 min access / 7 day refresh</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-SEC04</span><p>Zero OWASP Top 10 critical or high severity vulnerabilities at time of production release, verified by penetration test.</p></div>
+          <div class="specitem"><span class="specitem-id">NFR-SEC05</span><p>All API inputs validated via FluentValidation before any database operation. SQL injection prevention via EF Core parameterized queries only.</p></div>
+        </div>
+      </div>
+
+      <div class="specbox rv">
+        <div class="specbox-h">🟢 Reliability & Availability</div>
+        <div class="specbox-b">
+          <div class="specitem"><span class="specitem-id">NFR-R01</span><p>Platform uptime on a rolling 30-day basis. Measured via Azure Monitor. <span class="spec-val">≥ 99.5%</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-R02</span><p>Planned maintenance windows restricted to 02:00–05:00 Cairo time with 48-hour advance notice.</p></div>
+          <div class="specitem"><span class="specitem-id">NFR-R03</span><p>Database point-in-time recovery capability. RPO (Recovery Point Objective). <span class="spec-val">≤ 1 hour</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-R04</span><p>Payment webhook processing must be idempotent — duplicate webhook delivery must not create duplicate Orders or payouts. Idempotency keys required on all payment operations.</p></div>
+        </div>
+      </div>
+
+      <div class="specbox rv">
+        <div class="specbox-h">📈 Scalability</div>
+        <div class="specbox-b">
+          <div class="specitem"><span class="specitem-id">NFR-SC01</span><p>The system must handle 10× baseline load without architectural redesign. Baseline defined as 500 concurrent users. <span class="spec-val">5,000 concurrent users max</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-SC02</span><p>Adding a new MENA geographic market must require zero changes to core API or database schema. Market isolation via market_id discriminator columns where applicable.</p></div>
+        </div>
+      </div>
+
+      <div class="specbox rv">
+        <div class="specbox-h">♿ Accessibility & Compatibility</div>
+        <div class="specbox-b">
+          <div class="specitem"><span class="specitem-id">NFR-AC01</span><p>Web Accessibility standard for all customer-facing pages, verified by aXe automated testing. <span class="spec-val">WCAG 2.1 Level AA</span></p></div>
+          <div class="specitem"><span class="specitem-id">NFR-AC02</span><p>Full functionality across mobile ≥ 320px, tablet ≥ 768px, desktop ≥ 1280px. No horizontal overflow on any tested viewport.</p></div>
+          <div class="specitem"><span class="specitem-id">NFR-AC03</span><p>Angular i18n framework integrated from Day 1. Arabic RTL layout must be activatable in Phase 2 without structural code changes.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- INTERFACES -->
+    <section id="interfaces">
+      <div class="stag">05</div>
+      <h2>Interface Requirements</h2>
+      <h3>5.1 External System Interfaces</h3>
+      <div class="ifcards rv">
+        <div class="ifc"><div class="ifc-head"><div class="ifc-ico">💳</div><h4>Payment Gateway — Paymob</h4></div><p>REST API integration via HTTPS. Payment intent creation, webhook receipt for status updates, refund initiation, and recurring subscription billing. All communication server-to-server. Frontend never receives raw keys.</p></div>
+        <div class="ifc"><div class="ifc-head"><div class="ifc-ico">🤖</div><h4>AI Chatbot — OpenAI API</h4></div><p>Chat Completions API. System prompt includes EpicHub FAQ and current user context. Streamed responses displayed in real-time in chatbot UI. Confidence scoring used for escalation routing.</p></div>
+        <div class="ifc"><div class="ifc-head"><div class="ifc-ico">📧</div><h4>Email — SendGrid</h4></div><p>Transactional email for: registration verification, booking confirmations, payout notifications, dispute updates, survey triggers. Dynamic templates managed in SendGrid. All sends logged in the database.</p></div>
+        <div class="ifc"><div class="ifc-head"><div class="ifc-ico">📱</div><h4>SMS — Twilio</h4></div><p>SMS notifications for: booking confirmation, vendor acceptance, payout complete. Egypt long code used. Delivery receipts tracked and stored against notification records.</p></div>
+        <div class="ifc"><div class="ifc-head"><div class="ifc-ico">🗺️</div><h4>Google Maps & Places API</h4></div><p>Maps SDK embedded in Angular for venue location display. Places Autocomplete for location input fields. Geocoding for distance-based search filtering. Client-side API key (restricted to epichub.com domain).</p></div>
+        <div class="ifc"><div class="ifc-head"><div class="ifc-ico">☁️</div><h4>Azure Blob Storage</h4></div><p>Used for: vendor portfolio images, vendor license document uploads, dispute evidence files. All blobs served via Azure CDN. SAS tokens used for upload. Public read access for portfolio images only.</p></div>
+      </div>
+      <h3>5.2 Communication Interfaces</h3>
+      <p>All API communication uses HTTPS REST (JSON, UTF-8). Real-time notifications use SignalR over WebSocket (fallback to Long Polling). File uploads use multipart/form-data. All API endpoints are versioned at /api/v1/. API documentation auto-generated via Swagger/OpenAPI 3.0.</p>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- CONSTRAINTS -->
+    <section id="constraints">
+      <div class="stag">06</div>
+      <h2>System Constraints</h2>
+      <h3>6.1 Design Constraints</h3>
+      <div class="fr-list rv">
+        <div class="fr" style="grid-template-columns:auto 1fr;"><div class="fr-id">DC-01</div><div class="fr-body"><h4>Mandated Backend Stack</h4><p>Backend must be ASP.NET Core (.NET 8) with Entity Framework Core. No alternative ORM or non-.NET runtime is permitted.</p></div></div>
+        <div class="fr" style="grid-template-columns:auto 1fr;"><div class="fr-id">DC-02</div><div class="fr-body"><h4>Mandated Frontend Stack</h4><p>Frontend must be Angular 17+ with TypeScript. React, Vue, or other SPA frameworks are not permitted for any Phase 1 deliverable.</p></div></div>
+        <div class="fr" style="grid-template-columns:auto 1fr;"><div class="fr-id">DC-03</div><div class="fr-body"><h4>Azure Cloud Hosting</h4><p>All infrastructure must be hosted on Microsoft Azure. No AWS or GCP resources are permitted for Phase 1.</p></div></div>
+        <div class="fr" style="grid-template-columns:auto 1fr;"><div class="fr-id">DC-04</div><div class="fr-body"><h4>RESTful API Design</h4><p>All API endpoints must conform to RESTful conventions. GraphQL, gRPC, or RPC-style APIs are not permitted for Phase 1.</p></div></div>
+        <div class="fr" style="grid-template-columns:auto 1fr;"><div class="fr-id">DC-05</div><div class="fr-body"><h4>Code-First Database Migrations</h4><p>All database schema changes must be managed via EF Core code-first migrations. No manual SQL schema scripts are permitted in production deployments.</p></div></div>
+      </div>
+      <h3>6.2 Business Constraints</h3>
+      <p>Phase 1 is restricted to the Egypt market only. Arabic RTL, native mobile apps, BNPL payments, and corporate enterprise module are explicitly out of scope for Phase 1. See BRD for full business constraint list.</p>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="fi">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <div class="nlm" style="width:24px;height:24px;border-radius:4px;background:var(--bl);">EH</div>
+      <div><span style="font-family:'IBM Plex Serif',serif;font-weight:600;font-size:.9rem;">EpicHub SRS</span><div style="font-size:.63rem;color:var(--txt3);">Software Requirements Specification — v1.0</div></div>
+    </div>
+    <div style="font-size:.7rem;color:var(--txt3);text-align:center;">The "what" — functional & non-functional requirements<br><em style="font-size:.63rem;">How the system is built → see Architecture Docs</em></div>
+    <div class="ftags"><span class="ftag">IEEE 830</span><span class="ftag">.NET 8</span><span class="ftag">Angular 17</span><span class="ftag">Phase 1</span></div>
+  </div>
+</footer>
+
+<script>
+const html=document.documentElement;
+document.getElementById('tt').addEventListener('click',()=>{const n=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',n);document.getElementById('ti').textContent=n==='dark'?'🌙':'☀️';});
+document.getElementById('hb').addEventListener('click',()=>document.getElementById('mn').classList.toggle('open'));
+const pb=document.getElementById('prog');
+window.addEventListener('scroll',()=>{pb.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%';},{passive:true});
+const ro=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');ro.unobserve(x.target);}});},{threshold:.05,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+document.querySelectorAll('section[id]').forEach(s=>{new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){document.querySelectorAll('.toc a').forEach(l=>l.classList.remove('active'));const a=document.querySelector(`.toc a[href="#${x.target.id}"]`);if(a)a.classList.add('active');}});},{threshold:.2,rootMargin:'-70px 0px -55% 0px'}).observe(s);});
+</script>
+</body>
+</html>

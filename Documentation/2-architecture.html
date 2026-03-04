@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EpicHub — Architecture & Design</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--amb:#F59E0B;--ora:#F97316;--grn:#10B981;--sky:#38BDF8;--vio:#8B5CF6;--rose:#F43F5E;--tr:.28s cubic-bezier(.4,0,.2,1);--r:8px;}
+[data-theme="dark"]{--bg:#080600;--bg2:#120E00;--bg3:#1C1500;--bg4:#261C00;--bg5:#312400;--bdr:rgba(245,158,11,.1);--bdr2:rgba(245,158,11,.2);--bdr3:rgba(245,158,11,.35);--txt:#FFF8E1;--txt2:#B8932A;--txt3:#614D14;--ac:#F59E0B;--acs:rgba(245,158,11,.1);--nav:rgba(8,6,0,.93);}
+[data-theme="light"]{--bg:#FFFBEB;--bg2:#FEF3C7;--bg3:#FDE68A;--bg4:#FCD34D;--bdr:rgba(180,83,9,.08);--bdr2:rgba(180,83,9,.18);--bdr3:rgba(180,83,9,.32);--txt:#1A0F00;--txt2:#78350F;--txt3:#B45309;--ac:#D97706;--acs:rgba(217,119,6,.09);--nav:rgba(255,251,235,.93);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt);line-height:1.65;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+::selection{background:var(--amb);color:#000;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--bdr3);border-radius:99px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--bdr) 1px,transparent 1px),linear-gradient(90deg,var(--bdr) 1px,transparent 1px);
+  background-size:36px 36px;mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,black 20%,transparent 75%);}
+#prog{position:fixed;top:0;left:0;height:2px;z-index:9999;width:0%;background:linear-gradient(90deg,var(--amb),var(--ora));box-shadow:0 0 10px rgba(245,158,11,.5);transition:width .08s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--nav);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr2);}
+.ni{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:56px;gap:1.5rem;}
+.nlogo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--txt);font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;flex-shrink:0;}
+.nlm{width:26px;height:26px;border-radius:5px;background:var(--amb);display:grid;place-items:center;font-size:.55rem;font-weight:600;color:#000;}
+.ndoc{font-size:.57rem;padding:2px 8px;border-radius:3px;background:var(--acs);border:1px solid var(--bdr2);color:var(--ac);letter-spacing:.08em;}
+.nlinks{display:flex;gap:1.25rem;list-style:none;align-items:center;}
+.nlinks a{font-size:.63rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);text-decoration:none;transition:color var(--tr);}
+.nlinks a:hover{color:var(--ac);}
+.nright{display:flex;align-items:center;gap:8px;}
+.ttog{width:38px;height:19px;border-radius:99px;background:var(--bg4);border:1px solid var(--bdr2);cursor:pointer;position:relative;}
+.ttog::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:var(--amb);transition:transform var(--tr);}
+[data-theme="light"] .ttog::after{transform:translateX(19px);}
+.twrap{display:flex;align-items:center;gap:6px;font-size:.63rem;color:var(--txt3);}
+.hburg{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:3px;}
+.hburg span{width:18px;height:1.5px;background:var(--txt);border-radius:2px;}
+.mnav{display:none;position:fixed;inset:56px 0 0 0;background:var(--bg);z-index:99;padding:1.5rem;flex-direction:column;gap:1rem;border-top:1px solid var(--bdr2);overflow-y:auto;}
+.mnav.open{display:flex;}
+.mnav a{font-size:.88rem;color:var(--txt);text-decoration:none;padding:.45rem 0;border-bottom:1px solid var(--bdr);}
+
+.hero{min-height:80vh;display:flex;align-items:center;padding:96px 2rem 50px;position:relative;z-index:1;}
+.hinner{max-width:1440px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
+.heye{display:inline-flex;align-items:center;gap:8px;background:var(--acs);border:1px solid var(--bdr2);border-radius:3px;padding:4px 12px;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:1.25rem;animation:up .5s ease both;}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.8rem);font-weight:800;line-height:1.06;letter-spacing:-.03em;margin-bottom:.85rem;animation:up .5s ease .1s both;}
+h1 em{color:var(--amb);font-style:italic;}
+.hsub{font-size:.8rem;color:var(--txt2);line-height:1.8;max-width:450px;animation:up .5s ease .2s both;}
+.htags{display:flex;flex-wrap:wrap;gap:6px;margin-top:1.25rem;animation:up .5s ease .3s both;}
+.htag{background:var(--bg3);border:1px solid var(--bdr2);border-radius:3px;padding:3px 10px;font-size:.65rem;color:var(--txt2);}
+.htag.a{background:var(--acs);border-color:var(--bdr2);color:var(--ac);}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ARCH DIAGRAM */
+.arch-diagram{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:1.5rem;overflow-x:auto;animation:up .5s ease .15s both;}
+.arch-title{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin-bottom:1.1rem;}
+.arch-layer{border:1px solid var(--bdr2);border-radius:6px;padding:.85rem 1rem;margin-bottom:.75rem;background:var(--bg3);}
+.arch-layer:last-child{margin-bottom:0;}
+.arch-layer-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:.6rem;font-weight:600;}
+.arch-boxes{display:flex;flex-wrap:wrap;gap:.5rem;}
+.abox{background:var(--bg4);border:1px solid var(--bdr3);border-radius:4px;padding:.35rem .75rem;font-size:.65rem;color:var(--txt);white-space:nowrap;}
+.abox.hi{background:var(--acs);border-color:var(--bdr3);color:var(--ac);}
+.arch-arrow{text-align:center;font-size:.7rem;color:var(--txt3);margin:.2rem 0;letter-spacing:.04em;}
+
+/* LAYOUT */
+.layout{max-width:1440px;margin:0 auto;padding:0 2rem;display:flex;gap:2.5rem;}
+.toc{width:210px;flex-shrink:0;position:sticky;top:76px;height:fit-content;background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:1rem;}
+.toc h4{font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);font-weight:500;margin-bottom:.75rem;}
+.toc ul{list-style:none;display:flex;flex-direction:column;gap:1px;}
+.toc ul li a{display:block;font-size:.68rem;color:var(--txt2);text-decoration:none;padding:4px 8px;border-radius:3px;border-left:2px solid transparent;transition:background var(--tr),color var(--tr),border-color var(--tr);}
+.toc ul li a:hover,.toc ul li a.active{background:var(--acs);color:var(--ac);border-left-color:var(--ac);}
+.toc ul li.sub a{padding-left:1.1rem;font-size:.63rem;}
+.main{flex:1;min-width:0;padding:3rem 0 7rem;}
+section{margin-bottom:4rem;scroll-margin-top:86px;}
+.stag{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);font-weight:500;margin-bottom:.4rem;display:flex;align-items:center;gap:8px;}
+.stag::after{content:'';width:28px;height:1px;background:var(--ac);opacity:.4;}
+h2{font-family:'Syne',sans-serif;font-size:clamp(1.4rem,2.8vw,2rem);font-weight:800;line-height:1.1;letter-spacing:-.025em;margin-bottom:.65rem;}
+h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin:1.75rem 0 .75rem;letter-spacing:-.01em;}
+p{color:var(--txt2);margin-bottom:.9rem;font-size:.82rem;}
+strong{color:var(--txt);font-weight:600;}
+.sdesc{font-size:.83rem;color:var(--txt2);line-height:1.78;max-width:700px;margin-bottom:1.25rem;}
+.div{height:1px;background:linear-gradient(90deg,transparent,var(--bdr3),transparent);margin:3rem 0;}
+
+/* COMPONENT CARDS */
+.comps{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin:1.25rem 0;}
+.comp{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:1.25rem;transition:border-color var(--tr),transform .2s;}
+.comp:hover{border-color:var(--bdr2);transform:translateY(-2px);}
+.comp-head{display:flex;align-items:center;gap:8px;margin-bottom:.6rem;}
+.comp-ico{font-size:1.2rem;}
+.comp h4{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;}
+.comp p{font-size:.75rem;color:var(--txt2);margin:0;}
+.comp-stack{display:flex;flex-wrap:wrap;gap:4px;margin-top:.6rem;}
+.cs{font-size:.58rem;background:var(--bg3);border:1px solid var(--bdr);border-radius:3px;padding:1px 6px;color:var(--txt3);}
+
+/* ENTITY TABLE */
+.etable-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bdr2);margin:1.25rem 0;}
+table{width:100%;border-collapse:collapse;font-size:.75rem;}
+thead tr{background:var(--bg3);}
+thead th{padding:.6rem 1rem;text-align:left;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);font-weight:500;white-space:nowrap;}
+tbody tr{border-top:1px solid var(--bdr);transition:background .12s;}
+tbody tr:hover{background:var(--acs);}
+tbody td{padding:.7rem 1rem;color:var(--txt2);vertical-align:top;line-height:1.5;}
+tbody td:first-child{color:var(--ac);font-weight:500;}
+.badge-new{background:rgba(16,185,129,.12);color:#34D399;font-size:.58rem;padding:1px 6px;border-radius:3px;white-space:nowrap;}
+.badge-mod{background:rgba(245,158,11,.12);color:var(--amb);font-size:.58rem;padding:1px 6px;border-radius:3px;white-space:nowrap;}
+
+/* FLOW DIAGRAM TEXT */
+.flow-diagram{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:1.25rem;margin:1.25rem 0;overflow-x:auto;}
+.flow-row{display:flex;align-items:center;gap:.5rem;flex-wrap:nowrap;margin-bottom:.5rem;}
+.flow-row:last-child{margin-bottom:0;}
+.fbox{background:var(--bg3);border:1px solid var(--bdr2);border-radius:4px;padding:.4rem .9rem;font-size:.68rem;white-space:nowrap;}
+.fbox.hi{background:var(--acs);border-color:var(--bdr3);color:var(--ac);}
+.fbox.db{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.2);color:var(--sky);}
+.fbox.ext{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.2);color:#A78BFA;}
+.farrow{font-size:.7rem;color:var(--txt3);flex-shrink:0;}
+.fstep-label{font-size:.58rem;color:var(--txt3);margin-bottom:.35rem;}
+
+/* PATTERN CARDS */
+.patterns{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.25rem 0;}
+.pat{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:1.1rem;transition:border-color var(--tr);}
+.pat:hover{border-color:var(--bdr2);}
+.pat h4{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;margin-bottom:.4rem;}
+.pat p{font-size:.75rem;color:var(--txt2);margin:0;}
+
+/* SECURITY GRID */
+.secgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:1.25rem 0;}
+.seccard{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:1.1rem;transition:border-color var(--tr);}
+.seccard:hover{border-color:var(--bdr2);}
+.seccard h4{font-size:.82rem;font-weight:600;margin-bottom:.4rem;display:flex;align-items:center;gap:7px;}
+.seccard p{font-size:.74rem;color:var(--txt2);margin:0;}
+
+.note{background:var(--acs);border:1px solid var(--bdr2);border-radius:var(--r);padding:1.1rem 1.4rem;margin:1.25rem 0;}
+.note-tag{font-size:.57rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);font-weight:700;margin-bottom:.35rem;display:block;}
+.note p{color:var(--txt);font-size:.82rem;margin:0;}
+
+.rv{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease;}
+.rv.in{opacity:1;transform:none;}
+
+footer{border-top:1px solid var(--bdr2);padding:1.5rem 2rem;background:var(--bg2);}
+.fi{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.ftags{display:flex;gap:5px;flex-wrap:wrap;}
+.ftag{background:var(--bg3);border:1px solid var(--bdr2);border-radius:3px;padding:2px 8px;font-size:.58rem;color:var(--txt3);}
+
+@media(max-width:1100px){.toc{display:none;}.layout{padding:0 1.5rem;}.hinner{grid-template-columns:1fr;}.secgrid{grid-template-columns:1fr 1fr;}}
+@media(max-width:768px){.nlinks{display:none;}.hburg{display:flex;}.hero{padding:86px 1.25rem 36px;}.layout{padding:0 1rem;}.patterns{grid-template-columns:1fr;}.secgrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<nav>
+  <div class="ni">
+    <a href="#" class="nlogo"><div class="nlm">EH</div>EpicHub<span class="ndoc">ARCH</span></a>
+    <ul class="nlinks">
+      <li><a href="#overview">Overview</a></li><li><a href="#layers">Layers</a></li><li><a href="#datamodel">Data Model</a></li><li><a href="#interactions">Interactions</a></li><li><a href="#patterns">Patterns</a></li><li><a href="#security-arch">Security</a></li><li><a href="#deployment">Deployment</a></li>
+    </ul>
+    <div class="nright">
+      <div class="twrap"><span id="ti">🌙</span><button class="ttog" id="tt"></button></div>
+      <div class="hburg" id="hb"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</nav>
+<nav class="mnav" id="mn">
+  <a href="#overview">01 Architecture Overview</a><a href="#layers">02 System Layers</a><a href="#datamodel">03 Data Model</a><a href="#interactions">04 Component Interactions</a><a href="#patterns">05 Design Patterns</a><a href="#security-arch">06 Security Architecture</a><a href="#deployment">07 Deployment Architecture</a>
+</nav>
+
+<div class="hero">
+  <div class="hinner">
+    <div>
+      <div class="heye">Architecture & Design Document</div>
+      <h1>The <em>How</em> of<br>EpicHub</h1>
+      <p class="hsub">// System architecture, data model, component interactions, and design decisions. The definitive reference for how the EpicHub platform is structured and built.</p>
+      <div class="htags">
+        <span class="htag a">Layered Architecture</span><span class="htag a">Code-First EF Core</span><span class="htag">Azure Cloud</span><span class="htag">SignalR Real-Time</span>
+      </div>
+    </div>
+    <div class="arch-diagram">
+      <div class="arch-title">// System Architecture — High Level</div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">→ Presentation Layer (Client)</div>
+        <div class="arch-boxes">
+          <div class="abox hi">Angular 17 — Customer Portal</div>
+          <div class="abox hi">Angular 17 — Vendor Portal</div>
+          <div class="abox hi">Angular 17 — Ops CMS</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↕ HTTPS REST + WebSocket (SignalR)</div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">→ API Layer</div>
+        <div class="arch-boxes">
+          <div class="abox hi">ASP.NET Core Web API (.NET 8)</div>
+          <div class="abox">JWT Auth Middleware</div>
+          <div class="abox">SignalR Hub</div>
+          <div class="abox">Swagger / OpenAPI</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↕ EF Core + Repository Pattern</div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">→ Application / Service Layer</div>
+        <div class="arch-boxes">
+          <div class="abox">Booking Service</div><div class="abox">Escrow Service</div><div class="abox">Vendor Service</div><div class="abox">Event Service</div><div class="abox">Notification Service</div><div class="abox">Chatbot Service</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↕ Repository Interfaces</div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">→ Data Layer</div>
+        <div class="arch-boxes">
+          <div class="abox hi">SQL Server (EF Core)</div>
+          <div class="abox hi">Redis Cache</div>
+          <div class="abox">Azure Blob Storage</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="toc">
+    <h4>Contents</h4>
+    <ul>
+      <li><a href="#overview">01 Overview</a></li>
+      <li><a href="#layers">02 System Layers</a></li>
+      <li class="sub"><a href="#layers">API Layer</a></li>
+      <li class="sub"><a href="#layers">Service Layer</a></li>
+      <li class="sub"><a href="#layers">Data Layer</a></li>
+      <li><a href="#datamodel">03 Data Model</a></li>
+      <li class="sub"><a href="#datamodel">Entity List</a></li>
+      <li class="sub"><a href="#datamodel">Key Relationships</a></li>
+      <li class="sub"><a href="#datamodel">New Entities</a></li>
+      <li><a href="#interactions">04 Interactions</a></li>
+      <li class="sub"><a href="#interactions">Booking Flow</a></li>
+      <li class="sub"><a href="#interactions">Real-Time</a></li>
+      <li><a href="#patterns">05 Design Patterns</a></li>
+      <li><a href="#security-arch">06 Security Arch.</a></li>
+      <li><a href="#deployment">07 Deployment</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+
+    <section id="overview">
+      <div class="stag">01</div>
+      <h2>Architecture Overview</h2>
+      <p class="sdesc">EpicHub follows a layered, clean architecture pattern. The system is divided into four logical layers: Presentation, API, Application/Service, and Data. Each layer has a single direction of dependency — upper layers depend on lower layers, never the reverse.</p>
+      <div class="note rv">
+        <span class="note-tag">Key Architectural Decision</span>
+        <p>The planning layer (Event / EventItem) and financial layer (Order / OrderItem) are deliberately separated. Event records persist independently — they are <strong>never deleted</strong> when an Order is cancelled. Order.EventId is a nullable FK so Orders can exist without an Event (legacy support). This separation is the central architectural decision in the data model.</p>
+      </div>
+      <h3>Architecture Principles</h3>
+      <div class="comps rv">
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🧱</div><h4>Separation of Concerns</h4></div><p>Each layer owns exactly one responsibility. Controllers route. Services orchestrate. Repositories persist. No business logic in controllers or data models.</p></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🔄</div><h4>Dependency Inversion</h4></div><p>All service and repository dependencies are injected via interfaces. No concrete class instantiation across layer boundaries. Registered in ASP.NET DI container at startup.</p></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">📦</div><h4>Repository Pattern</h4></div><p>All database access goes through typed repository interfaces. EF Core DbContext is never directly called from service layer. Enables unit testing with in-memory database.</p></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">⚡</div><h4>Cache-Aside Pattern</h4></div><p>Redis used as an aside cache for vendor availability and search results. Cache is populated lazily and invalidated explicitly on writes. No write-through pattern.</p></div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <section id="layers">
+      <div class="stag">02</div>
+      <h2>System Layers</h2>
+
+      <h3>2.1 Presentation Layer — Angular 17</h3>
+      <div class="comps rv">
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🛒</div><h4>Customer Portal</h4></div><p>Vendor search, event planning, checkout, booking history, loyalty dashboard, chatbot widget.</p><div class="comp-stack"><span class="cs">Angular 17</span><span class="cs">NgRx</span><span class="cs">Angular Material</span><span class="cs">RxJS</span></div></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">📋</div><h4>Vendor Portal</h4></div><p>Onboarding form, calendar management, booking queue, analytics dashboard, subscription management.</p><div class="comp-stack"><span class="cs">Angular 17</span><span class="cs">NgRx</span><span class="cs">FullCalendar</span></div></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🛡️</div><h4>Ops CMS</h4></div><p>Vendor review queue, dispute management, promotions panel, platform analytics, user management.</p><div class="comp-stack"><span class="cs">Angular 17</span><span class="cs">NgRx</span><span class="cs">ECharts</span></div></div>
+      </div>
+
+      <h3>2.2 API Layer — ASP.NET Core</h3>
+      <div class="note rv">
+        <span class="note-tag">API Design</span>
+        <p>All endpoints versioned at <code style="color:var(--ac)">/api/v1/</code>. Controllers are thin — they validate, call a service, and return. All business logic lives in the service layer. FluentValidation handles input validation before controllers execute. Swagger auto-generated from XML doc comments + Swashbuckle.</p>
+      </div>
+      <div class="comps rv">
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🔒</div><h4>Auth Middleware</h4></div><p>JWT validation on every protected route. Claims extracted and passed to service layer as typed identity context. Role claims enforce [Authorize(Roles="...")] on controllers.</p><div class="comp-stack"><span class="cs">ASP.NET Identity</span><span class="cs">JWT Bearer</span><span class="cs">OAuth 2.0</span></div></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">📡</div><h4>SignalR Hub</h4></div><p>Real-time notification delivery. Groups: per-user, per-vendor. Used for: booking alerts, chatbot escalation, dispute updates, payout confirmations.</p><div class="comp-stack"><span class="cs">SignalR</span><span class="cs">WebSocket</span><span class="cs">Redis Backplane</span></div></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">⚙️</div><h4>Background Jobs</h4></div><p>Hosted services for: escrow auto-release (hourly), survey trigger (daily), loyalty point expiry (daily), Redis cache refresh.</p><div class="comp-stack"><span class="cs">IHostedService</span><span class="cs">Hangfire (Phase 2)</span></div></div>
+      </div>
+
+      <h3>2.3 Service Layer</h3>
+      <div class="comps rv">
+        <div class="comp"><div class="comp-head"><div class="comp-ico">📅</div><h4>EventService</h4></div><p>Creates/updates Events and EventItems. Enforces snapshot logic: reads Product/Package name+price at EventItem creation time, stores in snapshot fields.</p></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">💳</div><h4>BookingService</h4></div><p>Orchestrates checkout: creates Order + OrderItems, transitions EventItem statuses, calls PaymentService, emits SignalR notification. All in a single database transaction.</p></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🏦</div><h4>EscrowService</h4></div><p>Manages escrow state on Orders. Triggered by: payment webhook, delivery confirmation, auto-release job, dispute resolution. Calls PayoutService after deducting commission.</p></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🔔</div><h4>NotificationService</h4></div><p>Dispatches notifications via SendGrid (email), Twilio (SMS), SignalR (in-platform). All notification attempts are persisted with delivery status. Retries on failure (3 attempts, exponential backoff).</p></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🤖</div><h4>ChatbotService</h4></div><p>Manages OpenAI conversation context per user session. Applies confidence threshold for escalation. Routes escalations to the human agent SignalR group. Persists conversation history.</p></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🔍</div><h4>SearchService</h4></div><p>Builds vendor search queries with EF Core LINQ. Applies matchmaking scoring. Reads availability from Redis cache. Writes results to Redis with 5-minute TTL.</p></div>
+      </div>
+
+      <h3>2.4 Data Layer — SQL Server + Redis</h3>
+      <p>Primary persistence: Azure SQL Server via EF Core code-first. All schema changes via migrations (never manual SQL). Redis used for: vendor availability cache (TTL 60s), search results cache (TTL 5min), SignalR backplane, session data.</p>
+    </section>
+
+    <div class="div"></div>
+
+    <section id="datamodel">
+      <div class="stag">03</div>
+      <h2>Data Model</h2>
+      <p class="sdesc">The EpicHub data model consists of 10 entity classes. The two most critical architectural decisions: (1) Event ↔ Order separation, (2) EventItem price snapshotting. See entity schema reference document for full field specifications.</p>
+
+      <h3>3.1 Entity Inventory</h3>
+      <div class="etable-wrap rv">
+        <table>
+          <thead><tr><th>Entity</th><th>Status</th><th>Purpose</th><th>Key Relationships</th></tr></thead>
+          <tbody>
+            <tr><td>ApplicationUser</td><td>Existing</td><td>Identity base — extends IdentityUser&lt;Guid&gt;</td><td>1:N → Events, Orders, Vendor</td></tr>
+            <tr><td>Vendor</td><td>Existing</td><td>Vendor business profile and metadata</td><td>1:N → Products, Packages</td></tr>
+            <tr><td>Product</td><td>Existing</td><td>Individual service listing owned by a Vendor</td><td>N:1 → Vendor, Category, ServiceType</td></tr>
+            <tr><td>Package</td><td>Existing</td><td>Bundled Products with discount pricing</td><td>N:1 → Vendor, N:M → Products</td></tr>
+            <tr><td>Category</td><td>Existing</td><td>Service category lookup (Photography, Catering…)</td><td>1:N → Products</td></tr>
+            <tr><td>ServiceType</td><td>Existing</td><td>Sub-type within a Category</td><td>1:N → Products</td></tr>
+            <tr><td>Order</td><td>Modified ★</td><td>Financial record — linked to Event via nullable FK</td><td>N:1 → User, Event?; 1:N → OrderItems</td></tr>
+            <tr><td>OrderItem</td><td>Existing</td><td>Financial line item — price snapshotted</td><td>N:1 → Order</td></tr>
+            <tr><td>Event</td><td><span class="badge-new">NEW</span></td><td>Planning container — persists independently of Orders</td><td>N:1 → User; 1:N → EventItems, Orders</td></tr>
+            <tr><td>EventItem</td><td><span class="badge-new">NEW</span></td><td>Draft service selection — snapshots price at add time</td><td>N:1 → Event, Product?, Package?</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.2 Key Relationships & Constraints</h3>
+      <div class="flow-diagram rv">
+        <div class="fstep-label">// Planning Layer → Financial Layer flow</div>
+        <div class="flow-row">
+          <div class="fbox hi">ApplicationUser</div>
+          <div class="farrow">──1:N──▶</div>
+          <div class="fbox hi">Event (NEW)</div>
+          <div class="farrow">──1:N──▶</div>
+          <div class="fbox hi">EventItem (NEW)</div>
+          <div class="farrow">── snapshots ──▶</div>
+          <div class="fbox">Product / Package</div>
+        </div>
+        <div class="flow-row" style="margin-top:.75rem;">
+          <div class="fbox hi">Event (NEW)</div>
+          <div class="farrow">──1:N──▶</div>
+          <div class="fbox" style="border-color:var(--amb);color:var(--amb);">Order ★ (EventId FK)</div>
+          <div class="farrow">──1:N──▶</div>
+          <div class="fbox">OrderItem</div>
+        </div>
+      </div>
+
+      <h3>3.3 New Entity: Event</h3>
+      <div class="etable-wrap rv">
+        <table>
+          <thead><tr><th>Column</th><th>Type</th><th>Constraint</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Id</td><td>uniqueidentifier</td><td>PK, NOT NULL</td><td>Auto-generated GUID</td></tr>
+            <tr><td>UserId</td><td>uniqueidentifier</td><td>FK → Users, NOT NULL, CASCADE</td><td>Owner of the event plan</td></tr>
+            <tr><td>Title</td><td>nvarchar(200)</td><td>NOT NULL</td><td>Human-readable name</td></tr>
+            <tr><td>EventType</td><td>int</td><td>NOT NULL</td><td>Enum: Wedding=0, Corporate=1, Birthday=2…</td></tr>
+            <tr><td>EventDate</td><td>datetime2</td><td>NOT NULL</td><td>Future date — validated at application layer</td></tr>
+            <tr><td>Location</td><td>nvarchar(500)</td><td>NOT NULL</td><td>City or venue address string</td></tr>
+            <tr><td>TotalBudget</td><td>decimal(18,2)</td><td>NULL</td><td>Optional budget ceiling</td></tr>
+            <tr><td>GuestCount</td><td>int</td><td>NULL</td><td>Optional guest estimate</td></tr>
+            <tr><td>Notes</td><td>nvarchar(max)</td><td>NULL</td><td>Customer planning notes — not shared with vendors</td></tr>
+            <tr><td>Status</td><td>int</td><td>NOT NULL, DEFAULT 0</td><td>Enum: Draft=0, Confirmed=1, Completed=2, Cancelled=3</td></tr>
+            <tr><td>CreatedAt</td><td>datetime2</td><td>NOT NULL, DEFAULT GETUTCDATE()</td><td>Set once at creation</td></tr>
+            <tr><td>UpdatedAt</td><td>datetime2</td><td>NOT NULL</td><td>Auto-updated via SaveChanges override</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.4 New Entity: EventItem</h3>
+      <div class="etable-wrap rv">
+        <table>
+          <thead><tr><th>Column</th><th>Type</th><th>Constraint</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Id</td><td>uniqueidentifier</td><td>PK, NOT NULL</td><td></td></tr>
+            <tr><td>EventId</td><td>uniqueidentifier</td><td>FK → Events, NOT NULL, CASCADE</td><td>Parent event plan</td></tr>
+            <tr><td>ProductId</td><td>uniqueidentifier</td><td>FK → Products, NULL, SET NULL</td><td>Null when PackageId is set</td></tr>
+            <tr><td>PackageId</td><td>uniqueidentifier</td><td>FK → Packages, NULL, SET NULL</td><td>Null when ProductId is set</td></tr>
+            <tr><td>SnapshotName</td><td>nvarchar(300)</td><td>NOT NULL</td><td>Captured at EventItem creation time</td></tr>
+            <tr><td>SnapshotPrice</td><td>decimal(18,2)</td><td>NOT NULL, CHECK (&gt; 0)</td><td>Captured at creation — never updated</td></tr>
+            <tr><td>SnapshotVendorName</td><td>nvarchar(300)</td><td>NOT NULL</td><td>Vendor BusinessName at creation time</td></tr>
+            <tr><td>Quantity</td><td>int</td><td>NOT NULL, DEFAULT 1, CHECK (&gt;= 1)</td><td></td></tr>
+            <tr><td>Notes</td><td>nvarchar(1000)</td><td>NULL</td><td>Customer notes for this service</td></tr>
+            <tr><td>Status</td><td>int</td><td>NOT NULL, DEFAULT 0</td><td>Draft=0, Ordered=1, Removed=2</td></tr>
+            <tr><td>CreatedAt</td><td>datetime2</td><td>NOT NULL, DEFAULT GETUTCDATE()</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note rv">
+        <span class="note-tag">CHECK Constraint — Critical</span>
+        <p>EventItem table has a CHECK constraint enforcing exactly one service reference:<br><code style="color:var(--ac)">CHECK ((ProductId IS NOT NULL AND PackageId IS NULL) OR (ProductId IS NULL AND PackageId IS NOT NULL))</code><br>Applied in the EF Core migration via <code style="color:var(--ac)">HasCheckConstraint()</code> in the entity configuration.</p>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <section id="interactions">
+      <div class="stag">04</div>
+      <h2>Component Interactions</h2>
+
+      <h3>4.1 Booking Flow — Full Sequence</h3>
+      <div class="flow-diagram rv">
+        <div class="flow-row"><div class="fbox hi">Angular Customer</div><div class="farrow">→ POST /api/v1/orders/checkout</div><div class="fbox hi">BookingController</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">BookingController</div><div class="farrow">→ validates JWT + Customer role</div><div class="fbox hi">JWT Middleware</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">BookingController</div><div class="farrow">→ calls</div><div class="fbox hi">BookingService.CreateOrderAsync()</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">BookingService</div><div class="farrow">→ opens transaction</div><div class="fbox db">SQL Server (via EF Core)</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">BookingService</div><div class="farrow">→ creates Order, OrderItems, sets EventId FK</div><div class="fbox db">Orders, OrderItems tables</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">BookingService</div><div class="farrow">→ sets EventItem.Status = Ordered</div><div class="fbox db">EventItems table</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">BookingService</div><div class="farrow">→ sets Event.Status = Confirmed</div><div class="fbox db">Events table</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">BookingService</div><div class="farrow">→ creates PaymentIntent</div><div class="fbox ext">Paymob API</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">BookingService</div><div class="farrow">→ commits transaction</div><div class="fbox db">SQL Server</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox ext">Paymob Webhook</div><div class="farrow">→ POST /api/v1/payments/webhook</div><div class="fbox hi">PaymentController</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">PaymentController</div><div class="farrow">→ verifies HMAC signature</div><div class="fbox hi">PaymentService</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">PaymentService</div><div class="farrow">→ updates Order.PaymentStatus = Paid</div><div class="fbox db">Orders table</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">PaymentService</div><div class="farrow">→ dispatches</div><div class="fbox hi">NotificationService</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">NotificationService</div><div class="farrow">→ email</div><div class="fbox ext">SendGrid</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">NotificationService</div><div class="farrow">→ SMS</div><div class="fbox ext">Twilio</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">NotificationService</div><div class="farrow">→ real-time push</div><div class="fbox hi">SignalR Hub → Vendor</div></div>
+      </div>
+
+      <h3>4.2 Real-Time Architecture</h3>
+      <p>SignalR WebSocket hub is hosted within the ASP.NET Core app. Redis acts as the SignalR backplane — enabling notifications to route correctly across multiple scaled-out API instances. Each authenticated user has a dedicated connection group. Vendor connections are added to a vendor-specific group on connect.</p>
+
+      <h3>4.3 Availability Cache Interaction</h3>
+      <div class="flow-diagram rv">
+        <div class="flow-row"><div class="fbox hi">Search Request</div><div class="farrow">→ SearchService checks</div><div class="fbox db">Redis: availability:{vendorId}:{date}</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox">Cache HIT</div><div class="farrow">→ return cached result (TTL 60s)</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox">Cache MISS</div><div class="farrow">→ query</div><div class="fbox db">SQL: VendorCalendar table</div><div class="farrow">→ populate Redis</div></div>
+        <div class="flow-row" style="margin-top:.5rem;"><div class="fbox hi">Vendor Calendar Update</div><div class="farrow">→ invalidate key in</div><div class="fbox db">Redis (immediate)</div></div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <section id="patterns">
+      <div class="stag">05</div>
+      <h2>Design Patterns</h2>
+      <div class="patterns rv">
+        <div class="pat"><h4>Repository Pattern</h4><p>Generic IRepository&lt;T&gt; interface with typed implementations (VendorRepository, EventRepository, etc.). Injected via constructor DI. AppDbContext only instantiated in repository implementations.</p></div>
+        <div class="pat"><h4>Unit of Work</h4><p>IUnitOfWork wraps AppDbContext.SaveChangesAsync(). Services call UoW.CommitAsync() to persist. Enables atomic multi-repository operations in a single database transaction.</p></div>
+        <div class="pat"><h4>Cache-Aside</h4><p>Services check Redis before hitting SQL. On cache miss, populate Redis after SQL read. On writes, invalidate relevant cache keys explicitly. Used for: vendor availability, search results, session tokens.</p></div>
+        <div class="pat"><h4>Snapshot Pattern</h4><p>EventItem captures immutable price, name, and vendor name at creation time. OrderItem captures same at checkout. Prevents historical records being corrupted by future vendor edits — critical for financial integrity.</p></div>
+        <div class="pat"><h4>Observer (Domain Events)</h4><p>Domain events (BookingConfirmed, DeliveryConfirmed, DisputeRaised) dispatched via MediatR. Handlers for each event trigger notifications, escrow state changes, and audit log entries decoupled from business logic.</p></div>
+        <div class="pat"><h4>Strategy (Payment Gateway)</h4><p>IPaymentGateway interface with PaymobGateway and StripeGateway implementations. Gateway is selected at runtime via configuration. Enables zero-code failover between providers.</p></div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <section id="security-arch">
+      <div class="stag">06</div>
+      <h2>Security Architecture</h2>
+      <div class="secgrid rv">
+        <div class="seccard"><h4>🔑 Authentication</h4><p>JWT issued on login. Access token (15min) in Authorization header. Refresh token (7d) in httpOnly cookie. ASP.NET Identity manages password hashing (BCrypt). OAuth via Google provider linked to local user.</p></div>
+        <div class="seccard"><h4>🛡️ Authorization</h4><p>Role-based claims: Customer, Vendor, Admin. [Authorize(Roles="...")] on all protected controllers. Resource-level authorization: vendors can only modify their own resources (checked in service layer, not just controller).</p></div>
+        <div class="seccard"><h4>🔒 Data Encryption</h4><p>SQL Server transparent data encryption (AES-256). Azure Blob Storage server-side encryption. All transport via TLS 1.3. PII fields (email, phone) encrypted at column level in production.</p></div>
+        <div class="seccard"><h4>💉 Input Validation</h4><p>FluentValidation validates every API request before handler execution. Validation pipeline registered as MVC action filter. All user-supplied content is sanitized before persistence. EF Core parameterized queries prevent SQL injection.</p></div>
+        <div class="seccard"><h4>🪝 Webhook Security</h4><p>Payment gateway webhooks verified via HMAC-SHA256 signature against a secret key. Requests failing HMAC verification are rejected with 401. Webhook idempotency enforced via PaymentIntentId uniqueness constraint.</p></div>
+        <div class="seccard"><h4>📋 Audit Logging</h4><p>All admin actions (vendor approval, dispute resolution, promotion creation) are audit-logged with: actor UserId, action type, affected entity ID, timestamp, and IP address. Audit log is append-only and never modified.</p></div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <section id="deployment">
+      <div class="stag">07</div>
+      <h2>Deployment Architecture</h2>
+      <div class="comps rv">
+        <div class="comp"><div class="comp-head"><div class="comp-ico">☁️</div><h4>Azure App Service</h4></div><p>ASP.NET Core API hosted on Linux App Service Plan. Auto-scaling rules configured for 2×–8× instance count based on CPU/memory. Deployment slots: Staging → Production swap.</p><div class="comp-stack"><span class="cs">.NET 8 Linux</span><span class="cs">Auto-scale</span></div></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🌐</div><h4>Azure Static Web Apps</h4></div><p>Angular builds deployed via GitHub Actions. Azure CDN configured for all static assets (JS, CSS, images). Custom domain with Azure-managed TLS certificate.</p><div class="comp-stack"><span class="cs">CDN</span><span class="cs">TLS auto-renew</span></div></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🗄️</div><h4>Azure SQL Database</h4></div><p>General Purpose tier with geo-redundant backup. Point-in-time restore enabled (35-day window). Connection string stored in Azure Key Vault — never in code or config files.</p><div class="comp-stack"><span class="cs">Gen Purpose</span><span class="cs">Geo-backup</span></div></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">⚡</div><h4>Azure Cache for Redis</h4></div><p>Standard tier for SignalR backplane + application cache. Used as both session store and availability cache. Persistence enabled to survive Redis restarts.</p><div class="comp-stack"><span class="cs">Standard C1</span><span class="cs">Persistence</span></div></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">🔄</div><h4>GitHub Actions CI/CD</h4></div><p>PR → run tests → build Docker image → push to ACR → deploy to Staging slot → smoke test → manual approve → swap to Production. Separate workflows for API and Angular builds.</p><div class="comp-stack"><span class="cs">Docker</span><span class="cs">ACR</span><span class="cs">Slots</span></div></div>
+        <div class="comp"><div class="comp-head"><div class="comp-ico">📊</div><h4>Azure Monitor</h4></div><p>Application Insights for API telemetry. Custom dashboards for: booking volume, payment success rate, chatbot resolution rate, escrow amounts. Alerts on: 5xx error rate &gt; 1%, response time P95 &gt; 3s.</p><div class="comp-stack"><span class="cs">App Insights</span><span class="cs">Log Analytics</span></div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="fi">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <div class="nlm" style="width:24px;height:24px;border-radius:4px;background:var(--amb);color:#000;display:grid;place-items:center;font-size:.55rem;font-weight:700;">EH</div>
+      <div><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;">EpicHub Architecture</span><div style="font-size:.62rem;color:var(--txt3);">Architecture & Design Document — v1.0</div></div>
+    </div>
+    <div style="font-size:.7rem;color:var(--txt3);text-align:center;">The "how" — system layers, data model, interactions<br><em style="font-size:.62rem;">API endpoint specs → see Technical/API Docs</em></div>
+    <div class="ftags"><span class="ftag">.NET 8</span><span class="ftag">EF Core</span><span class="ftag">Azure</span><span class="ftag">SignalR</span><span class="ftag">Redis</span></div>
+  </div>
+</footer>
+
+<script>
+const html=document.documentElement;
+document.getElementById('tt').addEventListener('click',()=>{const n=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',n);document.getElementById('ti').textContent=n==='dark'?'🌙':'☀️';});
+document.getElementById('hb').addEventListener('click',()=>document.getElementById('mn').classList.toggle('open'));
+const pb=document.getElementById('prog');
+window.addEventListener('scroll',()=>{pb.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%';},{passive:true});
+const ro=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');ro.unobserve(x.target);}});},{threshold:.05,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+document.querySelectorAll('section[id]').forEach(s=>{new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){document.querySelectorAll('.toc a').forEach(l=>l.classList.remove('active'));const a=document.querySelector(`.toc a[href="#${x.target.id}"]`);if(a)a.classList.add('active');}});},{threshold:.2,rootMargin:'-70px 0px -55% 0px'}).observe(s);});
+</script>
+</body>
+</html>
