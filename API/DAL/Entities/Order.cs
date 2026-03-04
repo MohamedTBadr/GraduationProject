@@ -22,7 +22,8 @@ namespace DAL.Entities
     public DateTime CreatedAt { get; set; }
     public DateTime? Appointment { get; set; }
 
-
+     public Event? Event { get; set; }
+        public Guid? EventId { get; set; }
         public Address ShippingAddress { get; set; } = new Address();
     }
 
