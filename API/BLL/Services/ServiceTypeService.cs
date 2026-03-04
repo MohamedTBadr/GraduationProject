@@ -40,7 +40,7 @@ namespace BLL.Services
 
         public async Task<Result<ServiceTypeDTO>> GetServiceTypeByIdAsync(Guid id)
         {
-            var type = repository.GetServiceTypeByIdAsync(id);
+            var type = await repository.GetServiceTypeByIdAsync(id);
             if (type == null)
             {
                 return Result<ServiceTypeDTO>.NotFound("Service type not found");

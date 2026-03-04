@@ -11,9 +11,11 @@ namespace BLL.Services
 {
     public class CategoryService(ICategoryRepository categoryRepository, IMapper mapper) : ICategoryService
     {
-        public async Task<List<Category>> GetAllCategoriesAsync()
+        public async Task<Result<List<CategoryDTO>>> GetAllCategoriesAsync()
         {
-            return await categoryRepository.GetAllCategoriesAsync();
+            var categories = await categoryRepository.GetAllCategoriesAsync();
+            var categoriesDTO = mapper.Map<List<CategoryDTO>>(categories);
+            return Result<List<CategoryDTO>>.Success(categoriesDTO);
         }
         public async Task<Result<CategoryDTO>> GetCategoryByIdAsync(Guid id)
         {

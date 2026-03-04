@@ -18,14 +18,16 @@ namespace BLL.Services.Helpers
             #region Category
             CreateMap<CreateCategoryRequest, Category>();
             CreateMap<CategoryDTO, Category>().ReverseMap();
+            CreateMap<Category,CategoryDTO>().ReverseMap();
             #endregion
 
 
-         
+
 
 
             #region User
-            //  CreateMap<UserDTO, ApplicationUser>().
+            CreateMap<UserDTO, ApplicationUser>();
+            CreateMap<CreateUserRequest, ApplicationUser>();
             #endregion
 
             #region ServiceType

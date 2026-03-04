@@ -1,0 +1,452 @@
+{
+  "info": {
+    "name": "Graduation Project API",
+    "description": "Postman Collection for Graduation Project API endpoints organized by folder.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5037",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/Authentication/Login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Authentication", "Login"]
+            }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/Authentication/Register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Authentication", "Register"]
+            }
+          }
+        },
+        {
+          "name": "CheckIfEmailExists",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/Authentication/CheckIfEmailExists",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Authentication", "CheckIfEmailExists"]
+            }
+          }
+        },
+        {
+          "name": "RefreshToken",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/Authentication/RefreshToken",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Authentication", "RefreshToken"]
+            }
+          }
+        },
+        {
+          "name": "ForgetPassword",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/Authentication/ForgetPassword",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Authentication", "ForgetPassword"]
+            }
+          }
+        },
+        {
+          "name": "ResetPassword",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/Authentication/ResetPassword",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Authentication", "ResetPassword"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Category",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Category",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Category"]
+            }
+          }
+        },
+        {
+          "name": "Get Category By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Category/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Category", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/Category",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Category"]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/Category/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Category", "{{categoryId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/files/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "files", "upload"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Paymob",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/paymob",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "paymob"]
+            }
+          }
+        },
+        {
+          "name": "Paymob Webhook",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/paymob/webhook",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "paymob", "webhook"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Product",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Product"]
+            }
+          }
+        },
+        {
+          "name": "Get Product By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Product/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Product", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Products By Category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Product/by-category/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Product", "by-category", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Products By Vendor",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Product/by-vendor/{{vendorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Product", "by-vendor", "{{vendorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Products By Service Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Product/by-service-type/{{serviceTypeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Product", "by-service-type", "{{serviceTypeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/Product",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Product"]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/Product/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Product", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/Product/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Product", "{{productId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/User",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "User"]
+            }
+          }
+        },
+        {
+          "name": "Get User By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/User/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "User", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/User",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "User"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/User/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "User", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/User/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "User", "{{userId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ServiceType",
+      "item": [
+        {
+          "name": "Get All Service Types",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/ServiceType",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ServiceType"]
+            }
+          }
+        },
+        {
+          "name": "Get Service Type By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/ServiceType/{{serviceTypeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ServiceType", "{{serviceTypeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Service Type",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/ServiceType/{{serviceTypeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ServiceType", "{{serviceTypeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Service Type",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/ServiceType/{{serviceTypeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ServiceType", "{{serviceTypeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Service Type",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/ServiceType/{{serviceTypeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ServiceType", "{{serviceTypeId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vendor",
+      "item": [
+        {
+          "name": "Get All Vendors",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Vendor",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Vendor"]
+            }
+          }
+        },
+        {
+          "name": "Get Vendor By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Vendor/{{vendorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Vendor", "{{vendorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Vendor",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/Vendor",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Vendor"]
+            }
+          }
+        },
+        {
+          "name": "Update Vendor",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/Vendor/{{vendorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Vendor", "{{vendorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Vendor",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/Vendor/{{vendorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Vendor", "{{vendorId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

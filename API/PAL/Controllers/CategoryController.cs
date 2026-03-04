@@ -1,11 +1,12 @@
 ﻿using BLL.Services;
+using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PAL.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CategoryController(CategoryService categoryService) : ControllerBase
+    public class CategoryController(ICategoryService categoryService) : ControllerBase
     {
         [HttpGet]
         public async Task<IActionResult> GetAllCategories()
@@ -27,13 +28,13 @@ namespace PAL.Controllers
         public async Task<IActionResult> AddCategory(string name)
         {
             await categoryService.AddCategoryAsync(new BLL.DTOs.CategoryDTOs.CreateCategoryRequest(name));
-            return Ok();
+            return Created();
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
             await categoryService.DeleteCategoryAsync(id);
-            return Ok();
+            return NoContent();
         }
     }
 }

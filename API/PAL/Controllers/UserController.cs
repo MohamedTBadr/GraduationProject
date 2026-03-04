@@ -1,8 +1,11 @@
-﻿using BLL.DTOs.UserDTOs;
+﻿using BLL;
+using BLL.DTOs.UserDTOs;
+using Common;
 using DAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PAL.Controllers.Attributes;
 
 namespace PAL.Controllers
 {
@@ -11,9 +14,26 @@ namespace PAL.Controllers
     public class UserController(UserManager<ApplicationUser> userManager):APIController
     {
         [HttpGet]
-        public async Task<List<UserDTO>> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers([FromQuery] PaginatedRequest request)
         {
-            var users = await userManager.Users.ToListAsync();
+            var query = userManager.Users.AsQueryable();
+
+            // 🔍 Search
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                query = query.Where(u =>
+                    u.UserName.Contains(request.SearchTerm) ||
+                    u.Email.Contains(request.SearchTerm));
+            }
+
+            // 📊 Total count BEFORE pagination
+            var totalCount = await query.CountAsync();
+
+            // 📄 Pagination
+            var users = await query
+                .Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToListAsync();
 
             var userDtos = users.Select(u => new UserDTO
             {
@@ -22,7 +42,10 @@ namespace PAL.Controllers
                 Email = u.Email
             }).ToList();
 
-            return userDtos;
+
+            var response = Result<PaginatedResponse<UserDTO>>.Success(new PaginatedResponse<UserDTO>(userDtos,totalCount,request.PageIndex,request.PageSize));
+
+            return Ok(response);
         }
 
 
@@ -86,26 +109,34 @@ namespace PAL.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] UserDTO userDto)
+        [SuccessStatusCode(201)]
+        public async Task<Result<UserDTO>> CreateUser([FromBody] CreateUserRequest request)
         {
-
             var user = new ApplicationUser
             {
-                UserName = userDto.Name,
-                Email = userDto.Email
+                UserName = request.Name,
+                Email = request.Email
             };
 
-            var result = await userManager.CreateAsync(user);
+            var result = await userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors);
+                var (errorType, message) = ToError(result);
+                return Result<UserDTO>.Failure(errorType, message);
             }
-
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, userDto);
+            return Result<UserDTO>.Success(new UserDTO
+            {
+                Id = user.Id,
+                Name = user.UserName,
+                Email = user.Email
+            });
         }
 
-
-
+        private static (ErrorType, string) ToError(IdentityResult result)
+        {
+            var description = string.Join("; ", result.Errors.Select(e => e.Description));
+            return (ErrorType.Validation, description);
+        }
 
     }
 }

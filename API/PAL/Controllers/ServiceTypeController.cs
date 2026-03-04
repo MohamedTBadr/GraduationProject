@@ -1,5 +1,6 @@
 ﻿using BLL.DTOs.ServiceTypesDTOs;
 using BLL.Services;
+using BLL.Services.Interfaces;
 using DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,7 @@ namespace PAL.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ServiceTypeController(ServiceTypeService serviceTypeService) : ControllerBase
+    public class ServiceTypeController(IServiceTypeService serviceTypeService) : ControllerBase
     {
         [HttpGet]
         public async Task<IActionResult> GetAllServiceTypes()
@@ -30,18 +31,18 @@ namespace PAL.Controllers
         }
 
 
-        [HttpPost("{id}")]
+        [HttpPost]
         public async Task<IActionResult> AddServiceType(CreateServiceTypeRequest  type)
         {
             await serviceTypeService.AddTypeAsync(type);
-            return Ok();
+            return Created();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteServiceType(Guid id)
         {
             await serviceTypeService.DeleteTypeAsync(id);
-            return Ok();
+            return NoContent();
         }
 
         [HttpPatch("{id}")]

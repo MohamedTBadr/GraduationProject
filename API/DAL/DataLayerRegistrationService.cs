@@ -25,6 +25,7 @@ namespace DAL
             services.AddScoped<IDbIntialize, DbIntialize>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IServiceTypeRepository, ServiceTypeRepository>();
+            services.AddScoped<IVendorRepository, VendorRepository>();
 
             services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             // 1. Configure DbContext with SQL Server

@@ -7,7 +7,7 @@ namespace BLL.Services.Interfaces
     {
         Task AddCategoryAsync(CreateCategoryRequest category);
         Task<Result<CategoryDTO>> DeleteCategoryAsync(Guid id);
-        Task<List<Category>> GetAllCategoriesAsync();
+        Task<Result<List<CategoryDTO>>> GetAllCategoriesAsync();
         Task<Result<CategoryDTO>> GetCategoryByIdAsync(Guid id);
         Task<Result<CategoryDTO>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request);
     }

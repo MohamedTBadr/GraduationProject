@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Common
 {
-    public record PaginatedRequest(int PageNumber = 1,
+    public record PaginatedRequest(int PageIndex = 1,
         int PageSize = 10,
         string? SearchTerm = null,
         string? SortBy = null,

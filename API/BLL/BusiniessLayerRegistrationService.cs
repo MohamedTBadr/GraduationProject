@@ -5,18 +5,13 @@ using BLL.DTOs.PaymobDTOs;
 using BLL.Services;
 using BLL.Services.Helpers;
 using BLL.Services.Interfaces;
-using DAL.Repositories;
-using DAL.Repositories.Contracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using AutoMapper;
 
 namespace BLL
 {
@@ -28,11 +23,20 @@ namespace BLL
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IAttachmentService, AttachmentService>();
             services.AddScoped<IServiceManager, ServiceManager>();
-
+            services.AddScoped<IVendorService, VendorService>();
             services.AddScoped<IServiceTypeService,ServiceTypeService>();
             services.AddScoped<ICategoryService,CategoryService>();
-            services.AddAutoMapper(typeof(AssemblyReference).Assembly);
 
+
+
+
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<AutoMapperService>();
+
+            });
+            
+            
             services.Configure<JWTOptions>(
   configuration.GetSection("JWTOptions"));
          ConfigureJWT(services, configuration);

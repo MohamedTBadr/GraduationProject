@@ -44,11 +44,11 @@ namespace DAL.Repositories
             var totalCount = await query.CountAsync();
 
             var items = await query
-                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            return new PaginatedResponse<Product>(items, totalCount, request.PageNumber, request.PageSize);
+            return new PaginatedResponse<Product>(items, totalCount, request.PageIndex, request.PageSize);
         }
 
 
@@ -79,11 +79,11 @@ namespace DAL.Repositories
 
             var totalCount = await query.CountAsync();
             var items = await query
-                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            return new PaginatedResponse<Product>(items, totalCount, request.PageNumber, request.PageSize);
+            return new PaginatedResponse<Product>(items, totalCount, request.PageIndex, request.PageSize);
         }
 
         public async Task<PaginatedResponse<Product>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request)
@@ -112,11 +112,11 @@ namespace DAL.Repositories
 
             var totalCount = await query.CountAsync();
             var items = await query
-                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            return new PaginatedResponse<Product>(items, totalCount, request.PageNumber, request.PageSize);
+            return new PaginatedResponse<Product>(items, totalCount, request.PageIndex, request.PageSize);
         }
 
         public async Task<PaginatedResponse<Product>> GetByServiceTypeIdAsync(Guid serviceTypeId, PaginatedRequest request)
@@ -145,11 +145,11 @@ namespace DAL.Repositories
 
             var totalCount = await query.CountAsync();
             var items = await query
-                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Skip((request. PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            return new PaginatedResponse<Product>(items, totalCount, request.PageNumber, request.PageSize);
+            return new PaginatedResponse<Product>(items, totalCount, request.PageIndex, request.PageSize);
         }
         public async Task<Product> GetByIdAsync(Guid id)
         {
