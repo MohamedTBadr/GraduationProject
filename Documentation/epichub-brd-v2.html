@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EpicHub — Business Requirements Document</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --em:#059669; --em2:#047857; --em3:#065F46;
+  --lime:#84CC16; --teal:#0D9488; --amber:#D97706;
+  --rose:#E11D48; --sky:#0284C7; --slate:#475569;
+  --tr:.3s cubic-bezier(.4,0,.2,1); --r:10px; --rs:5px;
+}
+[data-theme="dark"]{
+  --bg:#050D0A; --bg2:#091410; --bg3:#0E1C18; --bg4:#142620; --bg5:#1A3028;
+  --bdr:rgba(5,150,105,.1); --bdr2:rgba(5,150,105,.2); --bdr3:rgba(5,150,105,.35);
+  --txt:#E2F0EA; --txt2:#7BAF98; --txt3:#3A6654;
+  --ac:var(--em); --ac-soft:rgba(5,150,105,.1);
+  --nav:rgba(5,13,10,.92);
+}
+[data-theme="light"]{
+  --bg:#F0FDF6; --bg2:#DCFCE7; --bg3:#BBF7D0; --bg4:#86EFAC; --bg5:#4ADE80;
+  --bdr:rgba(4,120,87,.08); --bdr2:rgba(4,120,87,.16); --bdr3:rgba(4,120,87,.28);
+  --txt:#052E16; --txt2:#166534; --txt3:#4ADE80;
+  --ac:#065F46; --ac-soft:rgba(6,95,70,.09);
+  --nav:rgba(240,253,246,.93);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);line-height:1.72;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+::selection{background:var(--em);color:#fff;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--bdr3);border-radius:99px;}
+
+/* subtle grid */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--bdr) 1px,transparent 1px),linear-gradient(90deg,var(--bdr) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 40%,black 20%,transparent 80%);}
+
+#prog{position:fixed;top:0;left:0;height:2px;z-index:9999;width:0%;
+  background:linear-gradient(90deg,var(--em),var(--lime));
+  box-shadow:0 0 12px rgba(5,150,105,.5);transition:width .08s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--nav);
+  backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr2);transition:background var(--tr);}
+.ni{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:58px;gap:1.5rem;}
+.nlogo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--txt);
+  font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;flex-shrink:0;}
+.nlm{width:28px;height:28px;border-radius:6px;background:var(--em);display:grid;place-items:center;
+  font-size:.58rem;font-weight:500;color:#fff;font-family:'DM Mono',monospace;}
+.ndoc{font-size:.58rem;padding:2px 8px;border-radius:3px;background:var(--ac-soft);
+  border:1px solid var(--bdr2);color:var(--ac);font-family:'DM Mono',monospace;letter-spacing:.08em;}
+.nlinks{display:flex;align-items:center;gap:1.25rem;list-style:none;}
+.nlinks a{font-size:.7rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--txt3);text-decoration:none;transition:color var(--tr);}
+.nlinks a:hover{color:var(--ac);}
+.nright{display:flex;align-items:center;gap:10px;}
+.ttog{width:40px;height:20px;border-radius:99px;background:var(--bg4);border:1px solid var(--bdr2);
+  cursor:pointer;position:relative;transition:background var(--tr);}
+.ttog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+  background:var(--em);transition:transform var(--tr);}
+[data-theme="light"] .ttog::after{transform:translateX(20px);}
+.twrap{display:flex;align-items:center;gap:7px;font-size:.68rem;color:var(--txt3);}
+.hburg{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:4px;}
+.hburg span{width:20px;height:1.5px;background:var(--txt);border-radius:2px;}
+.mnav{display:none;position:fixed;inset:58px 0 0 0;background:var(--bg);z-index:99;
+  padding:1.5rem;flex-direction:column;gap:1rem;border-top:1px solid var(--bdr2);overflow-y:auto;}
+.mnav.open{display:flex;}
+.mnav a{font-size:.95rem;color:var(--txt);text-decoration:none;padding:.5rem 0;border-bottom:1px solid var(--bdr);display:block;}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:110px 2rem 60px;position:relative;overflow:hidden;}
+.hbg{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 55% 45% at 20% 30%,rgba(5,150,105,.1) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 50% at 80% 70%,rgba(132,204,22,.05) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 50% 100%,rgba(13,148,136,.06) 0%,transparent 55%);}
+.hero-inner{max-width:1440px;margin:0 auto;width:100%;position:relative;z-index:1;}
+.hrow{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+.heye{display:inline-flex;align-items:center;gap:8px;background:var(--ac-soft);
+  border:1px solid var(--bdr2);border-radius:3px;padding:4px 14px;
+  font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ac);margin-bottom:1.5rem;animation:up .5s ease both;}
+.heye .pulse{width:5px;height:5px;border-radius:50%;background:var(--ac);animation:blink 2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+h1{font-family:'Libre Baskerville',serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:700;
+  line-height:1.12;letter-spacing:-.02em;margin-bottom:1rem;animation:up .5s ease .1s both;}
+h1 em{color:var(--em);font-style:italic;}
+.hsub{font-size:.9rem;color:var(--txt2);line-height:1.8;max-width:480px;
+  margin-bottom:2rem;animation:up .5s ease .2s both;}
+.htags{display:flex;flex-wrap:wrap;gap:7px;animation:up .5s ease .3s both;}
+.htag{background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);
+  padding:4px 12px;font-size:.72rem;color:var(--txt2);font-weight:500;}
+.htag.a{background:var(--ac-soft);border-color:var(--bdr2);color:var(--ac);}
+/* kpi strip right */
+.hkpis{display:grid;grid-template-columns:1fr 1fr;gap:1rem;animation:up .5s ease .2s both;}
+.hkpi{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);
+  padding:1.1rem 1.25rem;transition:border-color var(--tr),transform .2s;}
+.hkpi:hover{border-color:var(--bdr3);transform:translateY(-2px);}
+.hkpi-val{font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;
+  color:var(--ac);line-height:1;letter-spacing:-.03em;margin-bottom:.25rem;}
+.hkpi-label{font-size:.72rem;color:var(--txt2);font-weight:500;}
+.hkpi-desc{font-size:.67rem;color:var(--txt3);line-height:1.5;margin-top:3px;}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* LAYOUT */
+.layout{max-width:1440px;margin:0 auto;padding:0 2rem;display:flex;gap:2.5rem;}
+.toc{width:215px;flex-shrink:0;position:sticky;top:78px;height:fit-content;
+  background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:1.1rem;}
+.toc h4{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);
+  font-weight:500;margin-bottom:.8rem;font-family:'DM Mono',monospace;}
+.toc ul{list-style:none;display:flex;flex-direction:column;gap:1px;}
+.toc ul li a{display:block;font-size:.72rem;color:var(--txt2);text-decoration:none;
+  padding:5px 8px;border-radius:var(--rs);border-left:2px solid transparent;
+  transition:background var(--tr),color var(--tr),border-color var(--tr);}
+.toc ul li a:hover,.toc ul li a.active{background:var(--ac-soft);color:var(--ac);border-left-color:var(--ac);}
+.toc ul li.sub a{padding-left:1.25rem;font-size:.67rem;}
+.main{flex:1;min-width:0;padding:3.5rem 0 8rem;}
+
+/* SECTION */
+section{margin-bottom:4.5rem;scroll-margin-top:88px;}
+.stag{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ac);font-weight:500;margin-bottom:.5rem;display:flex;align-items:center;gap:8px;}
+.stag::after{content:'';width:32px;height:1px;background:var(--ac);opacity:.4;}
+h2{font-family:'Libre Baskerville',serif;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;
+  line-height:1.15;letter-spacing:-.015em;margin-bottom:.75rem;}
+h3{font-family:'Libre Baskerville',serif;font-size:1.15rem;font-weight:700;margin:2rem 0 .85rem;
+  letter-spacing:-.01em;color:var(--txt);}
+p{color:var(--txt2);margin-bottom:1rem;font-size:.9rem;}
+strong{color:var(--txt);font-weight:600;}
+.sdesc{font-size:.88rem;color:var(--txt2);line-height:1.75;max-width:700px;margin-bottom:1.5rem;}
+.div{height:1px;background:linear-gradient(90deg,transparent,var(--bdr3),transparent);margin:3.5rem 0;}
+
+/* OBJECTIVE CARDS */
+.objgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--bdr);border-radius:var(--r);overflow:hidden;margin:1.75rem 0;}
+.obj{background:var(--bg2);padding:1.5rem;transition:background var(--tr);}
+.obj:hover{background:var(--bg3);}
+.obj-id{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--ac);font-weight:500;
+  letter-spacing:.1em;margin-bottom:.6rem;display:block;}
+.obj h4{font-size:.88rem;font-weight:600;margin-bottom:.4rem;}
+.obj p{font-size:.78rem;color:var(--txt2);margin:0;line-height:1.6;}
+
+/* STAKEHOLDER */
+.shgrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.75rem 0;}
+.sh{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;
+  transition:border-color var(--tr),transform .2s;}
+.sh:hover{border-color:var(--bdr2);transform:translateY(-2px);}
+.sh-top{padding:1rem 1.25rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;}
+.sh-av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:1.1rem;flex-shrink:0;}
+.sh-info h4{font-size:.87rem;font-weight:600;margin:0 0 2px;}
+.sh-info .role{font-size:.63rem;font-family:'DM Mono',monospace;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sh-pow{margin-left:auto;text-align:center;}
+.sh-pow .label{font-size:.58rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;font-family:'DM Mono',monospace;}
+.sh-pow .bar{width:44px;height:3px;background:var(--bg4);border-radius:99px;margin-top:4px;overflow:hidden;}
+.sh-pow .fill{height:100%;border-radius:99px;background:var(--em);}
+.sh-body{padding:1rem 1.25rem;}
+.sh-body h5{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);
+  font-family:'DM Mono',monospace;margin-bottom:.6rem;font-weight:500;}
+.sh-body ul{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.sh-body ul li{font-size:.78rem;color:var(--txt2);display:flex;gap:7px;align-items:flex-start;line-height:1.5;}
+.sh-body ul li::before{content:'→';color:var(--ac);flex-shrink:0;font-size:.75rem;margin-top:2px;}
+.itag{display:inline-block;font-size:.6rem;padding:2px 7px;border-radius:99px;
+  font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.75rem;}
+
+/* BUSINESS REQUIREMENTS TABLE */
+.breq-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bdr2);margin:1.75rem 0;}
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+thead tr{background:var(--bg3);}
+thead th{padding:.75rem 1.1rem;text-align:left;font-size:.62rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--txt3);font-weight:500;white-space:nowrap;font-family:'DM Mono',monospace;}
+tbody tr{border-top:1px solid var(--bdr);transition:background .12s;}
+tbody tr:hover{background:var(--ac-soft);}
+tbody td{padding:.8rem 1.1rem;color:var(--txt2);vertical-align:top;line-height:1.55;}
+tbody td:first-child{color:var(--txt);font-weight:600;font-family:'DM Mono',monospace;font-size:.75rem;}
+.badge{font-size:.6rem;padding:2px 8px;border-radius:99px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+.b-must{background:rgba(225,29,72,.12);color:#F87171;}
+.b-should{background:rgba(217,119,6,.12);color:#FCD34D;}
+.b-could{background:rgba(2,132,199,.12);color:#7DD3FC;}
+.b-wont{background:rgba(71,85,105,.12);color:#94A3B8;}
+
+/* BUSINESS RULES */
+.rules{display:flex;flex-direction:column;gap:.65rem;margin:1.75rem 0;}
+.rule{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:1.1rem 1.25rem;display:grid;grid-template-columns:auto auto 1fr;
+  gap:1rem;align-items:flex-start;transition:background var(--tr),border-color var(--tr);}
+.rule:hover{border-color:var(--bdr2);}
+.rule-id{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--ac);
+  background:var(--ac-soft);border:1px solid var(--bdr2);border-radius:3px;
+  padding:2px 8px;white-space:nowrap;align-self:flex-start;margin-top:2px;}
+.rule-dom{font-size:.63rem;padding:2px 8px;border-radius:3px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;background:var(--bg3);
+  color:var(--txt3);white-space:nowrap;align-self:flex-start;margin-top:2px;
+  font-family:'DM Mono',monospace;}
+.rule-body p{font-size:.82rem;color:var(--txt2);margin:0;line-height:1.6;}
+
+/* PROCESS FLOW */
+.process{display:flex;flex-direction:column;gap:0;position:relative;margin:1.75rem 0;}
+.process::before{content:'';position:absolute;left:20px;top:42px;bottom:42px;width:1px;
+  background:linear-gradient(to bottom,var(--em),transparent);}
+.pstep{display:flex;gap:1.25rem;margin-bottom:1rem;}
+.pstep:last-child{margin-bottom:0;}
+.pnum{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:var(--bg3);
+  border:1px solid var(--bdr2);display:grid;place-items:center;
+  font-family:'DM Mono',monospace;font-size:.7rem;font-weight:500;color:var(--ac);z-index:1;}
+.pstep:hover .pnum{border-color:var(--em);background:var(--ac-soft);}
+.pcard{flex:1;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:1.1rem 1.4rem;transition:background var(--tr),border-color var(--tr);}
+.pstep:hover .pcard{border-color:var(--bdr2);}
+.pcard h4{font-size:.87rem;font-weight:600;margin-bottom:.3rem;}
+.pcard p{font-size:.8rem;color:var(--txt2);margin:0;line-height:1.55;}
+.pactors{display:flex;flex-wrap:wrap;gap:5px;margin-top:.6rem;}
+.actor{font-size:.63rem;padding:2px 8px;border-radius:3px;background:var(--bg3);
+  border:1px solid var(--bdr);color:var(--txt3);font-family:'DM Mono',monospace;}
+
+/* REVENUE MODEL */
+.revgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.75rem 0;}
+.revc{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:1.4rem;transition:border-color var(--tr),transform .2s;}
+.revc:hover{border-color:var(--bdr2);transform:translateY(-2px);}
+.revc-ico{font-size:1.5rem;margin-bottom:.75rem;}
+.revc h4{font-size:.88rem;font-weight:600;margin-bottom:.35rem;}
+.revc p{font-size:.78rem;color:var(--txt2);margin:0;}
+.revc .rev-type{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--ac);
+  text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.5rem;}
+
+/* KPI */
+.kpigrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.75rem 0;}
+.kpi{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:1.25rem;transition:border-color var(--tr),transform .2s;}
+.kpi:hover{border-color:var(--ac);transform:translateY(-2px);}
+.kpi-val{font-family:'Libre Baskerville',serif;font-size:2.2rem;font-weight:700;
+  color:var(--ac);line-height:1;letter-spacing:-.03em;margin-bottom:.25rem;}
+.kpi-label{font-size:.78rem;font-weight:600;margin-bottom:.25rem;}
+.kpi-desc{font-size:.72rem;color:var(--txt2);line-height:1.5;}
+.kpi-obj{font-size:.62rem;font-family:'DM Mono',monospace;color:var(--txt3);margin-top:.5rem;}
+.kpi-prog{height:3px;background:var(--bg4);border-radius:99px;margin-top:.75rem;overflow:hidden;}
+.kpi-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--em),var(--lime));transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+
+/* RISK */
+.risks{display:flex;flex-direction:column;gap:.65rem;margin:1.75rem 0;}
+.risk{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:1.1rem 1.25rem;display:grid;grid-template-columns:auto 1fr auto auto;
+  gap:1rem;align-items:flex-start;transition:background var(--tr),border-color var(--tr);}
+.risk:hover{border-color:var(--bdr2);}
+.risk-id{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--txt3);
+  background:var(--bg3);border-radius:3px;padding:2px 7px;white-space:nowrap;margin-top:2px;}
+.risk-body h4{font-size:.85rem;font-weight:600;margin-bottom:3px;}
+.risk-body p{font-size:.77rem;color:var(--txt2);margin:0;line-height:1.5;}
+.rbadge{font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:3px 8px;border-radius:3px;white-space:nowrap;font-family:'DM Mono',monospace;}
+.r-hi{background:rgba(225,29,72,.12);color:#F87171;}
+.r-med{background:rgba(217,119,6,.12);color:#FCD34D;}
+.r-lo{background:rgba(5,150,105,.12);color:#34D399;}
+
+/* NOTE / INSIGHT */
+.note{background:var(--ac-soft);border:1px solid var(--bdr2);border-radius:var(--r);
+  padding:1.25rem 1.5rem;margin:1.5rem 0;position:relative;overflow:hidden;}
+.note::before{content:'📋';position:absolute;right:1.5rem;top:1rem;font-size:2.2rem;opacity:.1;}
+.note-tag{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ac);font-weight:700;margin-bottom:.4rem;display:block;}
+.note p{color:var(--txt);font-size:.87rem;margin:0;}
+
+/* TWO COL */
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.75rem 0;}
+.listbox{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;}
+.listbox-h{padding:.9rem 1.25rem;background:var(--bg3);border-bottom:1px solid var(--bdr);
+  font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;}
+.listbox-h.gr{color:var(--em);}
+.listbox-h.am{color:#FCD34D;}
+.listbox-h.sk{color:#7DD3FC;}
+.listbox-h.ro{color:#F87171;}
+.listbox-b{padding:1.1rem 1.25rem;}
+.listbox-b ul{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.listbox-b ul li{font-size:.8rem;color:var(--txt2);display:flex;gap:8px;align-items:flex-start;line-height:1.5;}
+.listbox-b ul li .li-i{flex-shrink:0;margin-top:1px;}
+
+/* ACCEPTANCE */
+.acblock{display:flex;flex-direction:column;gap:0;border:1px solid var(--bdr2);border-radius:var(--r);overflow:hidden;margin:1.75rem 0;}
+.ac-sec{background:var(--bg3);padding:.8rem 1.25rem;font-size:.7rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--txt2);
+  font-family:'DM Mono',monospace;border-top:1px solid var(--bdr2);}
+.ac-sec:first-child{border-top:none;}
+.acrow{background:var(--bg2);padding:.9rem 1.25rem;display:grid;grid-template-columns:auto auto 1fr;
+  gap:1rem;align-items:flex-start;border-top:1px solid var(--bdr);transition:background .12s;}
+.acrow:hover{background:var(--bg3);}
+.ac-id{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--txt3);white-space:nowrap;padding-top:2px;}
+.ac-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.ac-dot.pass{background:rgba(5,150,105,.2);border:1.5px solid var(--em);}
+.ac-dot.pending{background:rgba(217,119,6,.15);border:1.5px solid var(--amber);}
+.ac-txt{font-size:.8rem;color:var(--txt2);line-height:1.55;}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease;}
+.rv.in{opacity:1;transform:none;}
+
+/* FOOTER */
+footer{border-top:1px solid var(--bdr2);padding:1.75rem 2rem;background:var(--bg2);transition:background var(--tr);}
+.fi{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.fb{display:flex;align-items:center;gap:9px;}
+.fb .nlm{width:24px;height:24px;border-radius:4px;}
+.fb span{font-family:'Libre Baskerville',serif;font-weight:700;font-size:.9rem;}
+.fr{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.ft{background:var(--bg3);border:1px solid var(--bdr2);border-radius:3px;
+  padding:3px 9px;font-size:.62rem;color:var(--txt3);font-family:'DM Mono',monospace;}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.toc{display:none;}.layout{padding:0 1.5rem;}.objgrid{grid-template-columns:1fr 1fr;}.kpigrid{grid-template-columns:1fr 1fr;}.revgrid{grid-template-columns:1fr 1fr;}.hkpis{grid-template-columns:1fr;}.hrow{grid-template-columns:1fr;}}
+@media(max-width:768px){.nlinks{display:none;}.hburg{display:flex;}.hero{padding:90px 1.25rem 40px;}.layout{padding:0 1rem;}.main{padding:2rem 0 4rem;}.shgrid{grid-template-columns:1fr;}.twocol{grid-template-columns:1fr;}.objgrid{grid-template-columns:1fr;}.kpigrid{grid-template-columns:1fr 1fr;}.revgrid{grid-template-columns:1fr;}.rule{grid-template-columns:auto 1fr;}.risk{grid-template-columns:auto 1fr;}.acrow{grid-template-columns:auto 1fr;}.ac-id{display:none;}}
+@media(max-width:480px){h1{font-size:2rem;}.kpigrid{grid-template-columns:1fr;}.ni{padding:0 1rem;}}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+
+<nav>
+  <div class="ni">
+    <a href="#" class="nlogo">
+      <div class="nlm">EH</div>
+      EpicHub
+      <span class="ndoc">BRD</span>
+    </a>
+    <ul class="nlinks">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#objectives">Objectives</a></li>
+      <li><a href="#stakeholders">Stakeholders</a></li>
+      <li><a href="#requirements">Requirements</a></li>
+      <li><a href="#rules">Business Rules</a></li>
+      <li><a href="#processes">Processes</a></li>
+      <li><a href="#revenue">Revenue</a></li>
+      <li><a href="#kpis">KPIs</a></li>
+      <li><a href="#risks">Risks</a></li>
+    </ul>
+    <div class="nright">
+      <div class="twrap"><span id="tico">🌙</span><button class="ttog" id="ttog"></button></div>
+      <div class="hburg" id="hburg"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</nav>
+
+<nav class="mnav" id="mnav">
+  <a href="#problem" onclick="cm()">01 — Business Problem</a>
+  <a href="#objectives" onclick="cm()">02 — Business Objectives</a>
+  <a href="#stakeholders" onclick="cm()">03 — Stakeholder Analysis</a>
+  <a href="#requirements" onclick="cm()">04 — Business Requirements</a>
+  <a href="#rules" onclick="cm()">05 — Business Rules</a>
+  <a href="#processes" onclick="cm()">06 — Business Processes</a>
+  <a href="#revenue" onclick="cm()">07 — Revenue Model</a>
+  <a href="#kpis" onclick="cm()">08 — KPIs & Success Metrics</a>
+  <a href="#risks" onclick="cm()">09 — Risk Register</a>
+  <a href="#acceptance" onclick="cm()">10 — Acceptance Criteria</a>
+  <a href="#constraints" onclick="cm()">11 — Constraints & Assumptions</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hbg"></div>
+  <div class="hero-inner">
+    <div class="hrow">
+      <div>
+        <div class="heye"><span class="pulse"></span>Business Requirements Document</div>
+        <h1>Why we build it.<br><em>What the business</em><br>needs to succeed.</h1>
+        <p class="hsub">This document defines the business case — the problem we solve, the objectives we must achieve, the rules we operate by, and the metrics that define success. It does not specify features, tech stack, or UX — those live in the PRD.</p>
+        <div class="htags">
+          <span class="htag a">Egypt → MENA</span>
+          <span class="htag a">Two-Sided Marketplace</span>
+          <span class="htag">Phase 1 Business Case</span>
+          <span class="htag">Event Services Vertical</span>
+        </div>
+      </div>
+      <div class="hkpis">
+        <div class="hkpi"><div class="hkpi-val">BO-01</div><div class="hkpi-label">Market Capture</div><div class="hkpi-desc">Lead Egypt event marketplace in 18 months</div></div>
+        <div class="hkpi"><div class="hkpi-val">BO-02</div><div class="hkpi-label">Revenue Gen.</div><div class="hkpi-desc">Positive unit economics in year one</div></div>
+        <div class="hkpi"><div class="hkpi-val">9</div><div class="hkpi-label">Biz Objectives</div><div class="hkpi-desc">Traceable across all requirements</div></div>
+        <div class="hkpi"><div class="hkpi-val">12</div><div class="hkpi-label">Business Rules</div><div class="hkpi-desc">Governing all platform operations</div></div>
+        <div class="hkpi"><div class="hkpi-val">6</div><div class="hkpi-label">Revenue Streams</div><div class="hkpi-desc">Multi-model monetization design</div></div>
+        <div class="hkpi"><div class="hkpi-val">8</div><div class="hkpi-label">Risks Identified</div><div class="hkpi-desc">With probability and impact ratings</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="toc">
+    <h4>Contents</h4>
+    <ul>
+      <li><a href="#problem">01 Business Problem</a></li>
+      <li><a href="#objectives">02 Business Objectives</a></li>
+      <li><a href="#stakeholders">03 Stakeholder Analysis</a></li>
+      <li><a href="#requirements">04 Business Requirements</a></li>
+      <li class="sub"><a href="#requirements">Demand Side</a></li>
+      <li class="sub"><a href="#requirements">Supply Side</a></li>
+      <li class="sub"><a href="#requirements">Platform Ops</a></li>
+      <li><a href="#rules">05 Business Rules</a></li>
+      <li><a href="#processes">06 Business Processes</a></li>
+      <li><a href="#revenue">07 Revenue Model</a></li>
+      <li><a href="#kpis">08 KPIs & Metrics</a></li>
+      <li><a href="#risks">09 Risk Register</a></li>
+      <li><a href="#acceptance">10 Acceptance Criteria</a></li>
+      <li><a href="#constraints">11 Constraints</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+
+    <!-- 01 PROBLEM -->
+    <section id="problem">
+      <div class="stag">01</div>
+      <h2>Business Problem & Opportunity</h2>
+      <p class="sdesc">The business case for EpicHub is grounded in a structural market failure — not a product gap. Understanding the problem precisely is what determines whether the business has a defensible reason to exist.</p>
+
+      <div class="note rv">
+        <span class="note-tag">The Core Market Failure</span>
+        <p>Planning an event in Egypt requires customers to individually identify, contact, negotiate, and pay multiple vendors through entirely disconnected channels — phone calls, Instagram DMs, and bank transfers. There is no trust infrastructure, no price transparency, and no accountability layer. Vendors, in turn, have no scalable digital sales channel and depend entirely on word-of-mouth. <strong>Both sides lose time, money, and confidence in every transaction.</strong></p>
+      </div>
+
+      <h3>Problem Dimensions</h3>
+      <div class="twocol rv">
+        <div class="listbox">
+          <div class="listbox-h ro">⚠ &nbsp;Customer-Side Problems</div>
+          <div class="listbox-b">
+            <ul>
+              <li><span class="li-i">🔍</span>No centralized discovery — must search across Instagram, WhatsApp groups, and recommendations individually</li>
+              <li><span class="li-i">💸</span>No price transparency — vendors quote based on perceived customer budget, not a published rate</li>
+              <li><span class="li-i">🤔</span>No trust signals — impossible to verify vendor quality, reliability, or business legitimacy before paying</li>
+              <li><span class="li-i">📱</span>No booking confirmation — verbal or WhatsApp agreements with no formal record or payment protection</li>
+              <li><span class="li-i">⏱️</span>Extremely time-consuming — sourcing 5 vendors for one event can take weeks of back-and-forth</li>
+            </ul>
+          </div>
+        </div>
+        <div class="listbox">
+          <div class="listbox-h am">⚠ &nbsp;Vendor-Side Problems</div>
+          <div class="listbox-b">
+            <ul>
+              <li><span class="li-i">📢</span>No scalable marketing channel — entirely dependent on word-of-mouth and personal social media presence</li>
+              <li><span class="li-i">💰</span>Inconsistent revenue — booking pipeline is unpredictable with no visibility into demand</li>
+              <li><span class="li-i">🧾</span>Payment collection risk — customers sometimes cancel or dispute after service delivery with no protection</li>
+              <li><span class="li-i">📊</span>No performance data — no way to measure conversion, compare pricing, or understand market demand</li>
+              <li><span class="li-i">🏆</span>No verified credibility — quality vendors cannot differentiate themselves from low-quality competitors online</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h3>Market Opportunity</h3>
+      <p>Egypt's event services market is large, informal, and growing. Corporate events represent 59–60% of event spend across the MENA region. The digital transaction rate for event services in Egypt is near zero — every booking is done offline. <strong>No existing MENA platform offers end-to-end booking for all event types with verified vendors and secure payment.</strong> EpicHub enters an uncontested space in Egypt with a model that works at global scale.</p>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 02 OBJECTIVES -->
+    <section id="objectives">
+      <div class="stag">02</div>
+      <h2>Business Objectives</h2>
+      <p class="sdesc">Nine measurable objectives that define what EpicHub must achieve. Every business requirement in Section 04 traces to at least one of these objectives. Changes to requirements must be evaluated against objective impact.</p>
+
+      <div class="objgrid rv">
+        <div class="obj">
+          <span class="obj-id">BO-01</span>
+          <h4>Market Leadership in Egypt</h4>
+          <p>Establish EpicHub as the leading event vendor marketplace in Egypt within 18 months of launch, measured by booking volume and brand awareness among target segments.</p>
+        </div>
+        <div class="obj">
+          <span class="obj-id">BO-02</span>
+          <h4>Positive Unit Economics</h4>
+          <p>Achieve positive unit economics within Year 1 — meaning revenue per booking exceeds variable cost per booking — without dependence on any single revenue stream.</p>
+        </div>
+        <div class="obj">
+          <span class="obj-id">BO-03</span>
+          <h4>Vendor Network Critical Mass</h4>
+          <p>Onboard sufficient verified vendors across all core service categories so that no customer search in Egypt returns zero results in any of the 5 primary categories.</p>
+        </div>
+        <div class="obj">
+          <span class="obj-id">BO-04</span>
+          <h4>Build a Trusted Brand</h4>
+          <p>Establish EpicHub as synonymous with safe, verified event booking in Egypt — measured by average platform rating ≥ 4.5 stars and a dispute rate below 3% of bookings.</p>
+        </div>
+        <div class="obj">
+          <span class="obj-id">BO-05</span>
+          <h4>Maximize Customer Lifetime Value</h4>
+          <p>Drive repeat usage through loyalty, promotions, and service quality — targeting a 35% repeat booking rate within the first year of a customer's account lifetime.</p>
+        </div>
+        <div class="obj">
+          <span class="obj-id">BO-06</span>
+          <h4>Corporate Revenue Penetration</h4>
+          <p>Secure a minimum of 20 active enterprise corporate accounts within 12 months, contributing a defined percentage of total platform GMV and anchoring B2B revenue.</p>
+        </div>
+        <div class="obj">
+          <span class="obj-id">BO-07</span>
+          <h4>Operational Efficiency via AI</h4>
+          <p>Resolve 80% of customer support inquiries via AI chatbot without human escalation — reducing cost per support interaction and enabling the ops team to scale without linear headcount growth.</p>
+        </div>
+        <div class="obj">
+          <span class="obj-id">BO-08</span>
+          <h4>Vendor Revenue Growth</h4>
+          <p>Demonstrate to vendors that the platform increases their bookings — a retention metric measured by vendor churn below 5% per quarter and subscription tier upgrade rates.</p>
+        </div>
+        <div class="obj">
+          <span class="obj-id">BO-09</span>
+          <h4>MENA Expansion Readiness</h4>
+          <p>Complete all business setup (legal entity, payment partnerships, regulatory compliance) required to launch in a second MENA market by the end of Phase 1 — ready to execute in Phase 2.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 03 STAKEHOLDERS -->
+    <section id="stakeholders">
+      <div class="stag">03</div>
+      <h2>Stakeholder Analysis</h2>
+      <p class="sdesc">Stakeholders are analyzed here from a <strong>business interest perspective</strong> — what they need the business to deliver, and what their influence is on business decisions. Product-level UX needs are documented in the PRD.</p>
+
+      <div class="shgrid rv">
+        <div class="sh">
+          <div class="sh-top">
+            <div class="sh-av" style="background:rgba(5,150,105,.1);">🎉</div>
+            <div class="sh-info"><h4>Customers</h4><div class="role">Demand Side · Primary</div></div>
+            <div class="sh-pow"><div class="label">Influence</div><div class="bar"><div class="fill" style="width:85%"></div></div></div>
+          </div>
+          <div class="sh-body">
+            <span class="itag" style="background:rgba(5,150,105,.1);color:var(--em);">Revenue Generator</span>
+            <h5>Business Interests</h5>
+            <ul>
+              <li>Platform fees must be transparent and justified by time-saving value</li>
+              <li>Payment protection (escrow) must genuinely protect their money</li>
+              <li>Vendor quality must be consistently high — trust must be earned and maintained</li>
+              <li>Loyalty rewards must offer real monetary value, not just points</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sh">
+          <div class="sh-top">
+            <div class="sh-av" style="background:rgba(2,132,199,.1);">🏢</div>
+            <div class="sh-info"><h4>Corporate Clients</h4><div class="role">High-Value Demand · Primary</div></div>
+            <div class="sh-pow"><div class="label">Influence</div><div class="bar"><div class="fill" style="width:90%"></div></div></div>
+          </div>
+          <div class="sh-body">
+            <span class="itag" style="background:rgba(2,132,199,.1);color:#38BDF8;">High GMV</span>
+            <h5>Business Interests</h5>
+            <ul>
+              <li>Enterprise pricing that reflects volume — not per-booking retail fees</li>
+              <li>Consolidated invoicing compatible with corporate finance and procurement workflows</li>
+              <li>Contractual SLAs for vendor reliability and account management response times</li>
+              <li>Platform must be procurement-compliant (invoice format, VAT, company registration)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sh">
+          <div class="sh-top">
+            <div class="sh-av" style="background:rgba(217,119,6,.1);">📸</div>
+            <div class="sh-info"><h4>Vendors</h4><div class="role">Supply Side · Critical</div></div>
+            <div class="sh-pow"><div class="label">Influence</div><div class="bar"><div class="fill" style="width:100%"></div></div></div>
+          </div>
+          <div class="sh-body">
+            <span class="itag" style="background:rgba(217,119,6,.1);color:#FCD34D;">Platform Supply</span>
+            <h5>Business Interests</h5>
+            <ul>
+              <li>Commission rate must be justified by tangible customer acquisition benefit</li>
+              <li>Payout timing must be predictable — 72h SLA is a commercial promise</li>
+              <li>Subscription ROI must be demonstrable within 90 days of joining</li>
+              <li>Platform must never allow competitors to access their pricing data</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sh">
+          <div class="sh-top">
+            <div class="sh-av" style="background:rgba(16,185,129,.1);">🛡️</div>
+            <div class="sh-info"><h4>EpicHub as Business</h4><div class="role">Platform Owner · Internal</div></div>
+            <div class="sh-pow"><div class="label">Influence</div><div class="bar"><div class="fill" style="width:100%"></div></div></div>
+          </div>
+          <div class="sh-body">
+            <span class="itag" style="background:rgba(16,185,129,.1);color:#34D399;">Owner</span>
+            <h5>Business Interests</h5>
+            <ul>
+              <li>Every feature must have a clear business objective it serves — no scope creep</li>
+              <li>Revenue diversification — no single stream should exceed 60% of total revenue</li>
+              <li>Unit economics must be positive before scaling marketing spend</li>
+              <li>Brand must be protected — vendor quality controls are non-negotiable</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sh">
+          <div class="sh-top">
+            <div class="sh-av" style="background:rgba(225,29,72,.1);">⚖️</div>
+            <div class="sh-info"><h4>Regulatory Bodies</h4><div class="role">External · Governance</div></div>
+            <div class="sh-pow"><div class="label">Influence</div><div class="bar"><div class="fill" style="width:70%"></div></div></div>
+          </div>
+          <div class="sh-body">
+            <span class="itag" style="background:rgba(225,29,72,.1);color:#F87171;">Compliance</span>
+            <h5>Business Interests</h5>
+            <ul>
+              <li>Egyptian e-commerce law compliance (commercial registration, consumer protection)</li>
+              <li>Central Bank of Egypt payment processing regulations for escrow and disbursement</li>
+              <li>Tax invoice generation in Egyptian legal format for all transactions</li>
+              <li>Data privacy compliance aligned with Egypt's Personal Data Protection Law</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sh">
+          <div class="sh-top">
+            <div class="sh-av" style="background:rgba(132,204,22,.1);">💳</div>
+            <div class="sh-info"><h4>Payment Partners</h4><div class="role">External · Enabler</div></div>
+            <div class="sh-pow"><div class="label">Influence</div><div class="bar"><div class="fill" style="width:60%"></div></div></div>
+          </div>
+          <div class="sh-body">
+            <span class="itag" style="background:rgba(132,204,22,.1);color:#84CC16;">Enabler</span>
+            <h5>Business Interests</h5>
+            <ul>
+              <li>EpicHub must meet payment partner onboarding requirements before launch</li>
+              <li>Escrow model must be agreed contractually — not all gateways support held funds</li>
+              <li>Volume commitments may be required to access preferred commission rates</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 04 BUSINESS REQUIREMENTS -->
+    <section id="requirements">
+      <div class="stag">04</div>
+      <h2>Business Requirements</h2>
+      <p class="sdesc">Business requirements define <strong>what the business needs to be true</strong> — not how the product achieves it. They are written in business language, not feature language. Each maps to a business objective.</p>
+
+      <h3>Demand Side — Customer Requirements</h3>
+      <div class="breq-wrap rv">
+        <table>
+          <thead><tr><th>ID</th><th>Business Requirement</th><th>Objective</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>BR-D01</td>
+              <td>Customers must be able to find and book any event service vendor in Egypt through a single digital channel, without needing to contact vendors outside the platform.</td>
+              <td>BO-01</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>BR-D02</td>
+              <td>Customer payment must be protected from the moment of booking until service delivery is confirmed. No vendor shall receive funds before service is delivered.</td>
+              <td>BO-04</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>BR-D03</td>
+              <td>Every vendor displayed to customers must be vetted and approved by EpicHub operations. No unreviewed vendor may appear in search results.</td>
+              <td>BO-04</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>BR-D04</td>
+              <td>Customers who complete bookings must be incentivized to return through a loyalty mechanism that provides measurable financial benefit, not just symbolic points.</td>
+              <td>BO-05</td>
+              <td><span class="badge b-should">SHOULD</span></td>
+            </tr>
+            <tr>
+              <td>BR-D05</td>
+              <td>Corporate clients must be able to manage event procurement through a billing model compatible with Egyptian corporate finance processes — consolidated invoicing, VAT compliance.</td>
+              <td>BO-06</td>
+              <td><span class="badge b-should">SHOULD</span></td>
+            </tr>
+            <tr>
+              <td>BR-D06</td>
+              <td>Customers must be able to raise a dispute and receive a binding resolution within 5 business days, with full escrow protection throughout the dispute window.</td>
+              <td>BO-04</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Supply Side — Vendor Requirements</h3>
+      <div class="breq-wrap rv">
+        <table>
+          <thead><tr><th>ID</th><th>Business Requirement</th><th>Objective</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>BR-S01</td>
+              <td>Vendors must receive a demonstrably higher volume of qualified booking inquiries through EpicHub than they currently achieve through their existing marketing channels.</td>
+              <td>BO-08</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>BR-S02</td>
+              <td>Vendor payout must occur within 72 hours of customer delivery confirmation — this is a commercial SLA that determines vendor willingness to join and remain on the platform.</td>
+              <td>BO-08</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>BR-S03</td>
+              <td>The subscription commission model must provide a clear, positive ROI for vendors — meaning the incremental bookings generated through the platform must exceed the subscription + commission cost.</td>
+              <td>BO-03, BO-08</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>BR-S04</td>
+              <td>All vendor profile content, pricing, and portfolio materials must be under full EpicHub editorial control. No vendor may directly modify their public-facing profile without EpicHub review.</td>
+              <td>BO-04</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Platform Operations Requirements</h3>
+      <div class="breq-wrap rv">
+        <table>
+          <thead><tr><th>ID</th><th>Business Requirement</th><th>Objective</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>BR-O01</td>
+              <td>EpicHub must generate revenue from multiple streams simultaneously — commission, subscriptions, and service fees — so that no single stream represents a single point of failure for the business model.</td>
+              <td>BO-02</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>BR-O02</td>
+              <td>The support function must be primarily automated — 80% of customer queries resolved by AI — so the ops team can scale the platform without linear growth in support headcount.</td>
+              <td>BO-07</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>BR-O03</td>
+              <td>Platform operations must collect and act on post-event feedback to maintain average vendor ratings above 4.5 stars. Vendors falling below 3.5 stars must enter a remediation or suspension process.</td>
+              <td>BO-04</td>
+              <td><span class="badge b-should">SHOULD</span></td>
+            </tr>
+            <tr>
+              <td>BR-O04</td>
+              <td>By end of Phase 1, all legal, regulatory, and financial infrastructure required for a second MENA market (UAE or KSA) must be ready — enabling Phase 2 launch with no blocking dependencies.</td>
+              <td>BO-09</td>
+              <td><span class="badge b-should">SHOULD</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 05 BUSINESS RULES -->
+    <section id="rules">
+      <div class="stag">05</div>
+      <h2>Business Rules</h2>
+      <p class="sdesc">Business rules are operational policies that govern how the EpicHub marketplace works. They are non-negotiable unless a formal change request is approved against the relevant business objective. These rules exist to protect platform integrity, trust, and legal standing.</p>
+
+      <div class="rules rv">
+        <div class="rule">
+          <div class="rule-id">BR-001</div><div class="rule-dom">Vendor Trust</div>
+          <div class="rule-body"><p>No vendor profile may appear in customer-facing search results until explicitly approved by EpicHub operations. All content — text, images, pricing — is owned and curated by EpicHub. Vendors submit content for review; they do not publish it directly.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-002</div><div class="rule-dom">Escrow</div>
+          <div class="rule-body"><p>Customer payments are held in escrow from booking confirmation until either: (a) the customer confirms delivery, or (b) 48 hours elapse after the event date with no dispute raised. Vendor receives payout within 72 hours of the release trigger. EpicHub deducts its commission before disbursement.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-003</div><div class="rule-dom">Reviews</div>
+          <div class="rule-body"><p>A customer may only submit one review per booking, and only after the booking status is Delivered. Reviews cannot be submitted more than 30 days after the event date. Reviews are moderated by EpicHub before publication. No anonymous reviews are permitted.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-004</div><div class="rule-dom">Cancellation</div>
+          <div class="rule-body"><p>Free cancellation is available up to 7 days before the event. Cancellations within 7 days incur a 25% platform fee. Cancellations within 48 hours are non-refundable. If a vendor cancels within 7 days of the event, the customer receives a full refund plus a 10% goodwill credit. Vendor-initiated late cancellations may result in account suspension.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-005</div><div class="rule-dom">Commission</div>
+          <div class="rule-body"><p>EpicHub charges a platform commission on each confirmed booking, automatically deducted from the escrow payout before vendor receives funds. Commission rates vary by vendor subscription tier and are reviewed quarterly. Commission rates are commercially confidential and not displayed to customers.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-006</div><div class="rule-dom">Disputes</div>
+          <div class="rule-body"><p>Disputes must be raised within 48 hours of the event date. A dispute automatically freezes the relevant escrow. Each booking is eligible for one dispute only. EpicHub issues a binding resolution within 5 business days. Resolution decisions are final and logged with a full audit trail.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-007</div><div class="rule-dom">Verification</div>
+          <div class="rule-body"><p>A vendor must hold and provide a valid Egyptian business license to receive the EpicHub Verified badge. License validity is checked at onboarding and re-verified annually. An expired license results in immediate badge removal and profile suspension until renewed.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-008</div><div class="rule-dom">Loyalty</div>
+          <div class="rule-body"><p>Loyalty points are credited only upon confirmed service delivery — not at booking time. Points expire 12 months from issue date. Points cannot be transferred, sold, or converted to cash. Maximum combined discount from points + promotional codes is capped at 30% of booking value per transaction.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-009</div><div class="rule-dom">Corporate</div>
+          <div class="rule-body"><p>Corporate accounts require a designated account administrator. Corporate bookings generate monthly consolidated invoices in Egyptian legal format including VAT. Corporate account holders are not eligible to use personal loyalty points. Corporate accounts may negotiate custom commission structures via enterprise agreement.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-010</div><div class="rule-dom">Promotions</div>
+          <div class="rule-body"><p>Only one promotional discount code may be applied per booking. Promotional campaigns are created, activated, and deactivated exclusively by EpicHub operations — vendors may not create their own promotions independently on the platform.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-011</div><div class="rule-dom">Data Retention</div>
+          <div class="rule-body"><p>Financial records (bookings, payments, invoices) must be retained for a minimum of 5 years for Egyptian tax and audit compliance. Customer personal data may be deleted on valid request, subject to mandatory financial retention obligations. Data handling must comply with Egypt's Personal Data Protection Law No. 151 of 2020.</p></div>
+        </div>
+        <div class="rule">
+          <div class="rule-id">BR-012</div><div class="rule-dom">Quality</div>
+          <div class="rule-body"><p>Any vendor maintaining an average rating below 3.5 stars over a rolling 90-day period enters a formal quality review. Vendors below 3.0 stars are suspended from appearing in new search results pending remediation. Persistent low ratings result in platform removal with 30 days' notice.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 06 PROCESSES -->
+    <section id="processes">
+      <div class="stag">06</div>
+      <h2>Business Processes</h2>
+      <p class="sdesc">The key business processes that define how value flows through the EpicHub marketplace. These are described at the business level — the process flows in the PRD describe the product implementation of these same journeys.</p>
+
+      <h3>BP-01 — Vendor Qualification Process</h3>
+      <div class="process rv">
+        <div class="pstep">
+          <div class="pnum">01</div>
+          <div class="pcard">
+            <h4>Vendor Application</h4>
+            <p>Vendor submits business application including commercial registration, service portfolio, pricing, and contact information via the vendor portal.</p>
+            <div class="pactors"><span class="actor">Vendor</span><span class="actor">Onboarding Portal</span></div>
+          </div>
+        </div>
+        <div class="pstep">
+          <div class="pnum">02</div>
+          <div class="pcard">
+            <h4>EpicHub Editorial Review</h4>
+            <p>Operations team verifies business license authenticity, assesses portfolio quality against platform standards, and reviews pricing for market reasonableness. May request additional information. Target: review within 5 business days.</p>
+            <div class="pactors"><span class="actor">EpicHub Ops</span><span class="actor">Internal CMS</span></div>
+          </div>
+        </div>
+        <div class="pstep">
+          <div class="pnum">03</div>
+          <div class="pcard">
+            <h4>Commercial Agreement</h4>
+            <p>Approved vendor selects subscription tier, agrees to commission terms and platform policies, and completes bank account setup for payouts. Platform terms are legally binding.</p>
+            <div class="pactors"><span class="actor">Vendor</span><span class="actor">Legal / Finance</span></div>
+          </div>
+        </div>
+        <div class="pstep">
+          <div class="pnum">04</div>
+          <div class="pcard">
+            <h4>Profile Publication & Go Live</h4>
+            <p>Ops publishes profile with Verified badge. Vendor enters the matchmaking algorithm and appears in customer search. Subscription billing begins.</p>
+            <div class="pactors"><span class="actor">EpicHub Ops</span><span class="actor">Search Index</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>BP-02 — Payment & Escrow Lifecycle</h3>
+      <div class="process rv">
+        <div class="pstep">
+          <div class="pnum">01</div>
+          <div class="pcard">
+            <h4>Customer Payment Captured</h4>
+            <p>Full booking amount collected from customer at checkout. Funds transferred to escrow account held by EpicHub's payment partner. Customer receives payment confirmation.</p>
+            <div class="pactors"><span class="actor">Customer</span><span class="actor">Payment Gateway</span><span class="actor">Escrow</span></div>
+          </div>
+        </div>
+        <div class="pstep">
+          <div class="pnum">02</div>
+          <div class="pcard">
+            <h4>Vendor Booking Confirmation</h4>
+            <p>Vendor accepts booking (within 24h window). Calendar is blocked. Both parties notified. Escrow remains held — vendor has not yet earned payout.</p>
+            <div class="pactors"><span class="actor">Vendor</span><span class="actor">Notification Service</span></div>
+          </div>
+        </div>
+        <div class="pstep">
+          <div class="pnum">03</div>
+          <div class="pcard">
+            <h4>Service Delivery</h4>
+            <p>Event date passes. Customer confirms delivery in-platform. This triggers the escrow release. If customer takes no action within 48h of event date and no dispute is raised, escrow auto-releases.</p>
+            <div class="pactors"><span class="actor">Customer</span><span class="actor">Escrow Service</span></div>
+          </div>
+        </div>
+        <div class="pstep">
+          <div class="pnum">04</div>
+          <div class="pcard">
+            <h4>Vendor Payout</h4>
+            <p>EpicHub deducts commission from escrowed amount. Net amount transferred to vendor's registered bank account within 72 hours of release trigger. Payout record created for audit.</p>
+            <div class="pactors"><span class="actor">Finance System</span><span class="actor">Payment Gateway</span><span class="actor">Vendor</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>BP-03 — Dispute Resolution</h3>
+      <div class="process rv">
+        <div class="pstep">
+          <div class="pnum">01</div>
+          <div class="pcard">
+            <h4>Dispute Initiated</h4>
+            <p>Customer raises dispute within 48h of event date via platform. Escrow is automatically frozen. Both customer and vendor notified. Dispute ticket opened with SLA clock started.</p>
+            <div class="pactors"><span class="actor">Customer</span><span class="actor">Dispute System</span><span class="actor">Escrow</span></div>
+          </div>
+        </div>
+        <div class="pstep">
+          <div class="pnum">02</div>
+          <div class="pcard">
+            <h4>Evidence Collection (72h window)</h4>
+            <p>Both parties submit evidence: customer provides photos and communications; vendor provides delivery proof. EpicHub ops reviews all evidence and any relevant platform records.</p>
+            <div class="pactors"><span class="actor">Customer</span><span class="actor">Vendor</span><span class="actor">EpicHub Ops</span></div>
+          </div>
+        </div>
+        <div class="pstep">
+          <div class="pnum">03</div>
+          <div class="pcard">
+            <h4>Resolution & Escrow Action</h4>
+            <p>EpicHub issues binding resolution within 5 business days: full refund to customer, partial refund, or full release to vendor. Resolution is actioned automatically in the payment system. Full audit trail retained.</p>
+            <div class="pactors"><span class="actor">EpicHub Ops</span><span class="actor">Escrow</span><span class="actor">Finance</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 07 REVENUE -->
+    <section id="revenue">
+      <div class="stag">07</div>
+      <h2>Revenue Model</h2>
+      <p class="sdesc">EpicHub's revenue model is designed for multi-stream diversification — no single stream should dominate. The model monetizes both sides of the marketplace and evolves with the platform's maturity.</p>
+
+      <div class="revgrid rv">
+        <div class="revc">
+          <div class="revc-ico">💸</div>
+          <span class="rev-type">Transactional</span>
+          <h4>Booking Commission</h4>
+          <p>Percentage fee on each confirmed booking, deducted automatically from vendor payout at escrow release. Rate varies by subscription tier. This is the primary revenue engine at launch.</p>
+        </div>
+        <div class="revc">
+          <div class="revc-ico">📦</div>
+          <span class="rev-type">Recurring</span>
+          <h4>Vendor Subscriptions</h4>
+          <p>Basic / Standard / Premium monthly subscription tiers for vendors. Higher tiers unlock better search ranking, analytics access, and featured placement. Recurring revenue baseline.</p>
+        </div>
+        <div class="revc">
+          <div class="revc-ico">⚡</div>
+          <span class="rev-type">Transactional</span>
+          <h4>Customer Service Fee</h4>
+          <p>Small, transparent service fee added to customer checkout total. Disclosed before payment confirmation. Covers platform transaction costs and customer protection infrastructure.</p>
+        </div>
+        <div class="revc">
+          <div class="revc-ico">👑</div>
+          <span class="rev-type">Recurring</span>
+          <h4>Premium Customer Features</h4>
+          <p>Paid customer tier unlocking priority booking access, early deal notifications, expanded shortlist limits, and enhanced loyalty multipliers. Secondary revenue stream.</p>
+        </div>
+        <div class="revc">
+          <div class="revc-ico">🏛️</div>
+          <span class="rev-type">Contracted</span>
+          <h4>Corporate Enterprise Plans</h4>
+          <p>Custom enterprise agreements for corporate accounts — negotiated pricing, volume discounts, dedicated account management, and consolidated billing. High-value, high-retention contracts.</p>
+        </div>
+        <div class="revc">
+          <div class="revc-ico">🎪</div>
+          <span class="rev-type">Phase 2+</span>
+          <h4>Direct Event Execution</h4>
+          <p>EpicHub produces fully managed events as a vendor, leveraging the platform's curated network. Higher margin per transaction. Transforms EpicHub from marketplace to full-service event company.</p>
+        </div>
+      </div>
+
+      <div class="note rv">
+        <span class="note-tag">Revenue Diversification Principle</span>
+        <p>No single revenue stream should exceed 60% of total platform revenue in Year 2. Commission will dominate Year 1 — the business goal is to grow subscriptions and enterprise plans to reduce transactional revenue dependency before scaling marketing spend.</p>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 08 KPIs -->
+    <section id="kpis">
+      <div class="stag">08</div>
+      <h2>KPIs & Success Metrics</h2>
+      <p class="sdesc">Business success metrics are defined here — not product metrics like page load time or uptime (those belong in the PRD NFR section). These KPIs measure whether the business is achieving its objectives.</p>
+
+      <h3>Platform Health — Both Sides</h3>
+      <div class="kpigrid rv">
+        <div class="kpi">
+          <div class="kpi-val">35%</div>
+          <div class="kpi-label">Repeat Booking Rate</div>
+          <div class="kpi-desc">Customers who make 2+ bookings within 12 months of first booking. Core LTV indicator.</div>
+          <div class="kpi-obj">→ BO-05</div>
+          <div class="kpi-prog"><div class="kpi-bar" data-w="35"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">4.5★</div>
+          <div class="kpi-label">Avg. Platform Rating</div>
+          <div class="kpi-desc">Minimum average customer satisfaction across all reviewed bookings. Trust metric.</div>
+          <div class="kpi-obj">→ BO-04</div>
+          <div class="kpi-prog"><div class="kpi-bar" data-w="90"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">&lt;3%</div>
+          <div class="kpi-label">Dispute Rate</div>
+          <div class="kpi-desc">Percentage of bookings that result in a raised dispute. Quality and trust health indicator.</div>
+          <div class="kpi-obj">→ BO-04</div>
+          <div class="kpi-prog"><div class="kpi-bar" data-w="97"></div></div>
+        </div>
+      </div>
+
+      <h3>Vendor-Side Metrics</h3>
+      <div class="kpigrid rv">
+        <div class="kpi">
+          <div class="kpi-val">40%</div>
+          <div class="kpi-label">Vendor Onboarding Rate</div>
+          <div class="kpi-desc">Percentage of vendor applications submitted that result in an approved, live profile within 60 days.</div>
+          <div class="kpi-obj">→ BO-03</div>
+          <div class="kpi-prog"><div class="kpi-bar" data-w="40"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">&lt;5%</div>
+          <div class="kpi-label">Vendor Churn (90-day)</div>
+          <div class="kpi-desc">Percentage of subscribed vendors cancelling in any 90-day rolling window. Subscription ROI indicator.</div>
+          <div class="kpi-obj">→ BO-08</div>
+          <div class="kpi-prog"><div class="kpi-bar" data-w="95"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">72h</div>
+          <div class="kpi-label">Vendor Payout SLA</div>
+          <div class="kpi-desc">Maximum time from customer delivery confirmation to cleared vendor bank payment. Commercial commitment.</div>
+          <div class="kpi-obj">→ BO-08</div>
+          <div class="kpi-prog"><div class="kpi-bar" data-w="100"></div></div>
+        </div>
+      </div>
+
+      <h3>Business Growth Metrics</h3>
+      <div class="kpigrid rv">
+        <div class="kpi">
+          <div class="kpi-val">20</div>
+          <div class="kpi-label">Enterprise Accounts (Y1)</div>
+          <div class="kpi-desc">Minimum corporate enterprise accounts signed within first 12 months. B2B revenue anchor.</div>
+          <div class="kpi-obj">→ BO-06</div>
+          <div class="kpi-prog"><div class="kpi-bar" data-w="20"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">80%</div>
+          <div class="kpi-label">Chatbot Resolution Rate</div>
+          <div class="kpi-desc">Customer support queries resolved by AI without human escalation. Ops efficiency metric.</div>
+          <div class="kpi-obj">→ BO-07</div>
+          <div class="kpi-prog"><div class="kpi-bar" data-w="80"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">Y1+</div>
+          <div class="kpi-label">Unit Economics Positive</div>
+          <div class="kpi-desc">Revenue per booking exceeds variable cost per booking. Required before scaling marketing investment.</div>
+          <div class="kpi-obj">→ BO-02</div>
+          <div class="kpi-prog"><div class="kpi-bar" data-w="100"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 09 RISKS -->
+    <section id="risks">
+      <div class="stag">09</div>
+      <h2>Risk Register</h2>
+      <p class="sdesc">Business risks — not technical risks (those belong in the PRD). These are threats to the business model, commercial viability, or market position of EpicHub.</p>
+
+      <div class="risks rv">
+        <div class="risk">
+          <div class="risk-id">R-01</div>
+          <div class="risk-body">
+            <h4>Vendor Supply Shortage at Launch</h4>
+            <p>Insufficient verified vendors means poor search results and customer abandonment before the platform gets traction. The marketplace has no value without supply. <em>Mitigation: Pre-launch vendor acquisition campaign; category-minimum thresholds as a launch gate.</em></p>
+          </div>
+          <div class="rbadge r-hi">High Prob</div>
+          <div class="rbadge r-hi">High Impact</div>
+        </div>
+        <div class="risk">
+          <div class="risk-id">R-02</div>
+          <div class="risk-body">
+            <h4>Low Consumer Trust in Online Payment for Services</h4>
+            <p>Egyptian customers are accustomed to paying cash on delivery for services. Convincing customers to pay online before receiving a service is a behavioral change the business must drive. <em>Mitigation: Prominent escrow guarantee messaging; money-back guarantee for legitimate disputes; social proof from early adopters.</em></p>
+          </div>
+          <div class="rbadge r-hi">High Prob</div>
+          <div class="rbadge r-hi">High Impact</div>
+        </div>
+        <div class="risk">
+          <div class="risk-id">R-03</div>
+          <div class="risk-body">
+            <h4>Vendor Resistance to Commission Model</h4>
+            <p>Vendors may reject the commission model and continue directing customers to off-platform transactions to avoid fees. This undermines the revenue model and escrow protection. <em>Mitigation: Strict terms prohibiting off-platform solicitation; demonstrate lead generation value in first 90 days; reduced commission introductory period.</em></p>
+          </div>
+          <div class="rbadge r-med">Med Prob</div>
+          <div class="rbadge r-hi">High Impact</div>
+        </div>
+        <div class="risk">
+          <div class="risk-id">R-04</div>
+          <div class="risk-body">
+            <h4>Regulatory or Payment Compliance Gaps</h4>
+            <p>Egyptian e-commerce payment regulations or escrow licensing requirements may not be fully met at launch, creating legal exposure or forcing a payment model change. <em>Mitigation: Legal review pre-launch; CBE guidance consultation; Paymob contractual alignment on escrow structure.</em></p>
+          </div>
+          <div class="rbadge r-lo">Low Prob</div>
+          <div class="rbadge r-hi">High Impact</div>
+        </div>
+        <div class="risk">
+          <div class="risk-id">R-05</div>
+          <div class="risk-body">
+            <h4>Competitor Replication</h4>
+            <p>A well-funded competitor (local or regional) copies the model and launches in Egypt during EpicHub's growth phase with a larger marketing budget. <em>Mitigation: Speed of execution; deep vendor relationships; brand investment from day one; proprietary vendor data as defensible moat.</em></p>
+          </div>
+          <div class="rbadge r-med">Med Prob</div>
+          <div class="rbadge r-med">Med Impact</div>
+        </div>
+        <div class="risk">
+          <div class="risk-id">R-06</div>
+          <div class="risk-body">
+            <h4>Escrow / Payment Partner Failure</h4>
+            <p>Primary payment gateway (Paymob) fails, is unavailable, or revokes escrow agreement, disrupting all bookings and payouts on the platform. <em>Mitigation: Parallel integration with Stripe as fallback; contractual SLA with payment partner; escrow held in segregated account.</em></p>
+          </div>
+          <div class="rbadge r-lo">Low Prob</div>
+          <div class="rbadge r-hi">High Impact</div>
+        </div>
+        <div class="risk">
+          <div class="risk-id">R-07</div>
+          <div class="risk-body">
+            <h4>Vendor Quality Degradation Post-Launch</h4>
+            <p>Rapid vendor onboarding to meet supply targets results in low-quality vendors joining the platform, damaging brand trust and triggering a spike in disputes and negative reviews. <em>Mitigation: Minimum quality bar at onboarding; proactive rating monitoring; BR-012 quality review process.</em></p>
+          </div>
+          <div class="rbadge r-med">Med Prob</div>
+          <div class="rbadge r-med">Med Impact</div>
+        </div>
+        <div class="risk">
+          <div class="risk-id">R-08</div>
+          <div class="risk-body">
+            <h4>Corporate Sales Cycle Too Long</h4>
+            <p>Enterprise accounts take 3–6 months to close, meaning BO-06 (20 accounts in Year 1) may not be achievable without a dedicated B2B sales function from launch. <em>Mitigation: Assign dedicated corporate sales resource from Month 1; target SMEs and mid-size companies before large enterprises.</em></p>
+          </div>
+          <div class="rbadge r-med">Med Prob</div>
+          <div class="rbadge r-med">Med Impact</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 10 ACCEPTANCE -->
+    <section id="acceptance">
+      <div class="stag">10</div>
+      <h2>Business Acceptance Criteria</h2>
+      <p class="sdesc">These criteria confirm that EpicHub Phase 1 meets its <strong>business commitments</strong> — not technical readiness. Technical acceptance is in the PRD. Business acceptance is signed off by the business owner, not QA.</p>
+
+      <div class="acblock rv">
+        <div class="ac-sec">📊 &nbsp;Business Model Validation</div>
+        <div class="acrow">
+          <span class="ac-id">BAC-01</span><div class="ac-dot pass"></div>
+          <div class="ac-txt">At least one confirmed booking has completed the full lifecycle — payment → vendor confirmation → delivery → escrow payout — before the public launch date.</div>
+        </div>
+        <div class="acrow">
+          <span class="ac-id">BAC-02</span><div class="ac-dot pass"></div>
+          <div class="ac-txt">Commission deduction and vendor payout have been tested end-to-end with a real payment gateway transaction, and the correct net amount is received by the vendor within 72 hours.</div>
+        </div>
+        <div class="acrow">
+          <span class="ac-id">BAC-03</span><div class="ac-dot pending"></div>
+          <div class="ac-txt">At least three vendor subscription tier payments have been collected and recorded correctly, with the correct tier benefits activated for each subscribing vendor.</div>
+        </div>
+        <div class="ac-sec">🛡️ &nbsp;Trust & Quality</div>
+        <div class="acrow">
+          <span class="ac-id">BAC-04</span><div class="ac-dot pass"></div>
+          <div class="ac-txt">Zero vendor profiles are visible in customer search results that have not been explicitly approved by EpicHub operations via the internal CMS.</div>
+        </div>
+        <div class="acrow">
+          <span class="ac-id">BAC-05</span><div class="ac-dot pass"></div>
+          <div class="ac-txt">A dispute can be raised, escrow is confirmed frozen within 5 minutes, and EpicHub operations can view the full dispute detail including payment records in the dispute management panel.</div>
+        </div>
+        <div class="acrow">
+          <span class="ac-id">BAC-06</span><div class="ac-dot pending"></div>
+          <div class="ac-txt">Post-event survey is automatically triggered 24 hours after confirmed event date, and at least one submitted review is successfully attached to the correct vendor profile after moderation.</div>
+        </div>
+        <div class="ac-sec">⚖️ &nbsp;Legal & Compliance</div>
+        <div class="acrow">
+          <span class="ac-id">BAC-07</span><div class="ac-dot pass"></div>
+          <div class="ac-txt">All booking invoices generated by the platform include the legally required fields for Egyptian tax compliance: EpicHub commercial registration number, VAT number, customer and vendor details, and itemized amounts.</div>
+        </div>
+        <div class="acrow">
+          <span class="ac-id">BAC-08</span><div class="ac-dot pending"></div>
+          <div class="ac-txt">Privacy policy, cookie consent, and user data processing agreements are live on the platform before launch, reviewed by a qualified Egyptian legal advisor.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem;">
+        <span style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--txt2);">
+          <span style="width:12px;height:12px;border-radius:50%;background:rgba(5,150,105,.2);border:1.5px solid var(--em);flex-shrink:0;"></span>
+          Pass — confirmed in testing
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--txt2);">
+          <span style="width:12px;height:12px;border-radius:50%;background:rgba(217,119,6,.15);border:1.5px solid var(--amber);flex-shrink:0;"></span>
+          Pending — in progress before launch
+        </span>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 11 CONSTRAINTS -->
+    <section id="constraints">
+      <div class="stag">11</div>
+      <h2>Business Constraints & Assumptions</h2>
+
+      <div class="twocol rv">
+        <div class="listbox">
+          <div class="listbox-h ro">⚠ &nbsp;Business Constraints</div>
+          <div class="listbox-b">
+            <ul>
+              <li><span class="li-i">🗺️</span>Phase 1 operates exclusively in the Egypt market. No cross-border transactions or non-Egyptian vendor onboarding in Phase 1.</li>
+              <li><span class="li-i">💳</span>BNPL / instalment payment integrations (Tamara, tabby) are a Phase 2 commercial initiative requiring separate partnership agreements.</li>
+              <li><span class="li-i">🎪</span>EpicHub acting as a direct event producer is a Phase 2+ strategic revenue stream. Not part of the Phase 1 business model.</li>
+              <li><span class="li-i">📱</span>Native mobile applications are not part of the Phase 1 go-to-market — web-first approach limits acquisition to web channels only.</li>
+              <li><span class="li-i">🏢</span>Corporate enterprise module (RFQ management, approval workflows) requires dedicated B2B sales resources not yet confirmed for Phase 1.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="listbox">
+          <div class="listbox-h gr">✓ &nbsp;Business Assumptions</div>
+          <div class="listbox-b">
+            <ul>
+              <li><span class="li-i">✅</span>Sufficient vendor appetite exists in Egypt to reach a viable supply-side critical mass within 6 months of launch outreach.</li>
+              <li><span class="li-i">✅</span>Egyptian customers are willing to pay online for event services when adequate trust signals (escrow, verified badges, reviews) are present.</li>
+              <li><span class="li-i">✅</span>Paymob escrow agreement will be contractually available and technically implemented before the launch date.</li>
+              <li><span class="li-i">✅</span>EpicHub operations team will be fully staffed to handle vendor review, dispute resolution, and support escalation from Day 1 of public launch.</li>
+              <li><span class="li-i">✅</span>No material changes to Egyptian e-commerce or payment regulation will occur in the 12 months following launch.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h3>Open Business Questions</h3>
+      <div class="twocol rv">
+        <div class="listbox">
+          <div class="listbox-h sk">❓ &nbsp;Commercial Decisions Pending</div>
+          <div class="listbox-b">
+            <ul>
+              <li><span class="li-i">❓</span>What is the exact commission rate per subscription tier? Decision required from commercial team before contract finalization.</li>
+              <li><span class="li-i">❓</span>What is the customer service fee amount? To be determined based on payment gateway costs and market benchmarking.</li>
+              <li><span class="li-i">❓</span>What is the minimum vendor count per category required before public launch? Operations and commercial team decision.</li>
+              <li><span class="li-i">❓</span>Will the introductory commission reduction for early vendors be offered — and for how long?</li>
+            </ul>
+          </div>
+        </div>
+        <div class="listbox">
+          <div class="listbox-h am">❓ &nbsp;Legal / Compliance Questions</div>
+          <div class="listbox-b">
+            <ul>
+              <li><span class="li-i">❓</span>Does EpicHub's escrow model require a specific payment processing license from the Central Bank of Egypt?</li>
+              <li><span class="li-i">❓</span>What corporate registration structure is required to issue VAT-compliant invoices for both individual and corporate customers in Egypt?</li>
+              <li><span class="li-i">❓</span>Are vendor payout disbursements subject to withholding tax obligations on EpicHub's side?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="fi">
+    <div class="fb">
+      <div class="nlm">EH</div>
+      <div>
+        <span>EpicHub BRD</span>
+        <div style="font-size:.65rem;color:var(--txt3);">Business Requirements Document — v1.0</div>
+      </div>
+    </div>
+    <div style="font-size:.72rem;color:var(--txt3);text-align:center;">
+      Why we build it. What the business needs to succeed.<br>
+      <em style="font-size:.65rem;">Features, tech stack, UX flows → see PRD</em>
+    </div>
+    <div class="fr">
+      <span class="ft">Egypt → MENA</span>
+      <span class="ft">Phase 1</span>
+      <span class="ft">v1.0</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const html=document.documentElement;
+document.getElementById('ttog').addEventListener('click',()=>{
+  const n=html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',n);
+  document.getElementById('tico').textContent=n==='dark'?'🌙':'☀️';
+});
+document.getElementById('hburg').addEventListener('click',()=>document.getElementById('mnav').classList.toggle('open'));
+function cm(){document.getElementById('mnav').classList.remove('open');}
+const pb=document.getElementById('prog');
+window.addEventListener('scroll',()=>{pb.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%';},{passive:true});
+const ro=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');ro.unobserve(x.target);}});},{threshold:.06,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+const secs=document.querySelectorAll('section[id]'),links=document.querySelectorAll('.toc a');
+secs.forEach(s=>{new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector(`.toc a[href="#${x.target.id}"]`);if(a)a.classList.add('active');}});},{threshold:.2,rootMargin:'-70px 0px -55% 0px'}).observe(s);});
+// KPI bars
+const kob=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.querySelectorAll('.kpi-bar[data-w]').forEach(b=>{setTimeout(()=>{b.style.width=b.dataset.w+'%';},200);});}});},{threshold:.3});
+document.querySelectorAll('.kpigrid').forEach(g=>kob.observe(g));
+</script>
+</body>
+</html>
