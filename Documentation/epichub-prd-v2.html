@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EpicHub — Product Requirements Document</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;0,700;0,900;1,300;1,700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --violet:#7C3AED; --violet-2:#6D28D9; --indigo:#4F46E5;
+  --pink:#EC4899; --sky:#0EA5E9; --amber:#F59E0B;
+  --green:#10B981; --rose:#F43F5E;
+  --tr:.3s cubic-bezier(.4,0,.2,1);
+  --r:10px; --rs:5px;
+}
+[data-theme="dark"]{
+  --bg:#080610; --bg2:#0F0B1E; --bg3:#16112A; --bg4:#1E1838; --bg5:#261F45;
+  --bdr:rgba(124,58,237,.1); --bdr2:rgba(124,58,237,.2); --bdr3:rgba(124,58,237,.35);
+  --txt:#EDE9FA; --txt2:#9B8EC4; --txt3:#4D4470;
+  --ac:var(--violet); --ac-soft:rgba(124,58,237,.12);
+  --nav:rgba(8,6,16,.9);
+}
+[data-theme="light"]{
+  --bg:#F5F3FF; --bg2:#EDE9FA; --bg3:#DDD6FE; --bg4:#C4B5FD; --bg5:#A78BFA;
+  --bdr:rgba(79,46,220,.08); --bdr2:rgba(79,46,220,.15); --bdr3:rgba(79,46,220,.28);
+  --txt:#1E1033; --txt2:#4C3D7A; --txt3:#8B7DB5;
+  --ac:#5B21B6; --ac-soft:rgba(91,33,182,.09);
+  --nav:rgba(245,243,255,.92);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);line-height:1.7;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+::selection{background:var(--violet);color:#fff;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--bdr3);border-radius:99px;}
+
+/* noise overlay */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px;}
+
+#prog{position:fixed;top:0;left:0;height:2px;z-index:9999;width:0%;
+  background:linear-gradient(90deg,var(--violet),var(--pink));
+  box-shadow:0 0 12px rgba(124,58,237,.6);transition:width .08s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--nav);
+  backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr2);transition:background var(--tr);}
+.ni{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:58px;gap:1.5rem;}
+.nlogo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--txt);
+  font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;flex-shrink:0;}
+.nlm{width:28px;height:28px;border-radius:6px;background:var(--violet);display:grid;place-items:center;
+  font-size:.58rem;font-weight:600;color:#fff;font-family:'JetBrains Mono',monospace;}
+.ndoc{font-size:.58rem;padding:2px 8px;border-radius:3px;
+  background:var(--ac-soft);border:1px solid var(--bdr2);color:var(--ac);
+  font-family:'JetBrains Mono',monospace;letter-spacing:.08em;font-weight:500;}
+.nlinks{display:flex;align-items:center;gap:1.25rem;list-style:none;}
+.nlinks a{font-size:.7rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--txt3);text-decoration:none;transition:color var(--tr);}
+.nlinks a:hover{color:var(--ac);}
+.nright{display:flex;align-items:center;gap:10px;}
+.ttog{width:40px;height:20px;border-radius:99px;background:var(--bg4);border:1px solid var(--bdr2);
+  cursor:pointer;position:relative;transition:background var(--tr);}
+.ttog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+  background:var(--violet);transition:transform var(--tr);}
+[data-theme="light"] .ttog::after{transform:translateX(20px);}
+.twrap{display:flex;align-items:center;gap:7px;font-size:.68rem;color:var(--txt3);}
+.hburg{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:4px;}
+.hburg span{width:20px;height:1.5px;background:var(--txt);border-radius:2px;transition:var(--tr);}
+.mnav{display:none;position:fixed;inset:58px 0 0 0;background:var(--bg);z-index:99;
+  padding:1.5rem;flex-direction:column;gap:1rem;border-top:1px solid var(--bdr2);overflow-y:auto;}
+.mnav.open{display:flex;}
+.mnav a{font-size:.95rem;color:var(--txt);text-decoration:none;padding:.5rem 0;
+  border-bottom:1px solid var(--bdr);display:block;}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:110px 2rem 60px;position:relative;overflow:hidden;}
+.hbg{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 50% at 80% 30%,rgba(124,58,237,.12) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 40% at 15% 70%,rgba(236,72,153,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 60% at 50% 0%,rgba(79,70,229,.08) 0%,transparent 50%);}
+.hero-inner{max-width:1440px;margin:0 auto;width:100%;position:relative;z-index:1;}
+.hrow{display:grid;grid-template-columns:1.1fr .9fr;gap:5rem;align-items:center;}
+.heye{display:inline-flex;align-items:center;gap:8px;
+  background:var(--ac-soft);border:1px solid var(--bdr2);border-radius:3px;
+  padding:4px 14px;font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:1.5rem;
+  animation:up .5s ease both;}
+.heye .pulse{width:5px;height:5px;border-radius:50%;background:var(--ac);animation:blink 2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+h1{font-family:'Fraunces',serif;font-size:clamp(2.4rem,5.5vw,4.2rem);font-weight:900;
+  line-height:1.07;letter-spacing:-.035em;margin-bottom:1rem;animation:up .5s ease .1s both;}
+h1 em{color:var(--violet);font-style:italic;}
+.hsub{font-size:.95rem;color:var(--txt2);line-height:1.78;max-width:480px;
+  margin-bottom:2rem;animation:up .5s ease .2s both;}
+.htags{display:flex;flex-wrap:wrap;gap:7px;animation:up .5s ease .3s both;}
+.htag{background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);
+  padding:4px 12px;font-size:.72rem;color:var(--txt2);font-weight:500;}
+.htag.a{background:var(--ac-soft);border-color:var(--bdr2);color:var(--ac);}
+/* right side cards */
+.hcards{display:flex;flex-direction:column;gap:1rem;animation:up .5s ease .15s both;}
+.hcard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);
+  padding:1.1rem 1.4rem;display:flex;align-items:center;gap:1rem;
+  transition:border-color var(--tr),transform .2s;}
+.hcard:hover{border-color:var(--bdr3);transform:translateX(4px);}
+.hcard-ico{font-size:1.5rem;flex-shrink:0;}
+.hcard-txt strong{display:block;font-size:.85rem;font-weight:600;margin-bottom:2px;}
+.hcard-txt span{font-size:.75rem;color:var(--txt2);}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* LAYOUT */
+.layout{max-width:1440px;margin:0 auto;padding:0 2rem;display:flex;gap:2.5rem;}
+.toc{width:215px;flex-shrink:0;position:sticky;top:78px;height:fit-content;
+  background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:1.1rem;}
+.toc h4{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--txt3);font-weight:500;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+.toc ul{list-style:none;display:flex;flex-direction:column;gap:1px;}
+.toc ul li a{display:block;font-size:.72rem;color:var(--txt2);text-decoration:none;
+  padding:5px 8px;border-radius:var(--rs);border-left:2px solid transparent;
+  transition:background var(--tr),color var(--tr),border-color var(--tr);}
+.toc ul li a:hover,.toc ul li a.active{background:var(--ac-soft);color:var(--ac);border-left-color:var(--ac);}
+.toc ul li.sub a{padding-left:1.25rem;font-size:.67rem;}
+.main{flex:1;min-width:0;padding:3.5rem 0 8rem;}
+
+/* SECTION */
+section{margin-bottom:4.5rem;scroll-margin-top:88px;}
+.stag{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ac);font-weight:500;margin-bottom:.5rem;
+  display:flex;align-items:center;gap:8px;}
+.stag::after{content:'';width:32px;height:1px;background:var(--ac);opacity:.4;}
+h2{font-family:'Fraunces',serif;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;
+  line-height:1.15;letter-spacing:-.025em;margin-bottom:.75rem;}
+h3{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:500;margin:2rem 0 .85rem;
+  letter-spacing:-.015em;color:var(--txt);}
+p{color:var(--txt2);margin-bottom:1rem;font-size:.9rem;}
+strong{color:var(--txt);font-weight:600;}
+.sdesc{font-size:.88rem;color:var(--txt2);line-height:1.75;max-width:700px;margin-bottom:1.5rem;}
+.div{height:1px;background:linear-gradient(90deg,transparent,var(--bdr3),transparent);margin:3.5rem 0;}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin:1.75rem 0;}
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:1.5rem;
+  transition:border-color var(--tr),transform .2s;}
+.card:hover{border-color:var(--bdr2);transform:translateY(-2px);}
+.card-ico{font-size:1.4rem;margin-bottom:.85rem;}
+.card h4{font-size:.9rem;font-weight:600;margin-bottom:.4rem;}
+.card p{font-size:.82rem;margin:0;color:var(--txt2);}
+
+/* PERSONA */
+.personas{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin:1.75rem 0;}
+.persona{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;
+  transition:border-color var(--tr),transform .2s;}
+.persona:hover{border-color:var(--bdr2);transform:translateY(-2px);}
+.persona-top{padding:1.1rem 1.4rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:12px;}
+.persona-av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:1.2rem;flex-shrink:0;}
+.persona-info h4{font-size:.88rem;font-weight:600;margin:0 0 3px;}
+.persona-info .role{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.persona-body{padding:1.1rem 1.4rem;}
+.persona-body ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.persona-body ul li{font-size:.8rem;color:var(--txt2);display:flex;gap:8px;align-items:flex-start;line-height:1.55;}
+.persona-body ul li::before{content:'›';color:var(--ac);flex-shrink:0;font-size:.9rem;}
+.ptag{display:inline-block;font-size:.6rem;padding:2px 7px;border-radius:99px;
+  font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-top:4px;}
+
+/* USER FLOW */
+.flow{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;
+  background:var(--bdr);border-radius:var(--r);overflow:hidden;margin:1.75rem 0;}
+.fstep{background:var(--bg2);padding:1.25rem;text-align:center;position:relative;
+  transition:background var(--tr);}
+.fstep:hover{background:var(--bg3);}
+.fstep-num{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:900;color:var(--ac);
+  line-height:1;margin-bottom:.5rem;opacity:.5;}
+.fstep h4{font-size:.8rem;font-weight:600;margin-bottom:.35rem;}
+.fstep p{font-size:.72rem;color:var(--txt2);margin:0;}
+
+/* FEATURE TABLE */
+.ftable-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bdr2);margin:1.75rem 0;}
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+thead tr{background:var(--bg3);}
+thead th{padding:.75rem 1.1rem;text-align:left;font-size:.62rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--txt3);font-weight:500;white-space:nowrap;
+  font-family:'JetBrains Mono',monospace;}
+tbody tr{border-top:1px solid var(--bdr);transition:background .12s;}
+tbody tr:hover{background:var(--ac-soft);}
+tbody td{padding:.8rem 1.1rem;color:var(--txt2);vertical-align:top;line-height:1.55;}
+tbody td:first-child{color:var(--txt);font-weight:600;}
+.badge{font-size:.6rem;padding:2px 8px;border-radius:99px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+.b-must{background:rgba(244,63,94,.12);color:#F87171;}
+.b-should{background:rgba(245,158,11,.12);color:#FCD34D;}
+.b-could{background:rgba(14,165,233,.12);color:#7DD3FC;}
+.b-wont{background:rgba(107,114,128,.12);color:#9CA3AF;}
+
+/* TECH STACK */
+.techgrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.75rem 0;}
+.techcard{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;
+  transition:background var(--tr);}
+.techcard-h{padding:.9rem 1.25rem;background:var(--bg3);border-bottom:1px solid var(--bdr);
+  display:flex;align-items:baseline;gap:10px;}
+.techcard-h .layer{font-size:.6rem;font-family:'JetBrains Mono',monospace;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);font-weight:500;}
+.techcard-h .lname{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;color:var(--txt);}
+.techcard-b{padding:1rem 1.25rem;display:flex;flex-direction:column;gap:6px;}
+.techitem{display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--txt2);
+  padding:6px 10px;background:var(--bg3);border-radius:var(--rs);border:1px solid var(--bdr);}
+.techitem .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+
+/* ROADMAP */
+.roadmap{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--bdr);border-radius:var(--r);overflow:hidden;margin:1.75rem 0;}
+.rphase{background:var(--bg2);padding:1.5rem;transition:background var(--tr);}
+.rphase:hover{background:var(--bg3);}
+.rphase-tag{font-size:.6rem;padding:3px 9px;border-radius:99px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;display:inline-block;margin-bottom:.85rem;}
+.rphase h4{font-size:.88rem;font-weight:600;margin-bottom:.6rem;}
+.rphase ul{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.rphase ul li{font-size:.76rem;color:var(--txt2);display:flex;gap:6px;align-items:flex-start;line-height:1.5;}
+.rphase ul li::before{content:'·';color:var(--ac);flex-shrink:0;}
+
+/* NFR */
+.nfrcards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.75rem 0;}
+.nfrcard{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:1.25rem;
+  transition:border-color var(--tr),transform .2s;}
+.nfrcard:hover{border-color:var(--bdr2);transform:translateY(-2px);}
+.nfrcard .nfr-top{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;}
+.nfrcard .nfr-ico{font-size:1.2rem;}
+.nfrcard h4{font-size:.85rem;font-weight:600;}
+.nfrcard p{font-size:.78rem;color:var(--txt2);margin:0;}
+.nfr-val{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ac);
+  background:var(--ac-soft);border:1px solid var(--bdr2);border-radius:var(--rs);
+  padding:2px 8px;display:inline-block;margin-top:.5rem;}
+
+/* SCOPE */
+.scopegrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.75rem 0;}
+.scopebox{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;}
+.scope-h{padding:.9rem 1.25rem;border-bottom:1px solid var(--bdr);
+  font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;}
+.scope-h.in{color:var(--green);background:rgba(16,185,129,.05);}
+.scope-h.out{color:#F87171;background:rgba(239,68,68,.05);}
+.scope-b{padding:1.1rem 1.25rem;}
+.scope-b ul{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.scope-b ul li{font-size:.8rem;color:var(--txt2);display:flex;gap:8px;align-items:flex-start;}
+.scope-h.in + .scope-b ul li::before{content:'✓';color:var(--green);flex-shrink:0;margin-top:1px;}
+.scope-h.out + .scope-b ul li::before{content:'✗';color:#F87171;flex-shrink:0;margin-top:1px;}
+
+/* NOTE BOX */
+.note{background:var(--ac-soft);border:1px solid var(--bdr2);border-radius:var(--r);
+  padding:1.25rem 1.5rem;margin:1.5rem 0;position:relative;overflow:hidden;}
+.note::before{content:'📌';position:absolute;right:1.5rem;top:1rem;font-size:2rem;opacity:.12;}
+.note-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ac);font-weight:700;margin-bottom:.4rem;display:block;}
+.note p{color:var(--txt);font-size:.87rem;margin:0;}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease;}
+.rv.in{opacity:1;transform:none;}
+
+/* FOOTER */
+footer{border-top:1px solid var(--bdr2);padding:1.75rem 2rem;background:var(--bg2);
+  transition:background var(--tr);}
+.fi{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.fb{display:flex;align-items:center;gap:9px;}
+.fb .nlm{width:24px;height:24px;border-radius:4px;}
+.fb span{font-family:'Fraunces',serif;font-weight:700;font-size:.9rem;}
+.fr{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.ft{background:var(--bg3);border:1px solid var(--bdr2);border-radius:3px;
+  padding:3px 9px;font-size:.62rem;color:var(--txt3);font-family:'JetBrains Mono',monospace;}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.toc{display:none;}.layout{padding:0 1.5rem;}.roadmap{grid-template-columns:1fr 1fr;}.techgrid{grid-template-columns:1fr;}.hrow{grid-template-columns:1fr;}.hcards{display:none;}}
+@media(max-width:768px){.nlinks{display:none;}.hburg{display:flex;}.hero{padding:90px 1.25rem 40px;}.layout{padding:0 1rem;}.main{padding:2rem 0 4rem;}.scopegrid{grid-template-columns:1fr;}.nfrcards{grid-template-columns:1fr 1fr;}.roadmap{grid-template-columns:1fr;}}
+@media(max-width:480px){h1{font-size:2.1rem;}.nfrcards{grid-template-columns:1fr;}.ni{padding:0 1rem;}}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+
+<nav>
+  <div class="ni">
+    <a href="#" class="nlogo">
+      <div class="nlm">EH</div>
+      EpicHub
+      <span class="ndoc">PRD</span>
+    </a>
+    <ul class="nlinks">
+      <li><a href="#vision">Vision</a></li>
+      <li><a href="#scope">Scope</a></li>
+      <li><a href="#personas">Personas</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#flows">User Flows</a></li>
+      <li><a href="#tech">Tech Stack</a></li>
+      <li><a href="#nfr">NFR</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+    </ul>
+    <div class="nright">
+      <div class="twrap"><span id="tico">🌙</span><button class="ttog" id="ttog"></button></div>
+      <div class="hburg" id="hburg"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</nav>
+
+<nav class="mnav" id="mnav">
+  <a href="#vision" onclick="cm()">01 — Product Vision</a>
+  <a href="#scope" onclick="cm()">02 — Product Scope</a>
+  <a href="#personas" onclick="cm()">03 — User Personas</a>
+  <a href="#features" onclick="cm()">04 — Feature Specifications</a>
+  <a href="#flows" onclick="cm()">05 — User Flows</a>
+  <a href="#tech" onclick="cm()">06 — Tech Stack</a>
+  <a href="#nfr" onclick="cm()">07 — Non-Functional Requirements</a>
+  <a href="#roadmap" onclick="cm()">08 — Product Roadmap</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hbg"></div>
+  <div class="hero-inner">
+    <div class="hrow">
+      <div class="hleft">
+        <div class="heye"><span class="pulse"></span>Product Requirements Document</div>
+        <h1>What <em>EpicHub</em><br>is — and how<br>it works.</h1>
+        <p class="hsub">This document defines the product — its features, the people who use it, how they move through it, what it's built on, and how it evolves. It does not cover business objectives, revenue, or rules — those live in the BRD.</p>
+        <div class="htags">
+          <span class="htag a">Angular 17 Frontend</span>
+          <span class="htag a">.NET 8 Backend</span>
+          <span class="htag">Event Marketplace</span>
+          <span class="htag">Egypt → MENA</span>
+          <span class="htag">Phase 1</span>
+        </div>
+      </div>
+      <div class="hright">
+        <div class="hcards">
+          <div class="hcard"><div class="hcard-ico">🗺️</div><div class="hcard-txt"><strong>Product Vision</strong><span>Centralized end-to-end event vendor platform</span></div></div>
+          <div class="hcard"><div class="hcard-ico">👤</div><div class="hcard-txt"><strong>4 User Personas</strong><span>Customer · Vendor · Planner · Ops</span></div></div>
+          <div class="hcard"><div class="hcard-ico">⚙️</div><div class="hcard-txt"><strong>14 Core Features</strong><span>Across discovery, booking & management</span></div></div>
+          <div class="hcard"><div class="hcard-ico">🛣️</div><div class="hcard-txt"><strong>4-Phase Roadmap</strong><span>From Egypt launch to full MENA</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- TOC -->
+  <aside class="toc">
+    <h4>Contents</h4>
+    <ul>
+      <li><a href="#vision">01 Product Vision</a></li>
+      <li><a href="#scope">02 Product Scope</a></li>
+      <li class="sub"><a href="#scope">In Scope</a></li>
+      <li class="sub"><a href="#scope">Out of Scope</a></li>
+      <li><a href="#personas">03 User Personas</a></li>
+      <li><a href="#features">04 Feature Specs</a></li>
+      <li class="sub"><a href="#features">Discovery</a></li>
+      <li class="sub"><a href="#features">Booking</a></li>
+      <li class="sub"><a href="#features">Vendor Portal</a></li>
+      <li class="sub"><a href="#features">CRM & Support</a></li>
+      <li><a href="#flows">05 User Flows</a></li>
+      <li><a href="#tech">06 Tech Stack</a></li>
+      <li><a href="#nfr">07 NFR</a></li>
+      <li><a href="#roadmap">08 Roadmap</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+
+    <!-- 01 VISION -->
+    <section id="vision">
+      <div class="stag">01</div>
+      <h2>Product Vision</h2>
+      <p class="sdesc">EpicHub is a web-based two-sided marketplace that allows customers to <strong>discover, compare, and book</strong> event service vendors — and allows vendors to <strong>list, manage, and fulfil</strong> bookings — all within a single platform. No phone calls. No bank transfers. No chasing confirmations.</p>
+
+      <div class="note rv">
+        <span class="note-tag">Product Purpose</span>
+        <p>EpicHub replaces the fragmented, WhatsApp-driven vendor search process in Egypt with a structured digital marketplace. The core product promise: a customer can go from "I need a photographer for my wedding" to "booking confirmed, payment secured" without ever leaving the platform.</p>
+      </div>
+
+      <h3>The Product Does Three Things</h3>
+      <div class="cards rv">
+        <div class="card">
+          <div class="card-ico">🔍</div>
+          <h4>Vendor Discovery</h4>
+          <p>Customers search, filter, and compare verified vendor profiles across all event service categories using real-time data — price, availability, ratings, location.</p>
+        </div>
+        <div class="card">
+          <div class="card-ico">📅</div>
+          <h4>Event Planning & Booking</h4>
+          <p>Customers build an event plan, shortlist services, and complete a secure end-to-end booking with payment in a single uninterrupted flow on the platform.</p>
+        </div>
+        <div class="card">
+          <div class="card-ico">⚙️</div>
+          <h4>Vendor & Order Management</h4>
+          <p>Vendors manage their availability, profiles, and incoming bookings. The platform manages payments, escrow, notifications, and post-event reviews.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 02 SCOPE -->
+    <section id="scope">
+      <div class="stag">02</div>
+      <h2>Product Scope</h2>
+      <p class="sdesc">Phase 1 defines the initial product boundary. Every feature outside this scope is explicitly deferred — not rejected.</p>
+
+      <div class="scopegrid rv">
+        <div class="scopebox">
+          <div class="scope-h in">✓ &nbsp;In Scope — Phase 1</div>
+          <div class="scope-b">
+            <ul>
+              <li>Customer-facing web platform for vendor search, filtering, and booking</li>
+              <li>Event planning layer — create an Event, add EventItems, proceed to Order</li>
+              <li>Real-time vendor availability calendar visible to customers</li>
+              <li>Secure end-to-end booking flow with escrow payment</li>
+              <li>Vendor onboarding portal — submit profile, services, pricing, calendar</li>
+              <li>Vendor dashboard — manage bookings, availability, performance</li>
+              <li>EpicHub internal CMS — editorial control over all vendor content</li>
+              <li>AI chatbot with human escalation routing</li>
+              <li>Loyalty points system for repeat customers</li>
+              <li>Post-event automated review and feedback survey</li>
+              <li>Responsive web — desktop, tablet, mobile (PWA-ready)</li>
+              <li>English language interface (Phase 1)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="scopebox">
+          <div class="scope-h out">✗ &nbsp;Out of Scope — Phase 1</div>
+          <div class="scope-b">
+            <ul>
+              <li>Native iOS and Android mobile applications</li>
+              <li>Arabic RTL interface (Phase 2 — internationalization)</li>
+              <li>BNPL / installment payment integrations (Tamara, tabby)</li>
+              <li>Direct event execution by EpicHub as event producer</li>
+              <li>Student and campus organizer segment</li>
+              <li>International markets beyond Egypt</li>
+              <li>Professional planner agency portal with passive income model</li>
+              <li>Corporate enterprise module with RFQ management</li>
+              <li>Real-time vendor-customer in-app messaging</li>
+              <li>Vendor contract generation and e-signature</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 03 PERSONAS -->
+    <section id="personas">
+      <div class="stag">03</div>
+      <h2>User Personas</h2>
+      <p class="sdesc">Four distinct user types interact with the EpicHub platform. Each has a different interface, set of permissions, and product journey. Product decisions must be evaluated against all four.</p>
+
+      <div class="personas rv">
+
+        <div class="persona">
+          <div class="persona-top">
+            <div class="persona-av" style="background:rgba(124,58,237,.12);">🎉</div>
+            <div class="persona-info">
+              <h4>The Customer</h4>
+              <div class="role">Primary · Demand Side</div>
+            </div>
+          </div>
+          <div class="persona-body">
+            <span class="ptag" style="background:rgba(124,58,237,.12);color:#A78BFA;">End User</span>
+            <ul>
+              <li>Plans a personal or small corporate event (wedding, birthday, conference)</li>
+              <li>Searches, shortlists, and books vendors through the customer portal</li>
+              <li>Manages their events, booking history, and loyalty points via dashboard</li>
+              <li>Submits post-event reviews for completed bookings</li>
+              <li>Raises disputes and uses chatbot support when needed</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="persona">
+          <div class="persona-top">
+            <div class="persona-av" style="background:rgba(14,165,233,.12);">📸</div>
+            <div class="persona-info">
+              <h4>The Vendor</h4>
+              <div class="role">Primary · Supply Side</div>
+            </div>
+          </div>
+          <div class="persona-body">
+            <span class="ptag" style="background:rgba(14,165,233,.12);color:#38BDF8;">Service Provider</span>
+            <ul>
+              <li>Submits business profile, services, pricing, and portfolio for EpicHub review</li>
+              <li>Manages their availability calendar to reflect real bookings</li>
+              <li>Receives booking notifications and accepts or declines via vendor dashboard</li>
+              <li>Views performance analytics and payout history</li>
+              <li>Chooses a subscription tier (Basic / Standard / Premium)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="persona">
+          <div class="persona-top">
+            <div class="persona-av" style="background:rgba(16,185,129,.12);">🛡️</div>
+            <div class="persona-info">
+              <h4>EpicHub Ops</h4>
+              <div class="role">Internal · Platform Admin</div>
+            </div>
+          </div>
+          <div class="persona-body">
+            <span class="ptag" style="background:rgba(16,185,129,.12);color:#34D399;">Admin</span>
+            <ul>
+              <li>Reviews and publishes vendor profiles via internal CMS</li>
+              <li>Manages promotional campaigns, loyalty offers, and featured placements</li>
+              <li>Handles dispute resolution with access to full evidence and audit trail</li>
+              <li>Monitors platform-wide analytics dashboard (GMV, bookings, ratings)</li>
+              <li>Manages chatbot escalation queue and human agent assignments</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="persona">
+          <div class="persona-top">
+            <div class="persona-av" style="background:rgba(245,158,11,.12);">📋</div>
+            <div class="persona-info">
+              <h4>Professional Planner</h4>
+              <div class="role">Secondary · Phase 2</div>
+            </div>
+          </div>
+          <div class="persona-body">
+            <span class="ptag" style="background:rgba(245,158,11,.12);color:#FCD34D;">Phase 2</span>
+            <ul>
+              <li>Uses EpicHub to source vendors for client events professionally</li>
+              <li>Requires bulk access, single-invoice management, and agency discount</li>
+              <li>Portal and passive income model deferred to Phase 2</li>
+              <li>In Phase 1: uses standard customer portal only</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 04 FEATURES -->
+    <section id="features">
+      <div class="stag">04</div>
+      <h2>Feature Specifications</h2>
+      <p class="sdesc">All platform features organized by functional area. Priority uses MoSCoW. Each feature is a product capability — not a business requirement.</p>
+
+      <h3>Discovery & Search</h3>
+      <div class="ftable-wrap rv">
+        <table>
+          <thead><tr><th>Feature</th><th>Description</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Vendor Search</td>
+              <td>Full-text and faceted search by category, event type, location, and date. Results ranked by matchmaking score (rating × availability × relevance).</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Budget Filter</td>
+              <td>Slider-based budget filter that limits search results to vendors whose packages fall within the customer's specified range. Applied in real time without page reload.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Vendor Profile Page</td>
+              <td>Dedicated page per vendor showing: verified badge, category, service list with pricing, portfolio gallery, average rating, review history, and real-time availability calendar preview.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Shortlist & Compare</td>
+              <td>Save up to 5 vendors per category to a persistent shortlist. Side-by-side comparison view across price, rating, availability, and inclusions.</td>
+              <td><span class="badge b-should">SHOULD</span></td>
+            </tr>
+            <tr>
+              <td>Matchmaking Algorithm</td>
+              <td>Backend scoring engine surfaces most relevant vendors based on event type, date, location, and budget inputs. Weights: availability (40%), rating (35%), category match (25%).</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Event Planning & Booking</h3>
+      <div class="ftable-wrap rv">
+        <table>
+          <thead><tr><th>Feature</th><th>Description</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Event Planner</td>
+              <td>Customer creates a named Event (title, type, date, location, budget). Multiple active events supported per user. Events persist independently from orders.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>EventItem Management</td>
+              <td>Add Products or Packages to an Event plan. Price and vendor name are snapshotted at add-time. Items show Draft → Ordered status transitions.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Real-Time Availability</td>
+              <td>Full availability calendar per vendor. Blocked dates propagate to search results within 60 seconds of vendor update. Prevents double-booking at the database layer.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Checkout & Payment</td>
+              <td>Single payment flow covering all selected EventItems. Total cost (service + platform fee) shown before confirmation. Funds held in escrow per vendor until delivery.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Booking Confirmation</td>
+              <td>Instant confirmation notification to customer and vendor (email + in-platform) within 60 seconds of payment success. Generates Order and OrderItems records.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Delivery Confirmation & Payout</td>
+              <td>Customer confirms service delivery post-event. Triggers escrow release to vendor within 72 hours. If no action within 48h of event date, auto-releases escrow.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Vendor Portal</h3>
+      <div class="ftable-wrap rv">
+        <table>
+          <thead><tr><th>Feature</th><th>Description</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Vendor Onboarding Portal</td>
+              <td>Multi-step submission form: business details, service categories, pricing, portfolio upload, license document. Submits to EpicHub ops review queue. Not live until approved.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Availability Calendar</td>
+              <td>Interactive calendar editor for vendors to mark dates available, booked, or blocked. Changes sync to customer-facing search within 60 seconds.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Booking Management</td>
+              <td>Incoming booking queue with accept / decline / modify actions. Decline requires a reason. Status tracking from pending → confirmed → delivered.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Performance Dashboard</td>
+              <td>Analytics for Standard/Premium tier vendors: booking conversion, profile views, revenue trends, average rating over selectable time periods.</td>
+              <td><span class="badge b-should">SHOULD</span></td>
+            </tr>
+            <tr>
+              <td>Subscription Management</td>
+              <td>Vendor selects and upgrades between Basic / Standard / Premium tiers. Tier benefits clearly displayed. Billing managed via payment gateway subscription.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>CRM, Support & Admin</h3>
+      <div class="ftable-wrap rv">
+        <table>
+          <thead><tr><th>Feature</th><th>Description</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Internal CMS</td>
+              <td>EpicHub ops portal for reviewing, editing, approving, rejecting, and publishing vendor profiles. Full editorial control. No vendor content goes live without approval.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>AI Chatbot</td>
+              <td>Embedded support bot trained on EpicHub FAQ, booking flows, and policy. Handles ≥80% of queries without human escalation. Escalates via confidence threshold to human agent queue.</td>
+              <td><span class="badge b-must">MUST</span></td>
+            </tr>
+            <tr>
+              <td>Loyalty Points System</td>
+              <td>Points earned per confirmed delivery (not booking). Displayed in customer dashboard. Redeemable against future booking fees. Expire after 12 months.</td>
+              <td><span class="badge b-should">SHOULD</span></td>
+            </tr>
+            <tr>
+              <td>Post-Event Review System</td>
+              <td>Auto-triggered survey 24h post-event. Review only enabled after confirmed delivery. One review per booking. Feeds into vendor aggregate rating and platform analytics.</td>
+              <td><span class="badge b-should">SHOULD</span></td>
+            </tr>
+            <tr>
+              <td>Promotions Engine</td>
+              <td>Ops-managed promo panel: create discount codes, featured placements, seasonal campaigns. No developer intervention required. Schedule start/end dates.</td>
+              <td><span class="badge b-should">SHOULD</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 05 USER FLOWS -->
+    <section id="flows">
+      <div class="stag">05</div>
+      <h2>User Flows</h2>
+      <p class="sdesc">The two critical customer journeys that define the product experience. Every UI decision should be evaluated against these flows.</p>
+
+      <h3>Primary Flow — Customer Books a Vendor</h3>
+      <div class="flow rv">
+        <div class="fstep">
+          <div class="fstep-num">01</div>
+          <h4>Create Event</h4>
+          <p>Customer creates a named Event with type, date, location, and optional budget</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">02</div>
+          <h4>Search & Filter</h4>
+          <p>Searches vendors by category with matchmaking score ranking results</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">03</div>
+          <h4>Review Profile</h4>
+          <p>Views vendor profile: portfolio, pricing, ratings, availability calendar</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">04</div>
+          <h4>Add to Event</h4>
+          <p>Adds Product or Package to EventItem. Price and name are snapshotted</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">05</div>
+          <h4>Checkout</h4>
+          <p>Reviews total cost, confirms, pays. Funds go to escrow per vendor</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">06</div>
+          <h4>Vendor Confirms</h4>
+          <p>Vendor accepts booking within 24h. Calendar blocked. Customer notified</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">07</div>
+          <h4>Event Day</h4>
+          <p>Service delivered. Customer confirms delivery. Escrow released to vendor in 72h</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">08</div>
+          <h4>Review</h4>
+          <p>Auto survey 24h post-event. Customer rates and reviews. Points credited</p>
+        </div>
+      </div>
+
+      <h3>Secondary Flow — Vendor Gets Onboarded</h3>
+      <div class="flow rv">
+        <div class="fstep">
+          <div class="fstep-num">01</div>
+          <h4>Apply</h4>
+          <p>Vendor submits business details, portfolio, pricing, and license via portal</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">02</div>
+          <h4>Ops Review</h4>
+          <p>EpicHub ops reviews quality, authenticity, and completeness via CMS</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">03</div>
+          <h4>Approved</h4>
+          <p>Profile published with Verified badge. Vendor appears in search results</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">04</div>
+          <h4>Choose Tier</h4>
+          <p>Vendor selects subscription tier and completes payment setup</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">05</div>
+          <h4>Manage Calendar</h4>
+          <p>Vendor marks availability. Real-time sync to customer-facing results</p>
+        </div>
+        <div class="fstep">
+          <div class="fstep-num">06</div>
+          <h4>Receive Bookings</h4>
+          <p>Booking alerts arrive. Vendor accepts, declines, or requests modification</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 06 TECH STACK -->
+    <section id="tech">
+      <div class="stag">06</div>
+      <h2>Technology Stack</h2>
+      <p class="sdesc">EpicHub is built on ASP.NET Core (.NET 8) backend and Angular 17 frontend. All technology decisions are mandated — this document records the full stack for implementation reference.</p>
+
+      <div class="techgrid rv">
+        <div class="techcard">
+          <div class="techcard-h"><span class="layer">Backend</span><span class="lname">.NET 8</span></div>
+          <div class="techcard-b">
+            <div class="techitem"><span class="dot" style="background:#7C3AED"></span>ASP.NET Core Web API — RESTful endpoints</div>
+            <div class="techitem"><span class="dot" style="background:#2563EB"></span>Entity Framework Core — ORM, code-first migrations</div>
+            <div class="techitem"><span class="dot" style="background:#DC2626"></span>SQL Server — primary relational database</div>
+            <div class="techitem"><span class="dot" style="background:#D97706"></span>Redis — caching, session, real-time pub/sub</div>
+            <div class="techitem"><span class="dot" style="background:#059669"></span>SignalR — real-time notifications</div>
+            <div class="techitem"><span class="dot" style="background:#0891B2"></span>JWT + OAuth 2.0 — auth & token management</div>
+            <div class="techitem"><span class="dot" style="background:#6B7280"></span>Swagger / OpenAPI — API documentation</div>
+            <div class="techitem"><span class="dot" style="background:#7C3AED"></span>FluentValidation — request validation layer</div>
+          </div>
+        </div>
+        <div class="techcard">
+          <div class="techcard-h"><span class="layer">Frontend</span><span class="lname">Angular 17</span></div>
+          <div class="techcard-b">
+            <div class="techitem"><span class="dot" style="background:#DD0031"></span>Angular 17 — component-based SPA</div>
+            <div class="techitem"><span class="dot" style="background:#007ACC"></span>TypeScript — type-safe development</div>
+            <div class="techitem"><span class="dot" style="background:#06B6D4"></span>RxJS — reactive streams & async state</div>
+            <div class="techitem"><span class="dot" style="background:#7C3AED"></span>NgRx — centralized state management</div>
+            <div class="techitem"><span class="dot" style="background:#F59E0B"></span>Angular Material + Custom Design System</div>
+            <div class="techitem"><span class="dot" style="background:#10B981"></span>Angular i18n — EN + AR (RTL) Phase 2</div>
+            <div class="techitem"><span class="dot" style="background:#EF4444"></span>Angular PWA — progressive web app</div>
+            <div class="techitem"><span class="dot" style="background:#6366F1"></span>Karma / Jasmine — unit testing</div>
+          </div>
+        </div>
+        <div class="techcard">
+          <div class="techcard-h"><span class="layer">Infrastructure</span><span class="lname">Azure</span></div>
+          <div class="techcard-b">
+            <div class="techitem"><span class="dot" style="background:#0078D4"></span>Azure App Service — backend hosting</div>
+            <div class="techitem"><span class="dot" style="background:#0078D4"></span>Azure Static Web Apps — Angular hosting</div>
+            <div class="techitem"><span class="dot" style="background:#2496ED"></span>Docker — containerized deployments</div>
+            <div class="techitem"><span class="dot" style="background:#F05032"></span>GitHub Actions — CI/CD pipelines</div>
+            <div class="techitem"><span class="dot" style="background:#FF6B35"></span>Azure CDN — static asset delivery</div>
+            <div class="techitem"><span class="dot" style="background:#326CE5"></span>Azure Kubernetes Service — orchestration</div>
+          </div>
+        </div>
+        <div class="techcard">
+          <div class="techcard-h"><span class="layer">Integrations</span><span class="lname">3rd Party</span></div>
+          <div class="techcard-b">
+            <div class="techitem"><span class="dot" style="background:#635BFF"></span>Paymob / Stripe — payment gateway</div>
+            <div class="techitem"><span class="dot" style="background:#1DB954"></span>OpenAI API — chatbot intelligence</div>
+            <div class="techitem"><span class="dot" style="background:#EA4335"></span>Google Maps API — venue location</div>
+            <div class="techitem"><span class="dot" style="background:#00B900"></span>Twilio — SMS notifications</div>
+            <div class="techitem"><span class="dot" style="background:#5865F2"></span>SendGrid — transactional email</div>
+            <div class="techitem"><span class="dot" style="background:#FFCA28"></span>Firebase Cloud Messaging — push (PWA)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note rv">
+        <span class="note-tag">Architecture Decision</span>
+        <p>The data model follows a two-layer separation: <strong>Event / EventItem</strong> (planning layer — persists forever) and <strong>Order / OrderItem</strong> (financial layer — created at checkout). The Order has a nullable <code>EventId</code> FK linking back to the plan. This means the Event record survives independently of any Order state or cancellation.</p>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 07 NFR -->
+    <section id="nfr">
+      <div class="stag">07</div>
+      <h2>Non-Functional Requirements</h2>
+      <p class="sdesc">These are product-level quality requirements — not business goals. They define how the product must behave technically for it to be considered production-ready.</p>
+
+      <div class="nfrcards rv">
+        <div class="nfrcard">
+          <div class="nfr-top"><div class="nfr-ico">⚡</div><h4>Performance</h4></div>
+          <p>All customer-facing pages must be interactive and usable on mobile connections.</p>
+          <div class="nfr-val">TTI ≤ 3s on 4G</div>
+          <div class="nfr-val" style="margin-left:6px;">Lighthouse ≥ 80</div>
+        </div>
+        <div class="nfrcard">
+          <div class="nfr-top"><div class="nfr-ico">🟢</div><h4>Availability</h4></div>
+          <p>Platform uptime target on a rolling 30-day basis. Maintenance windows restricted to 02:00–05:00 EGT.</p>
+          <div class="nfr-val">99.5% uptime</div>
+        </div>
+        <div class="nfrcard">
+          <div class="nfr-top"><div class="nfr-ico">🔒</div><h4>Security</h4></div>
+          <p>Data encrypted at rest and in transit. Pre-launch penetration testing required. Zero critical vulnerabilities at release.</p>
+          <div class="nfr-val">AES-256 at rest</div>
+          <div class="nfr-val" style="margin-left:6px;">TLS 1.3 in transit</div>
+        </div>
+        <div class="nfrcard">
+          <div class="nfr-top"><div class="nfr-ico">📱</div><h4>Responsiveness</h4></div>
+          <p>Fully functional across all viewport sizes. No horizontal scroll or broken layouts at any breakpoint.</p>
+          <div class="nfr-val">≥ 320px mobile</div>
+          <div class="nfr-val" style="margin-left:6px;">≥ 1280px desktop</div>
+        </div>
+        <div class="nfrcard">
+          <div class="nfr-top"><div class="nfr-ico">♿</div><h4>Accessibility</h4></div>
+          <p>Platform must meet web accessibility standards for all users, including keyboard navigation and screen reader support.</p>
+          <div class="nfr-val">WCAG 2.1 AA</div>
+        </div>
+        <div class="nfrcard">
+          <div class="nfr-top"><div class="nfr-ico">📈</div><h4>Scalability</h4></div>
+          <p>Architecture must support horizontal scaling to handle surge load without redesign. Geographic expansion must require zero core re-engineering.</p>
+          <div class="nfr-val">10× baseline load</div>
+        </div>
+        <div class="nfrcard">
+          <div class="nfr-top"><div class="nfr-ico">🔄</div><h4>Real-time Sync</h4></div>
+          <p>Vendor calendar changes must propagate to customer-facing search without a page refresh.</p>
+          <div class="nfr-val">≤ 60s sync</div>
+        </div>
+        <div class="nfrcard">
+          <div class="nfr-top"><div class="nfr-ico">🌍</div><h4>Internationalisation</h4></div>
+          <p>i18n must be built in from day one — supporting Arabic RTL in Phase 2 with no structural code change required.</p>
+          <div class="nfr-val">Angular i18n</div>
+          <div class="nfr-val" style="margin-left:6px;">CSS logical props</div>
+        </div>
+        <div class="nfrcard">
+          <div class="nfr-top"><div class="nfr-ico">📦</div><h4>API Standards</h4></div>
+          <p>All endpoints must follow RESTful conventions, versioned, and fully documented before any frontend integration begins.</p>
+          <div class="nfr-val">OpenAPI 3.0</div>
+          <div class="nfr-val" style="margin-left:6px;">Versioned /v1/</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- 08 ROADMAP -->
+    <section id="roadmap">
+      <div class="stag">08</div>
+      <h2>Product Roadmap</h2>
+      <p class="sdesc">Four product phases. Each phase delivers a shippable increment — not just a feature list. Phase boundaries are defined by product capability, not calendar dates.</p>
+
+      <div class="roadmap rv">
+        <div class="rphase">
+          <span class="rphase-tag" style="background:rgba(16,185,129,.12);color:#34D399;">Phase 1 — Launch</span>
+          <h4>Egypt Market MVP</h4>
+          <ul>
+            <li>Customer search, filter, shortlist</li>
+            <li>Event planning layer (Event + EventItem)</li>
+            <li>End-to-end booking + escrow payment</li>
+            <li>Vendor onboarding portal</li>
+            <li>Vendor availability calendar</li>
+            <li>EpicHub internal CMS</li>
+            <li>AI chatbot + human escalation</li>
+            <li>Basic loyalty points system</li>
+            <li>Post-event review flow</li>
+            <li>Responsive web (EN only)</li>
+          </ul>
+        </div>
+        <div class="rphase">
+          <span class="rphase-tag" style="background:rgba(59,130,246,.12);color:#60A5FA;">Phase 2 — Growth</span>
+          <h4>Depth & Monetization</h4>
+          <ul>
+            <li>Arabic RTL interface (full i18n)</li>
+            <li>Professional planner portal</li>
+            <li>Corporate procurement module</li>
+            <li>BNPL payment integrations (Tamara, tabby)</li>
+            <li>Vendor performance intelligence dashboard</li>
+            <li>In-app vendor–customer messaging</li>
+            <li>Promotions engine (ops-managed)</li>
+            <li>Direct event execution packages</li>
+          </ul>
+        </div>
+        <div class="rphase">
+          <span class="rphase-tag" style="background:rgba(245,158,11,.12);color:#FCD34D;">Phase 3 — Expansion</span>
+          <h4>MENA Markets</h4>
+          <ul>
+            <li>UAE and KSA market launch</li>
+            <li>Multi-currency and local payment methods</li>
+            <li>Government & entertainment authority integrations</li>
+            <li>Student and campus organizer segment</li>
+            <li>Native iOS and Android apps</li>
+            <li>Vendor e-contract and e-signature</li>
+          </ul>
+        </div>
+        <div class="rphase">
+          <span class="rphase-tag" style="background:rgba(139,92,246,.12);color:#A78BFA;">Phase 4 — Scale</span>
+          <h4>Full MENA Platform</h4>
+          <ul>
+            <li>Morocco, Jordan, Lebanon expansion</li>
+            <li>Planner Intelligence Dashboard</li>
+            <li>Data analytics monetization</li>
+            <li>B2B white-label platform offering</li>
+            <li>AI vendor recommendation engine v2</li>
+            <li>Multi-vendor event bundle packaging</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="fi">
+    <div class="fb">
+      <div class="nlm">EH</div>
+      <div>
+        <span>EpicHub PRD</span>
+        <div style="font-size:.65rem;color:var(--txt3);">Product Requirements Document — v1.0</div>
+      </div>
+    </div>
+    <div style="font-size:.72rem;color:var(--txt3);text-align:center;">
+      What the product is and how it works.<br>
+      <em style="font-size:.65rem;">Business objectives, rules & KPIs → see BRD</em>
+    </div>
+    <div class="fr">
+      <span class="ft">Angular 17</span><span class="ft">.NET 8</span>
+      <span class="ft">Azure</span><span class="ft">Phase 1</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const html=document.documentElement;
+document.getElementById('ttog').addEventListener('click',()=>{
+  const n=html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',n);
+  document.getElementById('tico').textContent=n==='dark'?'🌙':'☀️';
+});
+document.getElementById('hburg').addEventListener('click',()=>document.getElementById('mnav').classList.toggle('open'));
+function cm(){document.getElementById('mnav').classList.remove('open');}
+const pb=document.getElementById('prog');
+window.addEventListener('scroll',()=>{pb.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%';},{passive:true});
+const ro=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');ro.unobserve(x.target);}});},{threshold:.06,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+const secs=document.querySelectorAll('section[id]'),links=document.querySelectorAll('.toc a');
+secs.forEach(s=>{new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector(`.toc a[href="#${x.target.id}"]`);if(a)a.classList.add('active');}});},{threshold:.2,rootMargin:'-70px 0px -55% 0px'}).observe(s);});
+</script>
+</body>
+</html>

@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EpicHub — API Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--grn:#22C55E;--grn2:#16A34A;--eme:#10B981;--sky:#38BDF8;--amb:#F59E0B;--vio:#A78BFA;--rose:#F87171;--ora:#FB923C;--tr:.25s cubic-bezier(.4,0,.2,1);--r:7px;}
+[data-theme="dark"]{--bg:#040D08;--bg2:#071510;--bg3:#0C1F16;--bg4:#112A1C;--bg5:#173524;--bdr:rgba(34,197,94,.1);--bdr2:rgba(34,197,94,.2);--bdr3:rgba(34,197,94,.35);--txt:#DCFCE7;--txt2:#4ADE80;--txt3:#166534;--ac:#22C55E;--acs:rgba(34,197,94,.08);--nav:rgba(4,13,8,.93);}
+[data-theme="light"]{--bg:#F0FFF4;--bg2:#DCFCE7;--bg3:#BBF7D0;--bg4:#86EFAC;--bdr:rgba(21,128,61,.08);--bdr2:rgba(21,128,61,.18);--bdr3:rgba(21,128,61,.32);--txt:#052E16;--txt2:#14532D;--txt3:#166534;--ac:#15803D;--acs:rgba(21,128,61,.09);--nav:rgba(240,255,244,.93);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Fira Code',monospace;background:var(--bg);color:var(--txt);line-height:1.65;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+::selection{background:var(--grn);color:#000;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--bdr3);border-radius:99px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;background-image:radial-gradient(ellipse 50% 60% at 0% 50%,rgba(34,197,94,.06) 0%,transparent 55%),radial-gradient(ellipse 40% 40% at 100% 20%,rgba(56,189,248,.04) 0%,transparent 50%);}
+#prog{position:fixed;top:0;left:0;height:2px;z-index:9999;width:0%;background:linear-gradient(90deg,var(--grn),var(--eme));box-shadow:0 0 8px rgba(34,197,94,.5);transition:width .08s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--nav);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr2);}
+.ni{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:54px;gap:1.5rem;}
+.nlogo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--txt);font-size:.9rem;font-weight:600;flex-shrink:0;}
+.nlm{width:26px;height:26px;border-radius:5px;background:var(--grn);display:grid;place-items:center;font-size:.55rem;font-weight:700;color:#000;}
+.ndoc{font-size:.55rem;padding:2px 8px;border-radius:3px;background:var(--acs);border:1px solid var(--bdr2);color:var(--ac);letter-spacing:.1em;}
+.nlinks{display:flex;gap:1.25rem;list-style:none;align-items:center;}
+.nlinks a{font-size:.6rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);text-decoration:none;transition:color var(--tr);}
+.nlinks a:hover{color:var(--ac);}
+.nright{display:flex;align-items:center;gap:8px;}
+.ttog{width:36px;height:18px;border-radius:99px;background:var(--bg4);border:1px solid var(--bdr2);cursor:pointer;position:relative;}
+.ttog::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--grn);transition:transform var(--tr);}
+[data-theme="light"] .ttog::after{transform:translateX(18px);}
+.twrap{display:flex;align-items:center;gap:5px;font-size:.6rem;color:var(--txt3);}
+.hburg{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:3px;}
+.hburg span{width:17px;height:1.5px;background:var(--txt);border-radius:2px;}
+.mnav{display:none;position:fixed;inset:54px 0 0 0;background:var(--bg);z-index:99;padding:1.5rem;flex-direction:column;gap:.85rem;border-top:1px solid var(--bdr2);overflow-y:auto;}
+.mnav.open{display:flex;}
+.mnav a{font-size:.85rem;color:var(--txt);text-decoration:none;padding:.45rem 0;border-bottom:1px solid var(--bdr);}
+
+/* HERO */
+.hero{min-height:75vh;display:flex;align-items:center;padding:90px 2rem 40px;position:relative;z-index:1;}
+.hinner{max-width:1440px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:center;}
+.heye{display:inline-flex;align-items:center;gap:7px;background:var(--acs);border:1px solid var(--bdr2);border-radius:3px;padding:3px 11px;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:1rem;animation:up .5s ease both;}
+.heye .dot{width:5px;height:5px;border-radius:50%;background:var(--ac);animation:blink 2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+h1{font-family:'DM Sans',sans-serif;font-size:clamp(1.9rem,4vw,3.2rem);font-weight:700;line-height:1.1;letter-spacing:-.02em;margin-bottom:.85rem;animation:up .5s ease .1s both;}
+h1 em{color:var(--grn);font-style:normal;}
+.hsub{font-size:.75rem;color:var(--txt2);line-height:1.8;max-width:420px;animation:up .5s ease .2s both;}
+.htags{display:flex;flex-wrap:wrap;gap:5px;margin-top:1rem;animation:up .5s ease .3s both;}
+.htag{background:var(--bg3);border:1px solid var(--bdr2);border-radius:3px;padding:2px 9px;font-size:.6rem;color:var(--txt2);}
+.htag.a{background:var(--acs);border-color:var(--bdr2);color:var(--ac);}
+.terminal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);overflow:hidden;animation:up .5s ease .15s both;font-size:.72rem;}
+.t-bar{background:var(--bg3);border-bottom:1px solid var(--bdr2);padding:.55rem 1rem;display:flex;align-items:center;gap:.5rem;}
+.t-dot{width:10px;height:10px;border-radius:50%;}
+.t-title{font-size:.58rem;color:var(--txt3);margin-left:.5rem;letter-spacing:.06em;}
+.t-body{padding:1rem 1.25rem;display:flex;flex-direction:column;gap:.4rem;}
+.t-line{font-size:.7rem;line-height:1.5;}
+.t-cmd{color:var(--grn);}
+.t-cmt{color:var(--txt3);}
+.t-str{color:var(--sky);}
+.t-key{color:var(--amb);}
+.t-val{color:var(--vio);}
+.t-url{color:var(--rose);}
+.t-out{color:var(--txt2);}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* LAYOUT */
+.layout{max-width:1440px;margin:0 auto;padding:0 2rem;display:flex;gap:2.5rem;}
+.toc{width:210px;flex-shrink:0;position:sticky;top:74px;height:fit-content;background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:1rem;}
+.toc h4{font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);font-weight:500;margin-bottom:.7rem;}
+.toc ul{list-style:none;display:flex;flex-direction:column;gap:1px;}
+.toc ul li a{display:block;font-size:.67rem;color:var(--txt2);text-decoration:none;padding:4px 8px;border-radius:3px;border-left:2px solid transparent;transition:background var(--tr),color var(--tr),border-color var(--tr);}
+.toc ul li a:hover,.toc ul li a.active{background:var(--acs);color:var(--ac);border-left-color:var(--ac);}
+.toc ul li.sub a{padding-left:1.1rem;font-size:.62rem;}
+.main{flex:1;min-width:0;padding:3rem 0 7rem;}
+section{margin-bottom:4rem;scroll-margin-top:84px;}
+.stag{font-size:.57rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);font-weight:500;margin-bottom:.4rem;display:flex;align-items:center;gap:7px;}
+.stag::after{content:'';width:24px;height:1px;background:var(--ac);opacity:.4;}
+h2{font-family:'DM Sans',sans-serif;font-size:clamp(1.3rem,2.5vw,1.85rem);font-weight:700;line-height:1.15;letter-spacing:-.015em;margin-bottom:.6rem;}
+h3{font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;margin:1.75rem 0 .7rem;color:var(--txt);}
+p{color:var(--txt2);margin-bottom:.85rem;font-size:.8rem;line-height:1.7;}
+strong{color:var(--txt);font-weight:600;}
+.sdesc{font-size:.78rem;color:var(--txt2);line-height:1.78;max-width:700px;margin-bottom:1.25rem;}
+.div{height:1px;background:linear-gradient(90deg,transparent,var(--bdr3),transparent);margin:3rem 0;}
+
+/* ENDPOINT BLOCK */
+.ep{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:1.1rem;transition:border-color var(--tr);}
+.ep:hover{border-color:var(--bdr2);}
+.ep-header{padding:.8rem 1.1rem;display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;border-bottom:1px solid var(--bdr);background:var(--bg3);}
+.method{font-size:.62rem;padding:3px 9px;border-radius:3px;font-weight:700;letter-spacing:.08em;min-width:56px;text-align:center;}
+.m-get{background:rgba(34,197,94,.15);color:#4ADE80;}
+.m-post{background:rgba(56,189,248,.15);color:#7DD3FC;}
+.m-put{background:rgba(245,158,11,.15);color:#FCD34D;}
+.m-patch{background:rgba(251,146,60,.15);color:#FDBA74;}
+.m-del{background:rgba(248,113,113,.15);color:#F87171;}
+.ep-path{font-size:.75rem;color:var(--ac);font-weight:500;}
+.ep-path .param{color:var(--amb);}
+.ep-desc{font-size:.7rem;color:var(--txt3);margin-left:auto;}
+.ep-auth{font-size:.58rem;padding:2px 7px;border-radius:99px;background:rgba(167,139,250,.12);color:var(--vio);border:1px solid rgba(167,139,250,.2);}
+.ep-body{padding:1rem 1.1rem;}
+.ep-section{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:.5rem;margin-top:.85rem;font-weight:600;}
+.ep-section:first-child{margin-top:0;}
+
+/* CODE BLOCK */
+.code{background:var(--bg);border:1px solid var(--bdr);border-radius:5px;padding:.9rem 1.1rem;overflow-x:auto;margin:.5rem 0;}
+.code pre{font-size:.68rem;line-height:1.65;color:var(--txt2);}
+.code .k{color:var(--amb);}
+.code .s{color:var(--sky);}
+.code .n{color:var(--grn);}
+.code .c{color:var(--txt3);}
+.code .v{color:var(--vio);}
+.code .u{color:var(--rose);}
+.code .t{color:var(--ora);}
+.code-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:.3rem;display:flex;align-items:center;justify-content:space-between;}
+.copy-btn{font-size:.55rem;padding:2px 7px;border-radius:3px;background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt3);cursor:pointer;transition:background var(--tr);}
+.copy-btn:hover{background:var(--bg4);color:var(--txt);}
+
+/* PARAM TABLE */
+.ptable{width:100%;border-collapse:collapse;font-size:.73rem;margin:.5rem 0;}
+.ptable thead tr{background:var(--bg3);}
+.ptable thead th{padding:.5rem .85rem;text-align:left;font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);font-weight:500;white-space:nowrap;}
+.ptable tbody tr{border-top:1px solid var(--bdr);transition:background .1s;}
+.ptable tbody tr:hover{background:var(--acs);}
+.ptable tbody td{padding:.6rem .85rem;color:var(--txt2);vertical-align:top;line-height:1.5;}
+.ptable tbody td:first-child{color:var(--grn);font-weight:500;}
+.ptable tbody td:nth-child(2){color:var(--sky);}
+.req-badge{font-size:.55rem;padding:1px 5px;border-radius:3px;background:rgba(248,113,113,.12);color:var(--rose);}
+.opt-badge{font-size:.55rem;padding:1px 5px;border-radius:3px;background:var(--bg4);color:var(--txt3);}
+
+/* STATUS CODES */
+.statuses{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0;}
+.sc{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--bdr);border-radius:3px;padding:.35rem .75rem;}
+.sc-code{font-size:.65rem;font-weight:700;}
+.sc-200{color:#4ADE80;}.sc-201{color:#4ADE80;}.sc-204{color:#4ADE80;}
+.sc-400{color:#FCD34D;}.sc-401{color:#FCD34D;}.sc-403{color:#FCD34D;}.sc-404{color:#FCD34D;}
+.sc-409{color:var(--rose);}.sc-422{color:var(--rose);}.sc-500{color:var(--rose);}
+.sc-desc{font-size:.65rem;color:var(--txt2);}
+
+/* AUTH FLOW */
+.auth-flow{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:1.25rem;margin:1.25rem 0;}
+.af-step{display:flex;gap:.85rem;margin-bottom:.85rem;align-items:flex-start;}
+.af-step:last-child{margin-bottom:0;}
+.af-num{width:24px;height:24px;border-radius:50%;background:var(--acs);border:1px solid var(--bdr2);display:grid;place-items:center;font-size:.6rem;color:var(--ac);flex-shrink:0;font-weight:700;}
+.af-body h4{font-size:.78rem;font-weight:600;margin-bottom:3px;font-family:'DM Sans',sans-serif;}
+.af-body p{font-size:.72rem;color:var(--txt2);margin:0;}
+
+/* ERROR TABLE */
+.errtable{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bdr2);margin:1.1rem 0;}
+table.err{width:100%;border-collapse:collapse;font-size:.73rem;}
+table.err thead tr{background:var(--bg3);}
+table.err thead th{padding:.55rem .9rem;text-align:left;font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);font-weight:500;white-space:nowrap;}
+table.err tbody tr{border-top:1px solid var(--bdr);transition:background .1s;}
+table.err tbody tr:hover{background:var(--acs);}
+table.err tbody td{padding:.65rem .9rem;color:var(--txt2);vertical-align:top;line-height:1.5;}
+table.err tbody td:first-child{font-weight:600;}
+
+/* NOTE */
+.note{background:var(--acs);border:1px solid var(--bdr2);border-radius:var(--r);padding:1rem 1.3rem;margin:1.1rem 0;}
+.note-tag{font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);font-weight:700;margin-bottom:.3rem;display:block;}
+.note p{color:var(--txt);font-size:.78rem;margin:0;line-height:1.65;}
+
+/* WEBHOOK */
+.wh-events{display:flex;flex-direction:column;gap:.6rem;margin:1.1rem 0;}
+.wh-ev{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:.95rem 1.1rem;display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:flex-start;transition:border-color var(--tr);}
+.wh-ev:hover{border-color:var(--bdr2);}
+.wh-name{background:var(--acs);border:1px solid var(--bdr2);border-radius:3px;padding:2px 8px;font-size:.62rem;color:var(--ac);white-space:nowrap;align-self:flex-start;margin-top:2px;}
+.wh-desc p{font-size:.75rem;color:var(--txt2);margin:0;line-height:1.55;}
+.wh-desc h4{font-size:.8rem;font-weight:600;margin-bottom:3px;font-family:'DM Sans',sans-serif;}
+
+.rv{opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease;}
+.rv.in{opacity:1;transform:none;}
+
+footer{border-top:1px solid var(--bdr2);padding:1.5rem 2rem;background:var(--bg2);}
+.fi{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.ftags{display:flex;gap:5px;flex-wrap:wrap;}
+.ftag{background:var(--bg3);border:1px solid var(--bdr2);border-radius:3px;padding:2px 7px;font-size:.57rem;color:var(--txt3);}
+
+@media(max-width:1100px){.toc{display:none;}.layout{padding:0 1.5rem;}.hinner{grid-template-columns:1fr;}.terminal{display:none;}}
+@media(max-width:768px){.nlinks{display:none;}.hburg{display:flex;}.hero{padding:84px 1.25rem 36px;}.layout{padding:0 1rem;}}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<nav>
+  <div class="ni">
+    <a href="#" class="nlogo"><div class="nlm">EH</div>EpicHub<span class="ndoc">API DOCS</span></a>
+    <ul class="nlinks">
+      <li><a href="#auth">Auth</a></li><li><a href="#events-api">Events</a></li><li><a href="#vendors-api">Vendors</a></li><li><a href="#bookings-api">Bookings</a></li><li><a href="#webhooks">Webhooks</a></li><li><a href="#errors">Errors</a></li><li><a href="#sdks">SDK</a></li>
+    </ul>
+    <div class="nright">
+      <div class="twrap"><span id="ti">🌙</span><button class="ttog" id="tt"></button></div>
+      <div class="hburg" id="hb"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</nav>
+<nav class="mnav" id="mn">
+  <a href="#auth">01 Authentication</a><a href="#events-api">02 Events API</a><a href="#vendors-api">03 Vendors API</a><a href="#bookings-api">04 Bookings API</a><a href="#webhooks">05 Webhooks</a><a href="#errors">06 Error Reference</a><a href="#sdks">07 SDK & Integration</a>
+</nav>
+
+<div class="hero">
+  <div class="hinner">
+    <div>
+      <div class="heye"><span class="dot"></span>Technical / API Documentation</div>
+      <h1>EpicHub<br><em>REST API</em><br>v1 Reference</h1>
+      <p class="hsub">// All endpoints, authentication flows, request schemas, response shapes, and error codes. The complete developer reference for integrating with EpicHub.</p>
+      <div class="htags">
+        <span class="htag a">Base URL: /api/v1</span>
+        <span class="htag a">JSON / UTF-8</span>
+        <span class="htag">Bearer JWT Auth</span>
+        <span class="htag">OpenAPI 3.0</span>
+        <span class="htag">HTTPS only</span>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="t-bar">
+        <div class="t-dot" style="background:#F87171;"></div>
+        <div class="t-dot" style="background:#FCD34D;"></div>
+        <div class="t-dot" style="background:#4ADE80;"></div>
+        <span class="t-title">epichub-api — terminal</span>
+      </div>
+      <div class="t-body">
+        <div class="t-line t-cmt"># POST /api/v1/auth/login</div>
+        <div class="t-line"><span class="t-cmd">curl</span> -X POST \</div>
+        <div class="t-line">&nbsp;&nbsp;<span class="t-str">"https://api.epichub.com/api/v1/auth/login"</span> \</div>
+        <div class="t-line">&nbsp;&nbsp;-H <span class="t-str">"Content-Type: application/json"</span> \</div>
+        <div class="t-line">&nbsp;&nbsp;-d <span class="t-str">'{</span></div>
+        <div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"email"</span>: <span class="t-str">"user@example.com"</span>,</div>
+        <div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"password"</span>: <span class="t-str">"••••••••"</span></div>
+        <div class="t-line">&nbsp;&nbsp;<span class="t-str">}'</span></div>
+        <div class="t-line" style="margin-top:.35rem;t-cmt"># Response</div>
+        <div class="t-line t-out">{</div>
+        <div class="t-line">&nbsp;&nbsp;<span class="t-key">"accessToken"</span>: <span class="t-str">"eyJhbGciOiJIUzI1..."</span>,</div>
+        <div class="t-line">&nbsp;&nbsp;<span class="t-key">"expiresIn"</span>: <span class="t-val">900</span>,</div>
+        <div class="t-line">&nbsp;&nbsp;<span class="t-key">"role"</span>: <span class="t-str">"Customer"</span></div>
+        <div class="t-line t-out">}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="toc">
+    <h4>Contents</h4>
+    <ul>
+      <li><a href="#auth">01 Authentication</a></li>
+      <li class="sub"><a href="#auth">Register / Login</a></li>
+      <li class="sub"><a href="#auth">Token Refresh</a></li>
+      <li class="sub"><a href="#auth">Auth Flow</a></li>
+      <li><a href="#events-api">02 Events API</a></li>
+      <li class="sub"><a href="#events-api">Create Event</a></li>
+      <li class="sub"><a href="#events-api">Add EventItem</a></li>
+      <li class="sub"><a href="#events-api">Get Events</a></li>
+      <li><a href="#vendors-api">03 Vendors API</a></li>
+      <li class="sub"><a href="#vendors-api">Search</a></li>
+      <li class="sub"><a href="#vendors-api">Profile</a></li>
+      <li class="sub"><a href="#vendors-api">Onboarding</a></li>
+      <li><a href="#bookings-api">04 Bookings API</a></li>
+      <li class="sub"><a href="#bookings-api">Checkout</a></li>
+      <li class="sub"><a href="#bookings-api">Confirm Delivery</a></li>
+      <li><a href="#webhooks">05 Webhooks</a></li>
+      <li><a href="#errors">06 Error Reference</a></li>
+      <li><a href="#sdks">07 SDK & Integration</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+
+    <!-- AUTH -->
+    <section id="auth">
+      <div class="stag">01</div>
+      <h2>Authentication</h2>
+      <p class="sdesc">EpicHub uses JWT Bearer authentication. All protected endpoints require an <code style="color:var(--ac)">Authorization: Bearer &lt;accessToken&gt;</code> header. Access tokens expire after 15 minutes. Use the refresh endpoint to obtain a new token.</p>
+
+      <div class="auth-flow rv">
+        <div class="af-step"><div class="af-num">1</div><div class="af-body"><h4>Register or Login</h4><p>POST /auth/register or /auth/login. Receive accessToken + refreshToken (set as httpOnly cookie).</p></div></div>
+        <div class="af-step"><div class="af-num">2</div><div class="af-body"><h4>Include Bearer Token</h4><p>Add <code style="color:var(--ac)">Authorization: Bearer {accessToken}</code> to every protected request header.</p></div></div>
+        <div class="af-step"><div class="af-num">3</div><div class="af-body"><h4>Token Expires (15 min)</h4><p>API returns <code style="color:var(--rose)">401 Unauthorized</code> with <code style="color:var(--sky)">{"error":"token_expired"}</code>.</p></div></div>
+        <div class="af-step"><div class="af-num">4</div><div class="af-body"><h4>Refresh Token</h4><p>POST /auth/refresh. The httpOnly cookie is sent automatically. Receive new accessToken. No credentials needed.</p></div></div>
+      </div>
+
+      <!-- POST /auth/register -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/auth/register</span>
+          <span class="ep-desc">Register new user</span>
+          <span class="ep-auth">Public</span>
+        </div>
+        <div class="ep-body">
+          <div class="ep-section">Request Body</div>
+          <div class="code">
+            <div class="code-label"><span>application/json</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+            <pre>{
+  <span class="k">"email"</span>: <span class="s">"user@example.com"</span>,        <span class="c">// required</span>
+  <span class="k">"password"</span>: <span class="s">"Str0ng!Pass"</span>,          <span class="c">// required, min 8 chars</span>
+  <span class="k">"firstName"</span>: <span class="s">"Sara"</span>,                 <span class="c">// required</span>
+  <span class="k">"lastName"</span>: <span class="s">"Ahmed"</span>,                  <span class="c">// required</span>
+  <span class="k">"phone"</span>: <span class="s">"+201012345678"</span>             <span class="c">// optional</span>
+}</pre>
+          </div>
+          <div class="ep-section">Response 201</div>
+          <div class="code">
+            <pre>{
+  <span class="k">"userId"</span>: <span class="s">"3fa85f64-5717-4562-b3fc-2c963f66afa6"</span>,
+  <span class="k">"email"</span>: <span class="s">"user@example.com"</span>,
+  <span class="k">"role"</span>: <span class="s">"Customer"</span>,
+  <span class="k">"accessToken"</span>: <span class="s">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span>,
+  <span class="k">"expiresIn"</span>: <span class="v">900</span>                         <span class="c">// seconds</span>
+}</pre>
+          </div>
+          <div class="ep-section">Status Codes</div>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-201">201</span><span class="sc-desc">User created, token issued</span></div>
+            <div class="sc"><span class="sc-code sc-400">400</span><span class="sc-desc">Validation failure</span></div>
+            <div class="sc"><span class="sc-code sc-409">409</span><span class="sc-desc">Email already registered</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST /auth/login -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/auth/login</span>
+          <span class="ep-desc">Authenticate existing user</span>
+          <span class="ep-auth">Public</span>
+        </div>
+        <div class="ep-body">
+          <div class="ep-section">Request Body</div>
+          <div class="code">
+            <pre>{
+  <span class="k">"email"</span>: <span class="s">"user@example.com"</span>,
+  <span class="k">"password"</span>: <span class="s">"Str0ng!Pass"</span>
+}</pre>
+          </div>
+          <div class="ep-section">Response 200</div>
+          <div class="code">
+            <pre>{
+  <span class="k">"accessToken"</span>: <span class="s">"eyJhbGci..."</span>,
+  <span class="k">"expiresIn"</span>: <span class="v">900</span>,
+  <span class="k">"role"</span>: <span class="s">"Customer"</span>,      <span class="c">// "Customer" | "Vendor" | "Admin"</span>
+  <span class="k">"userId"</span>: <span class="s">"3fa85f64-..."</span>
+}
+<span class="c">// refreshToken set as httpOnly cookie automatically</span></pre>
+          </div>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-200">200</span><span class="sc-desc">Authenticated</span></div>
+            <div class="sc"><span class="sc-code sc-401">401</span><span class="sc-desc">Invalid credentials</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST /auth/refresh -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/auth/refresh</span>
+          <span class="ep-desc">Refresh access token</span>
+          <span class="ep-auth">Cookie</span>
+        </div>
+        <div class="ep-body">
+          <p style="font-size:.74rem;color:var(--txt2);margin:.3rem 0 .6rem;">No request body. Refresh token is read from the <code style="color:var(--ac)">epichub-refresh</code> httpOnly cookie automatically.</p>
+          <div class="ep-section">Response 200</div>
+          <div class="code"><pre>{ <span class="k">"accessToken"</span>: <span class="s">"eyJhbGci..."</span>, <span class="k">"expiresIn"</span>: <span class="v">900</span> }</pre></div>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-200">200</span><span class="sc-desc">New token issued</span></div>
+            <div class="sc"><span class="sc-code sc-401">401</span><span class="sc-desc">Refresh token expired or invalid</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- EVENTS API -->
+    <section id="events-api">
+      <div class="stag">02</div>
+      <h2>Events API</h2>
+      <p class="sdesc">The Event planning layer. Customers create Events (planning containers), add EventItems (draft service selections with snapshotted pricing), and later check out to create an Order.</p>
+
+      <!-- GET /events -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-get">GET</span>
+          <span class="ep-path">/api/v1/events</span>
+          <span class="ep-desc">List all events for authenticated customer</span>
+          <span class="ep-auth">Customer</span>
+        </div>
+        <div class="ep-body">
+          <div class="ep-section">Query Parameters</div>
+          <table class="ptable">
+            <thead><tr><th>Param</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>status</td><td>string</td><td><span class="opt-badge">optional</span></td><td>Filter by EventStatus: Draft | Confirmed | Completed | Cancelled</td></tr>
+              <tr><td>page</td><td>int</td><td><span class="opt-badge">optional</span></td><td>Page number, default 1</td></tr>
+              <tr><td>pageSize</td><td>int</td><td><span class="opt-badge">optional</span></td><td>Results per page, default 10, max 50</td></tr>
+            </tbody>
+          </table>
+          <div class="ep-section">Response 200</div>
+          <div class="code"><pre>{
+  <span class="k">"data"</span>: [
+    {
+      <span class="k">"id"</span>: <span class="s">"3fa85f64-5717-4562-b3fc-2c963f66afa6"</span>,
+      <span class="k">"title"</span>: <span class="s">"Sara's Wedding"</span>,
+      <span class="k">"eventType"</span>: <span class="s">"Wedding"</span>,
+      <span class="k">"eventDate"</span>: <span class="s">"2025-06-15T18:00:00Z"</span>,
+      <span class="k">"location"</span>: <span class="s">"Cairo, Egypt"</span>,
+      <span class="k">"status"</span>: <span class="s">"Draft"</span>,
+      <span class="k">"totalBudget"</span>: <span class="v">50000.00</span>,
+      <span class="k">"eventItemCount"</span>: <span class="v">3</span>,
+      <span class="k">"createdAt"</span>: <span class="s">"2025-01-10T09:00:00Z"</span>
+    }
+  ],
+  <span class="k">"pagination"</span>: { <span class="k">"total"</span>: <span class="v">5</span>, <span class="k">"page"</span>: <span class="v">1</span>, <span class="k">"pageSize"</span>: <span class="v">10</span> }
+}</pre></div>
+        </div>
+      </div>
+
+      <!-- POST /events -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/events</span>
+          <span class="ep-desc">Create a new event plan</span>
+          <span class="ep-auth">Customer</span>
+        </div>
+        <div class="ep-body">
+          <div class="ep-section">Request Body</div>
+          <div class="code"><pre>{
+  <span class="k">"title"</span>: <span class="s">"Sara's Wedding"</span>,            <span class="c">// required, max 200 chars</span>
+  <span class="k">"eventType"</span>: <span class="s">"Wedding"</span>,              <span class="c">// required — enum below</span>
+  <span class="k">"eventDate"</span>: <span class="s">"2025-06-15T18:00:00Z"</span>, <span class="c">// required, must be future</span>
+  <span class="k">"location"</span>: <span class="s">"Cairo, Egypt"</span>,          <span class="c">// required</span>
+  <span class="k">"totalBudget"</span>: <span class="v">50000.00</span>,             <span class="c">// optional</span>
+  <span class="k">"guestCount"</span>: <span class="v">200</span>,                   <span class="c">// optional</span>
+  <span class="k">"notes"</span>: <span class="s">"Garden ceremony preferred"</span>  <span class="c">// optional</span>
+}
+<span class="c">// eventType enum: Wedding | Corporate | Birthday | Graduation | Engagement | BabyShower | Ramadan | Other</span></pre></div>
+          <div class="ep-section">Response 201</div>
+          <div class="code"><pre>{
+  <span class="k">"id"</span>: <span class="s">"3fa85f64-5717-4562-b3fc-2c963f66afa6"</span>,
+  <span class="k">"title"</span>: <span class="s">"Sara's Wedding"</span>,
+  <span class="k">"status"</span>: <span class="s">"Draft"</span>,
+  <span class="k">"createdAt"</span>: <span class="s">"2025-01-10T09:00:00Z"</span>
+}</pre></div>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-201">201</span><span class="sc-desc">Event created</span></div>
+            <div class="sc"><span class="sc-code sc-400">400</span><span class="sc-desc">Validation error (date in past, etc.)</span></div>
+            <div class="sc"><span class="sc-code sc-401">401</span><span class="sc-desc">Not authenticated</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST /events/{id}/items -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/events/<span class="param">{eventId}</span>/items</span>
+          <span class="ep-desc">Add a Product or Package to an event plan</span>
+          <span class="ep-auth">Customer</span>
+        </div>
+        <div class="ep-body">
+          <div class="note" style="margin-bottom:.75rem;">
+            <span class="note-tag">Snapshot Behavior</span>
+            <p>The API snapshots <strong>SnapshotName</strong>, <strong>SnapshotPrice</strong>, and <strong>SnapshotVendorName</strong> from the live Product/Package at the moment this request is processed. Subsequent vendor price changes do NOT affect this EventItem.</p>
+          </div>
+          <div class="ep-section">Request Body — exactly one of productId or packageId must be provided</div>
+          <div class="code"><pre>{
+  <span class="k">"productId"</span>: <span class="s">"3fa85f64-..."</span>,    <span class="c">// provide this OR packageId — never both</span>
+  <span class="k">"packageId"</span>: null,               <span class="c">// null when productId is set</span>
+  <span class="k">"quantity"</span>: <span class="v">1</span>,                   <span class="c">// required, min 1</span>
+  <span class="k">"notes"</span>: <span class="s">"Outdoor setup needed"</span>  <span class="c">// optional</span>
+}</pre></div>
+          <div class="ep-section">Response 201</div>
+          <div class="code"><pre>{
+  <span class="k">"id"</span>: <span class="s">"7bc91a23-..."</span>,
+  <span class="k">"eventId"</span>: <span class="s">"3fa85f64-..."</span>,
+  <span class="k">"snapshotName"</span>: <span class="s">"Premium Wedding Photography"</span>,
+  <span class="k">"snapshotPrice"</span>: <span class="v">8500.00</span>,
+  <span class="k">"snapshotVendorName"</span>: <span class="s">"LensArt Studio"</span>,
+  <span class="k">"quantity"</span>: <span class="v">1</span>,
+  <span class="k">"status"</span>: <span class="s">"Draft"</span>
+}</pre></div>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-201">201</span><span class="sc-desc">Item added with snapshots</span></div>
+            <div class="sc"><span class="sc-code sc-400">400</span><span class="sc-desc">Both or neither productId/packageId provided</span></div>
+            <div class="sc"><span class="sc-code sc-404">404</span><span class="sc-desc">Event or Product/Package not found</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DELETE /events/{id}/items/{itemId} -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-del">DELETE</span>
+          <span class="ep-path">/api/v1/events/<span class="param">{eventId}</span>/items/<span class="param">{itemId}</span></span>
+          <span class="ep-desc">Remove an item from the plan (Draft only)</span>
+          <span class="ep-auth">Customer</span>
+        </div>
+        <div class="ep-body">
+          <p style="font-size:.74rem;color:var(--txt2);">Sets EventItem.Status = Removed. Only works on Draft items — cannot remove Ordered items.</p>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-204">204</span><span class="sc-desc">Item removed</span></div>
+            <div class="sc"><span class="sc-code sc-409">409</span><span class="sc-desc">Item is already Ordered — cannot remove</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- VENDORS API -->
+    <section id="vendors-api">
+      <div class="stag">03</div>
+      <h2>Vendors API</h2>
+
+      <!-- GET /vendors/search -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-get">GET</span>
+          <span class="ep-path">/api/v1/vendors/search</span>
+          <span class="ep-desc">Search vendors with filters and matchmaking score</span>
+          <span class="ep-auth">Public</span>
+        </div>
+        <div class="ep-body">
+          <div class="ep-section">Query Parameters</div>
+          <table class="ptable">
+            <thead><tr><th>Param</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>category</td><td>string</td><td><span class="opt-badge">optional</span></td><td>Category name or ID to filter vendors</td></tr>
+              <tr><td>eventType</td><td>string</td><td><span class="opt-badge">optional</span></td><td>EventType enum value</td></tr>
+              <tr><td>location</td><td>string</td><td><span class="opt-badge">optional</span></td><td>City name for location-based filtering</td></tr>
+              <tr><td>date</td><td>ISO 8601</td><td><span class="opt-badge">optional</span></td><td>Event date — excludes vendors blocked on this date</td></tr>
+              <tr><td>minPrice</td><td>decimal</td><td><span class="opt-badge">optional</span></td><td>Minimum package price filter</td></tr>
+              <tr><td>maxPrice</td><td>decimal</td><td><span class="opt-badge">optional</span></td><td>Maximum package price filter</td></tr>
+              <tr><td>page</td><td>int</td><td><span class="opt-badge">optional</span></td><td>Default 1</td></tr>
+              <tr><td>pageSize</td><td>int</td><td><span class="opt-badge">optional</span></td><td>Default 20, max 50</td></tr>
+            </tbody>
+          </table>
+          <div class="ep-section">Response 200</div>
+          <div class="code"><pre>{
+  <span class="k">"data"</span>: [{
+    <span class="k">"id"</span>: <span class="s">"9ab12c34-..."</span>,
+    <span class="k">"businessName"</span>: <span class="s">"LensArt Studio"</span>,
+    <span class="k">"isVerified"</span>: <span class="v">true</span>,
+    <span class="k">"vendorRatings"</span>: <span class="v">4.8</span>,
+    <span class="k">"category"</span>: <span class="s">"Photography"</span>,
+    <span class="k">"startingPrice"</span>: <span class="v">3500.00</span>,
+    <span class="k">"matchScore"</span>: <span class="v">0.94</span>,       <span class="c">// availability×40% + rating×35% + match×25%</span>
+    <span class="k">"portfolioThumbnail"</span>: <span class="s">"https://cdn.epichub.com/..."</span>,
+    <span class="k">"availableOnDate"</span>: <span class="v">true</span>
+  }],
+  <span class="k">"pagination"</span>: { <span class="k">"total"</span>: <span class="v">48</span>, <span class="k">"page"</span>: <span class="v">1</span>, <span class="k">"pageSize"</span>: <span class="v">20</span> }
+}</pre></div>
+        </div>
+      </div>
+
+      <!-- GET /vendors/{id} -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-get">GET</span>
+          <span class="ep-path">/api/v1/vendors/<span class="param">{vendorId}</span></span>
+          <span class="ep-desc">Get full vendor profile</span>
+          <span class="ep-auth">Public</span>
+        </div>
+        <div class="ep-body">
+          <div class="ep-section">Response 200</div>
+          <div class="code"><pre>{
+  <span class="k">"id"</span>: <span class="s">"9ab12c34-..."</span>,
+  <span class="k">"businessName"</span>: <span class="s">"LensArt Studio"</span>,
+  <span class="k">"description"</span>: <span class="s">"Award-winning wedding photographers..."</span>,
+  <span class="k">"isVerified"</span>: <span class="v">true</span>,
+  <span class="k">"vendorRatings"</span>: <span class="v">4.8</span>,
+  <span class="k">"yearsInBusiness"</span>: <span class="v">8</span>,
+  <span class="k">"portfolioLink"</span>: <span class="s">"https://lensart.com/portfolio"</span>,
+  <span class="k">"products"</span>: [
+    { <span class="k">"id"</span>: <span class="s">"..."</span>, <span class="k">"name"</span>: <span class="s">"Standard Package"</span>, <span class="k">"price"</span>: <span class="v">3500</span> }
+  ],
+  <span class="k">"packages"</span>: [...],
+  <span class="k">"reviews"</span>: [
+    { <span class="k">"rating"</span>: <span class="v">5</span>, <span class="k">"comment"</span>: <span class="s">"Incredible work!"</span>, <span class="k">"createdAt"</span>: <span class="s">"2025-01-05"</span> }
+  ],
+  <span class="k">"availabilityPreview"</span>: {
+    <span class="k">"blockedDates"</span>: [<span class="s">"2025-06-10"</span>, <span class="s">"2025-06-11"</span>]  <span class="c">// next 30 days</span>
+  }
+}</pre></div>
+        </div>
+      </div>
+
+      <!-- POST /vendors/onboard -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/vendors/onboard</span>
+          <span class="ep-desc">Submit vendor onboarding application</span>
+          <span class="ep-auth">Vendor</span>
+        </div>
+        <div class="ep-body">
+          <p style="font-size:.74rem;color:var(--txt2);">Multipart/form-data. Creates a Vendor record with IsVerified=false. Ops review required before profile goes live.</p>
+          <div class="ep-section">Form Fields</div>
+          <table class="ptable">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>businessName</td><td>string</td><td><span class="req-badge">required</span></td><td>max 200 chars</td></tr>
+              <tr><td>description</td><td>string</td><td><span class="req-badge">required</span></td><td>max 2000 chars</td></tr>
+              <tr><td>address</td><td>string</td><td><span class="req-badge">required</span></td><td></td></tr>
+              <tr><td>yearsInBusiness</td><td>int</td><td><span class="opt-badge">optional</span></td><td></td></tr>
+              <tr><td>portfolioLink</td><td>url</td><td><span class="opt-badge">optional</span></td><td></td></tr>
+              <tr><td>licenseDocument</td><td>file</td><td><span class="req-badge">required</span></td><td>PDF only, max 5MB</td></tr>
+              <tr><td>categoryIds</td><td>string[]</td><td><span class="req-badge">required</span></td><td>JSON array of Category GUIDs</td></tr>
+            </tbody>
+          </table>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-201">201</span><span class="sc-desc">Application submitted, pending review</span></div>
+            <div class="sc"><span class="sc-code sc-409">409</span><span class="sc-desc">Vendor profile already exists for this user</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PATCH /vendors/calendar -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-patch">PATCH</span>
+          <span class="ep-path">/api/v1/vendors/me/calendar</span>
+          <span class="ep-desc">Update vendor availability calendar</span>
+          <span class="ep-auth">Vendor</span>
+        </div>
+        <div class="ep-body">
+          <div class="ep-section">Request Body</div>
+          <div class="code"><pre>{
+  <span class="k">"updates"</span>: [
+    { <span class="k">"date"</span>: <span class="s">"2025-06-15"</span>, <span class="k">"status"</span>: <span class="s">"Blocked"</span> },
+    { <span class="k">"date"</span>: <span class="s">"2025-06-16"</span>, <span class="k">"status"</span>: <span class="s">"Available"</span> }
+  ]
+}
+<span class="c">// status enum: Available | Booked | Blocked</span>
+<span class="c">// cache invalidation happens within 60 seconds</span></pre></div>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-200">200</span><span class="sc-desc">Calendar updated, cache invalidated</span></div>
+            <div class="sc"><span class="sc-code sc-409">409</span><span class="sc-desc">Cannot modify a Booked date — booking exists</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- BOOKINGS -->
+    <section id="bookings-api">
+      <div class="stag">04</div>
+      <h2>Bookings API</h2>
+
+      <!-- POST /orders/checkout -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/orders/checkout</span>
+          <span class="ep-desc">Checkout all Draft EventItems in an Event</span>
+          <span class="ep-auth">Customer</span>
+        </div>
+        <div class="ep-body">
+          <div class="note" style="margin-bottom:.75rem;">
+            <span class="note-tag">Atomic Transaction</span>
+            <p>This endpoint performs: Order + OrderItems creation → EventItem status → Draft to Ordered → Event status → Draft to Confirmed → PaymentIntent creation — all in a single DB transaction. If any step fails, the entire operation rolls back.</p>
+          </div>
+          <div class="ep-section">Request Body</div>
+          <div class="code"><pre>{
+  <span class="k">"eventId"</span>: <span class="s">"3fa85f64-..."</span>,         <span class="c">// required</span>
+  <span class="k">"promoCode"</span>: <span class="s">"EPIC20"</span>,              <span class="c">// optional</span>
+  <span class="k">"loyaltyPointsToRedeem"</span>: <span class="v">500</span>      <span class="c">// optional, max 30% discount</span>
+}</pre></div>
+          <div class="ep-section">Response 201</div>
+          <div class="code"><pre>{
+  <span class="k">"orderId"</span>: <span class="s">"8dc73e11-..."</span>,
+  <span class="k">"eventId"</span>: <span class="s">"3fa85f64-..."</span>,
+  <span class="k">"totalAmount"</span>: <span class="v">8075.00</span>,
+  <span class="k">"currency"</span>: <span class="s">"EGP"</span>,
+  <span class="k">"paymentIntentId"</span>: <span class="s">"pi_3QxYZ1..."</span>,   <span class="c">// from Paymob</span>
+  <span class="k">"paymentUrl"</span>: <span class="s">"https://accept.paymob.com/..."</span>,
+  <span class="k">"status"</span>: <span class="s">"PendingPayment"</span>
+}</pre></div>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-201">201</span><span class="sc-desc">Order created, payment URL returned</span></div>
+            <div class="sc"><span class="sc-code sc-400">400</span><span class="sc-desc">No Draft items in event</span></div>
+            <div class="sc"><span class="sc-code sc-409">409</span><span class="sc-desc">Event already has an active Order</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST /orders/{id}/confirm-delivery -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/orders/<span class="param">{orderId}</span>/confirm-delivery</span>
+          <span class="ep-desc">Customer confirms service was delivered — triggers escrow release</span>
+          <span class="ep-auth">Customer</span>
+        </div>
+        <div class="ep-body">
+          <p style="font-size:.74rem;color:var(--txt2);">No body required. Triggers escrow release → vendor payout within 72h → loyalty points credited → survey notification scheduled for 24h later.</p>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-200">200</span><span class="sc-desc">Delivery confirmed, payout queued</span></div>
+            <div class="sc"><span class="sc-code sc-409">409</span><span class="sc-desc">Order not in Paid/Accepted state</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST /orders/{id}/dispute -->
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/orders/<span class="param">{orderId}</span>/dispute</span>
+          <span class="ep-desc">Raise a dispute — freezes escrow</span>
+          <span class="ep-auth">Customer</span>
+        </div>
+        <div class="ep-body">
+          <div class="ep-section">Request Body (multipart/form-data)</div>
+          <div class="code"><pre>reason: "Service was not as described"     <span class="c">// required text field</span>
+evidence: [file1.jpg, file2.jpg]           <span class="c">// optional, max 5 files, 5MB each</span></pre></div>
+          <p style="font-size:.74rem;color:var(--txt2);margin-top:.5rem;">Dispute must be raised within 48h of event date. Immediately freezes escrow on success.</p>
+          <div class="statuses">
+            <div class="sc"><span class="sc-code sc-201">201</span><span class="sc-desc">Dispute opened, escrow frozen</span></div>
+            <div class="sc"><span class="sc-code sc-400">400</span><span class="sc-desc">Outside 48h dispute window</span></div>
+            <div class="sc"><span class="sc-code sc-409">409</span><span class="sc-desc">Dispute already exists for this order</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- WEBHOOKS -->
+    <section id="webhooks">
+      <div class="stag">05</div>
+      <h2>Webhooks</h2>
+      <p class="sdesc">EpicHub receives webhooks from Paymob (payment events). All incoming webhooks are verified via HMAC-SHA256. EpicHub also emits outbound webhooks to enterprise integrations (Phase 2).</p>
+
+      <div class="note rv">
+        <span class="note-tag">HMAC Verification — Required</span>
+        <p>All Paymob webhooks include an <code style="color:var(--ac)">x-hmac-signature</code> header. Verify it: <code style="color:var(--grn)">HMAC-SHA256(request_body, PAYMOB_WEBHOOK_SECRET)</code>. Reject any request where signatures do not match. This prevents spoofed payment confirmations.</p>
+      </div>
+
+      <h3>Inbound — Paymob Payment Webhooks</h3>
+      <div class="wh-events rv">
+        <div class="wh-ev">
+          <div class="wh-name">payment.success</div>
+          <div class="wh-desc"><h4>Payment Captured Successfully</h4><p>Updates Order.PaymentStatus → Paid. Triggers booking confirmation notifications to customer (email + SMS) and vendor (SignalR). Escrow hold begins.</p></div>
+        </div>
+        <div class="wh-ev">
+          <div class="wh-name">payment.failed</div>
+          <div class="wh-desc"><h4>Payment Failed</h4><p>Updates Order.PaymentStatus → Failed. Event and EventItems revert to Draft status. Customer notified to retry.</p></div>
+        </div>
+        <div class="wh-ev">
+          <div class="wh-name">refund.processed</div>
+          <div class="wh-desc"><h4>Refund Completed</h4><p>Updates Order.PaymentStatus → Refunded. Linked to a dispute resolution or cancellation action. Customer notified by email.</p></div>
+        </div>
+        <div class="wh-ev">
+          <div class="wh-name">payout.completed</div>
+          <div class="wh-desc"><h4>Vendor Payout Transferred</h4><p>Updates payout record status → Completed. Vendor notified by email with gross/net breakdown. Audit log entry created.</p></div>
+        </div>
+      </div>
+
+      <h3>Webhook Endpoint</h3>
+      <div class="ep rv">
+        <div class="ep-header">
+          <span class="method m-post">POST</span>
+          <span class="ep-path">/api/v1/payments/webhook</span>
+          <span class="ep-desc">Receives Paymob payment events</span>
+          <span class="ep-auth">HMAC only</span>
+        </div>
+        <div class="ep-body">
+          <div class="ep-section">Headers Required</div>
+          <div class="code"><pre><span class="k">x-hmac-signature</span>: <span class="s">{HMAC-SHA256 of body}</span>
+<span class="k">Content-Type</span>: <span class="s">application/json</span></pre></div>
+          <div class="ep-section">Idempotency</div>
+          <p style="font-size:.74rem;color:var(--txt2);">Each webhook payload includes a unique <code style="color:var(--ac)">transactionId</code>. The endpoint checks for existing records with this ID before processing — duplicate deliveries are silently ignored with a 200 response.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- ERRORS -->
+    <section id="errors">
+      <div class="stag">06</div>
+      <h2>Error Reference</h2>
+      <p class="sdesc">All error responses use a consistent JSON envelope. Never parse HTTP status codes alone — always read the <code style="color:var(--ac)">errorCode</code> field for precise error type.</p>
+
+      <div class="code rv">
+        <div class="code-label"><span>Error Response Envelope</span></div>
+        <pre>{
+  <span class="k">"status"</span>: <span class="v">400</span>,
+  <span class="k">"errorCode"</span>: <span class="s">"VALIDATION_FAILED"</span>,   <span class="c">// machine-readable code</span>
+  <span class="k">"message"</span>: <span class="s">"EventDate must be in the future"</span>,
+  <span class="k">"details"</span>: [                          <span class="c">// optional field-level errors</span>
+    { <span class="k">"field"</span>: <span class="s">"eventDate"</span>, <span class="k">"error"</span>: <span class="s">"Must be future date"</span> }
+  ],
+  <span class="k">"traceId"</span>: <span class="s">"00-abc123-def456-00"</span>        <span class="c">// for support escalation</span>
+}</pre>
+      </div>
+
+      <div class="errtable rv">
+        <table class="err">
+          <thead><tr><th>HTTP</th><th>errorCode</th><th>When</th><th>Resolution</th></tr></thead>
+          <tbody>
+            <tr><td style="color:#4ADE80;">200</td><td>—</td><td>Success</td><td>—</td></tr>
+            <tr><td style="color:#4ADE80;">201</td><td>—</td><td>Resource created</td><td>—</td></tr>
+            <tr><td style="color:#FCD34D;">400</td><td>VALIDATION_FAILED</td><td>Invalid request body or params</td><td>Fix field values per details array</td></tr>
+            <tr><td style="color:#FCD34D;">401</td><td>TOKEN_EXPIRED</td><td>Access token expired</td><td>Call /auth/refresh</td></tr>
+            <tr><td style="color:#FCD34D;">401</td><td>INVALID_TOKEN</td><td>Token malformed or tampered</td><td>Re-login</td></tr>
+            <tr><td style="color:#FCD34D;">403</td><td>INSUFFICIENT_ROLE</td><td>Role not authorized for endpoint</td><td>Check user role</td></tr>
+            <tr><td style="color:#FCD34D;">404</td><td>RESOURCE_NOT_FOUND</td><td>Entity with given ID doesn't exist</td><td>Verify ID is correct</td></tr>
+            <tr><td style="color:var(--rose);">409</td><td>DUPLICATE_RESOURCE</td><td>Email already registered, etc.</td><td>Use existing resource</td></tr>
+            <tr><td style="color:var(--rose);">409</td><td>INVALID_STATE</td><td>Operation not allowed in current state</td><td>Check entity status before calling</td></tr>
+            <tr><td style="color:var(--rose);">422</td><td>BUSINESS_RULE_VIOLATION</td><td>Cancellation window, dispute window, etc.</td><td>Read message field for rule violated</td></tr>
+            <tr><td style="color:var(--rose);">500</td><td>INTERNAL_ERROR</td><td>Unexpected server error</td><td>Log traceId and contact support</td></tr>
+            <tr><td style="color:var(--rose);">503</td><td>PAYMENT_GATEWAY_ERROR</td><td>Paymob API unavailable</td><td>Retry with exponential backoff</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="div"></div>
+
+    <!-- SDK -->
+    <section id="sdks">
+      <div class="stag">07</div>
+      <h2>SDK & Integration Notes</h2>
+
+      <h3>Angular HTTP Client Setup</h3>
+      <div class="code rv">
+        <div class="code-label"><span>auth.interceptor.ts</span></div>
+        <pre><span class="c">// Add to app.module.ts providers</span>
+<span class="k">@Injectable</span>()
+<span class="k">export class</span> <span class="t">AuthInterceptor</span> <span class="k">implements</span> <span class="t">HttpInterceptor</span> {
+  intercept(req: <span class="t">HttpRequest</span>&lt;<span class="n">any</span>&gt;, next: <span class="t">HttpHandler</span>) {
+    <span class="k">const</span> token = <span class="k">this</span>.authService.getToken();
+    <span class="k">if</span> (token) {
+      req = req.clone({
+        setHeaders: { <span class="s">Authorization</span>: <span class="v">`Bearer ${token}`</span> }
+      });
+    }
+    <span class="k">return</span> next.handle(req).pipe(
+      catchError(err => {
+        <span class="k">if</span> (err.status === <span class="v">401</span> && err.error.errorCode === <span class="s">'TOKEN_EXPIRED'</span>) {
+          <span class="k">return this</span>.authService.refresh().pipe(
+            switchMap(() => next.handle(<span class="k">this</span>.addToken(req)))
+          );
+        }
+        <span class="k">return</span> throwError(() => err);
+      })
+    );
+  }
+}</pre>
+      </div>
+
+      <h3>SignalR Connection</h3>
+      <div class="code rv">
+        <div class="code-label"><span>signalr.service.ts</span></div>
+        <pre><span class="k">const</span> connection = <span class="k">new</span> HubConnectionBuilder()
+  .withUrl(<span class="s">'/hubs/notifications'</span>, {
+    accessTokenFactory: () => <span class="k">this</span>.authService.getToken()
+  })
+  .withAutomaticReconnect()
+  .build();
+
+<span class="c">// Listen for booking notifications</span>
+connection.on(<span class="s">'BookingConfirmed'</span>, (data) => {
+  <span class="k">this</span>.store.dispatch(bookingConfirmed({ payload: data }));
+});
+
+connection.on(<span class="s">'NewBookingRequest'</span>, (data) => {
+  <span class="c">// Vendor receives this on new booking</span>
+  <span class="k">this</span>.store.dispatch(newBookingReceived({ payload: data }));
+});
+
+<span class="k">await</span> connection.start();</pre>
+      </div>
+
+      <h3>Postman Collection</h3>
+      <p>A full Postman collection is maintained alongside the codebase at <code style="color:var(--ac)">docs/postman/EpicHub-API-v1.json</code>. Import it to Postman and set the <code style="color:var(--sky)">BASE_URL</code> and <code style="color:var(--sky)">JWT_TOKEN</code> environment variables. The collection includes pre-request scripts that auto-refresh tokens.</p>
+
+      <h3>Rate Limiting</h3>
+      <div class="code rv">
+        <pre><span class="c"># Response headers on rate-limited endpoints</span>
+X-RateLimit-Limit: <span class="v">100</span>        <span class="c"># requests per window</span>
+X-RateLimit-Remaining: <span class="v">87</span>     <span class="c"># requests left in window</span>
+X-RateLimit-Reset: <span class="v">1706187600</span> <span class="c"># UTC epoch reset time</span>
+
+<span class="c"># 429 Too Many Requests — back off and retry after Reset</span></pre>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="fi">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <div class="nlm">EH</div>
+      <div><span style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;">EpicHub API Docs</span><div style="font-size:.62rem;color:var(--txt3);">Technical / API Documentation — v1.0</div></div>
+    </div>
+    <div style="font-size:.68rem;color:var(--txt3);text-align:center;">Developer reference — endpoints, auth, schemas, errors<br><em style="font-size:.62rem;">Development lifecycle & testing → see Process Docs</em></div>
+    <div class="ftags"><span class="ftag">REST</span><span class="ftag">JWT</span><span class="ftag">OpenAPI 3.0</span><span class="ftag">v1</span></div>
+  </div>
+</footer>
+
+<script>
+const html=document.documentElement;
+document.getElementById('tt').addEventListener('click',()=>{const n=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',n);document.getElementById('ti').textContent=n==='dark'?'🌙':'☀️';});
+document.getElementById('hb').addEventListener('click',()=>document.getElementById('mn').classList.toggle('open'));
+const pb=document.getElementById('prog');
+window.addEventListener('scroll',()=>{pb.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%';},{passive:true});
+const ro=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');ro.unobserve(x.target);}});},{threshold:.04,rootMargin:'0px 0px -15px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+document.querySelectorAll('section[id]').forEach(s=>{new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){document.querySelectorAll('.toc a').forEach(l=>l.classList.remove('active'));const a=document.querySelector(`.toc a[href="#${x.target.id}"]`);if(a)a.classList.add('active');}});},{threshold:.2,rootMargin:'-70px 0px -55% 0px'}).observe(s);});
+function cp(btn){const pre=btn.closest('.code').querySelector('pre');navigator.clipboard.writeText(pre.innerText);btn.textContent='copied!';setTimeout(()=>btn.textContent='copy',1800);}
+</script>
+</body>
+</html>
