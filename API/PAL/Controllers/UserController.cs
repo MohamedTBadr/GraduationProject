@@ -1,4 +1,5 @@
-﻿using BLL;
+﻿using API.Controllers;
+using BLL;
 using BLL.DTOs.UserDTOs;
 using Common;
 using DAL.Entities;
@@ -11,7 +12,7 @@ namespace PAL.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(UserManager<ApplicationUser> userManager):APIController
+    public class UserController(UserManager<ApplicationUser> userManager): BaseController
     {
         [HttpGet]
         public async Task<IActionResult> GetAllUsers([FromQuery] PaginatedRequest request)

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     [ApiController]
-    public class APIController : ControllerBase
+    public class BaseController : ControllerBase
     {
         protected Guid GetUserIdFromToken()
         {

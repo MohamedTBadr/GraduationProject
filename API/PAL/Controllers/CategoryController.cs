@@ -1,4 +1,5 @@
-﻿using BLL.Services;
+﻿using API.Controllers;
+using BLL.Services;
 using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +7,7 @@ namespace PAL.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CategoryController(ICategoryService categoryService) : ControllerBase
+    public class CategoryController(ICategoryService categoryService) : BaseController
     {
         [HttpGet]
         public async Task<IActionResult> GetAllCategories()

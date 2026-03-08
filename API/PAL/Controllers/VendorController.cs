@@ -1,4 +1,5 @@
-﻿using BLL;
+﻿using API.Controllers;
+using BLL;
 using BLL.DTOs.VendorDTOs;
 using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ namespace PAL.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class VendorController(IVendorService vendorService) : ControllerBase
+    public class VendorController(IVendorService vendorService) : BaseController
     {
         [HttpGet]
         public async Task<Result<List<VendorListDTO>>> GetVendorsAsync()

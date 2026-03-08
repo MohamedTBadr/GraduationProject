@@ -11,7 +11,7 @@ namespace API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class EventsController : APIController
+    public class EventsController : BaseController
     {
         private readonly IEventService _eventService;
 

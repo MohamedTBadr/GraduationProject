@@ -1,4 +1,5 @@
-﻿using BLL.DTOs.AuthenticationDTOs;
+﻿using API.Controllers;
+using BLL.DTOs.AuthenticationDTOs;
 using BLL.Services.Interfaces;
 using Common.Exceptions;
 using IdempotentAPI.Filters;
@@ -13,7 +14,7 @@ namespace PAL.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthenticationController(IServiceManager serviceManager) : APIController
+    public class AuthenticationController(IServiceManager serviceManager) : BaseController
     {
         [HttpPost("Login")]
         [AllowAnonymous]
