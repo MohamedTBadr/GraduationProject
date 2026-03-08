@@ -1,4 +1,5 @@
-﻿using BLL.DTOs.AuthenticationDTOs;
+﻿using API.Controllers;
+using BLL.DTOs.AuthenticationDTOs;
 using BLL.Services.Interfaces;
 using Common.Exceptions;
 using IdempotentAPI.Filters;
