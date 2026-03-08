@@ -2,7 +2,7 @@
 using System.Net;
 using System.Text.Json;
 
-namespace PAL.Middlewares
+namespace Web.Api.Middlewares
 {
     public class IdempotencyCustomMiddleware(RequestDelegate next, ILogger<CustomExceptionHandlerMiddleware> _logger)
     {

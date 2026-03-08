@@ -4,7 +4,7 @@ using Shared.Exceptions;
 using IdempotentAPI.Core;
 using Microsoft.AspNetCore.Mvc;
 
-namespace PAL.Middlewares
+namespace Web.Api.Middlewares
 {
     public class CustomExceptionHandlerMiddleware(
         RequestDelegate next,

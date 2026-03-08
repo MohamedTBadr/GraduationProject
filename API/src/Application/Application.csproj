@@ -9,9 +9,9 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.0" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.15.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.3.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
   </ItemGroup>
 
   <ItemGroup>
