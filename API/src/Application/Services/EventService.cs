@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.DTOs;
 using Application.Interfaces;
-using BLL.DTOs;
-using DAL.Entities;
-using DAL.Repositories.Interfaces;
+using Domain.Contracts;
+using Domain.Entities;
 
-namespace BLL.Services
+namespace Application.Services
 {
     public class EventService : IEventService
     {

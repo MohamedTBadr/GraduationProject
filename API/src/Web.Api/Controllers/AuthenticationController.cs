@@ -1,10 +1,12 @@
-﻿using Application.Interfaces;
+﻿using Application.DTOs.AuthenticationDTOs;
+using Application.Interfaces;
 
 using IdempotentAPI.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 

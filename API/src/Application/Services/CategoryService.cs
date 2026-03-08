@@ -1,13 +1,10 @@
-﻿using DAL.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using DAL.Entities;
-using BLL.DTOs.CategoryDTOs;
-using DAL.Repositories.Contracts;
-using AutoMapper;
+﻿using Application;
+using Application.DTOs.CategoryDTOs;
 using Application.Interfaces;
-namespace BLL.Services
+using AutoMapper;
+using Domain.Contracts;
+using Domain.Entities;
+namespace Application.Services
 {
     public class CategoryService(ICategoryRepository categoryRepository, IMapper mapper) : ICategoryService
     {

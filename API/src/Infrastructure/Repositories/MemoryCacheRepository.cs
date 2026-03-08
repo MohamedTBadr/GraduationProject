@@ -1,4 +1,4 @@
-﻿using Application.Services.Caching.Interfaces;
+﻿using Domain.Contracts.Caching.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;

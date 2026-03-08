@@ -28,24 +28,24 @@ namespace Application
             => new Result<T>(false, default, errorType, message);
 
         public static Result<T> ValidationError(string message)
-            => Failure(BLL.ErrorType.Validation, message);
+            => Failure(Application.ErrorType.Validation, message);
 
         public static Result<T> NotFound(string message)
-            => Failure(BLL.ErrorType.NotFound, message);
+            => Failure(Application.ErrorType.NotFound, message);
 
         public static Result<T> Conflict(string message)
-            => Failure(BLL.ErrorType.Conflict, message);
+            => Failure(Application.ErrorType.Conflict, message);
 
         public static Result<T> Unauthorized(string message)
-            => Failure(BLL.ErrorType.Unauthorized, message);
+            => Failure(Application.ErrorType.Unauthorized, message);
 
         public static Result<T> Forbidden(string message)
-            => Failure(BLL.ErrorType.Forbidden, message);
+            => Failure(Application.ErrorType.Forbidden, message);
 
         public static Result<T> BusinessRule(string message)
-            => Failure(BLL.ErrorType.BusinessRule, message);
+            => Failure(Application.ErrorType.BusinessRule, message);
 
         public static Result<T> Unexpected(string message)
-            => Failure(BLL.ErrorType.Unexpected, message);
+            => Failure(Application.ErrorType.Unexpected, message);
     }
 }

@@ -1,9 +1,9 @@
-﻿using Application.Interfaces;
+﻿using Application;
+using Application.DTOs.VendorDTOs;
+using Application.Interfaces;
 using AutoMapper;
-using BLL.DTOs.VendorDTOs;
-using DAL.Context;
-using DAL.Entities;
-using DAL.Repositories.Contracts;
+using Domain.Contracts;
+using Domain.Entities;
 
 
 namespace BLL.Services

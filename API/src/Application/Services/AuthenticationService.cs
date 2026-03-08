@@ -1,18 +1,19 @@
-﻿using Application.Interfaces;
-using BLL.DTOs.AuthenticationDTOs;
-using Common.Exceptions;
-using DAL.Entities;
+﻿using Application.DTOs.AuthenticationDTOs;
+using Application.Interfaces;
+
+using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Exceptions;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace BLL.Services
+namespace Application.Services
 {
     // Use an interface IRefreshTokenGenerator or System.Security.Cryptography instead of Guid 
     // for a high-security refresh token implementation, but Guid is simple for this example.

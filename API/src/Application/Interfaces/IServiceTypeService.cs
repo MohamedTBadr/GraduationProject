@@ -1,4 +1,4 @@
-﻿using BLL.DTOs.ServiceTypesDTOs;
+﻿using Application.DTOs.ServiceTypesDTOs;
 
 namespace Application.Interfaces
 {

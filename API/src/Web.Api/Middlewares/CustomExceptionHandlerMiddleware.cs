@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
-using Common.Exceptions;
+using Shared.Exceptions;
 using IdempotentAPI.Core;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,6 +1,6 @@
-﻿using BLL.DTOs;
-using BLL.DTOs.ProductDTOs;
-using Common;
+﻿using Application.DTOs.ProductDTOs;
+
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;

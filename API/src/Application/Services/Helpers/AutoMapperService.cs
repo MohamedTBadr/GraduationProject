@@ -1,4 +1,10 @@
-﻿using AutoMapper;
+﻿using Application.DTOs.CategoryDTOs;
+using Application.DTOs.ProductDTOs;
+using Application.DTOs.ServiceTypesDTOs;
+using Application.DTOs.UserDTOs;
+using Application.DTOs.VendorDTOs;
+using AutoMapper;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;

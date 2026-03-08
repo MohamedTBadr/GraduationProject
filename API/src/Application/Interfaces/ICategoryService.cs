@@ -1,6 +1,5 @@
 ﻿using Application.DTOs.CategoryDTOs;
-using BLL.DTOs.CategoryDTOs;
-using DAL.Entities;
+
 
 namespace Application.Interfaces
 {

@@ -1,13 +1,11 @@
-﻿using BLL;
-using BLL.DTOs.UserDTOs;
-using Common;
-using DAL.Entities;
+﻿using Application;
+using Application.DTOs.UserDTOs;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PAL.Controllers.Attributes;
 using Shared;
+using Web.Api.Controllers.Attributes;
 
 namespace Web.Api.Controllers
 {

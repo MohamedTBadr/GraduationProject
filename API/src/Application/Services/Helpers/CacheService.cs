@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Contracts;
+using Domain.Contracts.Caching.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

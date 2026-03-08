@@ -1,4 +1,4 @@
-﻿using BLL.DTOs.AuthenticationDTOs;
+﻿using Application.DTOs.AuthenticationDTOs;
 using System.Threading.Tasks;
 
 namespace Application.Interfaces

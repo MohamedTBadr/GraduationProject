@@ -1,8 +1,7 @@
-﻿using BLL;
-using BLL.DTOs;
-using BLL.DTOs.ProductDTOs;
-using BLL.Services.Interfaces;
-using Common;
+﻿using Application;
+using Application.DTOs.ProductDTOs;
+using Application.Interfaces;
+using BLL;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 

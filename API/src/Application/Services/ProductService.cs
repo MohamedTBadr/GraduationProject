@@ -1,15 +1,16 @@
-﻿using Application.Interfaces;
+﻿using Application;
+using Application.DTOs.ProductDTOs;
+using Application.Interfaces;
 using AutoMapper;
-using BLL.DTOs;
-using BLL.DTOs.ProductDTOs;
-using Common;
-using DAL.Entities;
-using DAL.Repositories.Contracts;
+
+using Domain.Contracts;
+using Domain.Entities;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BLL.Services
+namespace Application.Services
 {
     public class ProductService(IProductRepository _productRepository, IMapper _mapper): IProductService
     {

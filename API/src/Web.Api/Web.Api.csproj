@@ -22,8 +22,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 
-
-		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.3.0" />
 
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.1" />
 

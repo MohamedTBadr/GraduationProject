@@ -1,4 +1,4 @@
-﻿using BLL.DTOs.PaymobDTOs;
+﻿using Application.DTOs.PaymobDTOs;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BLL.Services
+namespace Application.Services
 {
     public class PaymobService 
     {

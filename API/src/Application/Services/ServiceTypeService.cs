@@ -1,13 +1,16 @@
-﻿using Application.Interfaces;
+﻿using Application;
+using Application.DTOs.ServiceTypesDTOs;
+using Application.Interfaces;
 using AutoMapper;
-using BLL.DTOs.ServiceTypesDTOs;
-using DAL.Entities;
-using DAL.Repositories.Contracts;
+using Application.DTOs.ServiceTypesDTOs;
+using Domain.Entities;
+using Domain.Contracts;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BLL.Services
+namespace Application.Services
 {
     public class ServiceTypeService(IServiceTypeRepository repository, IMapper mapper) :IServiceTypeService
     {

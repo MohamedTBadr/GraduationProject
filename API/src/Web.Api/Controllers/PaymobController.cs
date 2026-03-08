@@ -1,6 +1,6 @@
 ﻿using Application.DTOs.PaymobDTOs;
-using BLL.DTOs.PaymobDTOs;
-using BLL.Services;
+using Application.Services;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Api.Controllers

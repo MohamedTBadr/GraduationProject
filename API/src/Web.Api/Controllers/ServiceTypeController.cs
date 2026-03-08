@@ -1,8 +1,6 @@
-﻿using Application.Interfaces;
-using BLL.DTOs.ServiceTypesDTOs;
-using BLL.Services;
-using BLL.Services.Interfaces;
-using DAL.Entities;
+﻿using Application.DTOs.ServiceTypesDTOs;
+using Application.Interfaces;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Api.Controllers

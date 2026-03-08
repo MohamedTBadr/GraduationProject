@@ -1,4 +1,4 @@
-﻿using BLL.DTOs.VendorDTOs;
+﻿using Application.DTOs.VendorDTOs;
 
 namespace Application.Interfaces
 {

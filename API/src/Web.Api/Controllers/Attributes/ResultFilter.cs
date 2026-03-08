@@ -1,4 +1,5 @@
 ﻿// PAL/Filters/ResultFilter.cs
+using Application;
 using BLL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

@@ -1,10 +1,7 @@
 ﻿using Application;
 using Application.DTOs.VendorDTOs;
-using BLL;
-using BLL.DTOs.VendorDTOs;
-using BLL.Services.Interfaces;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using PAL.Controllers.Attributes;
 using Web.Api.Controllers.Attributes;
 
 namespace Web.Api.Controllers
