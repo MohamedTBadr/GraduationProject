@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AutoMapper;
+using DAL.Repositories.Interfaces;
 
 namespace BLL
 {
@@ -26,6 +27,11 @@ namespace BLL
             services.AddScoped<IVendorService, VendorService>();
             services.AddScoped<IServiceTypeService,ServiceTypeService>();
             services.AddScoped<ICategoryService,CategoryService>();
+            services.AddScoped<IEventService, EventService>();
+            services.AddScoped<IEventItemService, EventItemService>();
+
+
+
 
 
 

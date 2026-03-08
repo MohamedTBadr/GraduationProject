@@ -24,5 +24,7 @@ namespace DAL.Entities
         public string Notes {  get; set; }
 
         public string EventStatus { get; set; } = "Planned"; // Planned, Completed, Cancelled
+
+        public List<EventItem> EventItems { get; set; } = new List<EventItem>();    
     }
 }

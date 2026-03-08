@@ -1,18 +1,42 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using System;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 
-namespace PAL.Controllers
+namespace API.Controllers
 {
-    [Route("api/[Controller]")]
     [ApiController]
-    public abstract class APIController : ControllerBase
+    public class APIController : ControllerBase
     {
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        protected string GetEmailFromToken()
+        protected Guid GetUserIdFromToken()
         {
-            return User.FindFirstValue(ClaimTypes.Email);
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirst("sub");
+
+            if (claim == null || !Guid.TryParse(claim.Value, out var userId))
+                throw new UnauthorizedAccessException("Invalid or missing user id in token.");
+
+            return userId;
         }
+
+        protected string GetUserRoleFromToken()
+        {
+            var claim = User.FindFirst(ClaimTypes.Role)
+                     ?? User.FindFirst("role");
+
+            if (claim == null)
+                throw new UnauthorizedAccessException("Invalid or missing role in token.");
+
+            return claim.Value; // "Admin" | "Vendor" | "Client"
+        }
+
+        protected bool IsAdmin() => GetUserRoleFromToken() == "Admin";
+        protected bool IsVendor() => GetUserRoleFromToken() == "Vendor";
+        protected bool IsClient() => GetUserRoleFromToken() == "Client";
+
+        /// <summary>
+        /// Returns true only if current user is Admin OR the requested resource belongs to them.
+        /// </summary>
+        protected bool IsAdminOrOwner(Guid resourceOwnerId)
+            => IsAdmin() || GetUserIdFromToken() == resourceOwnerId;
     }
 }

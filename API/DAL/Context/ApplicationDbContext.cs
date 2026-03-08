@@ -67,6 +67,10 @@ namespace DAL.Context
         public DbSet<Order> Orders { get; set; }
          public DbSet<OrderItem> OrderItems { get; set; }
             public DbSet<Vendor> Vendors { get; set; }
+        public DbSet<VendorServiceType> VendorServiceTypes { get; set; }
+        public DbSet<VendorRating> VendorRatings { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<EventItem> EventItems { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<IdentityRole<Guid>> IdentityRoles { get; set; }
 
