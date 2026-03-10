@@ -9,9 +9,13 @@ namespace Web.Api.Controllers
     {
         protected Guid GetUserIdFromToken()
         {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier)
-                     ?? User.FindFirst("sub");
-
+            // 🔍 Debug - print all claims to see what's there
+            foreach (var claims in User.Claims)
+            {
+                Console.WriteLine($"Type: {claims.Type} | Value: {claims.Value}");
+            }
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+          
             if (claim == null || !Guid.TryParse(claim.Value, out var userId))
                 throw new UnauthorizedAccessException("Invalid or missing user id in token.");
 

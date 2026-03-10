@@ -105,7 +105,109 @@ namespace Application.Services
 
             // 4) Compose email (HTML) - Removed HTML for brevity but kept the structure
             var subject = "Reset your password";
-            var body = $@"... Your full HTML email body here, using the {callbackUrl} ...";
+            var body = $@"<!doctype html>
+<html lang=""en"">
+    <head>
+        <meta charset=""UTF-8"" />
+        <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
+        <title>Email Verification</title>
+    </head>
+    <body style=""background-color: #f0ede6; margin: 0; padding: 0; box-sizing: border-box"">
+        <div
+            style=""
+                padding: 40px 16px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+            "">
+            <div style=""width: 100%; max-width: 720px; margin: 0 auto"">
+                <div
+                    style=""
+                        background-color: #2d5a4b;
+                        border-radius: 16px 16px 0 0;
+                        padding: 44px 40px 40px;
+                        text-align: center;
+                    "">
+                    <h1 style=""font-size: 32px; color: #ffffff; line-height: 1.3; margin: 0"">
+                        Welcome to EpicHub, laila!
+                    </h1>
+                </div>
+                <div style=""background-color: #ffffff; padding: 40px 40px 36px"">
+                    <p
+                        style=""
+                            font-size: 15px;
+                            color: #3a3a3a;
+                            line-height: 1.7;
+                            margin: 0 0 20px 0;
+                        "">
+                        Dear <span style=""color: #c07c3a; font-weight: 600"">{user.UserName}</span>,
+                    </p>
+                    <p
+                        style=""
+                            font-size: 15px;
+                            color: #3a3a3a;
+                            line-height: 1.7;
+                            margin: 0 0 20px 0;
+                        "">
+                        Thank you for registering with EpicHub! Please use the OTP below to verify
+                        your email address and complete your registration:
+                    </p>
+                    <div style=""margin: 28px 0; text-align: center"">
+                        <span
+                            style=""
+                                display: inline-block;
+
+                                font-size: 42px;
+                                color: #c07c3a;
+                                letter-spacing: 0.15em;
+                                background: #fdf6ed;
+                                border: 1.5px solid #e8d5b8;
+                                border-radius: 10px;
+                                padding: 14px 36px;
+                            "">
+                          {callbackUrl}
+                        </span>
+                    </div>
+                    <p
+                        style=""
+                            font-size: 15px;
+                            color: #3a3a3a;
+                            line-height: 1.7;
+                            margin: 0 0 20px 0;
+                        "">
+                        If you did not request this registration, please ignore this email.
+                    </p>
+                    <hr style=""border: none; border-top: 1px solid #ebebeb; margin: 32px 0 28px"" />
+                    <p style=""font-size: 14px; color: #5a5a5a; line-height: 1.6; margin: 0"">
+                        Best regards,<br />
+                        <strong>EpicHub Team</strong>
+                    </p>
+                </div>
+                <div
+                    style=""
+                        background-color: #2d5a4b;
+                        border-radius: 0 0 16px 16px;
+                        padding: 28px 40px;
+                        text-align: center;
+                    "">
+                    <p style=""font-size: 13px; color: #a8c9bc; margin: 0 0 6px 0"">
+                        For support and updates, please visit our website or contact us via email.
+                    </p>
+
+                    <p style=""font-size: 13px; color: #a8c9bc; margin: 0"">
+                        Email:
+                        <a
+                            href=""mailto:EpicHub@gmail.com""
+                            style=""color: #7dcfb6; text-decoration: none; font-weight: 500"">
+                            EpicHubhelp@gmail.com
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+";
 
             // 5) send email (use your IEmailSender implementation)
             await emailSender.SendEmailAsync(user.Email!, subject, body);
@@ -170,6 +272,7 @@ namespace Application.Services
             {
                 new(ClaimTypes.Name, user.UserName!),
                 new(ClaimTypes.Email, user.Email!),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()), // ✅ Add this - user Guid ID
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // JWT ID
             };
 

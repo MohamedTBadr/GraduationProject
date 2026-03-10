@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
-using Scalar.AspNetCore;
 using System.Reflection;
 using Web.Api;
 using Web.Api.Hubs;
@@ -32,9 +31,9 @@ namespace Web
 
 
            await InfrastructureRegistrationService.AddInfrastructureServices(builder.Services, builder.Configuration);
+            await WebRegistrationService.AddWebsRegistrationServices(builder.Services, builder.Configuration);
             await ApplicationRegistrationService.AddApplicationServices(builder.Services, builder.Configuration);
-             await WebRegistrationService.AddWebsRegistrationServices(builder.Services, builder.Configuration);
-            builder.Services.AddOpenApi();
+            //builder.Services.AddOpenApi();
             builder.Services.AddResponseCompression(options =>
             {
                 options.EnableForHttps = true;
@@ -56,21 +55,21 @@ namespace Web
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
-                    app.MapOpenApi();          // serves /openapi/v1.json
-                    app.MapScalarApiReference(); // serves modern UI at /scalar/v1
-                    //app.UseSwagger();
-                    //app.UseSwaggerUI(options =>
-                    //{
-                    //    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Graduation Project V1");
-                    //    options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
-                    //    options.DocumentTitle = "Graduation Project V1";
-                    //    options.EnablePersistAuthorization();
-                    //    options.DisplayRequestDuration();
-                    //    //options.RoutePrefix = string.Empty; // Serve Swagger UI at the app's root
-                    //    //options.InjectStylesheet("/swagger-ui/style.css");
+                //app.MapOpenApi();          // serves /openapi/v1.json
+                //app.MapScalarApiReference(); // serves modern UI at /scalar/v1
+                //app.UseSwagger();
+                //app.UseSwaggerUI(options =>
+                //{
+                //    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Graduation Project V1");
+                //    options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+                //    options.DocumentTitle = "Graduation Project V1";
+                //    options.EnablePersistAuthorization();
+                //    options.DisplayRequestDuration();
+                //    //options.RoutePrefix = string.Empty; // Serve Swagger UI at the app's root
+                //    //options.InjectStylesheet("/swagger-ui/style.css");
 
-                    //});
-                }
+                //});
+            }
 
                 //await SeedingScope(app);
 

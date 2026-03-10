@@ -1,56 +1,54 @@
-﻿namespace Web.Api.Hubs
-{
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.SignalR;
+﻿// Web.Api/Hubs/ChatHub.cs
+using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
-    [Authorize] // Protect Hub
+namespace Web.Api.Hubs
+{
+    [Authorize]
     public class ChatHub : Hub
     {
-        // Triggered when a client connects
-        public override Task OnConnectedAsync()
+        private readonly IChatService _chatService;
+        private readonly ILogger<ChatHub> _logger;
+
+        public ChatHub(IChatService chatService, ILogger<ChatHub> logger)
         {
-            var name = Context.User?.Identity?.Name;
-            Console.WriteLine($"Connected: {name}");
-            return base.OnConnectedAsync();
+            _chatService = chatService;
+            _logger = logger;
         }
 
-        // Broadcast message to all users
-        public async Task SendMessage(string message)
+        public override async Task OnConnectedAsync()
         {
-            var sender = Context.User.Identity.Name;
-            await Clients.All.SendAsync("ReceiveMessage", sender, message);
+            _logger.LogInformation("User connected: {UserId}", Context.UserIdentifier);
+            await Clients.Others.SendAsync("UserOnline", Context.UserIdentifier);
+            await base.OnConnectedAsync();
         }
 
-        // =======================
-        // 🚀 GROUP CHAT METHODS
-        // =======================
-
-        // Join a group (room)
-        public async Task JoinGroup(string groupName)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-
-            await Clients.Group(groupName)
-                .SendAsync("SystemMessage", $"{Context.User.Identity.Name} joined {groupName}");
+            _logger.LogInformation("User disconnected: {UserId}", Context.UserIdentifier);
+            await Clients.Others.SendAsync("UserOffline", Context.UserIdentifier);
+            await base.OnDisconnectedAsync(exception);
         }
 
-        // Leave a group
-        public async Task LeaveGroup(string groupName)
+        public async Task SendPrivateMessage(Guid receiverId, string content)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-
-            await Clients.Group(groupName)
-                .SendAsync("SystemMessage", $"{Context.User.Identity.Name} left {groupName}");
+            var senderId = Guid.Parse(Context.UserIdentifier!);
+            var message = await _chatService.SendMessageAsync(senderId, receiverId, content);
+            // Echo back to sender too (for multi-device)
+            await Clients.Caller.SendAsync("ReceivePrivateMessage", message);
         }
 
-        // Send a message to a group
-        public async Task SendMessageToGroup(string groupName, string message)
+        public async Task MarkMessageAsRead(Guid messageId)
         {
-            var sender = Context.User.Identity.Name;
+            var userId = Guid.Parse(Context.UserIdentifier!);
+            await _chatService.MarkAsReadAsync(messageId, userId);
+        }
 
-            await Clients.Group(groupName)
-                .SendAsync("ReceiveGroupMessage", groupName, sender, message);
+        public async Task Typing(string toUserId)
+        {
+            await Clients.User(toUserId)
+                .SendAsync("UserTyping", Context.UserIdentifier);
         }
     }
-
 }

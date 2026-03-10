@@ -6,7 +6,7 @@ using Domain.Contracts;
 using Domain.Entities;
 
 
-namespace BLL.Services
+namespace Application.Services
 {
     public class VendorService(IVendorRepository vendorRepository, IMapper mapper) : IVendorService
     {

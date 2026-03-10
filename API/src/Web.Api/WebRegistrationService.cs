@@ -1,20 +1,25 @@
-﻿using Application.Services.Helpers;
+﻿using Application.Hubs;
+using Application.Interfaces;
+using Application.Services;
+using Application.Services.Helpers;
 using Domain.Entities;
 using Google.GenAI;
 using IdempotentAPI.Cache.DistributedCache.Extensions.DependencyInjection;
 using IdempotentAPI.Core;
 using IdempotentAPI.Extensions.DependencyInjection;
 using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.IdentityModel.Tokens;
 using Shared.Exceptions;
-
-
 //using PAL.Notifications;
 using System.IO.Compression;
+using System.Text;
 using System.Threading.RateLimiting;
 using Web.Api.Controllers.Attributes;
+using Web.Api.Services;
 //using PAL.Notifications;
 
 namespace Web.Api
@@ -116,6 +121,9 @@ namespace Web.Api
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 6;
             });
+
+
+
             #endregion
 
 
@@ -214,7 +222,8 @@ namespace Web.Api
 
 
             #endregion
-
+            services.AddScoped<IChatNotificationService, ChatNotificationService>();
+            services.AddScoped<IChatService, ChatService>();
             return services;
         }
     }

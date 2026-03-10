@@ -7,7 +7,7 @@ using Application.Interfaces;
 using Domain.Contracts;
 using Domain.Entities;
 
-namespace BLL.Services
+namespace Application.Services
 {
     public class EventItemService : IEventItemService
     {

@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces;
 
-namespace BLL.Services
+namespace Application.Services
 {
     public class ServiceManager(
         IAttachmentService attachmentService,

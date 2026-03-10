@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -9,9 +9,10 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.0" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.15.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.3.0" />
+	  <!-- ✅ After -->
+	  <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.10.0" />
   </ItemGroup>
 
   <ItemGroup>

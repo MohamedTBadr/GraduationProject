@@ -1,11 +1,10 @@
 ﻿using Amazon.S3;
+using Application.DTOs;
 using Application.DTOs.AuthenticationDTOs;
 using Application.DTOs.PaymobDTOs;
 using Application.Interfaces;
 using Application.Services;
 using Application.Services.Helpers;
-using BLL.DTOs;
-using BLL.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +30,7 @@ namespace Application
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IEventItemService, EventItemService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
-
+            services.AddScoped<IChatService, ChatService>();
 
 
 
@@ -79,27 +78,26 @@ namespace Application
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
         {
             var jwt = configuration.GetSection("JWTOptions").Get<JWTOptions>();
-            services.AddAuthentication(config =>
+                       // ❌ Missing this is a very common cause of 401
+            services.AddAuthentication(options =>
             {
-                config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(config =>
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; // ✅ Add this
+
+            })
+            .AddJwtBearer(options =>
             {
-                config.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = jwt!.Issuer,
-
                     ValidateAudience = true,
-                    ValidAudience = jwt.Audience,
-
-
-                    ValidateLifetime = true
-
-
-                    ,
+                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey))
+                    ValidIssuer = configuration["JWTOptions:Issuer"],
+                    ValidAudience = configuration["JWTOptions:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(configuration["JWTOptions:SecretKey"]!))
                 };
             });
         }

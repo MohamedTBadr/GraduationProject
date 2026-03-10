@@ -1,5 +1,6 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Transfer;
+using Application.DTOs;
 using BLL.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;

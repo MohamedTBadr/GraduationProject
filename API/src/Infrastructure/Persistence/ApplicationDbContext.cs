@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace Infrastructure.Persistence
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
@@ -52,6 +52,24 @@ namespace Infrastructure.Persistence
                 .WithMany(v => v.VendorRatings)
                 .HasForeignKey(vr => vr.VendorId)
                 .OnDelete(DeleteBehavior.Cascade); // 👈 keep this
+
+            builder.Entity<Conversation>()
+    .HasOne(c => c.User1)
+    .WithMany()
+    .HasForeignKey(c => c.User1Id)
+    .OnDelete(DeleteBehavior.NoAction); // ✅ No cascade
+
+            builder.Entity<Conversation>()
+                .HasOne(c => c.User2)
+                .WithMany()
+                .HasForeignKey(c => c.User2Id)
+                .OnDelete(DeleteBehavior.NoAction); // ✅ No cascade
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.NoAction); // ✅ No cascade
         }
 
         public DbSet<Category> Categories { get; set; }
@@ -66,6 +84,9 @@ namespace Infrastructure.Persistence
         public DbSet<EventItem> EventItems { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<IdentityRole<Guid>> IdentityRoles { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Conversation> Conversations { get; set; }
+
 
 
     }

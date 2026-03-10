@@ -1,6 +1,6 @@
 ﻿using Application.DTOs.CategoryDTOs;
 using Application.Interfaces;
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Api.Controllers
