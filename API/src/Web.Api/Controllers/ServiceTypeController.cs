@@ -1,6 +1,6 @@
 ﻿using Application.DTOs.ServiceTypesDTOs;
 using Application.Interfaces;
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Api.Controllers
@@ -29,6 +29,7 @@ namespace Web.Api.Controllers
             return Ok(serviceType);
         }
 
+        [Authorize(Roles = "Admin")]
 
         [HttpPost]
         public async Task<IActionResult> AddServiceType(CreateServiceTypeRequest  type)
@@ -36,6 +37,7 @@ namespace Web.Api.Controllers
             await serviceTypeService.AddTypeAsync(type);
             return Created();
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteServiceType(Guid id)
@@ -43,6 +45,7 @@ namespace Web.Api.Controllers
             await serviceTypeService.DeleteTypeAsync(id);
             return NoContent();
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateServiceType(Guid id, UpdateServiceTypeRequest type)

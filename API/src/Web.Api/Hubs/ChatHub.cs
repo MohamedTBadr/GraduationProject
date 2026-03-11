@@ -1,54 +1,71 @@
-﻿// Web.Api/Hubs/ChatHub.cs
-using Application.Interfaces;
+﻿using Application.Interfaces;
+using Google.GenAI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
-namespace Web.Api.Hubs
+//[Authorize]
+public class ChatHub(IChatService chatService) : Hub
 {
-    [Authorize]
-    public class ChatHub : Hub
+    private Guid CurrentUserId =>
+        Guid.Parse(Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+    public override async Task OnConnectedAsync()
     {
-        private readonly IChatService _chatService;
-        private readonly ILogger<ChatHub> _logger;
-
-        public ChatHub(IChatService chatService, ILogger<ChatHub> logger)
+        // notify everyone this user is online
+        await Clients.Others.SendAsync("UserPresence", new
         {
-            _chatService = chatService;
-            _logger = logger;
-        }
+            UserId = CurrentUserId,
+            IsOnline = true
+        });
+        await base.OnConnectedAsync();
+    }
 
-        public override async Task OnConnectedAsync()
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        await Clients.Others.SendAsync("UserPresence", new
         {
-            _logger.LogInformation("User connected: {UserId}", Context.UserIdentifier);
-            await Clients.Others.SendAsync("UserOnline", Context.UserIdentifier);
-            await base.OnConnectedAsync();
-        }
+            UserId = CurrentUserId,
+            IsOnline = false
+        });
+        await base.OnDisconnectedAsync(exception);
+    }
 
-        public override async Task OnDisconnectedAsync(Exception? exception)
-        {
-            _logger.LogInformation("User disconnected: {UserId}", Context.UserIdentifier);
-            await Clients.Others.SendAsync("UserOffline", Context.UserIdentifier);
-            await base.OnDisconnectedAsync(exception);
-        }
+    public async Task SendMessage(Guid receiverId, string content)
+    {
+        var message = await chatService
+            .SendMessageAsync(CurrentUserId, receiverId, content);
 
-        public async Task SendPrivateMessage(Guid receiverId, string content)
-        {
-            var senderId = Guid.Parse(Context.UserIdentifier!);
-            var message = await _chatService.SendMessageAsync(senderId, receiverId, content);
-            // Echo back to sender too (for multi-device)
-            await Clients.Caller.SendAsync("ReceivePrivateMessage", message);
-        }
+        // confirm to sender
+        await Clients.Caller.SendAsync("ReceiveMessage", message);
 
-        public async Task MarkMessageAsRead(Guid messageId)
-        {
-            var userId = Guid.Parse(Context.UserIdentifier!);
-            await _chatService.MarkAsReadAsync(messageId, userId);
-        }
+        // push to receiver instantly
+        await Clients.User(receiverId.ToString())
+            .SendAsync("ReceiveMessage", message);
+    }
 
-        public async Task Typing(string toUserId)
-        {
-            await Clients.User(toUserId)
-                .SendAsync("UserTyping", Context.UserIdentifier);
-        }
+    public async Task MarkAsRead(Guid messageId)
+    {
+        await chatService.MarkAsReadAsync(messageId, CurrentUserId);
+
+        await Clients.Caller.SendAsync("MessageRead", messageId);
+    }
+
+    public async Task Typing(Guid receiverId, bool isTyping)
+    {
+        await Clients.User(receiverId.ToString())
+            .SendAsync("UserTyping", new
+            {
+                UserId = CurrentUserId,
+                IsTyping = isTyping
+            });
     }
 }
+//```
+
+//---
+
+//## One Rule to Remember
+//```
+//If the other user needs to know instantly  →  Hub (WebSocket)
+//If it's just loading data for yourself     →  Controller (REST)

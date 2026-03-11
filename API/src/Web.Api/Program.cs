@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
 using System.Reflection;
 using Web.Api;
-using Web.Api.Hubs;
+
 using Web.Api.Middlewares;
 
 
@@ -46,11 +46,21 @@ namespace Web
                 options.Level = System.IO.Compression.CompressionLevel.Fastest;
             });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy
+                        .WithOrigins("https://localhost:4200") // your frontend
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials(); // ← must for SignalR
+                });
+            });
 
 
-           
 
-                var app = builder.Build();
+            var app = builder.Build();
                 app.UseStaticFiles();
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
@@ -71,30 +81,15 @@ namespace Web
                 //});
             }
 
-                //await SeedingScope(app);
+            //await SeedingScope(app);
 
 
-                //app.Logger.LogInformation("Application Starting Up");
-
-
-
-                app.UseMiddleware<IdempotencyCustomMiddleware>();
-                app.UseMiddleware<CustomExceptionHandlerMiddleware>();
-                app.UseAuthentication();
-                app.UseAuthorization();
-                app.UseResponseCompression();
-
-                app.UseHttpsRedirection();
-                //app.UseRateLimiter();
-
-
-                //app.UseStaticFiles();
-
-                app.MapPost("/AI-Chat", async ([FromServices] GeminiService geminiService) =>
+            //app.Logger.LogInformation("Application Starting Up");
+            app.MapPost("/AI-Chat", async ([FromServices] GeminiService geminiService) =>
+            {
+                var budget = 3000;
+                var products = new[]
                 {
-                    var budget = 3000;
-                    var products = new[]
-                    {
         new { Name = "Product A", Price = 1000 },
         new { Name = "Product B", Price = 1500 },
         new { Name = "Product C", Price = 800 },
@@ -102,38 +97,38 @@ namespace Web
         new { Name = "Product E", Price = 500 }
         };
 
-                    // Step 1: Compute all valid combinations locally
-                    var affordableProducts = products.Where(p => p.Price <= budget).ToArray();
-                    var combinations = new List<object>();
+                // Step 1: Compute all valid combinations locally
+                var affordableProducts = products.Where(p => p.Price <= budget).ToArray();
+                var combinations = new List<object>();
 
-                    int n = affordableProducts.Length;
-                    for (int i = 1; i < (1 << n); i++)
+                int n = affordableProducts.Length;
+                for (int i = 1; i < (1 << n); i++)
+                {
+                    var combo = new List<string>();
+                    int total = 0;
+                    for (int j = 0; j < n; j++)
                     {
-                        var combo = new List<string>();
-                        int total = 0;
-                        for (int j = 0; j < n; j++)
+                        if ((i & (1 << j)) != 0)
                         {
-                            if ((i & (1 << j)) != 0)
-                            {
-                                combo.Add(affordableProducts[j].Name);
-                                total += affordableProducts[j].Price;
-                            }
+                            combo.Add(affordableProducts[j].Name);
+                            total += affordableProducts[j].Price;
                         }
-
-                        if (total <= budget)
-                            combinations.Add(new
-                            {
-                                products = combo,
-                                total_price = total,
-                                remaining_budget = budget - total
-                            });
                     }
 
-                    combinations = combinations.OrderBy(c => (int)c.GetType().GetProperty("total_price").GetValue(c)).ToList();
+                    if (total <= budget)
+                        combinations.Add(new
+                        {
+                            products = combo,
+                            total_price = total,
+                            remaining_budget = budget - total
+                        });
+                }
 
-                    // Step 2: Prepare top N combinations for AI enrichment
-                    var topCombos = combinations.Take(5).Select(c => ((dynamic)c).products).ToList();
-                    var prompt = $@"
+                combinations = combinations.OrderBy(c => (int)c.GetType().GetProperty("total_price").GetValue(c)).ToList();
+
+                // Step 2: Prepare top N combinations for AI enrichment
+                var topCombos = combinations.Take(5).Select(c => ((dynamic)c).products).ToList();
+                var prompt = $@"
 You are an API that returns ONLY valid JSON. Do not include markdown or extra text.
 Given the top product combinations under a budget of {budget} and their names:
 
@@ -152,27 +147,36 @@ Return JSON with the following schema for each combination:
 Return an array named ""enriched_recommendations"". Only JSON.
 ";
 
-                    // Step 3: Call AI
-                    var aiResponse = await geminiService.SendMessageAsync(prompt);
+                // Step 3: Call AI
+                var aiResponse = await geminiService.SendMessageAsync(prompt);
 
-                    // Step 4: Merge AI response with full deterministic combinations
-                    var jsonResponse = new
-                    {
-                        budget,
-                        products_available = affordableProducts.ToDictionary(p => p.Name, p => p.Price),
-                        recommendations = combinations, // full list
-                        enriched_recommendations = aiResponse // AI-enhanced top combos
-                    };
+                // Step 4: Merge AI response with full deterministic combinations
+                var jsonResponse = new
+                {
+                    budget,
+                    products_available = affordableProducts.ToDictionary(p => p.Name, p => p.Price),
+                    recommendations = combinations, // full list
+                    enriched_recommendations = aiResponse // AI-enhanced top combos
+                };
 
-                    return Results.Json(jsonResponse);
-                });
+                return Results.Json(jsonResponse);
+            });
 
-                app.MapControllers();
-                //app.MapHub<ChatHub>("Hub/chatHub");
-                //app.MapHub<NotificationHub>("Hub/notifications");
 
-                //app.Run($"https://localhost:{builder.Configuration["PORT"]}");
-                await app.RunAsync();
+
+            // ✅ Correct order
+            app.UseHttpsRedirection();
+            app.UseResponseCompression();
+            app.UseMiddleware<CustomExceptionHandlerMiddleware>();
+            app.UseMiddleware<IdempotencyCustomMiddleware>();
+            app.UseCors("CorsPolicy");           // ← add CORS
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.MapControllers();
+            app.MapHub<ChatHub>("/Hub/chatHub"); // ← fixed slash
+
+            //app.Run($"https://localhost:{builder.Configuration["PORT"]}");
+            await app.RunAsync();
           
         }
 

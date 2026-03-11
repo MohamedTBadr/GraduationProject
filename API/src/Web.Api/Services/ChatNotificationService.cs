@@ -1,7 +1,6 @@
 ﻿using Application.DTOs.MessageDTOs;
 using Application.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Web.Api.Hubs;
 
 namespace Web.Api.Services
 {

@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.DTOs.UserDTOs;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +49,7 @@ namespace Web.Api.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Admin")]
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
@@ -107,6 +109,7 @@ namespace Web.Api.Controllers
 
             return NoContent();
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpPost]
         [SuccessStatusCode(201)]

@@ -25,17 +25,27 @@ namespace Web.Api.Controllers
             }
             return Ok(category);
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddCategory(string name)
         {
             await categoryService.AddCategoryAsync(new CreateCategoryRequest(name));
             return Created();
         }
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
             await categoryService.DeleteCategoryAsync(id);
             return NoContent();
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateCategory(Guid id, string name)
+        {
+            await categoryService.UpdateCategoryAsync(id, new UpdateCategoryRequest(name));
+            return Ok();
+
         }
     }
 }

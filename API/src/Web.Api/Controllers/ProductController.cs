@@ -2,6 +2,7 @@
 using Application.DTOs.ProductDTOs;
 using Application.Interfaces;
 using BLL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 
@@ -52,6 +53,7 @@ namespace Web.Api.Controllers
         }
 
         // POST api/products
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateAsync([FromBody] CreateProductRequest dto)
         {
@@ -62,6 +64,7 @@ namespace Web.Api.Controllers
 
             return Ok(result); // filter handles the failure
         }
+        [Authorize(Roles = "Admin")]
 
         // PUT api/products/{id}
         [HttpPut("{id:guid}")]
@@ -73,6 +76,7 @@ namespace Web.Api.Controllers
             var result = await productService.UpdateAsync(dto);
             return Ok(result);
         }
+        [Authorize(Roles = "Admin")]
 
         // DELETE api/products/{id}
         [HttpDelete("{id:guid}")]
