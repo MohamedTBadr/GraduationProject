@@ -1,0 +1,53 @@
+﻿using Application;
+using Application.DTOs.CategoryDTOs;
+using Application.Interfaces;
+using AutoMapper;
+using Domain.Contracts;
+using Domain.Entities;
+namespace Application.Services
+{
+    public class CategoryService(ICategoryRepository categoryRepository, IMapper mapper) : ICategoryService
+    {
+        public async Task<Result<List<CategoryDTO>>> GetAllCategoriesAsync()
+        {
+            var categories = await categoryRepository.GetAllCategoriesAsync();
+            var categoriesDTO = mapper.Map<List<CategoryDTO>>(categories);
+            return Result<List<CategoryDTO>>.Success(categoriesDTO);
+        }
+        public async Task<Result<CategoryDTO>> GetCategoryByIdAsync(Guid id)
+        {
+            var category = await categoryRepository.GetCategoryByIdAsync(id);
+
+            if (category == null) return Result<CategoryDTO>.NotFound("Category not found");
+
+            var categoryDTO = mapper.Map<CategoryDTO>(category);
+            return Result<CategoryDTO>.Success(categoryDTO);
+        }
+        public async Task AddCategoryAsync(CreateCategoryRequest category)
+        {
+            // mapper 
+            
+            var newCategory = mapper.Map<Category>(category);
+
+            await categoryRepository.AddCategoryAsync(newCategory);
+        }
+        public async Task<Result<CategoryDTO>> DeleteCategoryAsync(Guid id)
+        {
+            var category = await categoryRepository.GetCategoryByIdAsync(id);
+            if (category == null) return Result<CategoryDTO>.NotFound("Category not found");
+
+            await categoryRepository.DeleteCategoryAsync(category);
+            return Result<CategoryDTO>.Success(mapper.Map<CategoryDTO>(category));
+        }
+
+        public async Task<Result<CategoryDTO>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request)
+        {
+            var existingCategory = await categoryRepository.GetCategoryByIdAsync(id);
+            if (existingCategory == null) return Result<CategoryDTO>.NotFound("Category not found");
+
+            var categoryMapped = mapper.Map(request, existingCategory);
+            await categoryRepository.UpdateCategoryAsync(categoryMapped);
+            return Result<CategoryDTO>.Success(mapper.Map<CategoryDTO>(categoryMapped));
+        }
+    }
+}
