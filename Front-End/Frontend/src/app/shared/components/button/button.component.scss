@@ -1,0 +1,4 @@
+/* The base `.btn` styles will be globally provided in styles.scss so they apply inside and outside the component identically. */
+:host {
+    display: inline-block;
+}

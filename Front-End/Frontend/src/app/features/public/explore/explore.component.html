@@ -1,0 +1,144 @@
+<div class="page active" id="page-explore">
+    <div class="explore-hero">
+        <h1>Explore Vendors</h1>
+        <p>340+ verified vendors across Egypt — filter to match your vision and budget</p>
+    </div>
+
+    <!-- Smart Filter Bar -->
+    <div class="filter-bar-wrap" id="filterBarWrap">
+        <div class="container" style="position:relative">
+            <!-- Scrollable pills row -->
+            <div class="filter-bar-scroll">
+                <div class="filter-bar">
+                    <div class="filter-pill" [class.active]="activePanel === 'type'" (click)="togglePanel('type')">
+                        <span>Service Type</span>
+                        <span class="pill-arrow" *ngIf="filters.type">({{filters.type}})</span>
+                        <span class="pill-arrow">▾</span>
+                    </div>
+                    <div class="filter-divider"></div>
+
+                    <div class="filter-pill" [class.active]="activePanel === 'loc'" (click)="togglePanel('loc')">
+                        <span>Location</span>
+                        <span class="pill-arrow" *ngIf="filters.loc">({{filters.loc}})</span>
+                        <span class="pill-arrow">▾</span>
+                    </div>
+                    <div class="filter-divider"></div>
+
+                    <div class="filter-pill" [class.active]="activePanel === 'price'" (click)="togglePanel('price')">
+                        <span>Price Range</span>
+                        <span class="pill-arrow" *ngIf="filters.maxPrice < 100000">(<{{filters.maxPrice /1000}}k)</span>
+                                <span class="pill-arrow">▾</span>
+                    </div>
+                    <div class="filter-divider"></div>
+
+                    <div class="filter-pill" [class.active]="activePanel === 'rating'" (click)="togglePanel('rating')">
+                        <span>Rating</span>
+                        <span class="pill-arrow" *ngIf="filters.rating">({{filters.rating}}+)</span>
+                        <span class="pill-arrow">▾</span>
+                    </div>
+                    <div class="filter-divider"></div>
+
+                    <button class="filter-pill" (click)="clearAllFilters()" style="color:#dc2626;border-color:#fecaca">
+                        Clear All</button>
+                </div>
+            </div>
+
+            <!-- Filter panels rendered OUTSIDE the overflow scroll layer -->
+            <div class="filter-panels-layer" *ngIf="activePanel">
+                <!-- Panel: Type -->
+                <div class="filter-panel open" *ngIf="activePanel === 'type'" style="left:0">
+                    <div class="fp-title">Service Type</div>
+                    <div class="fp-chips">
+                        <div class="fp-chip"
+                            *ngFor="let t of ['Venue','Catering','Decoration','Photography','Entertainment']"
+                            [class.selected]="activeType === t" (click)="activeType = t">{{t}}</div>
+                    </div>
+                    <div class="fp-footer">
+                        <button class="fp-clear" (click)="activeType=''; updateFilters()">Clear</button>
+                        <button class="fp-apply btn btn-gold btn-sm" (click)="updateFilters()">Apply</button>
+                    </div>
+                </div>
+
+                <!-- Panel: Location -->
+                <div class="filter-panel open" *ngIf="activePanel === 'loc'" style="left:140px">
+                    <div class="fp-title">Location</div>
+                    <div class="fp-chips">
+                        <div class="fp-chip" *ngFor="let l of ['Cairo','New Cairo','Giza','Alexandria','North Coast']"
+                            [class.selected]="activeLoc === l" (click)="activeLoc = l">{{l}}</div>
+                    </div>
+                    <div class="fp-footer">
+                        <button class="fp-clear" (click)="activeLoc=''; updateFilters()">Clear</button>
+                        <button class="fp-apply btn btn-gold btn-sm" (click)="updateFilters()">Apply</button>
+                    </div>
+                </div>
+
+                <!-- Panel: Price -->
+                <div class="filter-panel open" *ngIf="activePanel === 'price'" style="left:280px;min-width:320px">
+                    <div class="fp-title">Max Budget (EGP)</div>
+                    <input type="range" class="filter-range" [(ngModel)]="activePrice" min="0" max="100000" step="5000"
+                        style="width:100%;border:none;padding:0;height:4px;accent-color:var(--gold);margin:12px 0 4px" />
+                    <div class="fp-range-labels"><span>0</span><span>{{activePrice | number}} EGP</span></div>
+                    <div class="fp-footer">
+                        <button class="fp-clear" (click)="activePrice=100000; updateFilters()">Reset</button>
+                        <button class="fp-apply btn btn-gold btn-sm" (click)="updateFilters()">Apply</button>
+                    </div>
+                </div>
+
+                <!-- Panel: Rating -->
+                <div class="filter-panel open" *ngIf="activePanel === 'rating'" style="left:400px">
+                    <div class="fp-title">Minimum Rating</div>
+                    <div class="fp-chips">
+                        <div class="fp-chip" *ngFor="let r of [3,4,4.5,4.8]" [class.selected]="activeRating === r"
+                            (click)="activeRating = r">{{r}}+</div>
+                    </div>
+                    <div class="fp-footer">
+                        <button class="fp-clear" (click)="activeRating=0; updateFilters()">Clear</button>
+                        <button class="fp-apply btn btn-gold btn-sm" (click)="updateFilters()">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overlay to close panels -->
+            <div class="filter-panel-overlay" *ngIf="activePanel" (click)="activePanel = null"></div>
+
+            <!-- Active filter tags -->
+            <div class="active-filters">
+                <div class="af-tag" *ngIf="filters.type">{{filters.type}} <button
+                        (click)="filters.type=''; triggerSearch()"></button></div>
+                <div class="af-tag" *ngIf="filters.loc">{{filters.loc}} <button
+                        (click)="filters.loc=''; triggerSearch()"></button></div>
+                <div class="af-tag" *ngIf="filters.rating">{{filters.rating}}+ <button
+                        (click)="filters.rating=0; triggerSearch()"></button></div>
+                <div class="af-tag" *ngIf="filters.maxPrice < 100000">Up to {{filters.maxPrice | number}} EGP <button
+                        (click)="filters.maxPrice=100000; triggerSearch()"></button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="results-header">
+            <div class="results-count">Showing <strong>{{vendorCount}}</strong> vendors</div>
+            <div style="display:flex;gap:10px;align-items:center">
+                <!-- <button class="btn btn-ghost btn-sm" routerLink="/compare">️ Compare (0)</button> -->
+                <select class="sort-select" [(ngModel)]="sortOption" (change)="triggerSearch()">
+                    <option value="rating">Top Rated</option>
+                    <option value="price_asc">Price: Low → High</option>
+                    <option value="price_desc">Price: High → Low</option>
+                    <option value="reviews">Most Reviewed</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Vendor Grid Placeholder -->
+        <div class="explore-grid">
+            <app-vendor-card *ngFor="let v of displayVendors" [vendor]="v"></app-vendor-card>
+            <div class="no-results" *ngIf="displayVendors.length === 0">
+                <div style="font-size:3rem;margin-bottom:12px">🔍</div>
+                <h3>No vendors found</h3>
+                <p>Try adjusting your filters or search query.</p>
+                <button class="btn btn-gold btn-sm" (click)="clearAllFilters()" style="margin-top:16px">Clear All
+                    Filters</button>
+            </div>
+        </div>
+    </div>
+</div>

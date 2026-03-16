@@ -1,0 +1,88 @@
+.admin-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    background-color: transparent;
+    /* Assuming the dark #151828 color from main area flows up */
+
+    .search-container {
+        position: relative;
+        width: 400px;
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8c8fa7;
+            font-size: 0.9rem;
+        }
+
+        .search-input {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            padding: 10px 16px 10px 40px;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+
+            &::placeholder {
+                color: #8c8fa7;
+            }
+
+            &:focus {
+                outline: none;
+                border-color: var(--gold);
+                background-color: rgba(255, 255, 255, 0.08);
+            }
+        }
+    }
+
+    .topbar-actions {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+
+        .icon-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: var(--gold);
+            }
+
+            .indicator {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                border: 2px solid #151828;
+
+                &.indicator-yellow {
+                    background-color: #facc15;
+                }
+
+                &.indicator-pink {
+                    background-color: #ec4899;
+                }
+            }
+        }
+    }
+}

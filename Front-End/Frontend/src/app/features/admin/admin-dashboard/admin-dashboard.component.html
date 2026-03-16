@@ -1,0 +1,151 @@
+<div class="ad-section active" style="display:block">
+    <div class="ad-page-hd">
+        <div>
+            <div class="ad-page-title">Platform Overview</div>
+            <div class="ad-page-sub">Real-time pulse of the Eventora platform · March 2026</div>
+        </div>
+        <div style="display:flex;gap:8px">
+            <button class="ad-btn ad-btn-ghost">Export Report</button>
+            <button class="ad-btn ad-btn-gold">⚡ Quick Actions</button>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div id="ad-alerts-strip">
+        <div class="ad-alert err" style="margin-bottom:8px"> <strong>Critical:</strong> 2 unresolved support tickets require immediate admin action. <span style="cursor:pointer;text-decoration:underline;margin-left:8px" routerLink="/admin/support">View Tickets →</span></div>
+        <div class="ad-alert warn"> <strong>Pending:</strong> 14 vendor applications and 5 payout requests awaiting review. <span style="cursor:pointer;text-decoration:underline;margin-left:8px" routerLink="/admin/vendors">Review Now →</span></div>
+    </div>
+
+    <div class="ad-kpi-grid">
+        <div class="ad-kpi ak-gold">
+            <div class="ad-kpi-icon"></div>
+            <div class="ad-kpi-val">847K</div>
+            <div class="ad-kpi-lbl">Total Revenue (EGP)</div>
+            <div class="ad-kpi-trend akt-up">↑ 23% vs last month</div>
+        </div>
+        <div class="ad-kpi ak-blue">
+            <div class="ad-kpi-icon">📅</div>
+            <div class="ad-kpi-val">312</div>
+            <div class="ad-kpi-lbl">Total Bookings</div>
+            <div class="ad-kpi-trend akt-up">↑ 18% this month</div>
+        </div>
+        <div class="ad-kpi ak-green">
+            <div class="ad-kpi-icon"></div>
+            <div class="ad-kpi-val">47</div>
+            <div class="ad-kpi-lbl">Active Vendors</div>
+            <div class="ad-kpi-trend akt-flat">14 pending approval</div>
+        </div>
+        <div class="ad-kpi ak-purple">
+            <div class="ad-kpi-icon"></div>
+            <div class="ad-kpi-val">1,284</div>
+            <div class="ad-kpi-lbl">Registered Users</div>
+            <div class="ad-kpi-trend akt-up">↑ 142 this week</div>
+        </div>
+    </div>
+    <div class="ad-kpi-grid">
+        <div class="ad-kpi ak-cyan">
+            <div class="ad-kpi-icon">⭐</div>
+            <div class="ad-kpi-val">4.82</div>
+            <div class="ad-kpi-lbl">Platform Avg Rating</div>
+            <div class="ad-kpi-trend akt-up">↑ 0.04 this month</div>
+        </div>
+        <div class="ad-kpi ak-red">
+            <div class="ad-kpi-icon"></div>
+            <div class="ad-kpi-val">7</div>
+            <div class="ad-kpi-lbl">Open Support Tickets</div>
+            <div class="ad-kpi-trend akt-down">2 critical priority</div>
+        </div>
+        <div class="ad-kpi ak-gold">
+            <div class="ad-kpi-icon"></div>
+            <div class="ad-kpi-val">84.7K</div>
+            <div class="ad-kpi-lbl">Platform Commission (EGP)</div>
+            <div class="ad-kpi-trend akt-up">↑ 23% vs last month</div>
+        </div>
+        <div class="ad-kpi ak-green">
+            <div class="ad-kpi-icon"></div>
+            <div class="ad-kpi-val">5</div>
+            <div class="ad-kpi-lbl">Pending Payouts</div>
+            <div class="ad-kpi-trend akt-flat">142,500 EGP total</div>
+        </div>
+    </div>
+
+    <div class="ad-g2">
+        <div class="ad-card">
+            <div class="ad-card-title">Monthly Revenue (EGP)<span class="ad-card-link" routerLink="/admin/financials">Full →</span></div>
+            <div class="ad-bar-chart" id="ad-rev-chart" style="display:flex;align-items:flex-end;gap:15px;height:120px;padding-top:20px;margin-top:10px;justify-content:center">
+                <div style="width:25px;background:var(--gold);height:62%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Oct</span></div>
+                <div style="width:25px;background:var(--gold);height:71%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Nov</span></div>
+                <div style="width:25px;background:var(--gold);height:98%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Dec</span></div>
+                <div style="width:25px;background:var(--gold);height:82%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Jan</span></div>
+                <div style="width:25px;background:var(--gold);height:91%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Feb</span></div>
+                <div style="width:25px;background:var(--gold);height:85%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Mar</span></div>
+            </div>
+        </div>
+        <div class="ad-card">
+            <div class="ad-card-title">Booking Volume<span class="ad-card-link" routerLink="/admin/bookings">All →</span></div>
+            <div class="ad-bar-chart" id="ad-bk-chart" style="display:flex;align-items:flex-end;gap:15px;height:120px;padding-top:20px;margin-top:10px;justify-content:center">
+                <div style="width:25px;background:#3b82f6;height:42%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Oct</span></div>
+                <div style="width:25px;background:#3b82f6;height:51%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Nov</span></div>
+                <div style="width:25px;background:#3b82f6;height:73%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Dec</span></div>
+                <div style="width:25px;background:#3b82f6;height:60%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Jan</span></div>
+                <div style="width:25px;background:#3b82f6;height:68%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Feb</span></div>
+                <div style="width:25px;background:#3b82f6;height:55%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Mar</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ad-g3">
+        <div class="ad-card">
+            <div class="ad-card-title">Revenue by Category</div>
+            <div id="ad-rev-cat">
+                <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Venue</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:#3b82f6;width:38%"></div></div><div style="width:30px;text-align:right">38%</div></div>
+                <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Catering</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--gold);width:24%"></div></div><div style="width:30px;text-align:right">24%</div></div>
+                <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Decoration</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--gold);width:18%"></div></div><div style="width:30px;text-align:right">18%</div></div>
+                <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Photography</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:#10b981;width:11%"></div></div><div style="width:30px;text-align:right">11%</div></div>
+                <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Entertainment</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--gold);width:9%"></div></div><div style="width:30px;text-align:right">9%</div></div>
+            </div>
+        </div>
+        <div class="ad-card">
+            <div class="ad-card-title">Top Vendors This Month<span class="ad-card-link" routerLink="/admin/vendors">All →</span></div>
+            <div id="ad-top-vendors">
+                <div class="ad-metric-row"><div style="display:flex;align-items:center;gap:9px"><div style="font-size:1.1rem"></div><div><div class="ad-metric-val" style="font-size:.82rem">Nile City Venue</div><div class="ad-metric-lbl" style="font-size:.7rem">Venue</div></div></div><div style="text-align:right"><div style="color:var(--gold);font-weight:700;font-size:.8rem">142,000 EGP</div><div class="ad-metric-lbl">28 bookings</div></div></div>
+                <div class="ad-metric-row"><div style="display:flex;align-items:center;gap:9px"><div style="font-size:1.1rem">️</div><div><div class="ad-metric-val" style="font-size:.82rem">Elite Catering</div><div class="ad-metric-lbl" style="font-size:.7rem">Catering</div></div></div><div style="text-align:right"><div style="color:var(--gold);font-weight:700;font-size:.8rem">85,500 EGP</div><div class="ad-metric-lbl">34 bookings</div></div></div>
+                <div class="ad-metric-row"><div style="display:flex;align-items:center;gap:9px"><div style="font-size:1.1rem"></div><div><div class="ad-metric-val" style="font-size:.82rem">White Rose Decor</div><div class="ad-metric-lbl" style="font-size:.7rem">Decoration</div></div></div><div style="text-align:right"><div style="color:var(--gold);font-weight:700;font-size:.8rem">42,000 EGP</div><div class="ad-metric-lbl">61 bookings</div></div></div>
+                <div class="ad-metric-row"><div style="display:flex;align-items:center;gap:9px"><div style="font-size:1.1rem"></div><div><div class="ad-metric-val" style="font-size:.82rem">Studio Lens</div><div class="ad-metric-lbl" style="font-size:.7rem">Photography</div></div></div><div style="text-align:right"><div style="color:var(--gold);font-weight:700;font-size:.8rem">28,000 EGP</div><div class="ad-metric-lbl">43 bookings</div></div></div>
+            </div>
+        </div>
+        <div class="ad-card">
+            <div class="ad-card-title">Recent Activity<span class="ad-card-link" routerLink="/admin/activity">Live →</span></div>
+            <div id="ad-recent-activity">
+                <div class="ad-activity-item"><div class="ad-act-icon" style="background:rgba(34,197,94,.14)"></div><div><div class="ad-act-text">New user <span class="ad-act-bold">Heba Ali</span> registered.</div><div class="ad-act-time">2 mins ago</div></div></div>
+                <div class="ad-activity-item"><div class="ad-act-icon" style="background:rgba(201,168,76,.14)">📅</div><div><div class="ad-act-text">Booking <span class="ad-act-bold">BK-2026-419</span> created for <span class="ad-act-bold">Studio Lens</span>.</div><div class="ad-act-time">15 mins ago</div></div></div>
+                <div class="ad-activity-item"><div class="ad-act-icon" style="background:rgba(34,197,94,.14)"></div><div><div class="ad-act-text">Vendor <span class="ad-act-bold">Elite Catering</span> approved by Admin.</div><div class="ad-act-time">1 hr ago</div></div></div>
+                <div class="ad-activity-item"><div class="ad-act-icon" style="background:rgba(245,158,11,.14)"></div><div><div class="ad-act-text">New vendor application: <span class="ad-act-bold">Golden Touch Decor</span>.</div><div class="ad-act-time">2 hrs ago</div></div></div>
+                <div class="ad-activity-item"><div class="ad-act-icon" style="background:rgba(239,68,68,.14)"></div><div><div class="ad-act-text">Support ticket <span class="ad-act-bold">TK-082</span> opened. priority: high.</div><div class="ad-act-time">4 hrs ago</div></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ad-g2">
+        <div class="ad-card">
+            <div class="ad-card-title">Pending Vendor Approvals<span class="ad-card-link" routerLink="/admin/vendors">Review All →</span></div>
+            <div id="ad-pending-vendors">
+                <div class="ad-vendor-row"><div class="ad-vendor-ava"></div><div style="flex:1"><div class="ad-vendor-name">Sweet Dreams Cakes</div><div class="ad-vendor-sub">Cakes & Desserts · Heliopolis · Applied Feb 28</div></div><span class="ad-pill ap-green">Complete</span><button class="ad-btn ad-btn-green ad-btn-sm">Approve</button><button class="ad-btn ad-btn-red ad-btn-sm">Reject</button></div>
+                <div class="ad-vendor-row"><div class="ad-vendor-ava"></div><div class="ad-vendor-name" style="flex:1"><div class="ad-vendor-name">DJ Mido Events</div><div class="ad-vendor-sub">Entertainment · Alexandria · Applied Feb 27</div></div><span class="ad-pill ap-amber">Under Review</span><button class="ad-btn ad-btn-green ad-btn-sm">Approve</button><button class="ad-btn ad-btn-red ad-btn-sm">Reject</button></div>
+                <div class="ad-vendor-row"><div class="ad-vendor-ava">✨</div><div class="ad-vendor-name" style="flex:1"><div class="ad-vendor-name">Golden Touch Decor</div><div class="ad-vendor-sub">Decoration · Giza · Applied Feb 27</div></div><span class="ad-pill ap-green">Complete</span><button class="ad-btn ad-btn-green ad-btn-sm">Approve</button><button class="ad-btn ad-btn-red ad-btn-sm">Reject</button></div>
+                <div style="text-align:center;margin-top:10px"><button class="ad-btn ad-btn-ghost" style="width:100%;justify-content:center;border-radius:8px" routerLink="/admin/vendors">View All 14 Pending →</button></div>
+            </div>
+        </div>
+        <div class="ad-card">
+            <div class="ad-card-title">Platform Health</div>
+            <div id="ad-platform-health">
+                <div class="ad-metric-row"><span class="ad-metric-lbl">Booking Success Rate</span><div style="text-align:right"><div class="ad-metric-val">94.2%</div><div style="font-size:.68rem;color:#4ade80">↑ 1.2% this month</div></div></div>
+                <div class="ad-metric-row"><span class="ad-metric-lbl">Avg Vendor Response</span><div style="text-align:right"><div class="ad-metric-val">1.8 hrs</div><div style="font-size:.68rem;color:#4ade80">Target: 2 hrs ✓</div></div></div>
+                <div class="ad-metric-row"><span class="ad-metric-lbl">Platform Uptime</span><div style="text-align:right"><div class="ad-metric-val">99.97%</div><div style="font-size:.68rem;color:#4ade80">Last 30 days</div></div></div>
+                <div class="ad-metric-row"><span class="ad-metric-lbl">Dispute Rate</span><div style="text-align:right"><div class="ad-metric-val">2.1%</div><div style="font-size:.68rem;color:#f87171">↑ 0.3% — monitor</div></div></div>
+                <div class="ad-metric-row"><span class="ad-metric-lbl">User Satisfaction</span><div style="text-align:right"><div class="ad-metric-val">4.82 / 5</div><div style="font-size:.68rem;color:#4ade80">Based on 1,284 ratings</div></div></div>
+                <div class="ad-metric-row"><span class="ad-metric-lbl">Commission Collected</span><div style="text-align:right"><div class="ad-metric-val">84,700 EGP</div><div style="font-size:.68rem;color:#4ade80">This month</div></div></div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,305 @@
+.vp-header-dark {
+    background-color: var(--navy);
+    color: var(--white);
+    padding: 60px 0 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.vp-header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.vp-title {
+    font-family: var(--ff-d);
+    font-size: 2.8rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.vp-meta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    font-size: 0.95rem;
+    color: var(--cream2);
+    
+    .stars {
+        color: var(--gold);
+        letter-spacing: 2px;
+    }
+
+    .rating {
+        font-weight: 600;
+        color: var(--white);
+    }
+    
+    .location {
+        color: var(--white);
+    }
+
+    .save-btn {
+        color: var(--white);
+        margin-left: 8px;
+        padding: 0;
+        &:hover {
+            color: var(--gold);
+        }
+    }
+}
+
+.carousel-dots {
+    display: flex;
+    gap: 8px;
+    align-self: center;
+    margin-top: 40px;
+
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+
+        &.active {
+            background-color: var(--gold);
+            width: 24px;
+            border-radius: 4px;
+        }
+    }
+}
+
+.vp-nav {
+    border-bottom: 1px solid var(--lgray);
+    background: var(--cream);
+    
+    .tabs {
+        display: flex;
+        gap: 24px;
+        
+        .tab {
+            padding: 20px 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 0.95rem;
+            position: relative;
+
+            &.active {
+                color: var(--navy);
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -1px;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background-color: var(--gold);
+                }
+            }
+
+            &:hover:not(.active) {
+                color: var(--navy);
+            }
+        }
+    }
+}
+
+.vp-main-grid {
+    padding: 40px 0;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.service-card {
+    background: var(--white);
+    border: 1px solid var(--lgray);
+    border-radius: var(--r2);
+    padding: 24px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--sh1);
+        border-color: var(--gold);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+
+        .icon {
+            font-size: 1.5rem;
+        }
+
+        .view-details {
+            color: var(--gold);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        color: var(--navy);
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .card-price {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--gray);
+        margin-bottom: 12px;
+
+        &.text-gold {
+            color: var(--gold);
+        }
+    }
+
+    .card-desc {
+        color: var(--gray);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+}
+
+.vp-sidebar {
+    position: sticky;
+    top: 90px;
+}
+
+.booking-widget {
+    background: var(--white);
+    border-radius: var(--r3);
+    padding: 32px;
+    box-shadow: var(--sh2);
+
+    .widget-price {
+        font-family: var(--ff-d);
+        font-size: 2rem;
+        color: var(--gold);
+        margin-bottom: 8px;
+    }
+
+    .widget-sub {
+        color: var(--gray);
+        font-size: 0.85rem;
+        margin-bottom: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--lgray);
+            border-radius: var(--r1);
+            font-family: inherit;
+            color: var(--navy);
+            
+            &:focus {
+                outline: none;
+                border-color: var(--gold);
+            }
+        }
+    }
+
+    .btn-block {
+        width: 100%;
+        justify-content: center;
+        margin-top: 12px;
+        padding: 14px;
+        font-size: 1rem;
+    }
+    
+    .btn-green {
+        background-color: #25D366;
+        color: white;
+        border: none;
+        &:hover {
+            background-color: #128C7E;
+        }
+    }
+}
+
+.section-title {
+    font-family: var(--ff-d);
+    font-size: 1.8rem;
+    color: var(--navy);
+    margin-bottom: 20px;
+}
+
+.section-text {
+    color: var(--gray);
+    line-height: 1.7;
+    margin-bottom: 24px;
+}
+
+/* Reviews existing styles */
+.reviews-summary {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
+    align-items: center;
+    background: var(--white);
+    padding: 30px;
+    border-radius: var(--r2);
+    border: 1px solid var(--lgray);
+}
+
+.rating-big {
+    text-align: center;
+    .rating-score {
+        font-size: 3.5rem;
+        font-family: var(--ff-d);
+        color: var(--navy);
+        line-height: 1;
+    }
+    .stars { margin: 8px 0; color: var(--gold); }
+    .rating-count { color: var(--gray); font-size: 0.9rem; }
+}
+
+.rating-bars {
+    flex: 1;
+    .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+    .bar-label { width: 14px; color: var(--gray); font-size: 0.85rem; }
+    .bar-track {
+        flex: 1;
+        height: 6px;
+        background: var(--lgray);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .bar-fill {
+        background: var(--gold);
+        height: 100%;
+    }
+}

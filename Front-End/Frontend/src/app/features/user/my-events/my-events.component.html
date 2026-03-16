@@ -1,0 +1,121 @@
+
+
+<!-- Event Tabs -->
+<div class="event-tabs-bar" style="display:flex;gap:40px;margin-bottom:20px;overflow-x:auto;padding-bottom:0;border-bottom:2px solid var(--cream2)">
+    <div *ngFor="let ev of events" 
+        style="padding-bottom:10px;font-size:0.9rem;font-weight:700;cursor:pointer;position:relative" 
+        [ngStyle]="{'color': ev.id === activeEventId ? 'var(--navy)' : 'var(--gray)'}"
+        (click)="switchEvent(ev.id)">
+        {{ev.name}}
+        <div *ngIf="ev.id === activeEventId" style="position:absolute;bottom:-2px;left:0;width:100%;height:3px;background:var(--gold);border-radius:3px 3px 0 0"></div>
+    </div>
+    
+    <div style="padding-bottom:10px;font-size:0.8rem;font-weight:600;cursor:pointer;color:var(--gray);border:1px dashed var(--lgray);border-radius:50px;padding:4px 12px;margin-bottom:10px"
+        (click)="openAddEvent()">
+        + Add Event
+    </div>
+</div>
+
+<div *ngIf="activeEvent" class="event-detail-container">
+    <!-- Event Hero Details -->
+    <div
+        style="background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:var(--r2);padding:30px;margin-bottom:24px;color:var(--white);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px">
+        <div>
+            <div style="font-size:.78rem;opacity:.5;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Event
+                Details</div>
+            <div style="font-family:var(--ff-d);font-size:2rem;line-height:1">{{activeEvent.name}}</div>
+            <div style="font-size:.9rem;opacity:.7;margin-top:8px">
+                📅 {{activeEvent.date}} · {{activeEvent.type}} · {{activeEvent.guests}} guests
+            </div>
+        </div>
+        <div style="display:flex;gap:24px;text-align:center">
+            <div>
+                <div style="font-family:var(--ff-d);font-size:2.5rem;color:var(--gold);line-height:1">{{daysLeft}}</div>
+                <div style="font-size:.75rem;opacity:.6">days left</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dash-row" style="display:grid;grid-template-columns:1.2fr 1fr;gap:24px;margin-bottom:24px">
+        <!-- Checklist -->
+        <div class="dash-card"
+            style="background:var(--white);border-radius:var(--r2);padding:24px;box-shadow:var(--sh1)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h3 style="font-family:var(--ff-d);font-size:1.3rem;color:var(--navy);margin:0">Checklist</h3>
+                <button class="btn-text" style="color:var(--gold);font-weight:600;font-size:.9rem">+ Add Task</button>
+            </div>
+            <div class="checklist-container">
+                <div *ngFor="let item of activeEvent.checklist; let i = index" class="checklist-item"
+                    style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--lgray)">
+                    <div class="check-box" [class.done]="item.done" (click)="toggleCheck(i)"
+                        style="width:20px;height:20px;border:2px solid var(--lgray);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s">
+                        <span *ngIf="item.done" style="color:var(--white);font-size:.8rem">✓</span>
+                    </div>
+                    <span [class.done-text]="item.done"
+                        style="font-size:.95rem;color:var(--navy);transition:all .2s">{{item.text}}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget -->
+        <div class="dash-card"
+            style="background:var(--white);border-radius:var(--r2);padding:24px;box-shadow:var(--sh1)">
+            <h3 style="font-family:var(--ff-d);font-size:1.3rem;color:var(--navy);margin-bottom:20px">Budget Tracker
+            </h3>
+            <div style="margin-bottom:20px">
+                <div
+                    style="display:flex;justify-content:space-between;font-size:.9rem;font-weight:600;color:var(--navy);margin-bottom:8px">
+                    <span>Total Budget</span>
+                    <span>{{activeEvent.budget | number}} EGP</span>
+                </div>
+                <div class="budget-bar" style="height:10px;background:var(--lgray);border-radius:5px;overflow:hidden">
+                    <div class="budget-fill" [style.width.%]="budgetPct"
+                        style="height:100%;background:var(--gold);border-radius:5px;transition:width .5s ease-out">
+                    </div>
+                </div>
+                <div
+                    style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--gray);margin-top:8px">
+                    <span>Spent: {{spent | number}} EGP</span>
+                    <span>Left: {{(activeEvent.budget - spent) | number}} EGP</span>
+                </div>
+            </div>
+            <div style="display:grid;gap:10px">
+                <div *ngFor="let v of activeEvent.vendors"
+                    style="display:flex;justify-content:space-between;font-size:.9rem">
+                    <span style="color:var(--gray)">{{v.emoji}} {{v.type}}</span>
+                    <span style="font-weight:600">{{v.price | number}} EGP</span>
+                </div>
+                <div
+                    style="display:flex;justify-content:space-between;font-size:.95rem;padding-top:12px;border-top:1px solid var(--lgray);margin-top:5px">
+                    <span style="font-weight:700;color:var(--navy)">Remaining</span>
+                    <span style="font-weight:700;color:var(--gold)">{{(activeEvent.budget - spent) | number}} EGP</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booked Vendors -->
+    <div class="dash-card" style="background:var(--white);border-radius:var(--r2);padding:24px;box-shadow:var(--sh1)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="font-family:var(--ff-d);font-size:1.3rem;color:var(--navy);margin:0">Booked Vendors</h3>
+            <button class="btn btn-outline btn-sm" routerLink="/explore">+ Add Vendor</button>
+        </div>
+        <div class="vendors-list">
+            <div *ngFor="let v of activeEvent.vendors" class="vendor-row"
+                style="display:flex;align-items:center;padding:16px 0;border-bottom:1px solid var(--lgray);gap:16px">
+                <div
+                    style="font-size:1.8rem;width:50px;height:50px;background:var(--cream2);border-radius:12px;display:flex;align-items:center;justify-content:center">
+                    {{v.emoji}}</div>
+                <div style="flex:1">
+                    <div style="font-weight:700;color:var(--navy)">{{v.name}}</div>
+                    <div style="font-size:.85rem;color:var(--gray)">{{v.type}} {{v.price > 0 ? '· ' + (v.price | number)
+                        + ' EGP' : ''}}</div>
+                </div>
+                <span class="badge" [class.badge-confirmed]="v.status === 'confirmed'"
+                    [class.badge-pending]="v.status === 'pending'">
+                    {{v.status}}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

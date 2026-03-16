@@ -1,0 +1,130 @@
+/* ═══ USER TOPBAR ══════════════════════════════════════════════════════ */
+
+.usr-topbar {
+  height: 64px;
+  background: var(--white);
+  border-bottom: 1px solid var(--lgray);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 0 rgba(26, 37, 64, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Breadcrumb / page title */
+.ust-breadcrumb {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ust-page-title {
+  font-family: var(--ff-d);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ust-page-sub {
+  font-size: 0.75rem;
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  span {
+    color: var(--gold);
+    font-weight: 600;
+  }
+}
+
+/* Actions cluster */
+.ust-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ust-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--cream2);
+  border: 1.5px solid var(--lgray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  color: var(--navy);
+
+  &:hover {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.08);
+    color: var(--gold);
+  }
+}
+
+.ust-notif-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid var(--white);
+}
+
+.ust-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 0.83rem;
+  padding: 9px 18px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.22s;
+
+  i { font-size: 0.8rem; }
+
+  &:hover {
+    background: var(--gold2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(201, 168, 76, 0.3);
+  }
+}
+
+/* Date chip */
+.ust-date-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  background: var(--cream);
+  border: 1.5px solid var(--lgray);
+  border-radius: 50px;
+  font-size: 0.77rem;
+  color: var(--gray);
+  font-weight: 500;
+  white-space: nowrap;
+
+  i { color: var(--gold); font-size: 0.78rem; }
+}

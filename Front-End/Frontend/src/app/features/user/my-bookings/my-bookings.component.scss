@@ -1,0 +1,213 @@
+.mb-header {
+  margin-bottom: 24px;
+}
+.mb-title {
+  font-family: var(--ff-d);
+  font-size: 2.2rem;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.mb-subtitle {
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+.mb-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.mb-stat-card {
+  padding: 24px;
+  border-radius: var(--r);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  text-align: center;
+}
+.mb-stat-card .val {
+  font-family: var(--ff-d);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.mb-stat-card .lbl {
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+.card-confirmed { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.2); }
+.card-confirmed .val { color: var(--navy); }
+
+.card-pending { background: #fdf6e6; border-color: #f7e1b9; }
+.card-pending .val { color: var(--navy); }
+
+.card-completed { background: #eff3f8; border-color: #d8e4f1; }
+.card-completed .val { color: var(--navy); }
+
+.card-cancelled { background: #fce8e8; border-color: #f8c9c9; }
+.card-cancelled .val { color: var(--navy); }
+
+.mb-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1.5px solid var(--lgray);
+  padding-bottom: 2px;
+  margin-bottom: 24px;
+}
+.mb-tab {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  padding-bottom: 12px;
+  border-bottom: 3px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+.mb-tab.active {
+  color: var(--navy);
+  border-bottom-color: var(--gold);
+}
+.mb-tab:hover:not(.active) {
+  color: var(--navy);
+}
+.mb-tab-badge {
+  background: var(--gold);
+  color: var(--navy);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 50px;
+}
+.mb-tab-badge.inactive {
+  background: var(--lgray);
+  color: var(--gray);
+}
+
+.mb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mb-booking-card {
+  background: var(--white);
+  border-radius: var(--r2);
+  padding: 24px;
+  box-shadow: var(--sh);
+}
+.bk-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.bk-info {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.bk-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--cream2);
+  border-radius: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+.bk-vendor-name {
+  font-family: var(--ff-d);
+  font-size: 1.3rem;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+.bk-service-type {
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+.bk-event-ref {
+  font-size: 0.75rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.bk-status-col {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.bk-status-chip {
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.bk-status-chip.Confirmed { background: rgba(34,197,94,0.15); color: var(--green); }
+.bk-status-chip.Pending { background: rgba(245,158,11,0.15); color: var(--amber); }
+
+.bk-price {
+  font-family: var(--ff-b);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--navy);
+}
+.bk-price span {
+  font-size: 0.8rem;
+}
+
+.bk-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--cream2);
+  margin: 16px 0;
+}
+
+.bk-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bk-actions {
+  display: flex;
+  gap: 12px;
+}
+.bk-actions .btn {
+  background: var(--white);
+  border: 1px solid var(--lgray);
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 0.8rem;
+  border-radius: 50px;
+  padding: 8px 16px;
+  transition: all 0.2s;
+}
+.bk-actions .btn:hover {
+  border-color: var(--gold);
+}
+.bk-actions .btn.cancel {
+  color: #ef4444; 
+}
+.bk-actions .btn.cancel:hover {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: #ef4444;
+}
+
+.bk-id {
+  font-size: 0.65rem;
+  color: var(--lgray);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

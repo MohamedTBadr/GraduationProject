@@ -1,0 +1,47 @@
+<div class="page active" id="page-favorites">
+    <div class="container" style="padding:60px 0;min-height:70vh">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px">
+            <div>
+                <h2 class="section-title">My Favorites</h2>
+                <p class="section-sub">Vendors and packages you've saved for later.</p>
+            </div>
+            <button class="btn btn-outline" *ngIf="mockFavorites.length > 0" (click)="clearFavorites()">Clear
+                All</button>
+        </div>
+
+        <div *ngIf="mockFavorites.length === 0"
+            style="text-align:center;padding:80px 20px;background:var(--cream);border-radius:12px">
+            <div style="font-size:3rem;margin-bottom:16px"></div>
+            <h3 style="font-family:var(--ff-d);font-size:1.4rem;color:var(--navy);margin-bottom:8px">No favourites yet
+            </h3>
+            <p style="color:var(--gray);margin-bottom:24px">Start exploring vendors and tap the heart icon to save them
+                here.</p>
+            <button class="btn btn-gold" routerLink="/explore">Explore Vendors</button>
+        </div>
+
+        <div class="explore-grid" *ngIf="mockFavorites.length > 0">
+            <div class="vendor-card" routerLink="/vendor/{{v.id}}" *ngFor="let v of mockFavorites">
+                <div class="vc-photo">
+                    <div class="vc-photo-inner">{{v.icon}}</div>
+                    <div class="vc-top-row">
+                        <div class="vc-cat-badge">{{v.category}}</div>
+                        <button class="vc-fav-btn" style="color:var(--gold)"
+                            (click)="removeFromFavorites(v.id, $event)"></button>
+                    </div>
+                </div>
+                <div class="vc-body">
+                    <div class="vc-name">{{v.name}}</div>
+                    <div class="vc-loc">📍 {{v.location}}</div>
+                    <div class="vc-rating-row">
+                        <span class="stars"></span>
+                        <span class="vc-review-count">{{v.rating}}</span>
+                    </div>
+                    <div class="vc-footer">
+                        <div class="vc-price">From <strong>{{v.price | number}} EGP</strong></div>
+                        <button class="vc-view-btn">View Profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

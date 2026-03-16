@@ -1,0 +1,123 @@
+<div class="page active" id="page-vendor-profile" *ngIf="vendor">
+    <!-- Header -->
+    <div class="vp-header-dark">
+        <div class="container vp-header-content">
+            <h1 class="vp-title">{{vendor.name}}</h1>
+            <div class="vp-meta">
+                <span class="stars"></span>
+                <span class="rating">{{vendor.rating}}</span>
+                <span class="location">📍 {{vendor.location}}</span>
+                <button class="btn-text save-btn" (click)="toggleFav()">
+                    {{favoriteService.isFavorite(vendor.id) ? ' Saved' : ' Save'}}
+                </button>
+            </div>
+            <div class="carousel-dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="vp-nav">
+        <div class="container">
+            <div class="tabs">
+                <div class="tab" [class.active]="activeTab === 'services'" (click)="activeTab = 'services'">Services
+                </div>
+                <div class="tab" [class.active]="activeTab === 'packages'" (click)="activeTab = 'packages'">Packages
+                </div>
+                <div class="tab" [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">Reviews</div>
+                <div class="tab" [class.active]="activeTab === 'contact'" (click)="activeTab = 'contact'">Contact Vendor
+                </div>
+                <div class="tab" [class.active]="activeTab === 'about'" (click)="activeTab = 'about'">About</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container vp-main-grid">
+        <!-- Left Column -->
+        <div class="vp-content-left">
+            <div *ngIf="activeTab === 'services' || activeTab === 'packages'" class="vp-section">
+                <div class="services-grid">
+                    <div class="service-card" *ngFor="let svc of vendor.services || []" (click)="openServiceModal(svc)">
+                        <div class="card-header">
+                            <span class="icon">{{svc.icon || ''}}</span>
+                            <span class="view-details">View details →</span>
+                        </div>
+                        <h3 class="card-title">{{svc.name}}</h3>
+                        <div class="card-price"
+                            [class.text-gold]="svc.price !== 'Price on request' && svc.price !== 'Quote required'">
+                            {{svc.price}}</div>
+                        <p class="card-desc">{{svc.desc}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="activeTab === 'about'" class="vp-section">
+                <h2 class="section-title">About the Vendor</h2>
+                <p class="section-text">{{vendor.about}}</p>
+                <h3 class="subsection-title">Amenities & Features</h3>
+                <div class="amenities-list">
+                    <div class="tag" *ngFor="let am of vendor.amenities || []">✓ {{am}}
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="activeTab === 'contact'" class="vp-section">
+                <h2 class="section-title">Contact {{vendor.name}}</h2>
+                <p class="section-text">Send a message to discuss your event details.</p>
+                <!-- Existing contact form can go here if needed -->
+            </div>
+
+            <div *ngIf="activeTab === 'reviews'" class="vp-section">
+                <h2 class="section-title">Client Reviews</h2>
+                <div class="reviews-summary">
+                    <div class="rating-big">
+                        <div class="rating-score">{{vendor.rating}}</div>
+                        <div class="stars"></div>
+                        <div class="rating-count">Based on {{vendor.reviews}} reviews</div>
+                    </div>
+                    <div class="rating-bars">
+                        <div class="bar-row" *ngFor="let rat of [5,4,3,2,1]">
+                            <div class="bar-label">{{rat}}</div>
+                            <div class="bar-track">
+                                <div class="bar-fill" [style.width]="rat === 5 ? '80%' : rat === 4 ? '15%' : '2%'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column (Sticky Widget) -->
+        <div class="vp-sidebar">
+            <div class="booking-widget">
+                <div class="widget-price">From 25,000 EGP</div>
+                <div class="widget-sub">Starting price - exact quote on request</div>
+
+                <div class="form-group">
+                    <label>Event Date</label>
+                    <input type="date" />
+                </div>
+
+                <div class="form-group">
+                    <label>Event Type</label>
+                    <select>
+                        <option>Wedding</option>
+                        <option>Corporate</option>
+                        <option>Birthday</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-gold btn-block" (click)="scrollToServices()">✨
+                    Request Booking</button>
+                <button class="btn btn-green btn-block">💬 WhatsApp</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,59 @@
+.compare-grid {
+    display: flex;
+    min-width: 800px;
+    border: 1px solid var(--lgray);
+    border-radius: var(--r2);
+    overflow: hidden;
+    background: var(--white);
+}
+
+.compare-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--lgray);
+    min-width: 240px;
+
+    &:last-child {
+        border-right: none;
+    }
+}
+
+.compare-features {
+    flex: 0 0 220px;
+    min-width: 220px;
+    background: var(--cream2);
+    font-weight: 600;
+    color: var(--navy);
+}
+
+.comp-cell {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--lgray);
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    font-size: .92rem;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.comp-header {
+    background: var(--white);
+    min-height: 180px;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px;
+    border-bottom: 2px solid var(--lgray);
+}
+
+.compare-features .comp-header {
+    background: var(--cream2);
+}
+
+.stars {
+    color: var(--gold);
+}

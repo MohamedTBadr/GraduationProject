@@ -1,0 +1,66 @@
+<div class="page active" id="page-contact">
+    <div class="explore-hero">
+        <h1>Contact Us</h1>
+        <p>We're here to help make your event perfect</p>
+    </div>
+
+    <div class="container" style="padding:60px 0;display:grid;grid-template-columns:1fr 1fr;gap:60px">
+        <div>
+            <h2 class="section-title">Get in Touch</h2>
+            <p style="color:var(--gray);margin-bottom:30px;line-height:1.7">
+                Have questions about planning an event, or need help with a booking? Reach out to our support team and
+                we'll get back to you as soon as possible.
+            </p>
+
+            <div style="display:flex;flex-direction:column;gap:20px">
+                <div style="display:flex;gap:16px;align-items:flex-start">
+                    <div
+                        style="width:44px;height:44px;background:rgba(201,168,76,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--gold)">
+                        </div>
+                    <div><strong style="display:block;color:var(--navy);margin-bottom:4px">Email Support</strong><a
+                            href="mailto:hello@eventora.eg"
+                            style="color:var(--gray);text-decoration:none">hello&#64;eventora.eg</a></div>
+                </div>
+
+                <div style="display:flex;gap:16px;align-items:flex-start">
+                    <div
+                        style="width:44px;height:44px;background:rgba(201,168,76,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--gold)">
+                        </div>
+                    <div><strong style="display:block;color:var(--navy);margin-bottom:4px">WhatsApp /
+                            Phone</strong><span style="color:var(--gray)">+20 120 000 0000</span></div>
+                </div>
+
+                <div style="display:flex;gap:16px;align-items:flex-start">
+                    <div
+                        style="width:44px;height:44px;background:rgba(201,168,76,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--gold)">
+                        </div>
+                    <div><strong style="display:block;color:var(--navy);margin-bottom:4px">Office Address</strong><span
+                            style="color:var(--gray);line-height:1.6">Smart Village, Building B4<br />Giza, Egypt</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:var(--white);padding:40px;border-radius:var(--r2);box-shadow:var(--sh1)">
+            <h3 style="font-family:var(--ff-d);font-size:1.4rem;color:var(--navy);margin-bottom:24px">Send a Message
+            </h3>
+            <div class="form-row">
+                <div class="form-group"><label>Name</label><input type="text" placeholder="Your name" /></div>
+                <div class="form-group"><label>Email</label><input type="email" placeholder="your@email.com" /></div>
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <select>
+                    <option>General Inquiry</option>
+                    <option>Booking Issue</option>
+                    <option>Payment Question</option>
+                    <option>Vendor Support</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Message</label><textarea placeholder="How can we help?"
+                    style="height:120px"></textarea></div>
+            <button class="btn btn-navy" style="width:100%;justify-content:center;padding:12px"
+                (click)="sendMessage()">Send Message</button>
+        </div>
+    </div>
+</div>

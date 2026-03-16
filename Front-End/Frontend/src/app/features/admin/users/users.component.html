@@ -1,0 +1,39 @@
+<div class="ad-section active" style="display:block">
+  <div class="ad-page-hd">
+    <div>
+      <div class="ad-page-title">User Management</div>
+      <div class="ad-page-sub">All registered event planners and clients on the platform.</div>
+    </div>
+  </div>
+  <div class="ad-kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="ad-kpi ak-blue"><div class="ad-kpi-val">1,284</div><div class="ad-kpi-lbl">Total Users</div><div class="ad-kpi-trend akt-up">↑ 142 this week</div></div>
+    <div class="ad-kpi ak-green"><div class="ad-kpi-val">847</div><div class="ad-kpi-lbl">Active (event created)</div><div class="ad-kpi-trend akt-up">↑ 18%</div></div>
+    <div class="ad-kpi ak-gold"><div class="ad-kpi-val">3.2</div><div class="ad-kpi-lbl">Avg Bookings / User</div><div class="ad-kpi-trend akt-up">↑ 0.4</div></div>
+  </div>
+  <div class="ad-search-row">
+    <div class="ad-search-wrap"><span class="ad-search-icon">🔍</span><input type="text" placeholder="Search users…"/></div>
+    <select class="ad-filter-sel"><option>All Users</option><option>Active</option><option>Inactive</option><option>Flagged</option></select>
+    <select class="ad-filter-sel"><option>Sort: Latest</option><option>Sort: Bookings</option><option>Sort: Spend</option></select>
+  </div>
+  <div class="ad-tbl-wrap">
+    <table class="ad-tbl">
+      <thead><tr><th>User</th><th>Joined</th><th>Events Created</th><th>Total Bookings</th><th>Total Spend (EGP)</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="ad-users-tbody">
+        <tr>
+          <td><div><div>Heba Ali</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">heba at email.com</div></div></td>
+          <td>Feb 20, 2026</td><td>3</td><td>1</td>
+          <td style="color:var(--gold);font-weight:700">22,000 EGP</td>
+          <td><span class="ad-pill ap-green">Active</span></td>
+          <td><div style="display:flex;gap:5px"><button class="ad-btn ad-btn-ghost ad-btn-sm">View</button><button class="ad-btn ad-btn-red ad-btn-sm">Suspend</button></div></td>
+        </tr>
+        <tr>
+          <td><div><div>Omar Ibrahim</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">omar at email.com</div></div></td>
+          <td>Jan 15, 2026</td><td>1</td><td>1</td>
+          <td style="color:var(--gold);font-weight:700">8,000 EGP</td>
+          <td><span class="ad-pill ap-green">Active</span></td>
+          <td><div style="display:flex;gap:5px"><button class="ad-btn ad-btn-ghost ad-btn-sm">View</button><button class="ad-btn ad-btn-red ad-btn-sm">Suspend</button></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

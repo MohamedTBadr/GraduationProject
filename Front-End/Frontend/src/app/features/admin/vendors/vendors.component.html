@@ -1,0 +1,47 @@
+<div class="ad-section active" style="display:block">
+    <div class="ad-page-hd">
+        <div>
+            <div class="ad-page-title">Vendor Management</div>
+            <div class="ad-page-sub">Review, approve, suspend, and manage all registered vendors.</div>
+        </div>
+        <button class="ad-btn ad-btn-gold">+ Add Vendor</button>
+    </div>
+    <div class="ad-tab-bar">
+        <button class="ad-tab active">All (61)</button>
+        <button class="ad-tab">Pending (14) <span class="ad-badge gold" style="margin-left:4px">!</span></button>
+        <button class="ad-tab">Active (47)</button>
+        <button class="ad-tab">Suspended (3)</button>
+    </div>
+    <div class="ad-search-row">
+        <div class="ad-search-wrap"><span class="ad-search-icon">🔍</span><input type="text" placeholder="Search vendors…"/></div>
+        <select class="ad-filter-sel"><option>All Categories</option><option>Decoration</option><option>Venue</option><option>Catering</option><option>Photography</option><option>Entertainment</option></select>
+        <select class="ad-filter-sel"><option>All Cities</option><option>Cairo</option><option>Alexandria</option><option>Giza</option></select>
+    </div>
+    <div class="ad-tab-pane active" id="v-all">
+        <div class="ad-tbl-wrap">
+            <table class="ad-tbl">
+                <thead><tr><th>Vendor</th><th>Category</th><th>Location</th><th>Rating</th><th>Bookings</th><th>Revenue</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="ad-vendors-all">
+                    <tr>
+                        <td><div style="display:flex;align-items:center;gap:9px"><span style="font-size:1.2rem"></span><div><div>White Rose Decor</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">Mar 2025</div></div></div></td>
+                        <td>Decoration</td><td>Cairo</td>
+                        <td><span style="color:var(--gold)"></span> 4.9</td>
+                        <td>61</td>
+                        <td style="color:var(--gold);font-weight:700">42,000 EGP</td>
+                        <td><span class="ad-pill ap-green">Active</span></td>
+                        <td><div style="display:flex;gap:5px"><button class="ad-btn ad-btn-ghost ad-btn-sm">View</button><button class="ad-btn ad-btn-red ad-btn-sm">Suspend</button></div></td>
+                    </tr>
+                    <tr>
+                        <td><div style="display:flex;align-items:center;gap:9px"><span style="font-size:1.2rem"></span><div><div>Royal Palace Hall</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">Jan 2025</div></div></div></td>
+                        <td>Venue</td><td>Giza</td>
+                        <td><span style="color:var(--gold)"></span> 4.7</td>
+                        <td>18</td>
+                        <td style="color:var(--gold);font-weight:700">320,000 EGP</td>
+                        <td><span class="ad-pill ap-green">Active</span></td>
+                        <td><div style="display:flex;gap:5px"><button class="ad-btn ad-btn-ghost ad-btn-sm">View</button><button class="ad-btn ad-btn-red ad-btn-sm">Suspend</button></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

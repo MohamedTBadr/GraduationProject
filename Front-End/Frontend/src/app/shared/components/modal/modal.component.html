@@ -1,0 +1,308 @@
+<div class="modal-overlay" [class.open]="modalService.activeModal()" (click)="onOverlayClick($event)">
+    <div class="modal">
+        <button class="modal-close" (click)="modalService.close()"></button>
+
+        <!-- Dynamic Content based on ModalType -->
+        <ng-container [ngSwitch]="modalService.activeModal()">
+            <!-- Auth Modals -->
+            <div *ngSwitchCase="'login'">
+                <app-login></app-login>
+            </div>
+
+            <div *ngSwitchCase="'signup'">
+                <app-register></app-register>
+            </div>
+
+            <!-- Booking Modal -->
+            <div *ngSwitchCase="'book'">
+                <div class="modal-title">Request Booking</div>
+                <div class="modal-sub">We'll confirm within 2 hours </div>
+                <div class="form-group"><label>Your Name *</label><input type="text" placeholder="Sara Mohamed" /></div>
+                <div class="form-group"><label>Phone Number *</label><input type="tel" placeholder="+20 100 000 0000" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Event Type *</label><select>
+                            <option>Wedding</option>
+                            <option>Engagement</option>
+                            <option>Birthday</option>
+                            <option>Corporate</option>
+                            <option>Graduation</option>
+                            <option>Other</option>
+                        </select></div>
+                    <div class="form-group"><label>Event Date *</label><input type="date" /></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Guests</label><input type="number" placeholder="e.g. 100" /></div>
+                    <div class="form-group"><label>Budget (EGP)</label><input type="number" placeholder="e.g. 15000" />
+                    </div>
+                </div>
+                <div class="form-group"><label>Location / Venue</label><input type="text"
+                        placeholder="Venue name or area" /></div>
+                <div class="form-group"><label>Special Requirements</label><textarea
+                        placeholder="Any specific requests…" style="min-height:80px"></textarea></div>
+                <button class="modal-submit" (click)="modalService.close()">Send Booking Request →</button>
+            </div>
+
+            <!-- Service Detail -->
+            <div *ngSwitchCase="'service-detail'">
+                <!-- Rich Service Detail -->
+                <div class="sdm-header" *ngIf="modalService.modalData()">
+                    <div class="sdm-icon">{{modalService.modalData().icon}}</div>
+                    <div>
+                        <div class="sdm-title">{{modalService.modalData().name}}</div>
+                        <div class="sdm-price">{{modalService.modalData().price}}</div>
+                    </div>
+                </div>
+                <div class="sdm-content" *ngIf="modalService.modalData()">
+                    <p class="sdm-desc">{{modalService.modalData().desc}}</p>
+                    <div class="sdm-meta" *ngIf="modalService.modalData().delivery">
+                        <span> {{modalService.modalData().delivery}}</span>
+                        <span>⏱️ {{modalService.modalData().duration}}</span>
+                    </div>
+                </div>
+                <button class="sdm-cta" (click)="modalService.open('book')"> Request
+                    This Service</button>
+            </div>
+
+            <!-- Admin Quick Actions -->
+            <div *ngSwitchCase="'quick-action'">
+                <div class="ad-modal-title">⚡ Quick Actions</div>
+                <div class="ad-modal-sub">Jump to common admin tasks without navigating the sidebar.</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+                    <button class="ad-btn ad-btn-gold" style="justify-content:center;border-radius:10px;padding:14px"
+                        (click)="modalService.open('add-vendor')"> Add Vendor</button>
+                    <button class="ad-btn ad-btn-blue" style="justify-content:center;border-radius:10px;padding:14px"
+                        (click)="modalService.open('add-package')"> Create Package</button>
+                    <button class="ad-btn ad-btn-red" style="justify-content:center;border-radius:10px;padding:14px"
+                        (click)="modalService.open('schedule-report')"> Schedule Report</button>
+                    <button class="ad-btn ad-btn-green" style="justify-content:center;border-radius:10px;padding:14px"
+                        (click)="modalService.open('add-banner')"> Add Banner</button>
+                    <button class="ad-btn ad-btn-ghost" style="justify-content:center;border-radius:10px;padding:14px"
+                        (click)="modalService.open('add-category')">️ Categories</button>
+                    <button class="ad-btn ad-btn-ghost" style="justify-content:center;border-radius:10px;padding:14px"
+                        (click)="modalService.close()"> Close</button>
+                </div>
+            </div>
+
+            <!-- Admin Review Vendor -->
+            <div *ngSwitchCase="'review-vendor'">
+                <div class="ad-modal-title">Review Documents</div>
+                <div class="ad-modal-sub">Vendor verification checklist</div>
+                <div style="display:grid;gap:10px;margin-bottom:18px">
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:9px">
+                        <div style="font-size:.83rem;font-weight:600;color:var(--navy)"> Commercial Register</div>
+                        <span class="ad-pill ap-green"> Verified</span>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:9px">
+                        <div style="font-size:.83rem;font-weight:600;color:var(--navy)"> Bank Account</div><span
+                            class="ad-pill ap-green"> Verified</span>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:9px">
+                        <div style="font-size:.83rem;font-weight:600;color:var(--navy)"> National ID</div><span
+                            class="ad-pill ap-amber">Pending</span>
+                    </div>
+                </div>
+                <div class="form-group"><label>Admin Note (optional)</label><textarea
+                        placeholder="Internal notes about this vendor application…" style="min-height:70px"></textarea>
+                </div>
+                <div class="ad-submit-bar">
+                    <button class="ad-btn ad-btn-red" (click)="modalService.close()">Reject Application</button>
+                    <button class="ad-btn ad-btn-gold" (click)="modalService.close()">Approve Vendor <i
+                            class="fa-solid fa-check"></i></button>
+                </div>
+            </div>
+
+            <!-- Package Detail -->
+            <div *ngSwitchCase="'package-detail'">
+                <div class="sdm-header" *ngIf="modalService.modalData()">
+                    <div class="sdm-icon">{{modalService.modalData().icon}}</div>
+                    <div>
+                        <div class="sdm-title">{{modalService.modalData().name}}</div>
+                        <div class="sdm-price">{{modalService.modalData().price}}</div>
+                    </div>
+                </div>
+                <div class="sdm-content" *ngIf="modalService.modalData()">
+                    <p class="sdm-desc">{{modalService.modalData().desc}}</p>
+                    <div class="sdm-features" style="margin-top:20px">
+                        <div style="font-weight:700;margin-bottom:10px;font-size:.9rem">What's Included:</div>
+                        <div style="display:grid;gap:8px">
+                            <div style="font-size:.85rem;color:var(--navy);display:flex;gap:8px"> Full Venue Setup
+                            </div>
+                            <div style="font-size:.85rem;color:var(--navy);display:flex;gap:8px"> Premium Sound System
+                            </div>
+                            <div style="font-size:.85rem;color:var(--navy);display:flex;gap:8px"> On-site Coordinator
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="sdm-cta" (click)="modalService.open('book')"> Book This
+                    Package</button>
+            </div>
+
+            <!-- Add Event Modal -->
+            <div *ngSwitchCase="'add-event'">
+                <div class="modal-title">Plan New Event</div>
+                <div class="modal-sub">Tell us about your next big celebration.</div>
+                <div class="modal-form active">
+                    <div class="form-group"><label>Event Name *</label><input type="text"
+                            placeholder="e.g. Leila's 5th Birthday" /></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Event Type *</label><select>
+                                <option>Wedding</option>
+                                <option>Engagement</option>
+                                <option>Birthday</option>
+                                <option>Corporate</option>
+                            </select></div>
+                        <div class="form-group"><label>Date *</label><input type="date" /></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Budget (EGP)</label><input type="number" placeholder="50000" />
+                        </div>
+                        <div class="form-group"><label>Guests</label><input type="number" placeholder="150" /></div>
+                    </div>
+                    <button class="modal-submit" (click)="modalService.close()">Create Event Plan →</button>
+                </div>
+            </div>
+
+            <!-- Generic Confirmation -->
+            <div *ngSwitchCase="'confirm'">
+                <div class="modal-title" style="color:#ef4444">Are you sure?</div>
+                <div class="modal-sub">This action cannot be undone.</div>
+                <p style="text-align:center;color:var(--gray);font-size:.95rem;margin:20px 0"
+                    *ngIf="modalService.modalData()">
+                    {{modalService.modalData().message || 'Do you really want to proceed?'}}
+                </p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:30px">
+                    <button class="btn btn-outline" (click)="modalService.close()"
+                        style="justify-content:center">Cancel</button>
+                    <button class="btn btn-navy"
+                        style="background:#ef4444;border-color:#ef4444;justify-content:center;color:var(--white)"
+                        (click)="modalService.close()">Confirm Delete</button>
+                </div>
+            </div>
+
+            <!-- Add Vendor Modal -->
+            <div *ngSwitchCase="'add-vendor'">
+                <div class="ad-modal-title">Add New Vendor</div>
+                <div class="ad-modal-sub">Manually onboard a vendor to the platform.</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+                    <div class="form-group"><label>Business Name *</label><input type="text"
+                            placeholder="e.g. Cairo Flowers" /></div>
+                    <div class="form-group"><label>Category *</label><select>
+                            <option>Decoration</option>
+                            <option>Venue</option>
+                            <option>Catering</option>
+                            <option>Photography</option>
+                            <option>Entertainment</option>
+                        </select></div>
+                    <div class="form-group"><label>Owner Name *</label><input type="text" placeholder="Full name" />
+                    </div>
+                    <div class="form-group"><label>Phone / WhatsApp *</label><input type="tel"
+                            placeholder="+20 100 000 0000" /></div>
+                    <div class="form-group" style="grid-column:span 2"><label>Email *</label><input type="email"
+                            placeholder="vendor@email.com" /></div>
+                </div>
+                <div class="ad-submit-bar">
+                    <button class="ad-btn ad-btn-ghost" (click)="modalService.close()">Cancel</button>
+                    <button class="ad-btn ad-btn-gold" (click)="modalService.close()">Add Vendor</button>
+                </div>
+            </div>
+
+            <!-- Add Package Modal -->
+            <div *ngSwitchCase="'add-package'">
+                <div class="ad-modal-title">Create Platform Package</div>
+                <div class="ad-modal-sub">Bundle vendors into a curated package shown to all clients.</div>
+                <div class="form-group"><label>Package Name *</label><input type="text"
+                        placeholder="e.g. Wedding Dream" /></div>
+                <div class="form-group"><label>Description</label><textarea
+                        placeholder="What makes this package special?" style="min-height:70px"></textarea></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+                    <div class="form-group"><label>Total Price (EGP)</label><input type="number" placeholder="45000" />
+                    </div>
+                    <div class="form-group"><label>Event Type</label><select>
+                            <option>Wedding</option>
+                            <option>Engagement</option>
+                            <option>Birthday</option>
+                            <option>Corporate</option>
+                            <option>All</option>
+                        </select></div>
+                </div>
+                <div class="ad-submit-bar">
+                    <button class="ad-btn ad-btn-ghost" (click)="modalService.close()">Cancel</button>
+                    <button class="ad-btn ad-btn-gold" (click)="modalService.close()">Publish Package</button>
+                </div>
+            </div>
+
+            <!-- Schedule Report Modal -->
+            <div *ngSwitchCase="'schedule-report'">
+                <div class="ad-modal-title">Schedule Report</div>
+                <div class="ad-modal-sub">Set up automated report delivery to your email.</div>
+                <div class="form-group"><label>Report Type</label><select>
+                        <option>Full Platform Overview</option>
+                        <option>Financial Summary</option>
+                        <option>Vendor Performance</option>
+                    </select></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+                    <div class="form-group"><label>Frequency</label><select>
+                            <option>Weekly</option>
+                            <option>Monthly</option>
+                            <option>Daily</option>
+                        </select></div>
+                    <div class="form-group"><label>Format</label><select>
+                            <option>PDF</option>
+                            <option>Excel</option>
+                        </select></div>
+                </div>
+                <div class="ad-submit-bar">
+                    <button class="ad-btn ad-btn-ghost" (click)="modalService.close()">Cancel</button>
+                    <button class="ad-btn ad-btn-gold" (click)="modalService.close()">Schedule</button>
+                </div>
+            </div>
+
+            <!-- Add Banner Modal -->
+            <div *ngSwitchCase="'add-banner'">
+                <div class="ad-modal-title">Add Homepage Banner</div>
+                <div class="ad-modal-sub">Create a new promotional banner.</div>
+                <div class="form-group"><label>Banner Title *</label><input type="text"
+                        placeholder="Spring Weddings 2026" /></div>
+                <div class="form-group"><label>Position</label><select>
+                        <option>Homepage Hero</option>
+                        <option>Explore Page</option>
+                        <option>Packages Page</option>
+                    </select></div>
+                <div class="ad-submit-bar">
+                    <button class="ad-btn ad-btn-ghost" (click)="modalService.close()">Cancel</button>
+                    <button class="ad-btn ad-btn-gold" (click)="modalService.close()">Publish Banner</button>
+                </div>
+            </div>
+
+            <!-- Add Category Modal -->
+            <div *ngSwitchCase="'add-category'">
+                <div class="ad-modal-title">Add Category</div>
+                <div class="ad-modal-sub">Create a new service category or event type.</div>
+                <div class="form-group"><label>Name *</label><input type="text" placeholder="e.g. Makeup & Beauty" />
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+                    <div class="form-group"><label>Icon (emoji)</label><input type="text" placeholder="" /></div>
+                    <div class="form-group"><label>Status</label><select>
+                            <option>Active</option>
+                            <option>Hidden</option>
+                        </select></div>
+                </div>
+                <div class="ad-submit-bar">
+                    <button class="ad-btn ad-btn-ghost" (click)="modalService.close()">Cancel</button>
+                    <button class="ad-btn ad-btn-gold" (click)="modalService.close()">Create Category</button>
+                </div>
+            </div>
+
+            <div *ngSwitchDefault>
+                <div class="modal-title">Notice</div>
+                <div class="placeholder-modal" style="padding:40px;text-align:center;color:var(--gray)">Content for
+                    {{modalService.activeModal() || 'unknown'}} is under construction.</div>
+            </div>
+        </ng-container>
+    </div>
+</div>

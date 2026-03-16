@@ -1,0 +1,77 @@
+<div class="mb-header">
+  <div class="mb-title">My Bookings</div>
+  <div class="mb-subtitle">9 total bookings across all events</div>
+</div>
+
+<div class="mb-stats-grid">
+  <div class="mb-stat-card card-confirmed">
+    <div class="val">{{stats.confirmed}}</div>
+    <div class="lbl">Confirmed</div>
+  </div>
+  <div class="mb-stat-card card-pending">
+    <div class="val">{{stats.pending}}</div>
+    <div class="lbl">Pending</div>
+  </div>
+  <div class="mb-stat-card card-completed">
+    <div class="val">{{stats.completed}}</div>
+    <div class="lbl">Completed</div>
+  </div>
+  <div class="mb-stat-card card-cancelled">
+    <div class="val">{{stats.cancelled}}</div>
+    <div class="lbl">Cancelled</div>
+  </div>
+</div>
+
+<div class="mb-tabs">
+  <div class="mb-tab" 
+       [class.active]="activeTab === 'all'"
+       (click)="setTab('all')">
+    All <span class="mb-tab-badge" [class.inactive]="activeTab !== 'all'">{{stats.all}}</span>
+  </div>
+  <div class="mb-tab" 
+       [class.active]="activeTab === 'pending'"
+       (click)="setTab('pending')">
+    Pending <span class="mb-tab-badge" [class.inactive]="activeTab !== 'pending'">{{stats.pending}}</span>
+  </div>
+  <div class="mb-tab" 
+       [class.active]="activeTab === 'confirmed'"
+       (click)="setTab('confirmed')">
+    Confirmed <span class="mb-tab-badge" [class.inactive]="activeTab !== 'confirmed'">{{stats.confirmed}}</span>
+  </div>
+  <div class="mb-tab" 
+       [class.active]="activeTab === 'completed'"
+       (click)="setTab('completed')">
+    Completed <span class="mb-tab-badge" [class.inactive]="activeTab !== 'completed'">{{stats.completed}}</span>
+  </div>
+</div>
+
+<div class="mb-list">
+  <div class="mb-booking-card" *ngFor="let bk of filteredBookings">
+    <div class="bk-top">
+      <div class="bk-info">
+        <div class="bk-icon">{{bk.icon}}</div>
+        <div>
+          <div class="bk-vendor-name">{{bk.vendorName}}</div>
+          <div class="bk-service-type">{{bk.serviceType}}</div>
+          <div class="bk-event-ref">{{bk.eventRef}}</div>
+        </div>
+      </div>
+      
+      <div class="bk-status-col">
+        <div class="bk-status-chip" [ngClass]="bk.status">{{bk.status}}</div>
+        <div class="bk-price">{{bk.price}}</div>
+      </div>
+    </div>
+    
+    <div class="bk-divider"></div>
+
+    <div class="bk-actions-bar">
+      <div class="bk-actions">
+        <button class="btn">Message</button>
+        <button class="btn">View Contract</button>
+        <button class="btn cancel">Cancel</button>
+      </div>
+      <div class="bk-id">{{bk.id}}</div>
+    </div>
+  </div>
+</div>

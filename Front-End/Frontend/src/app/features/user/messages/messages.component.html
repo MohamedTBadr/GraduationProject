@@ -1,0 +1,87 @@
+<h2 style="font-family:var(--ff-d);font-size:2rem;color:var(--navy);margin-bottom:24px">Messages</h2>
+
+<div
+    style="background:var(--white);border-radius:var(--r2);box-shadow:var(--sh1);display:grid;grid-template-columns:300px 1fr;height:650px;overflow:hidden">
+
+    <!-- Inbox List -->
+    <div style="border-right:1px solid var(--lgray);overflow-y:auto;background:var(--white)">
+        <div style="padding:20px;border-bottom:1px solid var(--lgray)">
+            <input #chatSearch type="text" placeholder="Search messages..."
+                style="width:100%;padding:10px;border:1px solid var(--lgray);border-radius:8px;font-size:.9rem" />
+        </div>
+        <div *ngFor="let c of chats" (click)="selectChat(c)"
+            [style.background]="selectedChat.id === c.id ? 'var(--cream)' : 'transparent'"
+            style="padding:20px;border-bottom:1px solid var(--lgray);cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:background .2s">
+            <div
+                style="width:44px;height:44px;border-radius:50%;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;font-weight:700;color:var(--navy)">
+                {{c.avatar}}</div>
+            <div style="flex:1;overflow:hidden">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                    <strong style="color:var(--navy);font-size:.95rem">{{c.sender}}</strong>
+                    <span style="color:var(--gray);font-size:.75rem">{{c.time}}</span>
+                </div>
+                <div style="color:var(--gray);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+                    [style.fontWeight]="c.unread ? 700 : 400" [style.color]="c.unread ? 'var(--navy)' : 'var(--gray)'">
+                    {{c.lastMessage}}
+                </div>
+            </div>
+            <div *ngIf="c.unread"
+                style="width:10px;height:10px;border-radius:50%;background:var(--gold);margin-top:6px;flex-shrink:0">
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat View -->
+    <div style="display:flex;flex-direction:column;background:var(--white)">
+        <div
+            style="padding:20px 24px;border-bottom:1px solid var(--lgray);display:flex;justify-content:space-between;align-items:center;z-index:10;background:var(--white)">
+            <div style="display:flex;align-items:center;gap:12px">
+                <div
+                    style="width:48px;height:48px;border-radius:50%;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:var(--navy)">
+                    {{selectedChat.avatar}}</div>
+                <div>
+                    <strong
+                        style="display:block;color:var(--navy);font-size:1.1rem;margin-bottom:4px">{{selectedChat.sender}}</strong>
+                    <span style="color:#16a34a;font-size:.8rem;display:flex;align-items:center;gap:5px">
+                        <span style="width:8px;height:8px;background:#16a34a;border-radius:50%"></span> Online
+                    </span>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px">
+                <button class="btn btn-outline btn-sm">Archive</button>
+                <button class="btn btn-navy btn-sm">View Profile</button>
+            </div>
+        </div>
+
+        <div #scrollContainer
+            style="flex:1;padding:24px;overflow-y:auto;background:var(--cream);display:flex;flex-direction:column;gap:16px">
+            <div *ngFor="let msg of selectedChat.history" [style.alignSelf]="msg.isMe ? 'flex-end' : 'flex-start'"
+                [style.background]="msg.isMe ? 'var(--navy)' : 'var(--white)'"
+                [style.color]="msg.isMe ? 'var(--white)' : 'var(--navy)'"
+                style="max-width:70%;padding:14px 18px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.04);position:relative">
+
+                <!-- Bubble Tail logic could be added here if needed -->
+                <p style="font-size:.92rem;line-height:1.5;margin:0">{{msg.text}}</p>
+                <span style="display:block;text-align:right;font-size:.65rem;margin-top:8px"
+                    [style.color]="msg.isMe ? 'rgba(255,255,255,.6)' : 'var(--gray)'">
+                    {{msg.time}}
+                </span>
+            </div>
+        </div>
+
+        <div style="padding:20px;border-top:1px solid var(--lgray);background:var(--white)">
+            <div style="display:flex;gap:12px;align-items:center">
+                <button
+                    style="background:none;border:none;font-size:1.5rem;color:var(--gray);cursor:pointer;padding:0 5px">+</button>
+                <input #msgInput type="text" placeholder="Type a message..."
+                    (keyup.enter)="sendMessage(msgInput.value); msgInput.value=''"
+                    style="flex:1;padding:14px 20px;border:1px solid var(--lgray);border-radius:50px;font-size:.95rem;outline:none;transition:border-color .2s"
+                    onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--lgray)'" />
+                <button class="btn btn-navy" (click)="sendMessage(msgInput.value); msgInput.value=''"
+                    style="width:48px;height:48px;border-radius:50%;padding:0;justify-content:center;flex-shrink:0">
+                    <span style="font-size:1.2rem">→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

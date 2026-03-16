@@ -1,0 +1,56 @@
+<div class="vd-section active" style="display:block">
+  <div class="vd-page-header">
+    <div><div class="vd-page-title">Earnings</div><div class="vd-page-sub">Revenue, commissions, and payout history in full detail.</div></div>
+  </div>
+  <div class="vd-earn-banner">
+    <div>
+      <div style="font-size:.73rem;color:rgba(255,255,255,.36);margin-bottom:3px;letter-spacing:.5px;text-transform:uppercase">Available Balance</div>
+      <div class="vd-earn-val">18,500 EGP</div>
+      <div class="vd-earn-lbl">Next auto-payout: March 15, 2026</div>
+    </div>
+    <div class="vd-earn-stats">
+      <div class="vd-earn-stat"><div class="vd-earn-stat-val">142K</div><div class="vd-earn-stat-lbl">Gross Revenue</div></div>
+      <div class="vd-earn-stat"><div class="vd-earn-stat-val">14.2K</div><div class="vd-earn-stat-lbl">Commission (10%)</div></div>
+      <div class="vd-earn-stat"><div class="vd-earn-stat-val">127.8K</div><div class="vd-earn-stat-lbl">Net Earned</div></div>
+      <div class="vd-earn-stat"><div class="vd-earn-stat-val">47</div><div class="vd-earn-stat-lbl">Total Bookings</div></div>
+    </div>
+    <button class="vd-btn vd-btn-gold">Request Payout →</button>
+  </div>
+  <div class="vd-g2">
+    <div class="vd-card"><div class="vd-card-title">Monthly Breakdown</div>
+      <div class="vd-bar-chart" id="vd-earn-chart" style="display:flex;align-items:flex-end;gap:20px;height:120px;padding-top:20px;margin-top:10px;justify-content:center">
+         <div style="width:25px;background:var(--gold);height:40%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Oct</span></div>
+         <div style="width:25px;background:var(--gold);height:60%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Nov</span></div>
+         <div style="width:25px;background:var(--gold);height:30%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Dec</span></div>
+         <div style="width:25px;background:var(--gold);height:75%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Jan</span></div>
+         <div style="width:25px;background:var(--gold);height:50%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Feb</span></div>
+         <div style="width:25px;background:var(--gold);height:80%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Mar</span></div>
+      </div>
+    </div>
+    <div class="vd-card"><div class="vd-card-title">Latest Transactions</div>
+      <div id="vd-transactions">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+            <div><div style="font-weight:600;font-size:0.9rem">Payout Processed</div><div style="font-size:0.8rem;color:var(--gray)">Feb 15, 2026</div></div>
+            <div style="font-weight:600;color:var(--green)">+ 24,000 EGP</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="vd-card">
+    <div class="vd-card-title">Payout History</div>
+    <div style="overflow-x:auto">
+      <table class="vd-tbl">
+        <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th></tr></thead>
+        <tbody id="vd-payout-tbody">
+          <tr>
+            <td>Feb 15, 2026</td>
+            <td style="font-weight:600">24,000 EGP</td>
+            <td>Bank Transfer</td>
+            <td style="font-family:monospace;font-size:.76rem;color:rgba(255,255,255,.5)">TXN-102938</td>
+            <td><span class="vd-badge-pill vdb-green">Completed</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

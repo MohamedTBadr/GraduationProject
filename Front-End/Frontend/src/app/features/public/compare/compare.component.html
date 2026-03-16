@@ -1,0 +1,62 @@
+<div class="page active" id="page-compare">
+    <div class="container" style="padding:60px 0;min-height:70vh">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px">
+            <div>
+                <h2 class="section-title">Compare Vendors</h2>
+                <p class="section-sub">Side-by-side comparison to help you make the best choice.</p>
+            </div>
+            <button class="btn btn-outline" (click)="compareService.clearCompare()"
+                *ngIf="compareService.compareCount() > 0">Clear All</button>
+        </div>
+
+        <div *ngIf="compareService.compareCount() === 0"
+            style="background:var(--cream);padding:40px;border-radius:var(--r2);text-align:center">
+            <div style="font-size:3rem;margin-bottom:16px">️</div>
+            <h3>No vendors selected for comparison</h3>
+            <p style="color:var(--gray);margin-top:12px">Add at least 2 vendors from the Explore page to compare them
+                side-by-side.</p>
+            <button class="btn btn-gold" style="margin-top:24px" routerLink="/explore">Explore Vendors</button>
+        </div>
+
+        <!-- Compare View -->
+        <div *ngIf="compareService.compareCount() > 0" style="overflow-x:auto;padding-bottom:20px">
+            <div class="compare-grid">
+                <!-- Feature List Column -->
+                <div class="compare-col compare-features">
+                    <div class="comp-cell comp-header"></div>
+                    <div class="comp-cell" *ngFor="let f of getFeatures()">{{f.label}}</div>
+                    <div class="comp-cell">Actions</div>
+                </div>
+
+                <!-- Vendor Columns -->
+                <div class="compare-col" *ngFor="let v of compareService.compareListItems()">
+                    <div class="comp-cell comp-header" style="position:relative">
+                        <button
+                            style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--gray);transition:color .2s"
+                            (click)="compareService.toggleCompare(v)" onmouseover="this.style.color='var(--red)'"
+                            onmouseout="this.style.color='var(--gray)'" title="Remove"></button>
+                        <div style="font-size:2.5rem;margin-bottom:10px;margin-top:20px">{{v.emoji}}</div>
+                        <strong
+                            style="display:block;color:var(--navy);font-size:1.1rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{v.name}}</strong>
+                        <div style="color:var(--gray);font-size:.75rem;margin-bottom:12px">{{v.category}}</div>
+                    </div>
+
+                    <div class="comp-cell" *ngFor="let f of getFeatures()">
+                        <ng-container [ngSwitch]="f.key">
+                            <strong *ngSwitchCase="'startPrice'" style="color:var(--gold)">{{v.startPrice | number}}
+                                EGP</strong>
+                            <div *ngSwitchCase="'rating'"><span class="stars"
+                                    style="font-size:.9rem;margin-right:4px"></span> {{v.rating}}</div>
+                            <span *ngSwitchDefault>{{ $any(v)[f.key] || '-' }}</span>
+                        </ng-container>
+                    </div>
+
+                    <div class="comp-cell">
+                        <button class="btn btn-navy btn-sm" style="width:100%;justify-content:center"
+                            [routerLink]="'/vendor/' + v.id">View Profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

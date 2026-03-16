@@ -1,0 +1,49 @@
+<div class="vd-section active" style="display:block">
+  <div class="vd-page-header">
+    <div>
+      <div class="vd-page-title">Messages</div>
+      <div class="vd-page-sub">Stay connected with clients — fast replies win more bookings.</div>
+    </div>
+  </div>
+  <div class="vd-msg-layout">
+    <div class="vd-msg-list">
+      <div class="vd-msg-list-head">Conversations</div>
+      <div id="vd-msg-threads">
+        <div class="vd-msg-thread active">
+          <div class="vd-msg-ava">SM</div>
+          <div class="vd-msg-preview">
+            <div class="vd-msg-name">Sara Mohamed<span class="vd-msg-time">10:42 AM</span></div>
+            <div class="vd-msg-text">Are you available on June 12th for a setup in New Cairo?</div>
+          </div>
+        </div>
+        <div class="vd-msg-thread">
+          <div class="vd-msg-ava" style="background:var(--navy);color:var(--white)">KA</div>
+          <div class="vd-msg-preview">
+            <div class="vd-msg-name">Khaled Ali<span class="vd-msg-time">Yesterday</span></div>
+            <div class="vd-msg-text">Thank you, we'll confirm the details tomorrow!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vd-msg-pane">
+      <div class="vd-msg-pane-head">
+        <div style="font-size:1.4rem" id="vdMsgEmoji"></div>
+        <div>
+          <div class="vd-msg-pane-name" id="vdMsgName">Sara Mohamed</div>
+          <div class="vd-msg-pane-status" id="vdMsgStatus">Inquiry for Jun 12</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:6px"><button class="vd-btn vd-btn-ghost vd-btn-sm"
+            onclick="vdToast(' Booking request…')">View Booking</button><button class="vd-btn vd-btn-ghost vd-btn-sm"
+            onclick="vdToast('\uD83D\uDCAC WhatsApp…')">WhatsApp</button></div>
+      </div>
+      <div class="vd-msg-body" id="vdMsgBody">
+        <div class="vd-bubble vd-bubble-in">Hello! We are interested in your floral decor for our engagement party on
+          June 12th in New Cairo. Are you available?</div>
+        <div class="vd-bubble vd-bubble-out">Hi Sara! Yes, June 12th is currently open. Let me know what theme colors
+          you have in mind!</div>
+      </div>
+      <div class="vd-msg-input"><input type="text" id="vdMsgInput" placeholder="Type your reply…" /><button
+          class="vd-btn vd-btn-navy vd-btn-sm">Send</button></div>
+    </div>
+  </div>
+</div>

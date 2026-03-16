@@ -1,0 +1,318 @@
+<div class="page active" id="page-home">
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-orb"></div>
+        <div class="hero-orb"></div>
+        <div class="hero-content">
+            <div class="hero-eyebrow fade-up">✨ Egypt's Premier Event Platform</div>
+            <h1 class="fade-up fu1">Plan Your <em>Perfect</em><br />Event in Minutes</h1>
+            <p class="hero-sub fade-up fu2">Discover trusted vendors, book services, and manage everything in one
+                elegant platform.</p>
+            <div class="hero-search fade-up fu3">
+                <input type="text" placeholder="Search venues, catering, decoration…" #searchInput
+                    (keydown.enter)="doSearch(searchInput.value)" />
+                <button (click)="doSearch(searchInput.value)">Search →</button>
+            </div>
+            <div class="hero-cats fade-up fu4">
+                <div class="hero-cat active" (click)="filterCat('wedding')"> Weddings</div>
+                <div class="hero-cat" (click)="filterCat('birthday')"> Birthdays</div>
+                <div class="hero-cat" (click)="filterCat('corporate')"> Corporate</div>
+                <div class="hero-cat" (click)="filterCat('graduation')"> Graduation</div>
+                <div class="hero-cat" (click)="filterCat('engagement')"> Engagement</div>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-num">1,200+</div>
+                    <div class="hero-stat-lbl">Events Planned</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">340+</div>
+                    <div class="hero-stat-lbl">Trusted Vendors</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">4.9</div>
+                    <div class="hero-stat-lbl">Avg. Rating</div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-hint">SCROLL</div>
+    </section>
+
+    <div class="cats-strip">
+        <div class="container">
+            <div class="cats-grid">
+                <div class="cat-card" routerLink="/explore" [queryParams]="{category: 'Venue'}">
+                    <div class="cat-icon">️</div>
+                    <div class="cat-name">Venues</div>
+                    <div class="cat-count">68 venues</div>
+                </div>
+                <div class="cat-card" routerLink="/explore" [queryParams]="{category: 'Catering'}">
+                    <div class="cat-icon">️</div>
+                    <div class="cat-name">Catering</div>
+                    <div class="cat-count">52 caterers</div>
+                </div>
+                <div class="cat-card" routerLink="/explore" [queryParams]="{category: 'Decoration'}">
+                    <div class="cat-icon"></div>
+                    <div class="cat-name">Decoration</div>
+                    <div class="cat-count">74 vendors</div>
+                </div>
+                <div class="cat-card" routerLink="/explore" [queryParams]="{category: 'Photography'}">
+                    <div class="cat-icon"></div>
+                    <div class="cat-name">Photography</div>
+                    <div class="cat-count">89 studios</div>
+                </div>
+                <div class="cat-card" routerLink="/explore" [queryParams]="{category: 'Entertainment'}">
+                    <div class="cat-icon"></div>
+                    <div class="cat-name">Entertainment</div>
+                    <div class="cat-count">41 acts</div>
+                </div>
+                <div class="cat-card" routerLink="/explore">
+                    <div class="cat-icon">✨</div>
+                    <div class="cat-name">More</div>
+                    <div class="cat-count">60+ services</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section style="background:var(--cream)">
+        <div class="container">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px">
+                <div>
+                    <div class="tag"> Top Picks</div>
+                    <h2 class="section-title">Featured Vendors</h2>
+                    <p class="section-sub">Handpicked professionals trusted by thousands of happy clients.</p>
+                </div>
+                <button class="btn btn-outline" routerLink="/explore">View All →</button>
+            </div>
+            <div class="explore-grid" id="featuredVendors">
+                <app-vendor-card *ngFor="let v of featuredVendors" [vendor]="v"></app-vendor-card>
+            </div>
+        </div>
+    </section>
+
+    <section class="packages-section">
+        <div class="container">
+            <div class="tag"> Best Value</div>
+            <h2 class="section-title">Event Packages</h2>
+            <p class="section-sub">All-inclusive packages — bundled and priced honestly.</p>
+            <div class="pkg-grid" style="margin-top:36px">
+                <!-- Replace hardcoded packages with routerLinks where needed -->
+                <div class="pkg-card">
+                    <div class="pkg-icon"></div>
+                    <div class="pkg-name">Birthday Bliss</div>
+                    <div class="pkg-desc">Everything for an unforgettable birthday celebration.</div>
+                    <ul class="pkg-includes">
+                        <li>Venue rental (up to 80 guests)</li>
+                        <li>Decoration & balloon setup</li>
+                        <li>Professional photography</li>
+                        <li>Custom cake & dessert table</li>
+                        <li>WhatsApp coordination</li>
+                    </ul>
+                    <div class="pkg-vendors">
+                        <div class="pkg-vendors-title">Vendors in this package</div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"></span>
+                            <div class="pkg-vendor-name">Crystal Ballroom</div><span
+                                class="pkg-vendor-service">Venue</span><span class="pkg-vendor-price">3,500 EGP</span>
+                        </div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"></span>
+                            <div class="pkg-vendor-name">White Rose Decor</div><span
+                                class="pkg-vendor-service">Decoration</span><span class="pkg-vendor-price">2,200
+                                EGP</span>
+                        </div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"></span>
+                            <div class="pkg-vendor-name">Studio Lens</div><span
+                                class="pkg-vendor-service">Photography</span><span class="pkg-vendor-price">1,800
+                                EGP</span>
+                        </div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"></span>
+                            <div class="pkg-vendor-name">Sweet Dreams Cakes</div><span class="pkg-vendor-service">Cake &
+                                Desserts</span><span class="pkg-vendor-price">1,000 EGP</span>
+                        </div>
+                    </div>
+                    <div class="pkg-price-row">
+                        <div class="pkg-price">8,500 EGP</div>
+                        <div class="pkg-save">Save 2,000</div>
+                    </div><button class="pkg-btn pkg-btn-outline" (click)="bookPackage()">Book This Package</button>
+                </div>
+                <div class="pkg-card featured">
+                    <div class="pkg-featured-badge">MOST POPULAR</div>
+                    <div class="pkg-icon"></div>
+                    <div class="pkg-name">Wedding Dream</div>
+                    <div class="pkg-desc">The complete luxury wedding experience.</div>
+                    <ul class="pkg-includes">
+                        <li>Elegant hall (up to 300 guests)</li>
+                        <li>Full catering & live stations</li>
+                        <li>Floral décor & stage setup</li>
+                        <li>DJ & sound system</li>
+                        <li>Photography & videography</li>
+                        <li>Dedicated event coordinator</li>
+                    </ul>
+                    <div class="pkg-vendors">
+                        <div class="pkg-vendors-title">Vendors in this package</div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"></span>
+                            <div class="pkg-vendor-name">Nile City Venue</div><span class="pkg-vendor-service">Wedding
+                                Hall</span><span class="pkg-vendor-price">30,000 EGP</span>
+                        </div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji">️</span>
+                            <div class="pkg-vendor-name">Elite Catering</div><span class="pkg-vendor-service">Catering &
+                                Live Stations</span><span class="pkg-vendor-price">12,000 EGP</span>
+                        </div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"></span>
+                            <div class="pkg-vendor-name">White Rose Decor</div><span class="pkg-vendor-service">Floral
+                                Décor & Stage</span><span class="pkg-vendor-price">15,000 EGP</span>
+                        </div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"></span>
+                            <div class="pkg-vendor-name">DJ Mido Events</div><span class="pkg-vendor-service">DJ & Sound
+                                System</span><span class="pkg-vendor-price">6,000 EGP</span>
+                        </div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"></span>
+                            <div class="pkg-vendor-name">Studio Lens</div><span class="pkg-vendor-service">Photography &
+                                Video</span><span class="pkg-vendor-price">8,000 EGP</span>
+                        </div>
+                    </div>
+                    <div class="pkg-price-row">
+                        <div class="pkg-price">45,000 EGP</div>
+                        <div class="pkg-save">Save 8,000</div>
+                    </div><button class="pkg-btn pkg-btn-gold" (click)="bookPackage()">Book This Package</button>
+                </div>
+                <div class="pkg-card">
+                    <div class="pkg-icon"></div>
+                    <div class="pkg-name">Corporate Pro</div>
+                    <div class="pkg-desc">Professional execution for corporate events.</div>
+                    <ul class="pkg-includes">
+                        <li>Conference hall & AV setup</li>
+                        <li>Branding & print materials</li>
+                        <li>Catering & coffee stations</li>
+                        <li>Registration desk staffing</li>
+                        <li>Event photography</li>
+                    </ul>
+                    <div class="pkg-vendors">
+                        <div class="pkg-vendors-title">Vendors in this package</div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji">️</span>
+                            <div class="pkg-vendor-name">Royal Hall Cairo</div><span
+                                class="pkg-vendor-service">Conference Venue & AV</span><span
+                                class="pkg-vendor-price">Custom</span>
+                        </div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji">️</span>
+                            <div class="pkg-vendor-name">Elite Catering</div><span class="pkg-vendor-service">Catering &
+                                Coffee Stations</span><span class="pkg-vendor-price">Custom</span>
+                        </div>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"></span>
+                            <div class="pkg-vendor-name">Studio Lens</div><span class="pkg-vendor-service">Event
+                                Photography</span><span class="pkg-vendor-price">Custom</span>
+                        </div>
+                    </div>
+                    <div class="pkg-price-row">
+                        <div class="pkg-price">Custom</div>
+                    </div><button class="pkg-btn pkg-btn-outline" routerLink="/corporate">Request Quote</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="whyus">
+        <div class="container">
+            <div class="whyus-grid">
+                <div class="whyus-visual">
+                    <div class="whyus-card-main"></div>
+                    <div class="whyus-float">
+                        <div class="wf-icon">️</div>
+                        <div class="wf-text"><strong>All Vendors Verified</strong><span>340+ screened pros</span></div>
+                    </div>
+                    <div class="whyus-float">
+                        <div class="wf-icon">⭐</div>
+                        <div class="wf-text"><strong>4.9 Average Rating</strong><span>from 3,200+ reviews</span></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="tag">Why Choose Us</div>
+                    <h2 class="section-title">Planning made simple,<br />events made <em
+                            style="font-family:var(--ff-d);font-style:italic">unforgettable</em></h2>
+                    <p class="section-sub">We built Eventora because planning events in Egypt was needlessly stressful.
+                    </p>
+                    <div class="whyus-points">
+                        <div class="wp-card">
+                            <div class="wp-icon">️</div>
+                            <div class="wp-title">All Vendors Verified</div>
+                            <div class="wp-desc">Every vendor is screened and approved before joining.</div>
+                        </div>
+                        <div class="wp-card">
+                            <div class="wp-icon"></div>
+                            <div class="wp-title">Transparent Pricing</div>
+                            <div class="wp-desc">No hidden fees — prices shown upfront, always.</div>
+                        </div>
+                        <div class="wp-card">
+                            <div class="wp-icon">⚡</div>
+                            <div class="wp-title">Fast Booking</div>
+                            <div class="wp-desc">Confirm vendors in minutes. Instant confirmations.</div>
+                        </div>
+                        <div class="wp-card">
+                            <div class="wp-icon">💬</div>
+                            <div class="wp-title">WhatsApp Support</div>
+                            <div class="wp-desc">Real humans, fast replies in Arabic & English.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <div class="container">
+            <div style="text-align:center;margin-bottom:40px">
+                <div class="tag">️ Success Stories</div>
+                <h2 class="section-title">What Our Clients Say</h2>
+            </div>
+            <div class="testi-grid">
+                <div class="testi-card">
+                    <p class="testi-text">"Eventora made planning my daughter's wedding completely stress-free.
+                        Everything was organized and the result was breathtaking."</p>
+                    <div class="testi-author">
+                        <div class="testi-avatar"></div>
+                        <div>
+                            <div class="testi-name">Heba Mahmoud</div>
+                            <div class="testi-event">Wedding · New Cairo</div>
+                        </div>
+                    </div>
+                    <div class="stars" style="margin-top:11px"></div>
+                </div>
+                <div class="testi-card">
+                    <p class="testi-text">"Used Eventora for our product launch — seamless. The corporate packages saved
+                        us so much time and execution was flawless."</p>
+                    <div class="testi-author">
+                        <div class="testi-avatar"></div>
+                        <div>
+                            <div class="testi-name">Ahmed Karim</div>
+                            <div class="testi-event">Product Launch · Cairo</div>
+                        </div>
+                    </div>
+                    <div class="stars" style="margin-top:11px"></div>
+                </div>
+                <div class="testi-card">
+                    <p class="testi-text">"Planned my engagement party in under an hour. The budget tracker kept me on
+                        track and the decoration vendor was incredible."</p>
+                    <div class="testi-author">
+                        <div class="testi-avatar"></div>
+                        <div>
+                            <div class="testi-name">Sara Nasser</div>
+                            <div class="testi-event">Engagement · Alexandria</div>
+                        </div>
+                    </div>
+                    <div class="stars" style="margin-top:11px"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="cta-section">
+        <div class="container">
+            <h2 class="section-title">Ready to Plan Your Perfect Event?</h2>
+            <p>Join over 1,200 happy clients who trusted Eventora.</p>
+            <div class="cta-btns">
+                <button class="btn btn-gold" routerLink="/dashboard">Start Planning Free</button>
+                <button class="btn btn-outline" routerLink="/explore">Explore Vendors</button>
+            </div>
+        </div>
+    </div>
+</div>

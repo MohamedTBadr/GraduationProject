@@ -1,0 +1,46 @@
+<div class="vd-section active" style="display:block">
+  <div class="vd-page-header">
+    <div><div class="vd-page-title">Analytics</div><div class="vd-page-sub">Track visibility, conversion, and revenue trends over time.</div></div>
+    <div style="display:flex;gap:6px"><button class="vd-btn vd-btn-ghost vd-btn-sm">7d</button><button class="vd-btn vd-btn-gold vd-btn-sm">30d</button><button class="vd-btn vd-btn-ghost vd-btn-sm">3m</button><button class="vd-btn vd-btn-ghost vd-btn-sm">1yr</button></div>
+  </div>
+  <div class="vd-stats" style="grid-template-columns:repeat(4,1fr)">
+    <div class="vd-stat vds-gold"><div class="vd-stat-val">1,240</div><div class="vd-stat-lbl">Profile Views</div><div class="vd-stat-trend">↑ 24%</div></div>
+    <div class="vd-stat vds-blue"><div class="vd-stat-val">38</div><div class="vd-stat-lbl">Inquiries</div><div class="vd-stat-trend">↑ 8%</div></div>
+    <div class="vd-stat vds-green"><div class="vd-stat-val">24%</div><div class="vd-stat-lbl">Conversion</div><div class="vd-stat-trend">↑ 3%</div></div>
+    <div class="vd-stat vds-amber"><div class="vd-stat-val">1.8h</div><div class="vd-stat-lbl">Avg Response</div><div class="vd-stat-trend flat">Target: 2h ✓</div></div>
+  </div>
+  <div class="vd-g2">
+    <div class="vd-card">
+      <div class="vd-card-title">Revenue Trend</div>
+      <div class="vd-bar-chart" id="vd-analytics-chart" style="display:flex;align-items:flex-end;gap:20px;height:120px;padding-top:20px;margin-top:10px;justify-content:center">
+         <div style="width:25px;background:var(--gold);height:40%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Oct</span></div>
+         <div style="width:25px;background:var(--gold);height:60%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Nov</span></div>
+         <div style="width:25px;background:var(--gold);height:30%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Dec</span></div>
+         <div style="width:25px;background:var(--gold);height:75%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Jan</span></div>
+         <div style="width:25px;background:var(--gold);height:50%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Feb</span></div>
+         <div style="width:25px;background:var(--gold);height:80%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Mar</span></div>
+      </div>
+    </div>
+    <div class="vd-card"><div class="vd-card-title">Booking Sources</div>
+      <div id="vd-sources">
+        <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Direct Search</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--gold);width:65%"></div></div><div style="width:30px;text-align:right">65%</div></div>
+        <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Packages</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:#3b82f6;width:25%"></div></div><div style="width:30px;text-align:right">25%</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="vd-g2">
+    <div class="vd-card"><div class="vd-card-title">Top Services</div>
+      <div id="vd-top-svcs">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+            <div><div style="font-weight:600;font-size:0.9rem">Wedding Stage Floral Design</div><div style="font-size:0.8rem;color:var(--gray)">12 bookings</div></div>
+            <div style="font-weight:600;color:var(--gold)">180,000 EGP</div>
+        </div>
+      </div>
+    </div>
+    <div class="vd-card"><div class="vd-card-title">Event Types</div>
+      <div id="vd-event-types">
+        <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Wedding</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--gold);width:70%"></div></div><div style="width:30px;text-align:right">70%</div></div>
+      </div>
+    </div>
+  </div>
+</div>

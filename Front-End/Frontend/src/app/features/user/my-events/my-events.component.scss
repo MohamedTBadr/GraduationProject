@@ -1,0 +1,58 @@
+.event-tab-btn {
+    padding: 10px 20px;
+    background: var(--white);
+    border: 1px solid var(--lgray);
+    color: var(--gray);
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .2s;
+}
+
+.event-tab-btn.active {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+}
+
+.check-box.done {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.done-text {
+    text-decoration: line-through;
+    color: var(--gray) !important;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-confirmed {
+    background: rgba(22, 163, 74, .1);
+    color: #16a34a;
+}
+
+.badge-pending {
+    background: rgba(161, 98, 7, .1);
+    color: #a16207;
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Modal form style overrides if needed */
+.vps-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sh2);
+}

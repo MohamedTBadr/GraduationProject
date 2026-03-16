@@ -1,0 +1,88 @@
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../shared/components/toast/toast.service';
+import { ModalService } from '../../../shared/services/modal.service';
+import { HttpHeaders } from '@angular/common/http';
+
+@Component({
+    selector: 'app-login',
+    standalone: true,
+    imports: [CommonModule, ReactiveFormsModule, RouterModule],
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss']
+})
+export class LoginComponent {
+
+    private fb = inject(FormBuilder);
+    private authService = inject(AuthService);
+    private router = inject(Router);
+    private toastService = inject(ToastService);
+    private modalService = inject(ModalService);
+
+    loginForm: FormGroup = this.fb.group({
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(8)]],
+        role: ['user', Validators.required]
+    });
+
+    isLoading = false;
+
+    get emailControl() {
+        return this.loginForm.get('email');
+    }
+
+    get passwordControl() {
+        return this.loginForm.get('password');
+    }
+
+    onSubmit() {
+
+        if (this.loginForm.invalid) {
+            this.loginForm.markAllAsTouched();
+            return;
+        }
+
+        this.isLoading = true;
+
+        // Generate idempotency key per request
+        const headers = new HttpHeaders({
+            'IdempotencyKey': crypto.randomUUID()
+        });
+//mt
+        this.authService.login(this.loginForm.value, headers).subscribe({
+
+            next: (response) => {
+
+                this.isLoading = false;
+
+                this.toastService.show('Logged in successfully!', 'success');
+
+                this.modalService.close();
+
+                if (response.user.role === 'admin') {
+                    this.router.navigate(['/admin']);
+                }
+                else if (response.user.role === 'vendor') {
+                    this.router.navigate(['/vendor-dashboard']);
+                }
+                else {
+                    this.router.navigate(['/user/my-events']);
+                }
+            },
+
+            error: (err: any) => {
+
+                this.isLoading = false;
+
+                this.toastService.show(err.message || 'Failed to login', 'error');
+            }
+        });
+    }
+
+    switchToRegister() {
+        this.modalService.open('signup');
+    }
+}

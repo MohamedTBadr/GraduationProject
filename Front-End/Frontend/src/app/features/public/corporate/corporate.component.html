@@ -1,0 +1,162 @@
+<div class="page active" id="page-corporate">
+    <div class="corp-hero">
+        <div>
+            <div class="hero-eyebrow"
+                style="display:inline-flex;align-items:center;gap:9px;background:rgba(201,168,76,.13);border:1px solid rgba(201,168,76,.3);padding:6px 16px;border-radius:50px;font-size:.75rem;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px">
+                B2B Corporate Solutions
+            </div>
+            <h1
+                style="font-family:var(--ff-d);font-size:clamp(2.2rem,5vw,4rem);color:var(--white);font-weight:300;margin-bottom:14px;max-width:660px">
+                Professional Events, <em style="color:var(--gold)">Flawlessly</em> Executed
+            </h1>
+            <p style="color:rgba(255,255,255,.52);font-size:.97rem;max-width:460px;margin-bottom:34px;line-height:1.7">
+                From 50-person conferences to 2,000-guest brand activations — precision and reliability every time.
+            </p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <button class="btn btn-gold" (click)="scrollToForm()">Request a Quote</button>
+                <button class="btn btn-outline" routerLink="/contact">Talk to an Expert</button>
+            </div>
+        </div>
+    </div>
+
+    <section style="background:var(--cream);padding:72px 0">
+        <div class="container">
+            <div class="tag">Services</div>
+            <h2 class="section-title" style="margin-bottom:38px">Corporate Event Solutions</h2>
+            <div class="corp-services">
+                <div class="corp-service-card">
+                    <div class="cs-icon">️</div>
+                    <div class="cs-title">Conferences & Seminars</div>
+                    <div class="cs-desc">End-to-end conference management: venue, AV, registration, hospitality, and
+                        logistics.</div>
+                </div>
+                <div class="corp-service-card">
+                    <div class="cs-icon"></div>
+                    <div class="cs-title">Product Launches</div>
+                    <div class="cs-desc">Create memorable brand moments with stunning stage design and press coverage.
+                    </div>
+                </div>
+                <div class="corp-service-card">
+                    <div class="cs-icon"></div>
+                    <div class="cs-title">Brand Activations</div>
+                    <div class="cs-desc">Interactive experiences at malls, expos, and outdoor events.</div>
+                </div>
+                <div class="corp-service-card">
+                    <div class="cs-icon"></div>
+                    <div class="cs-title">Award Ceremonies</div>
+                    <div class="cs-desc">Elegant award nights with stage design, presentation visuals, and complete
+                        production.</div>
+                </div>
+                <div class="corp-service-card">
+                    <div class="cs-icon"></div>
+                    <div class="cs-title">Team Building</div>
+                    <div class="cs-desc">Engaging team activities, offsites, and internal events that boost morale.
+                    </div>
+                </div>
+                <div class="corp-service-card">
+                    <div class="cs-icon">️</div>
+                    <div class="cs-title">Exhibitions & Trade Shows</div>
+                    <div class="cs-desc">Full booth design, logistics, staffing, and management.</div>
+                </div>
+            </div>
+
+            <div style="margin-top:52px">
+                <h3 style="font-family:var(--ff-d);font-size:1.55rem;color:var(--navy);margin-bottom:14px">Industries We
+                    Serve</h3>
+                <div style="display:flex;flex-wrap:wrap;gap:10px">
+                    <div class="industry-tag"> Banking & Finance</div>
+                    <div class="industry-tag"> Telecommunications</div>
+                    <div class="industry-tag"> FMCG & Retail</div>
+                    <div class="industry-tag"> Education</div>
+                    <div class="industry-tag"> Technology</div>
+                    <div class="industry-tag">️ Government</div>
+                    <div class="industry-tag">️ Healthcare</div>
+                    <div class="industry-tag">️ Real Estate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div style="background:var(--cream2);padding:72px 0" id="corp-quote">
+        <div class="container" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start">
+            <div>
+                <div class="tag">Get in Touch</div>
+                <h2 class="section-title">Request a Custom Quote</h2>
+                <p class="section-sub">We respond to all corporate inquiries within 4 business hours with a tailored
+                    proposal.</p>
+                <div style="display:grid;gap:14px;margin-top:28px">
+                    <div style="display:flex;gap:12px">
+                        <span style="font-size:1.3rem">⚡</span>
+                        <div><strong style="color:var(--navy)">Fast Response</strong>
+                            <p style="font-size:.83rem;color:var(--gray);margin-top:2px">All corporate inquiries
+                                answered within 4 hours.</p>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:12px">
+                        <span style="font-size:1.3rem"></span>
+                        <div><strong style="color:var(--navy)">Dedicated Manager</strong>
+                            <p style="font-size:.83rem;color:var(--gray);margin-top:2px">Every corporate client gets a
+                                dedicated event manager.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="corp-form">
+                <h3 style="font-family:var(--ff-d);font-size:1.45rem;color:var(--navy);margin-bottom:22px">Event Details
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Company Name *</label><input type="text"
+                            placeholder="Your company" /></div>
+                    <div class="form-group"><label>Contact Person *</label><input type="text" placeholder="Full name" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Phone *</label><input type="tel" placeholder="+20 100 000 0000" />
+                    </div>
+                    <div class="form-group"><label>Email *</label><input type="email" placeholder="email@company.com" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Type *</label>
+                        <select>
+                            <option>Conference / Seminar</option>
+                            <option>Product Launch</option>
+                            <option>Brand Activation</option>
+                            <option>Award Ceremony</option>
+                            <option>Team Building</option>
+                            <option>Exhibition</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Expected Date</label><input type="date" /></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Estimated Attendees</label><input type="number"
+                            placeholder="e.g. 200" /></div>
+                    <div class="form-group">
+                        <label>Approximate Budget</label>
+                        <select>
+                            <option>Under 30,000 EGP</option>
+                            <option>30,000–80,000 EGP</option>
+                            <option>80,000–200,000 EGP</option>
+                            <option>200,000+ EGP</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Additional Requirements</label>
+                    <textarea placeholder="Tell us more about your vision…"></textarea>
+                </div>
+
+                <button class="form-submit" (click)="submitCorpForm()">Submit Request →</button>
+            </div>
+        </div>
+    </div>
+</div>

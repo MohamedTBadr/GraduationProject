@@ -1,0 +1,32 @@
+<div class="ad-section active" style="display:block">
+  <div class="ad-page-hd">
+    <div>
+      <div class="ad-page-title">Platform Settings</div>
+      <div class="ad-page-sub">Global configuration, commission rates, and API keys.</div>
+    </div>
+    <button class="ad-btn ad-btn-gold">Save All Changes</button>
+  </div>
+  <div class="ad-g2">
+    <div class="ad-card">
+      <div class="ad-card-title">Business Rules</div>
+      <div class="ad-form-group"><label>Global Commission Rate (%)</label><input type="number" value="10"/></div>
+      <div class="ad-form-group"><label>Vendor Approval Timeout (Days)</label><input type="number" value="3"/></div>
+      <div class="ad-form-group">
+        <label>Default Cancellation Policy</label>
+        <select><option>Flexible (Full refund up to 7 days)</option><option selected>Moderate (Full up to 14 days)</option><option>Strict</option></select>
+      </div>
+      <div class="ad-form-group"><label>Dispute Window (Days after event)</label><input type="number" value="3"/></div>
+    </div>
+    <div class="ad-card">
+      <div class="ad-card-title">API & Integrations</div>
+      <div class="ad-form-group"><label>Payment Gateway (Paymob) API Key</label><input type="password" value="sk_test_paymob_12345"/></div>
+      <div class="ad-form-group"><label>SMS Provider Key</label><input type="password" value="sk_sms_9876"/></div>
+      <div class="ad-form-group"><label>Analytics Tracking ID</label><input type="text" value="G-E87XCQ"/></div>
+      <div style="margin-top:20px;padding:12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:6px">
+        <div style="font-weight:600;color:#f87171;margin-bottom:4px">Danger Zone</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);margin-bottom:10px">Actions here can critically affect platform operation.</div>
+        <button class="ad-btn ad-btn-red ad-btn-sm" style="background:transparent;border:1px solid #ef4444">Trigger Maintenance Mode</button>
+      </div>
+    </div>
+  </div>
+</div>

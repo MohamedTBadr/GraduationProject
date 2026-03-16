@@ -1,0 +1,97 @@
+<div class="usr-sidebar">
+
+  <!-- User Profile -->
+  <div class="uss-profile">
+    <div class="uss-avatar"></div>
+    <div class="uss-user-info">
+      <div class="uss-user-name">Sara Mohamed</div>
+      <div class="uss-user-status">3 events active</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="uss-nav">
+
+    <div class="uss-section-label">Main</div>
+
+    <a class="uss-nav-link"
+       routerLink="/user/dashboard"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{exact: true}">
+      <span class="uss-nav-icon">
+        <i class="fa-solid fa-house"></i>
+      </span>
+      Overview
+    </a>
+
+    <a class="uss-nav-link"
+       routerLink="/user/my-events"
+       routerLinkActive="active">
+      <span class="uss-nav-icon">
+        <i class="fa-solid fa-calendar-star"></i>
+      </span>
+      My Events
+    </a>
+
+    <a class="uss-nav-link"
+       routerLink="/user/bookings"
+       routerLinkActive="active">
+      <span class="uss-nav-icon">
+        <i class="fa-solid fa-calendar-check"></i>
+      </span>
+      My Bookings
+    </a>
+
+    <a class="uss-nav-link"
+       routerLink="/user/messages"
+       routerLinkActive="active">
+      <span class="uss-nav-icon">
+        <i class="fa-solid fa-message"></i>
+      </span>
+      Messages
+      <span class="uss-nav-badge red">2</span>
+    </a>
+
+    <a class="uss-nav-link"
+       routerLink="/user/favorites"
+       routerLinkActive="active">
+      <span class="uss-nav-icon">
+        💖
+      </span>
+      Favorites
+    </a>
+
+    <div class="uss-divider"></div>
+    <div class="uss-section-label">Discover</div>
+
+    <a class="uss-nav-link"
+       routerLink="/explore"
+       routerLinkActive="active">
+      <span class="uss-nav-icon">
+        🔍
+      </span>
+      Find Vendors
+    </a>
+
+    <a class="uss-nav-link"
+       routerLink="/packages"
+       routerLinkActive="active">
+      <span class="uss-nav-icon">
+        <i class="fa-solid fa-box-open"></i>
+      </span>
+      Packages
+    </a>
+
+  </nav>
+
+  <!-- Footer -->
+  <div class="uss-footer">
+    <a class="uss-footer-link" routerLink="/">
+      <span class="uss-nav-icon">
+        <i class="fa-solid fa-arrow-left-from-bracket"></i>
+      </span>
+      Back to Home
+    </a>
+  </div>
+
+</div>

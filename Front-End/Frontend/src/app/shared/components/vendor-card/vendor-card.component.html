@@ -1,0 +1,27 @@
+<div class="vendor-card" [routerLink]="['/vendor', vendor.id]">
+    <div class="vc-photo">
+        <div class="vc-photo-inner" [style.background]="getGradient(vendor.id)">{{vendor.emoji}}</div>
+        <div class="vc-top-row">
+            <span class="vc-cat-badge">{{vendor.category}}</span>
+            <div style="display:flex;gap:7px">
+                <button class="compare-btn" [class.active]="compareService.isInCompare(vendor.id)"
+                    (click)="onToggleCompare($event)">️</button>
+                <button class="vc-fav-btn" [class.active]="favoriteService.isFavorite(vendor.id)"
+                    (click)="onToggleFavorite($event)"></button>
+            </div>
+        </div>
+    </div>
+    <div class="vc-body">
+        <div class="vc-name">{{vendor.name}}</div>
+        <div class="vc-loc">📍 {{vendor.location}}</div>
+        <div class="vc-rating-row">
+            <span class="stars" style="color:var(--gold);font-size:.8rem"></span>
+            <span style="font-weight:700;font-size:.85rem;color:var(--navy);margin-left:4px">{{vendor.rating}}</span>
+            <span class="vc-review-count">({{vendor.reviews}} reviews)</span>
+        </div>
+        <div class="vc-footer">
+            <div class="vc-price">from <strong>{{vendor.startPrice | number}} EGP</strong></div>
+            <button class="vc-view-btn">View Profile</button>
+        </div>
+    </div>
+</div>
