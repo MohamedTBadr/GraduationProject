@@ -1,10 +1,7 @@
 <!-- NAV -->
 <nav class="nav" id="mainNav">
   <div class="nav-inner">
-
-    <div class="nav-logo" routerLink="/">
-      Evento<span>ra</span>
-    </div>
+    <div class="nav-logo" routerLink="/">Evento<span>Alaa</span></div>
 
     <ul class="nav-links">
       <li><a routerLink="/explore">Explore Vendors</a></li>
@@ -15,20 +12,17 @@
     </ul>
 
     <div class="nav-actions">
-
       <button
         class="nav-fav-btn"
         (click)="goToFavorites()"
-        title="My Favorites">
-        
+        title="My Favorites"
+      >
         <div class="fav-count" id="favCount">0</div>
       </button>
 
       <!-- Not Logged In -->
       <ng-container *ngIf="!authService.isLoggedIn()">
-        <button class="btn-nav-login" (click)="openLoginModal()">
-          Login
-        </button>
+        <button class="btn-nav-login" (click)="openLoginModal()">Login</button>
         <button class="btn-nav-cta" (click)="openSignupModal()">
           Get Started
         </button>
@@ -36,14 +30,14 @@
 
       <!-- Logged In -->
       <ng-container *ngIf="authService.isLoggedIn()">
-
         <!-- Admin -->
         <button
           *ngIf="authService.role() === 'Admin'"
           class="btn-nav-admin"
           routerLink="/admin"
-          title="Admin Panel">
-           Admin
+          title="Admin Panel"
+        >
+          Admin
         </button>
 
         <!-- Vendor -->
@@ -51,8 +45,9 @@
           *ngIf="authService.role() === 'Vendor'"
           class="btn-nav-vendor"
           routerLink="/vendor-dashboard"
-          title="Vendor Portal">
-           Dashboard
+          title="Vendor Portal"
+        >
+          Dashboard
         </button>
 
         <!-- User -->
@@ -60,19 +55,19 @@
           *ngIf="authService.role() === 'User'"
           class="btn-nav-login"
           routerLink="/user/my-events"
-          title="My Events">
-           My Portal
+          title="My Events"
+        >
+          My Portal
         </button>
 
         <button
           class="btn btn-navy btn-sm"
           (click)="logout()"
-          style="border-color:#dc2626;color:#dc2626;background:transparent">
+          style="border-color: #dc2626; color: #dc2626; background: transparent"
+        >
           Logout
         </button>
-
       </ng-container>
-
     </div>
   </div>
 </nav>
