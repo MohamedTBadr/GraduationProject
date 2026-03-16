@@ -9,6 +9,7 @@ using IdempotentAPI.Core;
 using IdempotentAPI.Extensions.DependencyInjection;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -19,6 +20,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading.RateLimiting;
 using Web.Api.Controllers.Attributes;
+using Web.Api.Middlewares;
 using Web.Api.Services;
 //using PAL.Notifications;
 
@@ -224,6 +226,9 @@ namespace Web.Api
             #endregion
             services.AddScoped<IChatNotificationService, ChatNotificationService>();
             services.AddScoped<IChatService, ChatService>();
+            services.AddSingleton<
+    IAuthorizationMiddlewareResultHandler,
+    CustomAuthorizationResultHandler>();
             return services;
         }
     }

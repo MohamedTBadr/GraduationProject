@@ -16,5 +16,8 @@ namespace Domain.Contracts
             Task<Product> UpdateAsync(Product product);
             Task DeleteAsync(Guid id);
             Task<bool> ExistsAsync(Guid id);
-        }
+
+
+        Task<List<Product>> AIFilterAsync(AIRequest AIRequest);
+    }
     }

@@ -10,4 +10,12 @@ namespace Shared
         string? SortBy = null,
         bool IsDescending = false
     );
+
+    // ✅ Change to class or non-positional record
+    public record AIRequest
+    {
+        public decimal Budget { get; init; }
+        public int GuestCount { get; init; }
+        public string ServiceTypeName { get; init; }
+    }
 }

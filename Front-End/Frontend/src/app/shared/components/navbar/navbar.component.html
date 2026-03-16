@@ -39,7 +39,7 @@
 
         <!-- Admin -->
         <button
-          *ngIf="authService.role() === 'admin'"
+          *ngIf="authService.role() === 'Admin'"
           class="btn-nav-admin"
           routerLink="/admin"
           title="Admin Panel">
@@ -48,7 +48,7 @@
 
         <!-- Vendor -->
         <button
-          *ngIf="authService.role() === 'vendor'"
+          *ngIf="authService.role() === 'Vendor'"
           class="btn-nav-vendor"
           routerLink="/vendor-dashboard"
           title="Vendor Portal">
@@ -57,7 +57,7 @@
 
         <!-- User -->
         <button
-          *ngIf="authService.role() === 'user'"
+          *ngIf="authService.role() === 'User'"
           class="btn-nav-login"
           routerLink="/user/my-events"
           title="My Events">

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
-//[Authorize]
+[Authorize]
 public class ChatHub(IChatService chatService) : Hub
 {
     private Guid CurrentUserId =>

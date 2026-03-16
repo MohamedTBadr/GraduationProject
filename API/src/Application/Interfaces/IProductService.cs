@@ -14,6 +14,8 @@ namespace Application.Interfaces
         Task<Result<PaginatedResponse<ProductDTO>>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request);
         Task<Result<PaginatedResponse<ProductDTO>>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request);
         Task<Result<PaginatedResponse<ProductDTO>>> GetByServiceTypeIdAsync(Guid serviceTypeId, PaginatedRequest request);
+
+        Task<Result<List<ProductDTO>>> AIFilterAsync(AIRequest AIRequest);
         Task<Result<ProductDTO>> GetByIdAsync(Guid id);
         Task<Result<ProductDTO>> CreateAsync(CreateProductRequest dto);
         Task<Result<ProductDTO>> UpdateAsync(UpdateProductDTO dto);

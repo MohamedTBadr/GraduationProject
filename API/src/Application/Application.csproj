@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2.0" />
 	  <!-- ✅ After -->
 	  <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.10.0" />
+	  <PackageReference Include="Yoyo.Abp.MailKit" Version="9.1.0.1" />
   </ItemGroup>
 
   <ItemGroup>

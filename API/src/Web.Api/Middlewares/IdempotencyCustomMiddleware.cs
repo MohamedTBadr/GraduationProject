@@ -14,11 +14,11 @@ namespace Web.Api.Middlewares
                 { 
                 
                     if (!context.Request.Headers.ContainsKey("IdempotencyKey"))
-                        {
+                    {
                     throw new IdempotencyKeyMissingException("Missing Idempotency Key header.");
-                             }
+                    }
 
-                          await next(context);
+                     await next(context);
                     if (context.Response.StatusCode == StatusCodes.Status406NotAcceptable)
                     {
                         throw new IdempotencyKeyDuplicateException("Duplicate Idempotency Key Header");

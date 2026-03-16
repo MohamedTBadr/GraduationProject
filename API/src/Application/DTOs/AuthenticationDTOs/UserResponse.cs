@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.AuthenticationDTOs
 {
-    public record UserResponse(string name,string email,string AccessToken,string RefreshToken);
+    public record UserResponse(string name,string email,string AccessToken,string RefreshToken,string role);
     
 }

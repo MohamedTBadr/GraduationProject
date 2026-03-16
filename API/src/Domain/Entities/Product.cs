@@ -10,7 +10,7 @@ namespace Domain.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public ServiceType ServiceType { get; set; }
-
+        public decimal Price { get; set; }
         public Guid ServiceTypeId { get; set; }
 
         public Category Category { get; set; }

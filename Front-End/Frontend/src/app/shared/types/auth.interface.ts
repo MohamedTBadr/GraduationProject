@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'vendor' | 'user' | null;
+export type UserRole = 'Admin' | 'Vendor' | 'User' | null;
 
 export interface UserSession {
     id: string;
@@ -14,6 +14,17 @@ export interface LoginCredentials {
 }
 
 export interface AuthResponse {
-    user: UserSession;
-    token: string;
+    value: {
+        user: UserSession;
+        token: string;
+        refreshToken: string;
+        role: UserRole;
+    }
 }
+
+export interface APIResponse<T> {
+    value: T;
+}
+
+
+

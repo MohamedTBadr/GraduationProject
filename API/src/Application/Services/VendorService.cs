@@ -53,7 +53,10 @@ namespace Application.Services
         public async Task<Result<VendorDetailsDTO>> DeleteVendorAsync(Guid id)
         {
             var vendor = await vendorRepository.GetVendorByIdAsync(id);
-            return Result<VendorDetailsDTO>.NotFound("Vendor not found");
+            if (vendor == null)
+            {
+                return Result<VendorDetailsDTO>.NotFound("Vendor not found");
+            }
 
             await vendorRepository.DeleteVendorAsync(vendor);
             var vendorDTO = mapper.Map<VendorDetailsDTO>(vendor);
@@ -61,5 +64,17 @@ namespace Application.Services
 
         }
 
+        public async Task<Result<VendorDetailsDTO>> ApproveVendorAsync(Guid id)
+        {
+            var vendor = await vendorRepository.GetVendorByIdAsync(id);
+            if (vendor == null)
+            {
+                return Result<VendorDetailsDTO>.NotFound("Vendor not found");
+            }
+            vendor.IsVerified = true;
+            await vendorRepository.UpdateVendorAsync(vendor);
+            var vendorDTO = mapper.Map<VendorDetailsDTO>(vendor);
+            return Result<VendorDetailsDTO>.Success(vendorDTO);
+        }
     }
 }

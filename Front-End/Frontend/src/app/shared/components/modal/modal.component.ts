@@ -24,9 +24,9 @@ export class ModalComponent {
     this.modalService.close();
 
     // Navigate based on role
-    if (role === 'admin') this.router.navigate(['/admin']);
-    else if (role === 'vendor') this.router.navigate(['/vendor-dashboard']);
-    else if (role === 'user') this.router.navigate(['/user/my-events']);
+    if (role === 'Admin') this.router.navigate(['/admin']);
+    else if (role === 'Vendor') this.router.navigate(['/vendor-dashboard']);
+    else if (role === 'User') this.router.navigate(['/user/my-events']);
   }
 
   onOverlayClick(event: MouseEvent) {

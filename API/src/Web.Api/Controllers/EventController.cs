@@ -1,25 +1,22 @@
-using System;
-using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
-
+using Application.Services;
+using Application.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
+using System;
+using System.Threading.Tasks;
 
 namespace Web.Api.Controllers
 {
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class EventsController : BaseController
+    public class EventController(IEventService _eventService, GeminiService _geminiService , IProductService _productService) : BaseController
     {
-        private readonly IEventService _eventService;
-
-        public EventsController(IEventService eventService)
-        {
-            _eventService = eventService;
-        }
+      
 
         // ─────────────────────────────────────────────────────────
         // GET api/events
@@ -112,6 +109,77 @@ namespace Web.Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("createEventByAI/{eventId}")]
+        public async Task<IActionResult> CreateEventItemsByAI(Guid eventId)
+        {
+            // Step 1: Get event
+            var eventObject = await _eventService.GetByIdAsync(eventId);
+            if (eventObject is null)
+                return NotFound($"Event {eventId} not found.");
+
+            var request = new AIRequest { Budget = eventObject.TotalBudget, GuestCount = eventObject.GuestCount, ServiceTypeName = eventObject.ServiceTypeName };
+            var productLines = await _productService.AIFilterAsync(request);
+
+
+            // Step 5: Build prompt
+            var prompt = $@"
+You are an event planning API that returns ONLY valid JSON. Do not include markdown, explanation, or extra text.
+
+Plan a full event using the details and available products below.
+
+EVENT DETAILS:
+- Title: {eventObject.Title}
+- Type: {eventObject.ServiceTypeName}
+- Date: {eventObject.EventDate:yyyy-MM-dd}
+- Location: {eventObject.Location?.City}, {eventObject.Location?.City}
+- Guest Count: {eventObject.GuestCount}
+- Total Budget: {eventObject.TotalBudget:C}
+- Notes: {eventObject.Notes ?? "None"}
+
+AVAILABLE PRODUCTS (within budget):
+{string.Join("\n", productLines)}
+
+Return a JSON object with this exact schema:
+{{
+  ""event_title"": string,
+  ""event_type"": string,
+  ""guest_count"": number,
+  ""total_budget"": number,
+  ""plan_summary"": string,
+  ""selected_items"": [
+    {{
+      ""product_name"": string,
+      ""category"": string,
+      ""vendor"": string,
+      ""price"": number,
+      ""reason"": string
+    }}
+  ],
+  ""total_cost"": number,
+  ""remaining_budget"": number,
+  ""tips"": [string]
+}}
+
+Only return JSON. No markdown. No explanation.
+";
+
+            // Step 6: Call Gemini
+            var aiResponse = await _geminiService.SendMessageAsync(prompt);
+
+            // Step 7: Return
+            return Ok(new
+            {
+                eventId = eventObject.Id,
+                eventTitle = eventObject.Title,
+                budget = eventObject.TotalBudget,
+                serviceType = eventObject.ServiceTypeName,
+                productsConsidered = productLines.Value.Count,
+                aiPlan = aiResponse
+            });
+        }
+
+
 
         // ─────────────────────────────────────────────────────────
         // POST api/events

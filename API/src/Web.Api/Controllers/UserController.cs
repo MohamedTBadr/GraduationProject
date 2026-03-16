@@ -14,6 +14,7 @@ namespace Web.Api.Controllers
     [Route("api/[controller]")]
     public class UserController(UserManager<ApplicationUser> userManager): BaseController
     {
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers([FromQuery] PaginatedRequest request)
         {

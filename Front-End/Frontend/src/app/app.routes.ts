@@ -18,7 +18,7 @@ export const routes: Routes = [
     // Admin Portal (Protected)
     {
         path: 'admin',
-        canActivate: [authGuard, roleGuard('admin')],
+        canActivate: [authGuard, roleGuard('Admin')],
         loadComponent: () => import('./layouts/admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent),
         loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
     },
@@ -26,7 +26,7 @@ export const routes: Routes = [
     // Vendor Portal (Protected)
     {
         path: 'vendor-dashboard',
-        canActivate: [authGuard, roleGuard('vendor')],
+        canActivate: [authGuard, roleGuard('Vendor')],
         loadComponent: () => import('./layouts/vendor-layout/vendor-layout.component').then(m => m.VendorLayoutComponent),
         children: [
             {
@@ -79,7 +79,7 @@ export const routes: Routes = [
     // User Dashboard (Protected)
     {
         path: 'user',
-        canActivate: [authGuard, roleGuard('user')],
+        canActivate: [authGuard, roleGuard('User')],
         loadComponent: () => import('./layouts/user-layout/user-layout.component').then(m => m.UserLayoutComponent),
         children: [
             {

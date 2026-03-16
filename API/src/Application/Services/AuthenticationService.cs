@@ -44,7 +44,9 @@ namespace Application.Services
                 await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays);
 
                 // 5. Return both tokens
-                return new(user.UserName!, user.Email!, accessToken, refreshToken);
+                var roles = await userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault() ?? string.Empty;
+                return new(user.UserName!, user.Email!, accessToken, refreshToken, role);
             }
 
             throw new UnauthorizedException("Invalid credentials.");
@@ -81,7 +83,9 @@ namespace Application.Services
                 await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays);
 
                 // 3. Return both tokens
-                return new(request.name, request.email, accessToken, refreshToken);
+                var roles = await userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault() ?? string.Empty;
+                return new(request.name, request.email, accessToken, refreshToken, role);
             }
 
             var errors = result.Errors.Select(e => e.Description).ToList();
@@ -129,7 +133,7 @@ namespace Application.Services
                         text-align: center;
                     "">
                     <h1 style=""font-size: 32px; color: #ffffff; line-height: 1.3; margin: 0"">
-                        Welcome to EpicHub, laila!
+                        Welcome to Eventora, laila!
                     </h1>
                 </div>
                 <div style=""background-color: #ffffff; padding: 40px 40px 36px"">
@@ -165,7 +169,8 @@ namespace Application.Services
                                 border-radius: 10px;
                                 padding: 14px 36px;
                             "">
-                          {callbackUrl}
+                          <a href=""{callbackUrl}"" style=""color: #c07c3a; text-decoration: none; font-weight: 600"">
+                            Reset Password
                         </span>
                     </div>
                     <p
@@ -257,7 +262,9 @@ namespace Application.Services
             await SetRefreshTokenAsync(user, newRefreshToken, RefreshTokenDurationDays);
 
             // 6. Return the new tokens
-            return new UserResponse(user.UserName!, user.Email!, newAccessToken, newRefreshToken);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault() ?? string.Empty;
+            return new UserResponse(user.UserName!, user.Email!, newAccessToken, newRefreshToken, role);
         }
 
         // --- Private Utility Methods ---

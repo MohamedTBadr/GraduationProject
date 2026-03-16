@@ -50,9 +50,9 @@ export class RegisterComponent {
         this.modalService.close(); // Close modal upon success
 
         // redirect based on role
-        if (response.user.role === 'admin') {
+        if (response.value.role === 'Admin') {
           this.router.navigate(['/admin']);
-        } else if (response.user.role === 'vendor') {
+        } else if (response.value.role === 'Vendor') {
           this.router.navigate(['/vendor-dashboard']);
         } else {
           this.router.navigate(['/user/my-events']);

@@ -80,5 +80,13 @@ namespace Application.Services
             await _productRepository.DeleteAsync(id);
             return Result<bool>.Success(true);
         }
+
+         //✅ Fixed
+        public async Task<Result<List<ProductDTO>>> AIFilterAsync(AIRequest AIRequest)
+        {
+            var products = await _productRepository.AIFilterAsync(AIRequest); // ← awaited
+            var mapped = _mapper.Map<List<ProductDTO>>(products);
+            return Result<List<ProductDTO>>.Success(mapped);                  // ← async returns Task automatically
+        }
     }
 }

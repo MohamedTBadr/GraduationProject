@@ -2,6 +2,7 @@
 
 using Application;
 using Application.Services.Helpers;
+using Domain.Contracts;
 using Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +34,8 @@ namespace Web
            await InfrastructureRegistrationService.AddInfrastructureServices(builder.Services, builder.Configuration);
             await WebRegistrationService.AddWebsRegistrationServices(builder.Services, builder.Configuration);
             await ApplicationRegistrationService.AddApplicationServices(builder.Services, builder.Configuration);
+
+        
             //builder.Services.AddOpenApi();
             builder.Services.AddResponseCompression(options =>
             {
@@ -51,17 +54,19 @@ namespace Web
                 options.AddPolicy("CorsPolicy", policy =>
                 {
                     policy
-                        .WithOrigins("https://localhost:4200") // your frontend
+                        .WithOrigins("http://localhost:4200") // your frontend
+
+                        //.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials(); // ← must for SignalR
+                           
                 });
             });
 
 
 
             var app = builder.Build();
-                app.UseStaticFiles();
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
@@ -79,6 +84,7 @@ namespace Web
                 //    //options.InjectStylesheet("/swagger-ui/style.css");
 
                 //});
+                await SeedingScope(app);
             }
 
             //await SeedingScope(app);
@@ -164,38 +170,37 @@ Return an array named ""enriched_recommendations"". Only JSON.
 
 
 
-            // ✅ Correct order
+            app.UseCors("CorsPolicy");                          // ← First
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseResponseCompression();
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseMiddleware<IdempotencyCustomMiddleware>();
-            app.UseCors("CorsPolicy");           // ← add CORS
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapHub<ChatHub>("/Hub/chatHub"); // ← fixed slash
-
+            app.MapHub<ChatHub>("/Hub/chatHub");
             //app.Run($"https://localhost:{builder.Configuration["PORT"]}");
             await app.RunAsync();
           
         }
 
-        //private static async Task SeedingScope(WebApplication app)
-        //{
-        //    // ✅ Run DB seeders at startup
-        //    using (var scope = app.Services.CreateScope())
-        //    {
-        //        var services = scope.ServiceProvider;
-        //        try
-        //        {
-        //            var initializer = services.GetRequiredService<IDbIntialize>();
-        //            await initializer.IntializeAsync(); // seeds Vendors, Roles, Categories
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine($"Seeding failed: {ex.Message}");
-        //        }
-        //    }
-        //}
+        private static async Task SeedingScope(WebApplication app)
+        {
+            // ✅ Run DB seeders at startup
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var initializer = services.GetRequiredService<IDbIntialize>();
+                    await initializer.IntializeAsync(); // seeds Vendors, Roles, Categories
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Seeding failed: {ex.Message}");
+                }
+            }
+        }
     }
 }

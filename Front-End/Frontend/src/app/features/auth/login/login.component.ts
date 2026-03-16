@@ -59,16 +59,16 @@ export class LoginComponent {
                 this.isLoading = false;
 
                 this.toastService.show('Logged in successfully!', 'success');
-
+                
                 this.modalService.close();
-
-                if (response.user.role === 'admin') {
+                
+                if (response.value.role === 'Admin') {
                     this.router.navigate(['/admin']);
                 }
-                else if (response.user.role === 'vendor') {
+                else if (response.value.role === 'Vendor') {
                     this.router.navigate(['/vendor-dashboard']);
                 }
-                else {
+                else if (response.value.role === 'User') {
                     this.router.navigate(['/user/my-events']);
                 }
             },

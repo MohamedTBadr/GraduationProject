@@ -1,6 +1,7 @@
-﻿using Application.DTOs.AuthenticationDTOs;
+﻿using Application;
+using Application.DTOs.AuthenticationDTOs;
 using Application.Interfaces;
-
+using Domain.Entities;
 using IdempotentAPI.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,7 @@ namespace Web.Api.Controllers
     {
         [HttpPost("Login")]
         [AllowAnonymous]
+        //[Idecmpotent]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
@@ -33,8 +35,9 @@ namespace Web.Api.Controllers
 
                 throw new UnprocessableContentException(errors);
             }
-
-            return Ok(await serviceManager.AuthenticationService.LogIn(loginRequest));
+            var result = await serviceManager.AuthenticationService.LogIn(loginRequest);
+            var response = Result<UserResponse>.Success(result);
+            return Ok(response);
         }
 
         [HttpPost("Register")]
@@ -54,8 +57,9 @@ namespace Web.Api.Controllers
 
                 throw new BadRequestException(errors);
             }
-
-            return Ok(await serviceManager.AuthenticationService.RegisterAsync(request));
+            var result = await serviceManager.AuthenticationService.RegisterAsync(request);
+            var response = Result<UserResponse>.Success(result);
+            return Ok(response);
         }
 
         [HttpPost("CheckIfEmailExists")]
@@ -94,7 +98,7 @@ namespace Web.Api.Controllers
             {
                 // Call the secure service method with the token provided by the client
                 var response = await serviceManager.AuthenticationService.RefreshTokenAsync(request);
-
+                var result = Result<UserResponse>.Success(response);
                 // The UserResponse now contains the new AccessToken and the new RefreshToken
                 return Ok(response);
             }
@@ -119,7 +123,8 @@ namespace Web.Api.Controllers
                 throw new BadRequestException(errors);
             }
             await serviceManager.AuthenticationService.ForgetPassword(email);
-            return Ok();
+            var result = Result<string>.Success("Email Has Send Succussfully");
+            return Ok(result);
 
 
         }
@@ -136,7 +141,10 @@ namespace Web.Api.Controllers
                 throw new BadRequestException(errors);
             }
             await serviceManager.AuthenticationService.ResetPassword(request);
-            return Ok();
+
+            var result = Result<string>.Success("Email Has Send Succussfully");
+
+            return Ok(result);
         }
 
     }

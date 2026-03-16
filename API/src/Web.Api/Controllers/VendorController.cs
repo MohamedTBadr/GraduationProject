@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.DTOs.VendorDTOs;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Api.Controllers.Attributes;
 
@@ -11,36 +12,52 @@ namespace Web.Api.Controllers
     public class VendorController(IVendorService vendorService) : BaseController
     {
         [HttpGet]
-        public async Task<Result<List<VendorListDTO>>> GetVendorsAsync()
+        public async Task<IActionResult> GetVendorsAsync()
         {
-            return await vendorService.GetVendorsAsync();
+            var vendors= await vendorService.GetVendorsAsync();
+            return Ok(vendors);
         }
 
         [HttpGet("{id}")]
-        public async Task<Result<VendorDetailsDTO>> GetVendorByIdAsync(Guid id)
+        public async Task<IActionResult> GetVendorByIdAsync(Guid id)
         {
-            return await vendorService.GetVendorByIdAsync(id);
+           var vendor= await vendorService.GetVendorByIdAsync(id);
+            return Ok(vendor);
         }
 
         [HttpPost]
         [SuccessStatusCode(201)]
-        public async Task<Result<VendorDetailsDTO>> CreateVendorAsync(CreateVendorRequest request)
+        public async Task<IActionResult> CreateVendorAsync(CreateVendorRequest request)
         {
-            return await vendorService.AddVendorAsync(request);
+             await vendorService.AddVendorAsync(request);
+            return Created();
         }
+
+
+
 
         [HttpDelete("{id}")]
         [SuccessStatusCode(204)]
 
-        public async Task<Result<VendorDetailsDTO>> DeleteVendorAsync(Guid id)
+        public async Task<IActionResult> DeleteVendorAsync(Guid id)
         {
-            return await vendorService.DeleteVendorAsync(id);
+          var result= await vendorService.DeleteVendorAsync(id);
+            return NoContent();
+        }
+        [Authorize]
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request)
+        {
+             await vendorService.UpdateVendorAsync(id, request);
+            return NoContent();
         }
 
-        [HttpPatch("{id}")]
-        public async Task<Result<VendorDetailsDTO>> UpdateVendorAsync(Guid id, UpdateVendorRequest request)
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{id}/approve")]
+        public async Task<IActionResult> ApproveVendorAsync(Guid id)
         {
-            return await vendorService.UpdateVendorAsync(id, request);
+             await vendorService.ApproveVendorAsync(id);
+            return NoContent();
         }
     }
 }

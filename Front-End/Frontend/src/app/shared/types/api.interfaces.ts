@@ -13,10 +13,7 @@ export interface RegisterRequest {
 }
 
 export interface AuthApiResponse {
-  name: string;
-  email: string;
-  AccessToken: string;
-  RefreshToken: string;
+  value: { name: string; email: string; accessToken: string; refreshToken: string; role: string; }
 }
 
 export interface RefreshTokenRequest {

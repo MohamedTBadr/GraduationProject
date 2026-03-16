@@ -1,7 +1,7 @@
 ﻿using Application.Interfaces;
-
-//using Microsoft.AspNetCore.Identity.UI.Services;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
+using MimeKit;
 using System.Net;
 using System.Net.Mail;
 
@@ -9,27 +9,30 @@ namespace Application.Services.Helpers
 {
     public class EmailSenderService(IConfiguration _config) : IEmailSender
         {
-            async Task IEmailSender.SendEmailAsync(string email, string subject, string htmlMessage)
-            {
-                var smtpHost = _config["EmailSettings:SmtpHost"];
-                var smtpPort = int.Parse(_config["EmailSettings:SmtpPort"]);
-                var smtpUser = _config["EmailSettings:SmtpUser"];
-                var smtpPass = _config["EmailSettings:SmtpPass"];
-                var from = _config["EmailSettings:FromEmail"];
+        async Task IEmailSender.SendEmailAsync(string email, string subject, string htmlMessage)
+        {
+            var message = new MimeMessage();
+            message.From.Add(MailboxAddress.Parse(_config["EmailSettings:FromEmail"]));
+            message.To.Add(MailboxAddress.Parse(email));
+            message.Subject = subject;
+            message.Body = new TextPart("html") { Text = htmlMessage };
 
-                using var client = new SmtpClient(smtpHost, smtpPort)
-                {
-                    Credentials = new NetworkCredential(smtpUser, smtpPass),
-                    EnableSsl = true
-                };
+            using var client = new MailKit.Net.Smtp.SmtpClient();
 
-                var mailMessage = new MailMessage(from, email, subject, htmlMessage)
-                {
-                    IsBodyHtml = true
-                };
+            await client.ConnectAsync(
+                _config["EmailSettings:SmtpHost"],
+                int.Parse(_config["EmailSettings:SmtpPort"]),
+                SecureSocketOptions.StartTls  // correct for port 587
+            );
 
-                await client.SendMailAsync(mailMessage);
-            }
+            await client.AuthenticateAsync(
+                _config["EmailSettings:SmtpUser"],
+                _config["EmailSettings:SmtpPass"]
+            );
+
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
         }
+    }
     
 }

@@ -149,7 +149,7 @@ namespace Application.Services
             UserId = e.UserId,
             UserName = e.User?.UserName,
             Title = e.Title,
-            ServiceTypeName = e.ServiceType?.Name,
+            ServiceTypeName = e.ServiceType.Name,
             EventDate = e.EventDate,
             TotalBudget = e.TotalBudget,
             GuestCount = e.GuestCount,

@@ -53,7 +53,8 @@ export class AuthService {
       .pipe(
         tap((res) => {
           // Persist the raw RefreshToken before mapping
-          localStorage.setItem('eventora_refresh_token', res.RefreshToken);
+          localStorage.setItem('eventora_refresh_token', res.value.refreshToken);
+          localStorage.setItem('eventora_token', res.value.accessToken);
         }),
         map((res) => this.mapToAuthResponse(res)),
         tap((response) => {
@@ -84,7 +85,8 @@ export class AuthService {
       .pipe(
         tap((res) => {
           // Persist the raw RefreshToken before mapping
-          localStorage.setItem('eventora_refresh_token', res.RefreshToken);
+          localStorage.setItem('eventora_refresh_token', res.value.refreshToken);
+          localStorage.setItem('eventora_token', res.value.accessToken);
         }),
         map((res) => this.mapToAuthResponse(res)),
         tap((response) => {
@@ -113,8 +115,8 @@ export class AuthService {
       .post<AuthApiResponse>(`${this.apiUrl}/Authentication/RefreshToken`, body)
       .pipe(
         tap((res) => {
-          localStorage.setItem('eventora_token', res.AccessToken);
-          localStorage.setItem('eventora_refresh_token', res.RefreshToken);
+          localStorage.setItem('eventora_token', res.value.accessToken);
+          localStorage.setItem('eventora_refresh_token', res.value.refreshToken);
         })
       );
   }
@@ -162,21 +164,21 @@ export class AuthService {
 
   private mapToAuthResponse(res: AuthApiResponse): AuthResponse {
     // Derive role from JWT claims or default to 'user'
-    const role = this.extractRoleFromToken(res.AccessToken);
+    const role = this.extractRoleFromToken(res.value.accessToken);
     const user: UserSession = {
       id: '',          // will be overridden if returned by server
-      name: res.name,
-      email: res.email,
+      name: res.value.name,
+      email: res.value.email,
       role: role as UserRole
     };
-    return { user, token: res.AccessToken };
+    return { value: { user, token: res.value.accessToken, refreshToken: res.value.refreshToken, role: (res.value.role) as UserRole } };
   }
 
   private setSession(response: AuthResponse) {
     const refreshToken = localStorage.getItem('eventora_refresh_token'); // preserve if already set
-    this.currentUser.set(response.user);
-    localStorage.setItem('eventora_session', JSON.stringify(response.user));
-    localStorage.setItem('eventora_token', response.token);
+    this.currentUser.set(response.value.user);
+    localStorage.setItem('eventora_session', JSON.stringify(response.value.user));
+    localStorage.setItem('eventora_token', response.value.token);
     // The interceptor will capture the refresh token from the raw API response separately
   }
 

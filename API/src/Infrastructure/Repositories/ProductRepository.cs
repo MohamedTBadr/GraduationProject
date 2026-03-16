@@ -141,7 +141,7 @@ namespace Infrastructure.Repositories
 
             var totalCount = await query.CountAsync();
             var items = await query
-                .Skip((request. PageIndex - 1) * request.PageSize)
+                .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync();
 
@@ -186,5 +186,19 @@ namespace Infrastructure.Repositories
             return await _context.Products.AnyAsync(p => p.Id == id);
         }
 
+        public Task<List<Product>> AIFilterAsync(AIRequest AIRequest)
+        {
+            var query = _context.Products
+                .Where(p => p.Price < AIRequest.Budget && p.Price > 0)
+                .Include(p => p.Category)
+                .Include(p => p.Vendor)
+                .Include(p => p.ServiceType)
+                .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(AIRequest.ServiceTypeName))
+                query = query.Where(p => p.ServiceType.Name == AIRequest.ServiceTypeName);
+
+            return query.ToListAsync();
+        }
     }
 }
