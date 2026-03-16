@@ -18,7 +18,7 @@ namespace Web.Api.Middlewares
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
+                logger.LogError(ex, "Unhandled exception: {Message} ,For User: {User}", ex.Message, context.User?.Identity?.Name);
                 await HandleExceptionAsync(context, ex);
             }
         }
@@ -46,6 +46,8 @@ namespace Web.Api.Middlewares
 
             context.Response.StatusCode = problem.Status!.Value;
             await context.Response.WriteAsJsonAsync(problem);
+
+
         }
 
         private static ProblemDetails Problem(int status, string title, string detail, string code) => new()
