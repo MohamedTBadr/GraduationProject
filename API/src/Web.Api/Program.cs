@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
+using Serilog;
 using System.Reflection;
 using Web.Api;
 
@@ -34,8 +35,11 @@ namespace Web
            await InfrastructureRegistrationService.AddInfrastructureServices(builder.Services, builder.Configuration);
             await WebRegistrationService.AddWebsRegistrationServices(builder.Services, builder.Configuration);
             await ApplicationRegistrationService.AddApplicationServices(builder.Services, builder.Configuration);
+     
 
-        
+           
+            builder.Host.UseSerilog((ctx, config) => config
+                    .WriteTo.File("logs/app-.log", rollingInterval: RollingInterval.Day));
             //builder.Services.AddOpenApi();
             builder.Services.AddResponseCompression(options =>
             {
@@ -55,8 +59,6 @@ namespace Web
                 {
                     policy
                         .WithOrigins("http://localhost:4200") // your frontend
-
-                        //.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials(); // ← must for SignalR
@@ -84,10 +86,9 @@ namespace Web
                 //    //options.InjectStylesheet("/swagger-ui/style.css");
 
                 //});
-                await SeedingScope(app);
             }
 
-            //await SeedingScope(app);
+            await SeedingScope(app);
 
 
             //app.Logger.LogInformation("Application Starting Up");

@@ -6,7 +6,7 @@ namespace Domain.Entities
 {
     public class VendorRating
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public Vendor Vendor { get; set; }
         public Guid  VendorId { get; set; }
 

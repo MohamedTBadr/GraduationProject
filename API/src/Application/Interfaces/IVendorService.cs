@@ -10,5 +10,6 @@ namespace Application.Interfaces
         Task<Result<List<VendorListDTO>>> GetVendorsAsync();
         Task<Result<VendorDetailsDTO>> UpdateVendorAsync(Guid id, UpdateVendorRequest request);
         Task<Result<VendorDetailsDTO>> ApproveVendorAsync(Guid id);
+        Task<Result<VendorDetailsDTO>> RateVendorAsync(Guid id, RatingVendorRequest request);
     }
 }

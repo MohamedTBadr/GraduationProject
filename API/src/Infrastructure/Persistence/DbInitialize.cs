@@ -1,6 +1,7 @@
 ﻿
 using Domain.Contracts;
 using Domain.Entities;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,9 +28,11 @@ namespace Infrastructure.Persistence
                 await SeedRolesAsync();
                 await SeedAdminUserAsync();
                 await SeedVendorUserAsync();
+                await SeedCustomerAsync();
                 await SeedCategoriesAsync();
                 await SeedServiceTypesAsync();
-
+                await SeedProductsAsync();   // ✅ add
+                await SeedPackagesAsync();
             }
             catch (Exception E)
             {
@@ -102,15 +105,49 @@ namespace Infrastructure.Persistence
                         NormalizedEmail = vendorEmail.ToUpper(),
                         NormalizedUserName = "VENDOR"
                     };
+                    var vendorProfile = new Vendor
+                    {
+                        UserId = newVendorUser.Id,
+                        BusinessName = "Test",
+                        PortfolioLink = "...",
+                        Description = "Test1",
+                        IsVerified = true,
+
+                    };
                     var result = await userManager.CreateAsync(newVendorUser, "Vendor@123");
+
                     if (result.Succeeded)
                     {
                         await userManager.AddToRoleAsync(newVendorUser, "Vendor");
+                        await context.Vendors.AddAsync(vendorProfile);
                     }
                 }
             }
         }
-
+        private async Task SeedCustomerAsync()
+        {
+            string customerEmail = "customer@example.com";
+            if (userManager != null)
+            {
+                var vendorUser = await userManager.FindByEmailAsync(customerEmail);
+                if (vendorUser == null)
+                {
+                    var newVendorUser = new ApplicationUser
+                    {
+                        Id = Guid.NewGuid(),
+                        UserName = "customer",
+                        Email = customerEmail,
+                        NormalizedEmail = customerEmail.ToUpper(),
+                        NormalizedUserName = "CUSTOMER"
+                    };
+                    var result = await userManager.CreateAsync(newVendorUser, "Customer@123");
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(newVendorUser, "Customer");
+                    }
+                }
+            }
+        }
         private async Task SeedCategoriesAsync()
         {
             if (!context.Categories.Any())
@@ -141,5 +178,128 @@ namespace Infrastructure.Persistence
                 await context.SaveChangesAsync();
             }
         }
+        private async Task SeedProductsAsync()
+        {
+            if (context.Products.Any()) return;
+
+            // Pull existing seeded data to use as FKs
+            var vendor = await context.Vendors.FirstOrDefaultAsync();
+            var photography = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Photography");
+            var catering = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Catering");
+            var decoration = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Decoration");
+            var wedding = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Weeding");
+            var birthday = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Birthday");
+
+            if (vendor == null || photography == null || catering == null || wedding == null)
+            {
+                Console.WriteLine("Skipping product seeding: required vendor/serviceType/category not found.");
+                return;
+            }
+
+            var products = new List<Product>
+    {
+        new Product
+        {
+            Id = Guid.NewGuid(),
+            Name = "Wedding Photography Package",
+            Description = "Full-day wedding photography coverage with edited photos.",
+            Price = 5000m,
+            VendorId = vendor.UserId,
+            ServiceTypeId = photography.Id,
+            CategoryId = wedding.Id
+        },
+        new Product
+        {
+            Id = Guid.NewGuid(),
+            Name = "Birthday Catering Set",
+            Description = "Catering service for up to 50 guests with custom menu.",
+            Price = 3000m,
+            VendorId = vendor.UserId,
+            ServiceTypeId = catering.Id,
+            CategoryId = birthday.Id
+        },
+        new Product
+        {
+            Id = Guid.NewGuid(),
+            Name = "Wedding Hall Decoration",
+            Description = "Full wedding hall decoration with flowers and lighting.",
+            Price = 7000m,
+            VendorId = vendor.UserId,
+            ServiceTypeId = decoration.Id,
+            CategoryId = wedding.Id
+        }
+    };
+
+            await context.Products.AddRangeAsync(products);
+            await context.SaveChangesAsync();
+        }
+
+        private async Task SeedPackagesAsync()
+        {
+            if (context.Packages.Any()) return;
+
+            var vendor = await context.Vendors.FirstOrDefaultAsync();
+
+            if (vendor == null)
+            {
+                Console.WriteLine("Skipping package seeding: no vendor found.");
+                return;
+            }
+
+            var packages = new List<Package>
+    {
+        new Package
+        {
+            Id = Guid.NewGuid(),
+            Name = "Basic Wedding Package",
+            Description = "Essential wedding services bundle.",
+            Price = 10000m,
+            Discount = 10m,
+            Items = new List<string>
+            {
+                "Wedding Photography Coverage",
+                "Basic Hall Decoration",
+                "Catering for 50 guests"
+            },
+            VendorId = vendor.UserId
+        },
+        new Package
+        {
+            Id = Guid.NewGuid(),
+            Name = "Premium Wedding Package",
+            Description = "All-inclusive luxury wedding experience.",
+            Price = 25000m,
+            Discount = 15m,
+            Items = new List<string>
+            {
+                "Full-Day Photography & Videography",
+                "Premium Floral Decoration",
+                "Catering for 200 guests",
+                "Live Music Band",
+                "Luxury Car Rental"
+            },
+            VendorId = vendor.UserId
+        },
+        new Package
+        {
+            Id = Guid.NewGuid(),
+            Name = "Birthday Starter Package",
+            Description = "Fun birthday bundle for small gatherings.",
+            Price = 4000m,
+            Discount = 5m,
+            Items = new List<string>
+            {
+                "Birthday Photography",
+                "Balloon Decoration",
+                "Catering for 30 guests"
+            },
+            VendorId = vendor.UserId
+        }
+    };
+
+            await context.Packages.AddRangeAsync(packages);
+            await context.SaveChangesAsync();
+        }
+
     }
 }

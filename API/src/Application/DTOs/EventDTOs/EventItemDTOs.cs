@@ -10,6 +10,7 @@ namespace Application.DTOs
         public string ProductImage { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
+        public Guid VendorId { get; set; }
         public string VendorName { get; set; }
         public int Quantity { get; set; }
     }

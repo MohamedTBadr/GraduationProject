@@ -20,7 +20,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.User)
-                .Include(e => e.ServiceType)
+                .Include(e => e.Category)
                 .Include(e => e.Location)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
@@ -29,8 +29,8 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.User)
-                .Include(e => e.ServiceType)
-                .Include(e => e.Location)
+                .Include(e => e.Category)
+                //.Include(e => e.Location)
                 .Include(e => e.EventItems)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
@@ -39,7 +39,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.User)
-                .Include(e => e.ServiceType)
+                .Include(e => e.Category)
                 .Include(e => e.Location)
                 .Include(e => e.EventItems)
                 .ToListAsync();
@@ -48,8 +48,8 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Event>> GetByUserIdAsync(Guid userId)
         {
             return await _context.Events
-                .Include(e => e.ServiceType)
-                .Include(e => e.Location)
+                .Include(e => e.Category)
+                //.Include(e => e.Location)
                 .Include(e => e.EventItems)
                 .Where(e => e.UserId == userId)
                 .ToListAsync();
@@ -59,7 +59,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.User)
-                .Include(e => e.ServiceType)
+                .Include(e => e.Category)
                 .Include(e => e.Location)
                 .Where(e => e.EventStatus == status)
                 .ToListAsync();
@@ -77,7 +77,10 @@ namespace Infrastructure.Repositories
             entity.Id = Guid.NewGuid();
             await _context.Events.AddAsync(entity);
             await _context.SaveChangesAsync();
-            return entity;
+            return await _context.Events
+    .Include(e => e.Category)       // ✅ load Category
+    .Include(e => e.EventItems)     // ✅ load EventItems too
+    .FirstAsync(e => e.Id == entity.Id);
         }
 
         public async Task<Event> UpdateAsync(Event entity)

@@ -1,6 +1,8 @@
 ﻿using Amazon.S3;
+using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Application.DTOs;
+using Application.Interfaces;
 using BLL.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -11,7 +13,7 @@ using System.Text;
 
 namespace Application.Services
 {
-    public class FileService
+    public class FileService: IFileService
     {
         private readonly IAmazonS3 _s3;
         private readonly AwsSettings _settings;
@@ -22,6 +24,16 @@ namespace Application.Services
             _settings = settings.Value;
         }
 
+        public async Task DeleteAsync(List<string> keys)
+        {
+            var deleteRequest = new DeleteObjectsRequest
+            {
+                BucketName = _settings.BucketName,
+                Objects = keys.Select(k => new KeyVersion { Key = k }).ToList()
+            };
+
+            await _s3.DeleteObjectsAsync(deleteRequest);
+        }
         public async Task<string> Upload(string folderName, IFormFile file)
         {
            
@@ -44,5 +56,7 @@ namespace Application.Services
 
             return url;
         }
+
+       
     }
 }

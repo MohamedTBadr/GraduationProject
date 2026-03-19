@@ -7,8 +7,8 @@ namespace Application.Interfaces
 {
     public interface IFileService
     {
-        public Task<string> Upload(IFormFile file);
-
+        public Task<string> Upload(string folderName, IFormFile file);
+        public Task  DeleteAsync(List<string> keys);
 
     }
 }

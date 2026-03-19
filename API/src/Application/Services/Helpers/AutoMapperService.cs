@@ -56,8 +56,14 @@ namespace Application.Services.Helpers
             CreateMap<VendorDetailsDTO, Vendor>().ReverseMap();
             CreateMap<CreateVendorRequest, Vendor>().ReverseMap();
             CreateMap<VendorListDTO, Vendor>().ReverseMap();
-
+            //CreateMap<Vendor, VendorListDTO>().ForMember(d => d.UserId, o => o.MapFrom(s => s.User.Id));
+            CreateMap<VendorRating, VendorRatingDTO>()
+                .ForMember(dest => dest.VendorName, opt => opt.MapFrom(src => src.Vendor.BusinessName))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName));
+                
+            // Remove .ReverseMap() — mapping back from DTO to Entity doesn't make sense here
             #endregion
         }
     }
 }
+

@@ -16,8 +16,7 @@ namespace Web.Api.Controllers
     [Route("api/[controller]")]
     public class EventController(IEventService _eventService, GeminiService _geminiService , IProductService _productService) : BaseController
     {
-      
-
+        protected Guid UserId => GetUserIdFromToken();
         // ─────────────────────────────────────────────────────────
         // GET api/events
         //   Admin  → all events
@@ -63,7 +62,7 @@ namespace Web.Api.Controllers
         }
 
         // ─────────────────────────────────────────────────────────
-        // GET api/events/user/{userId}
+        // GET api/event/user/{userId}
         //   Admin  → can query any user's events
         //   Vendor → can only query their own
         //   Client → can only query their own
@@ -81,7 +80,7 @@ namespace Web.Api.Controllers
         }
 
         // ─────────────────────────────────────────────────────────
-        // GET api/events/status/{status}
+        // GET api/event/status/{status}
         //   Admin  → all events with that status
         //   Vendor → their own events with that status
         //   Client → their own events with that status
@@ -118,7 +117,7 @@ namespace Web.Api.Controllers
             if (eventObject is null)
                 return NotFound($"Event {eventId} not found.");
 
-            var request = new AIRequest { Budget = eventObject.TotalBudget, GuestCount = eventObject.GuestCount, ServiceTypeName = eventObject.ServiceTypeName };
+            var request = new AIRequest { Budget = eventObject.TotalBudget, GuestCount = eventObject.GuestCount, CategoryName = eventObject.CategoryName };
             var productLines = await _productService.AIFilterAsync(request);
 
 
@@ -130,7 +129,7 @@ Plan a full event using the details and available products below.
 
 EVENT DETAILS:
 - Title: {eventObject.Title}
-- Type: {eventObject.ServiceTypeName}
+- Category: {eventObject.CategoryName}
 - Date: {eventObject.EventDate:yyyy-MM-dd}
 - Location: {eventObject.Location?.City}, {eventObject.Location?.City}
 - Guest Count: {eventObject.GuestCount}
@@ -149,6 +148,7 @@ Return a JSON object with this exact schema:
   ""plan_summary"": string,
   ""selected_items"": [
     {{
+       ""productId"": Guid
       ""product_name"": string,
       ""category"": string,
       ""vendor"": string,
@@ -173,7 +173,7 @@ Only return JSON. No markdown. No explanation.
                 eventId = eventObject.Id,
                 eventTitle = eventObject.Title,
                 budget = eventObject.TotalBudget,
-                serviceType = eventObject.ServiceTypeName,
+                category = eventObject.CategoryName,
                 productsConsidered = productLines.Value.Count,
                 aiPlan = aiResponse
             });
@@ -182,7 +182,7 @@ Only return JSON. No markdown. No explanation.
 
 
         // ─────────────────────────────────────────────────────────
-        // POST api/events
+        // POST api/event
         //   Admin  → can create for any user (UserId taken from body)
         //   Client → UserId is forced to their own id
         //   Vendor → cannot create events (403)
@@ -199,15 +199,16 @@ Only return JSON. No markdown. No explanation.
             if (IsVendor())
                 return Forbid(); // Vendors cannot create events
 
-            if (!IsAdmin())
-                dto.UserId = GetUserIdFromToken(); // Clients always own their event
+            if (IsClient())
+                dto.UserId = UserId; // Clients always own their event
+
 
             var created = await _eventService.CreateAsync(dto);
             return Created();
         }
 
         // ─────────────────────────────────────────────────────────
-        // PUT api/events/{id}
+        // PUT api/event/{id}
         //   Admin  → can update any event, any field
         //   Vendor → can update their own events; cannot set status to Completed
         //   Client → can update their own; cannot set status to Completed

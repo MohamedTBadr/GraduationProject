@@ -16,6 +16,6 @@ namespace Shared
     {
         public decimal Budget { get; init; }
         public int GuestCount { get; init; }
-        public string ServiceTypeName { get; init; }
+        public string CategoryName { get; init; }
     }
 }

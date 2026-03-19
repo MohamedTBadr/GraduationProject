@@ -160,6 +160,13 @@ namespace Infrastructure.Repositories
         {
             product.Id = Guid.NewGuid();
             await _context.Products.AddAsync(product);
+            await _context.ProductImages.AddRangeAsync(product.ProductImages.Select(pi =>
+            {
+                pi.Id = Guid.NewGuid();
+                pi.ProductId = product.Id;
+                pi.ImagePath = $"/images/products/{pi.ImagePath}.jpg";
+                return pi;
+            }));
             await _context.SaveChangesAsync();
             return product;
         }
@@ -167,6 +174,16 @@ namespace Infrastructure.Repositories
         public async Task<Product> UpdateAsync(Product product)
         {
             _context.Products.Update(product);
+            if (product.ProductImages != null && product.ProductImages.Count > 0)
+            {
+                foreach (var image in product.ProductImages)
+                {
+                    image.ProductId = product.Id;
+                    image.ImagePath = $"/images/products/{image.ImagePath}.jpg";
+                }
+                _context.ProductImages.UpdateRange(product.ProductImages);
+            }
+
             await _context.SaveChangesAsync();
             return product;
         }
@@ -177,6 +194,7 @@ namespace Infrastructure.Repositories
             if (product is not null)
             {
                 _context.Products.Remove(product);
+                _context.ProductImages.RemoveRange(_context.ProductImages.Where(pi => pi.ProductId == id));
                 await _context.SaveChangesAsync();
             }
         }
@@ -195,8 +213,8 @@ namespace Infrastructure.Repositories
                 .Include(p => p.ServiceType)
                 .AsNoTracking();
 
-            if (!string.IsNullOrWhiteSpace(AIRequest.ServiceTypeName))
-                query = query.Where(p => p.ServiceType.Name == AIRequest.ServiceTypeName);
+            if (!string.IsNullOrWhiteSpace(AIRequest.CategoryName))
+                query = query.Where(p => p.Category.Name == AIRequest.CategoryName);
 
             return query.ToListAsync();
         }

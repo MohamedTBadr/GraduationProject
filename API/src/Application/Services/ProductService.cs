@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Application.Services
 {
-    public class ProductService(IProductRepository _productRepository, IMapper _mapper): IProductService
+    public class ProductService(IProductRepository _productRepository,IFileService _fileService, IMapper _mapper): IProductService
     {
 
         public async Task<Result<PaginatedResponse<ProductDTO>>> GetAllAsync(PaginatedRequest request)
@@ -57,6 +57,15 @@ namespace Application.Services
         {
             var product = _mapper.Map<Product>(dto);
             var created = await _productRepository.CreateAsync(product);
+
+            if (dto.ProductImages != null && dto.ProductImages.Count > 0)
+            {
+                foreach (var image in dto.ProductImages)
+                {
+                    var imagePath = await _fileService.Upload("products", image);
+                }
+            }
+
             return Result<ProductDTO>.Success(_mapper.Map<ProductDTO>(created));
         }
 
@@ -78,6 +87,7 @@ namespace Application.Services
                 return Result<bool>.NotFound("Product not found");
 
             await _productRepository.DeleteAsync(id);
+            await _fileService.DeleteAsync(new List<string> { id.ToString() }); // Assuming you want to delete associated images as well
             return Result<bool>.Success(true);
         }
 

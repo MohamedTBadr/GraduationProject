@@ -7,12 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="16.1.0" />
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.15.1" />
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2.0" />
 	  <!-- ✅ After -->
 	  <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.10.0" />
+	  <PackageReference Include="MimeKit" Version="4.15.1" />
+	  <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
+	  <PackageReference Include="System.Net.Security" Version="4.3.2" />
+	  <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
 	  <PackageReference Include="Yoyo.Abp.MailKit" Version="9.1.0.1" />
   </ItemGroup>
 

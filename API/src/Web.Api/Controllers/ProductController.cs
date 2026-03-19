@@ -10,8 +10,9 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductsController(IProductService productService) : ControllerBase
+    public class ProductController(IProductService productService) : BaseController
     {
+        private Guid userId => GetUserIdFromToken();
         // GET api/products
         [HttpGet]
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request)
@@ -53,16 +54,19 @@ namespace Web.Api.Controllers
         }
 
         // POST api/products
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Vendor" )]
         [HttpPost]
         public async Task<IActionResult> CreateAsync([FromBody] CreateProductRequest dto)
         {
+            dto.VendorId = userId; // Ensure the product is associated with the authenticated vendor
             var result = await productService.CreateAsync(dto);
 
-            if (result.IsSuccess)
-                return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Value.Id }, result);
+            if (result.IsFailure)
+                return BadRequest(result); // filter handles the failure
+            //if (result.IsSuccess)
+            //    return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Value.Id }, result);
 
-            return Ok(result); // filter handles the failure
+            return Created(); // filter handles the failure
         }
         [Authorize(Roles = "Admin")]
 

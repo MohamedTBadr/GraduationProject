@@ -13,8 +13,8 @@ namespace Domain.Entities
         public Guid UserId { get; set; }
 
         public string Title { get; set; } = string.Empty;
-        public ServiceType ServiceType { get; set; }
-        public Guid ServiceTypeId { get; set; }
+        public Category Category { get; set; }
+        public Guid CategoryId { get; set; }
         public DateTime EventDate { get; set; }
         public Address Location { get; set; }
 

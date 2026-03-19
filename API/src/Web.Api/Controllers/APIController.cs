@@ -35,7 +35,7 @@ namespace Web.Api.Controllers
 
         protected bool IsAdmin() => GetUserRoleFromToken() == "Admin";
         protected bool IsVendor() => GetUserRoleFromToken() == "Vendor";
-        protected bool IsClient() => GetUserRoleFromToken() == "Client";
+        protected bool IsClient() => GetUserRoleFromToken() == "Customer";
 
         /// <summary>
         /// Returns true only if current user is Admin OR the requested resource belongs to them.

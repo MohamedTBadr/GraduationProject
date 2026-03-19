@@ -20,7 +20,8 @@ namespace Application.Services
     public class AuthenticationService(UserManager<ApplicationUser> userManager,
                                      IConfiguration configuration,
                                      IOptions<JWTOptions> options,
-                                     IEmailSender emailSender) : IAuthenticationService
+                                     IEmailSender emailSender,
+                                     SseConnectionManager sseManager) : IAuthenticationService
     {
         // Define Refresh Token duration (e.g., 30 days)
         private const int RefreshTokenDurationDays = 30;
@@ -332,6 +333,15 @@ namespace Application.Services
             user.RefreshToken = null;
             user.RefreshTokenExpiryTime = DateTime.MinValue;
             await userManager.UpdateAsync(user);
+        }
+
+        public async Task LogoutAsync(Guid userId)
+        {
+            var user = await userManager.FindByIdAsync(userId.ToString())
+                ?? throw new UserNotFoundException(userId.ToString());
+
+            await ClearRefreshTokenAsync(user); // revoke refresh token
+            sseManager.Remove(userId);          // close SSE connection
         }
     }
 }

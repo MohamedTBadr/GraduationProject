@@ -8,9 +8,9 @@ namespace Application.DTOs
 
     public class CreateEventDto
     {
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
         public string Title { get; set; } = string.Empty;
-        public Guid ServiceTypeId { get; set; }
+        public Guid CategoryId { get; set; }
         public DateTime EventDate { get; set; }
         public AddressDto Location { get; set; }
         public decimal TotalBudget { get; set; }
@@ -21,7 +21,7 @@ namespace Application.DTOs
     public class UpdateEventDto
     {
         public string Title { get; set; } = string.Empty;
-        public Guid ServiceTypeId { get; set; }
+        public Guid CategoryId { get; set; }
         public DateTime EventDate { get; set; }
         public AddressDto Location { get; set; }
         public decimal TotalBudget { get; set; }
@@ -45,7 +45,7 @@ namespace Application.DTOs
         public Guid UserId { get; set; }
         public string UserName { get; set; }
         public string Title { get; set; }
-        public string ServiceTypeName { get; set; }
+        public string CategoryName { get; set; }
         public DateTime EventDate { get; set; }
         public AddressDto Location { get; set; }
         public decimal TotalBudget { get; set; }

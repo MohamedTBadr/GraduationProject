@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using Shared.Exceptions;
 //using PAL.Notifications;
 using System.IO.Compression;
@@ -229,6 +230,19 @@ namespace Web.Api
             services.AddSingleton<
     IAuthorizationMiddlewareResultHandler,
     CustomAuthorizationResultHandler>();
+         
+            #region Serilog
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .WriteTo.File(
+                 path: "logs/app-.log",
+                 rollingInterval: RollingInterval.Day,   // new file each day
+                 retainedFileCountLimit: 7               // keep last 7 days
+                )
+                .CreateLogger();
+           
+            #endregion
             return services;
         }
     }

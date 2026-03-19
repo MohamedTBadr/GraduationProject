@@ -21,6 +21,7 @@ namespace Domain.Entities
         public Vendor Vendor { get; set; }
         public Guid VendorId { get; set; }
 
+        public List<ProductImage> ProductImages { get; set; }
 
 
     }

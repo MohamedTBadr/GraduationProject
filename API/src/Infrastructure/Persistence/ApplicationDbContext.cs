@@ -87,7 +87,11 @@ namespace Infrastructure.Persistence
         public DbSet<Message> Messages { get; set; }
         public DbSet<Conversation> Conversations { get; set; }
 
+        public DbSet<Notification> Notifications { get; set; }
 
+        public DbSet<Package> Packages { get;set; }
+
+        public DbSet<ProductImage> ProductImages { get; set; }
 
     }
 }

@@ -27,14 +27,25 @@ namespace Web.Api.Controllers
 
         [HttpPost]
         [SuccessStatusCode(201)]
+        [ProducesResponseType(400)]
         public async Task<IActionResult> CreateVendorAsync(CreateVendorRequest request)
         {
-             await vendorService.AddVendorAsync(request);
+            var result=  await vendorService.AddVendorAsync(request);
+            if (result.IsFailure)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
             return Created();
         }
 
 
-
+        [HttpPost("{id}/rating")]
+        [Authorize]
+        public async Task<IActionResult> RateVendorAsync(Guid id, RatingVendorRequest request)
+        {
+             await vendorService.RateVendorAsync(id, request);
+            return NoContent();
+        }
 
         [HttpDelete("{id}")]
         [SuccessStatusCode(204)]

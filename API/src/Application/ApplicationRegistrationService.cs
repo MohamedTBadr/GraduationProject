@@ -3,6 +3,7 @@ using Application.DTOs;
 using Application.DTOs.AuthenticationDTOs;
 using Application.DTOs.PaymobDTOs;
 using Application.Interfaces;
+using Application.Interfaces.Services;
 using Application.Services;
 using Application.Services.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -32,9 +33,10 @@ namespace Application
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IProductService, ProductService>();
-
-
-
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddSingleton<SseConnectionManager>();
+            services.AddScoped<NotificationService>();
+            services.AddScoped<IFileService, FileService>();
 
             services.AddAutoMapper(cfg =>
             {

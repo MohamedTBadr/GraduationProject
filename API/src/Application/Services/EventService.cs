@@ -15,7 +15,7 @@ namespace Application.Services
 
         private static readonly HashSet<string> ValidStatuses =
             new() { "Planned", "Completed", "Cancelled" };
-
+        
         public EventService(IEventRepository eventRepo)
         {
             _eventRepo = eventRepo;
@@ -68,11 +68,12 @@ namespace Application.Services
 
         public async Task<EventResponseDto> CreateAsync(CreateEventDto dto)
         {
+
             var entity = new Event
             {
-                UserId = dto.UserId,
+                UserId = (Guid)dto.UserId!,
                 Title = dto.Title,
-                ServiceTypeId = dto.ServiceTypeId,
+                CategoryId = dto.CategoryId,
                 EventDate = dto.EventDate,
                 TotalBudget = dto.TotalBudget,
                 GuestCount = dto.GuestCount,
@@ -100,7 +101,7 @@ namespace Application.Services
                 throw new ArgumentException($"Invalid status '{dto.EventStatus}'.");
 
             entity.Title = dto.Title;
-            entity.ServiceTypeId = dto.ServiceTypeId;
+            entity.CategoryId = dto.CategoryId;
             entity.EventDate = dto.EventDate;
             entity.TotalBudget = dto.TotalBudget;
             entity.GuestCount = dto.GuestCount;
@@ -147,9 +148,9 @@ namespace Application.Services
         {
             Id = e.Id,
             UserId = e.UserId,
-            UserName = e.User?.UserName,
+            //UserName = e.User?.UserName,
             Title = e.Title,
-            ServiceTypeName = e.ServiceType.Name,
+            CategoryName = e.Category.Name,
             EventDate = e.EventDate,
             TotalBudget = e.TotalBudget,
             GuestCount = e.GuestCount,

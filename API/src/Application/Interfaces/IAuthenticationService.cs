@@ -17,5 +17,7 @@ namespace Application.Interfaces
 
         Task ForgetPassword(string email);
         Task ResetPassword(ResetPasswordRequest request);
+
+        Task LogoutAsync(Guid userId);
     }
 }

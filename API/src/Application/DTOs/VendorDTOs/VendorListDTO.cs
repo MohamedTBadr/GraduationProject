@@ -6,6 +6,7 @@ namespace Application.DTOs.VendorDTOs
 {
     public class VendorListDTO
     {
+        public Guid UserId { get; set; }
         public string BusinessName { get; set; }
         public decimal Rating { get; set; }
         public string Description { get; set; }

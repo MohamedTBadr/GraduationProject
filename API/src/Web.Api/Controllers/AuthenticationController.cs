@@ -147,5 +147,19 @@ namespace Web.Api.Controllers
             return Ok(result);
         }
 
+        [HttpPost("Logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            await serviceManager.AuthenticationService.LogoutAsync(Guid.Parse(userId));
+            var result = Result<string>.Success("Logged out successfully");
+            return Ok(result);
+        }
+
     }
 }
