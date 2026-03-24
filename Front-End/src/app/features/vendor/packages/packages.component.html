@@ -1,23 +1,123 @@
-<div class="vd-section active" style="display:block">
-  <div class="vd-page-header">
-    <div><div class="vd-page-title">Packages</div><div class="vd-page-sub">Bundle your services into attractive, all-inclusive packages.</div></div>
-    <button class="vd-btn vd-btn-gold">+ Create Package</button>
+<!-- Header section -->
+<div class="vd-page-header">
+  <div>
+    <div class="vd-page-title">Packages</div>
+    <div class="vd-page-sub">Bundle your services into attractive, all-inclusive packages.</div>
   </div>
-  <div style="display:grid;gap:12px" id="vd-pkgs">
-    <div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.1);border-radius:var(--r2);padding:20px;display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex;gap:15px;align-items:center">
-            <div style="font-size:2rem">✨</div>
-            <div><div style="font-weight:600;font-size:1.1rem">Ultimate Wedding Bundle</div><div style="font-size:.85rem;color:var(--gray)">Includes Stage Design, Tables, and Entry Setup</div></div>
+  <button class="vd-btn vd-btn-gold" (click)="openCreateModal()">+ Create Package</button>
+</div>
+
+  <div class="vd-tab-bar">
+    <button class="vd-tab" [class.active]="activeTab === 'Active'" (click)="activeTab = 'Active'">
+      Active ({{ getActiveCount() }})
+    </button>
+    <button class="vd-tab" [class.active]="activeTab === 'Paused'" (click)="activeTab = 'Paused'">
+      Paused ({{ getPausedCount() }})
+    </button>
+  </div>
+
+  <!-- Packages list -->
+  <div class="vd-tab-pane active" id="packages-active">
+    <div *ngIf="filteredPackages.length === 0" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 0.95rem; background: white; border-radius: 12px; border: 1px dashed #cbd5e1;">
+      No {{ activeTab.toLowerCase() }} packages found.
+    </div>
+
+    <div class="package-card" *ngFor="let pkg of filteredPackages">
+      <div class="card-left">
+        <div class="icon-wrapper">{{ pkg.icon }}</div>
+
+        <div class="card-details">
+          <div class="title-row">
+            <div class="pkg-name">{{ pkg.name }}</div>
+            <div class="status-badge" [ngClass]="pkg.status.toLowerCase()">{{ pkg.status }}</div>
+          </div>
+
+          <div class="price-row">
+            {{ pkg.pricePrefix }} {{ pkg.price | number }} EGP
+          </div>
+
+          <div class="desc-row">
+            {{ pkg.description }}
+          </div>
+
+          <div class="tags-row" *ngIf="pkg.services && pkg.services.length > 0">
+            <div class="service-tag" *ngFor="let service of pkg.services">
+              {{ service }}
+            </div>
+          </div>
+
+          <div class="savings-row">
+            ✨ {{ pkg.savings }}
+          </div>
+          <div class="bookings-row">
+            📦 {{ pkg.bookings }} bookings
+          </div>
         </div>
-        <div style="text-align:right">
-            <div style="font-weight:700;color:var(--gold);font-size:1.1rem">25,000 EGP</div>
-            <button class="vd-btn vd-btn-ghost vd-btn-sm" style="margin-top:6px">Edit Package</button>
+      </div>
+
+      <div class="card-actions">
+        <div>
+          <button class="btn-edit" (click)="openCreateModal(pkg)" style="margin-bottom:8px; display:block">Edit</button>
+          <button class="btn-pause" (click)="togglePackageStatus(pkg)" style="margin-bottom:8px; display:block">
+            {{ pkg.status === 'Active' ? 'Pause' : 'Activate' }}
+          </button>
         </div>
+        <button class="btn-delete" (click)="deletePackage(pkg.id)">Delete</button>
+      </div>
     </div>
   </div>
-  <div style="border:2px dashed var(--lgray);border-radius:var(--r2);padding:26px;text-align:center;cursor:pointer;margin-top:12px;transition:all .22s">
-    <div style="font-size:1.5rem;color:var(--lgray);margin-bottom:5px">+</div>
-    <div style="font-weight:600;font-size:.86rem;color:var(--navy);margin-bottom:2px">Create New Package</div>
-    <div style="font-size:.76rem;color:var(--gray)">Bundle your services for a complete event solution</div>
+
+  <!-- Create/Edit Package Modal -->
+  <div class="vd-modal-overlay" [class.open]="isModalOpen">
+    <div class="vd-modal" style="max-width: 600px;">
+      <button class="vd-modal-close" (click)="closeModal()">&times;</button>
+
+      <div class="vd-modal-title" style="font-size: 1.6rem;">{{ editingPackageId !== null ? 'Edit Package' : 'Create Package' }}</div>
+      <div class="vd-modal-sub" style="margin-bottom: 24px;">{{ editingPackageId !== null ? 'Update the details of your package.' : 'Bundle your services for a complete event solution.' }}</div>
+
+      <form [formGroup]="packageForm" (ngSubmit)="createPackage()">
+        <div class="vd-form-group">
+          <label>Package Name *</label>
+          <input type="text" formControlName="name" placeholder="e.g. Full Wedding Package" style="width: 100%; border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+        </div>
+
+        <div class="vd-form-group" style="margin-top: 16px;">
+          <label>Description *</label>
+          <textarea formControlName="description" rows="3"
+            placeholder="What does this package include? Who is it for?" style="width: 100%; border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);"></textarea>
+        </div>
+
+        <div class="vd-form-row" style="margin-top: 16px;">
+          <div>
+            <label>Total Price (EGP) *</label>
+            <input type="number" formControlName="price" placeholder="e.g. 32000" style="width: 100%; border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+          </div>
+          <div>
+            <label>Price Type *</label>
+            <select formControlName="priceType" style="width: 100%; border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+              <option value="Fixed">Fixed</option>
+              <option value="Starting From">Starting From</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="services-selection" style="margin-top: 24px; margin-bottom: 24px;">
+          <label style="display: block; font-weight: 600; color: #1e3a5f; font-size: 0.9rem; margin-bottom: 12px;">Services Included</label>
+          <div class="services-tags" style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div class="sel-tag" *ngFor="let srv of vendorServices" 
+              [style.background]="isServiceSelected(srv.id) ? '#1e3a5f' : 'white'"
+              [style.color]="isServiceSelected(srv.id) ? 'white' : '#475569'"
+              style="padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: 1px solid #cbd5e1; transition: all 0.2s; user-select: none;"
+              (click)="toggleServiceSelection(srv.id)">
+              {{ srv.name }}
+            </div>
+          </div>
+        </div>
+
+        <div class="vd-submit-bar" style="border: none; margin-top: 24px; padding-top: 0; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="vd-btn vd-btn-ghost" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="vd-btn vd-btn-gold" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;">{{ editingPackageId !== null ? 'Save Changes' : 'Create Package' }}</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>

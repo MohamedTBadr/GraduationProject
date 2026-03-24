@@ -21,7 +21,7 @@
                 [class.is-invalid]="passwordControl?.invalid && passwordControl?.touched" />
             <div *ngIf="passwordControl?.invalid && passwordControl?.touched" class="error-message">
                 <small *ngIf="passwordControl?.hasError('required')">Password is required.</small>
-                <small *ngIf="passwordControl?.hasError('minlength')">Password must be at least 8 characters.</small>
+                <small *ngIf="passwordControl?.hasError('minlength')">Password must be at least 6 characters.</small>
             </div>
         </div>
 

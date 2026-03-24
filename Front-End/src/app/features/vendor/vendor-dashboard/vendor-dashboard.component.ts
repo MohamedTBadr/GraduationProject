@@ -33,8 +33,8 @@ export class VendorDashboardComponent {
   }
   
   onImagesChanged(images: any[]) {
-    // Collect the files for future FormData or backend integration
-    this.newService.images = images.map(img => img.file || img.previewUrl);
+    // For UI demonstration, we store previewUrl to avoid "broken photo" [object File] rendering
+    this.newService.images = images.map(img => img.previewUrl);
   }
 
   createService() {

@@ -1,5 +1,11 @@
-<div class="vd-section active" style="display:block">
-  <div class="vd-page-header"><div><div class="vd-page-title">My Profile</div><div class="vd-page-sub">What clients see when they visit your vendor page.</div></div><button class="vd-btn vd-btn-ghost">View Public Profile →</button></div>
+<div class="vd-section active" style="display:block" *ngIf="vendor">
+  <div class="vd-page-header">
+    <div>
+      <div class="vd-page-title">My Profile</div>
+      <div class="vd-page-sub">What clients see when they visit your vendor page.</div>
+    </div>
+    <button class="vd-btn vd-btn-ghost" routerLink="/vendor/1">View Public Profile →</button>
+  </div>
   <div class="vd-cover"><div class="vd-cover-avatar"></div><div style="position:absolute;top:11px;right:11px"><button class="vd-btn vd-btn-ghost vd-btn-sm" style="background:rgba(255,255,255,.1);color:white;border-color:rgba(255,255,255,.2)">Change Cover</button></div></div>
   <div class="vd-tab-bar">
     <button class="vd-tab active">Business Info</button>
@@ -9,17 +15,38 @@
   </div>
   <div class="vd-tab-pane active" id="prf-info">
     <div class="vd-card">
-      <div class="vd-form-row"><div class="vd-form-group"><label>Business Name</label><input value="White Rose Decor"/></div><div class="vd-form-group"><label>Tagline</label><input value="Premium event decoration for every occasion"/></div></div>
-      <div class="vd-form-group"><label>Description</label><textarea>Founded in 2016, White Rose Decor specializes in creating lush, romantic environments for weddings, engagements, and special events across Cairo and Alexandria.</textarea></div>
-      <div class="vd-form-row"><div class="vd-form-group"><label>Starting Price (EGP)</label><input type="number" value="15000"/></div><div class="vd-form-group"><label>Response Time</label><select><option>Within 1 hour</option><option selected>Within 2 hours</option><option>Within 4 hours</option></select></div></div>
+      <div class="vd-form-row">
+        <div class="vd-form-group">
+          <label>Business Name</label>
+          <input [(ngModel)]="vendor.name" />
+        </div>
+        <div class="vd-form-group">
+          <label>Tagline/Category</label>
+          <input [(ngModel)]="vendor.category" />
+        </div>
+      </div>
+      <div class="vd-form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="vendor.about" rows="4"></textarea>
+      </div>
+      <div class="vd-form-row">
+        <div class="vd-form-group">
+          <label>Starting Price (EGP)</label>
+          <input type="number" [(ngModel)]="vendor.startPrice" />
+        </div>
+        <div class="vd-form-group">
+          <label>Main Location</label>
+          <input type="text" [(ngModel)]="vendor.location" />
+        </div>
+      </div>
       <div class="vd-form-section"><div class="vd-form-section-lbl">Contact Details</div>
         <div class="vd-form-row"><div class="vd-form-group"><label>Phone / WhatsApp</label><input type="tel" value="+20 100 123 4567"/></div><div class="vd-form-group"><label>Email</label><input type="email" value="info@whiterosedecor.eg"/></div></div>
         <div class="vd-form-row"><div class="vd-form-group"><label>Instagram</label><input value="@whiterosedecor"/></div><div class="vd-form-group"><label>Website</label><input value="www.whiterosedecor.eg"/></div></div>
       </div>
-      <div class="vd-form-section"><div class="vd-form-section-lbl">Service Areas</div>
-        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:5px"><div class="vd-chip on">Cairo</div><div class="vd-chip on">New Cairo</div><div class="vd-chip on">Heliopolis</div><div class="vd-chip">Zamalek</div><div class="vd-chip on">Alexandria</div><div class="vd-chip">Giza</div><div class="vd-chip">Maadi</div></div>
+      <div class="vd-submit-bar">
+        <button class="vd-btn vd-btn-ghost" (click)="ngOnInit()">Discard</button>
+        <button class="vd-btn vd-btn-gold" (click)="saveChanges()">Save Changes</button>
       </div>
-      <div class="vd-submit-bar"><button class="vd-btn vd-btn-ghost">Discard</button><button class="vd-btn vd-btn-gold">Save Changes</button></div>
     </div>
   </div>
 </div>

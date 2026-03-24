@@ -7,6 +7,7 @@ export interface VendorService {
     delivery?: string;
     duration?: string;
     images?: string[]; // Added to support multiple service images
+    status?: 'active' | 'paused';
 }
 
 export interface VendorPackage {
