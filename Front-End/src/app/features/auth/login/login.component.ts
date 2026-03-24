@@ -24,7 +24,7 @@ export class LoginComponent {
 
     loginForm: FormGroup = this.fb.group({
         email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required, Validators.minLength(8)]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
         role: ['user', Validators.required]
     });
 
@@ -60,7 +60,7 @@ export class LoginComponent {
 
                 this.toastService.show('Logged in successfully!', 'success');
                 
-                this.modalService.close();
+                // this.modalService.close();
                 
                 if (response.value.role === 'Admin') {
                     this.router.navigate(['/admin']);

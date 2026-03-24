@@ -1,17 +1,19 @@
 <div class="vd-section active" style="display:block">
   <div class="vd-page-header">
     <div><div class="vd-page-title">My Services</div><div class="vd-page-sub">Manage the services you offer clients. Changes go live immediately.</div></div>
-    <button class="vd-btn vd-btn-gold">+ Add Service</button>
+    <button class="vd-btn vd-btn-gold" routerLink="/vendor-dashboard">+ Add Service</button>
   </div>
   <div class="vd-tab-bar">
-    <button class="vd-tab active">Active (5)</button>
-    <button class="vd-tab">Paused (1)</button>
+    <button class="vd-tab active">Active ({{ services.length }})</button>
+    <button class="vd-tab">Paused (0)</button>
   </div>
   <div class="vd-tab-pane active" id="svcs-active">
     <div style="display:grid;gap:11px">
-      <div class="vd-svc-card"><div class="vd-svc-icon"></div><div style="flex:1"><div class="vd-svc-name">Wedding Stage Floral Design</div><div class="vd-svc-price">From 15,000 EGP</div><div class="vd-svc-desc">Full stage arrangement — arch, backdrop, aisle décor, and bridal entrance. Premium fresh flowers sourced daily.</div><div class="vd-svc-meta"><span> 23 bookings</span><span>⭐ 4.9</span><span>⏱ 4–6 hrs setup</span></div></div><div class="vd-svc-actions"><span class="vd-badge-pill vdb-green">Active</span><button class="vd-btn vd-btn-ghost vd-btn-sm">Edit</button><button class="vd-btn vd-btn-ghost vd-btn-sm">Pause</button></div></div>
-      <div class="vd-svc-card"><div class="vd-svc-icon"></div><div style="flex:1"><div class="vd-svc-name">Table Centerpieces</div><div class="vd-svc-price">From 1,200 EGP / table</div><div class="vd-svc-desc">Fresh flower centerpieces per table. Wide variety of arrangements to match your wedding theme.</div><div class="vd-svc-meta"><span> 14 bookings</span><span>⭐ 4.8</span><span>⏱ 2–3 hrs</span></div></div><div class="vd-svc-actions"><span class="vd-badge-pill vdb-green">Active</span><button class="vd-btn vd-btn-ghost vd-btn-sm">Edit</button><button class="vd-btn vd-btn-ghost vd-btn-sm">Pause</button></div></div>
-      <div class="vd-svc-card"><div class="vd-svc-icon"></div><div style="flex:1"><div class="vd-svc-name">Balloon Art & Setup</div><div class="vd-svc-price">From 3,500 EGP</div><div class="vd-svc-desc">Custom balloon arches, organic installations, and full room setups. Latex, foil, and biodegradable options.</div><div class="vd-svc-meta"><span> 10 bookings</span><span>⭐ 4.7</span><span>⏱ 2–4 hrs</span></div></div><div class="vd-svc-actions"><span class="vd-badge-pill vdb-green">Active</span><button class="vd-btn vd-btn-ghost vd-btn-sm">Edit</button><button class="vd-btn vd-btn-ghost vd-btn-sm">Pause</button></div></div>
+      <app-service-card 
+        *ngFor="let service of services" 
+        [service]="service" 
+        (actionClick)="handleAction($event, service)">
+      </app-service-card>
     </div>
   </div>
 </div>

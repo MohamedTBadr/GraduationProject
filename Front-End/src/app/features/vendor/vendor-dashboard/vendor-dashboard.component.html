@@ -1,58 +1,192 @@
-<div class="vd-section active" style="display:block">
+<div class="vd-section active">
   <div class="vd-page-header">
-    <div><div class="vd-page-title">Welcome back, White Rose </div><div class="vd-page-sub">Sunday, 1 March 2026 · Your business at a glance</div></div>
-    <button class="vd-btn vd-btn-gold">+ Add Service</button>
+    <div>
+      <div class="vd-page-title">Welcome back, White Rose 👋</div>
+      <div class="vd-page-sub">Sunday, 1 March 2026 &middot; Your business at a glance</div>
+    </div>
+    <button class="vd-btn vd-btn-gold" (click)="openAddServiceModal()">+ Add Service</button>
   </div>
+
   <div class="vd-stats">
-    <div class="vd-stat vds-gold"><div class="vd-stat-bg"></div><div class="vd-stat-val">47</div><div class="vd-stat-lbl">Total Bookings</div><div class="vd-stat-trend">↑ 12% this month</div></div>
-    <div class="vd-stat vds-amber"><div class="vd-stat-bg"></div><div class="vd-stat-val">8</div><div class="vd-stat-lbl">Pending Requests</div><div class="vd-stat-trend flat">3 need urgent reply</div></div>
-    <div class="vd-stat vds-green"><div class="vd-stat-bg"></div><div class="vd-stat-val" style="font-size:1.55rem">142K</div><div class="vd-stat-lbl">Revenue (EGP)</div><div class="vd-stat-trend">↑ 18% vs last month</div></div>
-    <div class="vd-stat vds-blue"><div class="vd-stat-bg">⭐</div><div class="vd-stat-val">4.9</div><div class="vd-stat-lbl">Average Rating</div><div class="vd-stat-trend">127 verified reviews</div></div>
+    <div class="vd-stat vds-gold">
+      <div class="vd-stat-bg" style="font-size: 1.8rem;">📦</div>
+      <div class="vd-stat-val">47</div>
+      <div class="vd-stat-lbl">Total Bookings</div>
+      <div class="vd-stat-trend">↑ 12% this month</div>
+    </div>
+    <div class="vd-stat vds-amber">
+      <div class="vd-stat-bg" style="font-size: 1.8rem;">⌛</div>
+      <div class="vd-stat-val">8</div>
+      <div class="vd-stat-lbl">Pending Requests</div>
+      <div class="vd-stat-trend flat" style="color: #f59e0b;">3 need urgent reply</div>
+    </div>
+    <div class="vd-stat vds-green">
+      <div class="vd-stat-bg" style="font-size: 1.8rem;">💰</div>
+      <div class="vd-stat-val">142K</div>
+      <div class="vd-stat-lbl">Revenue (EGP)</div>
+      <div class="vd-stat-trend" style="color: #10b981;">↑ 18% vs last month</div>
+    </div>
+    <div class="vd-stat vds-blue">
+      <div class="vd-stat-bg" style="font-size: 1.8rem;">⭐</div>
+      <div class="vd-stat-val">4.9</div>
+      <div class="vd-stat-lbl">Average Rating</div>
+      <div class="vd-stat-trend" style="color: #3b82f6;">127 verified reviews</div>
+    </div>
   </div>
+
   <div class="vd-g2">
-    <div class="vd-card"><div class="vd-card-title">Revenue — Last 6 Months<span class="vd-card-link" routerLink="/vendor-dashboard/analytics">Full Report →</span></div>
-      <div class="vd-bar-chart" style="display:flex;align-items:flex-end;gap:20px;height:120px;padding-top:20px;margin-top:10px;justify-content:center">
-         <div style="width:25px;background:var(--gold);height:40%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Oct</span></div>
-         <div style="width:25px;background:var(--gold);height:60%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Nov</span></div>
-         <div style="width:25px;background:var(--gold);height:30%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Dec</span></div>
-         <div style="width:25px;background:var(--gold);height:75%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Jan</span></div>
-         <div style="width:25px;background:var(--gold);height:50%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Feb</span></div>
-         <div style="width:25px;background:var(--gold);height:80%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-5px">Mar</span></div>
+    <!-- Left Column: Revenue -->
+    <div class="vd-card">
+      <div class="vd-card-title">Revenue — Last 6 Months<span class="vd-card-link" routerLink="/vendor-dashboard/analytics" style="text-decoration:none">Full Report →</span></div>
+      <div class="vd-bar-chart" style="display:flex;align-items:flex-end;gap:4px;height:120px;padding-top:20px;margin-top:10px;justify-content:space-between">
+         <div class="vd-bar-col"><span class="vd-bar-val">18K</span><div class="vd-bar-wrap"><div class="vd-bar vd-bar-gold" style="height:35%;"></div></div><span class="vd-bar-lbl">Oct</span></div>
+         <div class="vd-bar-col"><span class="vd-bar-val">22K</span><div class="vd-bar-wrap"><div class="vd-bar vd-bar-gold" style="height:45%;"></div></div><span class="vd-bar-lbl">Nov</span></div>
+         <div class="vd-bar-col"><span class="vd-bar-val">31K</span><div class="vd-bar-wrap"><div class="vd-bar vd-bar-gold" style="height:75%;"></div></div><span class="vd-bar-lbl">Dec</span></div>
+         <div class="vd-bar-col"><span class="vd-bar-val">24K</span><div class="vd-bar-wrap"><div class="vd-bar vd-bar-gold" style="height:50%;"></div></div><span class="vd-bar-lbl">Jan</span></div>
+         <div class="vd-bar-col"><span class="vd-bar-val">28K</span><div class="vd-bar-wrap"><div class="vd-bar vd-bar-gold" style="height:60%;"></div></div><span class="vd-bar-lbl">Feb</span></div>
+         <div class="vd-bar-col"><span class="vd-bar-val">19K</span><div class="vd-bar-wrap"><div class="vd-bar vd-bar-gold" style="height:38%;"></div></div><span class="vd-bar-lbl">Mar</span></div>
       </div>
     </div>
-    <div class="vd-card"><div class="vd-card-title">Upcoming Events<span class="vd-card-link" routerLink="/vendor-dashboard/bookings">All →</span></div>
+
+    <!-- Right Column: Upcoming Events -->
+    <div class="vd-card">
+      <div class="vd-card-title">Upcoming Events<span class="vd-card-link" routerLink="/vendor-dashboard/bookings" style="text-decoration:none">All →</span></div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-top:15px">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #eee">
-            <div style="display:flex;gap:10px"><span style="font-size:1.5rem"></span><div><div style="font-weight:600;font-size:0.9rem">Nour & Omar Wedding</div><div style="font-size:0.8rem;color:var(--gray)">Jun 14 2026</div></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--cream)">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div style="width: 38px; height: 38px; background: var(--cream); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.1rem;">💍</div>
+              <div><div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Nour & Omar Wedding</div><div style="font-size:0.75rem;color:var(--gray)">Jun 14 2026</div></div>
+            </div>
             <span class="vd-badge-pill vdb-green">confirmed</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="display:flex;gap:10px"><span style="font-size:1.5rem"></span><div><div style="font-weight:600;font-size:0.9rem">Sara Engagement</div><div style="font-size:0.8rem;color:var(--gray)">Jun 12 2026</div></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--cream)">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div style="width: 38px; height: 38px; background: var(--cream); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.1rem;">💐</div>
+              <div><div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Sara Engagement</div><div style="font-size:0.75rem;color:var(--gray)">Jun 12 2026</div></div>
+            </div>
             <span class="vd-badge-pill vdb-green">confirmed</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div style="width: 38px; height: 38px; background: var(--cream); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.1rem;">🎂</div>
+              <div><div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Layla's Birthday</div><div style="font-size:0.75rem;color:var(--gray)">May 22 2026</div></div>
+            </div>
+            <span class="vd-badge-pill vdb-amber">pending</span>
         </div>
       </div>
     </div>
   </div>
+
   <div class="vd-g2">
-    <div class="vd-card"><div class="vd-card-title">Pending Requests<span class="vd-card-link" routerLink="/vendor-dashboard/bookings">View All →</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eee">
-            <div><div style="font-weight:600;font-size:0.9rem">Sara Mohamed</div><div style="font-size:0.8rem;color:var(--gray)">Engagement Party · Jun 12</div></div>
-            <div style="font-weight:600;color:var(--gold)">12,000 EGP</div>
+    <!-- Left: Pending Requests -->
+    <div class="vd-card">
+      <div class="vd-card-title">Pending Requests<span class="vd-card-link" routerLink="/vendor-dashboard/bookings" style="text-decoration:none">View All →</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--cream)">
+            <div>
+              <div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Sara Mohamed</div>
+              <div style="font-size:0.8rem;color:var(--gray);margin-bottom:6px">Engagement Party &middot; Jun 12</div>
+              <div style="display:flex;gap:6px">
+                <button class="vd-btn vd-btn-green" style="padding:4px 12px; font-size:0.75rem">Accept</button>
+                <button class="vd-btn vd-btn-ghost" style="padding:4px 12px; font-size:0.75rem">Decline</button>
+              </div>
+            </div>
+            <div style="font-weight:700;color:#9f1239;font-size:0.9rem">12,000 EGP</div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
-            <div><div style="font-weight:600;font-size:0.9rem">Khaled Hassan</div><div style="font-size:0.8rem;color:var(--gray)">Wedding · Sep 20</div></div>
-            <div style="font-weight:600;color:var(--gold)">28,000 EGP</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--cream)">
+            <div>
+              <div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Khaled Hassan</div>
+              <div style="font-size:0.8rem;color:var(--gray);margin-bottom:6px">Wedding &middot; Sep 20</div>
+              <div style="display:flex;gap:6px">
+                <button class="vd-btn vd-btn-green" style="padding:4px 12px; font-size:0.75rem">Accept</button>
+                <button class="vd-btn vd-btn-ghost" style="padding:4px 12px; font-size:0.75rem">Decline</button>
+              </div>
+            </div>
+            <div style="font-weight:700;color:#9f1239;font-size:0.9rem">28,000 EGP</div>
+        </div>
+        <div style="text-align:center; padding-top:14px;">
+           <button class="vd-chip" routerLink="/vendor-dashboard/bookings">See all 8 requests &rarr;</button>
         </div>
     </div>
-    <div class="vd-card"><div class="vd-card-title">Profile Performance</div>
-        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee">
-            <div style="font-size:0.9rem;font-weight:500">Profile Views</div>
-            <div style="text-align:right"><div style="font-weight:600">1,240/mo</div><div style="font-size:0.8rem;color:#16a34a">↑ 24%</div></div>
+    
+    <!-- Right: Profile Performance -->
+    <div class="vd-card">
+      <div class="vd-card-title">Profile Performance</div>
+        <div class="vd-metric-row">
+            <div class="vd-metric-lbl">Profile Views</div>
+            <div style="text-align:right"><div class="vd-metric-val">1,240/mo</div><div style="font-size:0.75rem;color:#16a34a;font-weight:600">↑ 24%</div></div>
         </div>
-        <div style="display:flex;justify-content:space-between;padding:12px 0">
-            <div style="font-size:0.9rem;font-weight:500">Inquiries</div>
-            <div style="text-align:right"><div style="font-weight:600">38/mo</div><div style="font-size:0.8rem;color:#16a34a">↑ 8%</div></div>
+        <div class="vd-metric-row">
+            <div class="vd-metric-lbl">Inquiries</div>
+            <div style="text-align:right"><div class="vd-metric-val">38/mo</div><div style="font-size:0.75rem;color:#16a34a;font-weight:600">↑ 5%</div></div>
         </div>
+        <div class="vd-metric-row">
+            <div class="vd-metric-lbl">Conversion</div>
+            <div style="text-align:right"><div class="vd-metric-val">24%</div><div style="font-size:0.75rem;color:#16a34a;font-weight:600">↑ 3%</div></div>
+        </div>
+        <div class="vd-metric-row">
+            <div class="vd-metric-lbl">Avg Response</div>
+            <div style="text-align:right"><div class="vd-metric-val">1.8 hrs</div><div style="font-size:0.75rem;color:#16a34a;font-weight:600">✓ On target</div></div>
+        </div>
+        <div class="vd-metric-row">
+            <div class="vd-metric-lbl">Favorites</div>
+            <div style="text-align:right"><div class="vd-metric-val">89 saves</div><div style="font-size:0.75rem;color:#16a34a;font-weight:600">↑ 12 this month</div></div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SERVICE MODAL -->
+<div class="vd-modal-overlay" [class.open]="isAddServiceModalOpen">
+  <div class="vd-modal" style="max-width: 540px;">
+    <button class="vd-modal-close" (click)="closeAddServiceModal()">&times;</button>
+    <div class="vd-modal-title" style="font-size: 1.6rem;">Add New Service</div>
+    <div class="vd-modal-sub" style="margin-bottom: 24px;">Create a new listing that will appear on your vendor profile.</div>
+    
+    <div class="vd-form-group">
+      <label>Service Name *</label>
+      <input type="text" [(ngModel)]="newService.name" placeholder="e.g. Wedding Stage Floral Design" style="border-radius: 8px; font-size: 0.9rem; padding: 12px 14px; border: 1.5px solid var(--lgray);">
+    </div>
+    
+    <div class="vd-form-row" style="margin-bottom: 16px;">
+      <div>
+        <label>Category</label>
+        <select [(ngModel)]="newService.category" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+          <option>Decoration</option>
+          <option>Photography</option>
+          <option>Catering</option>
+          <option>Venue</option>
+        </select>
+      </div>
+      <div>
+        <label>Starting Price (EGP) *</label>
+        <input type="text" [(ngModel)]="newService.price" placeholder="e.g. 8000" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+      </div>
+    </div>
+    
+    <div class="vd-form-group" style="margin-bottom: 16px;">
+      <label>Description *</label>
+      <textarea [(ngModel)]="newService.description" placeholder="Describe the service in detail — what's included, materials, setup time..." rows="4" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);"></textarea>
+    </div>
+    
+    <div class="vd-form-row">
+      <div>
+        <label>Setup Duration</label>
+        <input type="text" [(ngModel)]="newService.duration" placeholder="e.g. 4-6 hours" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+      </div>
+      <div>
+        <label>Lead Time Required</label>
+        <input type="text" [(ngModel)]="newService.leadTime" placeholder="e.g. 2 weeks minimum" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+      </div>
+    </div>
+
+    <div class="vd-form-group" style="margin-top: 16px;">
+      <label>Service Images</label>
+      <app-image-upload (imagesChanged)="onImagesChanged($event)"></app-image-upload>
+    </div>
+    
+    <div class="vd-submit-bar" style="border: none; margin-top: 24px; padding-top: 0; display: flex; justify-content: flex-end; gap: 10px;">
+      <button class="vd-btn vd-btn-ghost" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;" (click)="closeAddServiceModal()">Cancel</button>
+      <button class="vd-btn vd-btn-gold" (click)="createService()">Create Service</button>
     </div>
   </div>
 </div>

@@ -1,0 +1,21 @@
+.iu-container { width: 100%; font-family: var(--ff-b), sans-serif; }
+.iu-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; font-size: 0.8rem; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; }
+.iu-dropzone { border: 2px dashed var(--lgray); border-radius: var(--r); background: var(--cream); text-align: center; transition: all 0.2s; position: relative; }
+.iu-dropzone.drag-over { border-color: var(--gold); background: rgba(201, 168, 76, 0.05); }
+.iu-input { display: none; }
+.iu-label { display: block; padding: 30px; cursor: pointer; margin: 0; }
+.iu-icon { font-size: 2rem; margin-bottom: 8px; color: var(--navy); }
+.iu-text { font-size: 0.9rem; color: var(--navy); margin-bottom: 4px; }
+.iu-text strong { color: var(--gold); text-decoration: underline; }
+.iu-subtext { font-size: 0.75rem; color: var(--gray); }
+
+.iu-previews { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 14px; }
+.iu-preview-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; border: 1px solid var(--lgray); background: var(--white); position: relative; }
+.iu-thumb { width: 50px; height: 50px; border-radius: 6px; background-color: var(--cream2); background-size: cover; background-position: center; flex-shrink: 0; }
+.iu-info { flex: 1; overflow: hidden; }
+.iu-name { font-size: 0.85rem; font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.iu-size { font-size: 0.75rem; color: var(--gray); margin-top: 4px; }
+.iu-progress-bar { height: 4px; background: var(--lgray); border-radius: 10px; margin-top: 6px; overflow: hidden; }
+.iu-progress-fill { height: 100%; background: var(--gold); transition: width 0.2s; }
+.iu-remove-btn { background: var(--cream2); border: none; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--gray); cursor: pointer; transition: all 0.2s; padding: 0; }
+.iu-remove-btn:hover { background: #fee2e2; color: #dc2626; }

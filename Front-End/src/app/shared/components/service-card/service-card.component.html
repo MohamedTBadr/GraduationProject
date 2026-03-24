@@ -1,0 +1,26 @@
+<div class="vd-svc-card" [class.grid-mode]="viewMode === 'grid'">
+  <!-- Image or Fallback Icon -->
+  <div class="svc-media" *ngIf="coverImage; else fallbackIcon" [style.backgroundImage]="'url(' + coverImage + ')'"></div>
+  <ng-template #fallbackIcon>
+    <div class="vd-svc-icon">{{ service.icon || '🛠️' }}</div>
+  </ng-template>
+
+  <!-- Content -->
+  <div class="svc-content">
+    <div class="vd-svc-name">{{ service.name }}</div>
+    <div class="vd-svc-price">{{ service.price }} EGP</div>
+    <div class="vd-svc-desc">{{ service.desc }}</div>
+    
+    <div class="vd-svc-meta">
+      <span *ngIf="service.duration">⏱️ {{ service.duration }} setup</span>
+      <span *ngIf="service.delivery">🚚 {{ service.delivery }} lead time</span>
+      <span *ngIf="service.images?.length" class="has-images">📷 {{ service.images?.length }} photos</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="vd-svc-actions">
+    <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="actionClick.emit('edit')">Edit</button>
+    <button class="vd-btn vd-btn-ghost vd-btn-sm" style="color: #ef4444;" (click)="actionClick.emit('delete')">Delete</button>
+  </div>
+</div>

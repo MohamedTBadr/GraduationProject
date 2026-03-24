@@ -6,6 +6,7 @@ export interface VendorService {
     includes?: string[];
     delivery?: string;
     duration?: string;
+    images?: string[]; // Added to support multiple service images
 }
 
 export interface VendorPackage {

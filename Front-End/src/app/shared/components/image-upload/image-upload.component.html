@@ -1,0 +1,36 @@
+<div class="iu-container">
+  <div class="iu-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="iu-dropzone" 
+       [class.drag-over]="dragOver"
+       (drop)="onFileDropped($event)" 
+       (dragover)="onDragOver($event)" 
+       (dragleave)="onDragLeave($event)">
+    
+    <label class="iu-label">
+      <input type="file" #fileInput class="iu-input" [multiple]="multiple" [accept]="acceptFormats.join(',')" (change)="onFileSelected($event)" />
+      <div class="iu-icon">📷</div>
+      <div class="iu-text"><strong>Click to upload</strong> or drag and drop</div>
+      <div class="iu-subtext">JPG, PNG, or WebP (max {{ maxSizeMB }}MB)</div>
+    </label>
+  </div>
+
+  <div class="iu-previews" *ngIf="images.length > 0">
+    <div class="iu-preview-card" *ngFor="let img of images; let i = index">
+      <div class="iu-thumb" [style.backgroundImage]="img.previewUrl ? 'url(' + img.previewUrl + ')' : 'none'"></div>
+      
+      <div class="iu-info">
+        <div class="iu-name" [title]="img.file?.name || 'Image'">{{ img.file?.name || 'Uploaded Image' }}</div>
+        <div class="iu-size" *ngIf="img.file">{{ (img.file.size / 1024 / 1024).toFixed(2) }} MB</div>
+        
+        <div class="iu-progress-bar" *ngIf="img.status === 'uploading'">
+          <div class="iu-progress-fill" [style.width.%]="img.progress"></div>
+        </div>
+      </div>
+      
+      <button class="iu-remove-btn" type="button" (click)="removeImage(i)" *ngIf="img.status === 'done' || img.status === 'error'">
+        &times;
+      </button>
+    </div>
+  </div>
+</div>
