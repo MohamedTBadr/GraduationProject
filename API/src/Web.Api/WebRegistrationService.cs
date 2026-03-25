@@ -30,16 +30,16 @@ namespace Web.Api
     public static class WebRegistrationService
     {
 
-        public async static Task<IServiceCollection> AddWebsRegistrationServices(IServiceCollection services, IConfiguration configuration)
+        public async static Task<IServiceCollection> AddWebsRegistrationServices(IServiceCollection Services, IConfiguration configuration)
         {
-            //services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
+            //Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
 
-            services.AddControllers(options =>
+            Services.AddControllers(options =>
             {
                 options.Filters.Add<ResultFilter>(); // ← applies to all controllers
             });
             #region RateLimiter
-            services.AddRateLimiter(options =>
+            Services.AddRateLimiter(options =>
             {
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                     RateLimitPartition.GetFixedWindowLimiter(
@@ -64,7 +64,7 @@ namespace Web.Api
             // 1) Register an IDistributedCache implementation first
             //    (in dev: in-memory; in prod: use StackExchange.Redis)
             // 1) Register Redis as IDistributedCache
-            services.AddStackExchangeRedisCache(options =>
+            Services.AddStackExchangeRedisCache(options =>
             {
                 // Your Redis connection string should be in appsettings.json
                 // e.g. "Redis": "localhost:6379"
@@ -86,31 +86,31 @@ namespace Web.Api
             };
 
             // Register core idempotency using the options (controller-based)
-            services.AddIdempotentAPI(idempotencyOptions);
+            Services.AddIdempotentAPI(idempotencyOptions);
 
             // 3) Register the library's DistributedCache implementation
             //    (this extension lives in the IdempotentAPI.Cache.DistributedCache package)
-            services.AddIdempotentAPIUsingDistributedCache(); // README shows this usage. :contentReference[oaicite:2]{index=2}
+            Services.AddIdempotentAPIUsingDistributedCache(); // README shows this usage. :contentReference[oaicite:2]{index=2}
             #endregion
 
 
             #region SignalR
 
-            services.AddSignalR();
+            Services.AddSignalR();
 
 
             #endregion
 
             #region Identity
             ////Configure Identity with your ApplicationUser (use Guid keys)
-            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
+            Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
 
 
             // Configure Identity options (AFTER AddIdentity)
-            services.Configure<IdentityOptions>(options =>
+            Services.Configure<IdentityOptions>(options =>
             {
                 // ✅ Allow letters, digits, and spaces
                 options.User.AllowedUserNameCharacters =
@@ -132,7 +132,7 @@ namespace Web.Api
 
             #region GeminiAI
             //Gemini Configuration
-            services.AddSingleton(provider =>
+            Services.AddSingleton(provider =>
             {
                 // Retrieve the API Key securely from configuration, environment variables, etc.
                 // For this example, we'll try an environment variable first.
@@ -148,7 +148,7 @@ namespace Web.Api
 
                 return new Client(apiKey: apiKey);
             });
-            services.AddScoped<GeminiService>();
+            Services.AddScoped<GeminiService>();
             #endregion
 
 
@@ -157,7 +157,7 @@ namespace Web.Api
 
 
 
-            services.AddHybridCache(options =>
+            Services.AddHybridCache(options =>
             {
                 options.MaximumKeyLength = 512;
                 options.MaximumPayloadBytes = 1024 * 1024 * 10;
@@ -169,7 +169,7 @@ namespace Web.Api
                 };
             });
 
-            services.AddStackExchangeRedisCache(options =>
+            Services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = configuration.GetConnectionString("Redis");
                 options.InstanceName = "HybridCache_";
@@ -180,7 +180,7 @@ namespace Web.Api
             #region Enhancment 
 
             // Enable compression
-            services.AddResponseCompression(options =>
+            Services.AddResponseCompression(options =>
             {
                 options.EnableForHttps = true; // compress HTTPS responses
                 options.Providers.Add<GzipCompressionProvider>();
@@ -188,14 +188,14 @@ namespace Web.Api
             });
 
             // Configure compression levels
-            services.Configure<GzipCompressionProviderOptions>(options =>
+            Services.Configure<GzipCompressionProviderOptions>(options =>
             {
                 options.Level = CompressionLevel.Fastest; // or Optimal
             });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            services.AddEndpointsApiExplorer();
+            Services.AddEndpointsApiExplorer();
 
-            //services.AddSwaggerGen(c =>
+            //Services.AddSwaggerGen(c =>
             //{
             //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Graduation Project V1", Version = "v1" });
 
@@ -225,9 +225,9 @@ namespace Web.Api
 
 
             #endregion
-            services.AddScoped<IChatNotificationService, ChatNotificationService>();
-            services.AddScoped<IChatService, ChatService>();
-            services.AddSingleton<
+            Services.AddScoped<IChatNotificationService, ChatNotificationService>();
+            Services.AddScoped<IChatService, ChatService>();
+            Services.AddSingleton<
     IAuthorizationMiddlewareResultHandler,
     CustomAuthorizationResultHandler>();
          
@@ -243,7 +243,7 @@ namespace Web.Api
                 .CreateLogger();
            
             #endregion
-            return services;
+            return Services;
         }
     }
 }

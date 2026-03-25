@@ -187,16 +187,16 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ProductImage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("ServiceImage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ServiceName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VendorName")
                         .IsRequired()
@@ -335,12 +335,12 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("ServiceName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("VendorId")
                         .HasColumnType("uniqueidentifier");
@@ -386,7 +386,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Packages");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Product", b =>
+            modelBuilder.Entity("Domain.Entities.Service", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -399,6 +399,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("LeadTimeRequired")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -408,6 +411,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<Guid>("ServiceTypeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("SetupDuration")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("VendorId")
                         .HasColumnType("uniqueidentifier");
@@ -420,10 +426,10 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VendorId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Services");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ProductImage", b =>
+            modelBuilder.Entity("Domain.Entities.ServiceImage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -433,14 +439,14 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid>("ServiceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ServiceId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ServiceImages");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceType", b =>
@@ -774,7 +780,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Product", b =>
+            modelBuilder.Entity("Domain.Entities.Service", b =>
                 {
                     b.HasOne("Domain.Entities.Category", "Category")
                         .WithMany()
@@ -789,7 +795,7 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Vendor", "Vendor")
-                        .WithMany("Products")
+                        .WithMany("Services")
                         .HasForeignKey("VendorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -801,15 +807,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ProductImage", b =>
+            modelBuilder.Entity("Domain.Entities.ServiceImage", b =>
                 {
-                    b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("ProductImages")
-                        .HasForeignKey("ProductId")
+                    b.HasOne("Domain.Entities.Service", "Service")
+                        .WithMany("ServiceImages")
+                        .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Product");
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("Domain.Entities.Vendor", b =>
@@ -927,9 +933,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("OrderItems");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Product", b =>
+            modelBuilder.Entity("Domain.Entities.Service", b =>
                 {
-                    b.Navigation("ProductImages");
+                    b.Navigation("ServiceImages");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceType", b =>
@@ -941,7 +947,7 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Packages");
 
-                    b.Navigation("Products");
+                    b.Navigation("Services");
 
                     b.Navigation("VendorRatings");
 

@@ -17,7 +17,7 @@ namespace Application.Services
             var items = request.Items.Select(i => new OrderItem
             {
                 Id = Guid.NewGuid(),
-                ProductName = i.ProductName,
+                ServiceName = i.ServiceName,
                 Quantity = i.Quantity,
                 Price = i.UnitPrice
             }).ToList();
@@ -57,7 +57,7 @@ namespace Application.Services
                         UserId: g.Key,
                         Type: nameof(NotificationType.ORDER_PLACED),
                         Title: "Order Details",
-                        Message: $"Order #{order.Id} details: {string.Join(", ", g.Select(i => $"{i.Quantity}x {i.ProductName}"))}."))
+                        Message: $"Order #{order.Id} details: {string.Join(", ", g.Select(i => $"{i.Quantity}x {i.ServiceName}"))}."))
                     .ToList();
                 await notificationService.SendBulkAsync(vendorNotifications);
             }
@@ -157,7 +157,7 @@ namespace Application.Services
             o.OrderItems.Select(i => new OrderItemResponse(
                 i.Id,
               
-                i.ProductName,
+                i.ServiceName,
                 i.Quantity,
                 i.Price,
                 i.Quantity * i.Price)).ToList(),

@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.DTOs.ProductDTOs
+namespace Application.DTOs.ServiceDTOs
 {
-    public record ProductDTO
+    public record ServiceDTO
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -17,20 +17,25 @@ namespace Application.DTOs.ProductDTOs
         public string VendorName { get; set; }
         public Guid ServiceTypeId { get; set; }
         public string ServiceTypeName { get; set; }
-        public List<string> ProductImages { get; set; }
+        public List<string> ServiceImages { get; set; }
+        public decimal SetupDuration { get; set; } // in hours
+        public decimal LeadTimeRequired { get; set; } // in weeks
     }
 
-    public record CreateProductRequest
+    public record CreateServiceRequest
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public List<IFormFile> ProductImages { get; set; }
+        public List<IFormFile> ServiceImages { get; set; }
         public Guid CategoryId { get; set; }
+        //CategoryId
         public Guid? VendorId { get; set; }
         public Guid ServiceTypeId { get; set; }
+        public decimal SetupDuration { get; set; } // in hours
+        public decimal LeadTimeRequired { get; set; } // in weeks
     }
 
-    public record UpdateProductDTO
+    public record UpdateServiceDTO
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -38,6 +43,8 @@ namespace Application.DTOs.ProductDTOs
         public Guid CategoryId { get; set; }
         public Guid VendorId { get; set; }
         public Guid ServiceTypeId { get; set; }
+        public decimal SetupDuration { get; set; } // in hours
+        public decimal LeadTimeRequired { get; set; } // in weeks
     }
 
 

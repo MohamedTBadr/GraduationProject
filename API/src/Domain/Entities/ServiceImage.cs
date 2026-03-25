@@ -1,10 +1,10 @@
 ﻿namespace Domain.Entities
 {
-    public class ProductImage
+    public class ServiceImage
     {
         public Guid Id { get; set; }
-        public Product Product { get; set; }
-        public Guid ProductId { get; set; }
+        public Service Service { get; set; }
+        public Guid ServiceId { get; set; }
 
         public string ImagePath { get; set; }
     }

@@ -4,20 +4,20 @@ using Shared;
 namespace Domain.Contracts
 {
 
-    public interface IProductRepository
+    public interface IServiceRepository
         {
-            Task<Product> GetByIdAsync(Guid id);
-        // PaginatedResult<Product> → PaginatedResponse<Product>
-        Task<PaginatedResponse<Product>> GetAllAsync(PaginatedRequest request);
-        Task<PaginatedResponse<Product>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request);
-        Task<PaginatedResponse<Product>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request);
-        Task<PaginatedResponse<Product>> GetByServiceTypeIdAsync(Guid serviceTypeId, PaginatedRequest request);
-        Task<Product> CreateAsync(Product product);
-            Task<Product> UpdateAsync(Product product);
+            Task<Service> GetByIdAsync(Guid id);
+        // PaginatedResult<Service> → PaginatedResponse<Service>
+        Task<PaginatedResponse<Service>> GetAllAsync(PaginatedRequest request);
+        Task<PaginatedResponse<Service>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request);
+        Task<PaginatedResponse<Service>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request);
+        Task<PaginatedResponse<Service>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request);
+        Task<Service> CreateAsync(Service Service);
+            Task<Service> UpdateAsync(Service Service);
             Task DeleteAsync(Guid id);
             Task<bool> ExistsAsync(Guid id);
 
 
-        Task<List<Product>> AIFilterAsync(AIRequest AIRequest);
+        Task<List<Service>> AIFilterAsync(AIRequest AIRequest);
     }
     }

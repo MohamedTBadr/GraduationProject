@@ -15,7 +15,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthenticationController(IServiceManager serviceManager) : BaseController
+    public class AuthenticationController(IServiceManager ServiceManager) : BaseController
     {
         [HttpPost("Login")]
         [AllowAnonymous]
@@ -35,7 +35,7 @@ namespace Web.Api.Controllers
 
                 throw new UnprocessableContentException(errors);
             }
-            var result = await serviceManager.AuthenticationService.LogIn(loginRequest);
+            var result = await ServiceManager.AuthenticationService.LogIn(loginRequest);
             var response = Result<UserResponse>.Success(result);
             return Ok(response);
         }
@@ -57,7 +57,7 @@ namespace Web.Api.Controllers
 
                 throw new BadRequestException(errors);
             }
-            var result = await serviceManager.AuthenticationService.RegisterAsync(request);
+            var result = await ServiceManager.AuthenticationService.RegisterAsync(request);
             var response = Result<UserResponse>.Success(result);
             return Ok(response);
         }
@@ -79,7 +79,7 @@ namespace Web.Api.Controllers
                 throw new BadRequestException(errors);
             }
 
-            return Ok(await serviceManager.AuthenticationService.CheckIfEmailExists(email));
+            return Ok(await ServiceManager.AuthenticationService.CheckIfEmailExists(email));
         }
 
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -96,8 +96,8 @@ namespace Web.Api.Controllers
 
             try
             {
-                // Call the secure service method with the token provided by the client
-                var response = await serviceManager.AuthenticationService.RefreshTokenAsync(request);
+                // Call the secure Service method with the token provided by the client
+                var response = await ServiceManager.AuthenticationService.RefreshTokenAsync(request);
                 var result = Result<UserResponse>.Success(response);
                 // The UserResponse now contains the new AccessToken and the new RefreshToken
                 return Ok(response);
@@ -122,7 +122,7 @@ namespace Web.Api.Controllers
                     .ToList();
                 throw new BadRequestException(errors);
             }
-            await serviceManager.AuthenticationService.ForgetPassword(email);
+            await ServiceManager.AuthenticationService.ForgetPassword(email);
             var result = Result<string>.Success("Email Has Send Succussfully");
             return Ok(result);
 
@@ -140,7 +140,7 @@ namespace Web.Api.Controllers
                     .ToList();
                 throw new BadRequestException(errors);
             }
-            await serviceManager.AuthenticationService.ResetPassword(request);
+            await ServiceManager.AuthenticationService.ResetPassword(request);
 
             var result = Result<string>.Success("Email Has Send Succussfully");
 
@@ -156,7 +156,7 @@ namespace Web.Api.Controllers
             {
                 return Unauthorized();
             }
-            await serviceManager.AuthenticationService.LogoutAsync(Guid.Parse(userId));
+            await ServiceManager.AuthenticationService.LogoutAsync(Guid.Parse(userId));
             var result = Result<string>.Success("Logged out successfully");
             return Ok(result);
         }

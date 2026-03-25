@@ -17,6 +17,15 @@ namespace Application.Services
     {
         private readonly IAmazonS3 _s3;
         private readonly AwsSettings _settings;
+        public List<string> allowedExtensions = new List<string>()
+        {
+            ".jpg",
+            ".png",
+            
+        };
+
+        public const int maxAllowed = 2_000_000;
+
 
         public FileService(IAmazonS3 s3, IOptions<AwsSettings> settings)
         {
@@ -36,7 +45,7 @@ namespace Application.Services
         }
         public async Task<string> Upload(string folderName, IFormFile file)
         {
-           
+            
 
             var key = $"{folderName}/{Guid.NewGuid()}_{file.FileName}";
             using var stream = file.OpenReadStream();

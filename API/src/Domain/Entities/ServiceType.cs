@@ -5,7 +5,7 @@ using System.Text;
 namespace Domain.Entities
 {
     /// <summary>
-    /// Represents a service type entity.
+    /// Represents a Service type entity.
     /// </summary>
     public class ServiceType
     {

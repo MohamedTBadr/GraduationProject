@@ -23,7 +23,7 @@ namespace Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Add Services to the container.
 
             builder.Services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>
@@ -95,20 +95,20 @@ namespace Web
             app.MapPost("/AI-Chat", async ([FromServices] GeminiService geminiService) =>
             {
                 var budget = 3000;
-                var products = new[]
+                var Services = new[]
                 {
-        new { Name = "Product A", Price = 1000 },
-        new { Name = "Product B", Price = 1500 },
-        new { Name = "Product C", Price = 800 },
-        new { Name = "Product D", Price = 1200 },
-        new { Name = "Product E", Price = 500 }
+        new { Name = "Service A", Price = 1000 },
+        new { Name = "Service B", Price = 1500 },
+        new { Name = "Service C", Price = 800 },
+        new { Name = "Service D", Price = 1200 },
+        new { Name = "Service E", Price = 500 }
         };
 
                 // Step 1: Compute all valid combinations locally
-                var affordableProducts = products.Where(p => p.Price <= budget).ToArray();
+                var affordableServices = Services.Where(p => p.Price <= budget).ToArray();
                 var combinations = new List<object>();
 
-                int n = affordableProducts.Length;
+                int n = affordableServices.Length;
                 for (int i = 1; i < (1 << n); i++)
                 {
                     var combo = new List<string>();
@@ -117,15 +117,15 @@ namespace Web
                     {
                         if ((i & (1 << j)) != 0)
                         {
-                            combo.Add(affordableProducts[j].Name);
-                            total += affordableProducts[j].Price;
+                            combo.Add(affordableServices[j].Name);
+                            total += affordableServices[j].Price;
                         }
                     }
 
                     if (total <= budget)
                         combinations.Add(new
                         {
-                            products = combo,
+                            Services = combo,
                             total_price = total,
                             remaining_budget = budget - total
                         });
@@ -134,21 +134,21 @@ namespace Web
                 combinations = combinations.OrderBy(c => (int)c.GetType().GetProperty("total_price").GetValue(c)).ToList();
 
                 // Step 2: Prepare top N combinations for AI enrichment
-                var topCombos = combinations.Take(5).Select(c => ((dynamic)c).products).ToList();
+                var topCombos = combinations.Take(5).Select(c => ((dynamic)c).Services).ToList();
                 var prompt = $@"
 You are an API that returns ONLY valid JSON. Do not include markdown or extra text.
-Given the top product combinations under a budget of {budget} and their names:
+Given the top Service combinations under a budget of {budget} and their names:
 
 {string.Join("\n", topCombos.Select(c => string.Join(" + ", c)))}
 
 Return JSON with the following schema for each combination:
 {{
-  ""products"": [string],
+  ""Services"": [string],
   ""total_price"": number,
   ""remaining_budget"": number,
   ""rank"": number,         // rank from best to worst
   ""description"": string,   // short recommendation
-  ""image_url"": string      // optional image for product combination
+  ""image_url"": string      // optional image for Service combination
 }}
 
 Return an array named ""enriched_recommendations"". Only JSON.
@@ -161,7 +161,7 @@ Return an array named ""enriched_recommendations"". Only JSON.
                 var jsonResponse = new
                 {
                     budget,
-                    products_available = affordableProducts.ToDictionary(p => p.Name, p => p.Price),
+                    Services_available = affordableServices.ToDictionary(p => p.Name, p => p.Price),
                     recommendations = combinations, // full list
                     enriched_recommendations = aiResponse // AI-enhanced top combos
                 };
@@ -191,10 +191,10 @@ Return an array named ""enriched_recommendations"". Only JSON.
             // ✅ Run DB seeders at startup
             using (var scope = app.Services.CreateScope())
             {
-                var services = scope.ServiceProvider;
+                var Services = scope.ServiceProvider;
                 try
                 {
-                    var initializer = services.GetRequiredService<IDbIntialize>();
+                    var initializer = Services.GetRequiredService<IDbIntialize>();
                     await initializer.IntializeAsync(); // seeds Vendors, Roles, Categories
                 }
                 catch (Exception ex)

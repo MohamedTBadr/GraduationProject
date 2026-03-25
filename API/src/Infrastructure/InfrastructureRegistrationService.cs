@@ -13,30 +13,30 @@ namespace Infrastructure
 {
     public static class InfrastructureRegistrationService
     {
-            public static async Task<IServiceCollection> AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+            public static async Task<IServiceCollection> AddInfrastructureServices(this IServiceCollection Services, IConfiguration configuration)
             {
-            //services.AddScoped<IDbIntialize, DbIntialize>();
-            services.AddScoped<ICategoryRepository, CategoryRepository>();
-            services.AddScoped<IServiceTypeRepository, ServiceTypeRepository>();
-            services.AddScoped<IVendorRepository, VendorRepository>();
-            services.AddScoped<IEventRepository, EventRepository>();
-            services.AddScoped<IEventItemRepository, EventItemRepository>();
-            services.AddScoped<IMessageRepository, MessageRepository>();
-            services.AddScoped<IDbIntialize, DbIntialize>();
-            services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<NotificationRepository>();
-            services.AddScoped<IOrderRepository, OrderRepository>();
+            //Services.AddScoped<IDbIntialize, DbIntialize>();
+            Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            Services.AddScoped<IServiceTypeRepository, ServiceTypeRepository>();
+            Services.AddScoped<IVendorRepository, VendorRepository>();
+            Services.AddScoped<IEventRepository, EventRepository>();
+            Services.AddScoped<IEventItemRepository, EventItemRepository>();
+            Services.AddScoped<IMessageRepository, MessageRepository>();
+            Services.AddScoped<IDbIntialize, DbIntialize>();
+            Services.AddScoped<IServiceRepository, ServiceRepository>();
+            Services.AddScoped<NotificationRepository>();
+            Services.AddScoped<IOrderRepository, OrderRepository>();
 
-            services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
+            Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             // 1. Configure DbContext with SQL Server
-            services.AddDbContext<ApplicationDbContext>(options =>
+            Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                    configuration.GetConnectionString("DefaultConnection")));
 
 
 
 
-            return services;
+            return Services;
         }
 
     }

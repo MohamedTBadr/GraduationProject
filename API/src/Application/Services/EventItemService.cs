@@ -72,8 +72,8 @@ namespace Application.Services
             if (entity == null)
                 throw new KeyNotFoundException($"EventItem with id '{id}' was not found.");
 
-            entity.ProductImage = dto.ProductImage;
-            entity.ProductName  = dto.ProductName;
+            entity.ServiceImage = dto.ServiceImage;
+            entity.ServiceName  = dto.ServiceName;
             entity.Price        = dto.Price;
             entity.VendorName   = dto.VendorName;
             entity.Quantity     = dto.Quantity;
@@ -103,8 +103,8 @@ namespace Application.Services
         private static EventItem MapFromCreateDto(CreateEventItemDto dto) => new()
         {
             EventId      = dto.EventId,
-            ProductImage = dto.ProductImage,
-            ProductName  = dto.ProductName,
+            ServiceImage = dto.ServiceImage,
+            ServiceName  = dto.ServiceName,
             Price        = dto.Price,
             VendorName   = dto.VendorName,
             Quantity     = dto.Quantity
@@ -114,8 +114,8 @@ namespace Application.Services
         {
             Id           = i.Id,
             EventId      = i.EventId,
-            ProductImage = i.ProductImage,
-            ProductName  = i.ProductName,
+            ServiceImage = i.ServiceImage,
+            ServiceName  = i.ServiceName,
             Price        = i.Price,
             VendorName   = i.VendorName,
             Quantity     = i.Quantity

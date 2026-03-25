@@ -14,7 +14,7 @@ namespace Application.DTOs.VendorDTOs
         public decimal YearsInBusiness { get; set; }
         public decimal StartingPrice { get; set; }
         public List<VendorRatingDTO> VendorRating { get; set; } = new List<VendorRatingDTO>();
-         public List<ProductDTOs.ProductDTO> Products { get; set; } = new List<ProductDTOs.ProductDTO>();
+         public List<ServiceDTOs.ServiceDTO> Services { get; set; } = new List<ServiceDTOs.ServiceDTO>();
         public List<PackageDTOs.PackageDTO> Packages { get; set; } = new List<PackageDTOs.PackageDTO>();
 
 

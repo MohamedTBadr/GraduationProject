@@ -7,13 +7,13 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ServiceTypeController(IServiceTypeService serviceTypeService) : ControllerBase
+    public class ServiceTypeController(IServiceTypeService ServiceTypeService) : ControllerBase
     {
         [HttpGet]
         public async Task<IActionResult> GetAllServiceTypes()
         {
-            var serviceTypes = await serviceTypeService.GetAllServiceTypesAsync();
-            return Ok(serviceTypes);
+            var ServiceTypes = await ServiceTypeService.GetAllServiceTypesAsync();
+            return Ok(ServiceTypes);
         }
 
 
@@ -21,12 +21,12 @@ namespace Web.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetServiceTypeById(Guid id)
         {
-            var serviceType = await serviceTypeService.GetServiceTypeByIdAsync(id);
-            if (serviceType == null)
+            var ServiceType = await ServiceTypeService.GetServiceTypeByIdAsync(id);
+            if (ServiceType == null)
             {
                 return NotFound();
             }
-            return Ok(serviceType);
+            return Ok(ServiceType);
         }
 
         [Authorize(Roles = "Admin")]
@@ -34,7 +34,7 @@ namespace Web.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddServiceType(CreateServiceTypeRequest  type)
         {
-            await serviceTypeService.AddTypeAsync(type);
+            await ServiceTypeService.AddTypeAsync(type);
             return Created();
         }
         [Authorize(Roles = "Admin")]
@@ -42,7 +42,7 @@ namespace Web.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteServiceType(Guid id)
         {
-            await serviceTypeService.DeleteTypeAsync(id);
+            await ServiceTypeService.DeleteTypeAsync(id);
             return NoContent();
         }
         [Authorize(Roles = "Admin")]
@@ -50,7 +50,7 @@ namespace Web.Api.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateServiceType(Guid id, UpdateServiceTypeRequest type)
         {
-            await serviceTypeService.UpdateTypeAsync(id, type);
+            await ServiceTypeService.UpdateTypeAsync(id, type);
             return Ok();
         }
     }

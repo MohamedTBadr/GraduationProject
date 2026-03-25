@@ -14,8 +14,8 @@ namespace Application.DTOs.Orders
     );
 
     public record OrderItemRequest(
-        Guid ProductId,
-        string ProductName,
+        Guid ServiceId,
+        string ServiceName,
         int Quantity,
         decimal UnitPrice
     );
@@ -49,7 +49,7 @@ namespace Application.DTOs.Orders
     public record OrderItemResponse(
         Guid Id
       ,
-        string ProductName,
+        string ServiceName,
         int Quantity,
         decimal Price,
         decimal SubTotal

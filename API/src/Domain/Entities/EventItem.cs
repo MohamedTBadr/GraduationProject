@@ -6,8 +6,8 @@
 
         public Event Event { get; set; }
         public Guid EventId { get; set; }
-        public string ProductImage { get; set; }
-        public string ProductName { get; set; }
+        public string ServiceImage { get; set; }
+        public string ServiceName { get; set; }
         public decimal Price { get; set; }
         public string VendorName { get; set; }
 

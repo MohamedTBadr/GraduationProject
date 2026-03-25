@@ -14,11 +14,11 @@
       <FileName>Entities\ServiceType.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DAL.Entities.Product">
+  <Class Name="DAL.Entities.Service">
     <Position X="9.5" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAKAAAAAAAgAAAAAAIAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Entities\Product.cs</FileName>
+      <FileName>Entities\Service.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="DAL.Entities.Package">

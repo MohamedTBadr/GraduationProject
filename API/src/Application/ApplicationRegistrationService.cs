@@ -19,43 +19,43 @@ namespace Application
 {
     public static class ApplicationRegistrationService
     {
-        public static async Task<IServiceCollection> AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+        public static async Task<IServiceCollection> AddApplicationServices(this IServiceCollection Services, IConfiguration configuration)
         {
-            services.AddScoped<IEmailSender, EmailSenderService>();
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
-            services.AddScoped<IAttachmentService, AttachmentService>();
-            services.AddScoped<IServiceManager, ServiceManager>();
-            services.AddScoped<IVendorService, VendorService>();
-            services.AddScoped<IServiceTypeService, ServiceTypeService>();
-            services.AddScoped<ICategoryService, CategoryService>();
-            services.AddScoped<IEventService, EventService>();
-            services.AddScoped<IEventItemService, EventItemService>();
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
-            services.AddScoped<IChatService, ChatService>();
-            services.AddScoped<IProductService, ProductService>();
-            services.AddScoped<IOrderService, OrderService>();
-            services.AddSingleton<SseConnectionManager>();
-            services.AddScoped<NotificationService>();
-            services.AddScoped<IFileService, FileService>();
+            Services.AddScoped<IEmailSender, EmailSenderService>();
+            Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            Services.AddScoped<IAttachmentService, AttachmentService>();
+            Services.AddScoped<IServiceManager, ServiceManager>();
+            Services.AddScoped<IVendorService, VendorService>();
+            Services.AddScoped<IServiceTypeService, ServiceTypeService>();
+            Services.AddScoped<ICategoryService, CategoryService>();
+            Services.AddScoped<IEventService, EventService>();
+            Services.AddScoped<IEventItemService, EventItemService>();
+            Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            Services.AddScoped<IChatService, ChatService>();
+            Services.AddScoped<IServiceService, ServiceService>();
+            Services.AddScoped<IOrderService, OrderService>();
+            Services.AddSingleton<SseConnectionManager>();
+            Services.AddScoped<NotificationService>();
+            Services.AddScoped<IFileService, FileService>();
 
-            services.AddAutoMapper(cfg =>
+            Services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<AutoMapperService>();
 
             });
 
 
-            services.Configure<JWTOptions>(
+            Services.Configure<JWTOptions>(
   configuration.GetSection("JWTOptions"));
-            ConfigureJWT(services, configuration);
+            ConfigureJWT(Services, configuration);
 
 
 
 
-            services.Configure<AwsSettings>(
+            Services.Configure<AwsSettings>(
     configuration.GetSection("AWS"));
 
-            services.AddSingleton<IAmazonS3>(sp =>
+            Services.AddSingleton<IAmazonS3>(sp =>
             {
                 var config = sp.GetRequiredService<IOptions<AwsSettings>>().Value;
 
@@ -67,21 +67,21 @@ namespace Application
             });
 
 
-            services.Configure<PaymobOptions>(
+            Services.Configure<PaymobOptions>(
     configuration.GetSection("Paymob"));
 
-            services.AddHttpClient<PaymobService>();
+            Services.AddHttpClient<PaymobService>();
 
 
 
-            return services;
+            return Services;
         }
 
-        public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureJWT(this IServiceCollection Services, IConfiguration configuration)
         {
             var jwt = configuration.GetSection("JWTOptions").Get<JWTOptions>();
                        // ❌ Missing this is a very common cause of 401
-            services.AddAuthentication(options =>
+            Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
