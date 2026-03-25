@@ -1,5 +1,5 @@
 ﻿using Application;
-using Application.DTOs.ProductDTOs;
+using Application.DTOs.ServiceDTOs;
 using Application.Interfaces;
 using AutoMapper;
 
@@ -12,91 +12,101 @@ using System.Text;
 
 namespace Application.Services
 {
-    public class ProductService(IProductRepository _productRepository,IFileService _fileService, IMapper _mapper): IProductService
+    public class ServiceService(IServiceRepository _ServiceRepository,IFileService _fileService, IMapper _mapper): IServiceService
     {
 
-        public async Task<Result<PaginatedResponse<ProductDTO>>> GetAllAsync(PaginatedRequest request)
+        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetAllAsync(PaginatedRequest request)
         {
-            var result = await _productRepository.GetAllAsync(request);
-            var mapped = _mapper.Map<IEnumerable<ProductDTO>>(result.Items);
-            return Result<PaginatedResponse<ProductDTO>>.Success(new PaginatedResponse<ProductDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
+            var result = await _ServiceRepository.GetAllAsync(request);
+            var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
+            return Result<PaginatedResponse<ServiceDTO>>.Success(new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
         }
 
-        public async Task<Result<PaginatedResponse<ProductDTO>>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request)
+        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request)
         {
-            var result = await _productRepository.GetByCategoryIdAsync(categoryId, request);
-            var mapped = _mapper.Map<IEnumerable<ProductDTO>>(result.Items);
-            return Result<PaginatedResponse<ProductDTO>>.Success(new PaginatedResponse<ProductDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
+            var result = await _ServiceRepository.GetByCategoryIdAsync(categoryId, request);
+            var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
+            return Result<PaginatedResponse<ServiceDTO>>.Success(new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
         }
 
-        public async Task<Result<PaginatedResponse<ProductDTO>>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request)
+        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request)
         {
-            var result = await _productRepository.GetByVendorIdAsync(vendorId, request);
-            var mapped = _mapper.Map<IEnumerable<ProductDTO>>(result.Items);
-            return Result<PaginatedResponse<ProductDTO>>.Success(new PaginatedResponse<ProductDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
+            var result = await _ServiceRepository.GetByVendorIdAsync(vendorId, request);
+            var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
+            return Result<PaginatedResponse<ServiceDTO>>.Success(new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
         }
 
-        public async Task<Result<PaginatedResponse<ProductDTO>>> GetByServiceTypeIdAsync(Guid serviceTypeId, PaginatedRequest request)
+        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request)
         {
-            var result = await _productRepository.GetByServiceTypeIdAsync(serviceTypeId, request);
-            var mapped = _mapper.Map<IEnumerable<ProductDTO>>(result.Items);
-            return Result<PaginatedResponse<ProductDTO>>.Success(new PaginatedResponse<ProductDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
+            var result = await _ServiceRepository.GetByServiceTypeIdAsync(ServiceTypeId, request);
+            var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
+            return Result<PaginatedResponse<ServiceDTO>>.Success(new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
         }
 
 
-        public async Task<Result<ProductDTO>> GetByIdAsync(Guid id)
+        public async Task<Result<ServiceDTO>> GetByIdAsync(Guid id)
         {
-            var product = await _productRepository.GetByIdAsync(id);
-            if (product is null)
-                return Result<ProductDTO>.NotFound("Product not found");
-            return Result<ProductDTO>.Success(_mapper.Map<ProductDTO>(product));
+            var Service = await _ServiceRepository.GetByIdAsync(id);
+            if (Service is null)
+                return Result<ServiceDTO>.NotFound("Service not found");
+            return Result<ServiceDTO>.Success(_mapper.Map<ServiceDTO>(Service));
         }
-      
 
-        public async Task<Result<ProductDTO>> CreateAsync(CreateProductRequest dto)
+
+        public async Task<Result<ServiceDTO>> CreateAsync(CreateServiceRequest dto)
         {
-            var product = _mapper.Map<Product>(dto);
-            var created = await _productRepository.CreateAsync(product);
+            var service = _mapper.Map<Service>(dto);
 
-            if (dto.ProductImages != null && dto.ProductImages.Count > 0)
+            if (dto.ServiceImages != null && dto.ServiceImages.Count > 0)
             {
-                foreach (var image in dto.ProductImages)
+                var images = new List<ServiceImage>();
+
+                foreach (var image in dto.ServiceImages)
                 {
-                    var imagePath = await _fileService.Upload("products", image);
+                    var imagePath = await _fileService.Upload("Services", image);
+                    images.Add(new ServiceImage
+                    {
+                        ImagePath = imagePath,
+                        ServiceId = service.Id
+                    });
                 }
+
+                service.ServiceImages = images;
             }
 
-            return Result<ProductDTO>.Success(_mapper.Map<ProductDTO>(created));
+            var created = await _ServiceRepository.CreateAsync(service);
+
+            return Result<ServiceDTO>.Success(_mapper.Map<ServiceDTO>(created));
         }
 
-        public async Task<Result<ProductDTO>> UpdateAsync(UpdateProductDTO dto)
+        public async Task<Result<ServiceDTO>> UpdateAsync(UpdateServiceDTO dto)
         {
-            var exists = await _productRepository.ExistsAsync(dto.Id);
+            var exists = await _ServiceRepository.ExistsAsync(dto.Id);
             if (!exists)
-                return Result<ProductDTO>.NotFound("Product not found");
+                return Result<ServiceDTO>.NotFound("Service not found");
 
-            var product = _mapper.Map<Product>(dto);
-            var updated = await _productRepository.UpdateAsync(product);
-            return Result<ProductDTO>.Success(_mapper.Map<ProductDTO>(updated));
+            var Service = _mapper.Map<Service>(dto);
+            var updated = await _ServiceRepository.UpdateAsync(Service);
+            return Result<ServiceDTO>.Success(_mapper.Map<ServiceDTO>(updated));
         }
 
         public async Task<Result<bool>> DeleteAsync(Guid id)
         {
-            var exists = await _productRepository.ExistsAsync(id);
+            var exists = await _ServiceRepository.ExistsAsync(id);
             if (!exists)
-                return Result<bool>.NotFound("Product not found");
+                return Result<bool>.NotFound("Service not found");
 
-            await _productRepository.DeleteAsync(id);
+            await _ServiceRepository.DeleteAsync(id);
             await _fileService.DeleteAsync(new List<string> { id.ToString() }); // Assuming you want to delete associated images as well
             return Result<bool>.Success(true);
         }
 
          //✅ Fixed
-        public async Task<Result<List<ProductDTO>>> AIFilterAsync(AIRequest AIRequest)
+        public async Task<Result<List<ServiceDTO>>> AIFilterAsync(AIRequest AIRequest)
         {
-            var products = await _productRepository.AIFilterAsync(AIRequest); // ← awaited
-            var mapped = _mapper.Map<List<ProductDTO>>(products);
-            return Result<List<ProductDTO>>.Success(mapped);                  // ← async returns Task automatically
+            var Services = await _ServiceRepository.AIFilterAsync(AIRequest); // ← awaited
+            var mapped = _mapper.Map<List<ServiceDTO>>(Services);
+            return Result<List<ServiceDTO>>.Success(mapped);                  // ← async returns Task automatically
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Application.Services
         IAttachmentService attachmentService,
         IEmailSender emailSender,
         IAuthenticationService authenticationService,
-        IServiceTypeService serviceTypeService,
+        IServiceTypeService ServiceTypeService,
         ICategoryService categoryService
     ) : IServiceManager
     {
@@ -14,7 +14,7 @@ namespace Application.Services
         public IEmailSender EmailSender => emailSender;
         public IAuthenticationService AuthenticationService => authenticationService;
 
-        public IServiceTypeService ServiceTypeService => serviceTypeService;
+        public IServiceTypeService ServiceTypeService => ServiceTypeService;
         public ICategoryService CategoryService => categoryService;
 
 

@@ -1,5 +1,5 @@
 ﻿using Application;
-using Application.DTOs.ProductDTOs;
+using Application.DTOs.ServiceDTOs;
 using Application.Interfaces;
 using BLL;
 using Microsoft.AspNetCore.Authorization;
@@ -10,83 +10,81 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductController(IProductService productService) : BaseController
+    public class ServiceController(IServiceService ServiceService) : BaseController
     {
         private Guid userId => GetUserIdFromToken();
-        // GET api/products
+        // GET api/Services
         [HttpGet]
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request)
         {
-            var result = await productService.GetAllAsync(request);
+            var result = await ServiceService.GetAllAsync(request);
             return Ok(result);
         }
 
-        // GET api/products/{id}
+        // GET api/Services/{id}
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
-            var result = await productService.GetByIdAsync(id);
+            var result = await ServiceService.GetByIdAsync(id);
             return Ok(result);
         }
 
-        // GET api/products/by-category/{categoryId}
+        // GET api/Services/by-category/{categoryId}
         [HttpGet("by-category/{categoryId:guid}")]
         public async Task<IActionResult> GetByCategoryAsync(Guid categoryId, [FromQuery] PaginatedRequest request)
         {
-            var result = await productService.GetByCategoryIdAsync(categoryId, request);
+            var result = await ServiceService.GetByCategoryIdAsync(categoryId, request);
             return Ok(result);
         }
 
-        // GET api/products/by-vendor/{vendorId}
+        // GET api/Services/by-vendor/{vendorId}
         [HttpGet("by-vendor/{vendorId:guid}")]
         public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request)
         {
-            var result = await productService.GetByVendorIdAsync(vendorId, request);
+            var result = await ServiceService.GetByVendorIdAsync(vendorId, request);
             return Ok(result);
         }
 
-        // GET api/products/by-service-type/{serviceTypeId}
-        [HttpGet("by-service-type/{serviceTypeId:guid}")]
-        public async Task<IActionResult> GetByServiceTypeAsync(Guid serviceTypeId, [FromQuery] PaginatedRequest request)
+        // GET api/Services/by-Service-type/{ServiceTypeId}
+        [HttpGet("by-Service-type/{ServiceTypeId:guid}")]
+        public async Task<IActionResult> GetByServiceTypeAsync(Guid ServiceTypeId, [FromQuery] PaginatedRequest request)
         {
-            var result = await productService.GetByServiceTypeIdAsync(serviceTypeId, request);
+            var result = await ServiceService.GetByServiceTypeIdAsync(ServiceTypeId, request);
             return Ok(result);
         }
 
-        // POST api/products
+        // POST api/Services
         [Authorize(Roles = "Vendor" )]
         [HttpPost]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateProductRequest dto)
+        public async Task<IActionResult> CreateAsync([FromForm] CreateServiceRequest dto)
         {
-            dto.VendorId = userId; // Ensure the product is associated with the authenticated vendor
-            var result = await productService.CreateAsync(dto);
+            dto.VendorId = userId; // Ensure the Service is associated with the authenticated vendor
+            var result = await ServiceService.CreateAsync(dto);
 
             if (result.IsFailure)
                 return BadRequest(result); // filter handles the failure
-            //if (result.IsSuccess)
-            //    return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Value.Id }, result);
-
+           
             return Created(); // filter handles the failure
         }
         [Authorize(Roles = "Admin")]
 
-        // PUT api/products/{id}
+        // PUT api/Services/{id}
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateProductDTO dto)
+        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateServiceDTO dto)
         {
             if (id != dto.Id)
-                return BadRequest(Error.Validation("Product.IdMismatch", "Route id and body id do not match."));
+                return BadRequest(Error.Validation("Service.IdMismatch", "Route id and body id do not match."));
 
-            var result = await productService.UpdateAsync(dto);
+            var result = await ServiceService.UpdateAsync(dto);
             return Ok(result);
         }
         [Authorize(Roles = "Admin")]
 
-        // DELETE api/products/{id}
+        // DELETE api/Services/{id}
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
-            var result = await productService.DeleteAsync(id);
+            var result = await ServiceService.DeleteAsync(id);
 
             if (result.IsSuccess)
                 return NoContent();

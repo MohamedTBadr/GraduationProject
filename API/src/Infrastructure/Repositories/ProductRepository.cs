@@ -5,16 +5,17 @@ using Shared;
 using Domain.Entities;
 namespace Infrastructure.Repositories
 {
-    public class ProductRepository(ApplicationDbContext _context) : IProductRepository
+    public class ServiceRepository(ApplicationDbContext _context) : IServiceRepository
     {
 
 
-        public async Task<PaginatedResponse<Product>> GetAllAsync(PaginatedRequest request)
+        public async Task<PaginatedResponse<Service>> GetAllAsync(PaginatedRequest request)
         {
-            var query = _context.Products
+            var query = _context.Services
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
+                .Include(p=>p.ServiceImages)
                 .AsNoTracking();
 
             // Search
@@ -32,11 +33,11 @@ namespace Infrastructure.Repositories
                 "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
                 "category" => request.IsDescending ? query.OrderByDescending(p => p.Category.Name) : query.OrderBy(p => p.Category.Name),
                 "vendor" => request.IsDescending ? query.OrderByDescending(p => p.Vendor.BusinessName) : query.OrderBy(p => p.Vendor.BusinessName),
-                "servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
+                "Servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
                 _ => query.OrderBy(p => p.Name) // default
             };
 
-            // Replace PaginatedResult<Product> { Items = ..., TotalCount = ..., ... } with:
+            // Replace PaginatedResult<Service> { Items = ..., TotalCount = ..., ... } with:
             var totalCount = await query.CountAsync();
 
             var items = await query
@@ -44,14 +45,14 @@ namespace Infrastructure.Repositories
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            return new PaginatedResponse<Product>(items, totalCount, request.PageIndex, request.PageSize);
+            return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
         }
 
 
 
-        public async Task<PaginatedResponse<Product>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request)
+        public async Task<PaginatedResponse<Service>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request)
         {
-            var query = _context.Products
+            var query = _context.Services
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
@@ -69,7 +70,7 @@ namespace Infrastructure.Repositories
             {
                 "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
                 "vendor" => request.IsDescending ? query.OrderByDescending(p => p.Vendor.BusinessName) : query.OrderBy(p => p.Vendor.BusinessName),
-                "servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
+                "Servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
                 _ => query.OrderBy(p => p.Name)
             };
 
@@ -79,12 +80,12 @@ namespace Infrastructure.Repositories
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            return new PaginatedResponse<Product>(items, totalCount, request.PageIndex, request.PageSize);
+            return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
         }
 
-        public async Task<PaginatedResponse<Product>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request)
+        public async Task<PaginatedResponse<Service>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request)
         {
-            var query = _context.Products
+            var query = _context.Services
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
@@ -102,7 +103,7 @@ namespace Infrastructure.Repositories
             {
                 "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
                 "category" => request.IsDescending ? query.OrderByDescending(p => p.Category.Name) : query.OrderBy(p => p.Category.Name),
-                "servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
+                "Servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
                 _ => query.OrderBy(p => p.Name)
             };
 
@@ -112,16 +113,16 @@ namespace Infrastructure.Repositories
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            return new PaginatedResponse<Product>(items, totalCount, request.PageIndex, request.PageSize);
+            return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
         }
 
-        public async Task<PaginatedResponse<Product>> GetByServiceTypeIdAsync(Guid serviceTypeId, PaginatedRequest request)
+        public async Task<PaginatedResponse<Service>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request)
         {
-            var query = _context.Products
+            var query = _context.Services
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
-                .Where(p => p.ServiceTypeId == serviceTypeId)
+                .Where(p => p.ServiceTypeId == ServiceTypeId)
                 .AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
@@ -145,68 +146,68 @@ namespace Infrastructure.Repositories
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            return new PaginatedResponse<Product>(items, totalCount, request.PageIndex, request.PageSize);
+            return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
         }
-        public async Task<Product> GetByIdAsync(Guid id)
+        public async Task<Service> GetByIdAsync(Guid id)
         {
-            return await _context.Products
+            return await _context.Services
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
-        public async Task<Product> CreateAsync(Product product)
+        public async Task<Service> CreateAsync(Service Service)
         {
-            product.Id = Guid.NewGuid();
-            await _context.Products.AddAsync(product);
-            await _context.ProductImages.AddRangeAsync(product.ProductImages.Select(pi =>
+            Service.Id = Guid.NewGuid();
+            await _context.Services.AddAsync(Service);
+            await _context.ServiceImages.AddRangeAsync(Service.ServiceImages.Select(pi =>
             {
                 pi.Id = Guid.NewGuid();
-                pi.ProductId = product.Id;
-                pi.ImagePath = $"/images/products/{pi.ImagePath}.jpg";
+                pi.ServiceId = Service.Id;
+                pi.ImagePath = $"{pi.ImagePath}";
                 return pi;
             }));
             await _context.SaveChangesAsync();
-            return product;
+            return Service;
         }
 
-        public async Task<Product> UpdateAsync(Product product)
+        public async Task<Service> UpdateAsync(Service Service)
         {
-            _context.Products.Update(product);
-            if (product.ProductImages != null && product.ProductImages.Count > 0)
+            _context.Services.Update(Service);
+            if (Service.ServiceImages != null && Service.ServiceImages.Count > 0)
             {
-                foreach (var image in product.ProductImages)
+                foreach (var image in Service.ServiceImages)
                 {
-                    image.ProductId = product.Id;
-                    image.ImagePath = $"/images/products/{image.ImagePath}.jpg";
+                    image.ServiceId = Service.Id;
+                    image.ImagePath = $"/images/Services/{image.ImagePath}.jpg";
                 }
-                _context.ProductImages.UpdateRange(product.ProductImages);
+                _context.ServiceImages.UpdateRange(Service.ServiceImages);
             }
 
             await _context.SaveChangesAsync();
-            return product;
+            return Service;
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product is not null)
+            var Service = await _context.Services.FindAsync(id);
+            if (Service is not null)
             {
-                _context.Products.Remove(product);
-                _context.ProductImages.RemoveRange(_context.ProductImages.Where(pi => pi.ProductId == id));
+                _context.Services.Remove(Service);
+                _context.ServiceImages.RemoveRange(_context.ServiceImages.Where(pi => pi.ServiceId == id));
                 await _context.SaveChangesAsync();
             }
         }
 
         public async Task<bool> ExistsAsync(Guid id)
         {
-            return await _context.Products.AnyAsync(p => p.Id == id);
+            return await _context.Services.AnyAsync(p => p.Id == id);
         }
 
-        public Task<List<Product>> AIFilterAsync(AIRequest AIRequest)
+        public Task<List<Service>> AIFilterAsync(AIRequest AIRequest)
         {
-            var query = _context.Products
+            var query = _context.Services
                 .Where(p => p.Price < AIRequest.Budget && p.Price > 0)
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)

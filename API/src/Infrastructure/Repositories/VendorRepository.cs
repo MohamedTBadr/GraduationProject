@@ -16,7 +16,7 @@ namespace Infrastructure.Repositories
 
         public async Task<Vendor?> GetVendorByIdAsync(Guid id)
         {
-            var vendor = await dbContext.Vendors.Include(v => v.VendorRatings).Include(x=>x.Packages).Include(x=>x.Products).FirstOrDefaultAsync(v => v.UserId == id);
+            var vendor = await dbContext.Vendors.Include(v => v.VendorRatings).Include(x=>x.Packages).Include(x=>x.Services).FirstOrDefaultAsync(v => v.UserId == id);
             return vendor;
         }
 

@@ -179,8 +179,8 @@ namespace Application.Services
         {
             Id = i.Id,
             EventId = i.EventId,
-            ProductImage = i.ProductImage,
-            ProductName = i.ProductName,
+            ServiceImage = i.ServiceImage,
+            ServiceName = i.ServiceName,
             Price = i.Price,
             VendorName = i.VendorName,
             Quantity = i.Quantity

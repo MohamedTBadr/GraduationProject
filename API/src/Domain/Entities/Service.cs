@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class Product
+    public class Service
     {
        public Guid Id { get; set; }
         public string Name { get; set; }
@@ -17,11 +17,12 @@ namespace Domain.Entities
 
         public Guid CategoryId { get; set; } 
 
-
+         public decimal SetupDuration { get; set; } // in hours
+        public decimal LeadTimeRequired { get; set; } // in weeks
         public Vendor Vendor { get; set; }
         public Guid VendorId { get; set; }
 
-        public List<ProductImage> ProductImages { get; set; }
+        public List<ServiceImage> ServiceImages { get; set; }
 
 
     }

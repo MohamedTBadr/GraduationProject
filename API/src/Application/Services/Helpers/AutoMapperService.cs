@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.CategoryDTOs;
-using Application.DTOs.ProductDTOs;
+using Application.DTOs.ServiceDTOs;
 using Application.DTOs.ServiceTypesDTOs;
 using Application.DTOs.UserDTOs;
 using Application.DTOs.VendorDTOs;
@@ -38,18 +38,22 @@ namespace Application.Services.Helpers
 
 
 
-            #region Product
+            #region Service
             // Entity → Read DTO
-            CreateMap<Product, ProductDTO>()
+            CreateMap<Service, ServiceDTO>()
                 .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category.Name))
                 .ForMember(d => d.VendorName, o => o.MapFrom(s => s.Vendor.BusinessName))
-                .ForMember(d => d.ServiceTypeName, o => o.MapFrom(s => s.ServiceType.Name));
+
+                .ForMember(d => d.ServiceTypeName, o => o.MapFrom(s => s.ServiceType.Name))
+                .ForMember(d => d.ServiceImages, o => o.MapFrom(s => s.ServiceImages.Select(i => i.ImagePath).ToList()));
+
 
             // Create DTO → Entity
-            CreateMap<CreateProductRequest, Product>();
-
+            // In your mapping profile
+            CreateMap<CreateServiceRequest, Service>()
+                .ForMember(d => d.ServiceImages, o => o.Ignore());
             // Update DTO → Entity
-            CreateMap<UpdateProductDTO, Product>();
+            CreateMap<UpdateServiceDTO, Service>();
             #endregion
 
             #region Vendor

@@ -14,7 +14,7 @@ namespace Web.Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class EventController(IEventService _eventService, GeminiService _geminiService , IProductService _productService) : BaseController
+    public class EventController(IEventService _eventService, GeminiService _geminiService , IServiceService _ServiceService) : BaseController
     {
         protected Guid UserId => GetUserIdFromToken();
         // ─────────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ namespace Web.Api.Controllers
         // ─────────────────────────────────────────────────────────
         // GET api/events/{id}
         //   Admin  → any event
-        //   Vendor → only events they are linked to as a service owner
+        //   Vendor → only events they are linked to as a Service owner
         //   Client → only their own
         // ─────────────────────────────────────────────────────────
         [HttpGet("{id:guid}")]
@@ -118,14 +118,14 @@ namespace Web.Api.Controllers
                 return NotFound($"Event {eventId} not found.");
 
             var request = new AIRequest { Budget = eventObject.TotalBudget, GuestCount = eventObject.GuestCount, CategoryName = eventObject.CategoryName };
-            var productLines = await _productService.AIFilterAsync(request);
+            var ServiceLines = await _ServiceService.AIFilterAsync(request);
 
 
             // Step 5: Build prompt
             var prompt = $@"
 You are an event planning API that returns ONLY valid JSON. Do not include markdown, explanation, or extra text.
 
-Plan a full event using the details and available products below.
+Plan a full event using the details and available Services below.
 
 EVENT DETAILS:
 - Title: {eventObject.Title}
@@ -136,8 +136,8 @@ EVENT DETAILS:
 - Total Budget: {eventObject.TotalBudget:C}
 - Notes: {eventObject.Notes ?? "None"}
 
-AVAILABLE PRODUCTS (within budget):
-{string.Join("\n", productLines)}
+AVAILABLE ServiceS (within budget):
+{string.Join("\n", ServiceLines)}
 
 Return a JSON object with this exact schema:
 {{
@@ -148,8 +148,8 @@ Return a JSON object with this exact schema:
   ""plan_summary"": string,
   ""selected_items"": [
     {{
-       ""productId"": Guid
-      ""product_name"": string,
+       ""ServiceId"": Guid
+      ""Service_name"": string,
       ""category"": string,
       ""vendor"": string,
       ""price"": number,
@@ -174,7 +174,7 @@ Only return JSON. No markdown. No explanation.
                 eventTitle = eventObject.Title,
                 budget = eventObject.TotalBudget,
                 category = eventObject.CategoryName,
-                productsConsidered = productLines.Value.Count,
+                ServicesConsidered = ServiceLines.Value.Count,
                 aiPlan = aiResponse
             });
         }

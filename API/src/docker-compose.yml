@@ -1,4 +1,4 @@
-services:
+Services:
   web:
     build:
       context: .
@@ -8,9 +8,9 @@ services:
       - "5000:8080"
     depends_on:
       db:
-        condition: service_healthy
+        condition: Service_healthy
       redis:
-        condition: service_started
+        condition: Service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=db;Database=GraduationProject;User=sa;Password=MyPass@word;TrustServerCertificate=True;

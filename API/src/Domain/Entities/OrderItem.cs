@@ -6,7 +6,7 @@
         public Order Order { get; set; }
         public Guid OrderId { get; set; }
         public Guid VendorId { get; set; }
-        public string ProductName { get; set; }= string.Empty;
+        public string ServiceName { get; set; }= string.Empty;
 
         public List<string>? PackageItems { get; set; }
         public decimal Price { get; set; }

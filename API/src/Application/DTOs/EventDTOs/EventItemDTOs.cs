@@ -7,8 +7,8 @@ namespace Application.DTOs
     public class CreateEventItemDto
     {
         public Guid EventId { get; set; }
-        public string ProductImage { get; set; }
-        public string ProductName { get; set; }
+        public string ServiceImage { get; set; }
+        public string ServiceName { get; set; }
         public decimal Price { get; set; }
         public Guid VendorId { get; set; }
         public string VendorName { get; set; }
@@ -17,8 +17,8 @@ namespace Application.DTOs
 
     public class UpdateEventItemDto
     {
-        public string ProductImage { get; set; }
-        public string ProductName { get; set; }
+        public string ServiceImage { get; set; }
+        public string ServiceName { get; set; }
         public decimal Price { get; set; }
         public string VendorName { get; set; }
         public int Quantity { get; set; }
@@ -30,8 +30,8 @@ namespace Application.DTOs
     {
         public Guid Id { get; set; }
         public Guid EventId { get; set; }
-        public string ProductImage { get; set; }
-        public string ProductName { get; set; }
+        public string ServiceImage { get; set; }
+        public string ServiceName { get; set; }
         public decimal Price { get; set; }
         public string VendorName { get; set; }
         public int Quantity { get; set; }

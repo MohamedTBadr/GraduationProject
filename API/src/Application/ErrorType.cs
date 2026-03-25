@@ -45,7 +45,7 @@
         InsufficientFunds,   // Balance/credit too low for operation
 
         // External Dependencies
-        ExternalService,     // Third-party service failure
+        ExternalService,     // Third-party Service failure
         Timeout,             // Operation timed out
 
         // System / Infrastructure

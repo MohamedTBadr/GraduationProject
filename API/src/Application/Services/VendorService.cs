@@ -15,7 +15,7 @@ namespace Application.Services
     {
         public async Task<Result<List<VendorListDTO>>> GetVendorsAsync()
         {
-            // Simulate fetching vendors from a database or service
+            // Simulate fetching vendors from a database or Service
             var vendors = await vendorRepository.GetVendorsAsync(); 
             var vendorListDTOs = mapper.Map<List<VendorListDTO>>(vendors);
             return Result<List<VendorListDTO>>.Success(vendorListDTOs);
@@ -37,14 +37,14 @@ namespace Application.Services
       
     
             // 2. Create the Vendor linked to that user
-            var serviceTypeIds = request.ServiceTypes.Select(s => s.Id).ToList();
+            var ServiceTypeIds = request.ServiceTypes.Select(s => s.Id).ToList();
 
             // Fetch real ServiceType entities from DB
             var existingServiceTypes = await dbContext.ServiceTypes
-                .Where(s => serviceTypeIds.Contains(s.Id))
+                .Where(s => ServiceTypeIds.Contains(s.Id))
                 .ToListAsync();
 
-            if (existingServiceTypes.Count != serviceTypeIds.Count)
+            if (existingServiceTypes.Count != ServiceTypeIds.Count)
                 return Result<VendorDetailsDTO>.Failure(ErrorType.NotFound, "One or more ServiceTypes not found.");
 
 

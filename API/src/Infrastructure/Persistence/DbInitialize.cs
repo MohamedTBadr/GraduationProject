@@ -16,7 +16,7 @@ namespace Infrastructure.Persistence
     {
         public async Task IntializeAsync()
         {
-            //production =>Seeding + Intialize Db
+            //Serviceion =>Seeding + Intialize Db
             if ((await context.Database.GetPendingMigrationsAsync()).Any())
             {
                 await context.Database.MigrateAsync();
@@ -31,7 +31,7 @@ namespace Infrastructure.Persistence
                 await SeedCustomerAsync();
                 await SeedCategoriesAsync();
                 await SeedServiceTypesAsync();
-                await SeedProductsAsync();   // ✅ add
+                await SeedServicesAsync();   // ✅ add
                 await SeedPackagesAsync();
             }
             catch (Exception E)
@@ -168,19 +168,19 @@ namespace Infrastructure.Persistence
         {
             if (!context.ServiceTypes.Any())
             {
-                var serviceTypes = new List<ServiceType>
+                var ServiceTypes = new List<ServiceType>
                 {
                     new ServiceType { Id = Guid.NewGuid(), Name = "Photography" },
                     new ServiceType { Id = Guid.NewGuid(), Name = "Catering" },
                     new ServiceType { Id = Guid.NewGuid(), Name = "Decoration" },
                 };
-                context.ServiceTypes.AddRange(serviceTypes);
+                context.ServiceTypes.AddRange(ServiceTypes);
                 await context.SaveChangesAsync();
             }
         }
-        private async Task SeedProductsAsync()
+        private async Task SeedServicesAsync()
         {
-            if (context.Products.Any()) return;
+            if (context.Services.Any()) return;
 
             // Pull existing seeded data to use as FKs
             var vendor = await context.Vendors.FirstOrDefaultAsync();
@@ -192,13 +192,13 @@ namespace Infrastructure.Persistence
 
             if (vendor == null || photography == null || catering == null || wedding == null)
             {
-                Console.WriteLine("Skipping product seeding: required vendor/serviceType/category not found.");
+                Console.WriteLine("Skipping Service seeding: required vendor/ServiceType/category not found.");
                 return;
             }
 
-            var products = new List<Product>
+            var Services = new List<Service>
     {
-        new Product
+        new Service
         {
             Id = Guid.NewGuid(),
             Name = "Wedding Photography Package",
@@ -208,17 +208,17 @@ namespace Infrastructure.Persistence
             ServiceTypeId = photography.Id,
             CategoryId = wedding.Id
         },
-        new Product
+        new Service
         {
             Id = Guid.NewGuid(),
             Name = "Birthday Catering Set",
-            Description = "Catering service for up to 50 guests with custom menu.",
+            Description = "Catering Service for up to 50 guests with custom menu.",
             Price = 3000m,
             VendorId = vendor.UserId,
             ServiceTypeId = catering.Id,
             CategoryId = birthday.Id
         },
-        new Product
+        new Service
         {
             Id = Guid.NewGuid(),
             Name = "Wedding Hall Decoration",
@@ -230,7 +230,7 @@ namespace Infrastructure.Persistence
         }
     };
 
-            await context.Products.AddRangeAsync(products);
+            await context.Services.AddRangeAsync(Services);
             await context.SaveChangesAsync();
         }
 
@@ -252,7 +252,7 @@ namespace Infrastructure.Persistence
         {
             Id = Guid.NewGuid(),
             Name = "Basic Wedding Package",
-            Description = "Essential wedding services bundle.",
+            Description = "Essential wedding Services bundle.",
             Price = 10000m,
             Discount = 10m,
             Items = new List<string>

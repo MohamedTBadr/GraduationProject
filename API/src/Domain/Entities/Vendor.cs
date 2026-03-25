@@ -22,7 +22,7 @@ namespace Domain.Entities
         public string BusinessName { get; set; }
         //public string OwnerName { get; set; }
         public ICollection<VendorServiceType> VendorServiceTypes { get; set; }
-        public ICollection<Product> Products { get; set; }
+        public ICollection<Service> Services { get; set; }
         public ICollection<Package> Packages { get; set; } 
         public ICollection<VendorRating> VendorRatings { get; set; } 
         public decimal YearsInBusiness { get; set; }

@@ -74,7 +74,7 @@ namespace Infrastructure.Persistence
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }
-        public DbSet<Product> Products { get; set; }
+        public DbSet<Service> Services { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
@@ -91,7 +91,7 @@ namespace Infrastructure.Persistence
 
         public DbSet<Package> Packages { get;set; }
 
-        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<ServiceImage> ServiceImages { get; set; }
 
     }
 }
