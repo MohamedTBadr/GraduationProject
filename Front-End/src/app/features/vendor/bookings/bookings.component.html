@@ -30,10 +30,9 @@
       </div>
       <div class="vd-bk-note">{{b.note}}</div>
       <div class="vd-bk-actions">
-        <button class="vd-btn vd-btn-green vd-btn-sm">Accept</button>
-        <button class="vd-btn vd-btn-ghost vd-btn-sm">Decline with Reason</button>
-        <button class="vd-btn vd-btn-ghost vd-btn-sm">Counter Offer</button>
-        <button class="vd-btn vd-btn-ghost vd-btn-sm">View Details</button>
+        <button class="vd-btn vd-btn-green vd-btn-sm" (click)="selectedBooking = b; acceptBooking()">Accept</button>
+        <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="openDeclineForm(b)">Decline with Reason</button>
+        <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="openDetails(b)">View Details</button>
         <button class="vd-btn vd-btn-ghost vd-btn-sm">Message</button>
       </div>
     </div>
@@ -68,7 +67,7 @@
             <td>
               <div class="vd-badge-pill" [ngClass]="cb.status === 'confirmed' ? 'vdb-green' : 'vdb-amber'">{{cb.status}}</div>
             </td>
-            <td><button class="vd-btn vd-btn-ghost vd-btn-sm" style="border-radius: 50px; padding: 4px 14px;">View</button></td>
+            <td><button class="vd-btn vd-btn-ghost vd-btn-sm" style="border-radius: 50px; padding: 4px 14px;" (click)="openDetails(cb)">View</button></td>
           </tr>
         </tbody>
       </table>
@@ -179,13 +178,91 @@
             </td>
             <td style="color: #9f1239;">
               <span *ngFor="let s of [1,2,3,4,5]">
-                <ng-container *ngIf="s <= hb.stars">★</ng-container>
-                <ng-container *ngIf="s > hb.stars">☆</ng-container>
+                <ng-container *ngIf="s <= (hb.stars || 0)">★</ng-container>
+                <ng-container *ngIf="s > (hb.stars || 0)">☆</ng-container>
               </span>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- Booking Details Modal -->
+<div class="vd-modal-overlay" [class.open]="isDetailsModalOpen">
+  <div class="vd-modal">
+    <button class="vd-modal-close" (click)="closeDetails()">✕</button>
+    
+    <ng-container *ngIf="selectedBooking as booking">
+      <div class="vd-modal-title" style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.2rem;">📋</span> Booking Request Details
+      </div>
+      
+      <div style="background: var(--cream); border-radius: 8px; padding: 16px; margin-top: 20px; margin-bottom: 20px;">
+        <div style="font-weight: 700; color: var(--navy); font-size: 1rem;">{{booking.client}}</div>
+        <div style="font-size: 0.85rem; color: var(--gray); margin-bottom: 0;">{{booking.event}} - {{booking.dateStr}}</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span style="color: var(--gray);">Service requested</span>
+          <span style="color: var(--navy); font-weight: 700;">{{booking.service}}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;" *ngIf="booking.guests">
+          <span style="color: var(--gray);">Guests</span>
+          <span style="color: #9f1239; font-weight: 700;">{{booking.guests}}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;" *ngIf="booking.value">
+          <span style="color: var(--gray);">Budget</span>
+          <span style="color: #9f1239; font-weight: 700;">{{booking.value}} EGP</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span style="color: var(--gray);">Date</span>
+          <span style="color: var(--navy); font-weight: 700;">{{booking.dateStr}} 2026</span>
+        </div>
+      </div>
+
+      <div *ngIf="booking.note" style="border-left: 3px solid #9f1239; padding-left: 14px; margin-bottom: 24px;">
+        <div style="font-size: 0.85rem; color: var(--gray); font-style: italic;">
+          "{{booking.note}}"
+        </div>
+      </div>
+
+      <div class="vd-submit-bar" style="gap: 12px;">
+        <button class="vd-btn vd-btn-ghost" (click)="closeDetails()" style="padding: 10px 24px; border-radius: 50px;">Close</button>
+        <button class="vd-btn vd-btn-ghost" (click)="openDeclineForm(booking)" style="padding: 10px 24px; border-radius: 50px;">Decline</button>
+        <button class="vd-btn vd-btn-gold" (click)="acceptBooking()" style="padding: 10px 24px; border-radius: 50px; background: #eba834; color: #fff; border: none;">Accept Booking</button>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<!-- Decline Booking Modal -->
+<div class="vd-modal-overlay" [class.open]="isDeclineModalOpen">
+  <div class="vd-modal">
+    <button class="vd-modal-close" (click)="closeDeclineForm()">✕</button>
+    <div class="vd-modal-title">Decline Booking Request</div>
+    <div class="vd-modal-sub" style="margin-bottom: 20px;">
+      Let {{selectedBooking?.client}} know why you can't take this booking.
+    </div>
+
+    <div class="vd-form-group">
+      <label style="margin-bottom: 8px;">Reason <span style="color: #e11d48">*</span></label>
+      <select class="vd-filter-sel" style="width: 100%; border-radius: 8px; padding: 12px; font-size: 0.9rem;" (change)="onDeclineReasonChange($event)">
+        <option value="" disabled selected>Select a reason...</option>
+        <option *ngFor="let reason of declineReasons" [value]="reason">{{reason}}</option>
+      </select>
+    </div>
+
+    <div class="vd-form-group" style="margin-top: 20px;">
+      <label style="margin-bottom: 8px;">Additional Note (optional)</label>
+      <textarea rows="4" placeholder="Any additional context for the client..." style="width: 100%; border-radius: 8px; padding: 12px; font-size: 0.9rem;" (input)="onDeclineNoteChange($event)"></textarea>
+    </div>
+
+    <div class="vd-submit-bar" style="border-top: 1px solid var(--lgray); padding-top: 20px; margin-top: 24px; justify-content: center; gap: 14px;">
+      <button class="vd-btn vd-btn-ghost" (click)="closeDeclineForm()" style="padding: 10px 24px; border-radius: 50px;">Cancel</button>
+      <button class="vd-btn vd-btn-red" (click)="submitDecline()" style="padding: 10px 24px; border-radius: 50px; color: #ef4444; border-color: #ef4444;">Send Decline</button>
     </div>
   </div>
 </div>
