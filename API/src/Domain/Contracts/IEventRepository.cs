@@ -16,5 +16,9 @@ namespace Domain.Contracts
         Task<Event> UpdateAsync(Event entity);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);
+
+
+        Task<EventItem?> GetItemByIdAsync(Guid itemId);
+        Task<EventItem> UpdateItemAsync(EventItem item);
     }
 }

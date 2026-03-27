@@ -2,6 +2,8 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Web.Api.Attributes;
+using Web.Api.Controllers.Attributes;
 
 namespace Web.Api.Controllers
 {
@@ -10,6 +12,7 @@ namespace Web.Api.Controllers
     public class ServiceTypeController(IServiceTypeService ServiceTypeService) : ControllerBase
     {
         [HttpGet]
+        [HybridCache(1800,"serviceTypes")]
         public async Task<IActionResult> GetAllServiceTypes()
         {
             var ServiceTypes = await ServiceTypeService.GetAllServiceTypesAsync();
@@ -19,6 +22,8 @@ namespace Web.Api.Controllers
 
 
         [HttpGet("{id}")]
+        [HybridCache(1800, "serviceTypes/{id}" )]
+
         public async Task<IActionResult> GetServiceTypeById(Guid id)
         {
             var ServiceType = await ServiceTypeService.GetServiceTypeByIdAsync(id);
@@ -30,8 +35,8 @@ namespace Web.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-
         [HttpPost]
+        [InvalidateCache("serviceTypes")]
         public async Task<IActionResult> AddServiceType(CreateServiceTypeRequest  type)
         {
             await ServiceTypeService.AddTypeAsync(type);
@@ -40,6 +45,7 @@ namespace Web.Api.Controllers
         [Authorize(Roles = "Admin")]
 
         [HttpDelete("{id}")]
+        [InvalidateCache("serviceTypes/{id}", "serviceTypes")]
         public async Task<IActionResult> DeleteServiceType(Guid id)
         {
             await ServiceTypeService.DeleteTypeAsync(id);
@@ -48,6 +54,7 @@ namespace Web.Api.Controllers
         [Authorize(Roles = "Admin")]
 
         [HttpPatch("{id}")]
+        [InvalidateCache("serviceTypes/{id}", "serviceTypes")]
         public async Task<IActionResult> UpdateServiceType(Guid id, UpdateServiceTypeRequest type)
         {
             await ServiceTypeService.UpdateTypeAsync(id, type);

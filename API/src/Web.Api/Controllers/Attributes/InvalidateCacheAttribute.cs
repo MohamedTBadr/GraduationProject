@@ -2,32 +2,41 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Hybrid;
 
-namespace Web.Api.Controllers.Attributes
+[AttributeUsage(AttributeTargets.Method)]
+public class InvalidateCacheAttribute : ActionFilterAttribute
 {
-    [AttributeUsage(AttributeTargets.Method)]
-    public class InvalidateCacheAttribute:ActionFilterAttribute
+    public string[] Tags { get; }
+
+    public InvalidateCacheAttribute(params string[] tags)
     {
-        private readonly string[] _keysToInvalidate;
+        Tags = tags;
+    }
 
-        public InvalidateCacheAttribute(params string[] keysToInvalidate)
+    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    {
+        var executedContext = await next();
+
+        // Don't invalidate on exceptions
+        if (executedContext.Exception != null) return;
+
+        var statusCode = executedContext.Result switch
         {
-            _keysToInvalidate = keysToInvalidate;
-        }
+            ObjectResult obj => obj.StatusCode,
+            StatusCodeResult sc => sc.StatusCode,
+            _ => null
+        };
 
-        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        if (statusCode is 201 or 204)
         {
-            var hybridCache = context.HttpContext.RequestServices.GetRequiredService<HybridCache>();
+            var cache = executedContext.HttpContext.RequestServices.GetRequiredService<HybridCache>();
 
-            var executedContext = await next();
+            var resolvedTags = Tags.Select(tag =>
+                executedContext.RouteData.Values.Aggregate(tag, (current, rv) =>
+                    current.Replace($"{{{rv.Key}}}", rv.Value?.ToString()))
+            ).ToList();
 
-            // Only invalidate on success
-            if (executedContext.Result is ObjectResult obj && obj.StatusCode >= 200 && obj.StatusCode < 300)
-            {
-                foreach (var key in _keysToInvalidate)
-                {
-                    await hybridCache.RemoveAsync(key);
-                }
-            }
+            foreach (var tag in resolvedTags)
+                await cache.RemoveByTagAsync(tag);
         }
     }
 }

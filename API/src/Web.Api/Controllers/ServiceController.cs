@@ -2,9 +2,12 @@
 using Application.DTOs.ServiceDTOs;
 using Application.Interfaces;
 using BLL;
+using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using Web.Api.Attributes;
+using Web.Api.Controllers.Attributes;
 
 namespace Web.Api.Controllers
 {
@@ -15,6 +18,8 @@ namespace Web.Api.Controllers
         private Guid userId => GetUserIdFromToken();
         // GET api/Services
         [HttpGet]
+        [HybridCache(1800, "services")]
+
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request)
         {
             var result = await ServiceService.GetAllAsync(request);
@@ -23,6 +28,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services/{id}
         [HttpGet("{id:guid}")]
+        [HybridCache(1800, "services", "services/{id}")]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
             var result = await ServiceService.GetByIdAsync(id);
@@ -31,6 +37,8 @@ namespace Web.Api.Controllers
 
         // GET api/Services/by-category/{categoryId}
         [HttpGet("by-category/{categoryId:guid}")]
+        [HybridCache(1800, "services")]
+
         public async Task<IActionResult> GetByCategoryAsync(Guid categoryId, [FromQuery] PaginatedRequest request)
         {
             var result = await ServiceService.GetByCategoryIdAsync(categoryId, request);
@@ -39,6 +47,8 @@ namespace Web.Api.Controllers
 
         // GET api/Services/by-vendor/{vendorId}
         [HttpGet("by-vendor/{vendorId:guid}")]
+        [HybridCache(1800)]
+
         public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request)
         {
             var result = await ServiceService.GetByVendorIdAsync(vendorId, request);
@@ -47,6 +57,8 @@ namespace Web.Api.Controllers
 
         // GET api/Services/by-Service-type/{ServiceTypeId}
         [HttpGet("by-Service-type/{ServiceTypeId:guid}")]
+        [HybridCache(1800)]
+
         public async Task<IActionResult> GetByServiceTypeAsync(Guid ServiceTypeId, [FromQuery] PaginatedRequest request)
         {
             var result = await ServiceService.GetByServiceTypeIdAsync(ServiceTypeId, request);
@@ -54,8 +66,9 @@ namespace Web.Api.Controllers
         }
 
         // POST api/Services
-        [Authorize(Roles = "Vendor" )]
+        [Authorize(Roles = "Vendor")]
         [HttpPost]
+        [InvalidateCache("services")]
         public async Task<IActionResult> CreateAsync([FromForm] CreateServiceRequest dto)
         {
             dto.VendorId = userId; // Ensure the Service is associated with the authenticated vendor
@@ -63,25 +76,28 @@ namespace Web.Api.Controllers
 
             if (result.IsFailure)
                 return BadRequest(result); // filter handles the failure
-           
+
             return Created(); // filter handles the failure
         }
         [Authorize(Roles = "Admin")]
 
         // PUT api/Services/{id}
         [HttpPut("{id:guid}")]
+        [InvalidateCache("services/{id}")]
         public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateServiceDTO dto)
         {
             if (id != dto.Id)
                 return BadRequest(Error.Validation("Service.IdMismatch", "Route id and body id do not match."));
 
             var result = await ServiceService.UpdateAsync(dto);
+      
             return Ok(result);
         }
         [Authorize(Roles = "Admin")]
 
         // DELETE api/Services/{id}
         [HttpDelete("{id:guid}")]
+        [InvalidateCache("services/{id}", "services")]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
             var result = await ServiceService.DeleteAsync(id);

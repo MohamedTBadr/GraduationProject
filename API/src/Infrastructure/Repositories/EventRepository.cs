@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Domain.Contracts;
 using Domain.Entities;
 using Infrastructure.Persistence;
@@ -16,21 +19,19 @@ namespace Infrastructure.Repositories
 
         // ── Read ──────────────────────────────────────────────────
 
-        public async Task<Event> GetByIdAsync(Guid id)
+        public async Task<Event?> GetByIdAsync(Guid id)
         {
             return await _context.Events
-                .Include(e => e.User)
                 .Include(e => e.Category)
                 .Include(e => e.Location)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public async Task<Event> GetByIdWithItemsAsync(Guid id)
+        public async Task<Event?> GetByIdWithItemsAsync(Guid id)
         {
             return await _context.Events
-                .Include(e => e.User)
                 .Include(e => e.Category)
-                //.Include(e => e.Location)
+                .Include(e => e.Location)       // ← was commented out; mapper needs it
                 .Include(e => e.EventItems)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
@@ -38,7 +39,6 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Event>> GetAllAsync()
         {
             return await _context.Events
-                .Include(e => e.User)
                 .Include(e => e.Category)
                 .Include(e => e.Location)
                 .Include(e => e.EventItems)
@@ -49,7 +49,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.Category)
-                //.Include(e => e.Location)
+                .Include(e => e.Location)       // ← was commented out
                 .Include(e => e.EventItems)
                 .Where(e => e.UserId == userId)
                 .ToListAsync();
@@ -58,9 +58,9 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Event>> GetByStatusAsync(string status)
         {
             return await _context.Events
-                .Include(e => e.User)
                 .Include(e => e.Category)
                 .Include(e => e.Location)
+                .Include(e => e.EventItems)     // ← was missing; SummaryDto needs ItemCount
                 .Where(e => e.EventStatus == status)
                 .ToListAsync();
         }
@@ -77,17 +77,26 @@ namespace Infrastructure.Repositories
             entity.Id = Guid.NewGuid();
             await _context.Events.AddAsync(entity);
             await _context.SaveChangesAsync();
+
+            // Re-fetch to ensure all navigations are loaded for the mapper
             return await _context.Events
-    .Include(e => e.Category)       // ✅ load Category
-    .Include(e => e.EventItems)     // ✅ load EventItems too
-    .FirstAsync(e => e.Id == entity.Id);
+                .Include(e => e.Category)
+                .Include(e => e.Location)
+                .Include(e => e.EventItems)
+                .FirstAsync(e => e.Id == entity.Id);
         }
 
         public async Task<Event> UpdateAsync(Event entity)
         {
             _context.Events.Update(entity);
             await _context.SaveChangesAsync();
-            return entity;
+
+            // Re-fetch so mapper always has Category/Location/Items loaded
+            return await _context.Events
+                .Include(e => e.Category)
+                .Include(e => e.Location)
+                .Include(e => e.EventItems)
+                .FirstAsync(e => e.Id == entity.Id);
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -98,6 +107,19 @@ namespace Infrastructure.Repositories
             _context.Events.Remove(entity);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<EventItem?> GetItemByIdAsync(Guid itemId)
+        {
+            return await _context.EventItems
+                .FirstOrDefaultAsync(i => i.Id == itemId);
+        }
+
+        public async Task<EventItem> UpdateItemAsync(EventItem item)
+        {
+            _context.EventItems.Update(item);
+            await _context.SaveChangesAsync();
+            return item;
         }
     }
 }

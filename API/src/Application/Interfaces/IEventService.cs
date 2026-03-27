@@ -17,5 +17,8 @@ namespace Application.Interfaces
         Task<EventResponseDto> UpdateAsync(Guid id, UpdateEventDto dto);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> UpdateStatusAsync(Guid id, string status);
+        Task CancelEventAsync(Guid id, CancelEventRequest request);
+        Task ApproveItemAsync(Guid eventId, Guid itemId, Guid vendorId, bool approve, string? reason);
+
     }
 }

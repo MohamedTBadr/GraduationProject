@@ -74,6 +74,8 @@ namespace Infrastructure.Persistence
                     var newAdminUser = new ApplicationUser
                     {
                         Id = Guid.NewGuid(),
+                        FirstName = "Mohamed",
+                        LastName = "Tarek",
                         UserName = "admin",
                         Email = adminEmail,
                         NormalizedEmail = adminEmail.ToUpper(),
@@ -101,6 +103,8 @@ namespace Infrastructure.Persistence
                     {
                         Id = Guid.NewGuid(),
                         UserName = "vendor",
+                        FirstName = "Mohamed",
+                        LastName = "Tarek",
                         Email = vendorEmail,
                         NormalizedEmail = vendorEmail.ToUpper(),
                         NormalizedUserName = "VENDOR"
@@ -136,6 +140,8 @@ namespace Infrastructure.Persistence
                     {
                         Id = Guid.NewGuid(),
                         UserName = "customer",
+                        FirstName = "Mohamed",
+                        LastName = "Tarek",
                         Email = customerEmail,
                         NormalizedEmail = customerEmail.ToUpper(),
                         NormalizedUserName = "CUSTOMER"

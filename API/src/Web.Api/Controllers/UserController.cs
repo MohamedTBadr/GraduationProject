@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared;
+using Web.Api.Attributes;
 using Web.Api.Controllers.Attributes;
 
 namespace Web.Api.Controllers
@@ -16,6 +17,7 @@ namespace Web.Api.Controllers
     {
         [Authorize(Roles = "Admin")]
         [HttpGet]
+        [HybridCache(1800, "GetAllUsers")]
         public async Task<IActionResult> GetAllUsers([FromQuery] PaginatedRequest request)
         {
             var query = userManager.Users.AsQueryable();
@@ -51,8 +53,8 @@ namespace Web.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-
         [HttpDelete("{id}")]
+        [InvalidateCache("GetAllUsers")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var user = await userManager.FindByIdAsync(id.ToString());
