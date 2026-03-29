@@ -47,12 +47,7 @@ export class LoginComponent {
 
         this.isLoading = true;
 
-        // Generate idempotency key per request
-        const headers = new HttpHeaders({
-            'IdempotencyKey': crypto.randomUUID()
-        });
-//mt
-        this.authService.login(this.loginForm.value, headers).subscribe({
+        this.authService.login(this.loginForm.value).subscribe({
 
             next: (response) => {
 
@@ -84,5 +79,10 @@ export class LoginComponent {
 
     switchToRegister() {
         this.modalService.open('signup');
+    }
+
+    goToForgotPassword() {
+        this.modalService.close();
+        this.router.navigate(['/forgot-password']);
     }
 }

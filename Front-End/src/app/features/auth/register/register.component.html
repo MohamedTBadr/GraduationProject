@@ -3,14 +3,12 @@
     <div class="modal-sub">Join the Eventora community.</div>
     
     <div class="modal-form">
-        <div class="form-row">
-            <div class="form-group">
-                <label>First Name *</label>
-                <input type="text" placeholder="Sara" formControlName="firstName" />
-            </div>
-            <div class="form-group">
-                <label>Last Name *</label>
-                <input type="text" placeholder="Mohamed" formControlName="lastName" />
+        <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" placeholder="Sara Mohamed" formControlName="name"
+                [class.is-invalid]="nameControl?.invalid && nameControl?.touched" />
+            <div *ngIf="nameControl?.invalid && nameControl?.touched" class="error-message">
+                <small *ngIf="nameControl?.hasError('required')">Name is required.</small>
             </div>
         </div>
 
@@ -25,34 +23,30 @@
             </div>
         </div>
 
-        <!-- Phone Block -->
-        <div class="form-group">
-            <label>Phone *</label>
-            <input type="tel" placeholder="+20 100 000 0000" formControlName="phone" 
-                [class.is-invalid]="phoneControl?.invalid && phoneControl?.touched" />
-        </div>
+
 
         <!-- Password Block -->
         <div class="form-group">
             <label>Password *</label>
-            <input type="password" placeholder="Min. 8 characters"
+            <input type="password" placeholder="Min. 6 characters"
                 formControlName="password"
                 [class.is-invalid]="passwordControl?.invalid && passwordControl?.touched" />
             <div *ngIf="passwordControl?.invalid && passwordControl?.touched" class="error-message">
                 <small *ngIf="passwordControl?.hasError('required')">Password is required.</small>
-                <small *ngIf="passwordControl?.hasError('minlength')">Password must be at least 8 characters.</small>
+                <small *ngIf="passwordControl?.hasError('minlength')">Password must be at least 6 characters.</small>
+                <small *ngIf="passwordControl?.hasError('pattern')">Password must have at least one lowercase ('a'-'z').</small>
             </div>
         </div>
 
         <!-- Role Selection -->
-        <div class="form-group">
+        <!-- <div class="form-group">
             <label>Register As</label>
             <select formControlName="role">
                 <option value="user">User</option>
                 <option value="admin">Administrator</option>
                 <option value="vendor">Vendor</option>
             </select>
-        </div>
+        </div> -->
 
         <!-- Submit Button -->
         <button type="submit" class="modal-submit" [disabled]="isLoading">

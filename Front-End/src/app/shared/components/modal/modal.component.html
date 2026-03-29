@@ -1,6 +1,6 @@
 <div class="modal-overlay" [class.open]="modalService.activeModal()" (click)="onOverlayClick($event)">
     <div class="modal">
-        <button class="modal-close" (click)="modalService.close()"></button>
+        <button class="modal-close" (click)="modalService.close()"><i class="fa-solid fa-x fa-xs"></i></button>
 
         <!-- Dynamic Content based on ModalType -->
         <ng-container [ngSwitch]="modalService.activeModal()">

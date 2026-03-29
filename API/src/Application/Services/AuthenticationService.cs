@@ -1,4 +1,4 @@
-﻿using Application.DTOs.AuthenticationDTOs;
+using Application.DTOs.AuthenticationDTOs;
 using Application.Interfaces;
 
 using Domain.Entities;
@@ -106,7 +106,7 @@ namespace Application.Services
 
             // 3) Build callback URL
             var baseUrl = configuration.GetSection("clientBaseUrl").Value;
-            var callbackUrl = $"{baseUrl}Authentication/reset-password?email={Uri.EscapeDataString(user.Email!)}&token={encodedToken}";
+            var callbackUrl = $"{baseUrl}reset-password?email={Uri.EscapeDataString(user.Email!)}&token={encodedToken}";
 
             // 4) Compose email (HTML) - Removed HTML for brevity but kept the structure
             var subject = "Reset your password";
@@ -134,7 +134,7 @@ namespace Application.Services
                         text-align: center;
                     "">
                     <h1 style=""font-size: 32px; color: #ffffff; line-height: 1.3; margin: 0"">
-                        Welcome to Eventora, laila!
+                        Welcome to Eventora, {user.UserName} !
                     </h1>
                 </div>
                 <div style=""background-color: #ffffff; padding: 40px 40px 36px"">

@@ -13,7 +13,11 @@ export interface RegisterRequest {
 }
 
 export interface AuthApiResponse {
-  value: { name: string; email: string; accessToken: string; refreshToken: string; role: string; }
+  value: { name: string;
+    email: string;
+    accessToken: string;
+    refreshToken: string; 
+    role: string; }
 }
 
 export interface RefreshTokenRequest {
@@ -28,6 +32,11 @@ export interface ResetPasswordRequest {
   email: string;
   token: string;
   newPassword: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword?: string;
+  newPassword?: string;
 }
 
 // ─────────────────────────────────────────────
