@@ -1,313 +1,119 @@
-# 📌 Graduation Project – API
+This updated README provides a high-level architectural deep dive, specifically tailored for your graduation project. It highlights your technical leadership as the **Backend Head** and demonstrates a "Senior Engineer" approach to documentation.
 
-This repository contains the **backend implementation** of the graduation project.
-The API is built with **ASP.NET Core Web API** and serves as the **core backend and gateway** for the entire system.
+-----
 
-The architecture is **production-oriented**, focusing on scalability, security, idempotency, and financial correctness.
+# 📌 Eventora: Resilient Backend Architecture
 
----
+**Production-Grade API Ecosystem for Event Management**
 
-## 🚀 Features
+This repository houses the core backend for **Eventora**, a digital marketplace bridging event service vendors and clients. Built on **ASP.NET Core 9.0**, the system is engineered for high availability, financial precision, and real-time engagement.
 
-### 🔐 Authentication & Authorization
+-----
 
-* Secure user registration and login
-* JWT-based authentication
-* Role-based access control (RBAC)
-* Token expiration and refresh handling
+## 🏛️ Architectural Blueprint: Clean & Resilient
 
----
+The project follows the **Clean Architecture (Onion)** pattern, ensuring that business rules remain independent of external frameworks, databases, or UI.
 
-### ⚡ Caching Layer
+### 🏗️ Layered Responsibility
 
-* In-memory caching for high-frequency reads
-* Optional distributed caching (Redis-ready)
-* Reduces database load and improves response time
+  * **Domain:** Core Entities (`Vendor`, `Order`, `Payment`), Value Objects, and Domain Exceptions. Encapsulates the "No Refund" business invariant.
+  * **Application:** Use cases, MediatR handlers, and **Resilience Policy Definitions**.
+  * **Infrastructure:** Concrete implementations for **AWS S3**, **Paymob**, **EF Core**, and **SignalR Hubs**.
+  * **Presentation (API):** Controller logic, YARP configuration, and Middleware.
 
----
+-----
 
-### 📧 Email Services
+## 🛡️ Resilience Strategy (Polly & .NET 9)
 
-* SMTP-based email delivery
-* Email verification
-* Password reset and recovery
-* System notifications
+We treat failure as a first-class citizen. Every external I/O operation is protected by a **Resilience Pipeline**.
 
----
+### 1\. Database Persistence Pipeline
 
-### 💬 Real-Time Chat (SignalR Hubs)
+  * **Exponential Backoff + Jitter:** Prevents the "Thundering Herd" effect during database recovery.
+  * **Circuit Breaker:** If the SQL cluster enters a failing state, the circuit opens for 30s to prevent application hang.
+  * **Command Isolation:** Save operations are wrapped in atomic pipelines to ensure `SaveChangesAsync` respects the timeout.
 
-The system supports **real-time communication** using **ASP.NET Core SignalR**.
+### 2\. Infrastructure Shielding
 
-#### Capabilities
+  * **AWS S3 Pipeline:** Implements a strict 30s timeout for file uploads to protect worker threads.
+  * **Standard HTTP Handler:** Paymob and external API calls utilize `AddStandardResilienceHandler`, providing a unified shield of retries and circuit breaking.
 
-* One-to-one and group chat support
-* Real-time message delivery
-* User connection and presence tracking
-* Scalable hub-based architecture
+-----
 
-#### Design Highlights
+## 💳 Financial Integrity & Paymob Integration
 
-* SignalR Hubs isolated from business logic
-* Authentication integrated with JWT
-* Ready for scale-out using Redis backplane
-* Clean separation between Chat domain and API layer
+The payment subsystem is designed for **Zero-Loss** and **Zero-Duplicate** transactions.
 
----
+  * **Idempotency Keying:** Every payment intent is linked to a unique Domain `OrderId`. Retries at the network level will never result in double charges.
+  * **Webhook Synchronization:** We treat the Paymob Webhook as the "Source of Truth." The system uses an **Append-Only Transaction Log** to track payment states.
+  * **Security:** All payment keys are generated server-side. Sensitive card data never touches our servers (PCI-DSS Compliance).
+  * **Policy:** The system enforces a **Non-Refundable** transaction model at the domain layer.
 
-### 📦 File Storage – AWS S3
+-----
 
-The API integrates with **Amazon S3** for secure and scalable file storage.
+## 💬 Real-Time Engine (SignalR)
 
-#### Supported Features
+Eventora features a low-latency chat system optimized for vendor-client negotiations.
 
-* Upload and download files securely
-* Pre-signed URLs for controlled client access
-* Public and private bucket support
-* Metadata and content-type preservation
+  * **One-to-One Architecture:** Strictly peer-to-peer messaging to ensure privacy and focus.
+  * **State Management:** Uses `OnConnectedAsync` and `OnDisconnectedAsync` to track user presence in real-time.
+  * **Scalability:** Configured for a **Redis Backplane**, allowing SignalR to broadcast across multiple Dockerized API instances behind the proxy.
 
-#### Storage Architecture
+-----
 
-* Files are stored outside the application server
-* Database stores only file metadata and references
-* S3 access handled via server-side credentials
-* Environment-based bucket configuration
+## 📦 Cloud & AI Integration
 
-> ⚠️ Large files never pass through the database
+### AWS S3 Storage
 
----
+  * **Decoupled Storage:** Binaries reside in S3; only metadata (URLs, Keys) exists in SQL.
+  * **Security:** Access is managed via **IAM Roles** and private bucket policies.
 
-### 🔄 Idempotent API Design
+### Google Gemini AI
 
-* Prevents duplicate processing of:
+  * **Intelligent Automation:** Used for content moderation, vendor description summarization, and event recommendation logic.
+  * **Model Agnostic:** The AI service is abstracted via interfaces, allowing a switch from Gemini to other LLMs without touching business logic.
 
-  * Network retries
-  * Payment callbacks
-  * Client resubmissions
-* Ensures **financial and business data consistency**
+-----
 
----
+## 🔗 Traffic Orchestration (YARP Proxy)
 
-### 💳 Paymob Payment Gateway Integration (NEW)
+To simulate a high-scale production environment, we use **YARP (Yet Another Reverse Proxy)**.
 
-The system includes a **full Paymob payment integration** designed according to real-world financial standards.
+  * **Load Balancing:** Round-robin distribution across three containerized API instances.
+  * **HTTPS Termination:** The proxy handles SSL/TLS, passing clean traffic to the internal Docker network.
+  * **Health Probes:** Automatically removes unhealthy instances from the rotation.
 
-#### Supported Capabilities
+-----
 
-* Card payments (3-D Secure / SCA supported)
-* Wallet & InstaPay ready (extensible)
-* Secure server-side payment initiation
-* Webhook-based payment confirmation
-* Refund and reconciliation support
+## 🛠️ Tech Stack & Requirements
 
-#### Payment Flow
+  * **Framework:** .NET 9.0 (ASP.NET Core)
+  * **Persistence:** EF Core + SQL Server
+  * **Resilience:** Polly 8.0+
+  * **Real-time:** SignalR
+  * **Cloud:** AWS S3, Google Gemini AI, Paymob
+  * **DevOps:** Docker, YARP, Apidog
 
-1. Business order is created internally
-2. Backend creates a Paymob payment intent (order)
-3. Payment key is generated securely
-4. User is redirected to Paymob hosted payment iframe
-5. Paymob sends webhook callbacks
-6. Backend validates and updates payment state
+-----
 
-> ⚠️ Frontend never communicates with Paymob directly
+## 📡 API Documentation
 
-#### Payment Architecture Highlights
+All endpoints are fully documented and interactively testable via **Apidog**.  
+Click below to join the project and explore the API:
 
-* Order ≠ Payment ≠ Transaction separation
-* Append-only transaction history
-* Idempotent webhook handling
-* Future-ready for multiple payment providers
-
----
-
-### 🤖 Gemini AI Integration
-
-The API integrates with **Google Gemini AI** to provide intelligent features:
-
-* Text generation
-* Classification
-* Summarization
-* Idea generation
-* Recommendation logic
-
-The AI layer follows **Clean Architecture principles**, allowing:
-
-* Easy model replacement
-* Scalability for future AI providers
-* Clear separation from business logic
-
----
-
-### 🔗 HTTPS Reverse Proxy (YARP)
-
-A centralized **YARP reverse proxy** exposes the API securely:
-
-* HTTPS endpoint:
-
-  ```
-  https://localhost:5000
-  ```
-
-* Load-balanced backend instances:
-
-  * [http://localhost:5001](http://localhost:5001)
-  * [http://localhost:5002](http://localhost:5002)
-  * [http://localhost:5003](http://localhost:5003)
-
-#### Capabilities
-
-* Centralized routing (`/api/*`)
-* HTTPS termination
-* Load balancing across instances
-* Single entry point for frontend clients
-
----
-
-### 🐳 Dockerized Deployment
-
-* Fully containerized backend
-* Dockerfile for API services
-* Docker Compose for local orchestration
-* Environment-based configuration support
-
----
-
-## 🛠️ Tech Stack
-
-* **ASP.NET Core Web API**
-* **SignalR (Real-Time Communication)**
-* **Entity Framework Core**
-* **SQL Server**
-* **JWT Authentication**
-* **Caching (In-Memory / Distributed)**
-* **SMTP Email Service**
-* **AWS S3 File Storage**
-* **Paymob Payment Gateway**
-* **Google Gemini AI**
-* **Idempotent Middleware**
-* **YARP Reverse Proxy**
-* **Docker & Docker Compose**
-
----
-
-## 📂 Project Structure
-
-```
-├── Api
-│   ├── Controllers
-│   ├── Hubs
-│   ├── Middlewares
-│   └── Filters
-│
-├── Application
-│   ├── Services
-│   │   ├── Payment
-│   │   ├── Email
-│   │   ├── AI
-│   │   ├── Chat
-│   │   └── Authentication
-│   └── Interfaces
-│
-├── Domain
-│   ├── Entities
-│   │   ├── Order
-│   │   ├── Payment
-│   │   ├── PaymentTransaction
-│   │   ├── Refund
-│   │   └── ChatMessage
-│   └── Enums
-│
-├── Infrastructure
-│   ├── Data
-│   ├── Repositories
-│   ├── Paymob
-│   ├── Gemini
-│   ├── Email
-│   └── Storage
-│       └── S3
-│
-├── ReverseProxy
-│   └── YarpConfig
-│
-├── Docker
-│   ├── Dockerfile
-│   └── docker-compose.yml
-│
-└── README.md
-```
-
----
-
-
-
-> Financial data is append-only and webhook-driven
-
----
-
-## 🔧 Usage – Reverse Proxy Setup
-
-### 1️⃣ Trust HTTPS Development Certificate
-
-```bash
-dotnet dev-certs https --trust
-```
-
----
-
-### 2️⃣ Run Backend Instances
-
-```bash
-dotnet run --urls=http://localhost:5001
-dotnet run --urls=http://localhost:5002
-dotnet run --urls=http://localhost:5003
-```
-
----
-
-### 3️⃣ Run Reverse Proxy
-
-```bash
-dotnet run --project ReverseProxy
-```
-
----
-
-## ✅ Design Goals Achieved
-
-* Secure and scalable architecture
-* Financially correct payment handling
-* Clean separation of concerns
-* Production-ready deployment
-* Extensible for future services
-
----
-
-## 📌 Notes
-
-* All sensitive operations (payments, AI, email, storage) are server-side only
-* Webhook endpoints are idempotent and auditable
-* File storage is externalized via AWS S3
-* Chat system is real-time and horizontally scalable
-
----
 <div align="center">
 
-# 🚀 Interactive API Playground
-
-Stop manual testing and **start collaborating**.  
-Join our official Postman Workspace for instant access to pre-configured collections, environment variables, and documentation.
-
-<br>
-
-<a href="https://app.getpostman.com/join-team?invite_code=a545087eeefb497e352e99484f2e99d3fce6402cec5d39107de64f9b765b154b&target_code=aace9867947f2b0034869f3790b48615">
-  <img src="https://img.shields.io/badge/🚀_JOIN_WORKSPACE-FF6C37?style=for-the-badge&logo=postman&logoColor=white" alt="Join Workspace" width="300">
+<a href="https://app.apidog.com/invite/project?token=zG2ZhohbOdBh5J8CGYRgp">
+  <img src="https://img.shields.io/badge/📖_Explore_API_Docs-00C2B8?style=for-the-badge&logoColor=white" alt="Apidog Documentation" width="300">
 </a>
 
-<br>
-
-<sub>✨ Pre-concluded collections • Environment variables • Live docs</sub>
+<br/>
+<sub>Powered by <strong>Apidog</strong> · Interactive testing · Full schema reference</sub>
 
 </div>
 
----
-If this repository is used for evaluation or demonstration, it reflects **real-world backend engineering practices**, not tutorial-level implementations.
+-----
+
+**Lead Developer:** Mohamed Tarek  
+**Architecture:** Clean Architecture + Resilience Patterns  
+**Purpose:** Graduation Project – Backend Excellence
