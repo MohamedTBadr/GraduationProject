@@ -1,4 +1,5 @@
-﻿using Application.Hubs;
+﻿using Application.DTOs.PaymobDTOs;
+using Application.Hubs;
 using Application.Interfaces;
 using Application.Services;
 using Application.Services.Helpers;
@@ -13,11 +14,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Retry;
 using Serilog;
 using Shared.Exceptions;
 //using PAL.Notifications;
 using System.IO.Compression;
+using System.Net;
 using System.Text;
 using System.Threading.RateLimiting;
 using Web.Api.Controllers.Attributes;
@@ -242,7 +248,81 @@ namespace Web.Api
                  retainedFileCountLimit: 7               // keep last 7 days
                 )
                 .CreateLogger();
-           
+
+            #endregion
+
+
+            #region Resilience 
+            #region Db Resiliency
+            Services.AddResiliencePipeline("db-pipeline", builder =>
+            {
+                builder
+                    .AddRetry(new RetryStrategyOptions
+                    {
+                        MaxRetryAttempts = 3,
+                        Delay = TimeSpan.FromMilliseconds(500),
+                        BackoffType = DelayBackoffType.Exponential,
+                        UseJitter = true
+                    })
+                    .AddCircuitBreaker(new CircuitBreakerStrategyOptions
+                    {
+                        FailureRatio = 0.5,
+                        MinimumThroughput = 5,
+                        BreakDuration = TimeSpan.FromSeconds(10)
+                    })
+                    .AddTimeout(TimeSpan.FromSeconds(3));
+            });
+            #endregion
+
+            #region External API Resiliency
+           Services.AddResiliencePipeline("storage-pipeline", builder =>
+            {
+                builder
+                    // 1. Total Timeout: The whole operation shouldn't exceed 30s
+                    .AddTimeout(TimeSpan.FromSeconds(30))
+
+                    // 2. Retry: Only 2 attempts (AWS SDK does some retries internally)
+                    .AddRetry(new RetryStrategyOptions
+                    {
+                        MaxRetryAttempts = 2,
+                        BackoffType = DelayBackoffType.Exponential,
+                        UseJitter = true,
+                        Delay = TimeSpan.FromSeconds(1)
+                    })
+
+                    // 3. Circuit Breaker: If S3 is unreachable, stop trying for 30s
+                    .AddCircuitBreaker(new CircuitBreakerStrategyOptions
+                    {
+                        FailureRatio = 0.2, // Break if 20% of calls fail
+                        MinimumThroughput = 10,
+                        BreakDuration = TimeSpan.FromSeconds(30)
+                    });
+            });
+
+
+            // Registering the Paymob Client with a built-in Resilience Pipeline
+            builder.Services.AddHttpClient("PaymobClient", (sp, client) =>
+            {
+                var options = sp.GetRequiredService<IOptions<PaymobOptions>>().Value;
+                client.BaseAddress = new Uri(options.BaseUrl);
+            })
+            .AddStandardResilienceHandler(options =>
+            {
+                // Payment-specific tweaks
+                options.Retry.MaxRetryAttempts = 2; // Be conservative with payments
+                options.Retry.Delay = TimeSpan.FromSeconds(2);
+                options.Retry.BackoffType = DelayBackoffType.Exponential;
+
+                // Total timeout for the combined operations
+                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(30);
+            });
+            #endregion
+
+
+
+
+
+
             #endregion
             return Services;
         }

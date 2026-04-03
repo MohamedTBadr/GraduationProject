@@ -11,26 +11,26 @@ namespace Infrastructure.Repositories
     public class MessageRepository(ApplicationDbContext _context) : IMessageRepository
     {
      
-        public async Task<Conversation?> GetConversationAsync(Guid user1Id, Guid user2Id) =>
+        public async Task<Conversation?> GetConversationAsync(Guid user1Id, Guid user2Id, CancellationToken cancellationToken) =>
             await _context.Conversations
                 .Include(c => c.User1)
                 .Include(c => c.User2)
                 .FirstOrDefaultAsync(c =>
-                    (c.User1Id == user1Id && c.User2Id == user2Id) ||
-                    (c.User1Id == user2Id && c.User2Id == user1Id));
+                    (c.User1Id == user1Id && c.User2Id == user2Id)  ||
+                    (c.User1Id == user2Id && c.User2Id == user1Id), cancellationToken);
 
-        public async Task<Conversation> GetOrCreateConversationAsync(Guid user1Id, Guid user2Id)
+        public async Task<Conversation> GetOrCreateConversationAsync(Guid user1Id, Guid user2Id, CancellationToken cancellationToken)
         {
-            var existing = await GetConversationAsync(user1Id, user2Id);
+            var existing = await GetConversationAsync(user1Id, user2Id ,cancellationToken);
             if (existing != null) return existing;
 
             var conversation = Conversation.Create(user1Id, user2Id);
-            await _context.Conversations.AddAsync(conversation);
-            await _context.SaveChangesAsync();
+            await _context.Conversations.AddAsync(conversation, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
             return conversation;
         }
 
-        public async Task<IEnumerable<Message>> GetMessagesAsync(Guid conversationId, int page, int pageSize) =>
+        public async Task<IEnumerable<Message>> GetMessagesAsync(Guid conversationId, int page, int pageSize, CancellationToken cancellationToken) =>
             await _context.Messages
                 .Where(m =>
                     (_context.Conversations
@@ -41,23 +41,23 @@ namespace Infrastructure.Repositories
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Include(m => m.Sender)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
-        public async Task<IEnumerable<Conversation>> GetUserConversationsAsync(Guid userId) =>
+        public async Task<IEnumerable<Conversation>> GetUserConversationsAsync(Guid userId, CancellationToken cancellationToken) =>
             await _context.Conversations
                 .Where(c => c.User1Id == userId || c.User2Id == userId)
                 .Include(c => c.User1)
                 .Include(c => c.User2)
                 .OrderByDescending(c => c.Messages.Max(m => (DateTime?)m.SentAt))
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
-        public async Task AddMessageAsync(Message message) =>
-            await _context.Messages.AddAsync(message);
+        public async Task AddMessageAsync(Message message, CancellationToken cancellationToken) =>
+            await _context.Messages.AddAsync(message, cancellationToken);
 
-        public async Task<Message?> GetMessageByIdAsync(Guid messageId) =>
-            await _context.Messages.FindAsync(messageId);
+        public async Task<Message?> GetMessageByIdAsync(Guid messageId, CancellationToken cancellationToken) =>
+            await _context.Messages.FindAsync([messageId], cancellationToken);
 
-        public async Task SaveChangesAsync() =>
-            await _context.SaveChangesAsync();
+        public async Task SaveChangesAsync(CancellationToken cancellationToken) =>
+            await _context.SaveChangesAsync(cancellationToken);
     }
 }

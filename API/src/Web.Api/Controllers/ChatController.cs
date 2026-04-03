@@ -15,9 +15,9 @@ public class ChatController : BaseController
 
     // ✅ KEEP — load inbox once on page open
     [HttpGet("conversations")]
-    public async Task<IActionResult> GetConversations()
+    public async Task<IActionResult> GetConversations(CancellationToken cancellationToken)
     {
-        var result = await _chatService.GetConversationsAsync(CurrentUserId);
+        var result = await _chatService.GetConversationsAsync(CurrentUserId, cancellationToken);
         return Ok(result);
     }
 
@@ -26,10 +26,11 @@ public class ChatController : BaseController
     public async Task<IActionResult> GetMessages(
         Guid otherUserId,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 100)
+        [FromQuery] int pageSize = 100,
+        CancellationToken cancellationToken)  
     {
         var messages = await _chatService
-            .GetMessagesAsync(CurrentUserId, otherUserId, page, pageSize);
+            .GetMessagesAsync(CurrentUserId, otherUserId, page, pageSize, cancellationToken);
         return Ok(messages);
     }
 

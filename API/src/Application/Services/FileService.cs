@@ -6,6 +6,8 @@ using Application.Interfaces;
 using BLL.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using Polly;
+using Polly.Registry;
 using System;
 using System.Collections.Generic;
 using System.Runtime;
@@ -13,10 +15,12 @@ using System.Text;
 
 namespace Application.Services
 {
-    public class FileService: IFileService
+    public class FileService : IFileService
     {
+
         private readonly IAmazonS3 _s3;
         private readonly AwsSettings _settings;
+        private readonly ResiliencePipeline _pipeline;
         public List<string> allowedExtensions = new List<string>()
         {
             ".jpg",
@@ -27,13 +31,14 @@ namespace Application.Services
         public const int maxAllowed = 2_000_000;
 
 
-        public FileService(IAmazonS3 s3, IOptions<AwsSettings> settings)
+        public FileService(IAmazonS3 s3, IOptions<AwsSettings> settings , ResiliencePipelineProvider<string> pipeline)
         {
             _s3 = s3;
             _settings = settings.Value;
+            _pipeline = pipeline.GetPipeline("storage-pipeline");
         }
 
-        public async Task DeleteAsync(List<string> keys)
+        public async Task DeleteAsync(List<string> keys , CancellationToken ct)
         {
             var deleteRequest = new DeleteObjectsRequest
             {
@@ -41,9 +46,9 @@ namespace Application.Services
                 Objects = keys.Select(k => new KeyVersion { Key = k }).ToList()
             };
 
-            await _s3.DeleteObjectsAsync(deleteRequest);
+            await _pipeline.ExecuteAsync(async token =>await _s3.DeleteObjectsAsync(deleteRequest, token), ct);
         }
-        public async Task<string> Upload(string folderName, IFormFile file)
+        public async Task<string> Upload(string folderName, IFormFile file, CancellationToken ct)
         {
             
 
@@ -59,7 +64,7 @@ namespace Application.Services
             };
 
             var transferUtility = new TransferUtility(_s3);
-            await transferUtility.UploadAsync(uploadRequest);
+            await _pipeline.ExecuteAsync(async token => await transferUtility.UploadAsync(uploadRequest, token), ct);
 
             var url = $"https://{_settings.BucketName}.s3.amazonaws.com/{key}";
 

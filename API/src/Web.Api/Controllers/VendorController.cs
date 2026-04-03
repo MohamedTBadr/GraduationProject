@@ -14,17 +14,17 @@ namespace Web.Api.Controllers
     {
         [HttpGet]
         [HybridCache(1800,"vendors")]
-        public async Task<IActionResult> GetVendorsAsync()
+        public async Task<IActionResult> GetVendorsAsync(CancellationToken cancellationToken)
         {
-            var vendors= await vendorService.GetVendorsAsync();
+            var vendors= await vendorService.GetVendorsAsync(cancellationToken);
             return Ok(vendors);
         }
 
         [HttpGet("{id}")]
         [HybridCache(1800, "vendors", "vendors/{id}")]
-        public async Task<IActionResult> GetVendorByIdAsync(Guid id)
+        public async Task<IActionResult> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-           var vendor= await vendorService.GetVendorByIdAsync(id);
+           var vendor= await vendorService.GetVendorByIdAsync(id, cancellationToken);
             return Ok(vendor);
         }
 
@@ -32,9 +32,9 @@ namespace Web.Api.Controllers
         [SuccessStatusCode(201)]
         [ProducesResponseType(400)]
         [InvalidateCache]
-        public async Task<IActionResult> CreateVendorAsync(CreateVendorRequest request)
+        public async Task<IActionResult> CreateVendorAsync(CreateVendorRequest request, CancellationToken cancellationToken)
         {
-            var result=  await vendorService.AddVendorAsync(request);
+            var result=  await vendorService.AddVendorAsync(request, cancellationToken);
             if (result.IsFailure)
             {
                 return BadRequest(result.ErrorMessage);
@@ -46,35 +46,35 @@ namespace Web.Api.Controllers
         [HttpPost("{id}/rating")]
         [Authorize]
         [InvalidateCache]
-        public async Task<IActionResult> RateVendorAsync(Guid id, RatingVendorRequest request)
+        public async Task<IActionResult> RateVendorAsync(Guid id, RatingVendorRequest request, CancellationToken cancellationToken)
         {
-             await vendorService.RateVendorAsync(id, request);
+             await vendorService.RateVendorAsync(id, request, cancellationToken);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         [SuccessStatusCode(204)]
         [InvalidateCache]
-        public async Task<IActionResult> DeleteVendorAsync(Guid id)
+        public async Task<IActionResult> DeleteVendorAsync(Guid id, CancellationToken cancellationToken)
         {
-          var result= await vendorService.DeleteVendorAsync(id);
+          var result= await vendorService.DeleteVendorAsync(id, cancellationToken);
             return NoContent();
         }
         [Authorize]
         [HttpPatch("{id}")]
         [InvalidateCache]
-        public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request)
+        public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken)
         {
-             await vendorService.UpdateVendorAsync(id, request);
+             await vendorService.UpdateVendorAsync(id, request, cancellationToken);
             return NoContent();
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/approve")]
         [InvalidateCache]
-        public async Task<IActionResult> ApproveVendorAsync(Guid id)
+        public async Task<IActionResult> ApproveVendorAsync(Guid id, CancellationToken cancellationToken)
         {
-             await vendorService.ApproveVendorAsync(id);
+             await vendorService.ApproveVendorAsync(id, cancellationToken);
             return NoContent();
         }
     }

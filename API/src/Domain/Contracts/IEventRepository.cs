@@ -7,18 +7,18 @@ namespace Domain.Contracts
 {
     public interface IEventRepository
     {
-        Task<Event> GetByIdAsync(Guid id);
-        Task<Event> GetByIdWithItemsAsync(Guid id);
-        Task<IEnumerable<Event>> GetAllAsync();
-        Task<IEnumerable<Event>> GetByUserIdAsync(Guid userId);
-        Task<IEnumerable<Event>> GetByStatusAsync(string status);
-        Task<Event> CreateAsync(Event entity);
-        Task<Event> UpdateAsync(Event entity);
-        Task<bool> DeleteAsync(Guid id);
-        Task<bool> ExistsAsync(Guid id);
+        Task<Event> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<Event> GetByIdWithItemsAsync(Guid id, CancellationToken cancellationToken);
+        Task<IEnumerable<Event>> GetAllAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<Event>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
+        Task<IEnumerable<Event>> GetByStatusAsync(string status, CancellationToken cancellationToken);
+        Task<Event> CreateAsync(Event entity, CancellationToken cancellationToken);
+        Task<Event> UpdateAsync(Event entity, CancellationToken cancellationToken);
+        Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken);
+        Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken);
 
 
-        Task<EventItem?> GetItemByIdAsync(Guid itemId);
-        Task<EventItem> UpdateItemAsync(EventItem item);
+        Task<EventItem?> GetItemByIdAsync(Guid itemId, CancellationToken cancellationToken);
+        Task<EventItem> UpdateItemAsync(EventItem item, CancellationToken cancellationToken);
     }
 }

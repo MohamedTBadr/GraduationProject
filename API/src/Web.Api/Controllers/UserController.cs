@@ -18,7 +18,7 @@ namespace Web.Api.Controllers
         [Authorize(Roles = "Admin")]
         [HttpGet]
         [HybridCache(1800, "GetAllUsers")]
-        public async Task<IActionResult> GetAllUsers([FromQuery] PaginatedRequest request)
+        public async Task<IActionResult> GetAllUsers([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var query = userManager.Users.AsQueryable();
 
@@ -55,7 +55,7 @@ namespace Web.Api.Controllers
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         [InvalidateCache("GetAllUsers")]
-        public async Task<IActionResult> DeleteUser(Guid id)
+        public async Task<IActionResult> DeleteUser(Guid id, CancellationToken cancellationToken)
         {
             var user = await userManager.FindByIdAsync(id.ToString());
             if (user == null)
@@ -63,7 +63,7 @@ namespace Web.Api.Controllers
                 return NotFound();
             }
 
-            var result = await userManager.DeleteAsync(user);
+            var result = await userManager.DeleteAsync(user );
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors);

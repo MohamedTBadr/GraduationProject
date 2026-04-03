@@ -24,51 +24,51 @@ namespace Application.Services
 
         // ── Read ──────────────────────────────────────────────────
 
-        public async Task<EventItemResponseDto> GetByIdAsync(Guid id)
+        public async Task<EventItemResponseDto> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var entity = await _itemRepo.GetByIdAsync(id);
+            var entity = await _itemRepo.GetByIdAsync(id, cancellationToken);
             if (entity == null)
                 throw new KeyNotFoundException($"EventItem with id '{id}' was not found.");
 
             return MapToDto(entity);
         }
 
-        public async Task<IEnumerable<EventItemResponseDto>> GetByEventIdAsync(Guid eventId)
+        public async Task<IEnumerable<EventItemResponseDto>> GetByEventIdAsync(Guid eventId, CancellationToken cancellationToken)
         {
-            if (!await _eventRepo.ExistsAsync(eventId))
+            if (!await _eventRepo.ExistsAsync(eventId, cancellationToken))
                 throw new KeyNotFoundException($"Event with id '{eventId}' was not found.");
 
-            var entities = await _itemRepo.GetByEventIdAsync(eventId);
+            var entities = await _itemRepo.GetByEventIdAsync(eventId, cancellationToken);
             return entities.Select(MapToDto);
         }
 
         // ── Write ─────────────────────────────────────────────────
 
-        public async Task<EventItemResponseDto> CreateAsync(CreateEventItemDto dto)
+        public async Task<EventItemResponseDto> CreateAsync(CreateEventItemDto dto, CancellationToken cancellationToken)
         {
-            if (!await _eventRepo.ExistsAsync(dto.EventId))
+            if (!await _eventRepo.ExistsAsync(dto.EventId, cancellationToken))
                 throw new KeyNotFoundException($"Event with id '{dto.EventId}' was not found.");
 
             var entity = MapFromCreateDto(dto);
-            var created = await _itemRepo.CreateAsync(entity);
+            var created = await _itemRepo.CreateAsync(entity, cancellationToken);
             
             return MapToDto(created);
         }
 
         public async Task<IEnumerable<EventItemResponseDto>> CreateRangeAsync(
-            Guid eventId, IEnumerable<CreateEventItemDto> dtos)
+            Guid eventId, IEnumerable<CreateEventItemDto> dtos, CancellationToken cancellationToken)
         {
-            if (!await _eventRepo.ExistsAsync(eventId))
+            if (!await _eventRepo.ExistsAsync(eventId, cancellationToken))
                 throw new KeyNotFoundException($"Event with id '{eventId}' was not found.");
 
             var entities = dtos.Select(d => { d.EventId = eventId; return MapFromCreateDto(d); });
-            var created  = await _itemRepo.CreateRangeAsync(entities);
+            var created  = await _itemRepo.CreateRangeAsync(entities, cancellationToken);
             return created.Select(MapToDto);
         }
 
-        public async Task<EventItemResponseDto> UpdateAsync(Guid id, UpdateEventItemDto dto)
+        public async Task<EventItemResponseDto> UpdateAsync(Guid id, UpdateEventItemDto dto, CancellationToken cancellationToken)
         {
-            var entity = await _itemRepo.GetByIdAsync(id);
+            var entity = await _itemRepo.GetByIdAsync(id, cancellationToken);
             if (entity == null)
                 throw new KeyNotFoundException($"EventItem with id '{id}' was not found.");
 
@@ -78,24 +78,24 @@ namespace Application.Services
             entity.VendorName   = dto.VendorName;
             entity.Quantity     = dto.Quantity;
 
-            var updated = await _itemRepo.UpdateAsync(entity);
+            var updated = await _itemRepo.UpdateAsync(entity, cancellationToken);
             return MapToDto(updated);
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            if (!await _itemRepo.ExistsAsync(id))
+            if (!await _itemRepo.ExistsAsync(id, cancellationToken))
                 throw new KeyNotFoundException($"EventItem with id '{id}' was not found.");
 
-            return await _itemRepo.DeleteAsync(id);
+            return await _itemRepo.DeleteAsync(id, cancellationToken);
         }
 
-        public async Task<bool> DeleteByEventIdAsync(Guid eventId)
+        public async Task<bool> DeleteByEventIdAsync(Guid eventId, CancellationToken cancellationToken)
         {
-            if (!await _eventRepo.ExistsAsync(eventId))
+            if (!await _eventRepo.ExistsAsync(eventId, cancellationToken))
                 throw new KeyNotFoundException($"Event with id '{eventId}' was not found.");
 
-            return await _itemRepo.DeleteByEventIdAsync(eventId);
+            return await _itemRepo.DeleteByEventIdAsync(eventId, cancellationToken);
         }
 
         // ── Mappers ───────────────────────────────────────────────

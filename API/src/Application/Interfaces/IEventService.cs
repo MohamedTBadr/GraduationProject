@@ -8,17 +8,17 @@ namespace Application.Interfaces
 {
     public interface IEventService
     {
-        Task<EventResponseDto> GetByIdAsync(Guid id);
-        Task<IEnumerable<EventSummaryDto>> GetAllAsync();
-        Task<IEnumerable<EventSummaryDto>> GetByUserIdAsync(Guid userId);
-        Task<IEnumerable<EventSummaryDto>> GetByStatusAsync(string status);
-        Task<IEnumerable<EventSummaryDto>> GetByUserIdAndStatusAsync(Guid userId, string status);
-        Task<EventResponseDto> CreateAsync(CreateEventDto dto);
-        Task<EventResponseDto> UpdateAsync(Guid id, UpdateEventDto dto);
-        Task<bool> DeleteAsync(Guid id);
-        Task<bool> UpdateStatusAsync(Guid id, string status);
-        Task CancelEventAsync(Guid id, CancelEventRequest request);
-        Task ApproveItemAsync(Guid eventId, Guid itemId, Guid vendorId, bool approve, string? reason);
+        Task<EventResponseDto> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<IEnumerable<EventSummaryDto>> GetAllAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<EventSummaryDto>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
+        Task<IEnumerable<EventSummaryDto>> GetByStatusAsync(string status, CancellationToken cancellationToken);
+        Task<IEnumerable<EventSummaryDto>> GetByUserIdAndStatusAsync(Guid userId, string status, CancellationToken cancellationToken);
+        Task<EventResponseDto> CreateAsync(CreateEventDto dto, CancellationToken cancellationToken);
+        Task<EventResponseDto> UpdateAsync(Guid id, UpdateEventDto dto, CancellationToken cancellationToken);
+        Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken);
+        Task<bool> UpdateStatusAsync(Guid id, string status, CancellationToken cancellationToken);
+        Task CancelEventAsync(Guid id, CancelEventRequest request, CancellationToken cancellationToken);
+        Task ApproveItemAsync(Guid eventId, Guid itemId, Guid vendorId, bool approve, string? reason, CancellationToken cancellationToken   );
 
     }
 }

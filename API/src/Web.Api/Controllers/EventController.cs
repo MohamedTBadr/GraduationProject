@@ -26,11 +26,11 @@ namespace Web.Api.Controllers
         // ─────────────────────────────────────────────────────────
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var result = IsAdmin()
-                ? await _eventService.GetAllAsync()
-                : await _eventService.GetByUserIdAsync(UserId); // ← was calling GetUserIdFromToken() directly, use property instead
+                ? await _eventService.GetAllAsync( cancellationToken)
+                : await _eventService.GetByUserIdAsync(UserId, cancellationToken); // ← was calling GetUserIdFromToken() directly, use property instead
 
             return Ok(result);
         }
@@ -42,12 +42,11 @@ namespace Web.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _eventService.GetByIdAsync(id);
-
+                var result = await _eventService.GetByIdAsync(id, cancellationToken);
                 if (!IsAdminOrOwner(result.UserId))
                     return Forbid();
 
@@ -65,12 +64,12 @@ namespace Web.Api.Controllers
         [HttpGet("user/{userId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> GetByUser(Guid userId)
+        public async Task<IActionResult> GetByUser(Guid userId, CancellationToken cancellationToken)
         {
             if (!IsAdminOrOwner(userId))
                 return Forbid();
 
-            var result = await _eventService.GetByUserIdAsync(userId);
+            var result = await _eventService.GetByUserIdAsync(userId, cancellationToken);
             return Ok(result);
         }
 
@@ -80,17 +79,17 @@ namespace Web.Api.Controllers
         [HttpGet("status/{status}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetByStatus(string status)
+        public async Task<IActionResult> GetByStatus(string status, CancellationToken cancellationToken)
         {
             try
             {
                 if (IsAdmin())
                 {
-                    var all = await _eventService.GetByStatusAsync(status);
+                    var all = await _eventService.GetByStatusAsync(status, cancellationToken);
                     return Ok(all);
                 }
 
-                var result = await _eventService.GetByUserIdAndStatusAsync(UserId, status);
+                var result = await _eventService.GetByUserIdAndStatusAsync(UserId, status, cancellationToken);
                 return Ok(result);
             }
             catch (ArgumentException ex)
@@ -105,12 +104,11 @@ namespace Web.Api.Controllers
         [HttpPost("createEventByAI/{eventId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> CreateEventItemsByAI(Guid eventId)
+        public async Task<IActionResult> CreateEventItemsByAI(Guid eventId, CancellationToken cancellationToken)
         {
             try
             {
-                var eventObject = await _eventService.GetByIdAsync(eventId);
-
+                var eventObject = await _eventService.GetByIdAsync(eventId, cancellationToken);
                 var request = new AIRequest
                 {
                     Budget = eventObject.TotalBudget,
@@ -118,7 +116,7 @@ namespace Web.Api.Controllers
                     CategoryName = eventObject.CategoryName
                 };
 
-                var ServiceLines = await _ServiceService.AIFilterAsync(request);
+                var ServiceLines = await _ServiceService.AIFilterAsync(request, cancellationToken);
 
                 var prompt = $@"
 You are an event planning API that returns ONLY valid JSON. Do not include markdown, explanation, or extra text.
@@ -186,7 +184,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> Create([FromBody] CreateEventDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateEventDto dto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -199,7 +197,7 @@ Only return JSON. No markdown. No explanation.
 
             try
             {
-                var created = await _eventService.CreateAsync(dto);
+                var created = await _eventService.CreateAsync(dto, cancellationToken);
                 return CreatedAtAction(nameof(GetById), new { id = created.Id }, created); // ← was Created() with no body or location
             }
             catch (ArgumentException ex)
@@ -216,14 +214,14 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateEventDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateEventDto dto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
-                var existing = await _eventService.GetByIdAsync(id);
+                var existing = await _eventService.GetByIdAsync(id, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.UserId))
                     return Forbid();
@@ -231,7 +229,7 @@ Only return JSON. No markdown. No explanation.
                 if ((IsVendor() || IsClient()) && dto.EventStatus == "Completed")
                     return Forbid();
 
-                var updated = await _eventService.UpdateAsync(id, dto);
+                var updated = await _eventService.UpdateAsync(id, dto, cancellationToken);
                 return Ok(updated);
             }
             catch (KeyNotFoundException ex)
@@ -255,14 +253,15 @@ Only return JSON. No markdown. No explanation.
         public async Task<IActionResult> ApproveItem(
             Guid eventId,
             Guid itemId,
-            [FromBody] ApproveItemRequest request)
+            [FromBody] ApproveItemRequest request,
+            CancellationToken cancellationToken)
         {
             if (!IsVendor())
                 return Forbid();
 
             try
             {
-                await _eventService.ApproveItemAsync(eventId, itemId, UserId, request.Approve, request.Reason);
+                await _eventService.ApproveItemAsync(eventId, itemId, UserId, request.Approve, request.Reason, cancellationToken);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -287,12 +286,11 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> CancelEvent(Guid id, [FromBody] CancelEventRequest cancelEventRequest)
+        public async Task<IActionResult> CancelEvent(Guid id, [FromBody] CancelEventRequest cancelEventRequest, CancellationToken cancellationToken)
         {
             try
             {
-                var existing = await _eventService.GetByIdAsync(id);
-
+                var existing = await _eventService.GetByIdAsync(id, cancellationToken);
                 if (!IsAdminOrOwner(existing.UserId))
                     return Forbid();
 
@@ -305,7 +303,7 @@ Only return JSON. No markdown. No explanation.
                 if (IsClient() && existing.EventDate.Date <= DateTime.Today.AddDays(7))
                     return BadRequest(new { message = "You cannot cancel an event less than 7 days before it occurs." });
 
-                await _eventService.CancelEventAsync(id, cancelEventRequest);
+                await _eventService.CancelEventAsync(id, cancelEventRequest, cancellationToken);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -326,14 +324,14 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
             if (IsVendor())
                 return Forbid();
 
             try
             {
-                var existing = await _eventService.GetByIdAsync(id);
+                var existing = await _eventService.GetByIdAsync(id, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.UserId))
                     return Forbid();
@@ -341,7 +339,7 @@ Only return JSON. No markdown. No explanation.
                 if (IsClient() && existing.EventStatus != "Planned")
                     return BadRequest(new { message = "You can only delete events with 'Planned' status." });
 
-                await _eventService.DeleteAsync(id);
+                await _eventService.DeleteAsync(id, cancellationToken);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

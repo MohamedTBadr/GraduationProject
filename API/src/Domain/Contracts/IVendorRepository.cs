@@ -3,10 +3,10 @@
 namespace Domain.Contracts { 
     public interface IVendorRepository
     {
-        Task AddVendorAsync(Vendor vendor);
-        Task DeleteVendorAsync(Vendor vendor);
-        Task<Vendor?> GetVendorByIdAsync(Guid id);
-        Task<List<Vendor>> GetVendorsAsync();
-        Task UpdateVendorAsync(Vendor vendor);
+        Task AddVendorAsync(Vendor vendor, CancellationToken cancellationToken);
+        Task DeleteVendorAsync(Vendor vendor, CancellationToken cancellationToken);
+        Task<Vendor?> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<List<Vendor>> GetVendorsAsync(CancellationToken cancellationToken);
+        Task UpdateVendorAsync(Vendor vendor, CancellationToken cancellationToken);
     }
 }
