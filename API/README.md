@@ -1,98 +1,107 @@
-This updated README provides a high-level architectural deep dive, specifically tailored for your graduation project. It highlights your technical leadership as the **Backend Head** and demonstrates a "Senior Engineer" approach to documentation.
+I have updated the README to include the **Notification System (SSE & Mail)** and refined the **Project Structure** while maintaining the exact clean and professional format you requested.
 
 -----
 
-# 📌 Eventora: Resilient Backend Architecture
+# 📌 Graduation Project – Eventora API
 
-**Production-Grade API Ecosystem for Event Management**
+This repository contains the **backend implementation** of the Eventora ecosystem.
+The API is built with **ASP.NET Core Web API** and follows **Clean Architecture** principles to serve as a high-performance gateway and core logic provider.
 
-This repository houses the core backend for **Eventora**, a digital marketplace bridging event service vendors and clients. Built on **ASP.NET Core 9.0**, the system is engineered for high availability, financial precision, and real-time engagement.
-
------
-
-## 🏛️ Architectural Blueprint: Clean & Resilient
-
-The project follows the **Clean Architecture (Onion)** pattern, ensuring that business rules remain independent of external frameworks, databases, or UI.
-
-### 🏗️ Layered Responsibility
-
-  * **Domain:** Core Entities (`Vendor`, `Order`, `Payment`), Value Objects, and Domain Exceptions. Encapsulates the "No Refund" business invariant.
-  * **Application:** Use cases, MediatR handlers, and **Resilience Policy Definitions**.
-  * **Infrastructure:** Concrete implementations for **AWS S3**, **Paymob**, **EF Core**, and **SignalR Hubs**.
-  * **Presentation (API):** Controller logic, YARP configuration, and Middleware.
+The architecture is **production-oriented**, focusing on resilience, scalability, security, and financial integrity.
 
 -----
 
-## 🛡️ Resilience Strategy (Polly & .NET 9)
+## 🛡️ Resilience & Fault Tolerance (New)
 
-We treat failure as a first-class citizen. Every external I/O operation is protected by a **Resilience Pipeline**.
+The system implements a centralized **Resilience Layer** using **Polly** and `Microsoft.Extensions.Resilience`. This protects the system from cascading failures.
 
-### 1\. Database Persistence Pipeline
-
-  * **Exponential Backoff + Jitter:** Prevents the "Thundering Herd" effect during database recovery.
-  * **Circuit Breaker:** If the SQL cluster enters a failing state, the circuit opens for 30s to prevent application hang.
-  * **Command Isolation:** Save operations are wrapped in atomic pipelines to ensure `SaveChangesAsync` respects the timeout.
-
-### 2\. Infrastructure Shielding
-
-  * **AWS S3 Pipeline:** Implements a strict 30s timeout for file uploads to protect worker threads.
-  * **Standard HTTP Handler:** Paymob and external API calls utilize `AddStandardResilienceHandler`, providing a unified shield of retries and circuit breaking.
+  * **Database Resilience:** Custom pipelines for SQL Server handling transient failures with **Exponential Backoff** and **Jitter**.
+  * **Infrastructure Shielding:** **Circuit Breakers** protect the API from failing external dependencies (AWS S3, Paymob).
+  * **Request Timeouts:** Strict 2026-standard timeouts on all external I/O to prevent thread exhaustion.
+  * **Bulkhead Isolation:** Ensures a failure in the AI or Email service doesn't crash the Payment or Auth flows.
 
 -----
 
-## 💳 Financial Integrity & Paymob Integration
+## 🚀 Key Features
 
-The payment subsystem is designed for **Zero-Loss** and **Zero-Duplicate** transactions.
+### ⚡ Clean Architecture & Core Logic
 
-  * **Idempotency Keying:** Every payment intent is linked to a unique Domain `OrderId`. Retries at the network level will never result in double charges.
-  * **Webhook Synchronization:** We treat the Paymob Webhook as the "Source of Truth." The system uses an **Append-Only Transaction Log** to track payment states.
-  * **Security:** All payment keys are generated server-side. Sensitive card data never touches our servers (PCI-DSS Compliance).
-  * **Policy:** The system enforces a **Non-Refundable** transaction model at the domain layer.
+  * **Domain-Driven Design (DDD):** Pure entities and business rules isolated from infrastructure.
+  * **JWT-based Security:** Secure RBAC (Role-Based Access Control) with refresh token rotation.
+  * **Idempotent API Design:** Middleware-level protection against duplicate network retries and payment callbacks.
 
------
+### 💳 Paymob Payment Integration
 
-## 💬 Real-Time Engine (SignalR)
+  * **Secure Initiation:** Server-to-server payment intent generation.
+  * **Financial Integrity:** Append-only transaction history and webhook-based state synchronization.
+  * **Business Rules:** Strictly **No Refund** policy enforced at the domain level.
+  * **SCA Ready:** Full support for 3-D Secure card payments.
 
-Eventora features a low-latency chat system optimized for vendor-client negotiations.
+### 💬 Real-Time & Notifications
 
-  * **One-to-One Architecture:** Strictly peer-to-peer messaging to ensure privacy and focus.
-  * **State Management:** Uses `OnConnectedAsync` and `OnDisconnectedAsync` to track user presence in real-time.
-  * **Scalability:** Configured for a **Redis Backplane**, allowing SignalR to broadcast across multiple Dockerized API instances behind the proxy.
+  * **One-to-One Chat:** SignalR-powered chat optimized for direct vendor-to-client communication.
+  * **SSE (Server-Sent Events):** Lightweight, real-time stream for unidirectional in-app notifications.
+  * **Mail Support:** Automated SMTP-based transactional emails for critical alerts (Verification, Resets).
+  * **Presence Tracking:** Real-time user connection status and live updates.
 
------
+### 📦 Infrastructure Services
 
-## 📦 Cloud & AI Integration
-
-### AWS S3 Storage
-
-  * **Decoupled Storage:** Binaries reside in S3; only metadata (URLs, Keys) exists in SQL.
-  * **Security:** Access is managed via **IAM Roles** and private bucket policies.
-
-### Google Gemini AI
-
-  * **Intelligent Automation:** Used for content moderation, vendor description summarization, and event recommendation logic.
-  * **Model Agnostic:** The AI service is abstracted via interfaces, allowing a switch from Gemini to other LLMs without touching business logic.
+  * **AWS S3 Storage:** Secure file handling via pre-signed URLs; metadata in SQL, binaries in S3.
+  * **Gemini AI:** Integrated for intelligent summarization and event recommendation logic.
+  * **YARP Reverse Proxy:** Centralized HTTPS entry point with load balancing across backend instances.
+  * **Caching:** Multi-level strategy (In-memory/Redis) for high-frequency data.
 
 -----
 
-## 🔗 Traffic Orchestration (YARP Proxy)
+## 🛠️ Tech Stack
 
-To simulate a high-scale production environment, we use **YARP (Yet Another Reverse Proxy)**.
-
-  * **Load Balancing:** Round-robin distribution across three containerized API instances.
-  * **HTTPS Termination:** The proxy handles SSL/TLS, passing clean traffic to the internal Docker network.
-  * **Health Probes:** Automatically removes unhealthy instances from the rotation.
+  * **Backend:** ASP.NET Core 9.0 (Web API)
+  * **Resilience:** Polly & Microsoft Resilience Extensions
+  * **Database:** SQL Server & Entity Framework Core
+  * **Real-time:** SignalR & SSE
+  * **Cloud:** AWS S3 (Storage) & Google Gemini (AI)
+  * **DevOps:** Docker, Docker Compose, YARP Proxy
+  * **Documentation:** Apidog
 
 -----
 
-## 🛠️ Tech Stack & Requirements
+## 📂 Project Structure
 
-  * **Framework:** .NET 9.0 (ASP.NET Core)
-  * **Persistence:** EF Core + SQL Server
-  * **Resilience:** Polly 8.0+
-  * **Real-time:** SignalR
-  * **Cloud:** AWS S3, Google Gemini AI, Paymob
-  * **DevOps:** Docker, YARP, Apidog
+```plaintext
+├── Api             // Controllers, Hubs (SignalR/SSE), Middlewares (Entry Point)
+├── Application     // Use Cases, DTOs, Interfaces, Resilience Policy Definitions
+├── Domain          // Entities, Value Objects, Domain Exceptions (Zero Dependencies)
+├── Infrastructure  // Persistence (EF Core), AWS S3, Paymob, Gemini AI, Email Service
+├── ReverseProxy    // YARP Configuration & HTTPS Termination
+└── Docker          // Containerization & Orchestration Logic
+```
+
+-----
+
+## 🔧 Getting Started
+
+### 1️⃣ Trust HTTPS Development Certificate
+
+```bash
+dotnet dev-certs https --trust
+```
+
+### 2️⃣ Run the System
+
+You can run the full stack via Docker Compose or manually start multiple instances behind the YARP Proxy (ports 5001, 5002, 5003).
+
+-----
+## 📌 Project Principles
+
+  * **One-to-One focus:** Chat and notification architecture is strictly peer-to-peer.
+  * **Financial Rigidity:** Once a transaction is authorized, it is final (**No Refunds**).
+  * **Resilient by Design:** Every external call is wrapped in a safety pipeline.
+
+
+**Lead Developer:** Mohamed Tarek  
+**Architecture:** Clean Architecture + Resilience Patterns  
+**Purpose:** Graduation Project – Backend Excellence
+
 
 -----
 
@@ -112,8 +121,4 @@ Click below to join the project and explore the API:
 
 </div>
 
------
 
-**Lead Developer:** Mohamed Tarek  
-**Architecture:** Clean Architecture + Resilience Patterns  
-**Purpose:** Graduation Project – Backend Excellence
