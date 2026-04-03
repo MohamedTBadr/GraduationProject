@@ -1,7 +1,3 @@
-I have updated the README to include the **Notification System (SSE & Mail)** and refined the **Project Structure** while maintaining the exact clean and professional format you requested.
-
------
-
 # 📌 Graduation Project – Eventora API
 
 This repository contains the **backend implementation** of the Eventora ecosystem.
