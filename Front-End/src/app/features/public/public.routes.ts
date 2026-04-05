@@ -44,5 +44,17 @@ export const PUBLIC_ROUTES: Routes = [
     {
         path: 'login',
         loadComponent: () => import('../auth/login/login.component').then(m => m.LoginComponent)
+    },
+    {
+        path: 'forgot-password',
+        loadComponent: () => import('../auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+    },
+    {
+        path: 'reset-password',
+        loadComponent: () => import('../auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+    },
+    {
+        path: 'Authentication/reset-password',
+        redirectTo: 'reset-password'
     }
 ];

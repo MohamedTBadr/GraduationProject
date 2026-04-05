@@ -11,7 +11,8 @@ import {
   LoginRequest,
   RegisterRequest,
   AuthApiResponse,
-  ResetPasswordRequest
+  ResetPasswordRequest,
+  ChangePasswordRequest
 } from '../../shared/types/api.interfaces';
 import { environment } from '../../../environments/environment';
 
@@ -42,11 +43,15 @@ export class AuthService {
 
   /** POST /Authentication/Login */
   //mt
-  login(credentials: LoginCredentials, headers?: HttpHeaders): Observable<AuthResponse> {
+  login(credentials: LoginCredentials): Observable<AuthResponse> {
     const body: LoginRequest = {
       email: credentials.email,
       password: credentials.password || ''
     };
+
+    const headers = new HttpHeaders({
+      'IdempotencyKey': crypto.randomUUID()
+    });
 
     return this.http
       .post<AuthApiResponse>(`${this.apiUrl}/Authentication/Login`, body, { headers })
@@ -72,7 +77,7 @@ export class AuthService {
   /** POST /Authentication/Register */
   register(data: any): Observable<AuthResponse> {
     const body: RegisterRequest = {
-      name: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim() || data.name || '',
+      name: (data.name || `${data.firstName || ''} ${data.lastName || ''}`).trim() || '',
       email: data.email,
       password: data.password
     };
@@ -94,9 +99,40 @@ export class AuthService {
         }),
         catchError((error) => {
           console.error('Registration error', error);
-          const msg = error?.error?.message
-            || (Array.isArray(error?.error) ? error.error.join(', ') : null)
-            || 'Registration failed.';
+          
+          let msg = 'Registration failed.';
+          
+          if (error.status === 409) {
+            if (error?.error?.detail) {
+              msg = error.error.detail;
+            } else if (error?.error?.message) {
+              msg = error.error.message;
+            } else {
+              msg = 'An account with this email already exists.';
+            }
+          } else if (typeof error.error === 'string') {
+            msg = error.error;
+          } else if (error?.error?.detail) {
+            msg = error.error.detail;
+          } else if (error?.error?.ErrorMessage) {
+            msg = error.error.ErrorMessage;
+          } else if (error?.error?.message) {
+            msg = error.error.message;
+          } else if (Array.isArray(error?.error)) {
+            msg = error.error.join(', ');
+          } else if (error?.error?.errors) {
+            // Standard .NET ValidationProblemDetails
+            const errorMessages = [];
+            for (const key in error.error.errors) {
+              if (Object.prototype.hasOwnProperty.call(error.error.errors, key)) {
+                errorMessages.push(...error.error.errors[key]);
+              }
+            }
+            if (errorMessages.length > 0) {
+              msg = errorMessages.join(' | ');
+            }
+          }
+          
           return throwError(() => new Error(msg));
         })
       );
@@ -109,8 +145,8 @@ export class AuthService {
       return throwError(() => new Error('No refresh token available'));
     }
 
-    // C# record field is 'RefreshToken' (capital R) – must match exactly
-    const body = { RefreshToken: refreshToken };
+    // Match the JSON key casing tested in Apidog
+    const body = { refreshToken: refreshToken };
     return this.http
       .post<AuthApiResponse>(`${this.apiUrl}/Authentication/RefreshToken`, body)
       .pipe(
@@ -131,15 +167,70 @@ export class AuthService {
 
   /** POST /Authentication/ForgetPassword */
   forgetPassword(email: string): Observable<void> {
+    const headers = new HttpHeaders({
+      'IdempotencyKey': crypto.randomUUID()
+    });
     return this.http.post<void>(
       `${this.apiUrl}/Authentication/ForgetPassword?email=${encodeURIComponent(email)}`,
-      {}
+      {},
+      { headers }
+    ).pipe(
+      catchError((error) => {
+        let msg = 'Failed to request password reset.';
+        if (error.status === 404) {
+          msg = 'No user found with this email address.';
+        } else if (typeof error.error === 'string') {
+          msg = error.error;
+        } else if (error?.error?.detail) {
+          msg = error.error.detail;
+        } else if (error?.error?.message) {
+          msg = error.error.message;
+        }
+        return throwError(() => new Error(msg));
+      })
     );
+  }
+
+  /** POST /Authentication/ForgetPassword (alias for resend) */
+  resendReset(email: string): Observable<void> {
+    return this.forgetPassword(email);
   }
 
   /** POST /Authentication/ResetPassword */
   resetPassword(payload: ResetPasswordRequest): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/Authentication/ResetPassword`, payload);
+    const headers = new HttpHeaders({
+      'IdempotencyKey': crypto.randomUUID()
+    });
+    return this.http.post<void>(`${this.apiUrl}/Authentication/ResetPassword`, payload, { headers }).pipe(
+      catchError((error) => {
+        let msg = 'Failed to reset password.';
+        if (typeof error.error === 'string') {
+          msg = error.error;
+        } else if (error?.error?.ErrorMessage) {
+          msg = error.error.ErrorMessage;
+        } else if (error?.error?.message) {
+          msg = error.error.message;
+        } else if (Array.isArray(error?.error)) {
+          msg = error.error.join(', ');
+        } else if (error?.error?.errors) {
+          const errorMessages = [];
+          for (const key in error.error.errors) {
+            if (Object.prototype.hasOwnProperty.call(error.error.errors, key)) {
+              errorMessages.push(...error.error.errors[key]);
+            }
+          }
+          if (errorMessages.length > 0) {
+            msg = errorMessages.join(' | ');
+          }
+        }
+        return throwError(() => new Error(msg));
+      })
+    );
+  }
+
+  /** POST /Authentication/ChangePassword */
+  changePassword(payload: ChangePasswordRequest): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/Authentication/ChangePassword`, payload);
   }
 
   logout() {
@@ -163,15 +254,24 @@ export class AuthService {
   // ─────────────────────────────────────────────
 
   private mapToAuthResponse(res: AuthApiResponse): AuthResponse {
-    // Derive role from JWT claims or default to 'user'
-    const role = this.extractRoleFromToken(res.value.accessToken);
+    // Derive role from JWT claims or default to 'User'
+    const tokenRole = this.extractRoleFromToken(res.value.accessToken);
     const user: UserSession = {
       id: '',          // will be overridden if returned by server
       name: res.value.name,
       email: res.value.email,
-      role: role as UserRole
+      role: tokenRole as UserRole
     };
-    return { value: { user, token: res.value.accessToken, refreshToken: res.value.refreshToken, role: (res.value.role) as UserRole } };
+    
+    // Use the role from the token if the api response role is empty or missing
+    let apiRole = res.value.role;
+    if (!apiRole) {
+      apiRole = tokenRole;
+    } else {
+      apiRole = apiRole.charAt(0).toUpperCase() + apiRole.slice(1).toLowerCase();
+    }
+
+    return { value: { user, token: res.value.accessToken, refreshToken: res.value.refreshToken, role: apiRole as UserRole } };
   }
 
   private setSession(response: AuthResponse) {
@@ -186,14 +286,16 @@ export class AuthService {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       // Common JWT claim names for roles
-      return (
+      let rawRole = (
         payload['role'] ||
         payload['Role'] ||
         payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
-        'user'
+        'User'
       );
+      if (typeof rawRole !== 'string') rawRole = String(rawRole);
+      return rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
     } catch {
-      return 'user';
+      return 'User';
     }
   }
 }

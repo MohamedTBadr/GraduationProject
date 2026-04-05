@@ -1,19 +1,268 @@
-<div class="vd-section active" style="display:block">
+<div class="vd-section active">
   <div class="vd-page-header">
-    <div><div class="vd-page-title">Bookings</div><div class="vd-page-sub">Manage all incoming requests and confirmed bookings.</div></div>
+    <div>
+      <div class="vd-page-title">Bookings</div>
+      <div class="vd-page-sub">Manage all incoming requests and confirmed bookings.</div>
+    </div>
   </div>
+
   <div class="vd-tab-bar">
-    <button class="vd-tab active">Pending (8)</button>
-    <button class="vd-tab">Confirmed (12)</button>
-    <button class="vd-tab">Calendar</button>
-    <button class="vd-tab">History</button>
+    <button class="vd-tab" [class.active]="currentTab === 'pending'" (click)="switchTab('pending')">Pending (8)</button>
+    <button class="vd-tab" [class.active]="currentTab === 'confirmed'" (click)="switchTab('confirmed')">Confirmed (12)</button>
+    <button class="vd-tab" [class.active]="currentTab === 'calendar'" (click)="switchTab('calendar')">Calendar</button>
+    <button class="vd-tab" [class.active]="currentTab === 'history'" (click)="switchTab('history')">History</button>
   </div>
-  <div class="vd-tab-pane active" id="bk-pending">
-    <div id="vd-pending-list">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.1);border-radius:var(--r2);margin-bottom:12px">
-        <div><div style="font-weight:600;margin-bottom:4px">Sara Mahmoud</div><div style="font-size:0.85rem;color:var(--gray)">Engagement Decor · Jun 12 · New Cairo</div></div>
-        <div style="display:flex;gap:8px;align-items:center"><div style="font-weight:600;color:var(--gold);margin-right:12px">12,000 EGP</div><button class="vd-btn vd-btn-ghost vd-btn-sm">Message</button><button class="vd-btn vd-btn-gold vd-btn-sm">Accept</button></div>
+
+  <!-- PENDING TAB -->
+  <div class="vd-tab-pane" [class.active]="currentTab === 'pending'" id="bk-pending">
+    <div class="vd-bk-card" *ngFor="let b of pendingBookings">
+      <div class="vd-bk-head">
+        <div>
+          <div class="vd-bk-client">{{b.client}}</div>
+          <div class="vd-bk-meta" style="margin-bottom: 2px;">{{b.event}} &middot; {{b.dateStr}}</div>
+        </div>
+        <div class="vd-badge-pill vdb-amber">Pending</div>
       </div>
+      <div class="vd-bk-meta">
+        <span>⚒️ {{b.service}}</span>
+        <span>👥 {{b.guests}} guests</span>
+        <span style="color: var(--gold); font-weight: 600;">💰 {{b.value}} EGP</span>
+      </div>
+      <div class="vd-bk-note">{{b.note}}</div>
+      <div class="vd-bk-actions">
+        <button class="vd-btn vd-btn-green vd-btn-sm" (click)="selectedBooking = b; acceptBooking()">Accept</button>
+        <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="openDeclineForm(b)">Decline with Reason</button>
+        <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="openDetails(b)">View Details</button>
+        <button class="vd-btn vd-btn-ghost vd-btn-sm">Message</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRMED TAB -->
+  <div class="vd-tab-pane" [class.active]="currentTab === 'confirmed'" id="bk-confirmed">
+    <div class="vd-table-wrap">
+      <div class="vd-table-head">
+        <div class="vd-table-head-title">Confirmed Bookings</div>
+        <button class="vd-btn vd-btn-ghost vd-btn-sm">&darr; Export</button>
+      </div>
+      <table class="vd-tbl">
+        <thead>
+          <tr>
+            <th>CLIENT</th>
+            <th>EVENT</th>
+            <th>SERVICE</th>
+            <th>DATE</th>
+            <th>VALUE</th>
+            <th>STATUS</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cb of confirmedBookings">
+            <td style="font-weight: 600; color: var(--navy)">{{cb.client}}</td>
+            <td>{{cb.event}}</td>
+            <td>{{cb.service}}</td>
+            <td>{{cb.dateStr}}</td>
+            <td style="color: #9f1239; font-weight: 700;">{{cb.value}} EGP</td>
+            <td>
+              <div class="vd-badge-pill" [ngClass]="cb.status === 'confirmed' ? 'vdb-green' : 'vdb-amber'">{{cb.status}}</div>
+            </td>
+            <td><button class="vd-btn vd-btn-ghost vd-btn-sm" style="border-radius: 50px; padding: 4px 14px;" (click)="openDetails(cb)">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CALENDAR TAB -->
+  <div class="vd-tab-pane" [class.active]="currentTab === 'calendar'" id="bk-calendar">
+    <div class="vd-g2">
+      <div class="vd-cal-wrap">
+        <div class="vd-cal-head">
+          <div style="font-weight: 700; color: var(--navy);">March 2026</div>
+          <div style="display: flex; gap: 4px;">
+            <button class="vd-cal-nav-btn">&lt;</button>
+            <button class="vd-cal-nav-btn">&gt;</button>
+          </div>
+        </div>
+        <div class="vd-cal-grid">
+          <div class="vd-cal-dname">Su</div>
+          <div class="vd-cal-dname">Mo</div>
+          <div class="vd-cal-dname">Tu</div>
+          <div class="vd-cal-dname">We</div>
+          <div class="vd-cal-dname">Th</div>
+          <div class="vd-cal-dname">Fr</div>
+          <div class="vd-cal-dname">Sa</div>
+
+          <div class="vd-cal-day in-month today has-event">1</div>
+          <div class="vd-cal-day in-month" *ngFor="let day of [2,3,4]">
+            {{day}}
+          </div>
+          <div class="vd-cal-day in-month has-event">5</div>
+          <div class="vd-cal-day in-month" *ngFor="let day of [6,7,8,9,10,11]">
+            {{day}}
+          </div>
+          <div class="vd-cal-day in-month has-event">12</div>
+          <div class="vd-cal-day in-month">13</div>
+          <div class="vd-cal-day in-month has-event">14</div>
+          <div class="vd-cal-day in-month" *ngFor="let day of [15,16,17]">
+            {{day}}
+          </div>
+          <div class="vd-cal-day in-month has-event">18</div>
+          <div class="vd-cal-day in-month" *ngFor="let day of [19,20,21]">
+            {{day}}
+          </div>
+          <div class="vd-cal-day in-month has-event">22</div>
+          <div class="vd-cal-day in-month">23</div>
+          <div class="vd-cal-day in-month">24</div>
+          <div class="vd-cal-day in-month has-event">25</div>
+          <div class="vd-cal-day in-month">26</div>
+          <div class="vd-cal-day in-month">27</div>
+          <div class="vd-cal-day in-month has-event">28</div>
+          <div class="vd-cal-day in-month">29</div>
+          <div class="vd-cal-day in-month">30</div>
+          <div class="vd-cal-day in-month">31</div>
+        </div>
+      </div>
+      
+      <div class="vd-card">
+        <div class="vd-card-title">Booked Days</div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div *ngFor="let rd of bookedDates" style="display: flex; gap: 14px; align-items: center;">
+            <div style="background: var(--cream); border-radius: 8px; padding: 6px; min-width: 44px; text-align: center;">
+              <div style="font-size: 0.7rem; color: #9f1239; font-weight: 700;">Mar</div>
+              <div style="font-size: 1.1rem; color: var(--navy); font-weight: 700; line-height: 1;">{{rd}}</div>
+            </div>
+            <div>
+              <div style="font-weight: 700; color: var(--navy); font-size: 0.9rem;">Confirmed Booking</div>
+              <div style="color: var(--gray); font-size: 0.8rem;">Decoration service</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="vd-tab-pane" [class.active]="currentTab === 'history'" id="bk-history">
+    <div class="vd-search-row">
+      <div class="vd-search-wrap">
+        <span class="vd-search-icon">🔍</span>
+        <input type="text" placeholder="Search...">
+      </div>
+      <select class="vd-filter-sel">
+        <option>All Status</option>
+      </select>
+    </div>
+
+    <div class="vd-table-wrap">
+      <table class="vd-tbl">
+        <thead>
+          <tr>
+            <th>CLIENT</th>
+            <th>SERVICE</th>
+            <th>DATE</th>
+            <th>VALUE</th>
+            <th>STATUS</th>
+            <th>REVIEW</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let hb of historyBookings">
+            <td style="font-weight: 600; color: #1e3a8a">{{hb.client}}</td>
+            <td>{{hb.service}}</td>
+            <td>{{hb.dateStr}}</td>
+            <td style="color: var(--navy); font-weight: 700;">{{hb.value}} EGP</td>
+            <td>
+              <div class="vd-badge-pill vdb-green">{{hb.status}}</div>
+            </td>
+            <td style="color: #9f1239;">
+              <span *ngFor="let s of [1,2,3,4,5]">
+                <ng-container *ngIf="s <= (hb.stars || 0)">★</ng-container>
+                <ng-container *ngIf="s > (hb.stars || 0)">☆</ng-container>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Booking Details Modal -->
+<div class="vd-modal-overlay" [class.open]="isDetailsModalOpen">
+  <div class="vd-modal">
+    <button class="vd-modal-close" (click)="closeDetails()">✕</button>
+    
+    <ng-container *ngIf="selectedBooking as booking">
+      <div class="vd-modal-title" style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.2rem;">📋</span> Booking Request Details
+      </div>
+      
+      <div style="background: var(--cream); border-radius: 8px; padding: 16px; margin-top: 20px; margin-bottom: 20px;">
+        <div style="font-weight: 700; color: var(--navy); font-size: 1rem;">{{booking.client}}</div>
+        <div style="font-size: 0.85rem; color: var(--gray); margin-bottom: 0;">{{booking.event}} - {{booking.dateStr}}</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span style="color: var(--gray);">Service requested</span>
+          <span style="color: var(--navy); font-weight: 700;">{{booking.service}}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;" *ngIf="booking.guests">
+          <span style="color: var(--gray);">Guests</span>
+          <span style="color: #9f1239; font-weight: 700;">{{booking.guests}}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;" *ngIf="booking.value">
+          <span style="color: var(--gray);">Budget</span>
+          <span style="color: #9f1239; font-weight: 700;">{{booking.value}} EGP</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span style="color: var(--gray);">Date</span>
+          <span style="color: var(--navy); font-weight: 700;">{{booking.dateStr}} 2026</span>
+        </div>
+      </div>
+
+      <div *ngIf="booking.note" style="border-left: 3px solid #9f1239; padding-left: 14px; margin-bottom: 24px;">
+        <div style="font-size: 0.85rem; color: var(--gray); font-style: italic;">
+          "{{booking.note}}"
+        </div>
+      </div>
+
+      <div class="vd-submit-bar" style="gap: 12px;">
+        <button class="vd-btn vd-btn-ghost" (click)="closeDetails()" style="padding: 10px 24px; border-radius: 50px;">Close</button>
+        <button class="vd-btn vd-btn-ghost" (click)="openDeclineForm(booking)" style="padding: 10px 24px; border-radius: 50px;">Decline</button>
+        <button class="vd-btn vd-btn-gold" (click)="acceptBooking()" style="padding: 10px 24px; border-radius: 50px; background: #eba834; color: #fff; border: none;">Accept Booking</button>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<!-- Decline Booking Modal -->
+<div class="vd-modal-overlay" [class.open]="isDeclineModalOpen">
+  <div class="vd-modal">
+    <button class="vd-modal-close" (click)="closeDeclineForm()">✕</button>
+    <div class="vd-modal-title">Decline Booking Request</div>
+    <div class="vd-modal-sub" style="margin-bottom: 20px;">
+      Let {{selectedBooking?.client}} know why you can't take this booking.
+    </div>
+
+    <div class="vd-form-group">
+      <label style="margin-bottom: 8px;">Reason <span style="color: #e11d48">*</span></label>
+      <select class="vd-filter-sel" style="width: 100%; border-radius: 8px; padding: 12px; font-size: 0.9rem;" (change)="onDeclineReasonChange($event)">
+        <option value="" disabled selected>Select a reason...</option>
+        <option *ngFor="let reason of declineReasons" [value]="reason">{{reason}}</option>
+      </select>
+    </div>
+
+    <div class="vd-form-group" style="margin-top: 20px;">
+      <label style="margin-bottom: 8px;">Additional Note (optional)</label>
+      <textarea rows="4" placeholder="Any additional context for the client..." style="width: 100%; border-radius: 8px; padding: 12px; font-size: 0.9rem;" (input)="onDeclineNoteChange($event)"></textarea>
+    </div>
+
+    <div class="vd-submit-bar" style="border-top: 1px solid var(--lgray); padding-top: 20px; margin-top: 24px; justify-content: center; gap: 14px;">
+      <button class="vd-btn vd-btn-ghost" (click)="closeDeclineForm()" style="padding: 10px 24px; border-radius: 50px;">Cancel</button>
+      <button class="vd-btn vd-btn-red" (click)="submitDecline()" style="padding: 10px 24px; border-radius: 50px; color: #ef4444; border-color: #ef4444;">Send Decline</button>
     </div>
   </div>
 </div>

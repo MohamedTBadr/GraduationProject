@@ -1,17 +1,138 @@
 <div class="vd-section active" style="display:block">
   <div class="vd-page-header">
     <div><div class="vd-page-title">My Services</div><div class="vd-page-sub">Manage the services you offer clients. Changes go live immediately.</div></div>
-    <button class="vd-btn vd-btn-gold">+ Add Service</button>
+    <button class="vd-btn vd-btn-gold" (click)="openAddServiceModal()">+ Add Service</button>
   </div>
   <div class="vd-tab-bar">
-    <button class="vd-tab active">Active (5)</button>
-    <button class="vd-tab">Paused (1)</button>
+    <button class="vd-tab" [class.active]="activeTab === 'active'" (click)="activeTab = 'active'">
+      Active ({{ getActiveCount() }})
+    </button>
+    <button class="vd-tab" [class.active]="activeTab === 'paused'" (click)="activeTab = 'paused'">
+      Paused ({{ getPausedCount() }})
+    </button>
   </div>
+
   <div class="vd-tab-pane active" id="svcs-active">
     <div style="display:grid;gap:11px">
-      <div class="vd-svc-card"><div class="vd-svc-icon"></div><div style="flex:1"><div class="vd-svc-name">Wedding Stage Floral Design</div><div class="vd-svc-price">From 15,000 EGP</div><div class="vd-svc-desc">Full stage arrangement — arch, backdrop, aisle décor, and bridal entrance. Premium fresh flowers sourced daily.</div><div class="vd-svc-meta"><span> 23 bookings</span><span>⭐ 4.9</span><span>⏱ 4–6 hrs setup</span></div></div><div class="vd-svc-actions"><span class="vd-badge-pill vdb-green">Active</span><button class="vd-btn vd-btn-ghost vd-btn-sm">Edit</button><button class="vd-btn vd-btn-ghost vd-btn-sm">Pause</button></div></div>
-      <div class="vd-svc-card"><div class="vd-svc-icon"></div><div style="flex:1"><div class="vd-svc-name">Table Centerpieces</div><div class="vd-svc-price">From 1,200 EGP / table</div><div class="vd-svc-desc">Fresh flower centerpieces per table. Wide variety of arrangements to match your wedding theme.</div><div class="vd-svc-meta"><span> 14 bookings</span><span>⭐ 4.8</span><span>⏱ 2–3 hrs</span></div></div><div class="vd-svc-actions"><span class="vd-badge-pill vdb-green">Active</span><button class="vd-btn vd-btn-ghost vd-btn-sm">Edit</button><button class="vd-btn vd-btn-ghost vd-btn-sm">Pause</button></div></div>
-      <div class="vd-svc-card"><div class="vd-svc-icon"></div><div style="flex:1"><div class="vd-svc-name">Balloon Art & Setup</div><div class="vd-svc-price">From 3,500 EGP</div><div class="vd-svc-desc">Custom balloon arches, organic installations, and full room setups. Latex, foil, and biodegradable options.</div><div class="vd-svc-meta"><span> 10 bookings</span><span>⭐ 4.7</span><span>⏱ 2–4 hrs</span></div></div><div class="vd-svc-actions"><span class="vd-badge-pill vdb-green">Active</span><button class="vd-btn vd-btn-ghost vd-btn-sm">Edit</button><button class="vd-btn vd-btn-ghost vd-btn-sm">Pause</button></div></div>
+      <app-service-card 
+        *ngFor="let service of filteredServices" 
+        [service]="service" 
+        (actionClick)="handleAction($event, service)">
+      </app-service-card>
+      
+      <div *ngIf="filteredServices.length === 0" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 0.95rem; background: white; border-radius: 12px; border: 1px dashed #cbd5e1;">
+        No {{ activeTab }} services found.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT SERVICE MODAL -->
+<div class="vd-modal-overlay" [class.open]="isAddServiceModalOpen">
+  <div class="vd-modal" style="max-width: 540px;">
+    <button class="vd-modal-close" (click)="closeAddServiceModal()">&times;</button>
+    <div class="vd-modal-title" style="font-size: 1.6rem;">{{ editingIndex > -1 ? 'Edit Service' : 'Add New Service' }}</div>
+    <div class="vd-modal-sub" style="margin-bottom: 24px;">{{ editingIndex > -1 ? 'Update the details for this service.' : 'Create a new listing that will appear on your vendor profile.' }}</div>
+    
+    <div class="vd-form-group">
+      <label>Service Name *</label>
+      <input type="text" [(ngModel)]="newService.name" placeholder="e.g. Wedding Stage Floral Design" style="border-radius: 8px; font-size: 0.9rem; padding: 12px 14px; border: 1.5px solid var(--lgray);">
+    </div>
+    
+    <div class="vd-form-row" style="margin-bottom: 16px;">
+      <div>
+        <label>Category</label>
+        <select [(ngModel)]="newService.category" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+          <option>Decoration</option>
+          <option>Photography</option>
+          <option>Catering</option>
+          <option>Venue</option>
+        </select>
+      </div>
+      <div>
+        <label>Starting Price (EGP) *</label>
+        <input type="text" [(ngModel)]="newService.price" placeholder="e.g. 8000" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+      </div>
+    </div>
+    
+    <div class="vd-form-group" style="margin-bottom: 16px;">
+      <label>Description *</label>
+      <textarea [(ngModel)]="newService.description" placeholder="Describe the service in detail — what's included, materials, setup time..." rows="4" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);"></textarea>
+    </div>
+    
+    <div class="vd-form-row">
+      <div>
+        <label>Setup Duration</label>
+        <input type="text" [(ngModel)]="newService.duration" placeholder="e.g. 4-6 hours" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+      </div>
+      <div>
+        <label>Lead Time Required</label>
+        <input type="text" [(ngModel)]="newService.leadTime" placeholder="e.g. 2 weeks minimum" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+      </div>
+    </div>
+
+    <div class="vd-form-group" style="margin-top: 16px;">
+      <label>Service Images</label>
+      <app-image-upload (imagesChanged)="onImagesChanged($event)"></app-image-upload>
+    </div>
+    
+    <div class="vd-submit-bar" style="border: none; margin-top: 24px; padding-top: 0; display: flex; justify-content: flex-end; gap: 10px;">
+      <button class="vd-btn vd-btn-ghost" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;" (click)="closeAddServiceModal()">Cancel</button>
+      <button class="vd-btn vd-btn-gold" (click)="createService()">{{ editingIndex > -1 ? 'Save Changes' : 'Create Service' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAILS MODAL -->
+<div class="vd-modal-overlay" [class.open]="isDetailModalOpen">
+  <div class="vd-modal" style="max-width: 500px;" *ngIf="selectedService">
+    <button class="vd-modal-close" (click)="closeDetailModal()">&times;</button>
+    
+    <div style="display:flex; align-items:center; gap: 16px; margin-bottom: 20px;">
+      <img *ngIf="selectedService.images && selectedService.images.length > 0; else detailFallbackIcon" 
+           [src]="selectedService.images[0]"
+           style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+      <ng-template #detailFallbackIcon>
+        <div style="font-size: 3rem; background: #f8fafc; border-radius: 12px; width: 80px; height: 80px; display:flex; align-items:center; justify-content:center; flex-shrink: 0;">
+          {{ selectedService.icon || '🛠️' }}
+        </div>
+      </ng-template>
+      
+      <div>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #1e3a5f;">{{ selectedService.name }}</div>
+        <div style="color: #b34a6c; font-weight: 600; font-size: 1.1rem; margin-top: 4px;">{{ selectedService.price }}</div>
+      </div>
+    </div>
+
+    <!-- Additional Images Gallery Strip -->
+    <div *ngIf="selectedService.images && selectedService.images.length > 1" style="display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 8px;">
+       <img *ngFor="let img of selectedService.images" 
+            [src]="img"
+            style="width: 90px; height: 70px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid #e2e8f0; cursor: pointer; transition: opacity 0.2s;"
+            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+    </div>
+
+    <div style="color: #64748b; line-height: 1.6; margin-bottom: 20px; font-size: 0.95rem;">
+      {{ selectedService.desc }}
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 12px;">
+      <div>
+        <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 600; margin-bottom: 4px;">STATUS</div>
+        <div style="font-weight: 600; color: #1e293b; text-transform: capitalize;">{{ selectedService.status || 'Active' }}</div>
+      </div>
+      <div>
+        <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 600; margin-bottom: 4px;">SETUP DURATION</div>
+        <div style="font-weight: 600; color: #1e293b;">{{ selectedService.duration || 'Not specified' }}</div>
+      </div>
+      <div>
+        <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 600; margin-bottom: 4px;">LEAD TIME</div>
+        <div style="font-weight: 600; color: #1e293b;">{{ selectedService.delivery || 'Not specified' }}</div>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end;">
+      <button class="vd-btn vd-btn-ghost" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;" (click)="closeDetailModal()">Close</button>
     </div>
   </div>
 </div>

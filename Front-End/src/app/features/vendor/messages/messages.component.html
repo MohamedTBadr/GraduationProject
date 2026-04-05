@@ -1,49 +1,118 @@
 <div class="vd-section active" style="display:block">
   <div class="vd-page-header">
     <div>
-      <div class="vd-page-title">Messages</div>
+      <div class="vd-page-title" style="font-size: 1.45rem;">Messages</div>
       <div class="vd-page-sub">Stay connected with clients — fast replies win more bookings.</div>
     </div>
   </div>
-  <div class="vd-msg-layout">
+
+  <div class="vd-msg-layout" style="height: 600px;">
+    <!-- Conversation List -->
     <div class="vd-msg-list">
       <div class="vd-msg-list-head">Conversations</div>
       <div id="vd-msg-threads">
-        <div class="vd-msg-thread active">
-          <div class="vd-msg-ava">SM</div>
-          <div class="vd-msg-preview">
-            <div class="vd-msg-name">Sara Mohamed<span class="vd-msg-time">10:42 AM</span></div>
-            <div class="vd-msg-text">Are you available on June 12th for a setup in New Cairo?</div>
+        <div class="vd-msg-thread active"
+          style="padding: 14px 18px; border-left: 3px solid var(--gold); background: var(--white); display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div
+              style="font-weight: 700; font-size: 0.9rem; color: var(--navy); display: flex; align-items: center; gap: 8px;">
+              <span>💍</span> Sara Mohamed
+            </div>
+            <div style="font-size: 0.75rem; color: var(--gray);">2m ago</div>
+          </div>
+          <div
+            style="font-size: 0.8rem; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            Can you confirm the date...</div>
+        </div>
+
+        <div class="vd-msg-thread"
+          style="padding: 14px 18px; border-bottom: 1px solid var(--cream); display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div
+              style="font-weight: 600; font-size: 0.85rem; color: var(--navy); display: flex; align-items: center; gap: 8px;">
+              <span>🏛️</span> Khaled Hassan
+            </div>
+            <div style="font-size: 0.75rem; color: var(--gray);">1h ago</div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div
+              style="font-size: 0.8rem; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              Portfolio link please</div>
+            <div class="vd-unread-dot" style="background: #e11d48; margin: 0;"></div>
           </div>
         </div>
-        <div class="vd-msg-thread">
-          <div class="vd-msg-ava" style="background:var(--navy);color:var(--white)">KA</div>
-          <div class="vd-msg-preview">
-            <div class="vd-msg-name">Khaled Ali<span class="vd-msg-time">Yesterday</span></div>
-            <div class="vd-msg-text">Thank you, we'll confirm the details tomorrow!</div>
+
+        <div class="vd-msg-thread"
+          style="padding: 14px 18px; border-bottom: 1px solid var(--cream); display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div
+              style="font-weight: 600; font-size: 0.85rem; color: var(--navy); display: flex; align-items: center; gap: 8px;">
+              <span>🎂</span> Dina Mostafa
+            </div>
+            <div style="font-size: 0.75rem; color: var(--gray);">3h ago</div>
           </div>
+          <div
+            style="font-size: 0.8rem; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            Love the unicorn theme!</div>
+        </div>
+
+        <div class="vd-msg-thread" style="padding: 14px 18px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div
+              style="font-weight: 600; font-size: 0.85rem; color: var(--navy); display: flex; align-items: center; gap: 8px;">
+              <span>🎓</span> Omar Ibrahim
+            </div>
+            <div style="font-size: 0.75rem; color: var(--gray);">Yesterday</div>
+          </div>
+          <div
+            style="font-size: 0.8rem; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            What about outdoor?</div>
         </div>
       </div>
     </div>
+
+    <!-- Message Pane -->
     <div class="vd-msg-pane">
-      <div class="vd-msg-pane-head">
-        <div style="font-size:1.4rem" id="vdMsgEmoji"></div>
-        <div>
-          <div class="vd-msg-pane-name" id="vdMsgName">Sara Mohamed</div>
-          <div class="vd-msg-pane-status" id="vdMsgStatus">Inquiry for Jun 12</div>
+      <!-- Pane Head -->
+      <div class="vd-msg-pane-head"
+        style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--lgray);">
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <div style="font-size: 1.6rem; margin-top:-4px;">💍</div>
+          <div>
+            <div class="vd-msg-pane-name" style="font-size: 1rem; color: #1a2540;">Sara Mohamed</div>
+            <div class="vd-msg-pane-status" style="font-size: 0.78rem; color: var(--green); margin-top: 1px;">Planning
+              &middot; Jun 12</div>
+          </div>
         </div>
-        <div style="margin-left:auto;display:flex;gap:6px"><button class="vd-btn vd-btn-ghost vd-btn-sm"
-            onclick="vdToast(' Booking request…')">View Booking</button><button class="vd-btn vd-btn-ghost vd-btn-sm"
-            onclick="vdToast('\uD83D\uDCAC WhatsApp…')">WhatsApp</button></div>
+        <div style="display: flex; gap: 10px;">
+          <button class="vd-btn vd-btn-ghost vd-btn-sm" style="font-weight: 600;">View Booking</button>
+          <button class="vd-btn vd-btn-ghost vd-btn-sm" style="font-weight: 600;">WhatsApp</button>
+        </div>
       </div>
-      <div class="vd-msg-body" id="vdMsgBody">
-        <div class="vd-bubble vd-bubble-in">Hello! We are interested in your floral decor for our engagement party on
-          June 12th in New Cairo. Are you available?</div>
-        <div class="vd-bubble vd-bubble-out">Hi Sara! Yes, June 12th is currently open. Let me know what theme colors
-          you have in mind!</div>
+
+      <!-- Messages Body -->
+      <div class="vd-msg-body" style="padding: 24px; gap: 16px;">
+        <div class="vd-msg-bubble them">
+          <div class="vd-msg-text">Hi! I wanted to confirm if June 12 is still available for the engagement room
+            styling?</div>
+        </div>
+
+        <div class="vd-msg-bubble me">
+          <div class="vd-msg-text">Yes, June 12 is confirmed for you! 🌸 I've held the date. Shall I send over the
+            contract and mood board?</div>
+        </div>
+
+        <div class="vd-msg-bubble them">
+          <div class="vd-msg-text">Yes please! And can you include some pink and white theme examples?</div>
+        </div>
       </div>
-      <div class="vd-msg-input"><input type="text" id="vdMsgInput" placeholder="Type your reply…" /><button
-          class="vd-btn vd-btn-navy vd-btn-sm">Send</button></div>
+
+      <!-- Input Area -->
+      <div class="vd-msg-input" style="padding: 18px 24px;">
+        <input type="text" placeholder="Type your reply.."
+          style="border: 1.5px solid var(--lgray); font-size: 0.88rem; padding: 12px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);" />
+        <button class="vd-btn vd-btn-navy" style="border-radius: 50px; padding: 0 26px; font-weight: 600;">Send</button>
+      </div>
     </div>
   </div>
 </div>

@@ -13,6 +13,11 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () => import('./features/user/add-event/add-event.component').then(m => m.AddEventComponent)
     },
+    {
+        path: 'change-password',
+        canActivate: [authGuard],
+        loadComponent: () => import('./features/auth/change-password/change-password.component').then(m => m.ChangePasswordComponent)
+    },
 
 
     // Admin Portal (Protected)

@@ -21,19 +21,16 @@ export class RegisterComponent {
   private modalService = inject(ModalService);
 
   registerForm: FormGroup = this.fb.group({
-    firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
+    name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    phone: ['', Validators.required],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    role: ['user', Validators.required]
+    password: ['', [Validators.required, Validators.minLength(6), Validators.pattern(/.*[a-z].*/)]]
   });
 
   isLoading = false;
 
+  get nameControl() { return this.registerForm.get('name'); }
   get emailControl() { return this.registerForm.get('email'); }
   get passwordControl() { return this.registerForm.get('password'); }
-  get phoneControl() { return this.registerForm.get('phone'); }
 
   onSubmit() {
     if (this.registerForm.invalid) {
