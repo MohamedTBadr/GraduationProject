@@ -13,17 +13,17 @@ namespace Application.Services
 {
     public class VendorService(UserManager<ApplicationUser> userManager, IVendorRepository vendorRepository, ApplicationDbContext dbContext, IMapper mapper) : IVendorService
     {
-        public async Task<Result<List<VendorListDTO>>> GetVendorsAsync()
+        public async Task<Result<List<VendorListDTO>>> GetVendorsAsync(CancellationToken cancellationToken)
         {
             // Simulate fetching vendors from a database or Service
-            var vendors = await vendorRepository.GetVendorsAsync(); 
+            var vendors = await vendorRepository.GetVendorsAsync(cancellationToken); 
             var vendorListDTOs = mapper.Map<List<VendorListDTO>>(vendors);
             return Result<List<VendorListDTO>>.Success(vendorListDTOs);
         }
 
-        public async Task<Result<VendorDetailsDTO>> GetVendorByIdAsync(Guid id)
+        public async Task<Result<VendorDetailsDTO>> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var vendor = await vendorRepository.GetVendorByIdAsync(id);
+            var vendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken);
             if (vendor == null)
             {
                 return Result<VendorDetailsDTO>.NotFound("Vendor not found");
@@ -32,7 +32,7 @@ namespace Application.Services
             return Result<VendorDetailsDTO>.Success(vendorDTO);
         }
 
-        public async Task<Result<VendorDetailsDTO>> AddVendorAsync(CreateVendorRequest request)
+        public async Task<Result<VendorDetailsDTO>> AddVendorAsync(CreateVendorRequest request, CancellationToken cancellationToken)
         {
       
     
@@ -84,53 +84,53 @@ namespace Application.Services
                 }).ToList()
             };
 
-            await vendorRepository.AddVendorAsync(vendor);
+            await vendorRepository.AddVendorAsync(vendor, cancellationToken);
 
             var vendorDTO = mapper.Map<VendorDetailsDTO>(vendor);
             return Result<VendorDetailsDTO>.Success(vendorDTO);
         }
 
-        public async Task<Result<VendorDetailsDTO>> UpdateVendorAsync(Guid id, UpdateVendorRequest request)
+        public async Task<Result<VendorDetailsDTO>> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken)
         {
-            var existingVendor = await vendorRepository.GetVendorByIdAsync(id);
+            var existingVendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken);
             if (existingVendor == null)
             {
                 return Result<VendorDetailsDTO>.NotFound("Vendor not found");
             }
             var vendorMapped = mapper.Map(request, existingVendor);
-            await vendorRepository.UpdateVendorAsync(vendorMapped);
+            await vendorRepository.UpdateVendorAsync(vendorMapped, cancellationToken);
             var vendorDTO = mapper.Map<VendorDetailsDTO>(vendorMapped);
             return Result<VendorDetailsDTO>.Success(vendorDTO);
         }
 
-        public async Task<Result<VendorDetailsDTO>> DeleteVendorAsync(Guid id)
+        public async Task<Result<VendorDetailsDTO>> DeleteVendorAsync(Guid id, CancellationToken cancellationToken)
         {
-            var vendor = await vendorRepository.GetVendorByIdAsync(id);
+            var vendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken);
             if (vendor == null)
             {
                 return Result<VendorDetailsDTO>.NotFound("Vendor not found");
             }
 
-            await vendorRepository.DeleteVendorAsync(vendor);
+            await vendorRepository.DeleteVendorAsync(vendor, cancellationToken);
             var vendorDTO = mapper.Map<VendorDetailsDTO>(vendor);
             return Result<VendorDetailsDTO>.Success(vendorDTO);
 
         }
 
-        public async Task<Result<VendorDetailsDTO>> ApproveVendorAsync(Guid id)
+        public async Task<Result<VendorDetailsDTO>> ApproveVendorAsync(Guid id, CancellationToken cancellationToken)
         {
-            var vendor = await vendorRepository.GetVendorByIdAsync(id);
+            var vendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken);
             if (vendor == null)
             {
                 return Result<VendorDetailsDTO>.NotFound("Vendor not found");
             }
             vendor.IsVerified = true;
-            await vendorRepository.UpdateVendorAsync(vendor);
+            await vendorRepository.UpdateVendorAsync(vendor, cancellationToken);
             var vendorDTO = mapper.Map<VendorDetailsDTO>(vendor);
             return Result<VendorDetailsDTO>.Success(vendorDTO);
         }
 
-        public Task<Result<VendorDetailsDTO>> RateVendorAsync(Guid id, RatingVendorRequest request)
+        public Task<Result<VendorDetailsDTO>> RateVendorAsync(Guid id, RatingVendorRequest request, CancellationToken cancellationToken)
         { 
             return Task.FromResult(Result<VendorDetailsDTO>.Success(new VendorDetailsDTO()));
 

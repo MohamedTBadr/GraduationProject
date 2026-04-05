@@ -23,8 +23,13 @@ namespace Domain.Entities
 
         public string Notes {  get; set; }
 
-        public string EventStatus { get; set; } = "Planned"; // Planned, Completed, Cancelled
+        public string EventStatus { get; set; } = "Planned"; // Planned,Approved, Completed, Cancelled
 
-        public List<EventItem> EventItems { get; set; } = new List<EventItem>();    
+        public List<EventItem> EventItems { get; set; } = new List<EventItem>();
+
+        public string? CancellationReason { get; set; }
+        public string? AdditionalNotes { get; set; }
+        public DateTime? CancelledAt { get; set; }
     }
+
 }

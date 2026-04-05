@@ -14,42 +14,39 @@ namespace Web.Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class EventController(IEventService _eventService, GeminiService _geminiService , IServiceService _ServiceService) : BaseController
+    public class EventController(
+        IEventService _eventService,
+        GeminiService _geminiService,
+        IServiceService _ServiceService) : BaseController
     {
         protected Guid UserId => GetUserIdFromToken();
+
         // ─────────────────────────────────────────────────────────
         // GET api/events
-        //   Admin  → all events
-        //   Vendor → only their own events
-        //   Client → only their own events
         // ─────────────────────────────────────────────────────────
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var result = IsAdmin()
-                ? await _eventService.GetAllAsync()
-                : await _eventService.GetByUserIdAsync(GetUserIdFromToken());
+                ? await _eventService.GetAllAsync( cancellationToken)
+                : await _eventService.GetByUserIdAsync(UserId, cancellationToken); // ← was calling GetUserIdFromToken() directly, use property instead
 
             return Ok(result);
         }
 
         // ─────────────────────────────────────────────────────────
         // GET api/events/{id}
-        //   Admin  → any event
-        //   Vendor → only events they are linked to as a Service owner
-        //   Client → only their own
         // ─────────────────────────────────────────────────────────
         [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _eventService.GetByIdAsync(id);
-
+                var result = await _eventService.GetByIdAsync(id, cancellationToken);
                 if (!IsAdminOrOwner(result.UserId))
                     return Forbid();
 
@@ -62,45 +59,37 @@ namespace Web.Api.Controllers
         }
 
         // ─────────────────────────────────────────────────────────
-        // GET api/event/user/{userId}
-        //   Admin  → can query any user's events
-        //   Vendor → can only query their own
-        //   Client → can only query their own
+        // GET api/events/user/{userId}
         // ─────────────────────────────────────────────────────────
         [HttpGet("user/{userId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> GetByUser(Guid userId)
+        public async Task<IActionResult> GetByUser(Guid userId, CancellationToken cancellationToken)
         {
             if (!IsAdminOrOwner(userId))
                 return Forbid();
 
-            var result = await _eventService.GetByUserIdAsync(userId);
+            var result = await _eventService.GetByUserIdAsync(userId, cancellationToken);
             return Ok(result);
         }
 
         // ─────────────────────────────────────────────────────────
-        // GET api/event/status/{status}
-        //   Admin  → all events with that status
-        //   Vendor → their own events with that status
-        //   Client → their own events with that status
+        // GET api/events/status/{status}
         // ─────────────────────────────────────────────────────────
         [HttpGet("status/{status}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetByStatus(string status)
+        public async Task<IActionResult> GetByStatus(string status, CancellationToken cancellationToken)
         {
             try
             {
                 if (IsAdmin())
                 {
-                    var all = await _eventService.GetByStatusAsync(status);
+                    var all = await _eventService.GetByStatusAsync(status, cancellationToken);
                     return Ok(all);
                 }
 
-                // Non-admins get their own events filtered by status
-                var userId = GetUserIdFromToken();
-                var result = await _eventService.GetByUserIdAndStatusAsync(userId, status);
+                var result = await _eventService.GetByUserIdAndStatusAsync(UserId, status, cancellationToken);
                 return Ok(result);
             }
             catch (ArgumentException ex)
@@ -109,20 +98,27 @@ namespace Web.Api.Controllers
             }
         }
 
+        // ─────────────────────────────────────────────────────────
+        // POST api/events/createEventByAI/{eventId}
+        // ─────────────────────────────────────────────────────────
         [HttpPost("createEventByAI/{eventId}")]
-        public async Task<IActionResult> CreateEventItemsByAI(Guid eventId)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CreateEventItemsByAI(Guid eventId, CancellationToken cancellationToken)
         {
-            // Step 1: Get event
-            var eventObject = await _eventService.GetByIdAsync(eventId);
-            if (eventObject is null)
-                return NotFound($"Event {eventId} not found.");
+            try
+            {
+                var eventObject = await _eventService.GetByIdAsync(eventId, cancellationToken);
+                var request = new AIRequest
+                {
+                    Budget = eventObject.TotalBudget,
+                    GuestCount = eventObject.GuestCount,
+                    CategoryName = eventObject.CategoryName
+                };
 
-            var request = new AIRequest { Budget = eventObject.TotalBudget, GuestCount = eventObject.GuestCount, CategoryName = eventObject.CategoryName };
-            var ServiceLines = await _ServiceService.AIFilterAsync(request);
+                var ServiceLines = await _ServiceService.AIFilterAsync(request, cancellationToken);
 
-
-            // Step 5: Build prompt
-            var prompt = $@"
+                var prompt = $@"
 You are an event planning API that returns ONLY valid JSON. Do not include markdown, explanation, or extra text.
 
 Plan a full event using the details and available Services below.
@@ -131,12 +127,12 @@ EVENT DETAILS:
 - Title: {eventObject.Title}
 - Category: {eventObject.CategoryName}
 - Date: {eventObject.EventDate:yyyy-MM-dd}
-- Location: {eventObject.Location?.City}, {eventObject.Location?.City}
+- Location: {eventObject.Location?.City}, {eventObject.Location?.State}  
 - Guest Count: {eventObject.GuestCount}
 - Total Budget: {eventObject.TotalBudget:C}
 - Notes: {eventObject.Notes ?? "None"}
 
-AVAILABLE ServiceS (within budget):
+AVAILABLE SERVICES (within budget):
 {string.Join("\n", ServiceLines)}
 
 Return a JSON object with this exact schema:
@@ -148,7 +144,7 @@ Return a JSON object with this exact schema:
   ""plan_summary"": string,
   ""selected_items"": [
     {{
-       ""ServiceId"": Guid
+      ""ServiceId"": ""Guid"",
       ""Service_name"": string,
       ""category"": string,
       ""vendor"": string,
@@ -163,78 +159,77 @@ Return a JSON object with this exact schema:
 
 Only return JSON. No markdown. No explanation.
 ";
+                var aiResponse = await _geminiService.SendMessageAsync(prompt);
 
-            // Step 6: Call Gemini
-            var aiResponse = await _geminiService.SendMessageAsync(prompt);
-
-            // Step 7: Return
-            return Ok(new
+                return Ok(new
+                {
+                    eventId = eventObject.Id,
+                    eventTitle = eventObject.Title,
+                    budget = eventObject.TotalBudget,
+                    category = eventObject.CategoryName,
+                    servicesConsidered = ServiceLines.Value.Count, // ← was capital S (inconsistent casing)
+                    aiPlan = aiResponse
+                });
+            }
+            catch (KeyNotFoundException ex) // ← was missing; GetByIdAsync throws, not returns null
             {
-                eventId = eventObject.Id,
-                eventTitle = eventObject.Title,
-                budget = eventObject.TotalBudget,
-                category = eventObject.CategoryName,
-                ServicesConsidered = ServiceLines.Value.Count,
-                aiPlan = aiResponse
-            });
+                return NotFound(new { message = ex.Message });
+            }
         }
 
-
-
         // ─────────────────────────────────────────────────────────
-        // POST api/event
-        //   Admin  → can create for any user (UserId taken from body)
-        //   Client → UserId is forced to their own id
-        //   Vendor → cannot create events (403)
+        // POST api/events
         // ─────────────────────────────────────────────────────────
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> Create([FromBody] CreateEventDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateEventDto dto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             if (IsVendor())
-                return Forbid(); // Vendors cannot create events
+                return Forbid();
 
             if (IsClient())
-                dto.UserId = UserId; // Clients always own their event
+                dto.UserId = UserId;
 
-
-            var created = await _eventService.CreateAsync(dto);
-            return Created();
+            try
+            {
+                var created = await _eventService.CreateAsync(dto, cancellationToken);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created); // ← was Created() with no body or location
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // ─────────────────────────────────────────────────────────
-        // PUT api/event/{id}
-        //   Admin  → can update any event, any field
-        //   Vendor → can update their own events; cannot set status to Completed
-        //   Client → can update their own; cannot set status to Completed
+        // PUT api/events/{id}
         // ─────────────────────────────────────────────────────────
         [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateEventDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateEventDto dto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
-                var existing = await _eventService.GetByIdAsync(id);
+                var existing = await _eventService.GetByIdAsync(id, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.UserId))
                     return Forbid();
 
-                // Vendors and Clients cannot mark an event as Completed — only Admin can
                 if ((IsVendor() || IsClient()) && dto.EventStatus == "Completed")
                     return Forbid();
 
-                var updated = await _eventService.UpdateAsync(id, dto);
+                var updated = await _eventService.UpdateAsync(id, dto, cancellationToken);
                 return Ok(updated);
             }
             catch (KeyNotFoundException ex)
@@ -248,40 +243,74 @@ Only return JSON. No markdown. No explanation.
         }
 
         // ─────────────────────────────────────────────────────────
-        // PATCH api/events/{id}/status
-        //   Admin  → any status transition allowed
-        //   Client → can only cancel their own event (→ Cancelled)
-        //   Vendor → cannot change status (403)
+        // PATCH api/events/{eventId}/items/{itemId}/approve
         // ─────────────────────────────────────────────────────────
-        [HttpPatch("{id:guid}/status")]
+        [HttpPatch("{eventId:guid}/items/{itemId:guid}/approve")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] string status)
+        public async Task<IActionResult> ApproveItem(
+            Guid eventId,
+            Guid itemId,
+            [FromBody] ApproveItemRequest request,
+            CancellationToken cancellationToken)
         {
-            if (IsVendor())
+            if (!IsVendor())
                 return Forbid();
 
             try
             {
-                var existing = await _eventService.GetByIdAsync(id);
-
-                if (!IsAdminOrOwner(existing.UserId))
-                    return Forbid();
-
-                // Clients can only cancel — not complete — their events
-                if (IsClient() && status != "Cancelled")
-                    return Forbid();
-
-                await _eventService.UpdateStatusAsync(id, status);
+                await _eventService.ApproveItemAsync(eventId, itemId, UserId, request.Approve, request.Reason, cancellationToken);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
-            catch (ArgumentException ex)
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // PATCH api/events/{id}/cancel
+        // ─────────────────────────────────────────────────────────
+        [HttpPatch("{id:guid}/cancel")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CancelEvent(Guid id, [FromBody] CancelEventRequest cancelEventRequest, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var existing = await _eventService.GetByIdAsync(id, cancellationToken);
+                if (!IsAdminOrOwner(existing.UserId))
+                    return Forbid();
+
+                if (IsVendor())
+                    return Forbid();
+
+                if (IsClient() && existing.EventStatus != "Approved")
+                    return Forbid();
+
+                if (IsClient() && existing.EventDate.Date <= DateTime.Today.AddDays(7))
+                    return BadRequest(new { message = "You cannot cancel an event less than 7 days before it occurs." });
+
+                await _eventService.CancelEventAsync(id, cancelEventRequest, cancellationToken);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
@@ -289,32 +318,28 @@ Only return JSON. No markdown. No explanation.
 
         // ─────────────────────────────────────────────────────────
         // DELETE api/events/{id}
-        //   Admin  → can delete any event regardless of status
-        //   Client → can only delete their own events in "Planned" status
-        //   Vendor → cannot delete events (403)
         // ─────────────────────────────────────────────────────────
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
             if (IsVendor())
                 return Forbid();
 
             try
             {
-                var existing = await _eventService.GetByIdAsync(id);
+                var existing = await _eventService.GetByIdAsync(id, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.UserId))
                     return Forbid();
 
-                // Clients can only delete events still in Planned status
                 if (IsClient() && existing.EventStatus != "Planned")
                     return BadRequest(new { message = "You can only delete events with 'Planned' status." });
 
-                await _eventService.DeleteAsync(id);
+                await _eventService.DeleteAsync(id, cancellationToken);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

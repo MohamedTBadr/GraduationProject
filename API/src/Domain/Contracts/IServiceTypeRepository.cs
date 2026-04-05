@@ -4,10 +4,10 @@ namespace Domain.Contracts
 {
     public interface IServiceTypeRepository
     {
-        Task AddTypeAsync(ServiceType ServiceType);
-        Task DeleteTypeAsync(Guid id);
-        Task UpdateTypeAsync(ServiceType ServiceType);
-        Task<List<ServiceType>> GetAllServiceTypesAsync();
-        Task<ServiceType> GetServiceTypeByIdAsync(Guid id);
+        Task AddTypeAsync(ServiceType ServiceType, CancellationToken cancellationToken);
+        Task DeleteTypeAsync(Guid id, CancellationToken cancellationToken);
+        Task UpdateTypeAsync(ServiceType ServiceType, CancellationToken cancellationToken);
+        Task<List<ServiceType>> GetAllServiceTypesAsync(CancellationToken cancellationToken);
+        Task<ServiceType> GetServiceTypeByIdAsync(Guid id, CancellationToken cancellationToken);
     }
 }

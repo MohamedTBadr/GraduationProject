@@ -1,131 +1,104 @@
 ﻿using Application.DTOs.PaymobDTOs;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.Services
+namespace Infrastructure.Payments; // Moved to Infrastructure (Clean Arch)
+
+public class PaymobService(
+    IHttpClientFactory httpClientFactory,
+    IOptions<PaymobOptions> options) 
 {
-    public class PaymobService 
+    private readonly PaymobOptions _options = options.Value;
+
+    public async Task<string> CreatePaymentAsync(decimal amount, BillingData billing, CancellationToken ct )
     {
-        private readonly HttpClient _http;
-        private readonly PaymobOptions _options;
+        // 1. Authenticate
+        var authToken = await AuthenticateAsync(ct);
 
-        public PaymobService(HttpClient http, IOptions<PaymobOptions> options)
-        {
-            _http = http;
-            _options = options.Value;
-        }
+        // 2. Create Order
+        var orderId = await CreateOrderAsync(authToken, amount, ct);
 
-        // -------------------------------
-        // PUBLIC ENTRY POINT
-        // -------------------------------
-        public async Task<string> CreatePaymentAsync(decimal amount, BillingData billing)
-        {
-            var token = await AuthenticateAsync();
-            var orderId = await CreateOrderAsync(token, amount);
-            var paymentKey = await GeneratePaymentKeyAsync(token, orderId, amount, billing);
+        // 3. Generate Payment Key
+        var paymentKey = await GeneratePaymentKeyAsync(authToken, orderId, amount, billing, ct);
 
-            return $"{_options.BaseUrl}/acceptance/iframes/{_options.IframeId}?payment_token={paymentKey}";
-        }
-
-        // -------------------------------
-        // AUTH
-        // -------------------------------
-        private async Task<string> AuthenticateAsync()
-        {
-            var response = await _http.PostAsJsonAsync(
-                $"{_options.BaseUrl}/auth/tokens",
-                new { api_key = _options.ApiKey });
-
-            response.EnsureSuccessStatusCode();
-
-            var data = await response.Content.ReadFromJsonAsync<AuthResponse>();
-            return data.token;
-        }
-
-        // -------------------------------
-        // CREATE ORDER
-        // -------------------------------
-        private async Task<string> CreateOrderAsync(string token, decimal amount)
-        {
-            _http.DefaultRequestHeaders.Clear();
-            _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-
-            var response = await _http.PostAsJsonAsync(
-                $"{_options.BaseUrl}/ecommerce/orders",
-                new
-                {
-                    amount_cents = (int)(amount * 100),
-                    currency = "EGP",
-                    delivery_needed = false,
-                    items = Array.Empty<object>()
-                });
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Paymob Order Error: {error}");
-            }
-
-            var data = await response.Content.ReadFromJsonAsync<OrderResponse>();
-            return data.id.ToString();
-        }
-
-
-        // -------------------------------
-        // PAYMENT KEY
-        // -------------------------------
-        private async Task<string> GeneratePaymentKeyAsync(
-            string token,
-            string orderId,
-            decimal amount,
-            BillingData billing)
-        {
-            _http.DefaultRequestHeaders.Clear();
-            _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-
-            var response = await _http.PostAsJsonAsync(
-                $"{_options.BaseUrl}/acceptance/payment_keys",
-                new
-                {
-                    amount_cents = (int)(amount * 100),
-                    expiration = 3600,
-                    order_id = orderId,
-                    billing_data = billing,
-                    currency = "EGP",
-                    integration_id = _options.IntegrationId
-                });
-
-            response.EnsureSuccessStatusCode();
-
-            var data = await response.Content.ReadFromJsonAsync<PaymentKeyResponse>();
-            return data.token;
-        }
-
-        // -------------------------------
-        // WEBHOOK HANDLING
-        // -------------------------------
-        public async Task HandleWebhookAsync(PaymobWebhookPayload payload)
-        {
-            bool success = payload.Success;
-            long orderId = payload.Order;
-
-            if (success)
-            {
-                // Update DB: Status = Paid
-                Console.WriteLine("Success");
-            }
-            else
-            {
-                // Update DB: Status = Failed
-            }
-
-            await Task.CompletedTask;
-        }
+        return $"{_options.BaseUrl}/acceptance/iframes/{_options.IframeId}?payment_token={paymentKey}";
     }
 
+    private async Task<string> AuthenticateAsync(CancellationToken ct)
+    {
+        var client = httpClientFactory.CreateClient("PaymobClient");
+
+        var response = await client.PostAsJsonAsync("auth/tokens", new { api_key = _options.ApiKey }, ct);
+        response.EnsureSuccessStatusCode();
+
+        var data = await response.Content.ReadFromJsonAsync<AuthResponse>(ct);
+        return data!.token;
+    }
+
+    private async Task<string> CreateOrderAsync(string token, decimal amount, CancellationToken ct)
+    {
+        var client = httpClientFactory.CreateClient("PaymobClient");
+
+        // Use HttpRequestMessage to avoid shared header pollution
+        var request = new HttpRequestMessage(HttpMethod.Post, "ecommerce/orders")
+        {
+            Content = JsonContent.Create(new
+            {
+                amount_cents = (int)(amount * 100),
+                currency = "EGP",
+                delivery_needed = false,
+                items = Array.Empty<object>()
+            })
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.SendAsync(request, ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException($"Paymob Order Error: {error}");
+        }
+
+        var data = await response.Content.ReadFromJsonAsync<OrderResponse>(ct);
+        return data!.id.ToString();
+    }
+
+    private async Task<string> GeneratePaymentKeyAsync(string token, string orderId, decimal amount, BillingData billing, CancellationToken ct)
+    {
+        var client = httpClientFactory.CreateClient("PaymobClient");
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "acceptance/payment_keys")
+        {
+            Content = JsonContent.Create(new
+            {
+                auth_token = token, // Paymob accepts token in body or header for this endpoint
+                amount_cents = (int)(amount * 100),
+                expiration = 3600,
+                order_id = orderId,
+                billing_data = billing,
+                currency = "EGP",
+                integration_id = _options.IntegrationId
+            })
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await client.SendAsync(request, ct);
+        response.EnsureSuccessStatusCode();
+
+        var data = await response.Content.ReadFromJsonAsync<PaymentKeyResponse>(ct);
+        return data!.token;
+    }
+
+    public async Task HandleWebhookAsync(PaymobWebhookPayload payload)
+    {
+        // In Clean Arch, this would likely trigger a Domain Event or MediatR Command
+        if (payload.Success)
+        {
+
+            // Logic to fulfill order
+        }
+        await Task.CompletedTask;
+    }
 }

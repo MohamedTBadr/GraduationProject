@@ -5,56 +5,63 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using Domain.Contracts;
 using Infrastructure.Persistence;
+using Polly;
+using Polly.Registry;
 namespace Infrastructure.Repositories
 {
     public class EventItemRepository : IEventItemRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly ResiliencePipeline _pipeline;
 
-        public EventItemRepository(ApplicationDbContext context)
+        public EventItemRepository(ApplicationDbContext context, ResiliencePipelineProvider<string> pipelineProvider)
         {
             _context = context;
+            _pipeline = pipelineProvider.GetPipeline("db-pipeline");
         }
 
         // ── Read ──────────────────────────────────────────────────
 
-        public async Task<EventItem> GetByIdAsync(Guid id)
+        public async Task<EventItem> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _context.EventItems
+            return await _pipeline.ExecuteAsync(async token => await _context.EventItems
                 .Include(i => i.Event)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .FirstOrDefaultAsync(i => i.Id == id, token), cancellationToken);
         }
 
-        public async Task<IEnumerable<EventItem>> GetAllAsync()
+        public async Task<IEnumerable<EventItem>> GetAllAsync(CancellationToken cancellationToken)
         {
-            return await _context.EventItems
+            return await _pipeline.ExecuteAsync(async token => await _context.EventItems
                 .Include(i => i.Event)
-                .ToListAsync();
+                .ToListAsync(token), cancellationToken);
         }
 
-        public async Task<IEnumerable<EventItem>> GetByEventIdAsync(Guid eventId)
+        public async Task<IEnumerable<EventItem>> GetByEventIdAsync(Guid eventId, CancellationToken cancellationToken)
         {
-            return await _context.EventItems
+            return await _pipeline.ExecuteAsync(async token => await _context.EventItems
                 .Where(i => i.EventId == eventId)
-                .ToListAsync();
+                .ToListAsync(token), cancellationToken);
         }
 
-        public async Task<bool> ExistsAsync(Guid id)
+        public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _context.EventItems.AnyAsync(i => i.Id == id);
+            return await _pipeline.ExecuteAsync(async token => await _context.EventItems.AnyAsync(i => i.Id == id, token), cancellationToken);
         }
 
         // ── Write ─────────────────────────────────────────────────
 
-        public async Task<EventItem> CreateAsync(EventItem entity)
+        public async Task<EventItem> CreateAsync(EventItem entity, CancellationToken cancellationToken)
         {
             entity.Id = Guid.NewGuid();
-            await _context.EventItems.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            await _pipeline.ExecuteAsync(async token =>
+            {
+                await _context.EventItems.AddAsync(entity, token);
+                await _context.SaveChangesAsync(token);
+            }, cancellationToken);
             return entity;
         }
 
-        public async Task<IEnumerable<EventItem>> CreateRangeAsync(IEnumerable<EventItem> entities)
+        public async Task<IEnumerable<EventItem>> CreateRangeAsync(IEnumerable<EventItem> entities, CancellationToken cancellationToken)
         {
             var list = new List<EventItem>();
             foreach (var item in entities)
@@ -62,38 +69,37 @@ namespace Infrastructure.Repositories
                 item.Id = Guid.NewGuid();
                 list.Add(item);
             }
-            await _context.EventItems.AddRangeAsync(list);
-            await _context.SaveChangesAsync();
+            await _context.EventItems.AddRangeAsync(list, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
             return list;
         }
 
-        public async Task<EventItem> UpdateAsync(EventItem entity)
+        public async Task<EventItem> UpdateAsync(EventItem entity, CancellationToken cancellationToken)
         {
             _context.EventItems.Update(entity);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
             return entity;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            var entity = await _context.EventItems.FindAsync(id);
+            var entity = await _pipeline.ExecuteAsync(async token => await _context.EventItems.FindAsync([id], token), cancellationToken);
             if (entity == null) return false;
 
             _context.EventItems.Remove(entity);
-            await _context.SaveChangesAsync();
+            await _pipeline.ExecuteAsync(async token => await _context.SaveChangesAsync(token), cancellationToken);
             return true;
         }
 
-        public async Task<bool> DeleteByEventIdAsync(Guid eventId)
+        public async Task<bool> DeleteByEventIdAsync(Guid eventId, CancellationToken cancellationToken)
         {
-            var items = await _context.EventItems
+            var items = await _pipeline.ExecuteAsync(async token => await _context.EventItems
                 .Where(i => i.EventId == eventId)
-                .ToListAsync();
-
+                .ToListAsync(token), cancellationToken);
             if (!items.Any()) return false;
 
             _context.EventItems.RemoveRange(items);
-            await _context.SaveChangesAsync();
+            await _pipeline.ExecuteAsync(async token => await _context.SaveChangesAsync(token), cancellationToken);
             return true;
         }
     }

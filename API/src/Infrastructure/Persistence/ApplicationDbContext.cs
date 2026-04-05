@@ -70,7 +70,16 @@ namespace Infrastructure.Persistence
                 .WithMany()
                 .HasForeignKey(m => m.SenderId)
                 .OnDelete(DeleteBehavior.NoAction); // ✅ No cascade
+
+      
+              builder.Entity<EventItem>()
+                .HasOne(i => i.Event)
+                .WithMany(e => e.EventItems)
+                .HasForeignKey(i => i.EventId)
+                .OnDelete(DeleteBehavior.NoAction); // ← fixes the cycle error
         }
+
+        
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }

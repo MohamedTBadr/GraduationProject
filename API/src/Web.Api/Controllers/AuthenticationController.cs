@@ -42,7 +42,7 @@ namespace Web.Api.Controllers
 
         [HttpPost("Register")]
         [Idempotent]
-        public async Task<IActionResult> Register(SignUpRequest request)
+        public async Task<IActionResult> Register(SignUpRequest request,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -63,7 +63,7 @@ namespace Web.Api.Controllers
         }
 
         [HttpPost("CheckIfEmailExists")]
-        public async Task<IActionResult> CheckEmailExists([Required][FromQuery] string email)
+        public async Task<IActionResult> CheckEmailExists([Required][FromQuery] string email,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -87,7 +87,7 @@ namespace Web.Api.Controllers
         [HttpPost("RefreshToken")]
         [ProducesResponseType(200, Type = typeof(UserResponse))]
         [ProducesResponseType(401)]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request,CancellationToken cancellationToken)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
             {
@@ -111,7 +111,7 @@ namespace Web.Api.Controllers
 
 
         [HttpPost("ForgetPassword")]
-        public async Task<IActionResult> ForgetPassword([FromQuery][Required] string email)
+        public async Task<IActionResult> ForgetPassword([FromQuery][Required] string email,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {

@@ -2,6 +2,8 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Web.Api.Attributes;
+using Web.Api.Controllers.Attributes;
 
 namespace Web.Api.Controllers
 {
@@ -10,18 +12,21 @@ namespace Web.Api.Controllers
     public class ServiceTypeController(IServiceTypeService ServiceTypeService) : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> GetAllServiceTypes()
+        [HybridCache(1800,"serviceTypes")]
+        public async Task<IActionResult> GetAllServiceTypes(CancellationToken cancellationToken)
         {
-            var ServiceTypes = await ServiceTypeService.GetAllServiceTypesAsync();
+            var ServiceTypes = await ServiceTypeService.GetAllServiceTypesAsync(cancellationToken);
             return Ok(ServiceTypes);
         }
 
 
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetServiceTypeById(Guid id)
+        [HybridCache(1800, "serviceTypes/{id}" )]
+
+        public async Task<IActionResult> GetServiceTypeById(Guid id, CancellationToken cancellationToken)
         {
-            var ServiceType = await ServiceTypeService.GetServiceTypeByIdAsync(id);
+            var ServiceType = await ServiceTypeService.GetServiceTypeByIdAsync(id, cancellationToken);
             if (ServiceType == null)
             {
                 return NotFound();
@@ -30,27 +35,29 @@ namespace Web.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-
         [HttpPost]
-        public async Task<IActionResult> AddServiceType(CreateServiceTypeRequest  type)
+        [InvalidateCache("serviceTypes")]
+        public async Task<IActionResult> AddServiceType(CreateServiceTypeRequest  type, CancellationToken cancellationToken)
         {
-            await ServiceTypeService.AddTypeAsync(type);
+            await ServiceTypeService.AddTypeAsync(type, cancellationToken);
             return Created();
         }
         [Authorize(Roles = "Admin")]
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteServiceType(Guid id)
+        [InvalidateCache("serviceTypes/{id}", "serviceTypes")]
+        public async Task<IActionResult> DeleteServiceType(Guid id, CancellationToken cancellationToken)
         {
-            await ServiceTypeService.DeleteTypeAsync(id);
+            await ServiceTypeService.DeleteTypeAsync(id, cancellationToken);
             return NoContent();
         }
         [Authorize(Roles = "Admin")]
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateServiceType(Guid id, UpdateServiceTypeRequest type)
+        [InvalidateCache("serviceTypes/{id}", "serviceTypes")]
+        public async Task<IActionResult> UpdateServiceType(Guid id, UpdateServiceTypeRequest type, CancellationToken cancellationToken)
         {
-            await ServiceTypeService.UpdateTypeAsync(id, type);
+            await ServiceTypeService.UpdateTypeAsync(id, type, cancellationToken);
             return Ok();
         }
     }

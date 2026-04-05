@@ -7,13 +7,13 @@ namespace Domain.Contracts
 {
     public interface IMessageRepository
     {
-        Task<Conversation?> GetConversationAsync(Guid user1Id, Guid user2Id);
-        Task<Conversation> GetOrCreateConversationAsync(Guid user1Id, Guid user2Id);
-        Task<IEnumerable<Message>> GetMessagesAsync(Guid conversationId, int page, int pageSize);
-        Task<IEnumerable<Conversation>> GetUserConversationsAsync(Guid userId);
-        Task AddMessageAsync(Message message);
-        Task<Message?> GetMessageByIdAsync(Guid messageId);
-        Task SaveChangesAsync();
+        Task<Conversation?> GetConversationAsync(Guid user1Id, Guid user2Id, CancellationToken cancellationToken);
+        Task<Conversation> GetOrCreateConversationAsync(Guid user1Id, Guid user2Id, CancellationToken cancellationToken);
+        Task<IEnumerable<Message>> GetMessagesAsync(Guid conversationId, int page, int pageSize, CancellationToken cancellationToken);
+        Task<IEnumerable<Conversation>> GetUserConversationsAsync(Guid userId, CancellationToken cancellationToken);
+        Task AddMessageAsync(Message message, CancellationToken cancellationToken);
+        Task<Message?> GetMessageByIdAsync(Guid messageId, CancellationToken cancellationToken);
+        Task SaveChangesAsync(CancellationToken cancellationToken);
     }
 }
 

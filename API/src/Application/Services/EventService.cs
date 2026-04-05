@@ -14,8 +14,8 @@ namespace Application.Services
         private readonly IEventRepository _eventRepo;
 
         private static readonly HashSet<string> ValidStatuses =
-            new() { "Planned", "Completed", "Cancelled" };
-        
+            new() { "Planned", "Approved", "Completed", "Cancelled" };
+
         public EventService(IEventRepository eventRepo)
         {
             _eventRepo = eventRepo;
@@ -25,99 +25,56 @@ namespace Application.Services
 
         public async Task<EventResponseDto> GetByIdAsync(Guid id)
         {
-            var entity = await _eventRepo.GetByIdWithItemsAsync(id);
-            if (entity == null)
-                throw new KeyNotFoundException($"Event with id '{id}' was not found.");
+            var entity = await _eventRepo.GetByIdWithItemsAsync(id)
+                ?? throw new KeyNotFoundException($"Event with id '{id}' was not found.");
 
-            return MapToResponseDto(entity);
+            return entity.ToResponseDto();
         }
 
         public async Task<IEnumerable<EventSummaryDto>> GetAllAsync()
         {
             var entities = await _eventRepo.GetAllAsync();
-            return entities.Select(MapToSummaryDto);
+            return entities.Select(e => e.ToSummaryDto());
         }
 
         public async Task<IEnumerable<EventSummaryDto>> GetByUserIdAsync(Guid userId)
         {
             var entities = await _eventRepo.GetByUserIdAsync(userId);
-            return entities.Select(MapToSummaryDto);
+            return entities.Select(e => e.ToSummaryDto());
         }
 
         public async Task<IEnumerable<EventSummaryDto>> GetByUserIdAndStatusAsync(Guid userId, string status)
         {
-            if (!ValidStatuses.Contains(status))
-                throw new ArgumentException($"Invalid status '{status}'. Valid values: Planned, Completed, Cancelled.");
-
+            ValidateStatus(status);
             var entities = await _eventRepo.GetByUserIdAsync(userId);
-            return entities
-                .Where(e => e.EventStatus == status)
-                .Select(MapToSummaryDto);
+            return entities.Where(e => e.EventStatus == status).Select(e => e.ToSummaryDto());
         }
 
         public async Task<IEnumerable<EventSummaryDto>> GetByStatusAsync(string status)
         {
-            if (!ValidStatuses.Contains(status))
-                throw new ArgumentException($"Invalid status '{status}'. Valid values: Planned, Completed, Cancelled.");
-
+            ValidateStatus(status);
             var entities = await _eventRepo.GetByStatusAsync(status);
-            return entities.Select(MapToSummaryDto);
+            return entities.Select(e => e.ToSummaryDto());
         }
 
         // ── Write ─────────────────────────────────────────────────
 
         public async Task<EventResponseDto> CreateAsync(CreateEventDto dto)
         {
-
-            var entity = new Event
-            {
-                UserId = (Guid)dto.UserId!,
-                Title = dto.Title,
-                CategoryId = dto.CategoryId,
-                EventDate = dto.EventDate,
-                TotalBudget = dto.TotalBudget,
-                GuestCount = dto.GuestCount,
-                Notes = dto.Notes,
-                EventStatus = "Planned",
-                Location = dto.Location == null ? null : new Address
-                {
-                    Street = dto.Location.Street,
-                    City = dto.Location.City,
-                    State = dto.Location.State
-                }
-            };
-
-            var created = await _eventRepo.CreateAsync(entity);
-            return MapToResponseDto(created);
+            var created = await _eventRepo.CreateAsync(dto.ToEntity());
+            return created.ToResponseDto();
         }
 
         public async Task<EventResponseDto> UpdateAsync(Guid id, UpdateEventDto dto)
         {
-            var entity = await _eventRepo.GetByIdWithItemsAsync(id);
-            if (entity == null)
-                throw new KeyNotFoundException($"Event with id '{id}' was not found.");
+            var entity = await _eventRepo.GetByIdWithItemsAsync(id)
+                ?? throw new KeyNotFoundException($"Event with id '{id}' was not found.");
 
-            if (!ValidStatuses.Contains(dto.EventStatus))
-                throw new ArgumentException($"Invalid status '{dto.EventStatus}'.");
-
-            entity.Title = dto.Title;
-            entity.CategoryId = dto.CategoryId;
-            entity.EventDate = dto.EventDate;
-            entity.TotalBudget = dto.TotalBudget;
-            entity.GuestCount = dto.GuestCount;
-            entity.Notes = dto.Notes;
-            entity.EventStatus = dto.EventStatus;
-
-            if (dto.Location != null)
-            {
-                entity.Location ??= new Address();
-                entity.Location.Street = dto.Location.Street;
-                entity.Location.City = dto.Location.City;
-                entity.Location.State = dto.Location.State;
-            }
+            ValidateStatus(dto.EventStatus);
+            dto.ApplyTo(entity);
 
             var updated = await _eventRepo.UpdateAsync(entity);
-            return MapToResponseDto(updated);
+            return updated.ToResponseDto();
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -130,25 +87,83 @@ namespace Application.Services
 
         public async Task<bool> UpdateStatusAsync(Guid id, string status)
         {
-            if (!ValidStatuses.Contains(status))
-                throw new ArgumentException($"Invalid status '{status}'.");
+            ValidateStatus(status);
 
-            var entity = await _eventRepo.GetByIdAsync(id);
-            if (entity == null)
-                throw new KeyNotFoundException($"Event with id '{id}' was not found.");
+            var entity = await _eventRepo.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Event with id '{id}' was not found.");
 
             entity.EventStatus = status;
             await _eventRepo.UpdateAsync(entity);
             return true;
         }
 
-        // ── Mappers ───────────────────────────────────────────────
+        public async Task CancelEventAsync(Guid id, CancelEventRequest request)
+        {
+            var entity = await _eventRepo.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Event with id '{id}' was not found.");
 
-        private static EventResponseDto MapToResponseDto(Event e) => new()
+            if (entity.EventStatus == "Cancelled")
+                throw new InvalidOperationException("Event is already cancelled.");
+
+            if (entity.EventStatus == "Completed")
+                throw new InvalidOperationException("A completed event cannot be cancelled.");
+
+            request.ApplyTo(entity);
+            await _eventRepo.UpdateAsync(entity);
+        }
+
+        public async Task ApproveItemAsync(Guid eventId, Guid itemId, Guid vendorId, bool approve, string? reason)
+        {
+            var item = await _eventRepo.GetItemByIdAsync(itemId);
+
+            if (item == null || item.EventId != eventId)
+                throw new KeyNotFoundException("Item not found in this event.");
+
+            if (item.VendorId != vendorId)
+                throw new UnauthorizedAccessException("You do not own this item.");
+
+            if (item.ItemStatus != "Pending")
+                throw new InvalidOperationException($"Item is already '{item.ItemStatus}'.");
+
+            item.ItemStatus = approve ? "Approved" : "Rejected";
+            item.RejectionReason = approve ? null : reason;
+
+            await _eventRepo.UpdateItemAsync(item);
+            await SyncEventStatusAsync(eventId);
+        }
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        private void ValidateStatus(string status)
+        {
+            if (!ValidStatuses.Contains(status))
+                throw new ArgumentException($"Invalid status '{status}'. Valid values: Planned, Approved, Completed, Cancelled.");
+        }
+
+        private async Task SyncEventStatusAsync(Guid eventId)
+        {
+            var ev = await _eventRepo.GetByIdWithItemsAsync(eventId);
+            if (ev == null) return;
+
+            if (ev.EventItems.All(i => i.ItemStatus == "Approved"))
+                ev.EventStatus = "Approved";
+            else if (ev.EventItems.Any(i => i.ItemStatus == "Rejected"))
+                ev.EventStatus = "Cancelled";
+
+            await _eventRepo.UpdateAsync(ev);
+        }
+    }
+
+    // ── Mappers ───────────────────────────────────────────────────
+
+    internal static class EventMappers
+    {
+        // ── Event → DTOs ──────────────────────────────────────────
+
+        internal static EventResponseDto ToResponseDto(this Event e) => new()
         {
             Id = e.Id,
             UserId = e.UserId,
-            //UserName = e.User?.UserName,
             Title = e.Title,
             CategoryName = e.Category.Name,
             EventDate = e.EventDate,
@@ -156,16 +171,14 @@ namespace Application.Services
             GuestCount = e.GuestCount,
             Notes = e.Notes,
             EventStatus = e.EventStatus,
-            Location = e.Location == null ? null : new AddressDto
-            {
-                Street = e.Location.Street,
-                City = e.Location.City,
-                State = e.Location.State
-            },
-            EventItems = e.EventItems?.Select(MapItemToDto).ToList() ?? new()
+            CancellationReason = e.CancellationReason,
+            AdditionalNotes = e.AdditionalNotes,
+            CancelledAt = e.CancelledAt,
+            Location = e.Location?.ToDto(),
+            EventItems = e.EventItems?.Select(i => i.ToResponseDto()).ToList() ?? new()
         };
 
-        private static EventSummaryDto MapToSummaryDto(Event e) => new()
+        internal static EventSummaryDto ToSummaryDto(this Event e) => new()
         {
             Id = e.Id,
             Title = e.Title,
@@ -175,15 +188,79 @@ namespace Application.Services
             ItemCount = e.EventItems?.Count ?? 0
         };
 
-        private static EventItemResponseDto MapItemToDto(EventItem i) => new()
+        internal static EventItemResponseDto ToResponseDto(this EventItem i) => new()
         {
             Id = i.Id,
             EventId = i.EventId,
             ServiceImage = i.ServiceImage,
             ServiceName = i.ServiceName,
             Price = i.Price,
+            VendorId = i.VendorId,
             VendorName = i.VendorName,
-            Quantity = i.Quantity
+            Quantity = i.Quantity,
+            ItemStatus = i.ItemStatus,
+            RejectionReason = i.RejectionReason
         };
+
+        internal static AddressDto ToDto(this Address a) => new()
+        {
+            Street = a.Street,
+            City = a.City,
+            State = a.State
+        };
+
+        // ── DTOs → Entity ─────────────────────────────────────────
+
+        internal static Event ToEntity(this CreateEventDto dto) => new()
+        {
+            UserId = (Guid)dto.UserId!,
+            Title = dto.Title,
+            CategoryId = dto.CategoryId,
+            EventDate = dto.EventDate,
+            TotalBudget = dto.TotalBudget,
+            GuestCount = dto.GuestCount,
+            Notes = dto.Notes,
+            EventStatus = "Planned",
+            Location = dto.Location?.ToEntity()
+        };
+
+        internal static void ApplyTo(this UpdateEventDto dto, Event entity)
+        {
+            entity.Title = dto.Title;
+            entity.CategoryId = dto.CategoryId;
+            entity.EventDate = dto.EventDate;
+            entity.TotalBudget = dto.TotalBudget;
+            entity.GuestCount = dto.GuestCount;
+            entity.Notes = dto.Notes;
+            entity.EventStatus = dto.EventStatus;
+
+            if (dto.Location != null)
+            {
+                entity.Location ??= new Address();
+                dto.Location.ApplyTo(entity.Location);
+            }
+        }
+
+        internal static void ApplyTo(this CancelEventRequest request, Event entity)
+        {
+            entity.EventStatus = "Cancelled";
+            entity.CancellationReason = request.Reason;
+            entity.AdditionalNotes = request.AdditionalNotes;
+            entity.CancelledAt = DateTime.UtcNow;
+        }
+
+        internal static Address ToEntity(this AddressDto dto) => new()
+        {
+            Street = dto.Street,
+            City = dto.City,
+            State = dto.State
+        };
+
+        internal static void ApplyTo(this AddressDto dto, Address address)
+        {
+            address.Street = dto.Street;
+            address.City = dto.City;
+            address.State = dto.State;
+        }
     }
 }

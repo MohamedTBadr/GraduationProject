@@ -7,21 +7,33 @@ namespace Application.DTOs
     public class CreateEventItemDto
     {
         public Guid EventId { get; set; }
-        public string ServiceImage { get; set; }
-        public string ServiceName { get; set; }
+        public string ServiceImage { get; set; } = string.Empty;
+        public string ServiceName { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public Guid VendorId { get; set; }
-        public string VendorName { get; set; }
+        public string VendorName { get; set; } = string.Empty;
         public int Quantity { get; set; }
     }
 
     public class UpdateEventItemDto
     {
-        public string ServiceImage { get; set; }
-        public string ServiceName { get; set; }
+        public string ServiceImage { get; set; } = string.Empty;
+        public string ServiceName { get; set; } = string.Empty;
         public decimal Price { get; set; }
-        public string VendorName { get; set; }
+        public string VendorName { get; set; } = string.Empty;
         public int Quantity { get; set; }
+    }
+
+    public class ApproveItemRequest
+    {
+        public bool Approve { get; set; }
+        public string? Reason { get; set; }
+    }
+
+    public class CancelEventRequest
+    {
+        public string? Reason { get; set; }
+        public string? AdditionalNotes { get; set; }
     }
 
     // ── Response DTOs ─────────────────────────────────────────────
@@ -30,11 +42,13 @@ namespace Application.DTOs
     {
         public Guid Id { get; set; }
         public Guid EventId { get; set; }
-        public string ServiceImage { get; set; }
-        public string ServiceName { get; set; }
+        public string ServiceName { get; set; } = string.Empty;
+        public string ServiceImage { get; set; } = string.Empty;
+        public Guid VendorId { get; set; }                  // ← was missing
+        public string VendorName { get; set; } = string.Empty;
         public decimal Price { get; set; }
-        public string VendorName { get; set; }
         public int Quantity { get; set; }
-        public decimal TotalPrice => Price * Quantity;
+        public string ItemStatus { get; set; } = "Pending"; // ← default value
+        public string? RejectionReason { get; set; }
     }
 }

@@ -69,8 +69,11 @@ namespace Application.Services
 
             var user = new ApplicationUser
             {
+                FirstName = request.firstName,
+                LastName = request.lastName,
                 Email = request.email,
-                UserName = request.name
+                UserName = request.name,
+                PhoneNumber = request.phoneNumber
             };
 
             // 1. Create User

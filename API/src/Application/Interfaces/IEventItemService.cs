@@ -7,12 +7,12 @@ namespace Application.Interfaces
 {
     public interface IEventItemService
     {
-        Task<EventItemResponseDto> GetByIdAsync(Guid id);
-        Task<IEnumerable<EventItemResponseDto>> GetByEventIdAsync(Guid eventId);
-        Task<EventItemResponseDto> CreateAsync(CreateEventItemDto dto);
-        Task<IEnumerable<EventItemResponseDto>> CreateRangeAsync(Guid eventId, IEnumerable<CreateEventItemDto> dtos);
-        Task<EventItemResponseDto> UpdateAsync(Guid id, UpdateEventItemDto dto);
-        Task<bool> DeleteAsync(Guid id);
+        Task<EventItemResponseDto> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<IEnumerable<EventItemResponseDto>> GetByEventIdAsync(Guid eventId, CancellationToken cancellationToken);
+        Task<EventItemResponseDto> CreateAsync(CreateEventItemDto dto, CancellationToken cancellationToken);
+        Task<IEnumerable<EventItemResponseDto>> CreateRangeAsync(Guid eventId, IEnumerable<CreateEventItemDto> dtos, CancellationToken cancellationToken);
+        Task<EventItemResponseDto> UpdateAsync(Guid id, UpdateEventItemDto dto, CancellationToken cancellationToken);
+        Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken);
         Task<bool> DeleteByEventIdAsync(Guid eventId);
     }
 }

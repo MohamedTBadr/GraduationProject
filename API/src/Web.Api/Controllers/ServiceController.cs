@@ -2,9 +2,12 @@
 using Application.DTOs.ServiceDTOs;
 using Application.Interfaces;
 using BLL;
+using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using Web.Api.Attributes;
+using Web.Api.Controllers.Attributes;
 
 namespace Web.Api.Controllers
 {
@@ -15,76 +18,89 @@ namespace Web.Api.Controllers
         private Guid userId => GetUserIdFromToken();
         // GET api/Services
         [HttpGet]
-        public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request)
+        [HybridCache(1800, "services")]
+
+        public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetAllAsync(request);
+            var result = await ServiceService.GetAllAsync(request, cancellationToken);
             return Ok(result);
         }
 
         // GET api/Services/{id}
         [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetByIdAsync(Guid id)
+        [HybridCache(1800, "services", "services/{id}")]
+        public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByIdAsync(id);
+            var result = await ServiceService.GetByIdAsync(id, cancellationToken);
             return Ok(result);
         }
 
         // GET api/Services/by-category/{categoryId}
         [HttpGet("by-category/{categoryId:guid}")]
-        public async Task<IActionResult> GetByCategoryAsync(Guid categoryId, [FromQuery] PaginatedRequest request)
+        [HybridCache(1800, "services")]
+
+        public async Task<IActionResult> GetByCategoryAsync(Guid categoryId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByCategoryIdAsync(categoryId, request);
+            var result = await ServiceService.GetByCategoryIdAsync(categoryId, request, cancellationToken);
             return Ok(result);
         }
 
         // GET api/Services/by-vendor/{vendorId}
         [HttpGet("by-vendor/{vendorId:guid}")]
-        public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request)
+        [HybridCache(1800)]
+
+        public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByVendorIdAsync(vendorId, request);
+            var result = await ServiceService.GetByVendorIdAsync(vendorId, request, cancellationToken);
             return Ok(result);
         }
 
         // GET api/Services/by-Service-type/{ServiceTypeId}
         [HttpGet("by-Service-type/{ServiceTypeId:guid}")]
-        public async Task<IActionResult> GetByServiceTypeAsync(Guid ServiceTypeId, [FromQuery] PaginatedRequest request)
+        [HybridCache(1800)]
+
+        public async Task<IActionResult> GetByServiceTypeAsync(Guid ServiceTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByServiceTypeIdAsync(ServiceTypeId, request);
+            var result = await ServiceService.GetByServiceTypeIdAsync(ServiceTypeId, request, cancellationToken);
             return Ok(result);
         }
 
         // POST api/Services
-        [Authorize(Roles = "Vendor" )]
+        [Authorize(Roles = "Vendor")]
         [HttpPost]
-        public async Task<IActionResult> CreateAsync([FromForm] CreateServiceRequest dto)
+        [InvalidateCache("services")]
+        public async Task<IActionResult> CreateAsync([FromForm] CreateServiceRequest dto, CancellationToken cancellationToken)
         {
             dto.VendorId = userId; // Ensure the Service is associated with the authenticated vendor
-            var result = await ServiceService.CreateAsync(dto);
+            var result = await ServiceService.CreateAsync(dto, cancellationToken);
 
             if (result.IsFailure)
                 return BadRequest(result); // filter handles the failure
-           
+
             return Created(); // filter handles the failure
         }
         [Authorize(Roles = "Admin")]
 
         // PUT api/Services/{id}
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateServiceDTO dto)
+        [InvalidateCache("services/{id}")]
+        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateServiceDTO dto, CancellationToken cancellationToken)
         {
             if (id != dto.Id)
                 return BadRequest(Error.Validation("Service.IdMismatch", "Route id and body id do not match."));
 
-            var result = await ServiceService.UpdateAsync(dto);
+            var result = await ServiceService.UpdateAsync(dto, cancellationToken);
+      
             return Ok(result);
         }
         [Authorize(Roles = "Admin")]
 
         // DELETE api/Services/{id}
         [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> DeleteAsync(Guid id)
+        [InvalidateCache("services/{id}", "services")]
+        public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.DeleteAsync(id);
+            var result = await ServiceService.DeleteAsync(id, cancellationToken);
 
             if (result.IsSuccess)
                 return NoContent();

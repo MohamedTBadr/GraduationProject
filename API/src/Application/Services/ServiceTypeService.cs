@@ -14,36 +14,36 @@ namespace Application.Services
 {
     public class ServiceTypeService(IServiceTypeRepository repository, IMapper mapper) :IServiceTypeService
     {
-        public async Task<Result<ServiceTypeDTO>> AddTypeAsync(CreateServiceTypeRequest type)
+        public async Task<Result<ServiceTypeDTO>> AddTypeAsync(CreateServiceTypeRequest type, CancellationToken cancellationToken)
         {
             var newType = mapper.Map<ServiceType>(type);
-            await repository.AddTypeAsync(newType);
+            await repository.AddTypeAsync(newType, cancellationToken);
             return Result<ServiceTypeDTO>.Success(mapper.Map<ServiceTypeDTO>(newType));
         }
 
-        public async Task<Result<ServiceTypeDTO>> DeleteTypeAsync(Guid id)
+        public async Task<Result<ServiceTypeDTO>> DeleteTypeAsync(Guid id, CancellationToken cancellationToken)
         {
-            var type = await repository.GetServiceTypeByIdAsync(id);
+            var type = await repository.GetServiceTypeByIdAsync(id, cancellationToken);
             if (type == null)
             {
                 return Result<ServiceTypeDTO>.NotFound("Service type not found");
             }
 
-            await repository.DeleteTypeAsync(id);
+            await repository.DeleteTypeAsync(id, cancellationToken);
             return Result<ServiceTypeDTO>.Success(mapper.Map<ServiceTypeDTO>(type));
 
         }
 
-        public async Task<Result<List<ServiceTypeDTO>>> GetAllServiceTypesAsync()
+        public async Task<Result<List<ServiceTypeDTO>>> GetAllServiceTypesAsync(CancellationToken cancellationToken)
         {
-            var types = await repository.GetAllServiceTypesAsync();
+            var types = await repository.GetAllServiceTypesAsync(cancellationToken);
             return Result<List<ServiceTypeDTO>>.Success(mapper.Map<List<ServiceTypeDTO>>(types));
 
         }
 
-        public async Task<Result<ServiceTypeDTO>> GetServiceTypeByIdAsync(Guid id)
+        public async Task<Result<ServiceTypeDTO>> GetServiceTypeByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var type = await repository.GetServiceTypeByIdAsync(id);
+            var type = await repository.GetServiceTypeByIdAsync(id, cancellationToken);
             if (type == null)
             {
                 return Result<ServiceTypeDTO>.NotFound("Service type not found");
@@ -51,15 +51,15 @@ namespace Application.Services
             return Result<ServiceTypeDTO>.Success(mapper.Map<ServiceTypeDTO>(type));
         }
 
-        public async Task<Result<ServiceTypeDTO>> UpdateTypeAsync(Guid id, UpdateServiceTypeRequest type)
+        public async Task<Result<ServiceTypeDTO>> UpdateTypeAsync(Guid id, UpdateServiceTypeRequest type, CancellationToken cancellationToken)
         {
-            var existingType = repository.GetServiceTypeByIdAsync(id);
+            var existingType = await repository.GetServiceTypeByIdAsync(id, cancellationToken);
             if (existingType == null)
             {
                 return Result<ServiceTypeDTO>.NotFound("Service type not found");
             }
 
-            await repository.UpdateTypeAsync(mapper.Map<ServiceType>(type));
+            await repository.UpdateTypeAsync(mapper.Map<ServiceType>(type), cancellationToken);
             return Result<ServiceTypeDTO>.Success(mapper.Map<ServiceTypeDTO>(type));
         }
     }

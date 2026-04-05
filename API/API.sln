@@ -3,9 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.11012.119
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseProxy", "ReverseProxy\ReverseProxy.csproj", "{AFE87ACE-DBCA-30AE-1107-1B9074C59EA9}"
-EndProject
+
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9BE80829-17B0-4218-AB85-8954CCD17711}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseProxy", "src\ReverseProxy\ReverseProxy.csproj", "{AFE87ACE-DBCA-30AE-1107-1B9074C59EA9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\Application\Application.csproj", "{58EE12E4-4F37-4898-9EA0-11FC55FC0AD0}"
 EndProject
@@ -52,6 +53,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{AFE87ACE-DBCA-30AE-1107-1B9074C59EA9} = {9BE80829-17B0-4218-AB85-8954CCD17711}
 		{58EE12E4-4F37-4898-9EA0-11FC55FC0AD0} = {9BE80829-17B0-4218-AB85-8954CCD17711}
 		{9041BC8B-C6B0-409C-B928-D6372352B50E} = {9BE80829-17B0-4218-AB85-8954CCD17711}
 		{1CA7FD7E-43C4-4877-87DB-AFB1E05EB007} = {9BE80829-17B0-4218-AB85-8954CCD17711}
