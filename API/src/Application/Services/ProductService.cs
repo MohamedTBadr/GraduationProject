@@ -22,9 +22,20 @@ namespace Application.Services
 
 
         public async Task<Result<PaginatedResponse<ServiceDTO>>> GetAllAsync(
-    PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken ct)
+         PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken ct)
         {
-            // 1. Determine Visibility Filter (The Business Logic)
+            Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
+
+            var result = await _ServiceRepository.GetAllAsync(request, visibilityFilter, ct);
+
+            var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
+
+            return Result<PaginatedResponse<ServiceDTO>>.Success(
+                new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
+        }
+
+        private static Expression<Func<Service, bool>> ShowVisibility(PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId)
+        {
             Expression<Func<Service, bool>> visibilityFilter = s => !s.IsHidden; // Default
 
             if (isAdmin && request.IncludeHidden)
@@ -36,39 +47,41 @@ namespace Application.Services
                 visibilityFilter = s => !s.IsHidden || s.VendorId == userId.Value;
             }
 
-            // 2. Call Repo with the "Instruction"
-            // Pass the identity flags down to the repository
-            var result = await _ServiceRepository.GetAllAsync(request, visibilityFilter, ct);
+            return visibilityFilter;
+        }
 
+        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByCategoryIdAsync(
+            Guid categoryId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken)
+        {
+            Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
+
+            var result = await _ServiceRepository.GetByCategoryIdAsync(categoryId, request, visibilityFilter, cancellationToken);
             var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
-
             return Result<PaginatedResponse<ServiceDTO>>.Success(
                 new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
         }
 
-
-        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, CancellationToken cancellationToken)
+        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByVendorIdAsync(
+            Guid vendorId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken)
         {
-            var result = await _ServiceRepository.GetByCategoryIdAsync(categoryId, request, cancellationToken);
+            Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
+
+            var result = await _ServiceRepository.GetByVendorIdAsync(vendorId, request, visibilityFilter, cancellationToken);
             var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
-            return Result<PaginatedResponse<ServiceDTO>>.Success(new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
+            return Result<PaginatedResponse<ServiceDTO>>.Success(
+                new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
         }
 
-        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request, CancellationToken cancellationToken)
+        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByServiceTypeIdAsync(
+            Guid serviceTypeId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken)
         {
-            var result = await _ServiceRepository.GetByVendorIdAsync(vendorId, request, cancellationToken);
+            Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
+
+            var result = await _ServiceRepository.GetByServiceTypeIdAsync(serviceTypeId, request, visibilityFilter, cancellationToken);
             var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
-            return Result<PaginatedResponse<ServiceDTO>>.Success(new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
+            return Result<PaginatedResponse<ServiceDTO>>.Success(
+                new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
         }
-
-        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request, CancellationToken cancellationToken)
-        {
-            var result = await _ServiceRepository.GetByServiceTypeIdAsync(ServiceTypeId, request, cancellationToken);
-            var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
-            return Result<PaginatedResponse<ServiceDTO>>.Success(new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
-        }
-
-
         public async Task<Result<ServiceDTO>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var Service = await _ServiceRepository.GetByIdAsync(id, cancellationToken);

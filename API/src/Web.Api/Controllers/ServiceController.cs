@@ -16,20 +16,16 @@ namespace Web.Api.Controllers
     [Route("api/[controller]")]
     public class ServiceController(IServiceService ServiceService) : BaseController
     {
-        private Guid userId => GetUserIdFromToken();
+        private Guid? UserId =>GetUserIdFromToken();
+        private bool IsAdmin => IsAdmin();
+        private bool IsVendor => IsVendor();
+
         // GET api/Services
         [HttpGet]
         [HybridCache(1800, "services")]
-
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            bool isAdmin = User.IsInRole("Admin");
-            bool isVendor = User.IsInRole("Vendor");
-            Guid? userId = User.Identity.IsAuthenticated
-                ? Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))
-                : null;
-
-            var result = await ServiceService.GetAllAsync(request, isAdmin, isVendor, userId, cancellationToken);
+            var result = await ServiceService.GetAllAsync(request, IsAdmin, IsVendor, UserId, cancellationToken);
             return Ok(result);
         }
 
@@ -45,40 +41,36 @@ namespace Web.Api.Controllers
         // GET api/Services/by-category/{categoryId}
         [HttpGet("by-category/{categoryId:guid}")]
         [HybridCache(1800, "services")]
-
         public async Task<IActionResult> GetByCategoryAsync(Guid categoryId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByCategoryIdAsync(categoryId, request, cancellationToken);
+            var result = await ServiceService.GetByCategoryIdAsync(categoryId, request, IsAdmin, IsVendor, UserId, cancellationToken);
             return Ok(result);
         }
 
         // GET api/Services/by-vendor/{vendorId}
         [HttpGet("by-vendor/{vendorId:guid}")]
         [HybridCache(1800)]
-
         public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByVendorIdAsync(vendorId, request, cancellationToken);
+            var result = await ServiceService.GetByVendorIdAsync(vendorId, request, IsAdmin, IsVendor, UserId, cancellationToken);
             return Ok(result);
         }
 
-        // GET api/Services/by-Service-type/{ServiceTypeId}
-        [HttpGet("by-Service-type/{ServiceTypeId:guid}")]
+        // GET api/Services/by-service-type/{serviceTypeId}
+        [HttpGet("by-service-type/{serviceTypeId:guid}")]
         [HybridCache(1800)]
-
-        public async Task<IActionResult> GetByServiceTypeAsync(Guid ServiceTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetByServiceTypeAsync(Guid serviceTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByServiceTypeIdAsync(ServiceTypeId, request, cancellationToken);
+            var result = await ServiceService.GetByServiceTypeIdAsync(serviceTypeId, request, IsAdmin, IsVendor, UserId, cancellationToken);
             return Ok(result);
         }
-
         // POST api/Services
         [Authorize(Roles = "Vendor")]
         [HttpPost]
         [InvalidateCache("services")]
         public async Task<IActionResult> CreateAsync([FromForm] CreateServiceRequest dto, CancellationToken cancellationToken)
         {
-            dto.VendorId = userId; // Ensure the Service is associated with the authenticated vendor
+            dto.VendorId = UserId; // Ensure the Service is associated with the authenticated vendor
             var result = await ServiceService.CreateAsync(dto, cancellationToken);
 
             if (result.IsFailure)
@@ -117,6 +109,7 @@ namespace Web.Api.Controllers
     
         [HttpPatch("{id}/status")]
         [Authorize(Roles = "Admin,Vendor")]
+        [InvalidateCache("services/{id}","services")]
         public async Task<IActionResult> ToggleStatus(Guid id, CancellationToken ct)
         {
             await ServiceService.ToggleStatusAsync(id, ct);
