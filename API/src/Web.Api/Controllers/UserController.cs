@@ -1,5 +1,6 @@
 ﻿using Application;
 using Application.DTOs.UserDTOs;
+using Application.Services.Helpers;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +14,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(UserManager<ApplicationUser> userManager): BaseController
+    public class UserController(UserManager<ApplicationUser> userManager, EmailSenderService emailSenderService): BaseController
     {
         [Authorize(Roles = "Admin")]
         [HttpGet]
@@ -91,6 +92,62 @@ namespace Web.Api.Controllers
 
             return Ok(userDto);
         }
+
+        [HttpPatch("suspend/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> SuspendUser(Guid id, [FromBody] string reason)
+        {
+            var user = await userManager.FindByIdAsync(id.ToString());
+            if (user == null) return NotFound();
+
+            user.IsSuspended = true;
+            user.SuspensionReason = reason;
+
+            // We still set LockoutEnd so the built-in Login system blocks them automatically
+            user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
+
+            await userManager.UpdateAsync(user);
+            await emailSenderService.SendEmailAsync(user.Email, "Account Suspended", $"Your account has been suspended for the following reason: {reason}");
+            return NoContent();
+        }
+
+
+        [HttpPatch("unsuspend/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UnsuspendUser(Guid id)
+        {
+            var user = await userManager.FindByIdAsync(id.ToString());
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            // 1. Reset the business flags
+            user.IsSuspended = false;
+            user.SuspensionReason = null;
+
+            // 2. Clear the technical lockout so the login system allows them in
+            // Passing 'null' removes the restriction immediately
+            await userManager.SetLockoutEndDateAsync(user, null);
+
+            // 3. Optional: Reset failed attempts 
+            // This prevents them from being locked out again if they had failed 
+            // logins before the admin suspended them.
+            await userManager.ResetAccessFailedCountAsync(user);
+
+            var result = await userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+            await emailSenderService.SendEmailAsync(user.Email, "Account Unsuspended", "Your account has been unsuspended. You can now log in.");
+            return NoContent();
+        }
+
+
+
+
+
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserDTO userDto)

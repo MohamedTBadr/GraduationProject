@@ -32,6 +32,11 @@ namespace Application.Services
             var user = await userManager.FindByEmailAsync(loginRequest.email) ??
                 throw new UserNotFoundException(loginRequest.email);
 
+
+            if(user.IsSuspended) {
+                    throw new UnauthorizedException("Your account is suspended. Please contact support.");
+            }
+
             // 2. Validate password
             var isValid = await userManager.CheckPasswordAsync(user, loginRequest.password);
 

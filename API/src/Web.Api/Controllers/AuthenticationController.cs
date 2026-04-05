@@ -35,8 +35,9 @@ namespace Web.Api.Controllers
 
                 throw new UnprocessableContentException(errors);
             }
-            var result = await ServiceManager.AuthenticationService.LogIn(loginRequest);
-            var response = Result<UserResponse>.Success(result);
+            var user = await ServiceManager.AuthenticationService.LogIn(loginRequest);
+
+            var response = Result<UserResponse>.Success(user);
             return Ok(response);
         }
 

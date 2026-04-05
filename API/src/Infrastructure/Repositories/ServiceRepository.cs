@@ -5,51 +5,62 @@ using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Registry;
 using Shared;
+using System.Linq.Expressions;
 namespace Infrastructure.Repositories
 {
     public class ServiceRepository(ApplicationDbContext _context ,ResiliencePipelineProvider<string> pipelineProvider) : IServiceRepository
     {
         private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
 
-        public async Task<PaginatedResponse<Service>> GetAllAsync(PaginatedRequest request, CancellationToken cancellationToken)
+        public async Task<PaginatedResponse<Service>> GetAllAsync(
+          PaginatedRequest request,
+          Expression<Func<Service, bool>> visibilityFilter, // Dynamic filter passed from Service
+          CancellationToken ct)
         {
-            var query = _context.Services
-                .Include(p => p.Category)
-                .Include(p => p.Vendor)
-                .Include(p => p.ServiceType)
-                .Include(p=>p.ServiceImages)
-                .AsNoTracking();
-
-            // Search
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-                query = query.Where(p =>
-                    p.Name.Contains(request.SearchTerm) ||
-                    p.Description.Contains(request.SearchTerm) ||
-                    p.Category.Name.Contains(request.SearchTerm) ||
-                    p.Vendor.BusinessName.Contains(request.SearchTerm) ||
-                    p.ServiceType.Name.Contains(request.SearchTerm));
-
-            // Sort
-            query = request.SortBy?.ToLower() switch
+            return await _pipeline.ExecuteAsync(async token =>
             {
-                "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
-                "category" => request.IsDescending ? query.OrderByDescending(p => p.Category.Name) : query.OrderBy(p => p.Category.Name),
-                "vendor" => request.IsDescending ? query.OrderByDescending(p => p.Vendor.BusinessName) : query.OrderBy(p => p.Vendor.BusinessName),
-                "Servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
-                _ => query.OrderBy(p => p.Name) // default
-            };
+                var query = _context.Services.AsNoTracking()
+                    .Where(visibilityFilter); // Just apply what the Service decided
 
-            // Replace PaginatedResult<Service> { Items = ..., TotalCount = ..., ... } with:
-            var totalCount = await query.CountAsync();
 
-            var items = await query
-                .Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync(cancellationToken);
 
-            return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+                // --- 2. SEARCH LOGIC ---
+                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+                {
+                    var search = request.SearchTerm.Trim();
+                    query = query.Where(p =>
+                        p.Name.Contains(search) ||
+                        p.Description.Contains(search) ||
+                        p.Category.Name.Contains(search) ||
+                        p.Vendor.BusinessName.Contains(search) ||
+                        p.ServiceType.Name.Contains(search));
+                }
+
+                // --- 3. SORTING LOGIC ---
+                query = request.SortBy?.ToLower() switch
+                {
+                    "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
+                    "category" => request.IsDescending ? query.OrderByDescending(p => p.Category.Name) : query.OrderBy(p => p.Category.Name),
+                    "vendor" => request.IsDescending ? query.OrderByDescending(p => p.Vendor.BusinessName) : query.OrderBy(p => p.Vendor.BusinessName),
+                    "servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
+                    _ => query.OrderBy(p => p.Name) 
+                };
+
+                // --- 4. EXECUTION ---
+                var totalCount = await query.CountAsync(token);
+
+                var items = await query
+                    .Include(p => p.Category)
+                    .Include(p => p.Vendor)
+                    .Include(p => p.ServiceType)
+                    .Include(p => p.ServiceImages)
+                    .Skip((request.PageIndex - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToListAsync(token);
+
+                return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+            }, ct);
         }
-
 
 
         public async Task<PaginatedResponse<Service>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, CancellationToken cancellationToken)
@@ -217,6 +228,18 @@ namespace Infrastructure.Repositories
         {
             return await _context.Services.AnyAsync(p => p.Id == id, cancellationToken);
         }
+
+
+        public async Task<bool> UpdateStatusAsync(Guid id, bool isActive, CancellationToken ct)
+        {
+            var rowsAffected = await _context.Services
+                .Where(s => s.Id == id)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(s => s.IsHidden, isActive), ct);
+
+            return rowsAffected > 0;
+        }
+
 
         public Task<List<Service>> AIFilterAsync(AIRequest AIRequest, CancellationToken cancellationToken)
         {

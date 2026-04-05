@@ -15,6 +15,9 @@ namespace Domain.Entities
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+
+        public bool IsSuspended { get; set; } = false; // Explicit business flag
+        public string? SuspensionReason { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
     }

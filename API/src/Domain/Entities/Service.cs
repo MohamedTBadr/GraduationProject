@@ -24,7 +24,7 @@ namespace Domain.Entities
 
         public List<ServiceImage> ServiceImages { get; set; }
 
-
+        public bool IsHidden { get; set; } = false;
 
 
     }

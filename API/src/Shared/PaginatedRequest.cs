@@ -8,7 +8,8 @@ namespace Shared
         int PageSize = 10,
         string? SearchTerm = null,
         string? SortBy = null,
-        bool IsDescending = false
+        bool IsDescending = false,
+        bool IncludeHidden = false
     );
 
     // ✅ Change to class or non-positional record

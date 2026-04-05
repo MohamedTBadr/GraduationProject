@@ -9,7 +9,7 @@ namespace Application.Services.Helpers
 {
     public class EmailSenderService(IConfiguration _config) : IEmailSender
         {
-        async Task IEmailSender.SendEmailAsync(string email, string subject, string htmlMessage)
+        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             var message = new MimeMessage();
             message.From.Add(MailboxAddress.Parse(_config["EmailSettings:FromEmail"]));

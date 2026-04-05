@@ -6,6 +6,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using System.Security.Claims;
 using Web.Api.Attributes;
 using Web.Api.Controllers.Attributes;
 
@@ -22,7 +23,13 @@ namespace Web.Api.Controllers
 
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetAllAsync(request, cancellationToken);
+            bool isAdmin = User.IsInRole("Admin");
+            bool isVendor = User.IsInRole("Vendor");
+            Guid? userId = User.Identity.IsAuthenticated
+                ? Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))
+                : null;
+
+            var result = await ServiceService.GetAllAsync(request, isAdmin, isVendor, userId, cancellationToken);
             return Ok(result);
         }
 
@@ -106,6 +113,14 @@ namespace Web.Api.Controllers
                 return NoContent();
 
             return Ok(result); // filter handles the failure
+        }
+    
+        [HttpPatch("{id}/status")]
+        [Authorize(Roles = "Admin,Vendor")]
+        public async Task<IActionResult> ToggleStatus(Guid id, CancellationToken ct)
+        {
+            await ServiceService.ToggleStatusAsync(id, ct);
+            return NoContent();
         }
     }
 }
