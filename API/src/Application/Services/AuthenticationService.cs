@@ -22,7 +22,7 @@ namespace Application.Services
                                      IConfiguration configuration,
                                      IOptions<JWTOptions> options,
                                      IEmailSender emailSender,
-                                     ApplicationDbContext dbContext
+                                     ApplicationDbContext dbContext,
                                      SseConnectionManager sseManager) : IAuthenticationService
     {
         // Define Refresh Token duration (e.g., 30 days)
