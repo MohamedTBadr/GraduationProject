@@ -34,9 +34,9 @@ namespace Web.Api.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [InvalidateCache("categories")]
-        public async Task<IActionResult> AddCategory(string name, CancellationToken cancellationToken)
+        public async Task<IActionResult> AddCategory(CreateCategoryRequest createCategory, CancellationToken cancellationToken)
         {
-            await categoryService.AddCategoryAsync(new CreateCategoryRequest(name), cancellationToken);
+            await categoryService.AddCategoryAsync( createCategory, cancellationToken);
             return Created();
         }
         [Authorize(Roles = "Admin")]
@@ -50,9 +50,9 @@ namespace Web.Api.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPatch("{id}")]
         [InvalidateCache("categories/{id}", "categories")]
-        public async Task<IActionResult> UpdateCategory(Guid id, string name, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateCategory(Guid id, UpdateCategoryRequest updateCategory, CancellationToken cancellationToken)
         {
-            await categoryService.UpdateCategoryAsync(id, new UpdateCategoryRequest(name), cancellationToken);
+            await categoryService.UpdateCategoryAsync(id, updateCategory, cancellationToken);
             return Ok();
 
         }

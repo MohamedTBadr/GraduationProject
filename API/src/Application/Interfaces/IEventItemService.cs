@@ -13,6 +13,6 @@ namespace Application.Interfaces
         Task<IEnumerable<EventItemResponseDto>> CreateRangeAsync(Guid eventId, IEnumerable<CreateEventItemDto> dtos, CancellationToken cancellationToken);
         Task<EventItemResponseDto> UpdateAsync(Guid id, UpdateEventItemDto dto, CancellationToken cancellationToken);
         Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken);
-        Task<bool> DeleteByEventIdAsync(Guid eventId);
+        Task<bool> DeleteByEventIdAsync(Guid eventId, CancellationToken cancellationToken);
     }
 }

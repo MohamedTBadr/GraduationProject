@@ -35,7 +35,7 @@ namespace Application.DTOs.ServiceDTOs
         public decimal LeadTimeRequired { get; set; } // in weeks
     }
 
-    public record UpdateServiceDTO
+    public record UpdateServiceTypeDTO
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

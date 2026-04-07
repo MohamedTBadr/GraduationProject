@@ -83,7 +83,7 @@ namespace Web.Api.Controllers
         // PUT api/Services/{id}
         [HttpPut("{id:guid}")]
         [InvalidateCache("services/{id}")]
-        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateServiceDTO dto, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateServiceTypeDTO dto, CancellationToken cancellationToken)
         {
             if (id != dto.Id)
                 return BadRequest(Error.Validation("Service.IdMismatch", "Route id and body id do not match."));

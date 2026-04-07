@@ -63,7 +63,7 @@ namespace Infrastructure.Repositories
         }
 
 
-        public async Task<PaginatedResponse<Service>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, CancellationToken cancellationToken)
+        public async Task<PaginatedResponse<Service>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter,  CancellationToken cancellationToken)
         {
             var query = _context.Services
                 .Include(p => p.Category)
@@ -96,7 +96,7 @@ namespace Infrastructure.Repositories
             return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
         }
 
-        public async Task<PaginatedResponse<Service>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request, CancellationToken cancellationToken)
+        public async Task<PaginatedResponse<Service>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken)
         {
             var query = _context.Services
                 .Include(p => p.Category)
@@ -129,7 +129,10 @@ namespace Infrastructure.Repositories
             return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
         }
 
-        public async Task<PaginatedResponse<Service>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request, CancellationToken cancellationToken)
+        public async Task<PaginatedResponse<Service>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request
+,                      Expression<Func<Service, bool>> visibilityFilter
+
+            , CancellationToken cancellationToken)
         {
             var query = _context.Services
                 .Include(p => p.Category)
@@ -161,7 +164,7 @@ namespace Infrastructure.Repositories
 
             return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
         }
-        public async Task<Service> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<Service> GetByIdAsync(Guid id,  CancellationToken cancellationToken)
         {
             return await _context.Services
                 .Include(p => p.Category)

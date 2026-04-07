@@ -31,10 +31,10 @@ public class ChatHub(IChatService chatService) : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendMessage(Guid receiverId, string content)
+    public async Task SendMessage(Guid receiverId, string content, CancellationToken cancellationToken)
     {
         var message = await chatService
-            .SendMessageAsync(CurrentUserId, receiverId, content);
+            .SendMessageAsync(CurrentUserId, receiverId, content,cancellationToken);
 
         // confirm to sender
         await Clients.Caller.SendAsync("ReceiveMessage", message);
@@ -44,20 +44,21 @@ public class ChatHub(IChatService chatService) : Hub
             .SendAsync("ReceiveMessage", message);
     }
 
-    public async Task MarkAsRead(Guid messageId)
+    public async Task MarkAsRead(Guid messageId, CancellationToken cancellationToken)
     {
-        await chatService.MarkAsReadAsync(messageId, CurrentUserId);
+        await chatService.MarkAsReadAsync(messageId, CurrentUserId, cancellationToken);
 
-        await Clients.Caller.SendAsync("MessageRead", messageId);
+        await Clients.Caller.SendAsync("MessageRead", messageId, cancellationToken);
     }
 
-    public async Task Typing(Guid receiverId, bool isTyping)
+    public async Task Typing(Guid receiverId, bool isTyping , CancellationToken cancellationToken)
     {
         await Clients.User(receiverId.ToString())
             .SendAsync("UserTyping", new
             {
                 UserId = CurrentUserId,
                 IsTyping = isTyping
+
             });
     }
 }

@@ -301,7 +301,7 @@ namespace Web.Api
 
 
             // Registering the Paymob Client with a built-in Resilience Pipeline
-            builder.Services.AddHttpClient("PaymobClient", (sp, client) =>
+            Services.AddHttpClient("PaymobClient", (sp, client) =>
             {
                 var options = sp.GetRequiredService<IOptions<PaymobOptions>>().Value;
                 client.BaseAddress = new Uri(options.BaseUrl);

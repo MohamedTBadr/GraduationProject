@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Application.Services
 {
-    public class ServiceTypeService(IServiceTypeRepository repository, IMapper mapper) :IServiceTypeService
+    public class ServiceTypeService(IServiceTypeRepository repository, IMapper mapper) : IServiceTypeService
     {
         public async Task<Result<ServiceTypeDTO>> AddTypeAsync(CreateServiceTypeRequest type, CancellationToken cancellationToken)
         {
@@ -59,8 +59,14 @@ namespace Application.Services
                 return Result<ServiceTypeDTO>.NotFound("Service type not found");
             }
 
-            await repository.UpdateTypeAsync(mapper.Map<ServiceType>(type), cancellationToken);
-            return Result<ServiceTypeDTO>.Success(mapper.Map<ServiceTypeDTO>(type));
+            // ✅ Map request properties onto the tracked existing entity
+            mapper.Map(type, existingType);
+
+            await repository.UpdateTypeAsync(existingType, cancellationToken);
+
+            var serviceType = mapper.Map<ServiceTypeDTO>(existingType);
+
+            return Result<ServiceTypeDTO>.Success(serviceType);
         }
     }
-}
+    }

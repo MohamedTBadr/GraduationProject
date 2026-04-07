@@ -129,7 +129,7 @@ namespace Application.Services
             return Result<ServiceDTO>.Success(_mapper.Map<ServiceDTO>(created));
         }
 
-        public async Task<Result<ServiceDTO>> UpdateAsync(UpdateServiceDTO dto, CancellationToken cancellationToken)
+        public async Task<Result<ServiceDTO>> UpdateAsync(UpdateServiceTypeDTO dto, CancellationToken cancellationToken)
         {
             var exists = await _ServiceRepository.ExistsAsync(dto.Id, cancellationToken);
             if (!exists)

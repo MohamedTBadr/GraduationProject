@@ -6,6 +6,7 @@ using Application.Interfaces;
 using Application.Interfaces.Services;
 using Application.Services;
 using Application.Services.Helpers;
+using Infrastructure.Payments;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

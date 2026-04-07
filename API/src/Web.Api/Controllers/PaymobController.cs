@@ -1,6 +1,6 @@
 ﻿using Application.DTOs.PaymobDTOs;
 using Application.Services;
-
+using Infrastructure.Payments;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Api.Controllers
@@ -17,12 +17,11 @@ namespace Web.Api.Controllers
         }
 
         [HttpPost("paymob")]
-        public async Task<IActionResult> CreatePayment([FromBody] PaymentRequest request)
+        public async Task<IActionResult> CreatePayment([FromBody] PaymentRequest request, CancellationToken cancellationToken)
         {
             var iframeUrl = await _paymob.CreatePaymentAsync(
                 request.Amount,
-                request.Billing);
-
+                request.Billing, cancellationToken);
             return Ok(new { iframeUrl });
         }
 

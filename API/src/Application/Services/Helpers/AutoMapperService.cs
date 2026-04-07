@@ -17,6 +17,7 @@ namespace Application.Services.Helpers
         {
             #region Category
             CreateMap<CreateCategoryRequest, Category>();
+            CreateMap<UpdateCategoryRequest, Category>();
             CreateMap<CategoryDTO, Category>().ReverseMap();
             CreateMap<Category,CategoryDTO>().ReverseMap();
             #endregion
@@ -32,6 +33,8 @@ namespace Application.Services.Helpers
 
             #region ServiceType
             CreateMap<CreateServiceTypeRequest, ServiceType>().ReverseMap();
+            CreateMap<UpdateServiceTypeRequest, ServiceType>().ReverseMap();
+            CreateMap<UpdateServiceTypeRequest, ServiceTypeDTO>().ReverseMap();
             CreateMap<ServiceTypeDTO, ServiceType>().ReverseMap();
             #endregion
 
@@ -53,7 +56,7 @@ namespace Application.Services.Helpers
             CreateMap<CreateServiceRequest, Service>()
                 .ForMember(d => d.ServiceImages, o => o.Ignore());
             // Update DTO → Entity
-            CreateMap<UpdateServiceDTO, Service>();
+            CreateMap<UpdateServiceTypeDTO, Service>();
             #endregion
 
             #region Vendor

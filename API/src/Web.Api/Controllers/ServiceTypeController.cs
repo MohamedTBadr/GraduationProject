@@ -42,8 +42,9 @@ namespace Web.Api.Controllers
             await ServiceTypeService.AddTypeAsync(type, cancellationToken);
             return Created();
         }
-        [Authorize(Roles = "Admin")]
 
+
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         [InvalidateCache("serviceTypes/{id}", "serviceTypes")]
         public async Task<IActionResult> DeleteServiceType(Guid id, CancellationToken cancellationToken)
@@ -58,7 +59,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> UpdateServiceType(Guid id, UpdateServiceTypeRequest type, CancellationToken cancellationToken)
         {
             await ServiceTypeService.UpdateTypeAsync(id, type, cancellationToken);
-            return Ok();
+            return NoContent();
         }
     }
 }

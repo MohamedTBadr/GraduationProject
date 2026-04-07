@@ -25,9 +25,10 @@ public class ChatController : BaseController
     [HttpGet("messages/{otherUserId}")]
     public async Task<IActionResult> GetMessages(
         Guid otherUserId,
+         CancellationToken cancellationToken,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 100,
-        CancellationToken cancellationToken)  
+        [FromQuery] int pageSize = 100
+       )  
     {
         var messages = await _chatService
             .GetMessagesAsync(CurrentUserId, otherUserId, page, pageSize, cancellationToken);
