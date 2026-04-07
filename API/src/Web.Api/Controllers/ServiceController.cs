@@ -115,5 +115,17 @@ namespace Web.Api.Controllers
             await ServiceService.ToggleStatusAsync(id, ct);
             return NoContent();
         }
+
+        [HttpPost("{id}/ratings")]
+        [Authorize(Roles = "User")]
+        [InvalidateCache("services/{id}")]
+        public async Task<IActionResult> AddRatingAsync(Guid id, ServiceRatingRequest dto, CancellationToken cancellationToken)
+        {
+            dto.UserId = UserId; // Ensure the rating is associated with the authenticated user
+            dto.ServiceId = id; // Ensure the rating is associated with the correct service
+            await ServiceService.AddRatingAsync(dto, cancellationToken);
+            
+            return Created(); // filter handles the failure
+        }
     }
 }

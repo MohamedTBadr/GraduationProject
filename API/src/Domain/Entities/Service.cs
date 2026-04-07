@@ -27,5 +27,9 @@ namespace Domain.Entities
         public bool IsHidden { get; set; } = false;
 
 
+        public ICollection<ServiceRating> ServiceRatings { get; set; }
+
+
+
     }
 }

@@ -3,6 +3,7 @@ using Application.DTOs.VendorDTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
 using Web.Api.Attributes;
 using Web.Api.Controllers.Attributes;
 
@@ -14,9 +15,11 @@ namespace Web.Api.Controllers
     {
         [HttpGet]
         [HybridCache(1800,"vendors")]
-        public async Task<IActionResult> GetVendorsAsync(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetVendorsAsync(PaginatedRequest paginatedRequest, CancellationToken cancellationToken)
         {
-            var vendors= await vendorService.GetVendorsAsync(cancellationToken);
+            var isAdmin = User.IsInRole("Admin");
+
+            var vendors = await vendorService.GetVendorsAsync(paginatedRequest,isAdmin, cancellationToken);
             return Ok(vendors);
         }
 

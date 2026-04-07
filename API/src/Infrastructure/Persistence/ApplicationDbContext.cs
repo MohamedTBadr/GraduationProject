@@ -41,16 +41,16 @@ namespace Infrastructure.Persistence
 
 
 
-            builder.Entity<VendorRating>()
+            builder.Entity<ServiceRating>()
                 .HasOne(vr => vr.User)
                 .WithMany()
                 .HasForeignKey(vr => vr.UserId)
                 .OnDelete(DeleteBehavior.NoAction); // 👈 Important
 
-            builder.Entity<VendorRating>()
-                .HasOne(vr => vr.Vendor)
-                .WithMany(v => v.VendorRatings)
-                .HasForeignKey(vr => vr.VendorId)
+            builder.Entity<ServiceRating>()
+                .HasOne(vr => vr.Service)
+                .WithMany(s => s.ServiceRatings)
+                .HasForeignKey(vr => vr.ServiceId)
                 .OnDelete(DeleteBehavior.Cascade); // 👈 keep this
 
             builder.Entity<Conversation>()
@@ -88,7 +88,7 @@ namespace Infrastructure.Persistence
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<VendorServiceType> VendorServiceTypes { get; set; }
-        public DbSet<VendorRating> VendorRatings { get; set; }
+        public DbSet<ServiceRating> ServiceRatings { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<EventItem> EventItems { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }

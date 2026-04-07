@@ -243,6 +243,13 @@ namespace Infrastructure.Repositories
             return rowsAffected > 0;
         }
 
+        public async Task  AddRatingAsync(ServiceRating rating, CancellationToken cancellationToken)
+        {
+
+            rating.Id = Guid.NewGuid();
+            await _context.ServiceRatings.AddAsync(rating, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
         public Task<List<Service>> AIFilterAsync(AIRequest AIRequest, CancellationToken cancellationToken)
         {
@@ -257,6 +264,17 @@ namespace Infrastructure.Repositories
                 query = query.Where(p => p.Category.Name == AIRequest.CategoryName);
 
             return query.ToListAsync(cancellationToken);
+        }
+
+        public async Task<bool> HasUserPurchasedAsync(Guid userId, Guid serviceId, CancellationToken cancellationToken)
+        {
+            // 1. Use AnyAsync to actually free up the thread during I/O
+            // 2. Pass the cancellationToken to the database provider
+            // 3. Remove .Include() for cleaner syntax
+            return await _context.Orders
+                .AnyAsync(o => o.UserId == userId &&
+                               o.OrderItems.Any(oi => oi.ServiceId == serviceId),
+                          cancellationToken);
         }
     }
 }

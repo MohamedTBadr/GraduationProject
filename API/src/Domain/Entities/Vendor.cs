@@ -24,7 +24,7 @@ namespace Domain.Entities
         public ICollection<VendorServiceType> VendorServiceTypes { get; set; }
         public ICollection<Service> Services { get; set; }
         public ICollection<Package> Packages { get; set; } 
-        public ICollection<VendorRating> VendorRatings { get; set; } 
+        public ICollection<ServiceRating> VendorRatings { get; set; } 
         public decimal YearsInBusiness { get; set; }
 
         public string Description { get; set; }

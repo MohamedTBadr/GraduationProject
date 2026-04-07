@@ -1,5 +1,6 @@
 ﻿
 using Domain.Entities;
+using Google.GenAI.Types;
 using Shared;
 using System.Linq.Expressions;
 namespace Domain.Contracts
@@ -36,6 +37,11 @@ namespace Domain.Contracts
             Task DeleteAsync(Guid id, CancellationToken cancellationToken);
             Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken);
         Task<bool> UpdateStatusAsync(Guid id, bool isActive, CancellationToken ct);
+        Task AddRatingAsync(ServiceRating rating, CancellationToken cancellationToken);
+
+
+        Task<bool> HasUserPurchasedAsync(Guid userId, Guid serviceId, CancellationToken cancellationToken);
+
         Task<List<Service>> AIFilterAsync(AIRequest AIRequest, CancellationToken cancellationToken);
     }
     }

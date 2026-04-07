@@ -7,18 +7,37 @@ using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shared;
+using System.Linq.Expressions;
 
 
 namespace Application.Services
 {
     public class VendorService(UserManager<ApplicationUser> userManager, IVendorRepository vendorRepository, ApplicationDbContext dbContext, IMapper mapper) : IVendorService
     {
-        public async Task<Result<List<VendorListDTO>>> GetVendorsAsync(CancellationToken cancellationToken)
+        public async Task<Result<PaginatedResponse<VendorListDTO>>> GetVendorsAsync(
+      PaginatedRequest paginatedRequest,
+      bool isAdmin,
+      CancellationToken cancellationToken)
         {
-            // Simulate fetching vendors from a database or Service
-            var vendors = await vendorRepository.GetVendorsAsync(cancellationToken); 
-            var vendorListDTOs = mapper.Map<List<VendorListDTO>>(vendors);
-            return Result<List<VendorListDTO>>.Success(vendorListDTOs);
+            // ✅ Admin sees all, others only see verified
+            Expression<Func<Vendor, bool>> visibilityFilter = isAdmin
+                ? v => true
+                : v => v.IsVerified;
+
+            var vendors = await vendorRepository.GetVendorsAsync(
+                paginatedRequest,
+                visibilityFilter,
+                cancellationToken);
+
+            var mappedItems = mapper.Map<List<VendorListDTO>>(vendors.Items);
+            var response = new PaginatedResponse<VendorListDTO>(
+                mappedItems,
+                vendors.TotalCount,
+                vendors.PageNumber,
+                vendors.PageSize);
+
+            return Result<PaginatedResponse<VendorListDTO>>.Success(response);
         }
 
         public async Task<Result<VendorDetailsDTO>> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken)

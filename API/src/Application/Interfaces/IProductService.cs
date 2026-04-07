@@ -20,7 +20,7 @@ namespace Application.Interfaces
         Task<Result<ServiceDTO>> CreateAsync(CreateServiceRequest dto, CancellationToken cancellationToken);
         Task<Result<ServiceDTO>> UpdateAsync(UpdateServiceTypeDTO dto, CancellationToken cancellationToken);
         Task<Result<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken);
-
+        Task AddRatingAsync(ServiceRatingRequest dto, CancellationToken cancellationToken);
         Task ToggleStatusAsync(Guid id, CancellationToken ct);
     }
 }

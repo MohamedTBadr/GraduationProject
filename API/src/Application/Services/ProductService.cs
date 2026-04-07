@@ -139,7 +139,30 @@ namespace Application.Services
             var updated = await _ServiceRepository.UpdateAsync(Service, cancellationToken);
             return Result<ServiceDTO>.Success(_mapper.Map<ServiceDTO>(updated));
         }
+        public async Task AddRatingAsync(ServiceRatingRequest dto, CancellationToken cancellationToken)
+        {
+            if (dto.UserId is not Guid userId)
+            {
+                throw new BadRequestException(new List<string> { "User ID is required to add a rating." });
+            }
 
+
+            var hasPurchased = await _ServiceRepository.HasUserPurchasedAsync(dto.UserId.Value, dto.ServiceId, cancellationToken);
+            if (!hasPurchased)
+                throw new BadRequestException(new List<string> { "User cannot rate a service they did not purchase." });
+
+
+          
+            var rating = new ServiceRating
+            {
+                Id = Guid.NewGuid(),
+                ServiceId = dto.ServiceId,
+                UserId = (Guid)dto.UserId, // Handle null user ID as needed
+                Rating = dto.Rating,
+                Review = dto.Review
+            };
+            await _ServiceRepository.AddRatingAsync(rating, cancellationToken);
+        }
         public async Task<Result<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
             var exists = await _ServiceRepository.ExistsAsync(id, cancellationToken);

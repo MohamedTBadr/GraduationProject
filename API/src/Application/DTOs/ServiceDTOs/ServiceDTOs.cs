@@ -48,6 +48,12 @@ namespace Application.DTOs.ServiceDTOs
     }
 
 
-
+    public record ServiceRatingRequest
+    {
+        public Guid? UserId { get; set; }
+        public Guid ServiceId { get; set; }
+        public decimal Rating { get; set; }
+        public string Review { get; set; }
+    }
 
 }

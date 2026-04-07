@@ -22,10 +22,6 @@ namespace Application.Services.Helpers
             CreateMap<Category,CategoryDTO>().ReverseMap();
             #endregion
 
-
-
-
-
             #region User
             CreateMap<UserDTO, ApplicationUser>();
             CreateMap<CreateUserRequest, ApplicationUser>();
@@ -37,9 +33,6 @@ namespace Application.Services.Helpers
             CreateMap<UpdateServiceTypeRequest, ServiceTypeDTO>().ReverseMap();
             CreateMap<ServiceTypeDTO, ServiceType>().ReverseMap();
             #endregion
-
-
-
 
             #region Service
             // Entity → Read DTO
@@ -60,12 +53,15 @@ namespace Application.Services.Helpers
             #endregion
 
             #region Vendor
-            CreateMap<VendorDetailsDTO, Vendor>().ReverseMap();
-            CreateMap<CreateVendorRequest, Vendor>().ReverseMap();
+            CreateMap<Vendor, VendorDetailsDTO>()
+                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src =>
+                    src.Services.SelectMany(s => s.ServiceRatings).Any()
+                    ? src.Services.SelectMany(s => s.ServiceRatings).Average(r => r.Rating)
+                    : 0)); CreateMap<CreateVendorRequest, Vendor>().ReverseMap();
             CreateMap<VendorListDTO, Vendor>().ReverseMap();
             //CreateMap<Vendor, VendorListDTO>().ForMember(d => d.UserId, o => o.MapFrom(s => s.User.Id));
-            CreateMap<VendorRating, VendorRatingDTO>()
-                .ForMember(dest => dest.VendorName, opt => opt.MapFrom(src => src.Vendor.BusinessName))
+            CreateMap<ServiceRating, VendorRatingDTO>()
+                .ForMember(dest => dest.VendorName, opt => opt.MapFrom(src => src.Service.Vendor.BusinessName))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName));
                 
             // Remove .ReverseMap() — mapping back from DTO to Entity doesn't make sense here

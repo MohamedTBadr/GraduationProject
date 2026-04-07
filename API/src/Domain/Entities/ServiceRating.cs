@@ -4,11 +4,11 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class VendorRating
+    public class ServiceRating
     {
         public Guid Id { get; set; }
-        public Vendor Vendor { get; set; }
-        public Guid  VendorId { get; set; }
+        public Service Service { get; set; }
+        public Guid  ServiceId { get; set; }
 
         public ApplicationUser User { get; set; }   
         public Guid UserId { get; set; }

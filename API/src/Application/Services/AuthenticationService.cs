@@ -2,6 +2,7 @@ using Application.DTOs.AuthenticationDTOs;
 using Application.Interfaces;
 
 using Domain.Entities;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ namespace Application.Services
                                      IConfiguration configuration,
                                      IOptions<JWTOptions> options,
                                      IEmailSender emailSender,
+                                     ApplicationDbContext dbContext
                                      SseConnectionManager sseManager) : IAuthenticationService
     {
         // Define Refresh Token duration (e.g., 30 days)
@@ -32,30 +34,36 @@ namespace Application.Services
             var user = await userManager.FindByEmailAsync(loginRequest.email) ??
                 throw new UserNotFoundException(loginRequest.email);
 
-
-            if(user.IsSuspended) {
-                    throw new UnauthorizedException("Your account is suspended. Please contact support.");
-            }
+            if (user.IsSuspended)
+                throw new UnauthorizedException("Your account is suspended. Please contact support.");
 
             // 2. Validate password
             var isValid = await userManager.CheckPasswordAsync(user, loginRequest.password);
 
-            if (isValid)
+            if (!isValid)
+                throw new UnauthorizedException("Invalid credentials.");
+
+            // 3. Check if vendor is verified
+            var roles = await userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault() ?? string.Empty;
+
+            if (role == "Vendor")
             {
-                // 3. Generate Access Token and Refresh Token
-                var accessToken = await GenerateAccessTokenAsync(user);
-                var refreshToken = GenerateNewRefreshToken();
+                var vendor = await dbContext.Vendors.FirstOrDefaultAsync(v => v.UserId == user.Id);
 
-                // 4. Update user entity with the new Refresh Token
-                await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays);
-
-                // 5. Return both tokens
-                var roles = await userManager.GetRolesAsync(user);
-                var role = roles.FirstOrDefault() ?? string.Empty;
-                return new(user.UserName!, user.Email!, accessToken, refreshToken, role);
+                if (vendor is null || !vendor.IsVerified)
+                    throw new BadRequestException(new List<string> { "Your vendor account is not verified yet. Please wait for approval." });
             }
 
-            throw new UnauthorizedException("Invalid credentials.");
+            // 4. Generate Access Token and Refresh Token
+            var accessToken = await GenerateAccessTokenAsync(user);
+            var refreshToken = GenerateNewRefreshToken();
+
+            // 5. Update user entity with the new Refresh Token
+            await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays);
+
+            // 6. Return both tokens
+            return new(user.UserName!, user.Email!, accessToken, refreshToken, role);
         }
 
         public async Task<bool> CheckIfEmailExists(string email) => (await userManager.FindByEmailAsync(email)) != null;
