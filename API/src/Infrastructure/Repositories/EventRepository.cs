@@ -23,7 +23,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.Category)
-                .Include(e => e.Location)
+                //.Include(e => e.Location)
                 .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
         }
 
@@ -31,7 +31,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.Category)
-                .Include(e => e.Location)       // ← was commented out; mapper needs it
+                //.Include(e => e.Location)       // ← was commented out; mapper needs it
                 .Include(e => e.EventItems)
                 .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
         }
@@ -40,7 +40,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.Category)
-                .Include(e => e.Location)
+                //.Include(e => e.Location)
                 .Include(e => e.EventItems)
                 .ToListAsync(cancellationToken);
         }
@@ -49,7 +49,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.Category)
-                .Include(e => e.Location)       // ← was commented out
+                //.Include(e => e.Location)       // ← was commented out
                 .Include(e => e.EventItems)
                 .Where(e => e.UserId == userId)
                 .ToListAsync(cancellationToken);
@@ -59,7 +59,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Events
                 .Include(e => e.Category)
-                .Include(e => e.Location)
+                //.Include(e => e.Location)
                 .Include(e => e.EventItems)     // ← was missing; SummaryDto needs ItemCount
                 .Where(e => e.EventStatus == status)
                 .ToListAsync(cancellationToken);
@@ -80,7 +80,7 @@ namespace Infrastructure.Repositories
             // Re-fetch to ensure all navigations are loaded for the mapper
             return await _context.Events
                 .Include(e => e.Category)
-                .Include(e => e.Location)
+                //.Include(e => e.Location)
                 .Include(e => e.EventItems)
                 .FirstAsync(e => e.Id == entity.Id);
         }
