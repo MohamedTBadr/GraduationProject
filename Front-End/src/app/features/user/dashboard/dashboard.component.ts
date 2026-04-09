@@ -1,79 +1,107 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { EventService } from '../../../core/services/event.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { EventResponseDto } from '../../../shared/types/api.interfaces';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule],
+  providers: [DatePipe],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   stats = [
-    { label: 'Active Events', value: '3', icon: '📅' },
-    { label: 'Booked Vendors', value: '7', icon: '' },
-    { label: 'Tasks Remaining', value: '12', icon: '' },
-    { label: 'Budget Used', value: '68%', icon: '' }
+    { label: 'Active Events', value: '0', icon: '📅' },
+    { label: 'Booked Vendors', value: '0', icon: '🏪' },
+    { label: 'Pending Requests', value: '0', icon: '⏳' },
+    { label: 'Avg Budget Used', value: '0%', icon: '💰' }
   ];
 
-  events = [
-    {
-      id: 1,
-      name: 'Engagement Party',
-      date: '2026-06-12',
-      type: 'Engagement',
-      guests: 60,
-      daysLeft: 92,
-      vendorsConfirmed: 2,
-      totalVendors: 4,
-      vendorProgress: '2/4 Confirmed',
-      tasksDone: 4,
-      totalTasks: 12,
-      tasksProgress: '8 Remaining',
-      budgetUsed: 6200,
-      totalBudget: 10000,
-      budgetProgress: '62%'
-    },
-    {
-      id: 2,
-      name: 'Brother\'s Wedding',
-      date: '2026-09-20',
-      type: 'Wedding',
-      guests: 250,
-      daysLeft: 192,
-      vendorsConfirmed: 4,
-      totalVendors: 6,
-      vendorProgress: '4/6 Confirmed',
-      tasksDone: 2,
-      totalTasks: 15,
-      tasksProgress: '13 Remaining',
-      budgetUsed: 35000,
-      totalBudget: 80000,
-      budgetProgress: '43%'
-    },
-    {
-      id: 3,
-      name: 'Company Conference',
-      date: '2026-04-05',
-      type: 'Corporate',
-      guests: 120,
-      daysLeft: 24,
-      vendorsConfirmed: 1,
-      totalVendors: 1,
-      vendorProgress: '1/1 Confirmed',
-      tasksDone: 0,
-      totalTasks: 2,
-      tasksProgress: '2 Remaining',
-      budgetUsed: 19950,
-      totalBudget: 35000,
-      budgetProgress: '57%'
+  events: any[] = [];
+  loading = true;
+
+  constructor(
+    private router: Router,
+    private eventService: EventService,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit() {
+    this.loadDashboardData();
+  }
+
+  loadDashboardData() {
+    const user = this.authService.user();
+    if (!user || user.role !== 'User') {
+      this.loading = false;
+      return;
     }
-  ];
 
-  constructor(private router: Router) {}
+    this.eventService.getByUser(user.id).subscribe({
+      next: (data: EventResponseDto[]) => {
+        this.processEventsData(data);
+        this.loading = false;
+      },
+      error: () => {
+        console.error('Failed to load events');
+        this.loading = false;
+      }
+    });
+  }
 
-  goToEvent(id: number) {
+  processEventsData(data: EventResponseDto[]) {
+    let totalVendors = 0;
+    let pendingVendors = 0;
+    let totalBudgetSum = 0;
+    let spentBudgetSum = 0;
+
+    this.events = data.map(ev => {
+      const today = new Date();
+      const evDate = new Date(ev.eventDate);
+      const diffTime = evDate.getTime() - today.getTime();
+      const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+      const totalEvVendors = ev.eventItems ? ev.eventItems.length : 0;
+      const confirmedVendors = ev.eventItems ? ev.eventItems.filter(i => i.itemStatus === 'Approved').length : 0;
+      const pendingEvVendors = ev.eventItems ? ev.eventItems.filter(i => i.itemStatus === 'Pending').length : 0;
+
+      totalVendors += confirmedVendors;
+      pendingVendors += pendingEvVendors;
+
+      const budgetUsed = ev.eventItems ? ev.eventItems.reduce((acc, item) => acc + ((item.itemStatus === 'Approved' || item.itemStatus === 'Pending') ? item.price : 0), 0) : 0;
+      totalBudgetSum += ev.totalBudget || 0;
+      spentBudgetSum += budgetUsed;
+
+      return {
+        id: ev.id,
+        name: ev.title || 'Untitled Event',
+        date: ev.eventDate,
+        type: ev.categoryName || 'General',
+        guests: ev.guestCount || 0,
+        daysLeft,
+        vendorsConfirmed: confirmedVendors,
+        totalVendors: totalEvVendors,
+        vendorProgress: totalEvVendors > 0 ? `${confirmedVendors}/${totalEvVendors} Confirmed` : 'No vendors',
+        tasksDone: confirmedVendors, 
+        totalTasks: totalEvVendors > 0 ? totalEvVendors + 2 : 2, 
+        tasksProgress: 'Mock Tasks',
+        budgetUsed,
+        totalBudget: ev.totalBudget || 1, 
+        budgetProgress: ev.totalBudget ? `${Math.round((budgetUsed / ev.totalBudget) * 100)}%` : '0%'
+      };
+    });
+
+    this.stats[0].value = data.length.toString();
+    this.stats[1].value = totalVendors.toString();
+    this.stats[2].value = pendingVendors.toString();
+    this.stats[3].value = totalBudgetSum > 0 ? `${Math.round((spentBudgetSum / totalBudgetSum) * 100)}%` : '0%';
+  }
+
+  goToEvent(id: string) {
     this.router.navigate(['/user/my-events'], { queryParams: { id }});
   }
 }

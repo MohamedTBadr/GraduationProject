@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   ApiUser,
@@ -19,13 +20,20 @@ export class UserService {
   /** GET /User?pageNumber=1&pageSize=10 */
   getAll(pagination?: PaginationParams): Observable<PagedResult<ApiUser>> {
     let params = new HttpParams();
-    if (pagination?.pageNumber) {
-      params = params.set('pageNumber', pagination.pageNumber.toString());
+    if (pagination) {
+      if (pagination.pageNumber) {
+        params = params.set('PageIndex', pagination.pageNumber.toString()); // Note: backend uses PageIndex
+      }
+      if (pagination.pageSize) {
+        params = params.set('PageSize', pagination.pageSize.toString());
+      }
+      if (pagination.searchTerm) {
+        params = params.set('SearchTerm', pagination.searchTerm);
+      }
     }
-    if (pagination?.pageSize) {
-      params = params.set('pageSize', pagination.pageSize.toString());
-    }
-    return this.http.get<PagedResult<ApiUser>>(`${this.apiUrl}/User`, { params });
+    return this.http.get<any>(`${this.apiUrl}/User`, { params }).pipe(
+      map(res => res.value || res)
+    );
   }
 
   /** GET /User/{userId} */

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   ApiVendor,
@@ -16,7 +17,21 @@ export class VendorService {
 
   /** GET /Vendor – returns all vendors */
   getAll(): Observable<ApiVendor[]> {
-    return this.http.get<ApiVendor[]>(`${this.apiUrl}/Vendor`);
+    return this.http.get<any>(`${this.apiUrl}/Vendor`).pipe(
+      map(res => {
+        const items = res.value || res;
+        if (!Array.isArray(items)) return [];
+        return items.map((v: any) => ({
+          ...v,
+          id: v.userId || v.id,
+          name: v.businessName || v.name || 'Unknown Vendor',
+          categoryName: v.serviceType || v.categoryName || 'Vendor',
+          about: v.description || v.about,
+          status: v.status || 'active',
+          isApproved: v.isApproved !== undefined ? v.isApproved : true
+        } as ApiVendor));
+      })
+    );
   }
 
   /** GET /Vendor/{vendorId} */

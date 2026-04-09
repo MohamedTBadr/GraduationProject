@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { MOCK_VENDORS } from '../../../shared/data/mock-vendors.data';
-import { Vendor } from '../../../shared/types/vendor.interface';
+import { ApiVendor, UpdateVendorRequest } from '../../../shared/types/api.interfaces';
+import { VendorService } from '../../../core/services/vendor.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 
 @Component({
@@ -14,28 +15,59 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
   styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit {
-  vendor!: Vendor;
+  vendor: ApiVendor | null = null;
   activeTab = 'info';
+  loading = false;
 
   constructor(
+    private vendorService: VendorService,
+    private authService: AuthService,
     private toastService: ToastService,
     private router: Router
   ) {}
 
   ngOnInit() {
-    const v = MOCK_VENDORS.find(v => v.id === 1);
-    if (v) {
-      // Create a local copy to edit so changes aren't applied until "Save" is clicked
-      this.vendor = JSON.parse(JSON.stringify(v));
-    }
+    this.loadProfile();
+  }
+
+  loadProfile() {
+    const user = this.authService.user();
+    if (!user) return;
+
+    this.loading = true;
+    this.vendorService.getById(user.id).subscribe({
+      next: (data) => {
+        this.vendor = { ...data };
+        this.loading = false;
+      },
+      error: () => {
+        this.toastService.show('Failed to load profile', 'error');
+        this.loading = false;
+        // Optionally map from user to vendor stub if no vendor found
+        this.vendor = { id: user.id, name: user.name, email: user.email };
+      }
+    });
   }
 
   saveChanges() {
-    const idx = MOCK_VENDORS.findIndex(v => v.id === 1);
-    if (idx !== -1) {
-      MOCK_VENDORS[idx] = JSON.parse(JSON.stringify(this.vendor));
-      this.toastService.show('Profile updated successfully!', 'success');
-      this.router.navigate(['/vendor/1']);
-    }
+    if (!this.vendor) return;
+
+    const payload: UpdateVendorRequest = {
+      name: this.vendor.name,
+      phone: this.vendor.phone,
+      location: this.vendor.location,
+      about: this.vendor.about
+    };
+
+    this.vendorService.update(this.vendor.id, payload).subscribe({
+      next: (res) => {
+        this.vendor = { ...res };
+        this.toastService.show('Profile updated successfully!', 'success');
+        this.router.navigate(['/vendor', this.vendor.id]);
+      },
+      error: () => {
+        this.toastService.show('Failed to update profile', 'error');
+      }
+    });
   }
 }

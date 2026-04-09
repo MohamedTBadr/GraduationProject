@@ -35,13 +35,13 @@
                             style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--gray);transition:color .2s"
                             (click)="compareService.toggleCompare(v)" onmouseover="this.style.color='var(--red)'"
                             onmouseout="this.style.color='var(--gray)'" title="Remove"></button>
-                        <div style="font-size:2.5rem;margin-bottom:10px;margin-top:20px">{{v.emoji}}</div>
+                        <!-- <div style="font-size:2.5rem;margin-bottom:10px;margin-top:20px">{{v.emoji}}</div> -->
                         <strong
                             style="display:block;color:var(--navy);font-size:1.1rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{v.name}}</strong>
-                        <div style="color:var(--gray);font-size:.75rem;margin-bottom:12px">{{v.category}}</div>
+                        <div style="color:var(--gray);font-size:.75rem;margin-bottom:12px">{{v.categoryId}}</div>
                     </div>
 
-                    <div class="comp-cell" *ngFor="let f of getFeatures()">
+                    <!-- <div class="comp-cell" *ngFor="let f of getFeatures()">
                         <ng-container [ngSwitch]="f.key">
                             <strong *ngSwitchCase="'startPrice'" style="color:var(--gold)">{{v.startPrice | number}}
                                 EGP</strong>
@@ -49,7 +49,7 @@
                                     style="font-size:.9rem;margin-right:4px"></span> {{v.rating}}</div>
                             <span *ngSwitchDefault>{{ $any(v)[f.key] || '-' }}</span>
                         </ng-container>
-                    </div>
+                    </div> -->
 
                     <div class="comp-cell">
                         <button class="btn btn-navy btn-sm" style="width:100%;justify-content:center"

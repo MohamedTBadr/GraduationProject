@@ -4,8 +4,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { FavoriteService } from '../../../shared/services/favorite.service';
 import { ModalService } from '../../../shared/services/modal.service';
-import { MOCK_VENDORS } from '../../../shared/data/mock-vendors.data';
-import { Vendor } from '../../../shared/types/vendor.interface';
+import { ApiVendor, ApiProduct } from '../../../shared/types/api.interfaces';
+import { VendorService } from '../../../core/services/vendor.service';
+import { ProductService } from '../../../core/services/product.service';
 
 @Component({
   selector: 'app-vendor-profile',
@@ -16,8 +17,10 @@ import { Vendor } from '../../../shared/types/vendor.interface';
 })
 export class VendorProfileComponent implements OnInit {
   activeTab = 'about';
-  vendorId: number | null = null;
-  vendor: Vendor | undefined;
+  vendorId: string | null = null;
+  vendor: ApiVendor | undefined;
+  products: ApiProduct[] = [];
+  loading = false;
 
   favoriteService = inject(FavoriteService);
   modalService = inject(ModalService);
@@ -25,21 +28,55 @@ export class VendorProfileComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private toastService: ToastService,
+    private vendorService: VendorService,
+    private productService: ProductService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
   ngOnInit() {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam) {
-      this.vendorId = parseInt(idParam, 10);
-      this.vendor = MOCK_VENDORS.find(v => v.id === this.vendorId);
+    this.vendorId = this.route.snapshot.paramMap.get('id');
+    if (this.vendorId) {
+      this.loadVendorProfile();
+      this.loadVendorProducts();
     }
   }
 
+  loadVendorProfile() {
+    if (!this.vendorId) return;
+    this.loading = true;
+    this.vendorService.getById(this.vendorId).subscribe({
+      next: (data) => {
+        this.vendor = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.toastService.show('Failed to load profile details.', 'error');
+        this.loading = false;
+      }
+    });
+  }
+
+  loadVendorProducts() {
+    if (!this.vendorId) return;
+    this.productService.getByVendor(this.vendorId).subscribe({
+      next: (data) => {
+        this.products = data;
+      },
+      error: (err) => {
+        console.error('Failed to load vendor products', err);
+      }
+    });
+  }
+
+  isFavorite(): boolean {
+    if (!this.vendor?.id) return false;
+    return this.favoriteService.isFavorite(this.vendor.id);
+  }
+
   toggleFav() {
-    if (this.vendor) {
+    if (this.vendor?.id) {
       this.favoriteService.toggleFavorite(this.vendor.id);
-      const isFav = this.favoriteService.isFavorite(this.vendor.id);
+      const isFav = this.isFavorite();
       this.toastService.show(isFav ? 'Added to favorites' : 'Removed from favorites', isFav ? 'success' : 'info');
     }
   }
@@ -53,12 +90,8 @@ export class VendorProfileComponent implements OnInit {
     }
   }
 
-  openServiceModal(service: any) {
-    this.modalService.open('service-detail', service);
-  }
-
-  openPackageModal(pkg: any) {
-    this.modalService.open('service-detail', pkg);
+  openServiceModal(product: ApiProduct) {
+    this.modalService.open('service-detail', product);
   }
 
   sendInquiry() {

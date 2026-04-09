@@ -4,44 +4,64 @@
             <div class="ad-page-title">Vendor Management</div>
             <div class="ad-page-sub">Review, approve, suspend, and manage all registered vendors.</div>
         </div>
-        <button class="ad-btn ad-btn-gold">+ Add Vendor</button>
     </div>
     <div class="ad-tab-bar">
-        <button class="ad-tab active">All (61)</button>
-        <button class="ad-tab">Pending (14) <span class="ad-badge gold" style="margin-left:4px">!</span></button>
-        <button class="ad-tab">Active (47)</button>
-        <button class="ad-tab">Suspended (3)</button>
+        <button [class.active]="activeTab === 'all'" (click)="setTab('all')" class="ad-tab">All ({{ vendors.length }})</button>
+        <button [class.active]="activeTab === 'pending'" (click)="setTab('pending')" class="ad-tab">
+            Pending ({{ pendingCount }}) <span *ngIf="pendingCount > 0" class="ad-badge gold" style="margin-left:4px">!</span>
+        </button>
+        <button [class.active]="activeTab === 'active'" (click)="setTab('active')" class="ad-tab">Active ({{ activeCount }})</button>
     </div>
     <div class="ad-search-row">
-        <div class="ad-search-wrap"><span class="ad-search-icon">🔍</span><input type="text" placeholder="Search vendors…"/></div>
-        <select class="ad-filter-sel"><option>All Categories</option><option>Decoration</option><option>Venue</option><option>Catering</option><option>Photography</option><option>Entertainment</option></select>
-        <select class="ad-filter-sel"><option>All Cities</option><option>Cairo</option><option>Alexandria</option><option>Giza</option></select>
+        <div class="ad-search-wrap">
+            <span class="ad-search-icon">🔍</span>
+            <input type="text" placeholder="Search vendors (Name, Category, Location)…" [(ngModel)]="searchQuery" (input)="onSearchChange()"/>
+        </div>
     </div>
-    <div class="ad-tab-pane active" id="v-all">
+    
+    <div *ngIf="loading" style="padding: 2rem; text-align: center; color: var(--gold);">Loading vendors...</div>
+
+    <div *ngIf="!loading" class="ad-tab-pane active" id="v-all">
         <div class="ad-tbl-wrap">
             <table class="ad-tbl">
-                <thead><tr><th>Vendor</th><th>Category</th><th>Location</th><th>Rating</th><th>Bookings</th><th>Revenue</th><th>Status</th><th>Actions</th></tr></thead>
-                <tbody id="ad-vendors-all">
-                    <tr>
-                        <td><div style="display:flex;align-items:center;gap:9px"><span style="font-size:1.2rem"></span><div><div>White Rose Decor</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">Mar 2025</div></div></div></td>
-                        <td>Decoration</td><td>Cairo</td>
-                        <td><span style="color:var(--gold)"></span> 4.9</td>
-                        <td>61</td>
-                        <td style="color:var(--gold);font-weight:700">42,000 EGP</td>
-                        <td><span class="ad-pill ap-green">Active</span></td>
-                        <td><div style="display:flex;gap:5px"><button class="ad-btn ad-btn-ghost ad-btn-sm">View</button><button class="ad-btn ad-btn-red ad-btn-sm">Suspend</button></div></td>
+                <thead><tr><th>Vendor</th><th>Category</th><th>Location</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    <tr *ngFor="let v of paginatedVendors">
+                        <td><div style="display:flex;align-items:center;gap:9px">
+                            <span style="font-size:1.2rem">🏛️</span>
+                            <div>
+                                <div>{{ v.name }}</div>
+                                <div style="font-size:.7rem;color:rgba(255,255,255,.35)">Joined {{ v.createdAt | date:'MMM yyyy' }}</div>
+                            </div>
+                        </div></td>
+                        <td>{{ v.categoryName || 'General' }}</td>
+                        <td>{{ v.location || 'Not Specified' }}</td>
+                        <td><span style="color:var(--gold)">★</span> {{ v.rating || 0 }}</td>
+                        <td>
+                            <span *ngIf="!v.isApproved" class="ad-pill ap-gold">Pending</span>
+                            <span *ngIf="v.isApproved && v.status === 'active'" class="ad-pill ap-green">Active</span>
+                            <span *ngIf="v.status === 'suspended'" class="ad-pill ap-red">Suspended</span>
+                        </td>
+                        <td>
+                            <div style="display:flex;gap:5px">
+                                <button *ngIf="!v.isApproved" (click)="approveVendor(v)" class="ad-btn ad-btn-gold ad-btn-sm">Approve</button>
+                                <button (click)="deleteVendor(v)" class="ad-btn ad-btn-red ad-btn-sm">Delete</button>
+                            </div>
+                        </td>
                     </tr>
-                    <tr>
-                        <td><div style="display:flex;align-items:center;gap:9px"><span style="font-size:1.2rem"></span><div><div>Royal Palace Hall</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">Jan 2025</div></div></div></td>
-                        <td>Venue</td><td>Giza</td>
-                        <td><span style="color:var(--gold)"></span> 4.7</td>
-                        <td>18</td>
-                        <td style="color:var(--gold);font-weight:700">320,000 EGP</td>
-                        <td><span class="ad-pill ap-green">Active</span></td>
-                        <td><div style="display:flex;gap:5px"><button class="ad-btn ad-btn-ghost ad-btn-sm">View</button><button class="ad-btn ad-btn-red ad-btn-sm">Suspend</button></div></td>
+                    <tr *ngIf="paginatedVendors.length === 0">
+                        <td colspan="6" style="text-align:center; padding: 2rem; color: #888;">No vendors found matching criteria.</td>
                     </tr>
                 </tbody>
             </table>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; color: #fff;" *ngIf="totalCount > 0">
+               <span>Page {{ pageNumber }} of {{ totalPages }} ({{ totalCount }} Total)</span>
+               <div style="display: flex; gap: 10px;">
+                  <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === 1" (click)="changePage(-1)">Previous</button>
+                  <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === totalPages" (click)="changePage(1)">Next</button>
+               </div>
+            </div>
         </div>
     </div>
 </div>

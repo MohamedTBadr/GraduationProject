@@ -1,7 +1,7 @@
 import { Component, Input, inject } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Vendor } from '../../types/vendor.interface';
+import { ApiVendor } from '../../types/api.interfaces';
 import { FavoriteService } from '../../services/favorite.service';
 import { CompareService } from '../../services/compare.service';
 import { ToastService } from '../toast/toast.service';
@@ -14,20 +14,25 @@ import { ToastService } from '../toast/toast.service';
   styleUrls: ['./vendor-card.component.scss']
 })
 export class VendorCardComponent {
-  @Input({ required: true }) vendor!: Vendor;
+  @Input({ required: true }) vendor!: ApiVendor;
 
   favoriteService = inject(FavoriteService);
   compareService = inject(CompareService);
   toastService = inject(ToastService);
 
-  getGradient(id: number): string {
-    return `linear-gradient(135deg, hsl(${id * 30 + 200}, 40%, 25%) 0%, hsl(${id * 30 + 220}, 45%, 30%) 100%)`;
+  getGradient(id: string): string {
+    const numId = parseInt(id, 16) % 10 || 1; // Basic hash for variety
+    return `linear-gradient(135deg, hsl(${numId * 30 + 200}, 40%, 25%) 0%, hsl(${numId * 30 + 220}, 45%, 30%) 100%)`;
+  }
+
+  isFavorite(): boolean {
+    return this.favoriteService.isFavorite(this.vendor.id);
   }
 
   onToggleFavorite(event: Event) {
     event.stopPropagation();
     this.favoriteService.toggleFavorite(this.vendor.id);
-    const isFav = this.favoriteService.isFavorite(this.vendor.id);
+    const isFav = this.isFavorite();
     this.toastService.show(isFav ? '️ Saved to favorites!' : ' Removed from favorites', isFav ? 'success' : 'info');
   }
 

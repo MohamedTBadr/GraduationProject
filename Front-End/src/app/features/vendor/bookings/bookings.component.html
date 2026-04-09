@@ -7,33 +7,36 @@
   </div>
 
   <div class="vd-tab-bar">
-    <button class="vd-tab" [class.active]="currentTab === 'pending'" (click)="switchTab('pending')">Pending (8)</button>
-    <button class="vd-tab" [class.active]="currentTab === 'confirmed'" (click)="switchTab('confirmed')">Confirmed (12)</button>
+    <button class="vd-tab" [class.active]="currentTab === 'pending'" (click)="switchTab('pending')">Pending ({{ pendingBookings.length }})</button>
+    <button class="vd-tab" [class.active]="currentTab === 'confirmed'" (click)="switchTab('confirmed')">Confirmed ({{ confirmedBookings.length }})</button>
     <button class="vd-tab" [class.active]="currentTab === 'calendar'" (click)="switchTab('calendar')">Calendar</button>
     <button class="vd-tab" [class.active]="currentTab === 'history'" (click)="switchTab('history')">History</button>
   </div>
 
   <!-- PENDING TAB -->
   <div class="vd-tab-pane" [class.active]="currentTab === 'pending'" id="bk-pending">
+    <div *ngIf="loading()" class="vd-loading">Loading bookings...</div>
+    <div *ngIf="!loading() && pendingBookings.length === 0" style="text-align:center; padding:40px; color:var(--gray)">
+      No pending booking requests.
+    </div>
     <div class="vd-bk-card" *ngFor="let b of pendingBookings">
       <div class="vd-bk-head">
         <div>
           <div class="vd-bk-client">{{b.client}}</div>
-          <div class="vd-bk-meta" style="margin-bottom: 2px;">{{b.event}} &middot; {{b.dateStr}}</div>
+          <div class="vd-bk-meta" style="margin-bottom: 2px;">{{b.event}} &middot; {{b.dateStr | date:'MMM d, y'}}</div>
         </div>
         <div class="vd-badge-pill vdb-amber">Pending</div>
       </div>
       <div class="vd-bk-meta">
         <span>⚒️ {{b.service}}</span>
         <span>👥 {{b.guests}} guests</span>
-        <span style="color: var(--gold); font-weight: 600;">💰 {{b.value}} EGP</span>
+        <span style="color: var(--gold); font-weight: 600;">💰 {{b.value | number}} EGP</span>
       </div>
-      <div class="vd-bk-note">{{b.note}}</div>
+      <div class="vd-bk-note" *ngIf="b.note">"{{b.note}}"</div>
       <div class="vd-bk-actions">
         <button class="vd-btn vd-btn-green vd-btn-sm" (click)="selectedBooking = b; acceptBooking()">Accept</button>
-        <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="openDeclineForm(b)">Decline with Reason</button>
+        <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="openDeclineForm(b)">Decline</button>
         <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="openDetails(b)">View Details</button>
-        <button class="vd-btn vd-btn-ghost vd-btn-sm">Message</button>
       </div>
     </div>
   </div>
@@ -62,12 +65,15 @@
             <td style="font-weight: 600; color: var(--navy)">{{cb.client}}</td>
             <td>{{cb.event}}</td>
             <td>{{cb.service}}</td>
-            <td>{{cb.dateStr}}</td>
-            <td style="color: #9f1239; font-weight: 700;">{{cb.value}} EGP</td>
+            <td>{{cb.dateStr | date:'MMM d, y'}}</td>
+            <td style="color: #9f1239; font-weight: 700;">{{cb.value | number}} EGP</td>
             <td>
-              <div class="vd-badge-pill" [ngClass]="cb.status === 'confirmed' ? 'vdb-green' : 'vdb-amber'">{{cb.status}}</div>
+              <div class="vd-badge-pill vdb-green">Confirmed</div>
             </td>
             <td><button class="vd-btn vd-btn-ghost vd-btn-sm" style="border-radius: 50px; padding: 4px 14px;" (click)="openDetails(cb)">View</button></td>
+          </tr>
+          <tr *ngIf="confirmedBookings.length === 0">
+            <td colspan="7" style="text-align:center; padding:20px; color:var(--gray)">No confirmed bookings yet.</td>
           </tr>
         </tbody>
       </table>
@@ -171,17 +177,23 @@
           <tr *ngFor="let hb of historyBookings">
             <td style="font-weight: 600; color: #1e3a8a">{{hb.client}}</td>
             <td>{{hb.service}}</td>
-            <td>{{hb.dateStr}}</td>
-            <td style="color: var(--navy); font-weight: 700;">{{hb.value}} EGP</td>
+            <td>{{hb.dateStr | date:'MMM d, y'}}</td>
+            <td style="color: var(--navy); font-weight: 700;">{{hb.value | number}} EGP</td>
             <td>
-              <div class="vd-badge-pill vdb-green">{{hb.status}}</div>
+              <div class="vd-badge-pill" [ngClass]="hb.status === 'Rejected' ? 'vdb-red' : 'vdb-green'">{{hb.status}}</div>
             </td>
             <td style="color: #9f1239;">
-              <span *ngFor="let s of [1,2,3,4,5]">
-                <ng-container *ngIf="s <= (hb.stars || 0)">★</ng-container>
-                <ng-container *ngIf="s > (hb.stars || 0)">☆</ng-container>
+              <span *ngIf="hb.stars">
+                <span *ngFor="let s of [1,2,3,4,5]">
+                  <ng-container *ngIf="s <= hb.stars">★</ng-container>
+                  <ng-container *ngIf="s > hb.stars">☆</ng-container>
+                </span>
               </span>
+              <span *ngIf="!hb.stars" style="color:var(--gray); font-size:0.75rem">No review</span>
             </td>
+          </tr>
+          <tr *ngIf="historyBookings.length === 0">
+            <td colspan="6" style="text-align:center; padding:20px; color:var(--gray)">No history records found.</td>
           </tr>
         </tbody>
       </table>
@@ -215,11 +227,11 @@
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem;" *ngIf="booking.value">
           <span style="color: var(--gray);">Budget</span>
-          <span style="color: #9f1239; font-weight: 700;">{{booking.value}} EGP</span>
+          <span style="color: #9f1239; font-weight: 700;">{{booking.value | number}} EGP</span>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
           <span style="color: var(--gray);">Date</span>
-          <span style="color: var(--navy); font-weight: 700;">{{booking.dateStr}} 2026</span>
+          <span style="color: var(--navy); font-weight: 700;">{{booking.dateStr | date:'fullDate'}}</span>
         </div>
       </div>
 

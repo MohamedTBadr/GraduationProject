@@ -1,135 +1,176 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ServiceCardComponent } from '../../../shared/components/service-card/service-card.component';
-import { VendorService } from '../../../shared/types/vendor.interface';
+import { ApiProduct, CreateProductRequest, UpdateProductRequest } from '../../../shared/types/api.interfaces';
 import { ImageUploadComponent } from '../../../shared/components/image-upload/image-upload.component';
+import { ServiceTypeDropdownComponent } from '../../../shared/components/service-type-dropdown/service-type-dropdown.component';
+import { ProductService } from '../../../core/services/product.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-services',
   standalone: true,
-  imports: [CommonModule, ServiceCardComponent, FormsModule, ImageUploadComponent],
+  imports: [
+    CommonModule, 
+    ServiceCardComponent, 
+    FormsModule, 
+    ReactiveFormsModule, 
+    ImageUploadComponent,
+    ServiceTypeDropdownComponent
+  ],
   templateUrl: './services.component.html',
   styleUrls: ['./services.component.scss']
 })
-export class ServicesComponent {
-  services: VendorService[] = [
-    { 
-      icon: '💐', 
-      name: 'Wedding Stage Floral Design', 
-      price: 'From 15,000', 
-      desc: 'Full stage arrangement — arch, backdrop, aisle décor, and bridal entrance. Premium fresh flowers sourced daily.',
-      duration: '4–6 hrs',
-      images: ['https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'],
-      status: 'active'
-    },
-    { 
-      icon: '🌹', 
-      name: 'Table Centerpieces', 
-      price: 'From 1,200', 
-      desc: 'Fresh flower centerpieces per table. Wide variety of arrangements to match your wedding theme.',
-      duration: '2–3 hrs',
-      status: 'active'
-    },
-    { 
-      icon: '🎈', 
-      name: 'Balloon Art & Setup', 
-      price: 'From 3,500', 
-      desc: 'Custom balloon arches, organic installations, and full room setups. Latex, foil, and biodegradable options.',
-      duration: '2–4 hrs',
-      images: ['https://images.unsplash.com/photo-1530103862676-de3c9da59c6b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80', 'https://images.pexels.com/photos/796606/pexels-photo-796606.jpeg?auto=compress&cs=tinysrgb&w=400'],
-      status: 'paused'
-    }
-  ];
-
+export class ServicesComponent implements OnInit {
+  services: ApiProduct[] = [];
+  loading = false;
   activeTab: 'active' | 'paused' = 'active';
 
-  get filteredServices() {
-    return this.services.filter(s => s.status === this.activeTab || (!s.status && this.activeTab === 'active'));
-  }
-
-  getActiveCount(): number {
-    return this.services.filter(s => s.status === 'active' || !s.status).length;
-  }
-
-  getPausedCount(): number {
-    return this.services.filter(s => s.status === 'paused').length;
-  }
-
   isAddServiceModalOpen = false;
-  editingIndex: number = -1;
+  editingId: string | null = null;
   
-  newService = {
-    name: '',
-    category: 'Decoration',
-    price: '',
-    description: '',
-    duration: '',
-    leadTime: '',
-    images: [] as any[]
-  };
+  serviceForm!: FormGroup;
+  uploadedImages: any[] = [];
 
   isDetailModalOpen = false;
-  selectedService: VendorService | null = null;
+  selectedService: ApiProduct | null = null;
 
-  openAddServiceModal(serviceToEdit?: VendorService) {
+  constructor(
+    private fb: FormBuilder,
+    private productService: ProductService,
+    private authService: AuthService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit(): void {
+    this.initForm();
+    this.loadProducts();
+  }
+
+  get activeServices(): ApiProduct[] {
+    return this.services.filter(s => s.status !== 'paused');
+  }
+
+  get pausedServices(): ApiProduct[] {
+    return this.services.filter(s => s.status === 'paused');
+  }
+
+  get currentServices(): ApiProduct[] {
+    return this.activeTab === 'active' ? this.activeServices : this.pausedServices;
+  }
+
+  setTab(tab: 'active' | 'paused') {
+    this.activeTab = tab;
+  }
+
+  initForm(): void {
+    this.serviceForm = this.fb.group({
+      name: ['', Validators.required],
+      serviceTypeId: ['', Validators.required],
+      price: [0, [Validators.required, Validators.min(0)]],
+      description: ['', Validators.required],
+      duration: [''],
+      leadTime: ['']
+    });
+  }
+
+  loadProducts(): void {
+    const user = this.authService.user();
+    if (!user) return;
+    
+    this.loading = true;
+    this.productService.getByVendor(user.id).subscribe({
+      next: (data) => {
+        // Enforce default status as active locally for backwards-compatibility or missing data.
+        this.services = data.map(d => ({ ...d, status: d.status || 'active' }));
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  openAddServiceModal(serviceToEdit?: ApiProduct) {
     if (serviceToEdit) {
-      this.editingIndex = this.services.indexOf(serviceToEdit);
-      this.newService = {
+      this.editingId = serviceToEdit.id;
+      this.serviceForm.patchValue({
         name: serviceToEdit.name,
-        category: 'Decoration',
-        price: serviceToEdit.price.replace('From ', ''),
-        description: serviceToEdit.desc,
+        serviceTypeId: serviceToEdit.serviceTypeId || '',
+        price: serviceToEdit.price || 0,
+        description: serviceToEdit.description || '',
         duration: serviceToEdit.duration || '',
-        leadTime: serviceToEdit.delivery || '',
-        images: serviceToEdit.images || []
-      };
+        leadTime: serviceToEdit.leadTime || ''
+      });
+      this.uploadedImages = serviceToEdit.imageUrl ? [{ previewUrl: serviceToEdit.imageUrl }] : [];
     } else {
-      this.editingIndex = -1;
-      this.newService = {
-        name: '', category: 'Decoration', price: '', description: '', duration: '', leadTime: '', images: []
-      };
+      this.editingId = null;
+      this.serviceForm.reset({ name: '', serviceTypeId: '', price: 0, description: '' });
+      this.uploadedImages = [];
     }
     this.isAddServiceModalOpen = true;
   }
   
   closeAddServiceModal() {
     this.isAddServiceModalOpen = false;
+    this.serviceForm.reset();
   }
   
   onImagesChanged(images: any[]) {
-    // For UI demonstration, store the previewUrl (base64 data) to ensure it renders correctly on screen.
-    // When connecting to .NET backend, you will extract img.file and send it via FormData instead.
-    this.newService.images = images.map(img => img.previewUrl);
+    this.uploadedImages = images;
   }
 
   createService() {
-    if (this.editingIndex > -1) {
-      // Update existing
-      this.services[this.editingIndex] = {
-        ...this.services[this.editingIndex],
-        name: this.newService.name,
-        price: this.newService.price ? `From ${this.newService.price}` : 'Price on request',
-        desc: this.newService.description,
-        duration: this.newService.duration || '',
-        delivery: this.newService.leadTime || '',
-        images: this.newService.images.length > 0 ? this.newService.images : this.services[this.editingIndex].images
-      };
-    } else {
-      // Create new
-      this.services.unshift({
-        icon: '✨',
-        name: this.newService.name,
-        price: this.newService.price ? `From ${this.newService.price}` : 'Price on request',
-        desc: this.newService.description,
-        duration: this.newService.duration || '',
-        delivery: this.newService.leadTime || '',
-        status: 'active',
-        images: this.newService.images
-      });
+    if (this.serviceForm.invalid) {
+      this.serviceForm.markAllAsTouched();
+      return;
     }
 
-    this.isAddServiceModalOpen = false;
+    const val = this.serviceForm.value;
+    const imageUrl = this.uploadedImages.length > 0 ? this.uploadedImages[0].previewUrl : null;
+
+    if (this.editingId) {
+      const existing = this.services.find(s => s.id === this.editingId);
+      const updateData: UpdateProductRequest = {
+        name: val.name,
+        serviceTypeId: val.serviceTypeId,
+        price: Number(val.price),
+        description: val.description,
+        imageUrl: imageUrl,
+        status: existing?.status || 'active',
+        duration: val.duration,
+        leadTime: val.leadTime
+      };
+      
+      this.productService.update(this.editingId, updateData).subscribe({
+        next: () => {
+          this.toastService.show('Service updated successfully', 'success');
+          this.loadProducts();
+          this.closeAddServiceModal();
+        }
+      });
+    } else {
+      const createData: CreateProductRequest = {
+        name: val.name,
+        serviceTypeId: val.serviceTypeId,
+        price: Number(val.price),
+        description: val.description,
+        imageUrl: imageUrl,
+        status: 'active',
+        duration: val.duration,
+        leadTime: val.leadTime
+      };
+
+      this.productService.create(createData).subscribe({
+        next: () => {
+          this.toastService.show('Service created successfully', 'success');
+          this.loadProducts();
+          this.closeAddServiceModal();
+        }
+      });
+    }
   }
 
   closeDetailModal() {
@@ -137,24 +178,47 @@ export class ServicesComponent {
     this.selectedService = null;
   }
 
-  handleAction(action: string, service: VendorService) {
+  handleAction(action: string, service: ApiProduct) {
     if (action === 'delete') {
       if(confirm('Are you sure you want to delete this service?')) {
-        this.services = this.services.filter(s => s !== service);
+        this.productService.delete(service.id).subscribe({
+          next: () => {
+            this.toastService.show('Service deleted', 'success');
+            this.loadProducts();
+          }
+        });
       }
     } else if (action === 'edit') {
       this.openAddServiceModal(service);
-    } else if (action === 'pause') {
-      service.status = 'paused';
-      // Automatically switch to the paused tab so the user sees where it went
-      this.activeTab = 'paused';
-    } else if (action === 'activate') {
-      service.status = 'active';
-      // Automatically switch back to the active tab
-      this.activeTab = 'active';
     } else if (action === 'detail') {
       this.selectedService = service;
       this.isDetailModalOpen = true;
+    } else if (action === 'pause') {
+      this.updateServiceStatus(service, 'paused');
+    } else if (action === 'activate') {
+      this.updateServiceStatus(service, 'active');
     }
+  }
+
+  updateServiceStatus(service: ApiProduct, newStatus: 'active' | 'paused') {
+    const updateData: UpdateProductRequest = {
+      name: service.name,
+      serviceTypeId: service.serviceTypeId,
+      price: service.price,
+      description: service.description,
+      imageUrl: service.imageUrl,
+      status: newStatus
+    };
+    
+    this.productService.update(service.id, updateData).subscribe({
+      next: () => {
+        service.status = newStatus;
+        if (newStatus === 'paused') {
+          this.toastService.show('Service paused. It will no longer be visible to clients.', 'info');
+        } else {
+          this.toastService.show('Service activated successfully!', 'success');
+        }
+      }
+    });
   }
 }

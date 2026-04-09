@@ -1,21 +1,89 @@
 <div class="ad-section active" style="display:block">
   <div class="ad-page-hd">
     <div>
-      <div class="ad-page-title">Service Categories</div>
-      <div class="ad-page-sub">Manage the taxonomy of services offered on Eventora.</div>
+      <div class="ad-page-title">Categories</div>
+      <div class="ad-page-sub">Manage vendor service categories and event types shown across the platform.</div>
     </div>
-    <button class="ad-btn ad-btn-gold">+ Add Category</button>
+    <button class="ad-btn ad-btn-gold" (click)="openAddModal()">+ Add Category</button>
   </div>
-  <div class="ad-card" style="padding:0;overflow:hidden">
-    <table class="ad-tbl">
-      <thead><tr><th>Category</th><th>Vendors</th><th>Rev Share</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="ad-cats">
-        <tr>
-          <td><div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.4rem">️</span><span style="font-weight:600">Venue</span></div></td>
-          <td>18</td><td>48%</td><td><span class="ad-pill ap-green">Active</span></td>
-          <td><button class="ad-btn ad-btn-ghost ad-btn-sm">Edit</button></td>
-        </tr>
-      </tbody>
-    </table>
+
+  <div class="ad-g2">
+    <!-- Left Card: Service Categories -->
+    <div class="ad-card" style="padding:0;overflow:hidden; height: fit-content;">
+      <div style="padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight:700; font-size:1rem; color:var(--white);">
+        Service Categories
+      </div>
+      <div *ngIf="loadingCategories" style="padding: 20px;text-align:center;color:gray;">Loading categories...</div>
+      
+      <div *ngFor="let cat of categories; let i = index" class="ad-vendor-row" style="justify-content: space-between;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="font-size: 1.4rem;">{{ getIconForCategory(cat.name) }}</div>
+          <div>
+            <div class="ad-vendor-name">{{ cat.name }}</div>
+            <!-- <div class="ad-vendor-sub">{{ cat.description || ((12 - (i % 5)) + ' vendors') }}</div> -->
+          </div>
+        </div>
+        
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="ad-pill ap-green">active</span>
+          <button class="ad-btn ad-btn-ghost ad-btn-sm" (click)="openEditCategory(cat)">Edit</button>
+          <button class="ad-btn ad-btn-red ad-btn-sm" (click)="deleteCategory(cat.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Card: Event Types -->
+    <div class="ad-card" style="padding:0;overflow:hidden; height: fit-content;">
+      <div style="padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight:700; font-size:1rem; color:var(--white);">
+        Event Types
+      </div>
+      <div *ngIf="loadingEventTypes" style="padding: 20px;text-align:center;color:gray;">Loading event types...</div>
+      
+      <div *ngFor="let ev of eventTypes; let i = index" class="ad-vendor-row" style="justify-content: space-between;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="font-size: 1.4rem;">{{ getIconForEventType(ev.name) }}</div>
+          <div>
+            <div class="ad-vendor-name">{{ ev.name }}</div>
+            <!-- <div class="ad-vendor-sub">{{ ev.description || ((150 - (i * 12)) + ' events') }}</div> -->
+          </div>
+        </div>
+        
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="ad-pill ap-green">active</span>
+          <button class="ad-btn ad-btn-ghost ad-btn-sm" (click)="openEditEventType(ev)">Edit</button>
+          <button class="ad-btn ad-btn-red ad-btn-sm" (click)="deleteEventType(ev.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="ad-modal-overlay" [class.open]="showModal">
+  <div class="ad-modal">
+    <button class="ad-modal-close" (click)="closeModal()">×</button>
+    <div class="ad-modal-title">{{ isEditMode ? 'Edit' : 'Add' }} {{ activeType === 'category' ? 'Service Category' : 'Event Type' }}</div>
+    <div class="ad-modal-sub">Fill in the details below.</div>
+
+    <div *ngIf="!isEditMode" style="display:flex; gap: 10px; margin-bottom: 20px;">
+      <button class="ad-btn" [class.ad-btn-gold]="activeType === 'category'" [class.ad-btn-ghost]="activeType !== 'category'" (click)="setType('category')">Service Category</button>
+      <button class="ad-btn" [class.ad-btn-gold]="activeType === 'eventType'" [class.ad-btn-ghost]="activeType !== 'eventType'" (click)="setType('eventType')">Event Type</button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" formControlName="name" placeholder="e.g. Photography" />
+      </div>
+      <!-- <div class="form-group">
+        <label>Description</label>
+        <textarea formControlName="description" placeholder="Briefly describe what this covers..."></textarea>
+      </div> -->
+
+      <div class="ad-submit-bar">
+        <button type="button" class="ad-btn ad-btn-ghost" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="ad-btn ad-btn-gold" [disabled]="form.invalid">{{ isEditMode ? 'Save Changes' : 'Create' }}</button>
+      </div>
+    </form>
   </div>
 </div>

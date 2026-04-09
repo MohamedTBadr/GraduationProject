@@ -1,0 +1,25 @@
+<select 
+  [value]="value" 
+  [disabled]="isDisabled || loading" 
+  (change)="onSelectChange($event)"
+  class="vd-select">
+  <option value="" disabled selected>{{ placeholder }}</option>
+  
+  <ng-container *ngIf="loading">
+    <option value="" disabled>Loading service types...</option>
+  </ng-container>
+
+  <ng-container *ngIf="error">
+    <option value="" disabled>{{ error }}</option>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && !error && serviceTypes.length === 0">
+    <option value="" disabled>No service types available</option>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && !error && serviceTypes.length > 0">
+    <option *ngFor="let type of serviceTypes" [value]="type.id">
+      {{ type.name }}
+    </option>
+  </ng-container>
+</select>

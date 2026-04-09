@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Category, CreateCategoryRequest } from '../../shared/types/api.interfaces';
 
@@ -12,7 +13,9 @@ export class CategoryService {
 
   /** GET /Category – returns all categories */
   getAll(): Observable<Category[]> {
-    return this.http.get<Category[]>(`${this.apiUrl}/Category`);
+    return this.http.get<any>(`${this.apiUrl}/Category`).pipe(
+      map(res => res.value || res)
+    );
   }
 
   /** GET /Category/{categoryId} */
@@ -22,11 +25,18 @@ export class CategoryService {
 
   /** POST /Category */
   create(payload: CreateCategoryRequest): Observable<Category> {
-    return this.http.post<Category>(`${this.apiUrl}/Category`, payload);
+    return this.http.post<Category>(`${this.apiUrl}/Category`, payload, { responseType: 'text' as 'json' });
   }
 
   /** DELETE /Category/{categoryId} */
   delete(categoryId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/Category/${categoryId}`);
   }
+
+  /** PATCH /Category/{categoryId} */
+  update(categoryId: string, payload: CreateCategoryRequest): Observable<Category> {
+    return this.http.patch<Category>(`${this.apiUrl}/Category/${categoryId}`, payload, { responseType: 'text' as 'json' });
+  }
+
+  
 }

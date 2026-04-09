@@ -1,15 +1,15 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Vendor } from '../types/vendor.interface';
+import { ApiVendor } from '../types/api.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CompareService {
-  private compareList = signal<Vendor[]>([]);
+  private compareList = signal<ApiVendor[]>([]);
   compareListItems = computed(() => this.compareList());
   compareCount = computed(() => this.compareList().length);
 
-  toggleCompare(vendor: Vendor): { success: boolean, added?: boolean, message?: string } {
+  toggleCompare(vendor: ApiVendor): { success: boolean, added?: boolean, message?: string } {
     const list = this.compareList();
     const index = list.findIndex(v => v.id === vendor.id);
 
@@ -25,7 +25,7 @@ export class CompareService {
     }
   }
 
-  isInCompare(id: number): boolean {
+  isInCompare(id: string): boolean {
     return this.compareList().some(v => v.id === id);
   }
 

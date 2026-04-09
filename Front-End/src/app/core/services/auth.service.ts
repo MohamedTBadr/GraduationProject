@@ -254,10 +254,15 @@ export class AuthService {
   // ─────────────────────────────────────────────
 
   private mapToAuthResponse(res: AuthApiResponse): AuthResponse {
-    // Derive role from JWT claims or default to 'User'
-    const tokenRole = this.extractRoleFromToken(res.value.accessToken);
+    // Derive claims from JWT
+    const claims = this.extractClaimsFromToken(res.value.accessToken);
+    const tokenRole = claims.role;
+    
+    // Attempt to extract user id from standard JWT claims (sub, nameidentifier, or id)
+    const userId = claims.id || '';
+
     const user: UserSession = {
-      id: '',          // will be overridden if returned by server
+      id: userId,
       name: res.value.name,
       email: res.value.email,
       role: tokenRole as UserRole
@@ -282,10 +287,10 @@ export class AuthService {
     // The interceptor will capture the refresh token from the raw API response separately
   }
 
-  private extractRoleFromToken(token: string): string {
+  private extractClaimsFromToken(token: string): {role: string, id: string} {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      // Common JWT claim names for roles
+      
       let rawRole = (
         payload['role'] ||
         payload['Role'] ||
@@ -293,9 +298,18 @@ export class AuthService {
         'User'
       );
       if (typeof rawRole !== 'string') rawRole = String(rawRole);
-      return rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
+      const role = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
+
+      let id = (
+        payload['sub'] || 
+        payload['nameid'] || 
+        payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
+        payload['id'] || ''
+      );
+
+      return { role, id };
     } catch {
-      return 'User';
+      return { role: 'User', id: '' };
     }
   }
 }

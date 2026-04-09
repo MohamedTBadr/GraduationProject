@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { VendorCardComponent } from '../../../shared/components/vendor-card/vendor-card.component';
-import { MOCK_VENDORS } from '../../../shared/data/mock-vendors.data';
-import { Vendor } from '../../../shared/types/vendor.interface';
+import { ApiVendor } from '../../../shared/types/api.interfaces';
+import { VendorService } from '../../../core/services/vendor.service';
 
 @Component({
   selector: 'app-home',
@@ -12,10 +12,27 @@ import { Vendor } from '../../../shared/types/vendor.interface';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent {
-  featuredVendors: Vendor[] = MOCK_VENDORS.slice(0, 4);
+export class HomeComponent implements OnInit {
+  featuredVendors: ApiVendor[] = [];
+  loading = false;
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private vendorService: VendorService) { }
+
+  ngOnInit() {
+    this.loading = true;
+    this.vendorService.getAll().subscribe({
+      next: (data) => {
+        // Take top 4 rated or approved vendors
+        this.featuredVendors = data.filter(v => v.status === 'active' || v.isApproved)
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+          .slice(0, 4);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
 
   doSearch(query: string) {
     if (query) {

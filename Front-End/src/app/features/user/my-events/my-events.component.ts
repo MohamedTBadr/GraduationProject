@@ -1,30 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-
-interface EventVendor {
-  emoji: string;
-  name: string;
-  type: string;
-  price: number;
-  status: 'confirmed' | 'pending';
-}
-
-interface ChecklistItem {
-  text: string;
-  done: boolean;
-}
-
-interface EventData {
-  id: number;
-  name: string;
-  date: string;
-  type: string;
-  guests: number;
-  budget: number;
-  vendors: EventVendor[];
-  checklist: ChecklistItem[];
-}
+import { EventService } from '../../../core/services/event.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { EventResponseDto } from '../../../shared/types/api.interfaces';
 
 @Component({
   selector: 'app-my-events',
@@ -34,74 +13,75 @@ interface EventData {
   styleUrls: ['./my-events.component.scss']
 })
 export class MyEventsComponent implements OnInit {
-  events: EventData[] = [
-    {
-      id: 1,
-      name: 'Engagement Party',
-      date: '2026-06-12',
-      type: 'Engagement',
-      guests: 60,
-      budget: 20000,
-      vendors: [
-        { emoji: '️', name: 'Nile City Venue', type: 'Venue', price: 5000, status: 'confirmed' },
-        { emoji: '', name: 'White Rose Decor', type: 'Decoration', price: 4200, status: 'confirmed' },
-        { emoji: '', name: 'Studio Lens', type: 'Photography', price: 0, status: 'pending' },
-        { emoji: '️', name: 'Royal Catering', type: 'Catering', price: 3200, status: 'pending' }
-      ],
-      checklist: [
-        { text: 'Book venue', done: true },
-        { text: 'Choose decor vendor', done: true },
-        { text: 'Set guest list', done: true },
-        { text: 'Confirm catering menu', done: false },
-        { text: 'Book photographer', done: false },
-        { text: 'Send invitations', done: false },
-        { text: 'Order flowers', done: false }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Brother\'s Wedding',
-      date: '2026-09-20',
-      type: 'Wedding',
-      guests: 250,
-      budget: 55000,
-      vendors: [
-        { emoji: '', name: 'Nile City Venue', type: 'Venue', price: 30000, status: 'confirmed' },
-        { emoji: '️', name: 'Elite Catering', type: 'Catering', price: 12000, status: 'confirmed' }
-      ],
-      checklist: [
-        { text: 'Book wedding hall', done: true },
-        { text: 'Choose catering', done: true },
-        { text: 'Photography quote', done: false }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Company Conference',
-      date: '2026-04-05',
-      type: 'Corporate',
-      guests: 120,
-      budget: 35000,
-      vendors: [
-        { emoji: '', name: 'Sound Systems Pro', type: 'AV', price: 15000, status: 'confirmed' }
-      ],
-      checklist: [
-        { text: 'Book speakers', done: true },
-        { text: 'Arrange seating', done: false }
-      ]
-    }
-  ];
+  events: any[] = [];
+  activeEventId: string | null = null;
+  loading = true;
 
-  activeEventId = 1;
-
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute, 
+    private router: Router,
+    private eventService: EventService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
         if(params['id']) {
-            this.activeEventId = Number(params['id']);
+            this.activeEventId = params['id'];
         }
     });
+
+    this.loadEvents();
+  }
+
+  loadEvents() {
+    const user = this.authService.user();
+    if (!user || user.role !== 'User') {
+      this.loading = false;
+      return;
+    }
+
+    this.eventService.getByUser(user.id).subscribe({
+      next: (data: EventResponseDto[]) => {
+        this.events = data.map(ev => this.mapEvent(ev));
+        if (this.events.length > 0 && !this.events.find(e => e.id === this.activeEventId)) {
+          this.activeEventId = this.events[0].id;
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load events:', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  mapEvent(ev: EventResponseDto): any {
+    const mappedVendors = (ev.eventItems || []).map(item => ({
+      emoji: '🏪', 
+      name: item.vendorName || 'Vendor',
+      type: item.serviceName || 'Service',
+      price: item.price || 0,
+      status: item.itemStatus?.toLowerCase() || 'pending'
+    }));
+
+    const defaultChecklist = [
+      { text: 'Book venue', done: mappedVendors.some(v => v.type.toLowerCase().includes('venue') && v.status === 'confirmed') },
+      { text: 'Choose decor vendor', done: mappedVendors.some(v => v.type.toLowerCase().includes('decor') && v.status === 'confirmed') },
+      { text: 'Setup guest list', done: false },
+      { text: 'Send invitations', done: false }
+    ];
+
+    return {
+      id: ev.id,
+      name: ev.title || 'Untitled Event',
+      date: ev.eventDate,
+      type: ev.categoryName || 'General',
+      guests: ev.guestCount || 0,
+      budget: ev.totalBudget || 0,
+      vendors: mappedVendors,
+      checklist: defaultChecklist
+    };
   }
 
   get activeEvent() {
@@ -109,21 +89,21 @@ export class MyEventsComponent implements OnInit {
   }
 
   get spent() {
-    return this.activeEvent?.vendors.reduce((sum, v) => sum + v.price, 0) || 0;
+    return this.activeEvent?.vendors.reduce((sum: number, v: any) => sum + (v.status !== 'rejected' ? v.price : 0), 0) || 0;
   }
 
   get budgetPct() {
-    if (!this.activeEvent) return 0;
+    if (!this.activeEvent || this.activeEvent.budget === 0) return 0;
     return Math.min(100, Math.round((this.spent / this.activeEvent.budget) * 100));
   }
 
   get daysLeft() {
-    if (!this.activeEvent) return 0;
+    if (!this.activeEvent || !this.activeEvent.date) return 0;
     const diff = new Date(this.activeEvent.date).getTime() - new Date().getTime();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }
 
-  switchEvent(id: number) {
+  switchEvent(id: string) {
     this.activeEventId = id;
   }
 

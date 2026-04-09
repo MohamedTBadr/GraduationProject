@@ -1,36 +1,36 @@
 <div class="vd-section active">
   <div class="vd-page-header">
     <div>
-      <div class="vd-page-title">Welcome back, White Rose 👋</div>
+      <div class="vd-page-title">Welcome back, {{ vendorName }} 👋</div>
       <div class="vd-page-sub">Sunday, 1 March 2026 &middot; Your business at a glance</div>
     </div>
-    <button class="vd-btn vd-btn-gold" (click)="openAddServiceModal()">+ Add Service</button>
+    <button class="vd-btn vd-btn-gold" routerLink="/vendor-dashboard/services">+ Add Service</button>
   </div>
 
   <div class="vd-stats">
     <div class="vd-stat vds-gold">
       <div class="vd-stat-bg" style="font-size: 1.8rem;">📦</div>
-      <div class="vd-stat-val">47</div>
+      <div class="vd-stat-val">{{ totalBookings() }}</div>
       <div class="vd-stat-lbl">Total Bookings</div>
-      <div class="vd-stat-trend">↑ 12% this month</div>
+      <div class="vd-stat-trend">Confirmed services</div>
     </div>
     <div class="vd-stat vds-amber">
       <div class="vd-stat-bg" style="font-size: 1.8rem;">⌛</div>
-      <div class="vd-stat-val">8</div>
+      <div class="vd-stat-val">{{ pendingRequests() }}</div>
       <div class="vd-stat-lbl">Pending Requests</div>
-      <div class="vd-stat-trend flat" style="color: #f59e0b;">3 need urgent reply</div>
+      <div class="vd-stat-trend flat" style="color: #f59e0b;">Waiting for approval</div>
     </div>
     <div class="vd-stat vds-green">
       <div class="vd-stat-bg" style="font-size: 1.8rem;">💰</div>
-      <div class="vd-stat-val">142K</div>
+      <div class="vd-stat-val">{{ totalRevenue() | number:'1.0-0' }}</div>
       <div class="vd-stat-lbl">Revenue (EGP)</div>
-      <div class="vd-stat-trend" style="color: #10b981;">↑ 18% vs last month</div>
+      <div class="vd-stat-trend" style="color: #10b981;">Total approved value</div>
     </div>
     <div class="vd-stat vds-blue">
       <div class="vd-stat-bg" style="font-size: 1.8rem;">⭐</div>
-      <div class="vd-stat-val">4.9</div>
+      <div class="vd-stat-val">{{ averageRating() | number:'1.1-1' }}</div>
       <div class="vd-stat-lbl">Average Rating</div>
-      <div class="vd-stat-trend" style="color: #3b82f6;">127 verified reviews</div>
+      <div class="vd-stat-trend" style="color: #3b82f6;">From client reviews</div>
     </div>
   </div>
 
@@ -52,26 +52,18 @@
     <div class="vd-card">
       <div class="vd-card-title">Upcoming Events<span class="vd-card-link" routerLink="/vendor-dashboard/bookings" style="text-decoration:none">All →</span></div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-top:15px">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--cream)">
+        <div *ngIf="upcomingEvents().length === 0" style="text-align:center; padding:20px; color:var(--gray)">
+          No upcoming events scheduled.
+        </div>
+        <div *ngFor="let event of upcomingEvents()" style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--cream)">
             <div style="display:flex;gap:10px;align-items:center;">
-              <div style="width: 38px; height: 38px; background: var(--cream); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.1rem;">💍</div>
-              <div><div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Nour & Omar Wedding</div><div style="font-size:0.75rem;color:var(--gray)">Jun 14 2026</div></div>
+              <div style="width: 38px; height: 38px; background: var(--cream); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.1rem;">📅</div>
+              <div>
+                <div style="font-weight:700;font-size:0.9rem;color:var(--navy)">{{ event.title }}</div>
+                <div style="font-size:0.75rem;color:var(--gray)">{{ event.eventDate | date:'MMM d, y' }}</div>
+              </div>
             </div>
             <span class="vd-badge-pill vdb-green">confirmed</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--cream)">
-            <div style="display:flex;gap:10px;align-items:center;">
-              <div style="width: 38px; height: 38px; background: var(--cream); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.1rem;">💐</div>
-              <div><div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Sara Engagement</div><div style="font-size:0.75rem;color:var(--gray)">Jun 12 2026</div></div>
-            </div>
-            <span class="vd-badge-pill vdb-green">confirmed</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="display:flex;gap:10px;align-items:center;">
-              <div style="width: 38px; height: 38px; background: var(--cream); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size: 1.1rem;">🎂</div>
-              <div><div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Layla's Birthday</div><div style="font-size:0.75rem;color:var(--gray)">May 22 2026</div></div>
-            </div>
-            <span class="vd-badge-pill vdb-amber">pending</span>
         </div>
       </div>
     </div>
@@ -81,30 +73,22 @@
     <!-- Left: Pending Requests -->
     <div class="vd-card">
       <div class="vd-card-title">Pending Requests<span class="vd-card-link" routerLink="/vendor-dashboard/bookings" style="text-decoration:none">View All →</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--cream)">
+        <div *ngIf="pendingEvents().length === 0" style="text-align:center; padding:20px; color:var(--gray)">
+          No pending requests.
+        </div>
+        <div *ngFor="let req of pendingEvents()" style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--cream)">
             <div>
-              <div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Sara Mohamed</div>
-              <div style="font-size:0.8rem;color:var(--gray);margin-bottom:6px">Engagement Party &middot; Jun 12</div>
+              <div style="font-weight:700;font-size:0.9rem;color:var(--navy)">{{ req.client }}</div>
+              <div style="font-size:0.8rem;color:var(--gray);margin-bottom:6px">{{ req.eventTitle }} &middot; {{ req.date | date:'MMM d' }}</div>
               <div style="display:flex;gap:6px">
-                <button class="vd-btn vd-btn-green" style="padding:4px 12px; font-size:0.75rem">Accept</button>
-                <button class="vd-btn vd-btn-ghost" style="padding:4px 12px; font-size:0.75rem">Decline</button>
+                <button class="vd-btn vd-btn-green" (click)="acceptRequest(req.itemId)" style="padding:4px 12px; font-size:0.75rem">Accept</button>
+                <button class="vd-btn vd-btn-ghost" (click)="declineRequest(req.itemId)" style="padding:4px 12px; font-size:0.75rem">Decline</button>
               </div>
             </div>
-            <div style="font-weight:700;color:#9f1239;font-size:0.9rem">12,000 EGP</div>
+            <div style="font-weight:700;color:#9f1239;font-size:0.9rem">{{ req.value | number }} EGP</div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--cream)">
-            <div>
-              <div style="font-weight:700;font-size:0.9rem;color:var(--navy)">Khaled Hassan</div>
-              <div style="font-size:0.8rem;color:var(--gray);margin-bottom:6px">Wedding &middot; Sep 20</div>
-              <div style="display:flex;gap:6px">
-                <button class="vd-btn vd-btn-green" style="padding:4px 12px; font-size:0.75rem">Accept</button>
-                <button class="vd-btn vd-btn-ghost" style="padding:4px 12px; font-size:0.75rem">Decline</button>
-              </div>
-            </div>
-            <div style="font-weight:700;color:#9f1239;font-size:0.9rem">28,000 EGP</div>
-        </div>
-        <div style="text-align:center; padding-top:14px;">
-           <button class="vd-chip" routerLink="/vendor-dashboard/bookings">See all 8 requests &rarr;</button>
+        <div *ngIf="pendingEvents().length > 0" style="text-align:center; padding-top:14px;">
+           <button class="vd-chip" routerLink="/vendor-dashboard/bookings">See all {{ pendingRequests() }} requests &rarr;</button>
         </div>
     </div>
     
@@ -135,58 +119,4 @@
   </div>
 </div>
 
-<!-- ADD SERVICE MODAL -->
-<div class="vd-modal-overlay" [class.open]="isAddServiceModalOpen">
-  <div class="vd-modal" style="max-width: 540px;">
-    <button class="vd-modal-close" (click)="closeAddServiceModal()">&times;</button>
-    <div class="vd-modal-title" style="font-size: 1.6rem;">Add New Service</div>
-    <div class="vd-modal-sub" style="margin-bottom: 24px;">Create a new listing that will appear on your vendor profile.</div>
-    
-    <div class="vd-form-group">
-      <label>Service Name *</label>
-      <input type="text" [(ngModel)]="newService.name" placeholder="e.g. Wedding Stage Floral Design" style="border-radius: 8px; font-size: 0.9rem; padding: 12px 14px; border: 1.5px solid var(--lgray);">
-    </div>
-    
-    <div class="vd-form-row" style="margin-bottom: 16px;">
-      <div>
-        <label>Category</label>
-        <select [(ngModel)]="newService.category" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
-          <option>Decoration</option>
-          <option>Photography</option>
-          <option>Catering</option>
-          <option>Venue</option>
-        </select>
-      </div>
-      <div>
-        <label>Starting Price (EGP) *</label>
-        <input type="text" [(ngModel)]="newService.price" placeholder="e.g. 8000" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
-      </div>
-    </div>
-    
-    <div class="vd-form-group" style="margin-bottom: 16px;">
-      <label>Description *</label>
-      <textarea [(ngModel)]="newService.description" placeholder="Describe the service in detail — what's included, materials, setup time..." rows="4" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);"></textarea>
-    </div>
-    
-    <div class="vd-form-row">
-      <div>
-        <label>Setup Duration</label>
-        <input type="text" [(ngModel)]="newService.duration" placeholder="e.g. 4-6 hours" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
-      </div>
-      <div>
-        <label>Lead Time Required</label>
-        <input type="text" [(ngModel)]="newService.leadTime" placeholder="e.g. 2 weeks minimum" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
-      </div>
-    </div>
-
-    <div class="vd-form-group" style="margin-top: 16px;">
-      <label>Service Images</label>
-      <app-image-upload (imagesChanged)="onImagesChanged($event)"></app-image-upload>
-    </div>
-    
-    <div class="vd-submit-bar" style="border: none; margin-top: 24px; padding-top: 0; display: flex; justify-content: flex-end; gap: 10px;">
-      <button class="vd-btn vd-btn-ghost" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;" (click)="closeAddServiceModal()">Cancel</button>
-      <button class="vd-btn vd-btn-gold" (click)="createService()">Create Service</button>
-    </div>
-  </div>
-</div>
+<!-- ADD SERVICE MODAL REMOVED - Managed in Services Component -->

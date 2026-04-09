@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { VendorService } from '../../types/vendor.interface';
+import { ApiProduct } from '../../types/api.interfaces';
 
 @Component({
   selector: 'app-service-card',
@@ -10,13 +10,13 @@ import { VendorService } from '../../types/vendor.interface';
   styleUrls: ['./service-card.component.scss']
 })
 export class ServiceCardComponent {
-  @Input() service!: VendorService;
+  @Input() service!: ApiProduct;
   @Input() viewMode: 'list' | 'grid' = 'list';
   @Output() actionClick = new EventEmitter<string>();
 
   get coverImage(): string | null {
-    if (this.service?.images && this.service.images.length > 0) {
-      return this.service.images[0];
+    if (this.service?.imageUrl) {
+      return this.service.imageUrl;
     }
     return null;
   }

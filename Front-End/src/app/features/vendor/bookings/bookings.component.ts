@@ -1,15 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../core/services/auth.service';
+import { EventService } from '../../../core/services/event.service';
+import { EventResponseDto, EventItemResponseDto } from '../../../shared/types/api.interfaces';
 
 export interface Booking {
+  id: string; // itemId
   client: string;
   event?: string;
   service: string;
   dateStr: string;
-  value: string;
+  value: number;
   guests?: number;
   note?: string;
-  status?: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
   stars?: number;
 }
 
@@ -20,59 +24,81 @@ export interface Booking {
   templateUrl: './bookings.component.html',
   styleUrls: ['./bookings.component.scss']
 })
-export class BookingsComponent {
+export class BookingsComponent implements OnInit {
   currentTab: 'pending' | 'confirmed' | 'calendar' | 'history' = 'pending';
+  vendorId: string | null = null;
+  loading = signal(false);
 
-  pendingBookings: Booking[] = [
-    {
-      client: 'Sara Mohamed',
-      event: 'Engagement Party',
-      dateStr: 'Jun 12',
-      service: 'Full Room Styling',
-      guests: 60,
-      value: '12,000',
-      note: "Hi! We'd love a pink and white theme with candles and fresh roses. Budget is flexible."
-    },
-    {
-      client: 'Khaled Hassan',
-      event: 'Wedding',
-      dateStr: 'Sep 20',
-      service: 'Wedding Stage + Tables',
-      guests: 250,
-      value: '28,000',
-      note: "Looking for an elegant garden theme. Venue is Four Seasons Cairo. Please send portfolio."
-    },
-    {
-      client: 'Dina Mostafa',
-      event: 'Birthday',
-      dateStr: 'May 5',
-      service: 'Balloon Art & Décor',
-      guests: 40,
-      value: '5,500',
-      note: "Unicorn theme for my daughter's 7th birthday. Need balloons, cake table, and wall backdrop."
-    }
-  ];
-
-  confirmedBookings: Booking[] = [
-    { client: 'Nour Ahmed', event: 'Wedding', service: 'Wedding Stage Floral', dateStr: 'Jun 14', value: '18,000', status: 'confirmed' },
-    { client: 'Sara Mohamed', event: 'Engagement', service: 'Room Styling', dateStr: 'Jun 12', value: '12,000', status: 'confirmed' },
-    { client: 'Layla Karim', event: 'Birthday', service: 'Balloon Setup', dateStr: 'May 22', value: '4,500', status: 'pending' },
-    { client: 'Omar Hassan', event: 'Corporate', service: 'Corporate Florals', dateStr: 'Apr 5', value: '8,000', status: 'confirmed' },
-    { client: 'Rania Saleh', event: 'Engagement', service: 'Room Styling', dateStr: 'Mar 18', value: '10,000', status: 'confirmed' }
-  ];
-
-  historyBookings: Booking[] = [
-    { client: 'Heba Mahmoud', service: 'Wedding Stage Floral', dateStr: 'Jan 15', value: '22,000', status: 'completed', stars: 5 },
-    { client: 'Ahmed Faris', service: 'Engagement Styling', dateStr: 'Feb 8', value: '9,500', status: 'completed', stars: 5 },
-    { client: 'Rania Said', service: 'Birthday Decor', dateStr: 'Feb 20', value: '4,000', status: 'completed', stars: 4 },
-    { client: 'Mona Ibrahim', service: 'Corporate Florals', dateStr: 'Jan 28', value: '7,000', status: 'completed', stars: 5 }
-  ];
+  pendingBookings: Booking[] = [];
+  confirmedBookings: Booking[] = [];
+  historyBookings: Booking[] = [];
 
   calendarDays = Array.from({length: 31}, (_, i) => i + 1);
   bookedDates = [5, 12, 14, 18, 22, 25, 28];
 
-  switchTab(tab: 'pending' | 'confirmed' | 'calendar' | 'history') {
-    this.currentTab = tab;
+  constructor(
+    private authService: AuthService,
+    private eventService: EventService
+  ) {}
+
+  ngOnInit() {
+    const user = this.authService.user();
+    if (user) {
+      this.vendorId = user.id;
+      this.loadBookings();
+    }
+  }
+
+  loadBookings() {
+    if (!this.vendorId) return;
+    this.loading.set(true);
+
+    this.eventService.getByUser(this.vendorId).subscribe({
+      next: (events) => {
+        this.processBookings(events);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading bookings', err);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  private processBookings(events: EventResponseDto[]) {
+    const pending: Booking[] = [];
+    const confirmed: Booking[] = [];
+    const history: Booking[] = [];
+
+    events.forEach(event => {
+      event.eventItems.forEach(item => {
+        if (item.vendorId === this.vendorId) {
+          const booking: Booking = {
+            id: item.id,
+            client: event.userName,
+            event: event.title,
+            service: item.serviceName,
+            dateStr: event.eventDate,
+            value: item.price * item.quantity,
+            guests: event.guestCount,
+            note: event.notes,
+            status: item.itemStatus
+          };
+
+          if (item.itemStatus === 'Pending') {
+            pending.push(booking);
+          } else if (item.itemStatus === 'Approved') {
+            confirmed.push(booking);
+          } else if (item.itemStatus === 'Rejected') {
+            history.push(booking);
+          }
+        }
+      });
+    });
+
+    this.pendingBookings = pending;
+    this.confirmedBookings = confirmed;
+    this.historyBookings = history;
   }
 
   isDetailsModalOpen = false;
@@ -125,43 +151,28 @@ export class BookingsComponent {
 
   acceptBooking() {
     if (this.selectedBooking) {
-      // Remove from pending
-      const idx = this.pendingBookings.indexOf(this.selectedBooking);
-      if (idx > -1) {
-        this.pendingBookings.splice(idx, 1);
-        
-        // Add to confirmed
-        this.confirmedBookings.unshift({
-          client: this.selectedBooking.client,
-          event: this.selectedBooking.event,
-          service: this.selectedBooking.service,
-          dateStr: this.selectedBooking.dateStr,
-          value: this.selectedBooking.value,
-          status: 'confirmed'
-        });
-      }
-      this.closeDetails();
+      this.eventService.updateItemStatus(this.selectedBooking.id, 'Approved').subscribe({
+        next: () => {
+          this.loadBookings();
+          this.closeDetails();
+        }
+      });
     }
   }
 
   submitDecline() {
     if (this.selectedBooking && this.declineReason) {
-      // Remove from pending
-      const idx = this.pendingBookings.indexOf(this.selectedBooking);
-      if (idx > -1) {
-        this.pendingBookings.splice(idx, 1);
-        
-        // Add to history as cancelled
-        this.historyBookings.unshift({
-          client: this.selectedBooking.client,
-          service: this.selectedBooking.service,
-          dateStr: this.selectedBooking.dateStr,
-          value: this.selectedBooking.value,
-          status: 'cancelled',
-          stars: 0
-        });
-      }
-      this.closeDeclineForm();
+      const fullReason = `${this.declineReason}${this.declineNote ? ': ' + this.declineNote : ''}`;
+      this.eventService.updateItemStatus(this.selectedBooking.id, 'Rejected', fullReason).subscribe({
+        next: () => {
+          this.loadBookings();
+          this.closeDeclineForm();
+        }
+      });
     }
+  }
+
+  switchTab(tab: 'pending' | 'confirmed' | 'calendar' | 'history') {
+    this.currentTab = tab;
   }
 }

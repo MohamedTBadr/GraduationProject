@@ -1,122 +1,118 @@
-<div class="add-event-page" [class.bg-cream]="true">
-    <div class="ae-header-bar">
-        <h1>Create New Event</h1>
-        <p>Start with a quickstart template or build your event from scratch</p>
+<div class="page active" id="page-add-event">
+  <div class="ae-hero">
+    <h1>Create New Event</h1>
+    <p>Start with a quickstart template or build your event from scratch</p>
+  </div>
+  
+  <div class="container" style="padding-top:0;padding-bottom:60px;max-width:860px">
+    <!-- Step indicator -->
+    <div class="ae-step-bar">
+      <div class="ae-step" [class.active]="step >= 1" [class.done]="step > 1">
+        <div class="ae-step-num">1</div>
+        <div class="ae-step-label">Event Type</div>
+      </div>
+      <div class="ae-step-connector" [class.done]="step > 1"></div>
+      <div class="ae-step" [class.active]="step >= 2" [class.done]="step > 2">
+        <div class="ae-step-num">2</div>
+        <div class="ae-step-label">Event Details</div>
+      </div>
+      <div class="ae-step-connector" [class.done]="step > 2"></div>
+      <div class="ae-step" [class.active]="step === 3">
+        <div class="ae-step-num">3</div>
+        <div class="ae-step-label">Done</div>
+      </div>
     </div>
 
-    <div class="stepper-wrapper">
-        <div class="stepper">
-            <div class="step" [class.active]="step >= 1">
-                <div class="step-num">1</div>
-                <div class="step-lbl">Event Type</div>
-            </div>
-            <div class="step-line" [class.active]="step >= 2"></div>
-            <div class="step" [class.active]="step >= 2">
-                <div class="step-num">2</div>
-                <div class="step-lbl" [class.fw-bold]="step === 2">Event Details</div>
-            </div>
-            <div class="step-line"></div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <div class="step-lbl">Done</div>
-            </div>
+    <!-- Step 1: Quickstart type select -->
+    <div id="ae-panel-1" *ngIf="step === 1">
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="tag">⚡ Quickstart</div>
+        <h2 class="section-title" style="font-size:1.8rem">What type of event are you planning?</h2>
+        <p style="color:var(--gray);font-size:.9rem;margin-top:8px">We'll pre-fill suggested vendors, checklist items, and budget splits for you.</p>
+      </div>
+      
+      <div class="qs-grid">
+        <div class="qs-card" *ngFor="let t of eventTypes" 
+             [class.selected]="selectedEventType?.id === t.id" 
+             (click)="selectType(t)">
+          <div class="qs-icon">{{t.icon}}</div>
+          <div class="qs-name">{{t.title}}</div>
+          <div class="qs-desc">{{t.desc}}</div>
+          <div class="qs-includes">{{t.services}}</div>
         </div>
+      </div>
+      
+      <div style="text-align:center">
+        <button class="btn btn-gold" (click)="goToStep2()" [disabled]="!selectedEventType" [style.opacity]="!selectedEventType ? '0.5' : '1'" style="padding:12px 36px">Continue →</button>
+      </div>
     </div>
 
-    <div class="container-inner">
-        <!-- Step 1 -->
-        <div class="step-content text-center" *ngIf="step === 1">
-            <div class="quickstart-lbl">
-                <span>⚡</span> QUICKSTART
-            </div>
-            <h2 class="step-title">What type of event are you planning?</h2>
-            <p class="step-subtitle">We'll pre-fill suggested vendors, checklist items, and budget splits for you.</p>
+    <!-- Step 2: Event Details Form -->
+    <div id="ae-panel-2" *ngIf="step === 2">
+      <div class="ae-form-box" [formGroup]="eventForm">
+        <div class="ae-form-title">{{selectedEventType?.title}} Details</div>
+        <div class="ae-form-sub">Fill in the details — we've pre-loaded recommended services and a suggested budget split.</div>
 
-            <div class="event-type-grid">
-                <div *ngFor="let t of eventTypes" class="type-card" [class.selected]="selectedEventType?.id === t.id" (click)="selectType(t)">
-                    <div class="icon">{{t.icon}}</div>
-                    <h3>{{t.title}}</h3>
-                    <p>{{t.desc}}</p>
-                    <div class="services">{{t.services}}</div>
-                </div>
-            </div>
-
-            <div class="action-btn-row" style="margin-top: 40px; margin-bottom: 60px;">
-                <button class="btn btn-gold" style="padding: 14px 40px; font-weight: 700; border-radius: 50px" (click)="goToStep2()" [disabled]="!selectedEventType">Continue →</button>
-            </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Event Name *</label>
+            <input type="text" formControlName="name" placeholder="e.g. Sara & Omar's Wedding"/>
+          </div>
+          <div class="form-group">
+            <label>Event Date *</label>
+            <input type="date" formControlName="date"/>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Number of Guests</label>
+            <input type="number" formControlName="guests" placeholder="e.g. 150"/>
+          </div>
+          <div class="form-group">
+            <label>Location / Area</label>
+            <input type="text" formControlName="location" placeholder="e.g. New Cairo, Cairo"/>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Total Budget (EGP) *</label>
+          <input type="number" formControlName="budget" placeholder="e.g. 50000" />
         </div>
 
-        <!-- Step 2 -->
-        <div class="step-content" *ngIf="step === 2">
-            <div class="form-container" [formGroup]="eventForm">
-                <h2 class="form-title" style="font-family:var(--ff-d);font-size:1.8rem;color:var(--navy);font-weight:400;margin-bottom:8px">
-                    {{selectedEventType?.title}} Event Details
-                </h2>
-                <p style="color:var(--gray);font-size:0.95rem;margin-bottom:30px">
-                    Fill in the details — we've pre-loaded recommended services and a suggested budget split.
-                </p>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Event Name *</label>
-                        <input type="text" formControlName="name" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label>Event Date *</label>
-                        <input type="date" formControlName="date" class="form-control" />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Number of Guests</label>
-                        <input type="number" formControlName="guests" class="form-control" placeholder="e.g. 150" />
-                    </div>
-                    <div class="form-group">
-                        <label>Location / Area</label>
-                        <input type="text" formControlName="location" class="form-control" placeholder="e.g. New Cairo, Cairo" />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Total Budget (EGP) *</label>
-                    <input type="text" formControlName="budget" class="form-control" />
-                </div>
-
-                <div class="budget-breakdown">
-                    <h4 style="font-size:1rem;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px">
-                         Suggested Budget Breakdown
-                    </h4>
-                    <div class="bb-list">
-                        <div class="bb-item"><span>Venue</span> <span><strong>20,000 EGP</strong> (40%)</span></div>
-                        <div class="bb-item"><span>Catering</span> <span><strong>15,000 EGP</strong> (30%)</span></div>
-                        <div class="bb-item"><span>Decoration</span> <span><strong>7,500 EGP</strong> (15%)</span></div>
-                        <div class="bb-item"><span>Photography</span> <span><strong>5,000 EGP</strong> (10%)</span></div>
-                        <div class="bb-item"><span>Entertainment</span> <span><strong>2,500 EGP</strong> (5%)</span></div>
-                        <div class="bb-item total"><span>Total Budget</span> <span><strong>50,000 EGP</strong></span></div>
-                    </div>
-                </div>
-
-                <div class="services-toggle" style="margin-top: 30px">
-                    <label style="display:block;margin-bottom:12px;font-weight:700;color:var(--navy);font-size:0.9rem">Services You Need</label>
-                    <div style="display:flex;flex-wrap:wrap;gap:12px">
-                        <button *ngFor="let s of servicesRequired" type="button" 
-                            class="service-pill" [class.selected]="s.selected" (click)="toggleService(s)">
-                            {{s.label}}
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 30px">
-                    <label>Notes / Special Requests</label>
-                    <textarea formControlName="notes" class="form-control" rows="4" placeholder="Any specific ideas, themes, or requirements..."></textarea>
-                </div>
-            </div>
-            
-            <div class="form-footer-bar">
-                <button class="btn" style="background:var(--white);border:1px solid var(--lgray);border-radius:50px;padding:12px 24px;color:var(--navy);font-weight:700" (click)="goToStep1()">← Back</button>
-                <button class="btn btn-gold" style="border-radius:50px;padding:12px 32px;font-weight:700" (click)="createEvent()">Create Event 🎉</button>
-            </div>
+        <!-- Budget breakdown -->
+        <div style="margin-bottom:18px">
+          <div style="font-size:.84rem;font-weight:600;color:var(--navy);margin-bottom:6px">💰 Suggested Budget Breakdown</div>
+          <div class="ae-budget-breakdown">
+             <div class="ae-budget-row"><span>Venue</span> <span><strong>20,000 EGP</strong> (40%)</span></div>
+             <div class="ae-budget-row"><span>Catering</span> <span><strong>15,000 EGP</strong> (30%)</span></div>
+             <div class="ae-budget-row"><span>Decoration</span> <span><strong>7,500 EGP</strong> (15%)</span></div>
+             <div class="ae-budget-row"><span>Photography</span> <span><strong>5,000 EGP</strong> (10%)</span></div>
+             <div class="ae-budget-row"><span>Entertainment</span> <span><strong>2,500 EGP</strong> (5%)</span></div>
+             <div class="ae-budget-row total"><span>Total Budget</span> <span><strong>50,000 EGP</strong></span></div>
+          </div>
         </div>
+
+        <div class="form-group">
+          <label>Services You Need</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+            <button *ngFor="let s of servicesRequired" type="button" 
+                class="service-pill" [class.selected]="s.selected" (click)="toggleService(s)">
+                {{s.label}}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notes / Special Requests</label>
+          <textarea formControlName="notes" placeholder="Any specific ideas, themes, or requirements…"></textarea>
+        </div>
+
+        <div class="ae-nav-btns">
+          <button class="btn btn-ghost" (click)="goToStep1()">← Back</button>
+          <button class="btn btn-gold" (click)="createEvent()" style="padding:11px 32px">Create Event 🎉</button>
+        </div>
+      </div>
     </div>
+  </div>
 </div>

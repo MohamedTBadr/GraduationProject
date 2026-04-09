@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { EventService } from '../../../core/services/event.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { EventResponseDto } from '../../../shared/types/api.interfaces';
 
 interface Booking {
   id: string;
@@ -18,37 +21,79 @@ interface Booking {
   templateUrl: './my-bookings.component.html',
   styleUrls: ['./my-bookings.component.scss']
 })
-export class MyBookingsComponent {
+export class MyBookingsComponent implements OnInit {
   stats = {
-    all: 9,
-    confirmed: 4,
-    pending: 3,
-    completed: 2,
+    all: 0,
+    confirmed: 0,
+    pending: 0,
+    completed: 0,
     cancelled: 0
   };
 
   activeTab = 'all';
+  bookings: Booking[] = [];
+  loading = true;
 
-  bookings: Booking[] = [
-    {
-      id: 'BK-312',
-      vendorName: 'White Rose Decor',
-      serviceType: 'Wedding Stage Floral',
-      eventRef: "Sara & Karim's Wedding · Jun 14",
-      status: 'Confirmed',
-      price: '18,000 EGP',
-      icon: ''
-    },
-    {
-      id: 'BK-311',
-      vendorName: 'Royal Hall Cairo',
-      serviceType: 'Wedding Hall Rental',
-      eventRef: "Sara & Karim's Wedding · Jun 14",
-      status: 'Confirmed',
-      price: '45,000 EGP',
-      icon: '️'
+  constructor(
+    private eventService: EventService,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit() {
+    this.loadBookings();
+  }
+
+  loadBookings() {
+    const user = this.authService.user();
+    if (!user || user.role !== 'User') {
+      this.loading = false;
+      return;
     }
-  ];
+
+    this.eventService.getByUser(user.id).subscribe({
+      next: (events: EventResponseDto[]) => {
+        let allBookings: Booking[] = [];
+        
+        events.forEach(ev => {
+          if (ev.eventItems && ev.eventItems.length > 0) {
+            ev.eventItems.forEach(item => {
+              let localStatus: 'Confirmed' | 'Pending' | 'Completed' | 'Cancelled' = 'Pending';
+              if (item.itemStatus === 'Approved') localStatus = 'Confirmed';
+              if (item.itemStatus === 'Rejected') localStatus = 'Cancelled';
+              
+              const evDate = new Date(ev.eventDate);
+              const isPast = evDate.getTime() < new Date().getTime();
+              if (localStatus === 'Confirmed' && isPast) {
+                localStatus = 'Completed';
+              }
+
+              allBookings.push({
+                id: item.id || `BK-${Math.floor(Math.random() * 10000)}`,
+                vendorName: item.vendorName || 'Unknown Vendor',
+                serviceType: item.serviceName || 'Service',
+                eventRef: `${ev.title} · ${new Date(ev.eventDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`,
+                status: localStatus,
+                price: `${item.price.toLocaleString()} EGP`,
+                icon: '🏪'
+              });
+            });
+          }
+        });
+
+        this.bookings = allBookings;
+        this.stats.all = allBookings.length;
+        this.stats.confirmed = allBookings.filter(b => b.status === 'Confirmed').length;
+        this.stats.pending = allBookings.filter(b => b.status === 'Pending').length;
+        this.stats.completed = allBookings.filter(b => b.status === 'Completed').length;
+        this.stats.cancelled = allBookings.filter(b => b.status === 'Cancelled').length;
+        this.loading = false;
+      },
+      error: () => {
+        console.error('Failed to load bookings');
+        this.loading = false;
+      }
+    });
+  }
 
   get filteredBookings() {
     if (this.activeTab === 'all') return this.bookings;

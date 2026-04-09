@@ -45,6 +45,7 @@ export interface ChangePasswordRequest {
 export interface PaginationParams {
   pageNumber?: number;
   pageSize?: number;
+  searchTerm?: string;
 }
 
 export interface PagedResult<T> {
@@ -61,12 +62,12 @@ export interface PagedResult<T> {
 export interface Category {
   id: string;
   name: string;
-  description?: string;
+  // description?: string;
 }
 
 export interface CreateCategoryRequest {
   name: string;
-  description?: string;
+  // description?: string;
 }
 
 // ─────────────────────────────────────────────
@@ -75,17 +76,17 @@ export interface CreateCategoryRequest {
 export interface ServiceType {
   id: string;
   name: string;
-  description?: string;
+  // description?: string;
 }
 
 export interface CreateServiceTypeRequest {
   name: string;
-  description?: string;
+  // description?: string;
 }
 
 export interface UpdateServiceTypeRequest {
   name?: string;
-  description?: string;
+  // description?: string;
 }
 
 // ─────────────────────────────────────────────
@@ -161,6 +162,9 @@ export interface ApiProduct {
   serviceTypeId?: string;
   serviceTypeName?: string;
   imageUrl?: string;
+  status?: 'active' | 'paused';
+  duration?: string;
+  leadTime?: string;
   createdAt?: string;
 }
 
@@ -171,6 +175,9 @@ export interface CreateProductRequest {
   categoryId?: string;
   serviceTypeId?: string;
   imageUrl?: string;
+  status?: 'active' | 'paused';
+  duration?: string;
+  leadTime?: string;
 }
 
 export interface UpdateProductRequest {
@@ -180,6 +187,9 @@ export interface UpdateProductRequest {
   categoryId?: string;
   serviceTypeId?: string;
   imageUrl?: string;
+  status?: 'active' | 'paused';
+  duration?: string;
+  leadTime?: string;
 }
 
 // ─────────────────────────────────────────────
@@ -234,4 +244,52 @@ export interface Conversation {
 export interface GeminiResponse {
   result: string;
   prompt?: string;
+}
+
+// ─────────────────────────────────────────────
+// Event / Bookings
+// ─────────────────────────────────────────────
+export interface EventSummaryDto {
+  id: string;
+  title: string;
+  eventDate: string;
+  eventStatus: string;
+  totalBudget: number;
+  itemCount: number;
+}
+
+export interface AddressDto {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
+export interface EventItemResponseDto {
+  id: string;
+  eventId: string;
+  serviceImage?: string;
+  serviceName: string;
+  price: number;
+  vendorId: string;
+  vendorName: string;
+  quantity: number;
+  itemStatus: 'Pending' | 'Approved' | 'Rejected';
+  rejectionReason?: string;
+}
+
+export interface EventResponseDto {
+  id: string;
+  userId: string;
+  userName: string;
+  title: string;
+  categoryName: string;
+  eventDate: string;
+  totalBudget: number;
+  guestCount: number;
+  notes?: string;
+  eventStatus: string;
+  location: AddressDto;
+  eventItems: EventItemResponseDto[];
 }

@@ -4,7 +4,7 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root'
 })
 export class FavoriteService {
-  private favorites = new Set<number>();
+  private favorites = new Set<string>();
   favoritesCount = signal(0);
 
   constructor() {
@@ -15,7 +15,7 @@ export class FavoriteService {
     const saved = localStorage.getItem('eventora_favorites');
     if (saved) {
       const ids = JSON.parse(saved);
-      ids.forEach((id: number) => this.favorites.add(id));
+      ids.forEach((id: string) => this.favorites.add(String(id)));
       this.favoritesCount.set(this.favorites.size);
     }
   }
@@ -25,7 +25,7 @@ export class FavoriteService {
     this.favoritesCount.set(this.favorites.size);
   }
 
-  toggleFavorite(id: number) {
+  toggleFavorite(id: string) {
     if (this.favorites.has(id)) {
       this.favorites.delete(id);
     } else {
@@ -34,11 +34,11 @@ export class FavoriteService {
     this.saveFavorites();
   }
 
-  isFavorite(id: number): boolean {
+  isFavorite(id: string): boolean {
     return this.favorites.has(id);
   }
 
-  getFavoriteIds(): number[] {
+  getFavoriteIds(): string[] {
     return Array.from(this.favorites);
   }
 }

@@ -1,17 +1,18 @@
-<div class="vd-section active" style="display:block" *ngIf="vendor">
+<div *ngIf="loading" style="padding: 40px; text-align: center; color: #94a3b8;">
+  Loading profile...
+</div>
+
+<div class="vd-section active" style="display:block" *ngIf="!loading && vendor">
   <div class="vd-page-header">
     <div>
       <div class="vd-page-title">My Profile</div>
       <div class="vd-page-sub">What clients see when they visit your vendor page.</div>
     </div>
-    <button class="vd-btn vd-btn-ghost" routerLink="/vendor/1">View Public Profile →</button>
+    <button class="vd-btn vd-btn-ghost" [routerLink]="['/vendor', vendor.id]">View Public Profile →</button>
   </div>
   <div class="vd-cover"><div class="vd-cover-avatar"></div><div style="position:absolute;top:11px;right:11px"><button class="vd-btn vd-btn-ghost vd-btn-sm" style="background:rgba(255,255,255,.1);color:white;border-color:rgba(255,255,255,.2)">Change Cover</button></div></div>
   <div class="vd-tab-bar">
     <button class="vd-tab active">Business Info</button>
-    <button class="vd-tab">Photos</button>
-    <button class="vd-tab">Availability</button>
-    <button class="vd-tab">Documents</button>
   </div>
   <div class="vd-tab-pane active" id="prf-info">
     <div class="vd-card">
@@ -21,30 +22,32 @@
           <input [(ngModel)]="vendor.name" />
         </div>
         <div class="vd-form-group">
-          <label>Tagline/Category</label>
-          <input [(ngModel)]="vendor.category" />
+          <label>Category (Read Only)</label>
+          <input [value]="vendor.categoryName || 'Not specified'" disabled style="background-color: #f1f5f9; cursor: not-allowed;" />
         </div>
       </div>
       <div class="vd-form-group">
-        <label>Description</label>
+        <label>Description (About)</label>
         <textarea [(ngModel)]="vendor.about" rows="4"></textarea>
       </div>
       <div class="vd-form-row">
         <div class="vd-form-group">
-          <label>Starting Price (EGP)</label>
-          <input type="number" [(ngModel)]="vendor.startPrice" />
-        </div>
-        <div class="vd-form-group">
           <label>Main Location</label>
           <input type="text" [(ngModel)]="vendor.location" />
         </div>
+        <div class="vd-form-group">
+          <label>Status</label>
+          <input [value]="vendor.isApproved ? 'Approved' : 'Pending Approval'" disabled style="background-color: #f1f5f9; cursor: not-allowed; font-weight: bold;" [style.color]="vendor.isApproved ? '#16a34a' : '#d97706'" />
+        </div>
       </div>
       <div class="vd-form-section"><div class="vd-form-section-lbl">Contact Details</div>
-        <div class="vd-form-row"><div class="vd-form-group"><label>Phone / WhatsApp</label><input type="tel" value="+20 100 123 4567"/></div><div class="vd-form-group"><label>Email</label><input type="email" value="info@whiterosedecor.eg"/></div></div>
-        <div class="vd-form-row"><div class="vd-form-group"><label>Instagram</label><input value="@whiterosedecor"/></div><div class="vd-form-group"><label>Website</label><input value="www.whiterosedecor.eg"/></div></div>
+        <div class="vd-form-row">
+          <div class="vd-form-group"><label>Phone / WhatsApp</label><input type="tel" [(ngModel)]="vendor.phone"/></div>
+          <div class="vd-form-group"><label>Email (Read Only)</label><input type="email" [value]="vendor.email" disabled style="background-color: #f1f5f9; cursor: not-allowed;"/></div>
+        </div>
       </div>
       <div class="vd-submit-bar">
-        <button class="vd-btn vd-btn-ghost" (click)="ngOnInit()">Discard</button>
+        <button class="vd-btn vd-btn-ghost" (click)="loadProfile()">Discard</button>
         <button class="vd-btn vd-btn-gold" (click)="saveChanges()">Save Changes</button>
       </div>
     </div>

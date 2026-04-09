@@ -9,30 +9,28 @@
 </div>
 
 <!-- Events List -->
-<h3 style="font-family:var(--ff-d);font-size:1.4rem;color:var(--navy);margin-bottom:20px;">Active Planning</h3>
+<h3 class="dashboard-section-title">Active Planning</h3>
 
-<div style="display:flex;flex-direction:column;gap:22px;">
-    <div class="dash-card" *ngFor="let ev of events" (click)="goToEvent(ev.id)" style="cursor:pointer; transition:transform 0.2s; border:1px solid transparent;" 
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='var(--gold)';" 
-         onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='transparent';">
+<div class="events-list">
+    <div class="dash-card event-card" *ngFor="let ev of events" (click)="goToEvent(ev.id)">
         
-        <div class="dash-card-title" style="margin-bottom:10px; font-size:1.3rem;">
+        <div class="dash-card-title">
             {{ev.name}}
-            <span style="font-size:0.8rem;color:var(--gold);font-weight:600">{{ev.daysLeft}} days left</span>
+            <span class="days-left">{{ev.daysLeft}} days left</span>
         </div>
         
-        <div style="font-size:0.85rem;color:var(--gray);margin-bottom:20px;display:flex;gap:15px">
+        <div class="event-meta">
             <span>📅 {{ev.date | date:'longDate'}}</span>
             <span>✨ {{ev.type}}</span>
             <span> {{ev.guests}} Guests</span>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:20px;">
+        <div class="event-progress-container">
             <!-- Vendors -->
             <div>
                 <div class="budget-row">
                     <span>Vendors</span>
-                    <strong style="color:var(--navy)">{{ev.vendorProgress}}</strong>
+                    <strong>{{ev.vendorProgress}}</strong>
                 </div>
                 <div class="budget-bar">
                     <div class="budget-fill" [style.width]="(ev.vendorsConfirmed / ev.totalVendors * 100) + '%'"></div>
@@ -43,10 +41,10 @@
             <div>
                 <div class="budget-row">
                     <span>Tasks</span>
-                    <strong style="color:var(--navy)">{{ev.tasksProgress}}</strong>
+                    <strong>{{ev.tasksProgress}}</strong>
                 </div>
                 <div class="budget-bar">
-                    <div class="budget-fill" [style.width]="(ev.tasksDone / ev.totalTasks * 100) + '%'" style="background:linear-gradient(90deg, #16a34a, #22c55e)"></div>
+                    <div class="budget-fill fill-green" [style.width]="(ev.tasksDone / ev.totalTasks * 100) + '%'"></div>
                 </div>
             </div>
 
@@ -54,10 +52,10 @@
             <div>
                 <div class="budget-row">
                     <span>Budget Used</span>
-                    <strong style="color:var(--navy)">{{ev.budgetProgress}}</strong>
+                    <strong>{{ev.budgetProgress}}</strong>
                 </div>
                 <div class="budget-bar">
-                    <div class="budget-fill" [style.width]="(ev.budgetUsed / ev.totalBudget * 100) + '%'" style="background:linear-gradient(90deg, #ca8a04, #eab308)"></div>
+                    <div class="budget-fill fill-amber" [style.width]="(ev.budgetUsed / ev.totalBudget * 100) + '%'"></div>
                 </div>
             </div>
         </div>

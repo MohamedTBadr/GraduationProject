@@ -14,11 +14,11 @@ export class AddEventComponent {
   step = 1;
   
   eventTypes = [
-    { id: 'wedding', title: 'Wedding', icon: '', desc: 'Romantic ceremony & reception for your big day', services: 'Venue · Catering · Decor · Photography · DJ' },
-    { id: 'engagement', title: 'Engagement', icon: '', desc: 'Intimate celebration for your forever commitment', services: 'Venue · Decor · Desserts · Photography' },
-    { id: 'birthday', title: 'Birthday', icon: '', desc: 'A memorable party for any age milestone', services: 'Venue · Decor · Cake · Entertainment' },
-    { id: 'graduation', title: 'Graduation', icon: '', desc: 'Celebrate the achievement with family and friends', services: 'Venue · Decor · Photography · Catering' },
-    { id: 'corporate', title: 'Corporate', icon: '', desc: 'Professional events, conferences & product launches', services: 'Venue · AV · Catering · Branding' },
+    { id: 'wedding', title: 'Wedding', icon: '💍', desc: 'Romantic ceremony & reception for your big day', services: 'Venue · Catering · Decor · Photography · DJ' },
+    { id: 'engagement', title: 'Engagement', icon: '💐', desc: 'Intimate celebration for your forever commitment', services: 'Venue · Decor · Desserts · Photography' },
+    { id: 'birthday', title: 'Birthday', icon: '🎂', desc: 'A memorable party for any age milestone', services: 'Venue · Decor · Cake · Entertainment' },
+    { id: 'graduation', title: 'Graduation', icon: '🎓', desc: 'Celebrate the achievement with family and friends', services: 'Venue · Decor · Photography · Catering' },
+    { id: 'corporate', title: 'Corporate', icon: '🏢', desc: 'Professional events, conferences & product launches', services: 'Venue · AV · Catering · Branding' },
     { id: 'custom', title: 'Custom Event', icon: '✨', desc: 'Build your own event from scratch, your way', services: 'Choose any services' }
   ];
 

@@ -20,7 +20,7 @@ import { CompareService } from '../../services/compare.service';
         
         <div class="bar-vendors">
           <div class="bar-vendor" *ngFor="let vendor of compareService.compareListItems()">
-            <span class="bv-emoji">{{vendor.emoji}}</span>
+            <!-- <span class="bv-emoji">{{vendor.emoji}}</span> -->
             <span class="bv-name">{{vendor.name}}</span>
             <button class="bv-remove" (click)="compareService.toggleCompare(vendor)"></button>
           </div>

@@ -6,34 +6,41 @@
     </div>
   </div>
   <div class="ad-kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-    <div class="ad-kpi ak-blue"><div class="ad-kpi-val">1,284</div><div class="ad-kpi-lbl">Total Users</div><div class="ad-kpi-trend akt-up">↑ 142 this week</div></div>
-    <div class="ad-kpi ak-green"><div class="ad-kpi-val">847</div><div class="ad-kpi-lbl">Active (event created)</div><div class="ad-kpi-trend akt-up">↑ 18%</div></div>
-    <div class="ad-kpi ak-gold"><div class="ad-kpi-val">3.2</div><div class="ad-kpi-lbl">Avg Bookings / User</div><div class="ad-kpi-trend akt-up">↑ 0.4</div></div>
+    <div class="ad-kpi ak-blue"><div class="ad-kpi-val">{{ totalCount }}</div><div class="ad-kpi-lbl">Total Users</div></div>
   </div>
   <div class="ad-search-row">
-    <div class="ad-search-wrap"><span class="ad-search-icon">🔍</span><input type="text" placeholder="Search users…"/></div>
-    <select class="ad-filter-sel"><option>All Users</option><option>Active</option><option>Inactive</option><option>Flagged</option></select>
-    <select class="ad-filter-sel"><option>Sort: Latest</option><option>Sort: Bookings</option><option>Sort: Spend</option></select>
+    <div class="ad-search-wrap">
+      <span class="ad-search-icon">🔍</span>
+      <input type="text" placeholder="Search users (Name or Email)…" [(ngModel)]="searchQuery" (input)="onSearchChange()"/>
+    </div>
   </div>
-  <div class="ad-tbl-wrap">
+  
+  <div *ngIf="loading" style="padding: 2rem; text-align: center; color: var(--gold);">Loading users...</div>
+
+  <div *ngIf="!loading" class="ad-tbl-wrap">
     <table class="ad-tbl">
-      <thead><tr><th>User</th><th>Joined</th><th>Events Created</th><th>Total Bookings</th><th>Total Spend (EGP)</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="ad-users-tbody">
-        <tr>
-          <td><div><div>Heba Ali</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">heba at email.com</div></div></td>
-          <td>Feb 20, 2026</td><td>3</td><td>1</td>
-          <td style="color:var(--gold);font-weight:700">22,000 EGP</td>
-          <td><span class="ad-pill ap-green">Active</span></td>
-          <td><div style="display:flex;gap:5px"><button class="ad-btn ad-btn-ghost ad-btn-sm">View</button><button class="ad-btn ad-btn-red ad-btn-sm">Suspend</button></div></td>
+      <thead><tr><th>User</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let u of users">
+          <td><div><div>{{ u.name }}</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">{{ u.email }}</div></div></td>
+          <td><span class="ad-pill ap-green">{{ u.role || 'User' }}</span></td>
+          <td>{{ (u.createdAt | date:'mediumDate') || 'N/A' }}</td>
+          <td><div style="display:flex;gap:5px">
+             <button (click)="deleteUser(u)" class="ad-btn ad-btn-red ad-btn-sm">Delete</button>
+          </div></td>
         </tr>
-        <tr>
-          <td><div><div>Omar Ibrahim</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">omar at email.com</div></div></td>
-          <td>Jan 15, 2026</td><td>1</td><td>1</td>
-          <td style="color:var(--gold);font-weight:700">8,000 EGP</td>
-          <td><span class="ad-pill ap-green">Active</span></td>
-          <td><div style="display:flex;gap:5px"><button class="ad-btn ad-btn-ghost ad-btn-sm">View</button><button class="ad-btn ad-btn-red ad-btn-sm">Suspend</button></div></td>
+        <tr *ngIf="users.length === 0">
+          <td colspan="4" style="text-align:center; padding: 2rem; color: #888;">No users found.</td>
         </tr>
       </tbody>
     </table>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; color: #fff;">
+       <span>Page {{ pageNumber }} of {{ totalPages }}</span>
+       <div style="display: flex; gap: 10px;">
+          <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === 1" (click)="changePage(-1)">Previous</button>
+          <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === totalPages" (click)="changePage(1)">Next</button>
+       </div>
+    </div>
   </div>
 </div>
