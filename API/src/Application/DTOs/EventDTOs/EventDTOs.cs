@@ -67,5 +67,6 @@ namespace Application.DTOs
         public string EventStatus { get; set; } = string.Empty;
         public decimal TotalBudget { get; set; }
         public int ItemCount { get; set; }
+        public List<EventItemResponseDto> EventItems { get; set; } = new();
     }
 }

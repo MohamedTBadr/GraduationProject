@@ -53,7 +53,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> UpdateCategory(Guid id, UpdateCategoryRequest updateCategory, CancellationToken cancellationToken)
         {
             await categoryService.UpdateCategoryAsync(id, updateCategory, cancellationToken);
-            return Ok();
+            return NoContent();
 
         }
     }
