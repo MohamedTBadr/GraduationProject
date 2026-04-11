@@ -1,4 +1,4 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -54,7 +54,18 @@ namespace Infrastructure.Repositories
 
         public async Task<Vendor?> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var vendor = await _pipeline.ExecuteAsync(async token => await dbContext.Vendors.Include(x=>x.Services).ThenInclude(s => s.ServiceRatings).Include(x=>x.Packages).FirstOrDefaultAsync(v => v.UserId == id, token), cancellationToken);
+            var vendor = await _pipeline.ExecuteAsync(async token => await dbContext.Vendors
+                .Include(x => x.Services)
+                    .ThenInclude(s => s.ServiceRatings)
+                        .ThenInclude(r => r.User)
+                .Include(x => x.Services)
+                    .ThenInclude(s => s.Category)
+                .Include(x => x.Services)
+                    .ThenInclude(s => s.ServiceType)
+                .Include(x => x.Services)
+                    .ThenInclude(s => s.ServiceImages)
+                .Include(x => x.Packages)
+                .FirstOrDefaultAsync(v => v.UserId == id, token), cancellationToken);
             return vendor;
         }
 

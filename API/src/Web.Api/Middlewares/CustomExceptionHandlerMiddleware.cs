@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 using Shared.Exceptions;
 using IdempotentAPI.Core;
@@ -41,7 +41,7 @@ namespace Web.Api.Middlewares
                 GeminiException => Problem(422, "Unprocessable Entity", ex.Message, "GEMINI_ERROR"),
 
                 // ── Fallback ──────────────────────────────────────────────
-                _ => Problem(500, "Internal Server Error", "An unexpected error occurred.", "UNEXPECTED")
+                _ => Problem(500, "Internal Server Error", ex.ToString(), "UNEXPECTED")
             };
 
             context.Response.StatusCode = problem.Status!.Value;

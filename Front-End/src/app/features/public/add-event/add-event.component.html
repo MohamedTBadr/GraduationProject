@@ -1,120 +1,130 @@
 <div class="page active" id="page-add-event">
-    <div class="container" style="padding:40px 0;max-width:800px;min-height:80vh">
-        <div style="background:var(--white);border-radius:var(--r2);padding:40px;box-shadow:var(--sh1)">
-
-            <!-- Progress Bar -->
-            <div style="display:flex;justify-content:space-between;margin-bottom:40px;position:relative">
-                <div style="position:absolute;top:14px;left:0;right:0;height:4px;background:var(--lgray);z-index:1">
-                    <div style="background:var(--gold);height:100%;transition:width .3s"
-                        [style.width]="(step - 1) * 33.33 + '%'"></div>
-                </div>
-                <div style="background:var(--white);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;border:2px solid"
-                    [ngStyle]="{'borderColor': step >= 1 ? 'var(--gold)' : 'var(--lgray)', 'color': step >= 1 ? 'var(--gold)' : 'var(--gray)'}">
-                    1</div>
-                <div style="background:var(--white);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;border:2px solid"
-                    [ngStyle]="{'borderColor': step >= 2 ? 'var(--gold)' : 'var(--lgray)', 'color': step >= 2 ? 'var(--gold)' : 'var(--gray)'}">
-                    2</div>
-                <div style="background:var(--white);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;border:2px solid"
-                    [ngStyle]="{'borderColor': step >= 3 ? 'var(--gold)' : 'var(--lgray)', 'color': step >= 3 ? 'var(--gold)' : 'var(--gray)'}">
-                    3</div>
-                <div style="background:var(--white);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;border:2px solid"
-                    [ngStyle]="{'borderColor': step >= 4 ? 'var(--gold)' : 'var(--lgray)', 'color': step >= 4 ? 'var(--gray)' : 'var(--gray)'}">
-                    ✓</div>
-            </div>
-
-            <!-- Step 1 -->
-            <div *ngIf="step === 1">
-                <h2 style="font-family:var(--ff-d);font-size:1.8rem;color:var(--navy);margin-bottom:8px">Let's start
-                    your event</h2>
-                <p style="color:var(--gray);margin-bottom:32px">What kind of event are you planning?</p>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
-                    <div class="add-ev-type" [class.selected]="eventType === 'Wedding'" (click)="selectType('Wedding')">
-                         Wedding</div>
-                    <div class="add-ev-type" [class.selected]="eventType === 'Engagement'"
-                        (click)="selectType('Engagement')"> Engagement</div>
-                    <div class="add-ev-type" [class.selected]="eventType === 'Birthday'"
-                        (click)="selectType('Birthday')"> Birthday</div>
-                    <div class="add-ev-type" [class.selected]="eventType === 'Corporate'"
-                        (click)="selectType('Corporate')"> Corporate</div>
-                </div>
-                <div class="form-group"><label>Name your event</label><input type="text"
-                        placeholder="e.g. Sara & Ahmed Wedding" [(ngModel)]="eventName" /></div>
-            </div>
-
-            <!-- Step 2 -->
-            <div *ngIf="step === 2">
-                <h2 style="font-family:var(--ff-d);font-size:1.8rem;color:var(--navy);margin-bottom:8px">When and Where?
-                </h2>
-                <p style="color:var(--gray);margin-bottom:32px">Help us find available vendors.</p>
-                <div class="form-row">
-                    <div class="form-group"><label>Event Date</label><input type="date" [(ngModel)]="eventDate" /></div>
-                    <div class="form-group">
-                        <label>City Hub</label>
-                        <select [(ngModel)]="location">
-                            <option value="Cairo">Cairo</option>
-                            <option value="Giza">Giza</option>
-                            <option value="Alexandria">Alexandria</option>
-                            <option value="North Coast">North Coast</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Guest Count</label><input type="number" [(ngModel)]="guestCount"
-                            placeholder="50" /></div>
-                    <div class="form-group">
-                        <label>Estimated Total Budget (EGP)</label>
-                        <select [(ngModel)]="budgetRange">
-                            <option value="Under 20k">Under 20k</option>
-                            <option value="20k - 50k">20k - 50k</option>
-                            <option value="50k - 150k">50k - 150k</option>
-                            <option value="150k+">150k+</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3 -->
-            <div *ngIf="step === 3">
-                <h2 style="font-family:var(--ff-d);font-size:1.8rem;color:var(--navy);margin-bottom:8px">What services
-                    do you need?</h2>
-                <p style="color:var(--gray);margin-bottom:32px">Select multiple options.</p>
-                <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:32px">
-                    <div class="add-ev-type" [class.selected]="services.includes('Venue')"
-                        (click)="toggleService('Venue')" style="padding:12px 20px;text-align:left">️ Venue / Hall
-                    </div>
-                    <div class="add-ev-type" [class.selected]="services.includes('Catering')"
-                        (click)="toggleService('Catering')" style="padding:12px 20px;text-align:left">️ Catering</div>
-                    <div class="add-ev-type" [class.selected]="services.includes('Decoration')"
-                        (click)="toggleService('Decoration')" style="padding:12px 20px;text-align:left"> Decoration
-                    </div>
-                    <div class="add-ev-type" [class.selected]="services.includes('Photography')"
-                        (click)="toggleService('Photography')" style="padding:12px 20px;text-align:left"> Photography
-                    </div>
-                    <div class="add-ev-type" [class.selected]="services.includes('Entertainment')"
-                        (click)="toggleService('Entertainment')" style="padding:12px 20px;text-align:left">
-                        Entertainment / DJ</div>
-                </div>
-            </div>
-
-            <!-- Step 4 Success -->
-            <div *ngIf="step === 4" style="text-align:center;padding:40px 0">
-                <div style="font-size:4rem;color:var(--gold);margin-bottom:20px">✨</div>
-                <h2 style="font-family:var(--ff-d);font-size:2rem;color:var(--navy);margin-bottom:12px">Event
-                    Successfully Created</h2>
-                <p style="color:var(--gray);margin-bottom:30px">Your workspace is ready. You can now invite
-                    collaborators, track budget, and start booking vendors.</p>
-                <button class="btn btn-gold" routerLink="/dashboard">Go to Dashboard</button>
-            </div>
-
-            <!-- Footer Buttons -->
-            <div style="display:flex;justify-content:space-between;margin-top:40px;padding-top:20px;border-top:1px solid var(--lgray)"
-                *ngIf="step < 4">
-                <button class="btn btn-outline" (click)="prevStep()"
-                    [style.visibility]="step === 1 ? 'hidden' : 'visible'">← Back</button>
-                <button class="btn btn-navy" (click)="nextStep()">{{ step === 3 ? 'Create Event' : 'Continue →'
-                    }}</button>
-            </div>
-
-        </div>
+  <div class="ae-hero">
+    <h1>Create New Event</h1>
+    <p>Start with a quickstart template or build your event from scratch</p>
+  </div>
+  
+  <div class="container" style="padding-top:0;padding-bottom:60px;max-width:860px">
+    <!-- Step indicator -->
+    <div class="ae-step-bar">
+      <div class="ae-step" [class.active]="step >= 1" [class.done]="step > 1">
+        <div class="ae-step-num">1</div>
+        <div class="ae-step-label">Event Type</div>
+      </div>
+      <div class="ae-step-connector" [class.done]="step > 1"></div>
+      <div class="ae-step" [class.active]="step >= 2" [class.done]="step > 2">
+        <div class="ae-step-num">2</div>
+        <div class="ae-step-label">Event Details</div>
+      </div>
+      <div class="ae-step-connector" [class.done]="step > 2"></div>
+      <div class="ae-step" [class.active]="step === 3">
+        <div class="ae-step-num">3</div>
+        <div class="ae-step-label">Done</div>
+      </div>
     </div>
+
+    <!-- Step 1: Quickstart type select -->
+    <div id="ae-panel-1" *ngIf="step === 1">
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="tag">⚡ Quickstart</div>
+        <h2 class="section-title" style="font-size:1.8rem">What type of event are you planning?</h2>
+        <p style="color:var(--gray);font-size:.9rem;margin-top:8px">We'll pre-fill suggested vendors, checklist items, and budget splits for you.</p>
+      </div>
+      
+      <div *ngIf="loadingCategories" style="text-align: center; padding: 40px; color: var(--gray);">
+        <span class="spinner" style="display:inline-block; border: 3px solid rgba(0,0,0,0.1); border-top-color: var(--gold); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></span>
+        <div style="margin-top: 10px;">Loading event types...</div>
+      </div>
+      
+      <div class="qs-grid" *ngIf="!loadingCategories">
+        <div class="qs-card" *ngFor="let t of eventTypes" 
+             [class.selected]="selectedEventType?.id === t.id" 
+             (click)="selectType(t)">
+          <div class="qs-icon">{{t.icon}}</div>
+          <div class="qs-name">{{t.title}}</div>
+          <div class="qs-desc">{{t.desc}}</div>
+          <div class="qs-includes">{{t.services}}</div>
+        </div>
+      </div>
+      
+      <div style="text-align:center">
+        <button class="btn btn-gold" (click)="goToStep2()" [disabled]="!selectedEventType" [style.opacity]="!selectedEventType ? '0.5' : '1'" style="padding:12px 36px">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Event Details Form -->
+    <div id="ae-panel-2" *ngIf="step === 2">
+      <div class="ae-form-box" [formGroup]="eventForm">
+        <div class="ae-form-title">{{selectedEventType?.title}} Details</div>
+        <div class="ae-form-sub">Fill in the details — we've pre-loaded recommended services and a suggested budget split.</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Event Name *</label>
+            <input type="text" formControlName="name" placeholder="e.g. My Awesome Event"/>
+          </div>
+          <div class="form-group">
+            <label>Event Date *</label>
+            <input type="date" formControlName="date"/>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Number of Guests</label>
+            <input type="number" formControlName="guests" placeholder="e.g. 150"/>
+          </div>
+          <div class="form-group">
+            <label>Location / Area</label>
+            <input type="text" formControlName="location" placeholder="e.g. New Cairo, Cairo"/>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Total Budget (EGP) *</label>
+          <input type="number" formControlName="budget" placeholder="e.g. 50000" />
+        </div>
+
+        <!-- Budget breakdown -->
+        <div style="margin-bottom:18px">
+          <div style="font-size:.84rem;font-weight:600;color:var(--navy);margin-bottom:6px">💰 Suggested Budget Breakdown</div>
+          
+          <div class="ae-budget-breakdown" *ngIf="!totalBudget" style="padding: 24px; text-align: center; color: var(--gray);">
+            Enter your budget above to see the suggested allocation.
+          </div>
+
+          <div class="ae-budget-breakdown" *ngIf="totalBudget && budgetBreakdownCalculated">
+             <div class="ae-budget-row"><span>Venue</span> <span><strong>{{ budgetBreakdownCalculated.venue.val | number:'1.0-0' }} EGP</strong> ({{ budgetBreakdownCalculated.venue.pct }}%)</span></div>
+             <div class="ae-budget-row"><span>Catering</span> <span><strong>{{ budgetBreakdownCalculated.catering.val | number:'1.0-0' }} EGP</strong> ({{ budgetBreakdownCalculated.catering.pct }}%)</span></div>
+             <div class="ae-budget-row"><span>Decoration</span> <span><strong>{{ budgetBreakdownCalculated.decoration.val | number:'1.0-0' }} EGP</strong> ({{ budgetBreakdownCalculated.decoration.pct }}%)</span></div>
+             <div class="ae-budget-row"><span>Photography</span> <span><strong>{{ budgetBreakdownCalculated.photography.val | number:'1.0-0' }} EGP</strong> ({{ budgetBreakdownCalculated.photography.pct }}%)</span></div>
+             <div class="ae-budget-row"><span>Other</span> <span><strong>{{ budgetBreakdownCalculated.other.val | number:'1.0-0' }} EGP</strong> ({{ budgetBreakdownCalculated.other.pct }}%)</span></div>
+             <div class="ae-budget-row total" style="padding-top:10px; margin-top:5px;"><span>Total Budget</span> <span><strong>{{ totalBudget | number:'1.0-0' }} EGP</strong></span></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Services You Need</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+            <button *ngFor="let s of servicesRequired" type="button" 
+                class="service-pill" [class.selected]="s.selected" (click)="toggleService(s)">
+                {{s.label}}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notes / Special Requests</label>
+          <textarea formControlName="notes" placeholder="Any specific ideas, themes, or requirements…"></textarea>
+        </div>
+
+        <div class="ae-nav-btns">
+          <button class="btn btn-ghost" (click)="goToStep1()" [disabled]="submitting">← Back</button>
+          <button class="btn btn-gold" (click)="createEvent()" [disabled]="submitting" style="padding:11px 32px">
+            {{ submitting ? 'Creating...' : 'Create Event 🎉' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

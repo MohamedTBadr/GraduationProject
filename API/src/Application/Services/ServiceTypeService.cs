@@ -1,4 +1,4 @@
-﻿using Application;
+using Application;
 using Application.DTOs.ServiceTypesDTOs;
 using Application.Interfaces;
 using AutoMapper;

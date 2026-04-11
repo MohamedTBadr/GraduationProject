@@ -1,4 +1,4 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +69,7 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
+                .Include(p => p.ServiceImages)
                 .Where(p => p.CategoryId == categoryId)
                 .AsNoTracking();
 
@@ -102,6 +103,7 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
+                .Include(p => p.ServiceImages)
                 .Where(p => p.VendorId == vendorId)
                 .AsNoTracking();
 
@@ -138,6 +140,7 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
+                .Include(p => p.ServiceImages)
                 .Where(p => p.ServiceTypeId == ServiceTypeId)
                 .AsNoTracking();
 
@@ -170,6 +173,7 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
+                .Include(p => p.ServiceImages)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         }
@@ -258,6 +262,7 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Vendor)
                 .Include(p => p.ServiceType)
+                .Include(p => p.ServiceImages)
                 .AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(AIRequest.CategoryName))

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -23,6 +23,14 @@ export class EventService {
     if (params?.pageSize) queryParams.pageSize = params.pageSize;
     
     return this.http.get<PagedResult<EventSummaryDto>>(this.apiUrl, { params: queryParams });
+  }
+
+  /** POST /Event - Create a new event */
+  create(payload: any): Observable<EventResponseDto> {
+    const headers = new HttpHeaders({
+      'IdempotencyKey': crypto.randomUUID()
+    });
+    return this.http.post<EventResponseDto>(this.apiUrl, payload, { headers });
   }
 
   /** GET /Event/{id} - Get event details */
