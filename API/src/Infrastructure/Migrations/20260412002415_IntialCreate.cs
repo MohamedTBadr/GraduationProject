@@ -256,6 +256,33 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CorporationInquiries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CompanyName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ContactPerson = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExpectedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EstimatedAttendees = table.Column<int>(type: "int", nullable: false),
+                    ApproximateBudget = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AdditionalRequirements = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CorporationInquiries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CorporationInquiries_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Events",
                 columns: table => new
                 {
@@ -588,6 +615,11 @@ namespace Infrastructure.Migrations
                 column: "User2Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CorporationInquiries_CategoryId",
+                table: "CorporationInquiries",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_EventItems_EventId",
                 table: "EventItems",
                 column: "EventId");
@@ -700,6 +732,9 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "CorporationInquiries");
 
             migrationBuilder.DropTable(
                 name: "EventItems");
