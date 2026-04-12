@@ -7,6 +7,15 @@ The architecture is **production-oriented**, focusing on resilience, scalability
 
 -----
 
+
+## 🚀 Key Features
+
+### ⚡ Clean Architecture & Core Logic
+
+  * **Domain-Driven Design (DDD):** Pure entities and business rules isolated from infrastructure.
+  * **JWT-based Security:** Secure RBAC (Role-Based Access Control) with refresh token rotation.
+  * **Idempotent API Design:** Middleware-level protection against duplicate network retries and payment callbacks.
+    
 ## 🛡️ Resilience & Fault Tolerance (New)
 
 The system implements a centralized **Resilience Layer** using **Polly** and `Microsoft.Extensions.Resilience`. This protects the system from cascading failures.
@@ -16,15 +25,7 @@ The system implements a centralized **Resilience Layer** using **Polly** and `Mi
   * **Request Timeouts:** Strict 2026-standard timeouts on all external I/O to prevent thread exhaustion.
   * **Bulkhead Isolation:** Ensures a failure in the AI or Email service doesn't crash the Payment or Auth flows.
 
------
 
-## 🚀 Key Features
-
-### ⚡ Clean Architecture & Core Logic
-
-  * **Domain-Driven Design (DDD):** Pure entities and business rules isolated from infrastructure.
-  * **JWT-based Security:** Secure RBAC (Role-Based Access Control) with refresh token rotation.
-  * **Idempotent API Design:** Middleware-level protection against duplicate network retries and payment callbacks.
 
 ### 💳 Paymob Payment Integration
 
