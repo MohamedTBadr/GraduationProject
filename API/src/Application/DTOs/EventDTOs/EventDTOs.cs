@@ -70,3 +70,26 @@ namespace Application.DTOs
         public List<EventItemResponseDto> EventItems { get; set; } = new();
     }
 }
+
+
+// add to your existing EventDTOs file
+
+public class CreateEventItemDto
+{
+    public Guid ServiceId { get; set; }
+    public string ServiceName { get; set; } = string.Empty;
+    public string? ServiceImage { get; set; }
+    public decimal Price { get; set; }
+    public Guid VendorId { get; set; }
+    public string VendorName { get; set; } = string.Empty;
+    public int Quantity { get; set; } = 1;
+}
+
+public class UpdateEventItemDto
+{
+    public string? ServiceImage { get; set; }
+    public string ServiceName { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public string VendorName { get; set; } = string.Empty;
+    public int Quantity { get; set; }
+}

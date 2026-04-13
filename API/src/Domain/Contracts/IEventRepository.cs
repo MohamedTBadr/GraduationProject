@@ -18,7 +18,9 @@ namespace Domain.Contracts
         Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken);
 
 
-        Task<EventItem?> GetItemByIdAsync(Guid itemId, CancellationToken cancellationToken);
-        Task<EventItem> UpdateItemAsync(EventItem item, CancellationToken cancellationToken);
+        // IEventRepository — add to interface
+        Task<EventItem> AddItemAsync(EventItem item, CancellationToken cancellationToken);
+        Task<EventItem?> GetItemByIdAsync(Guid itemId, CancellationToken cancellationToken); // already exists
+        Task<EventItem> UpdateItemAsync(EventItem item, CancellationToken cancellationToken); // already exists
     }
 }
