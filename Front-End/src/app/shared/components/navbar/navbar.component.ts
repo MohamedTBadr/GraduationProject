@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ModalService } from '../../services/modal.service';
@@ -14,10 +14,17 @@ import { AuthService } from '../../../core/services/auth.service';
 export class NavbarComponent {
 
   isMenuOpen = false;
+  isScrolled = false; 
 
   private modalService = inject(ModalService);
   private router = inject(Router);
   authService = inject(AuthService);
+
+  //  scroll listener
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    this.isScrolled = window.scrollY > 50; 
+  }
 
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
