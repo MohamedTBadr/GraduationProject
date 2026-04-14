@@ -132,6 +132,53 @@ namespace Application.Services
             await SyncEventStatusAsync(eventId,cancellationToken);
         }
 
+
+
+        // EventService — add both methods
+        public async Task<EventItemResponseDto> AddItemAsync(Guid eventId, CreateEventItemDto dto, CancellationToken cancellationToken)
+        {
+            var ev = await _eventRepo.GetByIdAsync(eventId, cancellationToken)
+                ?? throw new KeyNotFoundException($"Event '{eventId}' not found.");
+
+            if (ev.EventStatus is "Cancelled" or "Completed")
+                throw new InvalidOperationException($"Cannot add items to a '{ev.EventStatus}' event.");
+
+            var item = new EventItem
+            {
+                EventId = eventId,
+                ServiceName = dto.ServiceName,
+                ServiceImage = dto.ServiceImage,
+                Price = dto.Price,
+                VendorId = dto.VendorId,
+                VendorName = dto.VendorName,
+                Quantity = dto.Quantity,
+                ItemStatus = "Pending"
+            };
+
+            var created = await _eventRepo.AddItemAsync(item, cancellationToken);
+            return created.ToResponseDto();
+        }
+
+        public async Task<EventItemResponseDto> UpdateItemAsync(Guid eventId, Guid itemId, UpdateEventItemDto dto, CancellationToken cancellationToken)
+        {
+            var item = await _eventRepo.GetItemByIdAsync(itemId, cancellationToken);
+
+            if (item == null || item.EventId != eventId)
+                throw new KeyNotFoundException("Item not found in this event.");
+
+            if (item.ItemStatus is "Approved" or "Rejected")
+                throw new InvalidOperationException($"Cannot edit an item that is already '{item.ItemStatus}'.");
+
+            item.ServiceName = dto.ServiceName;
+            item.ServiceImage = dto.ServiceImage;
+            item.Price = dto.Price;
+            item.VendorName = dto.VendorName;
+            item.Quantity = dto.Quantity;
+            item.ItemStatus = "Pending"; // reset to pending after edit
+
+            var updated = await _eventRepo.UpdateItemAsync(item, cancellationToken);
+            return updated.ToResponseDto();
+        }
         // ── Helpers ───────────────────────────────────────────────
 
         private void ValidateStatus(string status)

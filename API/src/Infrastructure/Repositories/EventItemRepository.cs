@@ -102,5 +102,13 @@ namespace Infrastructure.Repositories
             await _pipeline.ExecuteAsync(async token => await _context.SaveChangesAsync(token), cancellationToken);
             return true;
         }
+        // EventRepository — add AddItemAsync (the other two already exist)
+        public async Task<EventItem> AddItemAsync(EventItem item, CancellationToken cancellationToken)
+        {
+            item.Id = Guid.NewGuid();
+            await _context.EventItems.AddAsync(item, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+            return item;
+        }
     }
 }

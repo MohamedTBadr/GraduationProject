@@ -24,6 +24,7 @@ namespace Application.Services
             Expression<Func<Vendor, bool>> visibilityFilter = isAdmin
                 ? v => true
                 : v => v.IsVerified;
+            //paginatedRequest ??= new PaginatedRequest();
 
             var vendors = await vendorRepository.GetVendorsAsync(
                 paginatedRequest,
@@ -71,6 +72,8 @@ namespace Application.Services
             var user = new ApplicationUser
             {
                 Id = new Guid(),
+                FirstName = request.FirstName,
+                LastName =request.LastName,
                 UserName = request.Name,
                 Email = request.Email,
                 PhoneNumber = request.Phone,

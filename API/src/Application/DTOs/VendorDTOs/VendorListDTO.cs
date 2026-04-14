@@ -13,5 +13,6 @@ namespace Application.DTOs.VendorDTOs
         public string ServiceType { get; set; }
         public decimal YearsInBusiness { get; set; }
         public decimal StartingPrice { get; set; }
+        public bool IsVerified { get; set; }
     }
 }

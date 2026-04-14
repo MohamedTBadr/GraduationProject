@@ -102,5 +102,8 @@ namespace Infrastructure.Persistence
 
         public DbSet<ServiceImage> ServiceImages { get; set; }
 
+
+        public DbSet<CorporationInquiry> CorporationInquiries { get; set; }
+
     }
 }

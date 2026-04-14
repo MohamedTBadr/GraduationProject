@@ -32,6 +32,8 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsSuspended = table.Column<bool>(type: "bit", nullable: false),
+                    SuspensionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -254,6 +256,33 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CorporationInquiries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CompanyName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ContactPerson = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExpectedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EstimatedAttendees = table.Column<int>(type: "int", nullable: false),
+                    ApproximateBudget = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AdditionalRequirements = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CorporationInquiries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CorporationInquiries_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Events",
                 columns: table => new
                 {
@@ -356,7 +385,8 @@ namespace Infrastructure.Migrations
                     CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SetupDuration = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     LeadTimeRequired = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    VendorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    VendorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsHidden = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -375,32 +405,6 @@ namespace Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Services_Vendors_VendorId",
-                        column: x => x.VendorId,
-                        principalTable: "Vendors",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "VendorRatings",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VendorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Rating = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Review = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VendorRatings", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_VendorRatings_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_VendorRatings_Vendors_VendorId",
                         column: x => x.VendorId,
                         principalTable: "Vendors",
                         principalColumn: "UserId",
@@ -506,12 +510,45 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ServiceRatings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ServiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Rating = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Review = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VendorUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServiceRatings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ServiceRatings_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ServiceRatings_Services_ServiceId",
+                        column: x => x.ServiceId,
+                        principalTable: "Services",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ServiceRatings_Vendors_VendorUserId",
+                        column: x => x.VendorUserId,
+                        principalTable: "Vendors",
+                        principalColumn: "UserId");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrderItems",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     VendorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ServiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ServiceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PackageItems = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -578,6 +615,11 @@ namespace Infrastructure.Migrations
                 column: "User2Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CorporationInquiries_CategoryId",
+                table: "CorporationInquiries",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_EventItems_EventId",
                 table: "EventItems",
                 column: "EventId");
@@ -638,6 +680,21 @@ namespace Infrastructure.Migrations
                 column: "ServiceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ServiceRatings_ServiceId",
+                table: "ServiceRatings",
+                column: "ServiceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ServiceRatings_UserId",
+                table: "ServiceRatings",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ServiceRatings_VendorUserId",
+                table: "ServiceRatings",
+                column: "VendorUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Services_CategoryId",
                 table: "Services",
                 column: "CategoryId");
@@ -650,16 +707,6 @@ namespace Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Services_VendorId",
                 table: "Services",
-                column: "VendorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_VendorRatings_UserId",
-                table: "VendorRatings",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_VendorRatings_VendorId",
-                table: "VendorRatings",
                 column: "VendorId");
 
             migrationBuilder.CreateIndex(
@@ -687,6 +734,9 @@ namespace Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "CorporationInquiries");
+
+            migrationBuilder.DropTable(
                 name: "EventItems");
 
             migrationBuilder.DropTable(
@@ -705,7 +755,7 @@ namespace Infrastructure.Migrations
                 name: "ServiceImages");
 
             migrationBuilder.DropTable(
-                name: "VendorRatings");
+                name: "ServiceRatings");
 
             migrationBuilder.DropTable(
                 name: "VendorServiceTypes");

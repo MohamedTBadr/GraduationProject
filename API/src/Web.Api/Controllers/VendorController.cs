@@ -15,7 +15,7 @@ namespace Web.Api.Controllers
     {
         [HttpGet]
         [HybridCache(1800,"vendors")]
-        public async Task<IActionResult> GetVendorsAsync(PaginatedRequest paginatedRequest, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetVendorsAsync([FromQuery] PaginatedRequest paginatedRequest, CancellationToken cancellationToken)
         {
             var isAdmin = User.IsInRole("Admin");
 

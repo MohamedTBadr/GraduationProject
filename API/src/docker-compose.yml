@@ -16,6 +16,8 @@ services:
       - ConnectionStrings__DefaultConnection=Server=db;Database=GraduationProject;User=sa;Password=MyPass@word;TrustServerCertificate=True;
       - ConnectionStrings__Redis=redis:6379
     restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.75
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -29,6 +31,8 @@ services:
     volumes:
       - sql_data:/var/opt/mssql
     restart: unless-stopped
+    mem_limit: 1.5g       # SQL Server needs at least 1GB
+    cpus: 1.0
     healthcheck:
       test:
         [
@@ -47,6 +51,8 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.25
 
 volumes:
   sql_data:

@@ -7,16 +7,6 @@ The architecture is **production-oriented**, focusing on resilience, scalability
 
 -----
 
-## 🛡️ Resilience & Fault Tolerance (New)
-
-The system implements a centralized **Resilience Layer** using **Polly** and `Microsoft.Extensions.Resilience`. This protects the system from cascading failures.
-
-  * **Database Resilience:** Custom pipelines for SQL Server handling transient failures with **Exponential Backoff** and **Jitter**.
-  * **Infrastructure Shielding:** **Circuit Breakers** protect the API from failing external dependencies (AWS S3, Paymob).
-  * **Request Timeouts:** Strict 2026-standard timeouts on all external I/O to prevent thread exhaustion.
-  * **Bulkhead Isolation:** Ensures a failure in the AI or Email service doesn't crash the Payment or Auth flows.
-
------
 
 ## 🚀 Key Features
 
@@ -25,6 +15,14 @@ The system implements a centralized **Resilience Layer** using **Polly** and `Mi
   * **Domain-Driven Design (DDD):** Pure entities and business rules isolated from infrastructure.
   * **JWT-based Security:** Secure RBAC (Role-Based Access Control) with refresh token rotation.
   * **Idempotent API Design:** Middleware-level protection against duplicate network retries and payment callbacks.
+    
+### 🛡️ Resilience & Fault Tolerance (New)
+The system implements a centralized **Resilience Layer** using **Polly** and `Microsoft.Extensions.Resilience`. This protects the system from cascading failures.
+
+  * **Database Resilience:** Custom pipelines for SQL Server handling transient failures with **Exponential Backoff** and **Jitter**.
+  * **Infrastructure Shielding:** **Circuit Breakers** protect the API from failing external dependencies (AWS S3, Paymob).
+  * **Request Timeouts:** Strict 2026-standard timeouts on all external I/O to prevent thread exhaustion.
+  * **Bulkhead Isolation:** Ensures a failure in the AI or Email service doesn't crash the Payment or Auth flows.
 
 ### 💳 Paymob Payment Integration
 

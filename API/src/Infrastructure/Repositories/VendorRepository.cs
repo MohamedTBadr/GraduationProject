@@ -24,7 +24,7 @@ namespace Infrastructure.Repositories
                 .AsNoTracking();
 
             // 2. Apply Search Filter
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            if (!string.IsNullOrWhiteSpace(request?.SearchTerm))
             {
                 var search = request.SearchTerm.Trim().ToLower();
                 query = query.Where(v =>

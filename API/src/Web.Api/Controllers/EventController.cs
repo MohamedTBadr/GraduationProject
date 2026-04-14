@@ -242,6 +242,76 @@ Only return JSON. No markdown. No explanation.
             }
         }
 
+
+
+
+
+        // ─────────────────────────────────────────────────────────
+        // POST api/events/{eventId}/items
+        // ─────────────────────────────────────────────────────────
+        [HttpPost("{eventId:guid}/items")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AddItem(
+            Guid eventId,
+            [FromBody] CreateEventItemDto dto,
+            CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (IsVendor())
+                return Forbid();
+
+            try
+            {
+                var existing = await _eventService.GetByIdAsync(eventId, cancellationToken);
+
+                if (!IsAdminOrOwner(existing.UserId))
+                    return Forbid();
+
+                var result = await _eventService.AddItemAsync(eventId, dto, cancellationToken);
+                return CreatedAtAction(nameof(GetById), new { id = eventId }, result);
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // PUT api/events/{eventId}/items/{itemId}
+        // ─────────────────────────────────────────────────────────
+        [HttpPut("{eventId:guid}/items/{itemId:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateItem(
+            Guid eventId,
+            Guid itemId,
+            [FromBody] UpdateEventItemDto dto,
+            CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (IsVendor())
+                return Forbid();
+
+            try
+            {
+                var existing = await _eventService.GetByIdAsync(eventId, cancellationToken);
+
+                if (!IsAdminOrOwner(existing.UserId))
+                    return Forbid();
+
+                var result = await _eventService.UpdateItemAsync(eventId, itemId, dto, cancellationToken);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+        }
         // ─────────────────────────────────────────────────────────
         // PATCH api/events/{eventId}/items/{itemId}/approve
         // ─────────────────────────────────────────────────────────

@@ -20,5 +20,9 @@ namespace Application.Interfaces
         Task CancelEventAsync(Guid id, CancelEventRequest request, CancellationToken cancellationToken);
         Task ApproveItemAsync(Guid eventId, Guid itemId, Guid vendorId, bool approve, string? reason, CancellationToken cancellationToken   );
 
+        // IEventService — add
+        Task<EventItemResponseDto> AddItemAsync(Guid eventId, CreateEventItemDto dto, CancellationToken cancellationToken);
+        Task<EventItemResponseDto> UpdateItemAsync(Guid eventId, Guid itemId, UpdateEventItemDto dto, CancellationToken cancellationToken);
+
     }
 }
