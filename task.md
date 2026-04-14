@@ -1,0 +1,29 @@
+- `[x]` Setup and Configuration
+  - `[x]` Install and configure Tailwind CSS
+  - `[x]` Setup global HTTP Interceptor for Error Handling and Loading state
+- `[x]` 1. Vendor Module Implementation
+  - `[x]` `vendor-dashboard.component`: Wire up dashboard statistics overview
+  - `[x]` `services.component`: Implement product/service list and "Add Service" form with API
+  - `[x]` `profile.component`: Integrate profile loading and updating
+  - `[x]` File upload logic fix
+- `[x]` 2. Public Module Implementation
+  - `[x]` Landing page integration with real events/vendors
+  - `[ ]` Search/Filter functionality connection
+- `[x]` 3. User Module Implementation
+  - `[x]` User dashboard dynamic data
+  - `[x]` My Bookings UI and integration (500 Error resolved)
+- `[/]` 5. Booking & Checkout System
+  - `[x]` Add Event creation API integration
+  - `[ ]` Add Vendor Services to Master Event (Pending backend endpoint)
+  - `[ ]` Favorites integration
+- `[x]` 4. Admin Module Implementation
+  - `[x]` Vendors approval flow and overview
+  - `[x]` Users list and management
+  - `[x]` Categories error handling and dynamic UI
+- `[ ]` Refinement & Polish
+  - `[ ]` Final E2E flow testing
+  - `[ ]` Loading states and Toasts for all interactions
+- `[ ]` Phase 2: Advanced Features
+  - `[ ]` **AI Integration**: Implement `GeminiService` and AI-Powered Event Studio 
+  - `[ ]` **Payments**: Integrate `PaymentService` (Paymob) and Order history 
+  - `[ ]` **Real-time**: WebSocket implementation for Chat and SSE for Notifications

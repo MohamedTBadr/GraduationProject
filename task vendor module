@@ -1,0 +1,17 @@
+# Vendor Module Implementation Tasks
+
+- `[/]` 1. Foundation & Services
+  - `[ ]` Create `EventService` for fetching event/booking data [NEW]
+  - `[ ]` Setup global HTTP Interceptor for Error Handling and Loading state
+- `[ ]` 2. Dashboard Integration
+  - `[ ]` `vendor-dashboard.component`: Fetch real statistics (Count of Bookings, Revenue, Ratings)
+  - `[ ]` `vendor-dashboard.component`: Display "Upcoming Events" and "Pending Requests" from API
+- `[ ]` 3. Service Management
+  - `[ ]` `services.component`: Integrate `ProductService` for real product listings
+  - `[ ]` `services.component`: Implement "Add Service" and "Edit Service" Reactive Forms
+- `[ ]` 4. Booking Management
+  - `[ ]` `bookings.component`: Fetch real bookings from `EventService`
+  - `[ ]` `bookings.component`: Wire up "Accept/Decline" logic via `approve-reject-item`
+- `[ ]` 5. Profile Integration
+  - `[ ]` `profile.component`: Bind with `VendorService.getById` and `VendorService.update`
+  
