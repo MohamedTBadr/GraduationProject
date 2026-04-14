@@ -26,7 +26,7 @@ namespace Infrastructure
             Services.AddScoped<IServiceRepository, ServiceRepository>();
             Services.AddScoped<NotificationRepository>();
             Services.AddScoped<IOrderRepository, OrderRepository>();
-
+            Services.AddScoped<IEventTypeRepository, EventTypeRespository>();
             Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             // 1. Configure DbContext with SQL Server
             Services.AddDbContext<ApplicationDbContext>(options =>

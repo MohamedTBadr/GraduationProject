@@ -13,8 +13,10 @@ namespace Domain.Entities
         public Guid UserId { get; set; }
 
         public string Title { get; set; } = string.Empty;
-        public Category Category { get; set; }
-        public Guid CategoryId { get; set; }
+
+        public EventType EventType { get; set; }
+        public Guid EventTypeId { get; set; }
+
         public DateTime EventDate { get; set; }
         public Address Location { get; set; }
 

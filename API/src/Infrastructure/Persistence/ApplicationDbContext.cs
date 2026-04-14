@@ -105,5 +105,8 @@ namespace Infrastructure.Persistence
 
         public DbSet<CorporationInquiry> CorporationInquiries { get; set; }
 
+
+        public DbSet<EventType> EventTypes { get; set; } 
+
     }
 }

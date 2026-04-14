@@ -22,7 +22,7 @@ namespace Infrastructure.Repositories
         public async Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _context.Events
-                .Include(e => e.Category)
+                .Include(e => e.EventType)
                 //.Include(e => e.Location)
                 .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
         }
@@ -30,7 +30,7 @@ namespace Infrastructure.Repositories
         public async Task<Event?> GetByIdWithItemsAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _context.Events
-                .Include(e => e.Category)
+                .Include(e => e.EventType)
                 //.Include(e => e.Location)       // ← was commented out; mapper needs it
                 .Include(e => e.EventItems)
                 .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
@@ -39,7 +39,7 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Event>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await _context.Events
-                .Include(e => e.Category)
+                .Include(e => e.EventType)
                 //.Include(e => e.Location)
                 .Include(e => e.EventItems)
                 .ToListAsync(cancellationToken);
@@ -48,7 +48,7 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Event>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
             return await _context.Events
-                .Include(e => e.Category)
+                .Include(e => e.EventType)
                 //.Include(e => e.Location)       // ← was commented out
                 .Include(e => e.EventItems)
                 .Where(e => e.UserId == userId)
@@ -58,7 +58,7 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Event>> GetByStatusAsync(string status, CancellationToken cancellationToken)
         {
             return await _context.Events
-                .Include(e => e.Category)
+                .Include(e => e.EventType)
                 //.Include(e => e.Location)
                 .Include(e => e.EventItems)     // ← was missing; SummaryDto needs ItemCount
                 .Where(e => e.EventStatus == status)
@@ -79,7 +79,7 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync(cancellationToken);
             // Re-fetch to ensure all navigations are loaded for the mapper
             return await _context.Events
-                .Include(e => e.Category)
+                .Include(e => e.EventType)
                 //.Include(e => e.Location)
                 .Include(e => e.EventItems)
                 .FirstAsync(e => e.Id == entity.Id);
@@ -92,7 +92,7 @@ namespace Infrastructure.Repositories
 
             // Re-fetch so mapper always has Category/Location/Items loaded
             return await _context.Events
-                .Include(e => e.Category)
+                .Include(e => e.EventType)
                 .Include(e => e.Location)
                 .Include(e => e.EventItems)
                 .FirstAsync(e => e.Id == entity.Id);
@@ -117,6 +117,13 @@ namespace Infrastructure.Repositories
         public async Task<EventItem> UpdateItemAsync(EventItem item, CancellationToken cancellationToken)
         {
             _context.EventItems.Update(item);
+            await _context.SaveChangesAsync(cancellationToken);
+            return item;
+        }
+
+        public async Task<EventItem> AddItemAsync(EventItem item, CancellationToken cancellationToken)
+        {
+            _context.EventItems.AddAsync(item);
             await _context.SaveChangesAsync(cancellationToken);
             return item;
         }

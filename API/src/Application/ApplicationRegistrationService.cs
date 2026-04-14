@@ -38,7 +38,7 @@ namespace Application
             Services.AddSingleton<SseConnectionManager>();
             Services.AddScoped<NotificationService>();
             Services.AddScoped<IFileService, FileService>();
-
+            Services.AddScoped<IEventTypeService, EventTypeService>();
             Services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<AutoMapperService>();

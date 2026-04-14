@@ -265,8 +265,8 @@ namespace Infrastructure.Repositories
                 .Include(p => p.ServiceImages)
                 .AsNoTracking();
 
-            if (!string.IsNullOrWhiteSpace(AIRequest.CategoryName))
-                query = query.Where(p => p.Category.Name == AIRequest.CategoryName);
+            //if (!string.IsNullOrWhiteSpace(AIRequest.EventTypeName))
+            //    query = query.Where(p => p.Event.Name == AIRequest.EventTypeName);
 
             return query.ToListAsync(cancellationToken);
         }

@@ -4,6 +4,7 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414230158_SecondIntialMigration")]
+    partial class SecondIntialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,7 +123,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Domain.Entities.Conversation", b =>
@@ -144,7 +147,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("User2Id");
 
-                    b.ToTable("Conversations", (string)null);
+                    b.ToTable("Conversations");
                 });
 
             modelBuilder.Entity("Domain.Entities.CorporationInquiry", b =>
@@ -193,7 +196,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("CorporationInquiries", (string)null);
+                    b.ToTable("CorporationInquiries");
                 });
 
             modelBuilder.Entity("Domain.Entities.Event", b =>
@@ -244,7 +247,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Events", (string)null);
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("Domain.Entities.EventType", b =>
@@ -259,7 +262,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EventTypes", (string)null);
+                    b.ToTable("EventTypes");
                 });
 
             modelBuilder.Entity("Domain.Entities.Message", b =>
@@ -298,7 +301,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Domain.Entities.Notification", b =>
@@ -331,7 +334,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Domain.Entities.Order", b =>
@@ -370,7 +373,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Domain.Entities.OrderItem", b =>
@@ -405,7 +408,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Domain.Entities.Package", b =>
@@ -439,7 +442,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VendorId");
 
-                    b.ToTable("Packages", (string)null);
+                    b.ToTable("Packages");
                 });
 
             modelBuilder.Entity("Domain.Entities.Service", b =>
@@ -485,7 +488,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VendorId");
 
-                    b.ToTable("Services", (string)null);
+                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceImage", b =>
@@ -505,7 +508,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("ServiceImages", (string)null);
+                    b.ToTable("ServiceImages");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceRating", b =>
@@ -538,7 +541,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VendorUserId");
 
-                    b.ToTable("ServiceRatings", (string)null);
+                    b.ToTable("ServiceRatings");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceType", b =>
@@ -553,7 +556,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceTypes", (string)null);
+                    b.ToTable("ServiceTypes");
                 });
 
             modelBuilder.Entity("Domain.Entities.Vendor", b =>
@@ -581,7 +584,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Vendors", (string)null);
+                    b.ToTable("Vendors");
                 });
 
             modelBuilder.Entity("Domain.Entities.VendorServiceType", b =>
@@ -596,7 +599,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ServiceTypeId");
 
-                    b.ToTable("VendorServiceTypes", (string)null);
+                    b.ToTable("VendorServiceTypes");
                 });
 
             modelBuilder.Entity("EventItem", b =>
@@ -642,7 +645,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VendorId");
 
-                    b.ToTable("EventItems", (string)null);
+                    b.ToTable("EventItems");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>

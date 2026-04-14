@@ -113,7 +113,7 @@ namespace Web.Api.Controllers
                 {
                     Budget = eventObject.TotalBudget,
                     GuestCount = eventObject.GuestCount,
-                    CategoryName = eventObject.CategoryName
+                    EventTypeName = eventObject.EventTypeName
                 };
 
                 var ServiceLines = await _ServiceService.AIFilterAsync(request, cancellationToken);
@@ -125,7 +125,7 @@ Plan a full event using the details and available Services below.
 
 EVENT DETAILS:
 - Title: {eventObject.Title}
-- Category: {eventObject.CategoryName}
+- Event Type Name: {eventObject.EventTypeName}
 - Date: {eventObject.EventDate:yyyy-MM-dd}
 - Location: {eventObject.Location?.City}, {eventObject.Location?.State}  
 - Guest Count: {eventObject.GuestCount}
@@ -166,7 +166,7 @@ Only return JSON. No markdown. No explanation.
                     eventId = eventObject.Id,
                     eventTitle = eventObject.Title,
                     budget = eventObject.TotalBudget,
-                    category = eventObject.CategoryName,
+                    eventTypeName = eventObject.EventTypeName,
                     servicesConsidered = ServiceLines.Value.Count, // ← was capital S (inconsistent casing)
                     aiPlan = aiResponse
                 });

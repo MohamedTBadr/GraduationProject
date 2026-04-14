@@ -10,7 +10,7 @@ namespace Application.DTOs
     {
         public Guid? UserId { get; set; }
         public string Title { get; set; } = string.Empty;
-        public Guid CategoryId { get; set; }
+        public Guid EventTypeId { get; set; }
         public DateTime EventDate { get; set; }
         public AddressDto? Location { get; set; }           // ← nullable (optional field)
         public decimal TotalBudget { get; set; }
@@ -21,7 +21,7 @@ namespace Application.DTOs
     public class UpdateEventDto
     {
         public string Title { get; set; } = string.Empty;
-        public Guid CategoryId { get; set; }
+        public Guid EventTypeId { get; set; }
         public DateTime EventDate { get; set; }
         public AddressDto? Location { get; set; }           // ← nullable (optional field)
         public decimal TotalBudget { get; set; }
@@ -45,7 +45,7 @@ namespace Application.DTOs
         public Guid UserId { get; set; }
         public string UserName { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
-        public string CategoryName { get; set; } = string.Empty;
+        public string EventTypeName { get; set; } = string.Empty;
         public DateTime EventDate { get; set; }
         public AddressDto? Location { get; set; }           // ← nullable (event may have no location)
         public decimal TotalBudget { get; set; }
@@ -72,24 +72,25 @@ namespace Application.DTOs
 }
 
 
-// add to your existing EventDTOs file
+//// add to your existing EventDTOs file
 
-public class CreateEventItemDto
-{
-    public Guid ServiceId { get; set; }
-    public string ServiceName { get; set; } = string.Empty;
-    public string? ServiceImage { get; set; }
-    public decimal Price { get; set; }
-    public Guid VendorId { get; set; }
-    public string VendorName { get; set; } = string.Empty;
-    public int Quantity { get; set; } = 1;
-}
+//public class CreateEventItemDto
+//{
 
-public class UpdateEventItemDto
-{
-    public string? ServiceImage { get; set; }
-    public string ServiceName { get; set; } = string.Empty;
-    public decimal Price { get; set; }
-    public string VendorName { get; set; } = string.Empty;
-    public int Quantity { get; set; }
-}
+//    public Guid ServiceId { get; set; }
+//    public string ServiceName { get; set; } = string.Empty;
+//    public string? ServiceImage { get; set; }
+//    public decimal Price { get; set; }
+//    public Guid VendorId { get; set; }
+//    public string VendorName { get; set; } = string.Empty;
+//    public int Quantity { get; set; } = 1;
+//}
+
+//public class UpdateEventItemDto
+//{
+//    public string? ServiceImage { get; set; }
+//    public string ServiceName { get; set; } = string.Empty;
+//    public decimal Price { get; set; }
+//    public string VendorName { get; set; } = string.Empty;
+//    public int Quantity { get; set; }
+//}

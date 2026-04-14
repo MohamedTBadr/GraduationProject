@@ -212,7 +212,7 @@ namespace Application.Services
             Id = e.Id,
             UserId = e.UserId,
             Title = e.Title,
-            CategoryName = e.Category.Name,
+            EventTypeName = e.EventType.Name,
             EventDate = e.EventDate,
             TotalBudget = e.TotalBudget,
             GuestCount = e.GuestCount,
@@ -262,7 +262,7 @@ namespace Application.Services
         {
             UserId = (Guid)dto.UserId!,
             Title = dto.Title,
-            CategoryId = dto.CategoryId,
+            EventTypeId = dto.EventTypeId,
             EventDate = dto.EventDate,
             TotalBudget = dto.TotalBudget,
             GuestCount = dto.GuestCount,
@@ -274,7 +274,7 @@ namespace Application.Services
         internal static void ApplyTo(this UpdateEventDto dto, Event entity)
         {
             entity.Title = dto.Title;
-            entity.CategoryId = dto.CategoryId;
+            entity.EventTypeId = dto.EventTypeId;
             entity.EventDate = dto.EventDate;
             entity.TotalBudget = dto.TotalBudget;
             entity.GuestCount = dto.GuestCount;
