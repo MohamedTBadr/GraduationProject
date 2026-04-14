@@ -66,7 +66,7 @@ export class VendorDashboardComponent implements OnInit {
   }
 
   private processVendorStats(vendor: ApiVendor, events: EventResponseDto[]) {
-    this.averageRating.set(vendor.rating || 0);
+    this.averageRating.set(vendor?.rating || 0);
     
     let bookingsCount = 0;
     let pendingCount = 0;

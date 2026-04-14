@@ -14,13 +14,18 @@ export class JsonInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
 
+    let headersConfig: any = {
+      'Accept': 'application/json'
+    };
+
+    if (req.method !== 'GET' && req.method !== 'DELETE') {
+      headersConfig['Content-Type'] = 'application/json';
+    }
+
     const jsonReq = req.clone({
-      setHeaders: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+      setHeaders: headersConfig
     });
 
     return next.handle(jsonReq);
   }
-}
+}
