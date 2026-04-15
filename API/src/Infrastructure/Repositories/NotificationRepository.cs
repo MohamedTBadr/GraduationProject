@@ -1,9 +1,13 @@
-﻿using Domain.Entities;
+﻿using Domain.Contracts;
+using Domain.Entities;
 using Google.GenAI.Types;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-public class NotificationRepository(ApplicationDbContext db)
+
+namespace Infrastructure.Repositories;
+
+public class NotificationRepository(ApplicationDbContext db): INotificationRepository
 {
     public async Task AddAsync(Notification notification)
     {

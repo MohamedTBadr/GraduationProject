@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Domain.Entities;
+﻿using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 namespace Infrastructure.Persistence
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
@@ -25,7 +26,9 @@ namespace Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.Cascade);
 
 
-
+           builder.Entity<OrderInsight>()
+        .ToView("View_OrderInsights")
+        .HasNoKey();
             builder.Entity<VendorServiceType>()
       .HasKey(vs => new { vs.VendorId, vs.ServiceTypeId });
 
@@ -79,8 +82,8 @@ namespace Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.NoAction); // ← fixes the cycle error
         }
 
-        
 
+        public DbSet<OrderInsight> OrderInsights { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }
         public DbSet<Service> Services { get; set; }

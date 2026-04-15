@@ -8,18 +8,8 @@ using System.Text;
 
 namespace Application.Services.Helpers
 {
-    public class HybridCacheService : ICacheService
+    public class HybridCacheService(ICacheRepository _memory, ICacheRepository _redis) : ICacheService
     {
-        private readonly ICacheRepository _memory;
-        private readonly ICacheRepository _redis;
-
-        public HybridCacheService(
-            MemoryCacheRepository memory,
-            CacheRepository redis)
-        {
-            _memory = (ICacheRepository?)memory!;
-            _redis = redis;
-        }
 
         public async Task<string> GetCachedValueAsync(string key)
         {

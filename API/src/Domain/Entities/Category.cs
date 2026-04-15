@@ -9,7 +9,7 @@ namespace Domain.Entities
     /// <summary>
     /// Represents a category entity.
     /// </summary>
-    public class Category
+    public class Category: BaseEntity
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

@@ -95,5 +95,10 @@ namespace Infrastructure.Repositories
             await _pipeline.ExecuteAsync(async token => await dbContext.SaveChangesAsync(token), cancellationToken);
         }
 
+        public Task<List<ServiceType>> GetServiceTypesByIdsAsync(List<Guid> ids, CancellationToken cancellationToken)
+        {
+
+            return dbContext.ServiceTypes.Where(st => ids.Contains(st.Id)).ToListAsync(cancellationToken);
+        }
     }
 }

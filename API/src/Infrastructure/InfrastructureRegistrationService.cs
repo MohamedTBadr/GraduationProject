@@ -1,4 +1,6 @@
 ﻿using Domain.Contracts;
+using Domain.Contracts.Caching;
+using Domain.Contracts.Caching.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +29,10 @@ namespace Infrastructure
             Services.AddScoped<NotificationRepository>();
             Services.AddScoped<IOrderRepository, OrderRepository>();
             Services.AddScoped<IEventTypeRepository, EventTypeRespository>();
+            Services.AddScoped<INotificationRepository, NotificationRepository>();
+            Services.AddScoped<ICacheRepository, CacheRepository>();
+            Services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
+            Services.AddScoped<IUserRepository, UserRepository>();
             Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             // 1. Configure DbContext with SQL Server
             Services.AddDbContext<ApplicationDbContext>(options =>

@@ -1,9 +1,9 @@
-﻿using Domain.Entities;
+﻿using Domain.Contracts;
+using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
-
 public class NotificationService(
-    NotificationRepository repo,
+    INotificationRepository repo,
     SseConnectionManager sseManager)
 {
     public async Task SendAsync(Guid userId, string type, string title, string message)

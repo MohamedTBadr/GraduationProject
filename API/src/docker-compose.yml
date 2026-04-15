@@ -11,13 +11,28 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      ollama:
+        condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=db;Database=GraduationProject;User=sa;Password=MyPass@word;TrustServerCertificate=True;
       - ConnectionStrings__Redis=redis:6379
+      - Ollama__Url=http://ollama:11434
+      - Ollama__Model=llama3.2
     restart: unless-stopped
     mem_limit: 512m
     cpus: 0.75
+
+  ollama:
+    image: ollama/ollama
+    container_name: Graduation-Project-Ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    mem_limit: 4g
+    cpus: 2.0
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -31,7 +46,7 @@ services:
     volumes:
       - sql_data:/var/opt/mssql
     restart: unless-stopped
-    mem_limit: 1.5g       # SQL Server needs at least 1GB
+    mem_limit: 1.5g
     cpus: 1.0
     healthcheck:
       test:
@@ -57,3 +72,4 @@ services:
 volumes:
   sql_data:
   redis_data:
+  ollama_data:    # persists downloaded models

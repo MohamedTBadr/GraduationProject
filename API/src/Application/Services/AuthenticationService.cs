@@ -1,8 +1,7 @@
 using Application.DTOs.AuthenticationDTOs;
 using Application.Interfaces;
-
+using Domain.Contracts;
 using Domain.Entities;
-using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -18,64 +17,61 @@ namespace Application.Services
 {
     // Use an interface IRefreshTokenGenerator or System.Security.Cryptography instead of Guid 
     // for a high-security refresh token implementation, but Guid is simple for this example.
-    public class AuthenticationService(UserManager<ApplicationUser> userManager,
-                                     IConfiguration configuration,
-                                     IOptions<JWTOptions> options,
-                                     IEmailSender emailSender,
-                                     ApplicationDbContext dbContext,
-                                     SseConnectionManager sseManager) : IAuthenticationService
+    public class AuthenticationService(
+            IUserRepository userRepository,
+            IConfiguration configuration,
+            IOptions<JWTOptions> options,
+            IEmailSender emailSender,
+            SseConnectionManager sseManager) : IAuthenticationService
     {
         // Define Refresh Token duration (e.g., 30 days)
         private const int RefreshTokenDurationDays = 30;
-
         public async Task<UserResponse> LogIn(LoginRequest loginRequest)
         {
-            // 1. Check if User exists
-            var user = await userManager.FindByEmailAsync(loginRequest.email) ??
+            // 1. Check if User exists via Repository
+            var user = await userRepository.GetByEmailAsync(loginRequest.email) ??
                 throw new UserNotFoundException(loginRequest.email);
 
             if (user.IsSuspended)
                 throw new UnauthorizedException("Your account is suspended. Please contact support.");
 
-            // 2. Validate password
-            var isValid = await userManager.CheckPasswordAsync(user, loginRequest.password);
+            // 2. Validate password via Repository
+            var isValid = await userRepository.CheckPasswordAsync(user, loginRequest.password);
 
             if (!isValid)
                 throw new UnauthorizedException("Invalid credentials.");
 
-            // 3. Check if vendor is verified
-            var roles = await userManager.GetRolesAsync(user);
+            // 3. Check roles and vendor verification
+            var roles = await userRepository.GetUserRolesAsync(user);
             var role = roles.FirstOrDefault() ?? string.Empty;
 
             if (role == "Vendor")
             {
-                var vendor = await dbContext.Vendors.FirstOrDefaultAsync(v => v.UserId == user.Id);
-
-                if (vendor is null || !vendor.IsVerified)
+                var isVerified = await userRepository.IsVendorVerifiedAsync(user.Id);
+                if (!isVerified)
                     throw new BadRequestException(new List<string> { "Your vendor account is not verified yet. Please wait for approval." });
             }
 
-            // 4. Generate Access Token and Refresh Token
+            // 4. Generate Tokens
             var accessToken = await GenerateAccessTokenAsync(user);
             var refreshToken = GenerateNewRefreshToken();
 
-            // 5. Update user entity with the new Refresh Token
+            // 5. Update user entity via Repository
             await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays);
 
-            // 6. Return both tokens
             return new(user.UserName!, user.Email!, accessToken, refreshToken, role);
         }
 
-        public async Task<bool> CheckIfEmailExists(string email) => (await userManager.FindByEmailAsync(email)) != null;
-
+        public async Task<bool> CheckIfEmailExists(string email)
+                    => (await userRepository.GetByEmailAsync(email)) != null;
         public async Task<UserResponse> RegisterAsync(SignUpRequest request)
         {
             // Input validation and existing user checks
-            if (await userManager.FindByNameAsync(request.name) != null)
+            if (await userRepository.GetByNameAsync(request.name) != null)
             {
                 throw new UserAlreadyExistException($"User name '{request.name}' already exists.");
             }
-            if (await userManager.FindByEmailAsync(request.email) != null)
+            if (await userRepository.GetByEmailAsync(request.email) != null)
             {
                 throw new UserAlreadyExistException($"Email '{request.email}' already registered.");
             }
@@ -90,7 +86,7 @@ namespace Application.Services
             };
 
             // 1. Create User
-            var result = await userManager.CreateAsync(user, request.password);
+            var result = await userRepository.CreateAsync(user, request.password);
 
             if (result.Succeeded)
             {
@@ -100,7 +96,7 @@ namespace Application.Services
                 await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays);
 
                 // 3. Return both tokens
-                var roles = await userManager.GetRolesAsync(user);
+                var roles = await userRepository.GetUserRolesAsync(user);
                 var role = roles.FirstOrDefault() ?? string.Empty;
                 return new(request.name, request.email, accessToken, refreshToken, role);
             }
@@ -111,10 +107,10 @@ namespace Application.Services
 
         public async Task ForgetPassword(string email)
         {
-            var user = await userManager.FindByEmailAsync(email) ?? throw new UserNotFoundException(email);
+            var user = await userRepository.GetByEmailAsync(email) ?? throw new UserNotFoundException(email);
 
             // 1) create token
-            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            var token = await userRepository.GeneratePasswordResetTokenAsync(user);
 
             // 2) encode token so it's safe in a URL
             var tokenBytes = Encoding.UTF8.GetBytes(token);
@@ -236,12 +232,12 @@ namespace Application.Services
         }
         public async Task ResetPassword(ResetPasswordRequest request)
         {
-            var user = await userManager.FindByEmailAsync(request.email) ?? throw new UserNotFoundException(request.email);
+            var user = await userRepository.GetByEmailAsync(request.email) ?? throw new UserNotFoundException(request.email);
             // 1) decode the token from URL
             var decodedTokenBytes = WebEncoders.Base64UrlDecode(request.token);
             var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
             // 2) reset password
-            var result = await userManager.ResetPasswordAsync(user, decodedToken, request.newPassword);
+            var result = await userRepository.ResetPasswordAsync(user, decodedToken, request.newPassword);
             if (!result.Succeeded)
             {
                 var errors = result.Errors.Select(e => e.Description).ToList();
@@ -253,7 +249,7 @@ namespace Application.Services
         public async Task<UserResponse> RefreshTokenAsync(RefreshTokenRequest request)
         {
             // 1. Find the user by the Refresh Token in the database
-            var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.RefreshToken);
+            var user = await userRepository.GetByRefreshTokenAsync(request.RefreshToken);
 
             if (user == null)
             {
@@ -279,7 +275,7 @@ namespace Application.Services
             await SetRefreshTokenAsync(user, newRefreshToken, RefreshTokenDurationDays);
 
             // 6. Return the new tokens
-            var roles = await userManager.GetRolesAsync(user);
+            var roles = await userRepository.GetUserRolesAsync(user);
             var role = roles.FirstOrDefault() ?? string.Empty;
             return new UserResponse(user.UserName!, user.Email!, newAccessToken, newRefreshToken, role);
         }
@@ -300,7 +296,7 @@ namespace Application.Services
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // JWT ID
             };
 
-            var roles = await userManager.GetRolesAsync(user);
+            var roles = await userRepository.GetUserRolesAsync(user);
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey));
@@ -338,7 +334,7 @@ namespace Application.Services
         {
             user.RefreshToken = token;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(durationDays);
-            await userManager.UpdateAsync(user);
+            await userRepository.UpdateAsync(user);
         }
 
         /// <summary>
@@ -348,12 +344,12 @@ namespace Application.Services
         {
             user.RefreshToken = null;
             user.RefreshTokenExpiryTime = DateTime.MinValue;
-            await userManager.UpdateAsync(user);
+            await userRepository.UpdateAsync(user);
         }
 
         public async Task LogoutAsync(Guid userId)
         {
-            var user = await userManager.FindByIdAsync(userId.ToString())
+            var user = await userRepository.GetByIdAsync(userId.ToString())
                 ?? throw new UserNotFoundException(userId.ToString());
 
             await ClearRefreshTokenAsync(user); // revoke refresh token

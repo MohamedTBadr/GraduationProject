@@ -7,7 +7,7 @@ namespace Domain.Entities
     /// <summary>
     /// Represents a package entity.
     /// </summary>
-    public class Package
+    public class Package: BaseEntity
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

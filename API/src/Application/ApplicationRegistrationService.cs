@@ -39,6 +39,8 @@ namespace Application
             Services.AddScoped<NotificationService>();
             Services.AddScoped<IFileService, FileService>();
             Services.AddScoped<IEventTypeService, EventTypeService>();
+            //Services.AddScoped<IUs
+            //Services.AddScoped<Ime>
             Services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<AutoMapperService>();

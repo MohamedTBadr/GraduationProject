@@ -1,19 +1,11 @@
-﻿using Abp.Domain.Repositories;
-using Application;
-using Application.DTOs.ServiceDTOs;
+﻿using Application.DTOs.ServiceDTOs;
 using Application.Interfaces;
 using AutoMapper;
-
 using Domain.Contracts;
 using Domain.Entities;
-using Infrastructure.Repositories;
-using Microsoft.Extensions.Caching.Hybrid;
 using Shared;
 using Shared.Exceptions;
-using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace Application.Services
 {

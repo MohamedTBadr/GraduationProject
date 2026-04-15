@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class Event
+    public class Event:BaseEntity
     {
 
         public Guid Id { get; set; }

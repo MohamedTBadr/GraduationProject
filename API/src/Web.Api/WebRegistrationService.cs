@@ -133,7 +133,11 @@ namespace Web.Api
             });
 
 
-
+            Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("DashboardAccess", policy =>
+                    policy.RequireRole("Admin", "Vendor"));
+            });
             #endregion
 
 

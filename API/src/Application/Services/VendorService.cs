@@ -4,7 +4,6 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain.Contracts;
 using Domain.Entities;
-using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shared;
@@ -13,7 +12,7 @@ using System.Linq.Expressions;
 
 namespace Application.Services
 {
-    public class VendorService(UserManager<ApplicationUser> userManager, IVendorRepository vendorRepository, ApplicationDbContext dbContext, IMapper mapper) : IVendorService
+    public class VendorService(IUserRepository userRepository, UserManager<ApplicationUser> userManager,IVendorRepository vendorRepository, IMapper mapper) : IVendorService
     {
         public async Task<Result<PaginatedResponse<VendorListDTO>>> GetVendorsAsync(
       PaginatedRequest paginatedRequest,
@@ -60,9 +59,7 @@ namespace Application.Services
             var ServiceTypeIds = request.ServiceTypes.Select(s => s.Id).ToList();
 
             // Fetch real ServiceType entities from DB
-            var existingServiceTypes = await dbContext.ServiceTypes
-                .Where(s => ServiceTypeIds.Contains(s.Id))
-                .ToListAsync();
+            var existingServiceTypes = await vendorRepository.GetServiceTypesByIdsAsync(ServiceTypeIds, cancellationToken);
 
             if (existingServiceTypes.Count != ServiceTypeIds.Count)
                 return Result<VendorDetailsDTO>.Failure(ErrorType.NotFound, "One or more ServiceTypes not found.");
@@ -79,14 +76,13 @@ namespace Application.Services
                 PhoneNumber = request.Phone,
             };
 
-            var identityResult = await userManager.CreateAsync(user, request.Password);
+            var identityResult = await userRepository.CreateAsync(user, request.Password);
             if (!identityResult.Succeeded)
             {
                 var errors = string.Join(", ", identityResult.Errors.Select(e => e.Description));
                 return Result<VendorDetailsDTO>.Failure(ErrorType.AlreadyExists, errors);
             }
 
-            await userManager.AddToRoleAsync(user, "Vendor");
 
 
             var vendor = new Vendor
@@ -107,6 +103,7 @@ namespace Application.Services
             };
 
             await vendorRepository.AddVendorAsync(vendor, cancellationToken);
+            await userManager.AddToRoleAsync(user, "Vendor");
 
             var vendorDTO = mapper.Map<VendorDetailsDTO>(vendor);
             return Result<VendorDetailsDTO>.Success(vendorDTO);

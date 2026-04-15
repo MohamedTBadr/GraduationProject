@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class Service
+    public class Service: BaseEntity
     {
        public Guid Id { get; set; }
         public string Name { get; set; }

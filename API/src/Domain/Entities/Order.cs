@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class Order
-{
+    public class Order: BaseEntity
+    {
     public Guid Id { get; set; }
     public Guid? UserId { get; set; }
 
@@ -19,13 +19,11 @@ namespace Domain.Entities
     public string? PaymentIntentId { get; set; } // Paymob order_id
     public string PaymentStatus { get; set; } = "Pending";
 
-    public DateTime CreatedAt { get; set; }
     public DateTime? Appointment { get; set; }
 
      public Event? Event { get; set; }
         public Guid? EventId { get; set; }
         public Address ShippingAddress { get; set; } = new Address();
     }
-
 
 }

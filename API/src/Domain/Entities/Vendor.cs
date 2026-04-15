@@ -13,7 +13,7 @@ namespace Domain.Entities
     /// Not Completed, we need to add more properties to this class, such as Linking with User entity,
     /// and also we need to add more details about the vendor such as contact information, location, etc.
     /// </summary>
-    public class Vendor
+    public class Vendor: BaseEntity
     {
         [Key]
         public Guid UserId { get; set; }

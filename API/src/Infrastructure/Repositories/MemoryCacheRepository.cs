@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Domain.Contracts.Caching
 {
-    public class MemoryCacheRepository(IMemoryCache cache) : ICacheRepository
+    public class MemoryCacheRepository(IMemoryCache cache) : ICacheRepository, IMemoryCacheRepository
     {
         public Task<string?> GetCachedValueAsync(string key)
         {
