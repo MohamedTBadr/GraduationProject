@@ -2,80 +2,91 @@
 using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Polly;
+using Polly.Registry;
 using Shared;
 
 namespace Infrastructure.Repositories
 {
-    public class CompanyInquiryRepository(ApplicationDbContext _context) : ICompanyInquiryRepository
+    public class CompanyInquiryRepository(ApplicationDbContext _context, ResiliencePipelineProvider<string> pipelineProvider) : ICompanyInquiryRepository
     {
-
-      
+        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
 
         public async Task AddCompanyInquiryAsync(CorporationInquiry inquiry)
         {
-           
-
-            await _context.CorporationInquiries.AddAsync(inquiry);
-            await _context.SaveChangesAsync();
+            await _pipeline.ExecuteAsync(async token =>
+            {
+                await _context.CorporationInquiries.AddAsync(inquiry, token);
+                await _context.SaveChangesAsync(token);
+            });
         }
 
         public async Task DeleteCompanyInquiryAsync(Guid id)
         {
-            var inquiry = await _context.CorporationInquiries.FindAsync(id);
+            await _pipeline.ExecuteAsync(async token =>
+            {
+                var inquiry = await _context.CorporationInquiries.FindAsync([id], cancellationToken: token);
 
-            if (inquiry is null)
-                throw new KeyNotFoundException($"Inquiry with ID {id} was not found.");
+                if (inquiry is null)
+                    throw new KeyNotFoundException($"Inquiry with ID {id} was not found.");
 
-            _context.CorporationInquiries.Remove(inquiry);
-            await _context.SaveChangesAsync();
+                _context.CorporationInquiries.Remove(inquiry);
+                await _context.SaveChangesAsync(token);
+            });
         }
 
         public async Task<CorporationInquiry> GetCompanyInquiryByIdAsync(Guid id)
         {
-            var inquiry = await _context.CorporationInquiries.Include(x => x.Category)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id);
+            return await _pipeline.ExecuteAsync(async token =>
+            {
+                var inquiry = await _context.CorporationInquiries
+                    .Include(x => x.Category)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == id, token);
 
-            if (inquiry is null)
-                throw new KeyNotFoundException($"Inquiry with ID {id} was not found.");
+                if (inquiry is null)
+                    throw new KeyNotFoundException($"Inquiry with ID {id} was not found.");
 
-            return inquiry;
+                return inquiry;
+            });
         }
-
-      
 
         public async Task UpdateCompanyInquiryAsync(CorporationInquiry inquiry)
         {
-            var exists = await _context.CorporationInquiries.AnyAsync(x => x.Id == inquiry.Id);
+            await _pipeline.ExecuteAsync(async token =>
+            {
+                var exists = await _context.CorporationInquiries.AnyAsync(x => x.Id == inquiry.Id, token);
 
-            if (!exists)
-                throw new KeyNotFoundException($"Inquiry with ID {inquiry.Id} was not found.");
+                if (!exists)
+                    throw new KeyNotFoundException($"Inquiry with ID {inquiry.Id} was not found.");
 
-            _context.CorporationInquiries.Update(inquiry);
-            await _context.SaveChangesAsync();
+                _context.CorporationInquiries.Update(inquiry);
+                await _context.SaveChangesAsync(token);
+            });
         }
 
         public async Task<PaginatedResponse<CorporationInquiry>> GetAllCompanyInquiriesAsync(PaginatedRequest request)
         {
-            var query = _context.CorporationInquiries.Include(x => x.Category)
-                    .AsNoTracking()
-                    ;
+            return await _pipeline.ExecuteAsync(async token =>
+            {
+                var query = _context.CorporationInquiries
+                    .Include(x => x.Category)
+                    .AsNoTracking();
 
-            var totalCount = await query.CountAsync();
+                var totalCount = await query.CountAsync(token);
 
-            var items = await query
-                .Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync();
+                var items = await query
+                    .Skip((request.PageIndex - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToListAsync(token);
 
-            return new PaginatedResponse<CorporationInquiry>(
-      items,
-      totalCount,
-      request.PageIndex,
-      request.PageSize
-  );
-
-
+                return new PaginatedResponse<CorporationInquiry>(
+                    items,
+                    totalCount,
+                    request.PageIndex,
+                    request.PageSize
+                );
+            });
         }
     }
 }

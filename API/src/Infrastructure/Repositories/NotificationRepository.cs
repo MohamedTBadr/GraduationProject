@@ -1,35 +1,52 @@
 ﻿using Domain.Contracts;
 using Domain.Entities;
-using Google.GenAI.Types;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-
+using Polly;
+using Polly.Registry;
 
 namespace Infrastructure.Repositories;
 
-public class NotificationRepository(ApplicationDbContext db): INotificationRepository
+public class NotificationRepository(
+    ApplicationDbContext db,
+    ResiliencePipelineProvider<string> pipelineProvider) : INotificationRepository
 {
-    public async Task AddAsync(Notification notification)
+    private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
+
+    public async Task AddAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        await db.Notifications.AddAsync(notification);
-        await db.SaveChangesAsync();
+        await _pipeline.ExecuteAsync(async token =>
+        {
+            await db.Notifications.AddAsync(notification, token);
+            await db.SaveChangesAsync(token);
+        }, cancellationToken);
     }
 
-    public async Task<List<Notification>> GetByUserIdAsync(Guid userId) =>
-        await db.Notifications
-            .Where(n => n.UserId == userId)
-            .OrderByDescending(n => n.CreatedAt)
-            .ToListAsync();
-
-    public async Task MarkAsReadAsync(Guid notificationId)
+    public async Task<List<Notification>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        await db.Notifications
-            .Where(n => n.Id == notificationId)
-            .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true));
+        return await _pipeline.ExecuteAsync(async token =>
+            await db.Notifications
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync(token),
+            cancellationToken);
     }
-    public async Task AddRangeAsync(IEnumerable<Notification> notifications)
+
+    public async Task MarkAsReadAsync(Guid notificationId, CancellationToken cancellationToken = default)
     {
-        await db.Notifications.AddRangeAsync(notifications);
-        await db.SaveChangesAsync();
+        await _pipeline.ExecuteAsync(async token =>
+            await db.Notifications
+                .Where(n => n.Id == notificationId)
+                .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true), token),
+            cancellationToken);
+    }
+
+    public async Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken cancellationToken = default)
+    {
+        await _pipeline.ExecuteAsync(async token =>
+        {
+            await db.Notifications.AddRangeAsync(notifications, token);
+            await db.SaveChangesAsync(token);
+        }, cancellationToken);
     }
 }

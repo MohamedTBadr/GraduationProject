@@ -3,51 +3,63 @@ using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Polly;
+using Polly.Registry;
 
 namespace Infrastructure.Repositories
 {
-    public class UserRepository(UserManager<ApplicationUser> userManager,
-                            ApplicationDbContext dbContext) : IUserRepository
+    public class UserRepository(
+        UserManager<ApplicationUser> userManager,
+        ApplicationDbContext dbContext,
+        ResiliencePipelineProvider<string> pipelineProvider) : IUserRepository
     {
-        public async Task<ApplicationUser?> GetByEmailAsync(string email)
-            => await userManager.FindByEmailAsync(email);
+        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
 
-        public async Task<ApplicationUser?> GetByNameAsync(string name)
-            => await userManager.FindByNameAsync(name);
+        // Identity UserManager doesn't always accept tokens for 'Find' methods, 
+        // but we pass 'cancellationToken' to Polly to allow the pipeline to cancel retries.
 
-        public async Task<ApplicationUser?> GetByIdAsync(string userId)
-            => await userManager.FindByIdAsync(userId);
+        public async Task<ApplicationUser?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.FindByEmailAsync(email), cancellationToken);
 
-        public async Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken)
-            => await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+        public async Task<ApplicationUser?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.FindByNameAsync(name), cancellationToken);
 
-        public async Task<IList<string>> GetUserRolesAsync(ApplicationUser user)
-            => await userManager.GetRolesAsync(user);
+        public async Task<ApplicationUser?> GetByIdAsync(string userId, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.FindByIdAsync(userId), cancellationToken);
 
-        public async Task<IdentityResult> CreateAsync(ApplicationUser user, string password)
-            => await userManager.CreateAsync(user, password);
+        public async Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async token =>
+                await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, token),
+                cancellationToken);
 
-        public async Task<IdentityResult> UpdateAsync(ApplicationUser user)
-            => await userManager.UpdateAsync(user);
+        public async Task<IList<string>> GetUserRolesAsync(ApplicationUser user, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.GetRolesAsync(user), cancellationToken);
 
-        public async Task<bool> CheckPasswordAsync(ApplicationUser user, string password)
-            => await userManager.CheckPasswordAsync(user, password);
+        public async Task<IdentityResult> CreateAsync(ApplicationUser user, string password, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.CreateAsync(user, password), cancellationToken);
 
-        public async Task<string> GeneratePasswordResetTokenAsync(ApplicationUser user)
-            => await userManager.GeneratePasswordResetTokenAsync(user);
+        public async Task<IdentityResult> UpdateAsync(ApplicationUser user, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.UpdateAsync(user), cancellationToken);
 
-        public async Task<IdentityResult> ResetPasswordAsync(ApplicationUser user, string token, string newPassword)
-            => await userManager.ResetPasswordAsync(user, token, newPassword);
+        public async Task<bool> CheckPasswordAsync(ApplicationUser user, string password, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.CheckPasswordAsync(user, password), cancellationToken);
 
-        public async Task<bool> IsVendorVerifiedAsync(Guid userId)
+        public async Task<string> GeneratePasswordResetTokenAsync(ApplicationUser user, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.GeneratePasswordResetTokenAsync(user), cancellationToken);
+
+        public async Task<IdentityResult> ResetPasswordAsync(ApplicationUser user, string token, string newPassword, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.ResetPasswordAsync(user, token, newPassword), cancellationToken);
+
+        public async Task<bool> IsVendorVerifiedAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            var vendor = await dbContext.Vendors.FirstOrDefaultAsync(v => v.UserId == userId);
-            return vendor?.IsVerified ?? false;
+            return await _pipeline.ExecuteAsync(async token =>
+            {
+                var vendor = await dbContext.Vendors
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(v => v.UserId == userId, token);
+
+                return vendor?.IsVerified ?? false;
+            }, cancellationToken);
         }
     }
 }

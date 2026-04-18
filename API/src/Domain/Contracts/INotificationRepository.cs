@@ -9,10 +9,10 @@ namespace Domain.Contracts
 {
     public interface INotificationRepository
     {
-        Task AddAsync(Notification notification);
-        Task<List<Notification>> GetByUserIdAsync(Guid userId);
-        Task MarkAsReadAsync(Guid notificationId);
-        Task AddRangeAsync(IEnumerable<Notification> notifications);
+        Task AddAsync(Notification notification, CancellationToken cancellationToken = default);
+        Task<List<Notification>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+        Task MarkAsReadAsync(Guid notificationId, CancellationToken cancellationToken = default);
+        Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken cancellationToken = default);
 
     }
 }

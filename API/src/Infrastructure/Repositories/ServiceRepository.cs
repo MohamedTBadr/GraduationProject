@@ -6,13 +6,12 @@ using Polly;
 using Polly.Registry;
 using Shared;
 using System.Linq.Expressions;
+
 namespace Infrastructure.Repositories
 {
-    public class ServiceRepository(ApplicationDbContext _context ,ResiliencePipelineProvider<string> pipelineProvider) : IServiceRepository
+    public class ServiceRepository(ApplicationDbContext _context, ResiliencePipelineProvider<string> pipelineProvider) : IServiceRepository
     {
         private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
-
-
 
         public async Task<List<ServiceImage>> GetServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken)
         {
@@ -21,19 +20,16 @@ namespace Infrastructure.Repositories
                     .Where(i => i.ServiceId == serviceId)
                     .ToListAsync(token), cancellationToken);
         }
+
         public async Task<PaginatedResponse<Service>> GetAllAsync(
           PaginatedRequest request,
-          Expression<Func<Service, bool>> visibilityFilter, // Dynamic filter passed from Service
+          Expression<Func<Service, bool>> visibilityFilter,
           CancellationToken ct)
         {
             return await _pipeline.ExecuteAsync(async token =>
             {
-                var query = _context.Services.AsNoTracking()
-                    .Where(visibilityFilter); // Just apply what the Service decided
+                var query = _context.Services.AsNoTracking().Where(visibilityFilter);
 
-
-
-                // --- 2. SEARCH LOGIC ---
                 if (!string.IsNullOrWhiteSpace(request.SearchTerm))
                 {
                     var search = request.SearchTerm.Trim();
@@ -45,19 +41,16 @@ namespace Infrastructure.Repositories
                         p.ServiceType.Name.Contains(search));
                 }
 
-                // --- 3. SORTING LOGIC ---
                 query = request.SortBy?.ToLower() switch
                 {
                     "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
                     "category" => request.IsDescending ? query.OrderByDescending(p => p.Category.Name) : query.OrderBy(p => p.Category.Name),
                     "vendor" => request.IsDescending ? query.OrderByDescending(p => p.Vendor.BusinessName) : query.OrderBy(p => p.Vendor.BusinessName),
                     "servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
-                    _ => query.OrderBy(p => p.Name) 
+                    _ => query.OrderBy(p => p.Name)
                 };
 
-                // --- 4. EXECUTION ---
                 var totalCount = await query.CountAsync(token);
-
                 var items = await query
                     .Include(p => p.Category)
                     .Include(p => p.Vendor)
@@ -71,134 +64,88 @@ namespace Infrastructure.Repositories
             }, ct);
         }
 
-
-        public async Task<PaginatedResponse<Service>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter,  CancellationToken cancellationToken)
+        public async Task<PaginatedResponse<Service>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken)
         {
-            var query = _context.Services
-                .Include(p => p.Category)
-                .Include(p => p.Vendor)
-                .Include(p => p.ServiceType)
-                .Include(p => p.ServiceImages)
-                .Where(p => p.CategoryId == categoryId)
-                .AsNoTracking();
-
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-                query = query.Where(p =>
-                    p.Name.Contains(request.SearchTerm) ||
-                    p.Description.Contains(request.SearchTerm) ||
-                    p.Vendor.BusinessName.Contains(request.SearchTerm) ||
-                    p.ServiceType.Name.Contains(request.SearchTerm));
-
-            query = request.SortBy?.ToLower() switch
+            return await _pipeline.ExecuteAsync(async token =>
             {
-                "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
-                "vendor" => request.IsDescending ? query.OrderByDescending(p => p.Vendor.BusinessName) : query.OrderBy(p => p.Vendor.BusinessName),
-                "Servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
-                _ => query.OrderBy(p => p.Name)
-            };
+                var query = _context.Services
+                    .Include(p => p.Category)
+                    .Include(p => p.Vendor)
+                    .Include(p => p.ServiceType)
+                    .Include(p => p.ServiceImages)
+                    .Where(p => p.CategoryId == categoryId)
+                    .Where(visibilityFilter)
+                    .AsNoTracking();
 
-            var totalCount = await query.CountAsync();
-            var items = await query
-                .Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync(cancellationToken);
+                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+                    query = query.Where(p => p.Name.Contains(request.SearchTerm) || p.Description.Contains(request.SearchTerm));
 
-            return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+                var totalCount = await query.CountAsync(token);
+                var items = await query
+                    .Skip((request.PageIndex - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToListAsync(token);
+
+                return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+            }, cancellationToken);
         }
 
         public async Task<PaginatedResponse<Service>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken)
         {
-            var query = _context.Services
-                .Include(p => p.Category)
-                .Include(p => p.Vendor)
-                .Include(p => p.ServiceType)
-                .Include(p => p.ServiceImages)
-                .Where(p => p.VendorId == vendorId)
-                .AsNoTracking();
-
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-                query = query.Where(p =>
-                    p.Name.Contains(request.SearchTerm) ||
-                    p.Description.Contains(request.SearchTerm) ||
-                    p.Category.Name.Contains(request.SearchTerm) ||
-                    p.ServiceType.Name.Contains(request.SearchTerm));
-
-            query = request.SortBy?.ToLower() switch
+            return await _pipeline.ExecuteAsync(async token =>
             {
-                "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
-                "category" => request.IsDescending ? query.OrderByDescending(p => p.Category.Name) : query.OrderBy(p => p.Category.Name),
-                "Servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
-                _ => query.OrderBy(p => p.Name)
-            };
+                var query = _context.Services
+                    .Where(p => p.VendorId == vendorId)
+                    .Where(visibilityFilter)
+                    .AsNoTracking();
 
-            var totalCount = await query.CountAsync();
-            var items = await query
-                .Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync(cancellationToken);
+                var totalCount = await query.CountAsync(token);
+                var items = await query
+                    .Skip((request.PageIndex - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToListAsync(token);
 
-            return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+                return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+            }, cancellationToken);
         }
 
-        public async Task<PaginatedResponse<Service>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request
-,                      Expression<Func<Service, bool>> visibilityFilter
-
-            , CancellationToken cancellationToken)
+        public async Task<PaginatedResponse<Service>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken)
         {
-            var query = _context.Services
-                .Include(p => p.Category)
-                .Include(p => p.Vendor)
-                .Include(p => p.ServiceType)
-                .Include(p => p.ServiceImages)
-                .Where(p => p.ServiceTypeId == ServiceTypeId)
-                .AsNoTracking();
-
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-                query = query.Where(p =>
-                    p.Name.Contains(request.SearchTerm) ||
-                    p.Description.Contains(request.SearchTerm) ||
-                    p.Category.Name.Contains(request.SearchTerm) ||
-                    p.Vendor.BusinessName.Contains(request.SearchTerm));
-
-            query = request.SortBy?.ToLower() switch
+            return await _pipeline.ExecuteAsync(async token =>
             {
-                "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
-                "category" => request.IsDescending ? query.OrderByDescending(p => p.Category.Name) : query.OrderBy(p => p.Category.Name),
-                "vendor" => request.IsDescending ? query.OrderByDescending(p => p.Vendor.BusinessName) : query.OrderBy(p => p.Vendor.BusinessName),
-                _ => query.OrderBy(p => p.Name)
-            };
-
-            var totalCount = await query.CountAsync();
-            var items = await query
-                .Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .ToListAsync(cancellationToken);
-
-            return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+                var query = _context.Services.Where(p => p.ServiceTypeId == ServiceTypeId).Where(visibilityFilter).AsNoTracking();
+                var totalCount = await query.CountAsync(token);
+                var items = await query.Skip((request.PageIndex - 1) * request.PageSize).Take(request.PageSize).ToListAsync(token);
+                return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+            }, cancellationToken);
         }
-        public async Task<Service> GetByIdAsync(Guid id,  CancellationToken cancellationToken)
+
+        public async Task<Service> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _context.Services
-                .Include(p => p.Category)
-                .Include(p => p.Vendor)
-                .Include(p => p.ServiceType)
-                .Include(p => p.ServiceImages)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            return await _pipeline.ExecuteAsync(async token =>
+                await _context.Services
+                    .Include(p => p.Category).Include(p => p.Vendor).Include(p => p.ServiceType).Include(p => p.ServiceImages)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.Id == id, token), cancellationToken);
         }
-        public async Task<Service> CreateAsync(Service Service, CancellationToken cancellationToken)
+
+        public async Task<Service> CreateAsync(Service service, CancellationToken cancellationToken)
         {
-            Service.Id = Guid.NewGuid();
-            await _context.Services.AddAsync(Service, cancellationToken);
-            await _context.ServiceImages.AddRangeAsync(Service.ServiceImages.Select(pi =>
+            return await _pipeline.ExecuteAsync(async token =>
             {
-                pi.Id = Guid.NewGuid();
-                pi.ServiceId = Service.Id;
-                pi.ImagePath = $"{pi.ImagePath}";
-                return pi;
-            }));
-            await _context.SaveChangesAsync(cancellationToken);
-            return Service;
+                service.Id = Guid.NewGuid();
+                await _context.Services.AddAsync(service, token);
+
+                foreach (var img in service.ServiceImages)
+                {
+                    img.Id = Guid.NewGuid();
+                    img.ServiceId = service.Id;
+                }
+
+                await _context.ServiceImages.AddRangeAsync(service.ServiceImages, token);
+                await _context.SaveChangesAsync(token);
+                return service;
+            }, cancellationToken);
         }
 
         public async Task<Service> UpdateAsync(Service service, CancellationToken cancellationToken)
@@ -206,17 +153,12 @@ namespace Infrastructure.Repositories
             return await _pipeline.ExecuteAsync(async token =>
             {
                 _context.Services.Update(service);
-
-                if (service.ServiceImages != null && service.ServiceImages.Count > 0)
+                if (service.ServiceImages?.Any() == true)
                 {
-                    foreach (var image in service.ServiceImages)
-                    {
-                        image.ServiceId = service.Id;
-                    }
-                    _context.ServiceImages.AddRange(service.ServiceImages); // ✅ Add not Update (old were deleted already)
+                    foreach (var image in service.ServiceImages) image.ServiceId = service.Id;
+                    await _context.ServiceImages.AddRangeAsync(service.ServiceImages, token);
                 }
-
-                await _context.SaveChangesAsync(token); // ✅ use token not cancellationToken
+                await _context.SaveChangesAsync(token);
                 return service;
             }, cancellationToken);
         }
@@ -225,19 +167,12 @@ namespace Infrastructure.Repositories
         {
             await _pipeline.ExecuteAsync(async token =>
             {
-                // 1. Fetch the entity
                 var service = await _context.Services.FindAsync([id], token);
-
                 if (service is not null)
                 {
-                    // 2. Remove related images (In-memory tracking)
                     var images = _context.ServiceImages.Where(pi => pi.ServiceId == id);
                     _context.ServiceImages.RemoveRange(images);
-
-                    // 3. Remove the service
                     _context.Services.Remove(service);
-
-                    // 4. Save everything in ONE transaction
                     await _context.SaveChangesAsync(token);
                 }
             }, cancellationToken);
@@ -245,63 +180,57 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _context.Services.AnyAsync(p => p.Id == id, cancellationToken);
+            return await _pipeline.ExecuteAsync(async token =>
+                await _context.Services.AnyAsync(p => p.Id == id, token), cancellationToken);
         }
-
 
         public async Task<bool> UpdateStatusAsync(Guid id, bool isActive, CancellationToken ct)
         {
-            var rowsAffected = await _context.Services
-                .Where(s => s.Id == id)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(s => s.IsHidden, isActive), ct);
-
-            return rowsAffected > 0;
+            return await _pipeline.ExecuteAsync(async token =>
+            {
+                var rowsAffected = await _context.Services
+                    .Where(s => s.Id == id)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.IsHidden, isActive), token);
+                return rowsAffected > 0;
+            }, ct);
         }
 
-        public async Task  AddRatingAsync(ServiceRating rating, CancellationToken cancellationToken)
+        public async Task AddRatingAsync(ServiceRating rating, CancellationToken cancellationToken)
         {
-
-            rating.Id = Guid.NewGuid();
-            await _context.ServiceRatings.AddAsync(rating, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _pipeline.ExecuteAsync(async token =>
+            {
+                rating.Id = Guid.NewGuid();
+                await _context.ServiceRatings.AddAsync(rating, token);
+                await _context.SaveChangesAsync(token);
+            }, cancellationToken);
         }
 
-        public Task<List<Service>> AIFilterAsync(AIRequest AIRequest, CancellationToken cancellationToken)
+        public async Task<List<Service>> AIFilterAsync(AIRequest AIRequest, CancellationToken cancellationToken)
         {
-            var query = _context.Services
-                .Where(p => p.Price < AIRequest.Budget && p.Price > 0)
-                .Include(p => p.Category)
-                .Include(p => p.Vendor)
-                .Include(p => p.ServiceType)
-                .Include(p => p.ServiceImages)
-                .AsNoTracking();
-
-            //if (!string.IsNullOrWhiteSpace(AIRequest.EventTypeName))
-            //    query = query.Where(p => p.Event.Name == AIRequest.EventTypeName);
-
-            return query.ToListAsync(cancellationToken);
+            return await _pipeline.ExecuteAsync(async token =>
+                await _context.Services
+                    .Where(p => p.Price < AIRequest.Budget && p.Price > 0)
+                    .Include(p => p.Category).Include(p => p.Vendor).Include(p => p.ServiceType).Include(p => p.ServiceImages)
+                    .AsNoTracking()
+                    .ToListAsync(token), cancellationToken);
         }
-
 
         public async Task DeleteServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken)
         {
-            var oldImages = await _context.ServiceImages
-                .Where(i => i.ServiceId == serviceId)
-                .ToListAsync(cancellationToken);
-
-            _context.ServiceImages.RemoveRange(oldImages);
+            await _pipeline.ExecuteAsync(async token =>
+            {
+                var oldImages = await _context.ServiceImages.Where(i => i.ServiceId == serviceId).ToListAsync(token);
+                _context.ServiceImages.RemoveRange(oldImages);
+                await _context.SaveChangesAsync(token);
+            }, cancellationToken);
         }
 
         public async Task<bool> HasUserPurchasedAsync(Guid userId, Guid serviceId, CancellationToken cancellationToken)
         {
-            // 1. Use AnyAsync to actually free up the thread during I/O
-            // 2. Pass the cancellationToken to the database provider
-            // 3. Remove .Include() for cleaner syntax
-            return await _context.Orders
-                .AnyAsync(o => o.UserId == userId &&
-                               o.OrderItems.Any(oi => oi.ServiceId == serviceId),
-                          cancellationToken);
+            return await _pipeline.ExecuteAsync(async token =>
+                await _context.Orders
+                    .AnyAsync(o => o.UserId == userId && o.OrderItems.Any(oi => oi.ServiceId == serviceId), token),
+                cancellationToken);
         }
     }
 }

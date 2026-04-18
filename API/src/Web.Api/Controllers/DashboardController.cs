@@ -24,117 +24,127 @@ namespace Web.Api.Controllers
 
             if (IsAdmin())
             {
-                var insights = await _context.OrderInsights
-                    .FirstOrDefaultAsync(x => x.Year == now.Year && x.Month == now.Month);
-
-                var totalLifetime = await _context.Orders
-                    .Where(o => o.PaymentStatus == "Success")
-                    .SumAsync(o => o.Amount);
-
-                var recent = await _context.Orders
-                    .OrderByDescending(o => o.CreatedAt)
-                    .Take(5)
-                    .Select(o => new { o.Id, User = o.UserId, o.Amount, o.CreatedAt })
-                    .ToListAsync();
-
-                var revenueHistory = await _context.OrderInsights
-                    .OrderByDescending(x => x.Year).ThenByDescending(x => x.Month)
-                    .Take(12)
-                    .OrderBy(x => x.Year).ThenBy(x => x.Month)
-                    .Select(x => new
-                    {
-                        x.Year,
-                        x.Month,
-                        x.MonthlyRevenue,
-                        x.OrderCount,
-                        x.PercentageGrowth,
-                        Label = new DateTime(x.Year, x.Month, 1).ToString("MMM yyyy")
-                    })
-                    .ToListAsync();
-
-                return Ok(FormatDashboardResponse(
-                    totalLifetime,
-                    insights?.MonthlyRevenue ?? 0,
-                    insights?.PercentageGrowth ?? 0,
-                    recent,
-                    revenueHistory));
+                return await AdminStat(now);
             }
             else if (IsVendor())
             {
-                var vendorId = GetUserIdFromToken();
+                return await VendorStats(startOfCurrentMonth, startOfLastMonth);
+            }
 
-                var lifetimeRevenue = await _context.OrderItems
-                    .Where(oi => oi.VendorId == vendorId && oi.Order.PaymentStatus == "Success")
-                    .SumAsync(oi => oi.Price * oi.Quantity);
+            return Forbid();
+        }
 
-                var currentMonthRevenue = await _context.OrderItems
-                    .Where(oi => oi.VendorId == vendorId &&
-                                 oi.Order.PaymentStatus == "Success" &&
-                                 oi.Order.CreatedAt >= startOfCurrentMonth)
-                    .SumAsync(oi => oi.Price * oi.Quantity);
+        private async Task<IActionResult> AdminStat(DateTime now)
+        {
+            var insights = await _context.OrderInsights
+                .FirstOrDefaultAsync(x => x.Year == now.Year && x.Month == now.Month);
 
-                var lastMonthRevenue = await _context.OrderItems
-                    .Where(oi => oi.VendorId == vendorId &&
-                                 oi.Order.PaymentStatus == "Success" &&
-                                 oi.Order.CreatedAt >= startOfLastMonth &&
-                                 oi.Order.CreatedAt < startOfCurrentMonth)
-                    .SumAsync(oi => oi.Price * oi.Quantity);
+            var totalLifetime = await _context.Orders
+                .Where(o => o.PaymentStatus == "Success")
+                .SumAsync(o => o.Amount);
 
-                decimal growth = 0;
-                if (lastMonthRevenue > 0)
-                    growth = ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
-                else if (currentMonthRevenue > 0)
-                    growth = 100;
+            var recent = await _context.Orders
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(5)
+                .Select(o => new { o.Id, User = o.UserId, o.Amount, o.CreatedAt })
+                .ToListAsync();
 
-                var recentItems = await _context.OrderItems
-                    .Where(oi => oi.VendorId == vendorId)
-                    .OrderByDescending(oi => oi.Order.CreatedAt)
-                    .Take(5)
-                    .Select(oi => new
-                    {
-                        oi.OrderId,
-                        User = oi.Order.UserId,
-                        Amount = oi.Price * oi.Quantity,
-                        oi.Order.CreatedAt
-                    })
-                    .ToListAsync();
-
-                var revenueHistory = await _context.OrderItems
-                    .Where(oi => oi.VendorId == vendorId && oi.Order.PaymentStatus == "Success")
-                    .GroupBy(oi => new { oi.Order.CreatedAt.Year, oi.Order.CreatedAt.Month })
-                    .Select(g => new
-                    {
-                        g.Key.Year,
-                        g.Key.Month,
-                        MonthlyRevenue = g.Sum(oi => oi.Price * oi.Quantity),
-                        OrderCount = g.Select(oi => oi.OrderId).Distinct().Count(),
-                    })
-                    .OrderByDescending(x => x.Year).ThenByDescending(x => x.Month)
-                    .Take(12)
-                    .OrderBy(x => x.Year).ThenBy(x => x.Month)
-                    .ToListAsync();
-
-                // Label is computed after the DB query because
-                // new DateTime(...).ToString() can't translate to SQL
-                var revenueHistoryWithLabel = revenueHistory.Select(x => new
+            var revenueHistory = await _context.OrderInsights
+                .OrderByDescending(x => x.Year).ThenByDescending(x => x.Month)
+                .Take(12)
+                .OrderBy(x => x.Year).ThenBy(x => x.Month)
+                .Select(x => new
                 {
                     x.Year,
                     x.Month,
                     x.MonthlyRevenue,
                     x.OrderCount,
-                    PercentageGrowth = (decimal?)null,   // not stored for vendors; calculated below if needed
+                    x.PercentageGrowth,
                     Label = new DateTime(x.Year, x.Month, 1).ToString("MMM yyyy")
-                });
+                })
+                .ToListAsync();
 
-                return Ok(FormatDashboardResponse(
-                    lifetimeRevenue,
-                    currentMonthRevenue,
-                    growth,
-                    recentItems,
-                    revenueHistoryWithLabel));
-            }
+            return Ok(FormatDashboardResponse(
+                totalLifetime,
+                insights?.MonthlyRevenue ?? 0,
+                insights?.PercentageGrowth ?? 0,
+                recent,
+                revenueHistory));
+        }
 
-            return Forbid();
+        private async Task<IActionResult> VendorStats(DateTime startOfCurrentMonth, DateTime startOfLastMonth)
+        {
+            var vendorId = GetUserIdFromToken();
+
+            var lifetimeRevenue = await _context.OrderItems
+                .Where(oi => oi.VendorId == vendorId && oi.Order.PaymentStatus == "Success")
+                .SumAsync(oi => oi.Price * oi.Quantity);
+
+            var currentMonthRevenue = await _context.OrderItems
+                .Where(oi => oi.VendorId == vendorId &&
+                             oi.Order.PaymentStatus == "Success" &&
+                             oi.Order.CreatedAt >= startOfCurrentMonth)
+                .SumAsync(oi => oi.Price * oi.Quantity);
+
+            var lastMonthRevenue = await _context.OrderItems
+                .Where(oi => oi.VendorId == vendorId &&
+                             oi.Order.PaymentStatus == "Success" &&
+                             oi.Order.CreatedAt >= startOfLastMonth &&
+                             oi.Order.CreatedAt < startOfCurrentMonth)
+                .SumAsync(oi => oi.Price * oi.Quantity);
+
+            decimal growth = 0;
+            if (lastMonthRevenue > 0)
+                growth = ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+            else if (currentMonthRevenue > 0)
+                growth = 100;
+
+            var recentItems = await _context.OrderItems
+                .Where(oi => oi.VendorId == vendorId)
+                .OrderByDescending(oi => oi.Order.CreatedAt)
+                .Take(5)
+                .Select(oi => new
+                {
+                    oi.OrderId,
+                    User = oi.Order.UserId,
+                    Amount = oi.Price * oi.Quantity,
+                    oi.Order.CreatedAt
+                })
+                .ToListAsync();
+
+            var revenueHistory = await _context.OrderItems
+                .Where(oi => oi.VendorId == vendorId && oi.Order.PaymentStatus == "Success")
+                .GroupBy(oi => new { oi.Order.CreatedAt.Year, oi.Order.CreatedAt.Month })
+                .Select(g => new
+                {
+                    g.Key.Year,
+                    g.Key.Month,
+                    MonthlyRevenue = g.Sum(oi => oi.Price * oi.Quantity),
+                    OrderCount = g.Select(oi => oi.OrderId).Distinct().Count(),
+                })
+                .OrderByDescending(x => x.Year).ThenByDescending(x => x.Month)
+                .Take(12)
+                .OrderBy(x => x.Year).ThenBy(x => x.Month)
+                .ToListAsync();
+
+            // Label is computed after the DB query because
+            // new DateTime(...).ToString() can't translate to SQL
+            var revenueHistoryWithLabel = revenueHistory.Select(x => new
+            {
+                x.Year,
+                x.Month,
+                x.MonthlyRevenue,
+                x.OrderCount,
+                PercentageGrowth = (decimal?)null,   // not stored for vendors; calculated below if needed
+                Label = new DateTime(x.Year, x.Month, 1).ToString("MMM yyyy")
+            });
+
+            return Ok(FormatDashboardResponse(
+                lifetimeRevenue,
+                currentMonthRevenue,
+                growth,
+                recentItems,
+                revenueHistoryWithLabel));
         }
 
         private object FormatDashboardResponse(

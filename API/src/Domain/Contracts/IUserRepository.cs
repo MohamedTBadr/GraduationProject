@@ -10,18 +10,18 @@ namespace Domain.Contracts
 {
     public interface IUserRepository
     {
-        Task<ApplicationUser?> GetByEmailAsync(string email);
-        Task<ApplicationUser?> GetByNameAsync(string name);
-        Task<ApplicationUser?> GetByIdAsync(string userId);
-        Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken);
-        Task<IList<string>> GetUserRolesAsync(ApplicationUser user);
-        Task<IdentityResult> CreateAsync(ApplicationUser user, string password);
-        Task<IdentityResult> UpdateAsync(ApplicationUser user);
-        Task<bool> CheckPasswordAsync(ApplicationUser user, string password);
-        Task<string> GeneratePasswordResetTokenAsync(ApplicationUser user);
-        Task<IdentityResult> ResetPasswordAsync(ApplicationUser user, string token, string newPassword);
+        Task<ApplicationUser?> GetByEmailAsync(string email,CancellationToken cancellationToken);
+        Task<ApplicationUser?> GetByNameAsync(string name, CancellationToken cancellationToken);
+        Task<ApplicationUser?> GetByIdAsync(string userId, CancellationToken cancellationToken);
+        Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+        Task<IList<string>> GetUserRolesAsync(ApplicationUser user, CancellationToken cancellationToken);
+        Task<IdentityResult> CreateAsync(ApplicationUser user, string password, CancellationToken cancellationToken);
+        Task<IdentityResult> UpdateAsync(ApplicationUser user, CancellationToken cancellationToken);
+        Task<bool> CheckPasswordAsync(ApplicationUser user, string password, CancellationToken cancellationToken);
+        Task<string> GeneratePasswordResetTokenAsync(ApplicationUser user, CancellationToken cancellationToken);
+        Task<IdentityResult> ResetPasswordAsync(ApplicationUser user, string token, string newPassword, CancellationToken cancellationToken);
 
         // Vendor specific check logic moved here
-        Task<bool> IsVendorVerifiedAsync(Guid userId);
+        Task<bool> IsVendorVerifiedAsync(Guid userId, CancellationToken cancellationToken);
     }
 }
