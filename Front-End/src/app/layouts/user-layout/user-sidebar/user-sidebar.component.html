@@ -4,8 +4,8 @@
   <div class="uss-profile">
     <div class="uss-avatar"></div>
     <div class="uss-user-info">
-      <div class="uss-user-name">Sara Mohamed</div>
-      <div class="uss-user-status">3 events active</div>
+      <div class="uss-user-name">{{ authService.user()?.name || 'User' }}</div>
+      <div class="uss-user-status">Welcome back!</div>
     </div>
   </div>
 

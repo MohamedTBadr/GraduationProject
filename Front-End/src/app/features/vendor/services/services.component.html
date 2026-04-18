@@ -44,10 +44,21 @@
       
       <div class="vd-form-row" style="margin-bottom: 16px;">
         <div style="flex: 1;">
+          <label>Category *</label>
+          <select formControlName="categoryId" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray); width: 100%; background-color: white; appearance: auto;">
+            <option value="" disabled selected>Select a category</option>
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          </select>
+          <div *ngIf="serviceForm.get('categoryId')?.invalid && serviceForm.get('categoryId')?.touched" style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">Category is required</div>
+        </div>
+        <div style="flex: 1;">
           <label>Service Type *</label>
           <app-service-type-dropdown formControlName="serviceTypeId"></app-service-type-dropdown>
           <div *ngIf="serviceForm.get('serviceTypeId')?.invalid && serviceForm.get('serviceTypeId')?.touched" style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">Service Type is required</div>
         </div>
+      </div>
+      
+      <div class="vd-form-row" style="margin-bottom: 16px;">
         <div style="flex: 1;">
           <label>Starting Price (EGP) *</label>
           <input type="text" formControlName="price" placeholder="e.g. 8000" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray); width: 100%;">

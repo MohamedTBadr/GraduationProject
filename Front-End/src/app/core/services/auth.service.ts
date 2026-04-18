@@ -78,6 +78,9 @@ export class AuthService {
   register(data: any): Observable<AuthResponse> {
     const body: RegisterRequest = {
       name: (data.name || `${data.firstName || ''} ${data.lastName || ''}`).trim() || '',
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      phoneNumber: data.phoneNumber || '',
       email: data.email,
       password: data.password
     };
@@ -275,6 +278,7 @@ export class AuthService {
     } else {
       apiRole = apiRole.charAt(0).toUpperCase() + apiRole.slice(1).toLowerCase();
     }
+    if (apiRole === 'Customer') apiRole = 'User';
 
     return { value: { user, token: res.value.accessToken, refreshToken: res.value.refreshToken, role: apiRole as UserRole } };
   }
@@ -298,11 +302,13 @@ export class AuthService {
         'User'
       );
       if (typeof rawRole !== 'string') rawRole = String(rawRole);
-      const role = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
+      let role = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
+      if (role === 'Customer') role = 'User';
 
       let id = (
         payload['sub'] || 
         payload['nameid'] || 
+        payload['nameidentifier'] ||
         payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
         payload['id'] || ''
       );

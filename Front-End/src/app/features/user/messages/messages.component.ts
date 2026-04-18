@@ -17,6 +17,8 @@ interface Chat {
   history: Message[];
 }
 
+import { AuthService } from '../../../core/services/auth.service';
+
 @Component({
   selector: 'app-messages',
   standalone: true,
@@ -25,6 +27,8 @@ interface Chat {
   styleUrls: ['./messages.component.scss']
 })
 export class MessagesComponent {
+  constructor(private authService: AuthService) {}
+
   chats: Chat[] = [
     {
       id: 1,
@@ -34,7 +38,7 @@ export class MessagesComponent {
       time: '10:30 AM',
       unread: true,
       history: [
-        { text: 'Hi Sara, congratulations on your upcoming event!', time: '10:00 AM', isMe: false },
+        { text: `Hi ${this.authService.user()?.name?.split(' ')[0] || 'there'}, congratulations on your upcoming event!`, time: '10:00 AM', isMe: false },
         { text: 'Thank you! I was wondering if the floral setup is included.', time: '11:15 AM', isMe: true },
         { text: 'The quote for your wedding is ready. It includes all major floral arrangements.', time: '1:30 PM', isMe: false }
       ]

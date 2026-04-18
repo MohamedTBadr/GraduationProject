@@ -8,6 +8,8 @@ import { ServiceTypeDropdownComponent } from '../../../shared/components/service
 import { ProductService } from '../../../core/services/product.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
+import { CategoryService } from '../../../core/services/category.service';
+import { Category } from '../../../shared/types/api.interfaces';
 
 @Component({
   selector: 'app-services',
@@ -33,6 +35,7 @@ export class ServicesComponent implements OnInit {
   
   serviceForm!: FormGroup;
   uploadedImages: any[] = [];
+  categories: Category[] = [];
 
   isDetailModalOpen = false;
   selectedService: ApiProduct | null = null;
@@ -41,12 +44,21 @@ export class ServicesComponent implements OnInit {
     private fb: FormBuilder,
     private productService: ProductService,
     private authService: AuthService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private categoryService: CategoryService
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadProducts();
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.categoryService.getAll().subscribe({
+      next: (data) => this.categories = data,
+      error: () => console.error('Failed to load categories')
+    });
   }
 
   get activeServices(): ApiProduct[] {
@@ -68,6 +80,7 @@ export class ServicesComponent implements OnInit {
   initForm(): void {
     this.serviceForm = this.fb.group({
       name: ['', Validators.required],
+      categoryId: ['', Validators.required],
       serviceTypeId: ['', Validators.required],
       price: [0, [Validators.required, Validators.min(0)]],
       description: ['', Validators.required],
@@ -98,16 +111,17 @@ export class ServicesComponent implements OnInit {
       this.editingId = serviceToEdit.id;
       this.serviceForm.patchValue({
         name: serviceToEdit.name,
+        categoryId: serviceToEdit.categoryId || '',
         serviceTypeId: serviceToEdit.serviceTypeId || '',
         price: serviceToEdit.price || 0,
         description: serviceToEdit.description || '',
         duration: serviceToEdit.duration || '',
         leadTime: serviceToEdit.leadTime || ''
       });
-      this.uploadedImages = serviceToEdit.imageUrl ? [{ previewUrl: serviceToEdit.imageUrl }] : [];
+      this.uploadedImages = serviceToEdit.imageUrl ? [{ previewUrl: serviceToEdit.imageUrl, status: 'done' }] : [];
     } else {
       this.editingId = null;
-      this.serviceForm.reset({ name: '', serviceTypeId: '', price: 0, description: '' });
+      this.serviceForm.reset({ name: '', categoryId: '', serviceTypeId: '', price: 0, description: '' });
       this.uploadedImages = [];
     }
     this.isAddServiceModalOpen = true;
@@ -129,16 +143,20 @@ export class ServicesComponent implements OnInit {
     }
 
     const val = this.serviceForm.value;
-    const imageUrl = this.uploadedImages.length > 0 ? this.uploadedImages[0].previewUrl : null;
 
     if (this.editingId) {
+      // NOTE: Using existing JSON approach for update since API expects JSON
       const existing = this.services.find(s => s.id === this.editingId);
+      const imageUrl = this.uploadedImages.length > 0 && !this.uploadedImages[0].file 
+            ? this.uploadedImages[0].previewUrl : null;
+            
       const updateData: UpdateProductRequest = {
         name: val.name,
+        categoryId: val.categoryId,
         serviceTypeId: val.serviceTypeId,
         price: Number(val.price),
         description: val.description,
-        imageUrl: imageUrl,
+        imageUrl: imageUrl, // Keep existing if not changed, API update doesn't handle files right now
         status: existing?.status || 'active',
         duration: val.duration,
         leadTime: val.leadTime
@@ -152,22 +170,34 @@ export class ServicesComponent implements OnInit {
         }
       });
     } else {
-      const createData: CreateProductRequest = {
-        name: val.name,
-        serviceTypeId: val.serviceTypeId,
-        price: Number(val.price),
-        description: val.description,
-        imageUrl: imageUrl,
-        status: 'active',
-        duration: val.duration,
-        leadTime: val.leadTime
-      };
+      // Create expects FormData from the backend
+      const formData = new FormData();
+      formData.append('Name', val.name);
+      formData.append('Description', val.description);
+      formData.append('CategoryId', val.categoryId);
+      formData.append('ServiceTypeId', val.serviceTypeId);
+      formData.append('Price', (val.price || 0).toString());
+      if (val.duration) formData.append('SetupDuration', val.duration);
+      if (val.leadTime) formData.append('LeadTimeRequired', val.leadTime);
+      
+      // Append files
+      if (this.uploadedImages && this.uploadedImages.length > 0) {
+        this.uploadedImages.forEach(img => {
+          if (img.file) {
+            formData.append('ServiceImages', img.file, img.file.name);
+          }
+        });
+      }
 
-      this.productService.create(createData).subscribe({
+      this.productService.create(formData as any).subscribe({
         next: () => {
           this.toastService.show('Service created successfully', 'success');
           this.loadProducts();
           this.closeAddServiceModal();
+        },
+        error: (err) => {
+           console.error("Error creating service:", err);
+           this.toastService.show('Failed to create service', 'error');
         }
       });
     }
@@ -203,6 +233,7 @@ export class ServicesComponent implements OnInit {
   updateServiceStatus(service: ApiProduct, newStatus: 'active' | 'paused') {
     const updateData: UpdateProductRequest = {
       name: service.name,
+      categoryId: service.categoryId,
       serviceTypeId: service.serviceTypeId,
       price: service.price,
       description: service.description,

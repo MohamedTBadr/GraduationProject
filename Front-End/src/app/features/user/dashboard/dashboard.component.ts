@@ -80,7 +80,7 @@ export class DashboardComponent implements OnInit {
         id: ev.id,
         name: ev.title || 'Untitled Event',
         date: ev.eventDate,
-        type: ev.categoryName || 'General',
+        type: ev.eventTypeName || 'General',
         guests: ev.guestCount || 0,
         daysLeft,
         vendorsConfirmed: confirmedVendors,

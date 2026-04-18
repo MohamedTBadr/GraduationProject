@@ -6,6 +6,7 @@ import { EventResponseDto, EventItemResponseDto } from '../../../shared/types/ap
 
 export interface Booking {
   id: string; // itemId
+  eventId: string;
   client: string;
   event?: string;
   service: string;
@@ -75,6 +76,7 @@ export class BookingsComponent implements OnInit {
         if (item.vendorId === this.vendorId) {
           const booking: Booking = {
             id: item.id,
+            eventId: event.id,
             client: event.userName,
             event: event.title,
             service: item.serviceName,
@@ -151,7 +153,7 @@ export class BookingsComponent implements OnInit {
 
   acceptBooking() {
     if (this.selectedBooking) {
-      this.eventService.updateItemStatus(this.selectedBooking.id, 'Approved').subscribe({
+      this.eventService.approveItem(this.selectedBooking.eventId, this.selectedBooking.id, { approve: true }).subscribe({
         next: () => {
           this.loadBookings();
           this.closeDetails();
@@ -163,7 +165,7 @@ export class BookingsComponent implements OnInit {
   submitDecline() {
     if (this.selectedBooking && this.declineReason) {
       const fullReason = `${this.declineReason}${this.declineNote ? ': ' + this.declineNote : ''}`;
-      this.eventService.updateItemStatus(this.selectedBooking.id, 'Rejected', fullReason).subscribe({
+      this.eventService.approveItem(this.selectedBooking.eventId, this.selectedBooking.id, { approve: false, reason: fullReason }).subscribe({
         next: () => {
           this.loadBookings();
           this.closeDeclineForm();

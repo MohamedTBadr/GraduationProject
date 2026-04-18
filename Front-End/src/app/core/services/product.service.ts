@@ -51,7 +51,7 @@ export class ProductService {
   }
 
   /** POST /Service */
-  create(payload: CreateProductRequest): Observable<ApiProduct> {
+  create(payload: FormData): Observable<ApiProduct> {
     return this.http.post<any>(`${this.apiUrl}/Service`, payload).pipe(
       map(res => res.value || res)
     );

@@ -102,61 +102,53 @@
                 </div>
             </div>
 
-            <div class="corp-form">
+            <form class="corp-form" [formGroup]="corpForm" (ngSubmit)="submitCorpForm()">
                 <h3 style="font-family:var(--ff-d);font-size:1.45rem;color:var(--navy);margin-bottom:22px">Event Details
                 </h3>
 
                 <div class="form-row">
-                    <div class="form-group"><label>Company Name *</label><input type="text"
+                    <div class="form-group"><label>Company Name *</label><input type="text" formControlName="companyName"
                             placeholder="Your company" /></div>
-                    <div class="form-group"><label>Contact Person *</label><input type="text" placeholder="Full name" />
+                    <div class="form-group"><label>Contact Person *</label><input type="text" formControlName="contactPerson" placeholder="Full name" />
                     </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group"><label>Phone *</label><input type="tel" placeholder="+20 100 000 0000" />
+                    <div class="form-group"><label>Phone *</label><input type="tel" formControlName="phoneNumber" placeholder="+20 100 000 0000" />
                     </div>
-                    <div class="form-group"><label>Email *</label><input type="email" placeholder="email@company.com" />
+                    <div class="form-group"><label>Email *</label><input type="email" formControlName="email" placeholder="email@company.com" />
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Event Type *</label>
-                        <select>
-                            <option>Conference / Seminar</option>
-                            <option>Product Launch</option>
-                            <option>Brand Activation</option>
-                            <option>Award Ceremony</option>
-                            <option>Team Building</option>
-                            <option>Exhibition</option>
-                            <option>Other</option>
+                        <select formControlName="categoryId">
+                            <option value="">Select Event Type</option>
+                            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Expected Date</label><input type="date" /></div>
+                    <div class="form-group"><label>Expected Date</label><input formControlName="expectedDate" type="date" /></div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group"><label>Estimated Attendees</label><input type="number"
+                    <div class="form-group"><label>Estimated Attendees</label><input type="number" formControlName="estimatedAttendees"
                             placeholder="e.g. 200" /></div>
                     <div class="form-group">
                         <label>Approximate Budget</label>
-                        <select>
-                            <option>Under 30,000 EGP</option>
-                            <option>30,000–80,000 EGP</option>
-                            <option>80,000–200,000 EGP</option>
-                            <option>200,000+ EGP</option>
-                        </select>
+                        <input type="number" formControlName="approximateBudget" placeholder="e.g. 50000" />
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Additional Requirements</label>
-                    <textarea placeholder="Tell us more about your vision…"></textarea>
+                    <textarea formControlName="additionalRequirements" placeholder="Tell us more about your vision…"></textarea>
                 </div>
 
-                <button class="form-submit" (click)="submitCorpForm()">Submit Request →</button>
-            </div>
+                <button class="form-submit" type="submit" [disabled]="isSubmitting">
+                    {{ isSubmitting ? 'Submitting...' : 'Submit Request →' }}
+                </button>
+            </form>
         </div>
     </div>
 </div>

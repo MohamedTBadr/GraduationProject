@@ -19,7 +19,8 @@ export class VendorService {
   getAll(): Observable<ApiVendor[]> {
     return this.http.get<any>(`${this.apiUrl}/Vendor`).pipe(
       map(res => {
-        const items = res.value || res;
+        const data = res.value || res;
+        const items = Array.isArray(data) ? data : (data.items || data.Items || []);
         if (!Array.isArray(items)) return [];
         return items.map((v: any) => ({
           ...v,
@@ -27,8 +28,8 @@ export class VendorService {
           name: v.businessName || v.name || 'Unknown Vendor',
           categoryName: v.serviceType || v.categoryName || 'Vendor',
           about: v.description || v.about,
-          status: v.status || 'active',
-          isApproved: v.isApproved !== undefined ? v.isApproved : true
+          status: v.status ? v.status : (v.isVerified ? 'active' : 'pending'),
+          isApproved: v.isApproved !== undefined ? v.isApproved : (v.isVerified !== undefined ? v.isVerified : false)
         } as ApiVendor));
       })
     );

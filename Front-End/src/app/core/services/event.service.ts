@@ -7,7 +7,11 @@ import {
   EventResponseDto,
   EventSummaryDto,
   PagedResult,
-  PaginationParams
+  PaginationParams,
+  CreateEventDto,
+  UpdateEventDto,
+  ApproveItemRequest,
+  CancelEventRequest
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -26,11 +30,16 @@ export class EventService {
   }
 
   /** POST /Event - Create a new event */
-  create(payload: any): Observable<EventResponseDto> {
+  create(payload: CreateEventDto): Observable<EventResponseDto> {
     const headers = new HttpHeaders({
       'IdempotencyKey': crypto.randomUUID()
     });
     return this.http.post<EventResponseDto>(this.apiUrl, payload, { headers });
+  }
+
+  /** PUT /Event/{id} - Update an existing event */
+  update(id: string, payload: UpdateEventDto): Observable<EventResponseDto> {
+    return this.http.put<EventResponseDto>(`${this.apiUrl}/${id}`, payload);
   }
 
   /** GET /Event/{id} - Get event details */
@@ -52,11 +61,13 @@ export class EventService {
     );
   }
 
-  /** PATCH /Event/approve-reject-item/{id} - Vendor approve/reject an item */
-  updateItemStatus(itemId: string, status: 'Approved' | 'Rejected', reason?: string): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/approve-reject-item/${itemId}`, {
-      status,
-      rejectionReason: reason
-    });
+  /** PATCH /Event/{eventId}/items/{itemId}/approve - Vendor approve/reject an item */
+  approveItem(eventId: string, itemId: string, payload: ApproveItemRequest): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${eventId}/items/${itemId}/approve`, payload);
+  }
+
+  /** PATCH /Event/{id}/cancel - Cancel an event */
+  cancelEvent(id: string, payload: CancelEventRequest): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/cancel`, payload);
   }
 }
