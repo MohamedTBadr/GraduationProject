@@ -14,13 +14,30 @@ export class CategoryService {
   /** GET /Category – returns all categories */
   getAll(): Observable<Category[]> {
     return this.http.get<any>(`${this.apiUrl}/Category`).pipe(
-      map(res => res.value || res)
+      map(res => {
+        const data = res.value || res.Value || res;
+        const arr = Array.isArray(data) ? data : (data.items || data.Items || []);
+        return arr.map((item: any) => ({
+           ...item,
+           id: item.id || item.Id,
+           name: item.name || item.Name
+        }));
+      })
     );
   }
 
   /** GET /Category/{categoryId} */
   getById(categoryId: string): Observable<Category> {
-    return this.http.get<Category>(`${this.apiUrl}/Category/${categoryId}`);
+    return this.http.get<any>(`${this.apiUrl}/Category/${categoryId}`).pipe(
+      map(res => {
+        const item = res.value || res.Value || res;
+        return {
+          ...item,
+          id: item.id || item.Id,
+          name: item.name || item.Name
+        };
+      })
+    );
   }
 
   /** POST /Category */

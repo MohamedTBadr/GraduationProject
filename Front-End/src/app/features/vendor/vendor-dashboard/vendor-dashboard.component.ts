@@ -88,7 +88,8 @@ export class VendorDashboardComponent implements OnInit {
               eventTitle: event.title,
               date: event.eventDate,
               value: item.price * item.quantity,
-              itemId: item.id
+              itemId: item.id,
+              eventId: event.id
             });
           }
         }
@@ -102,14 +103,14 @@ export class VendorDashboardComponent implements OnInit {
     this.pendingEvents.set(pending.slice(0, 5));
   }
 
-  acceptRequest(itemId: string) {
-    this.eventService.updateItemStatus(itemId, 'Approved').subscribe(() => {
+  acceptRequest(request: any) {
+    this.eventService.approveItem(request.eventId, request.itemId, { approve: true }).subscribe(() => {
       this.loadDashboardData();
     });
   }
 
-  declineRequest(itemId: string) {
-    this.eventService.updateItemStatus(itemId, 'Rejected').subscribe(() => {
+  declineRequest(request: any) {
+    this.eventService.approveItem(request.eventId, request.itemId, { approve: false, reason: 'Declined' }).subscribe(() => {
       this.loadDashboardData();
     });
   }

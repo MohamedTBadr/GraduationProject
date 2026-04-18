@@ -23,14 +23,36 @@ export class ServiceTypeService {
     }
     
     return this.http.get<any>(`${this.apiUrl}/ServiceType`).pipe(
-      map(res => res.value || res),
-      tap(data => this.cachedServiceTypes = data)
+      map(res => {
+        const data = res.value || res.Value || res;
+        return Array.isArray(data) ? data : (data.items || data.Items || []);
+      }),
+      tap(data => {
+        // Automatically map Id to id and Name to name if needed, but Angular templates usually expect lowercase.
+        // The API might be returning PascalCase (Id, Name). Let's let the component handle it or map it here:
+        const normalizedData = data.map((item: any) => ({
+           ...item,
+           id: item.id || item.Id,
+           name: item.name || item.Name
+        }));
+        this.cachedServiceTypes = normalizedData;
+      }),
+      map(data => this.cachedServiceTypes as ServiceType[])
     );
   }
 
   /** GET /ServiceType/{serviceTypeId} */
   getById(serviceTypeId: string): Observable<ServiceType> {
-    return this.http.get<ServiceType>(`${this.apiUrl}/ServiceType/${serviceTypeId}`);
+    return this.http.get<any>(`${this.apiUrl}/ServiceType/${serviceTypeId}`).pipe(
+      map(res => {
+        const item = res.value || res.Value || res;
+        return {
+          ...item,
+          id: item.id || item.Id,
+          name: item.name || item.Name
+        };
+      })
+    );
   }
 
   /** POST /ServiceType */

@@ -3,12 +3,40 @@
     <div class="modal-sub">Join the Eventora community.</div>
     
     <div class="modal-form">
+        <div class="form-group" style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label>First Name *</label>
+                <input type="text" placeholder="Sara" formControlName="firstName"
+                    [class.is-invalid]="firstNameControl?.invalid && firstNameControl?.touched" />
+                <div *ngIf="firstNameControl?.invalid && firstNameControl?.touched" class="error-message">
+                    <small *ngIf="firstNameControl?.hasError('required')">Required.</small>
+                </div>
+            </div>
+            <div style="flex: 1;">
+                <label>Last Name *</label>
+                <input type="text" placeholder="Mohamed" formControlName="lastName"
+                    [class.is-invalid]="lastNameControl?.invalid && lastNameControl?.touched" />
+                <div *ngIf="lastNameControl?.invalid && lastNameControl?.touched" class="error-message">
+                    <small *ngIf="lastNameControl?.hasError('required')">Required.</small>
+                </div>
+            </div>
+        </div>
+
         <div class="form-group">
-            <label>Full Name *</label>
-            <input type="text" placeholder="Sara Mohamed" formControlName="name"
+            <label>Username *</label>
+            <input type="text" placeholder="saramohamed123" formControlName="name"
                 [class.is-invalid]="nameControl?.invalid && nameControl?.touched" />
             <div *ngIf="nameControl?.invalid && nameControl?.touched" class="error-message">
-                <small *ngIf="nameControl?.hasError('required')">Name is required.</small>
+                <small *ngIf="nameControl?.hasError('required')">Username is required.</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="text" placeholder="01234567890" formControlName="phoneNumber"
+                [class.is-invalid]="phoneNumberControl?.invalid && phoneNumberControl?.touched" />
+            <div *ngIf="phoneNumberControl?.invalid && phoneNumberControl?.touched" class="error-message">
+                <small *ngIf="phoneNumberControl?.hasError('required')">Phone number is required.</small>
             </div>
         </div>
 

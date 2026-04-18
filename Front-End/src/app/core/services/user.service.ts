@@ -32,7 +32,18 @@ export class UserService {
       }
     }
     return this.http.get<any>(`${this.apiUrl}/User`, { params }).pipe(
-      map(res => res.value || res)
+      map(res => {
+        const data = res.value || res;
+        const totalCount = data.totalCount || data.TotalCount || 0;
+        const pageSize = data.pageSize || data.PageSize || 10;
+        return {
+          items: data.items || data.Items || [],
+          totalCount: totalCount,
+          pageNumber: data.pageNumber || data.PageNumber || 1,
+          pageSize: pageSize,
+          totalPages: data.totalPages || data.TotalPages || Math.ceil(totalCount / pageSize) || 1
+        } as PagedResult<ApiUser>;
+      })
     );
   }
 

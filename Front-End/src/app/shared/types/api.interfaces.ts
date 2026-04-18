@@ -8,6 +8,9 @@ export interface LoginRequest {
 
 export interface RegisterRequest {
   name: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
   email: string;
   password: string;
 }
@@ -262,8 +265,6 @@ export interface AddressDto {
   street: string;
   city: string;
   state: string;
-  zipCode: string;
-  country: string;
 }
 
 export interface EventItemResponseDto {
@@ -284,12 +285,47 @@ export interface EventResponseDto {
   userId: string;
   userName: string;
   title: string;
-  categoryName: string;
+  eventTypeName: string;
   eventDate: string;
   totalBudget: number;
   guestCount: number;
   notes?: string;
   eventStatus: string;
-  location: AddressDto;
+  cancellationReason?: string;
+  additionalNotes?: string;
+  cancelledAt?: string;
+  location?: AddressDto;
   eventItems: EventItemResponseDto[];
+}
+
+export interface CreateEventDto {
+  userId?: string;
+  title: string;
+  eventTypeId: string;
+  eventDate: string;
+  location?: AddressDto;
+  totalBudget: number;
+  guestCount: number;
+  notes?: string;
+}
+
+export interface UpdateEventDto {
+  title: string;
+  eventTypeId: string;
+  eventDate: string;
+  location?: AddressDto;
+  totalBudget: number;
+  guestCount: number;
+  notes?: string;
+  eventStatus: string;
+}
+
+export interface ApproveItemRequest {
+  approve: boolean;
+  reason?: string;
+}
+
+export interface CancelEventRequest {
+  reason?: string;
+  additionalNotes?: string;
 }

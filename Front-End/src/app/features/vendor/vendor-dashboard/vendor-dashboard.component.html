@@ -81,8 +81,8 @@
               <div style="font-weight:700;font-size:0.9rem;color:var(--navy)">{{ req.client }}</div>
               <div style="font-size:0.8rem;color:var(--gray);margin-bottom:6px">{{ req.eventTitle }} &middot; {{ req.date | date:'MMM d' }}</div>
               <div style="display:flex;gap:6px">
-                <button class="vd-btn vd-btn-green" (click)="acceptRequest(req.itemId)" style="padding:4px 12px; font-size:0.75rem">Accept</button>
-                <button class="vd-btn vd-btn-ghost" (click)="declineRequest(req.itemId)" style="padding:4px 12px; font-size:0.75rem">Decline</button>
+                <button class="vd-btn vd-btn-green" (click)="acceptRequest(req)" style="padding:4px 12px; font-size:0.75rem">Accept</button>
+                <button class="vd-btn vd-btn-ghost" (click)="declineRequest(req)" style="padding:4px 12px; font-size:0.75rem">Decline</button>
               </div>
             </div>
             <div style="font-weight:700;color:#9f1239;font-size:0.9rem">{{ req.value | number }} EGP</div>
