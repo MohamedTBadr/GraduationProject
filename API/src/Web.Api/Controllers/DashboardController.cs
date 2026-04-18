@@ -24,7 +24,6 @@ namespace Web.Api.Controllers
 
             if (IsAdmin())
             {
-                // ADMIN LOGIC: Uses the optimized Database View
                 var insights = await _context.OrderInsights
                     .FirstOrDefaultAsync(x => x.Year == now.Year && x.Month == now.Month);
 
@@ -38,30 +37,42 @@ namespace Web.Api.Controllers
                     .Select(o => new { o.Id, User = o.UserId, o.Amount, o.CreatedAt })
                     .ToListAsync();
 
+                var revenueHistory = await _context.OrderInsights
+                    .OrderByDescending(x => x.Year).ThenByDescending(x => x.Month)
+                    .Take(12)
+                    .OrderBy(x => x.Year).ThenBy(x => x.Month)
+                    .Select(x => new
+                    {
+                        x.Year,
+                        x.Month,
+                        x.MonthlyRevenue,
+                        x.OrderCount,
+                        x.PercentageGrowth,
+                        Label = new DateTime(x.Year, x.Month, 1).ToString("MMM yyyy")
+                    })
+                    .ToListAsync();
+
                 return Ok(FormatDashboardResponse(
                     totalLifetime,
                     insights?.MonthlyRevenue ?? 0,
                     insights?.PercentageGrowth ?? 0,
-                    recent));
+                    recent,
+                    revenueHistory));
             }
             else if (IsVendor())
             {
-                // VENDOR LOGIC: Scoped to specific VendorId
                 var vendorId = GetUserIdFromToken();
 
-                // 1. Lifetime Revenue for this Vendor
                 var lifetimeRevenue = await _context.OrderItems
                     .Where(oi => oi.VendorId == vendorId && oi.Order.PaymentStatus == "Success")
                     .SumAsync(oi => oi.Price * oi.Quantity);
 
-                // 2. Current Month Revenue
                 var currentMonthRevenue = await _context.OrderItems
                     .Where(oi => oi.VendorId == vendorId &&
                                  oi.Order.PaymentStatus == "Success" &&
                                  oi.Order.CreatedAt >= startOfCurrentMonth)
                     .SumAsync(oi => oi.Price * oi.Quantity);
 
-                // 3. Last Month Revenue (for Percentage calculation)
                 var lastMonthRevenue = await _context.OrderItems
                     .Where(oi => oi.VendorId == vendorId &&
                                  oi.Order.PaymentStatus == "Success" &&
@@ -69,29 +80,69 @@ namespace Web.Api.Controllers
                                  oi.Order.CreatedAt < startOfCurrentMonth)
                     .SumAsync(oi => oi.Price * oi.Quantity);
 
-                // 4. Calculate Percentage Growth
                 decimal growth = 0;
                 if (lastMonthRevenue > 0)
                     growth = ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
                 else if (currentMonthRevenue > 0)
                     growth = 100;
 
-                // 5. Recent Items for this Vendor
                 var recentItems = await _context.OrderItems
                     .Where(oi => oi.VendorId == vendorId)
                     .OrderByDescending(oi => oi.Order.CreatedAt)
                     .Take(5)
-                    .Select(oi => new { oi.OrderId, User = oi.Order.UserId, Amount = oi.Price * oi.Quantity, oi.Order.CreatedAt })
+                    .Select(oi => new
+                    {
+                        oi.OrderId,
+                        User = oi.Order.UserId,
+                        Amount = oi.Price * oi.Quantity,
+                        oi.Order.CreatedAt
+                    })
                     .ToListAsync();
 
-                return Ok(FormatDashboardResponse(lifetimeRevenue, currentMonthRevenue, growth, recentItems));
+                var revenueHistory = await _context.OrderItems
+                    .Where(oi => oi.VendorId == vendorId && oi.Order.PaymentStatus == "Success")
+                    .GroupBy(oi => new { oi.Order.CreatedAt.Year, oi.Order.CreatedAt.Month })
+                    .Select(g => new
+                    {
+                        g.Key.Year,
+                        g.Key.Month,
+                        MonthlyRevenue = g.Sum(oi => oi.Price * oi.Quantity),
+                        OrderCount = g.Select(oi => oi.OrderId).Distinct().Count(),
+                    })
+                    .OrderByDescending(x => x.Year).ThenByDescending(x => x.Month)
+                    .Take(12)
+                    .OrderBy(x => x.Year).ThenBy(x => x.Month)
+                    .ToListAsync();
+
+                // Label is computed after the DB query because
+                // new DateTime(...).ToString() can't translate to SQL
+                var revenueHistoryWithLabel = revenueHistory.Select(x => new
+                {
+                    x.Year,
+                    x.Month,
+                    x.MonthlyRevenue,
+                    x.OrderCount,
+                    PercentageGrowth = (decimal?)null,   // not stored for vendors; calculated below if needed
+                    Label = new DateTime(x.Year, x.Month, 1).ToString("MMM yyyy")
+                });
+
+                return Ok(FormatDashboardResponse(
+                    lifetimeRevenue,
+                    currentMonthRevenue,
+                    growth,
+                    recentItems,
+                    revenueHistoryWithLabel));
             }
 
             return Forbid();
         }
 
-        // Helper to keep the output structure identical for Admin and Vendor
-        private object FormatDashboardResponse(decimal total, decimal monthly, decimal growth, object recent)
+        private object FormatDashboardResponse(
+            decimal total,
+            decimal monthly,
+            decimal growth,
+            object recent,
+            object revenueHistory)
         {
             return new
             {
@@ -104,7 +155,8 @@ namespace Web.Api.Controllers
                     IsUp = growth >= 0,
                     Message = $"Your revenue is {(growth >= 0 ? "up" : "down")} by {Math.Abs(Math.Round(growth, 1))}% compared to last month"
                 },
-                RecentActivity = recent
+                RecentActivity = recent,
+                RevenueHistory = revenueHistory
             };
         }
     }
