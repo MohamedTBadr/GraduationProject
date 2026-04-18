@@ -78,27 +78,45 @@ namespace Web.Api.Controllers
 
             return Created(); // filter handles the failure
         }
-        [Authorize(Roles = "Admin")]
 
         // PUT api/Services/{id}
+
+        [Authorize(Roles = "Admin,Vendor")]
         [HttpPut("{id:guid}")]
         [InvalidateCache("services/{id}")]
-        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateServiceTypeDTO dto, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateAsync(Guid id, [FromForm] UpdateServiceDTO dto, CancellationToken cancellationToken)
         {
             if (id != dto.Id)
-                return BadRequest(Error.Validation("Service.IdMismatch", "Route id and body id do not match."));
+                return BadRequest(Error.Validation("Service.Id Mismatch", "Route id and body id do not match."));
+
+            if (!IsAdmin) // Vendor: verify ownership and force their own VendorId
+            {
+                var service = await ServiceService.GetByIdAsync(id, cancellationToken);
+
+                if (service.Value.VendorId != UserId)
+                    return Forbid();
+
+                dto.VendorId = UserId; // Vendor can only assign themselves
+            }
+            // Admin: dto.VendorId is used as-is (they can assign any vendor)
 
             var result = await ServiceService.UpdateAsync(dto, cancellationToken);
-      
-            return Ok(result);
+
+            return NoContent();
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Vendor")]
 
         // DELETE api/Services/{id}
         [HttpDelete("{id:guid}")]
         [InvalidateCache("services/{id}", "services")]
         public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
+            if (UserId != null && !IsAdmin) // if user is authenticated and not admin, ensure they own the service
+            {
+                var service = await ServiceService.GetByIdAsync(id, cancellationToken);
+                if (service.Value.VendorId != UserId)
+                    return Forbid(); // filter handles the failure
+            }
             var result = await ServiceService.DeleteAsync(id, cancellationToken);
 
             if (result.IsSuccess)

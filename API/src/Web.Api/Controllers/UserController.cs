@@ -1,5 +1,6 @@
 ﻿using Application;
 using Application.DTOs.UserDTOs;
+using Application.Interfaces;
 using Application.Services.Helpers;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(UserManager<ApplicationUser> userManager, EmailSenderService emailSenderService): BaseController
+    public class UserController(UserManager<ApplicationUser> userManager, IEmailSender emailSenderService): BaseController
     {
         [Authorize(Roles = "Admin")]
         [HttpGet]

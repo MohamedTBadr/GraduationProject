@@ -28,8 +28,5 @@ namespace Domain.Entities
 
 
         public ICollection<ServiceRating> ServiceRatings { get; set; }
-
-
-
     }
 }

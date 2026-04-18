@@ -34,6 +34,7 @@ namespace Infrastructure
             Services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
             Services.AddScoped<IUserRepository, UserRepository>();
             Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
+            Services.AddScoped<ICompanyInquiryRepository, CompanyInquiryRepository>();
             // 1. Configure DbContext with SQL Server
             Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(

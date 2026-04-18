@@ -49,7 +49,7 @@ namespace Application.Services.Helpers
             CreateMap<CreateServiceRequest, Service>()
                 .ForMember(d => d.ServiceImages, o => o.Ignore());
             // Update DTO → Entity
-            CreateMap<UpdateServiceTypeDTO, Service>();
+            CreateMap<UpdateServiceDTO, Service>();
             #endregion
 
             #region Vendor
