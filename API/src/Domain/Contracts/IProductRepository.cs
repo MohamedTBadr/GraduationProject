@@ -21,6 +21,9 @@ namespace Domain.Contracts
             Expression<Func<Service, bool>> visibilityFilter,
             CancellationToken cancellationToken);
 
+        Task<List<ServiceImage>> GetServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken);
+
+        Task DeleteServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken);
         Task<PaginatedResponse<Service>> GetByVendorIdAsync(
             Guid vendorId,
             PaginatedRequest request,

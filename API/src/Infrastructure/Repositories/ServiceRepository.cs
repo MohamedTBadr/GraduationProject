@@ -12,6 +12,15 @@ namespace Infrastructure.Repositories
     {
         private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
 
+
+
+        public async Task<List<ServiceImage>> GetServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken)
+        {
+            return await _pipeline.ExecuteAsync(async token =>
+                await _context.ServiceImages
+                    .Where(i => i.ServiceId == serviceId)
+                    .ToListAsync(token), cancellationToken);
+        }
         public async Task<PaginatedResponse<Service>> GetAllAsync(
           PaginatedRequest request,
           Expression<Func<Service, bool>> visibilityFilter, // Dynamic filter passed from Service
@@ -192,21 +201,24 @@ namespace Infrastructure.Repositories
             return Service;
         }
 
-        public async Task<Service> UpdateAsync(Service Service, CancellationToken cancellationToken)
+        public async Task<Service> UpdateAsync(Service service, CancellationToken cancellationToken)
         {
-            _context.Services.Update(Service);
-            if (Service.ServiceImages != null && Service.ServiceImages.Count > 0)
+            return await _pipeline.ExecuteAsync(async token =>
             {
-                foreach (var image in Service.ServiceImages)
-                {
-                    image.ServiceId = Service.Id;
-                    image.ImagePath = $"/images/Services/{image.ImagePath}.jpg";
-                }
-                _context.ServiceImages.UpdateRange(Service.ServiceImages);
-            }
+                _context.Services.Update(service);
 
-            await _context.SaveChangesAsync(cancellationToken);
-            return Service;
+                if (service.ServiceImages != null && service.ServiceImages.Count > 0)
+                {
+                    foreach (var image in service.ServiceImages)
+                    {
+                        image.ServiceId = service.Id;
+                    }
+                    _context.ServiceImages.AddRange(service.ServiceImages); // ✅ Add not Update (old were deleted already)
+                }
+
+                await _context.SaveChangesAsync(token); // ✅ use token not cancellationToken
+                return service;
+            }, cancellationToken);
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
@@ -269,6 +281,16 @@ namespace Infrastructure.Repositories
             //    query = query.Where(p => p.Event.Name == AIRequest.EventTypeName);
 
             return query.ToListAsync(cancellationToken);
+        }
+
+
+        public async Task DeleteServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken)
+        {
+            var oldImages = await _context.ServiceImages
+                .Where(i => i.ServiceId == serviceId)
+                .ToListAsync(cancellationToken);
+
+            _context.ServiceImages.RemoveRange(oldImages);
         }
 
         public async Task<bool> HasUserPurchasedAsync(Guid userId, Guid serviceId, CancellationToken cancellationToken)

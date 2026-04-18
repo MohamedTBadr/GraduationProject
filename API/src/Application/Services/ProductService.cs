@@ -127,10 +127,42 @@ namespace Application.Services
             if (!exists)
                 return Result<ServiceDTO>.NotFound("Service not found");
 
-            var Service = _mapper.Map<Service>(dto);
-            var updated = await _ServiceRepository.UpdateAsync(Service, cancellationToken);
+            var service = _mapper.Map<Service>(dto);
+
+            if (dto.Images != null && dto.Images.Count > 0)
+            {
+                // 1. Get old image keys from DB and delete from S3
+                var oldImages = await _ServiceRepository.GetServiceImagesAsync(dto.Id, cancellationToken);
+                if (oldImages.Any())
+                {
+                    var oldKeys = oldImages.Select(i => i.ImagePath).ToList(); // S3 keys
+                    await _fileService.DeleteAsync(oldKeys, cancellationToken);
+                    await _ServiceRepository.DeleteServiceImagesAsync(dto.Id, cancellationToken);
+                }
+
+                // 2. Upload new images to S3
+                var newImages = new List<ServiceImage>();
+                foreach (var file in dto.Images)
+                {
+                    var url = await _fileService.Upload("services", file, cancellationToken);
+                    newImages.Add(new ServiceImage
+                    {
+                        ServiceId = dto.Id,
+                        ImagePath = url
+                    });
+                }
+
+                service.ServiceImages = newImages;
+            }
+            else
+            {
+                service.ServiceImages = null; // repo will skip images
+            }
+
+            var updated = await _ServiceRepository.UpdateAsync(service, cancellationToken);
             return Result<ServiceDTO>.Success(_mapper.Map<ServiceDTO>(updated));
         }
+}
         public async Task AddRatingAsync(ServiceRatingRequest dto, CancellationToken cancellationToken)
         {
             if (dto.UserId is not Guid userId)

@@ -42,6 +42,8 @@ namespace Application.DTOs.ServiceDTOs
         public string Description { get; set; }
         public Guid CategoryId { get; set; }
         public Guid? VendorId { get; set; }
+        public List<IFormFile>? Images { get; set; } // ✅ nullable — if null, keep old
+
         public Guid ServiceTypeId { get; set; }
         public decimal SetupDuration { get; set; } // in hours
         public decimal LeadTimeRequired { get; set; } // in weeks
