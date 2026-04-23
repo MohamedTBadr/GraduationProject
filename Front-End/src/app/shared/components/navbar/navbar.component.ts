@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ModalService } from '../../services/modal.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { SignalRService } from '../../../core/services/signalr.service';
 
 @Component({
   selector: 'app-navbar',
@@ -19,6 +20,7 @@ export class NavbarComponent {
   private modalService = inject(ModalService);
   private router = inject(Router);
   authService = inject(AuthService);
+  signalRService = inject(SignalRService);
 
   //  scroll listener
   @HostListener('window:scroll', [])
@@ -31,6 +33,7 @@ export class NavbarComponent {
   }
 
   logout() {
+    this.signalRService.stopConnections();
     this.authService.logout();
   }
 
@@ -47,6 +50,13 @@ export class NavbarComponent {
       this.router.navigate(['/user/favorites']);
     } else {
       this.modalService.open('login');
+    }
+  }
+
+  goToMessages() {
+    if (this.authService.isLoggedIn()) {
+      const route = this.authService.role() === 'Vendor' ? '/vendor/messages' : '/user/messages';
+      this.router.navigate([route]);
     }
   }
 }

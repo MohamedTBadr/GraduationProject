@@ -11,7 +11,7 @@ export const routes: Routes = [
     {
         path: 'add-event',
         canActivate: [authGuard],
-        loadComponent: () => import('./features/user/add-event/add-event.component').then(m => m.AddEventComponent)
+        loadComponent: () => import('./features/public/add-event/add-event.component').then(m => m.AddEventComponent)
     },
     {
         path: 'change-password',

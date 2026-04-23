@@ -57,7 +57,10 @@ export class ServicesComponent implements OnInit {
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
       next: (data) => this.categories = data,
-      error: () => console.error('Failed to load categories')
+      error: (err) => {
+        console.error('Failed to load categories', err);
+        this.toastService.show('Failed to load categories', 'error');
+      }
     });
   }
 
@@ -100,7 +103,9 @@ export class ServicesComponent implements OnInit {
         this.services = data.map(d => ({ ...d, status: d.status || 'active' }));
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Failed to load products', err);
+        this.toastService.show('Failed to load services', 'error');
         this.loading = false;
       }
     });
@@ -167,6 +172,10 @@ export class ServicesComponent implements OnInit {
           this.toastService.show('Service updated successfully', 'success');
           this.loadProducts();
           this.closeAddServiceModal();
+        },
+        error: (err) => {
+          console.error('Failed to update service', err);
+          this.toastService.show('Failed to update service', 'error');
         }
       });
     } else {
@@ -215,6 +224,10 @@ export class ServicesComponent implements OnInit {
           next: () => {
             this.toastService.show('Service deleted', 'success');
             this.loadProducts();
+          },
+          error: (err) => {
+            console.error('Failed to delete service', err);
+            this.toastService.show('Failed to delete service', 'error');
           }
         });
       }
@@ -249,6 +262,10 @@ export class ServicesComponent implements OnInit {
         } else {
           this.toastService.show('Service activated successfully!', 'success');
         }
+      },
+      error: (err) => {
+        console.error('Failed to update service status', err);
+        this.toastService.show('Failed to update service status', 'error');
       }
     });
   }

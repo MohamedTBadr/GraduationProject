@@ -10,6 +10,10 @@ export const PUBLIC_ROUTES: Routes = [
         loadComponent: () => import('./explore/explore.component').then(m => m.ExploreComponent)
     },
     {
+        path: 'explore-services',
+        loadComponent: () => import('./explore-services/explore-services.component').then(m => m.ExploreServicesComponent)
+    },
+    {
         path: 'packages',
         loadComponent: () => import('./packages/packages.component').then(m => m.PackagesComponent)
     },
@@ -38,12 +42,8 @@ export const PUBLIC_ROUTES: Routes = [
         loadComponent: () => import('./vendor-profile/vendor-profile.component').then(m => m.VendorProfileComponent)
     },
     {
-        path: 'add-event',
-        loadComponent: () => import('./add-event/add-event.component').then(m => m.AddEventComponent)
-    },
-    {
         path: 'login',
-        loadComponent: () => import('../auth/login/login.component').then(m => m.LoginComponent)
+        redirectTo: ''
     },
     {
         path: 'forgot-password',

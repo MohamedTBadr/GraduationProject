@@ -138,7 +138,7 @@ export class AddEventComponent implements OnInit {
       const createDto: any = {
         userId: activeUser?.id, // Fix 500 error in .NET because IsClient() fails on "User" role
         title: formVal.name,
-        categoryId: this.selectedEventType.id,
+        eventTypeId: this.selectedEventType.id,
         eventDate: new Date(formVal.date).toISOString(),
         totalBudget: Number(formVal.budget),
         guestCount: Number(formVal.guests) || 0,

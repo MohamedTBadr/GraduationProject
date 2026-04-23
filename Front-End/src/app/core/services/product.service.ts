@@ -15,10 +15,19 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
+  private extractArrayData(res: any): any[] {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (res.value && Array.isArray(res.value.items)) return res.value.items;
+    if (res.value && Array.isArray(res.value)) return res.value;
+    if (Array.isArray(res.items)) return res.items;
+    return [];
+  }
+
   /** GET /Service – returns all products */
   getAll(): Observable<ApiProduct[]> {
     return this.http.get<any>(`${this.apiUrl}/Service`).pipe(
-      map(res => res.value?.items || res.items || res.value || res)
+      map(res => this.extractArrayData(res))
     );
   }
 
@@ -32,21 +41,21 @@ export class ProductService {
   /** GET /Service/by-category/{categoryId} */
   getByCategory(categoryId: string): Observable<ApiProduct[]> {
     return this.http.get<any>(`${this.apiUrl}/Service/by-category/${categoryId}`).pipe(
-      map(res => res.value?.items || res.items || res.value || res)
+      map(res => this.extractArrayData(res))
     );
   }
 
   /** GET /Service/by-vendor/{vendorId} */
   getByVendor(vendorId: string): Observable<ApiProduct[]> {
     return this.http.get<any>(`${this.apiUrl}/Service/by-vendor/${vendorId}`).pipe(
-      map(res => res.value?.items || res.items || res.value || res)
+      map(res => this.extractArrayData(res))
     );
   }
 
   /** GET /Service/by-service-type/{serviceTypeId} */
   getByServiceType(serviceTypeId: string): Observable<ApiProduct[]> {
     return this.http.get<any>(`${this.apiUrl}/Service/by-service-type/${serviceTypeId}`).pipe(
-      map(res => res.value?.items || res.items || res.value || res)
+      map(res => this.extractArrayData(res))
     );
   }
 

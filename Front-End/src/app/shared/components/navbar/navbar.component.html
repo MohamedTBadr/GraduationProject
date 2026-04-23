@@ -1,9 +1,10 @@
 <!-- NAV -->
 <nav class="nav" [class.scrolled]="isScrolled">
     <div class="nav-inner">
-    <div class="nav-logo" routerLink="/">Epic<span>Hub</span></div>
+    <div class="nav-logo" routerLink="/">Event<span>ora</span></div>
 
     <ul class="nav-links">
+      <li><a routerLink="/explore-services">Explore Services</a></li>
       <li><a routerLink="/explore">Explore Vendors</a></li>
       <li><a routerLink="/packages">Packages</a></li>
       <li><a routerLink="/corporate">Corporate</a></li>
@@ -12,6 +13,30 @@
     </ul>
 
     <div class="nav-actions">
+      <!-- Chat Messages -->
+      <button
+        *ngIf="authService.isLoggedIn()"
+        class="nav-icon-btn"
+        (click)="goToMessages()"
+        title="Messages"
+      >
+        💬
+      </button>
+
+      <!-- Notifications -->
+      <button
+        *ngIf="authService.isLoggedIn()"
+        class="nav-icon-btn"
+        title="Notifications"
+        style="position: relative;"
+      >
+        🔔
+        <div class="fav-count" *ngIf="signalRService.unreadCount() > 0">
+          {{signalRService.unreadCount()}}
+        </div>
+      </button>
+
+      <!-- Favorites -->
       <button
         class="nav-fav-btn"
         (click)="goToFavorites()"
@@ -44,7 +69,7 @@
         <button
           *ngIf="authService.role() === 'Vendor'"
           class="btn-nav-vendor"
-          routerLink="/vendor-dashboard"
+          routerLink="/vendor/dashboard"
           title="Vendor Portal"
         >
           Dashboard
@@ -63,7 +88,7 @@
         <button
           class="btn btn-navy btn-sm"
           (click)="logout()"
-          style="border-color: #dc2626; color: #dc2626; background: transparent"
+          style="border-color: #dc2626; color: #dc2626; background: transparent; margin-left: 12px;"
         >
           Logout
         </button>

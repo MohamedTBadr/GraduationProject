@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export type ModalType = 'login' | 'signup' | 'book' | 'service-detail' | 'package-detail' | 'add-event' | 'quick-action' | 'review-vendor' | 'confirm' | 'add-package' | 'edit-package' | 'add-vendor' | 'schedule-report' | 'add-banner' | 'add-category' | null;
+export type ModalType = 'login' | 'signup' | 'enter-event-details' | 'choose-event' | 'service-detail' | 'package-detail' | 'add-event' | 'quick-action' | 'review-vendor' | 'confirm' | 'add-package' | 'edit-package' | 'add-vendor' | 'schedule-report' | 'add-banner' | 'add-category' | null;
 
 @Injectable({
   providedIn: 'root'

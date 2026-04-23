@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { ModalComponent } from './shared/components/modal/modal.component';
+import { SignalRService } from './core/services/signalr.service';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +12,15 @@ import { ModalComponent } from './shared/components/modal/modal.component';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'Eventora';
+  
+  private signalRService = inject(SignalRService);
+  private authService = inject(AuthService);
+
+  ngOnInit() {
+    if (this.authService.isLoggedIn()) {
+      this.signalRService.startConnections();
+    }
+  }
 }
