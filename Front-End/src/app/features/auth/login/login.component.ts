@@ -5,7 +5,6 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { ModalService } from '../../../shared/services/modal.service';
-import { HttpHeaders } from '@angular/common/http';
 
 @Component({
     selector: 'app-login',
@@ -82,7 +81,8 @@ export class LoginComponent {
     }
 
     goToForgotPassword() {
+        const email = this.loginForm.get('email')?.value;
         this.modalService.close();
-        this.router.navigate(['/forgot-password']);
+        this.router.navigate(['/forgot-password'], { queryParams: { email: email } });
     }
 }

@@ -8,6 +8,7 @@ import { VendorService } from '../../../core/services/vendor.service';
 import { ProductService } from '../../../core/services/product.service';
 import { EventResponseDto, ApiVendor, ApiProduct } from '../../../shared/types/api.interfaces';
 import { forkJoin } from 'rxjs';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-vendor-dashboard',
@@ -33,7 +34,8 @@ export class VendorDashboardComponent implements OnInit {
     private authService: AuthService,
     private eventService: EventService,
     private vendorService: VendorService,
-    private productService: ProductService
+    private productService: ProductService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -61,6 +63,7 @@ export class VendorDashboardComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading dashboard data', err);
+        this.toastService.show('Failed to load dashboard data.', 'error');
       }
     });
   }

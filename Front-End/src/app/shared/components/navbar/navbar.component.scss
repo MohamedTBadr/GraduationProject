@@ -151,7 +151,7 @@
     background: var(--gold2);
 }
 
-.nav-fav-btn {
+.nav-fav-btn, .nav-icon-btn {
     position: relative;
     width: 36px;
     height: 36px;
@@ -168,12 +168,12 @@
     text-decoration: none;
 }
 
-.nav.scrolled .nav-fav-btn {
+.nav.scrolled .nav-fav-btn, .nav.scrolled .nav-icon-btn {
     background: var(--cream2);
     color: var(--navy);
 }
 
-.nav-fav-btn:hover {
+.nav-fav-btn:hover, .nav-icon-btn:hover {
     background: rgba(201, 168, 76, .2);
 }
 

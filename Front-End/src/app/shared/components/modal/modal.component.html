@@ -13,35 +13,53 @@
                 <app-register></app-register>
             </div>
 
-            <!-- Booking Modal -->
-            <div *ngSwitchCase="'book'">
+            <!-- Request Booking (Enter Event Details) -->
+            <div *ngSwitchCase="'enter-event-details'">
                 <div class="modal-title">Request Booking</div>
-                <div class="modal-sub">We'll confirm within 2 hours </div>
-                <div class="form-group"><label>Your Name *</label><input type="text" placeholder="e.g. John Doe" /></div>
-                <div class="form-group"><label>Phone Number *</label><input type="tel" placeholder="+20 100 000 0000" />
+                <div class="modal-sub">Create your event to request this service.</div>
+                
+                <div class="form-group">
+                    <label>Event Name *</label>
+                    <input type="text" [(ngModel)]="eventData.title" placeholder="e.g. My Awesome Wedding" />
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>Event Type *</label><select>
-                            <option>Wedding</option>
-                            <option>Engagement</option>
-                            <option>Birthday</option>
-                            <option>Corporate</option>
-                            <option>Graduation</option>
-                            <option>Other</option>
-                        </select></div>
-                    <div class="form-group"><label>Event Date *</label><input type="date" /></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Guests</label><input type="number" placeholder="e.g. 100" /></div>
-                    <div class="form-group"><label>Budget (EGP)</label><input type="number" placeholder="e.g. 15000" />
+                    <div class="form-group">
+                        <label>Event Type *</label>
+                        <select [(ngModel)]="eventData.eventTypeId">
+                            <option value="" disabled selected>Select Event Type</option>
+                            <option *ngFor="let t of eventTypes" [value]="t.id">{{t.name}}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Event Date *</label>
+                        <input type="date" [(ngModel)]="eventData.eventDate" />
                     </div>
                 </div>
-                <div class="form-group"><label>Location / Venue</label><input type="text"
-                        placeholder="Venue name or area" /></div>
-                <div class="form-group"><label>Special Requirements</label><textarea
-                        placeholder="Any specific requests…" style="min-height:80px"></textarea></div>
-                <button class="modal-submit" (click)="modalService.close()">Send Booking Request →</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Guests</label>
+                        <input type="number" [(ngModel)]="eventData.guests" placeholder="e.g. 100" />
+                    </div>
+                    <div class="form-group">
+                        <label>Budget (EGP)</label>
+                        <input type="number" [(ngModel)]="eventData.budget" placeholder="e.g. 15000" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Location / Venue</label>
+                    <input type="text" [(ngModel)]="eventData.location" placeholder="Venue name or area" />
+                </div>
+                <div class="form-group">
+                    <label>Special Requirements</label>
+                    <textarea [(ngModel)]="eventData.notes" placeholder="Any specific requests…" style="min-height:80px"></textarea>
+                </div>
+                <button class="modal-submit" [disabled]="submitting" (click)="submitNewEventAndAdd()">
+                    {{ submitting ? 'Processing...' : 'Send Booking Request →' }}
+                </button>
             </div>
+
+            <!-- Choose Event Modal (DEPRECATED) -->
+            <!-- We replaced this with an inline dropdown inside the service/package detail modal -->
 
             <!-- Service Detail -->
             <div *ngSwitchCase="'service-detail'">
@@ -60,8 +78,20 @@
                         <span>⏱️ {{modalService.modalData().duration}}</span>
                     </div>
                 </div>
-                <button class="sdm-cta" (click)="modalService.open('book')"> Request
-                    This Service</button>
+                <div class="sdm-actions" *ngIf="!showEventDropdown">
+                    <button class="sdm-cta" [disabled]="submitting" (click)="handleServiceRequest(modalService.modalData())">
+                        {{ submitting ? 'Processing...' : 'Request This Service' }}
+                    </button>
+                </div>
+                <div class="sdm-dropdown-actions" *ngIf="showEventDropdown" style="margin-top: 20px; display: flex; gap: 10px;">
+                    <select [(ngModel)]="selectedEventId" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        <option *ngFor="let ev of userEvents" [value]="ev.id">{{ev.title}} ({{ev.eventDate | date}})</option>
+                        <option value="NEW_EVENT">+ Create New Event</option>
+                    </select>
+                    <button class="sdm-cta" style="flex: 1;" [disabled]="submitting" (click)="submitChooseEvent(modalService.modalData())">
+                        {{ submitting ? 'Adding...' : 'Confirm' }}
+                    </button>
+                </div>
             </div>
 
             <!-- Admin Quick Actions -->
@@ -138,8 +168,20 @@
                         </div>
                     </div>
                 </div>
-                <button class="sdm-cta" (click)="modalService.open('book')"> Book This
-                    Package</button>
+                <div class="sdm-actions" *ngIf="!showEventDropdown">
+                    <button class="sdm-cta" [disabled]="submitting" (click)="handleServiceRequest(modalService.modalData())">
+                        {{ submitting ? 'Processing...' : 'Request This Package' }}
+                    </button>
+                </div>
+                <div class="sdm-dropdown-actions" *ngIf="showEventDropdown" style="margin-top: 20px; display: flex; gap: 10px;">
+                    <select [(ngModel)]="selectedEventId" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        <option *ngFor="let ev of userEvents" [value]="ev.id">{{ev.title}} ({{ev.eventDate | date}})</option>
+                        <option value="NEW_EVENT">+ Create New Event</option>
+                    </select>
+                    <button class="sdm-cta" style="flex: 1;" [disabled]="submitting" (click)="submitChooseEvent(modalService.modalData())">
+                        {{ submitting ? 'Adding...' : 'Confirm' }}
+                    </button>
+                </div>
             </div>
 
             <!-- Add Event Modal -->

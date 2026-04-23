@@ -49,7 +49,10 @@ export class CorporateComponent implements OnInit {
   private loadCategories() {
     this.categoryService.getAll().subscribe({
       next: (data) => this.categories = data,
-      error: (err) => console.error('Failed to load categories', err)
+      error: (err) => {
+        console.error('Failed to load categories', err);
+        this.toastService.show('Failed to load categories.', 'error');
+      }
     });
   }
 

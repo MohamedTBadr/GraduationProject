@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import * as signalR from '@microsoft/signalr';
 import { environment } from '../../../environments/environment';
 import { ChatMessage, Conversation } from '../../shared/types/api.interfaces';
@@ -21,14 +22,18 @@ export class ChatService implements OnDestroy {
   // REST endpoints
   // ─────────────────────────────────────────────
 
-  /** GET /messages/{otherUserId} */
+  /** GET /Chat/messages/{otherUserId} */
   getMessages(otherUserId: string): Observable<ChatMessage[]> {
-    return this.http.get<ChatMessage[]>(`${this.apiUrl}/messages/${otherUserId}`);
+    return this.http.get<any>(`${this.apiUrl}/Chat/messages/${otherUserId}`).pipe(
+      map(res => res.value || res)
+    );
   }
 
-  /** GET /conversations */
+  /** GET /Chat/conversations */
   getConversations(): Observable<Conversation[]> {
-    return this.http.get<Conversation[]>(`${this.apiUrl}/conversations`);
+    return this.http.get<any>(`${this.apiUrl}/Chat/conversations`).pipe(
+      map(res => res.value || res)
+    );
   }
 
   // ─────────────────────────────────────────────
@@ -39,9 +44,13 @@ export class ChatService implements OnDestroy {
   startConnection(): void {
     if (this.hubConnection) return; // already connected
 
+    const token = this.authService.getToken() ?? '';
+    const connectionUrl = `${environment.signalRUrl}?accessToken=${token}`;
+
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(environment.signalRUrl, {
-        accessTokenFactory: () => this.authService.getToken() ?? ''
+      .withUrl(connectionUrl, {
+        accessTokenFactory: () => token,
+        headers: { 'IdempotencyKey': crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() }
       })
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Warning)
@@ -50,6 +59,11 @@ export class ChatService implements OnDestroy {
     // Listen for incoming messages
     this.hubConnection.on('ReceiveMessage', (message: ChatMessage) => {
       this.messageReceived$.next(message);
+    });
+
+    // Listen for presence events to suppress warnings
+    this.hubConnection.on('UserPresence', (presence: any) => {
+      // console.log('[ChatService] User presence updated:', presence);
     });
 
     this.hubConnection

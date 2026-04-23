@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../../core/services/event.service';
-import { AuthService } from '../../../core/services/auth.service';
 import { EventResponseDto } from '../../../shared/types/api.interfaces';
+import { ToastService } from '../../../shared/components/toast/toast.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface Booking {
   id: string;
@@ -36,7 +37,8 @@ export class MyBookingsComponent implements OnInit {
 
   constructor(
     private eventService: EventService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -88,8 +90,9 @@ export class MyBookingsComponent implements OnInit {
         this.stats.cancelled = allBookings.filter(b => b.status === 'Cancelled').length;
         this.loading = false;
       },
-      error: () => {
-        console.error('Failed to load bookings');
+      error: (err) => {
+        console.error('Failed to load bookings', err);
+        this.toastService.show('Failed to load your bookings.', 'error');
         this.loading = false;
       }
     });

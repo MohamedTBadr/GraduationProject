@@ -64,6 +64,7 @@ export class VendorProfileComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load vendor products', err);
+        this.toastService.show('Failed to load vendor products.', 'error');
       }
     });
   }

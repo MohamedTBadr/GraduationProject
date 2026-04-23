@@ -1,0 +1,79 @@
+<div class="ai-studio-overlay">
+  <div class="ai-studio-modal">
+    <div class="ai-header">
+      <div class="ai-title">
+        <span class="sparkle-icon">✨</span> Gemini Event Studio
+      </div>
+      <button class="close-btn" (click)="close.emit()">×</button>
+    </div>
+
+    <div class="ai-body">
+      <!-- Initial State -->
+      <div class="ai-initial" *ngIf="!isGenerating && !aiPlan && !error">
+        <h3>Let AI design your perfect event</h3>
+        <p>Gemini will analyze your budget of <strong>{{eventBudget | number}} EGP</strong> and instantly match you with the best available vendors in our database to build a complete package.</p>
+        <button class="btn btn-gold btn-lg mt-4" (click)="generatePlan()">
+          ✨ Generate Event Plan
+        </button>
+      </div>
+
+      <!-- Generating State -->
+      <div class="ai-generating" *ngIf="isGenerating">
+        <div class="loader-pulse"></div>
+        <h3>Gemini is thinking...</h3>
+        <p>Analyzing vendors, crunching numbers, and building your dream event.</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="ai-error" *ngIf="error">
+        <div class="error-icon">⚠️</div>
+        <h3>Something went wrong</h3>
+        <p>{{error}}</p>
+        <button class="btn btn-outline mt-3" (click)="generatePlan()">Try Again</button>
+      </div>
+
+      <!-- Result State -->
+      <div class="ai-result" *ngIf="aiPlan">
+        <div class="plan-summary-card">
+          <h4>{{aiPlan.event_title}}</h4>
+          <p>{{aiPlan.plan_summary}}</p>
+          
+          <div class="budget-breakdown mt-3">
+            <div class="b-item">
+              <span>Total Cost</span>
+              <strong>{{aiPlan.total_cost | number}} EGP</strong>
+            </div>
+            <div class="b-item">
+              <span>Remaining Budget</span>
+              <strong style="color: var(--gold)">{{aiPlan.remaining_budget | number}} EGP</strong>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="mt-4 mb-3">Recommended Vendors</h4>
+        <div class="ai-vendor-list">
+          <div class="ai-vendor-item" *ngFor="let item of aiPlan.selected_items">
+            <div class="avi-header">
+              <span class="avi-cat">{{item.category}}</span>
+              <span class="avi-price">{{item.price | number}} EGP</span>
+            </div>
+            <div class="avi-name">{{item.vendor}}</div>
+            <div class="avi-reason">"{{item.reason}}"</div>
+          </div>
+        </div>
+
+        <div class="ai-tips mt-4" *ngIf="aiPlan.tips?.length">
+          <h4>💡 Gemini Tips</h4>
+          <ul>
+            <li *ngFor="let tip of aiPlan.tips">{{tip}}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-footer" *ngIf="aiPlan">
+      <button class="btn btn-outline" (click)="generatePlan()">Regenerate</button>
+      <button class="btn btn-gold" (click)="acceptPlan()">Accept & Add Vendors</button>
+    </div>
+  </div>
+</div>

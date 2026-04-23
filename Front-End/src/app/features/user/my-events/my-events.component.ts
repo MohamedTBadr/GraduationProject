@@ -2,13 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
-import { AuthService } from '../../../core/services/auth.service';
 import { EventResponseDto } from '../../../shared/types/api.interfaces';
+import { ToastService } from '../../../shared/components/toast/toast.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { PaymentService } from '../../../core/services/payment.service';
+import { EventStudioComponent } from '../event-studio/event-studio.component';
 
 @Component({
   selector: 'app-my-events',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, EventStudioComponent],
   templateUrl: './my-events.component.html',
   styleUrls: ['./my-events.component.scss']
 })
@@ -16,12 +19,16 @@ export class MyEventsComponent implements OnInit {
   events: any[] = [];
   activeEventId: string | null = null;
   loading = true;
+  showAiStudio = false;
+  isPaying = false;
 
   constructor(
     private route: ActivatedRoute, 
     private router: Router,
     private eventService: EventService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService,
+    private paymentService: PaymentService
   ) {}
 
   ngOnInit() {
@@ -51,6 +58,7 @@ export class MyEventsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load events:', err);
+        this.toastService.show('Failed to load your events.', 'error');
         this.loading = false;
       }
     });
@@ -80,7 +88,8 @@ export class MyEventsComponent implements OnInit {
       guests: ev.guestCount || 0,
       budget: ev.totalBudget || 0,
       vendors: mappedVendors,
-      checklist: defaultChecklist
+      checklist: defaultChecklist,
+      status: ev.eventStatus || 'Pending'
     };
   }
 
@@ -115,5 +124,46 @@ export class MyEventsComponent implements OnInit {
 
   openAddEvent() {
     this.router.navigate(['/add-event']);
+  }
+
+  openAiStudio() {
+    this.showAiStudio = true;
+  }
+
+  onAiPlanAccepted(plan: any) {
+    this.loadEvents();
+  }
+
+  payDeposit() {
+    if (!this.activeEvent || this.spent === 0) return;
+    
+    this.isPaying = true;
+    const user = this.authService.user();
+    
+    // Deposit is 25% of total spent for the event items
+    const depositAmount = this.spent * 0.25;
+
+    const nameParts = user?.name ? user.name.split(' ') : ['User', 'Name'];
+
+    this.paymentService.initiatePaymob({
+      amount: depositAmount,
+      billing: {
+        first_name: nameParts[0] || 'User',
+        last_name: nameParts[1] || 'Name',
+        email: user?.email || 'test@example.com',
+        phone_number: '+201234567890'
+      }
+    }).subscribe({
+      next: (res) => {
+        this.isPaying = false;
+        // The user selected to open the URL in a new tab
+        window.open(res.iframeUrl, '_blank');
+      },
+      error: (err) => {
+        this.isPaying = false;
+        this.toastService.show('Failed to initialize payment gateway.', 'error');
+        console.error(err);
+      }
+    });
   }
 }

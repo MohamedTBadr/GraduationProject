@@ -11,7 +11,8 @@ import {
   CreateEventDto,
   UpdateEventDto,
   ApproveItemRequest,
-  CancelEventRequest
+  CancelEventRequest,
+  CreateEventItemDto
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -37,6 +38,11 @@ export class EventService {
     return this.http.post<EventResponseDto>(this.apiUrl, payload, { headers });
   }
 
+  /** POST /Event/{eventId}/items - Add an item to an event */
+  addItem(eventId: string, payload: CreateEventItemDto): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${eventId}/items`, payload);
+  }
+
   /** PUT /Event/{id} - Update an existing event */
   update(id: string, payload: UpdateEventDto): Observable<EventResponseDto> {
     return this.http.put<EventResponseDto>(`${this.apiUrl}/${id}`, payload);
@@ -50,7 +56,14 @@ export class EventService {
   /** GET /Event/user/{userId} - Get events for a specific user/vendor */
   getByUser(userId: string): Observable<EventResponseDto[]> {
     return this.http.get<any>(`${this.apiUrl}/user/${userId}`).pipe(
-      map(res => res.value || res)
+      map(res => {
+        if (!res) return [];
+        if (Array.isArray(res)) return res;
+        if (res.value && Array.isArray(res.value)) return res.value;
+        if (res.value?.items && Array.isArray(res.value.items)) return res.value.items;
+        if (res.items && Array.isArray(res.items)) return res.items;
+        return res.value || res;
+      })
     );
   }
 
@@ -69,5 +82,10 @@ export class EventService {
   /** PATCH /Event/{id}/cancel - Cancel an event */
   cancelEvent(id: string, payload: CancelEventRequest): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${id}/cancel`, payload);
+  }
+
+  /** POST /Event/createEventByAI/{eventId} - Generate an event plan using Gemini */
+  generateEventByAI(eventId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/createEventByAI/${eventId}`, {});
   }
 }

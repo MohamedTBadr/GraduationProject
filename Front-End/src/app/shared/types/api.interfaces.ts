@@ -298,6 +298,43 @@ export interface EventResponseDto {
   eventItems: EventItemResponseDto[];
 }
 
+export interface CreateEventItemDto {
+  eventId: string;
+  serviceImage: string;
+  serviceName: string;
+  price: number;
+  vendorId: string;
+  vendorName: string;
+  quantity: number;
+}
+
+export interface CartItem {
+  product: ApiProduct;
+  quantity: number;
+}
+
+export interface CreateEventDto {
+  userId?: string;
+  title: string;
+  eventTypeId: string;
+  eventDate: string;
+  location?: AddressDto;
+  totalBudget: number;
+  guestCount: number;
+  notes?: string;
+}
+
+export interface UpdateEventDto {
+  title: string;
+  eventTypeId: string;
+  eventDate: string;
+  location?: AddressDto;
+  totalBudget: number;
+  guestCount: number;
+  notes?: string;
+  eventStatus: string;
+}
+
 export interface CreateEventDto {
   userId?: string;
   title: string;
@@ -328,4 +365,36 @@ export interface ApproveItemRequest {
 export interface CancelEventRequest {
   reason?: string;
   additionalNotes?: string;
+}
+
+// ─────────────────────────────────────────────
+// Notifications
+// ─────────────────────────────────────────────
+export interface AppNotification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+// ─────────────────────────────────────────────
+// Payments (Paymob)
+// ─────────────────────────────────────────────
+export interface PaymobBillingData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+}
+
+export interface PaymobPaymentRequest {
+  amount: number;
+  billing: PaymobBillingData;
+}
+
+export interface PaymobPaymentResponse {
+  iframeUrl: string;
 }

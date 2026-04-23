@@ -37,7 +37,20 @@ export class VendorService {
 
   /** GET /Vendor/{vendorId} */
   getById(vendorId: string): Observable<ApiVendor> {
-    return this.http.get<ApiVendor>(`${this.apiUrl}/Vendor/${vendorId}`);
+    return this.http.get<any>(`${this.apiUrl}/Vendor/${vendorId}`).pipe(
+      map((res: any) => {
+        const v = res?.value || res;
+        return {
+          ...v,
+          id: v.userId || v.id,
+          name: v.businessName || v.name || 'Unknown Vendor',
+          categoryName: v.serviceType || v.categoryName || 'Vendor',
+          about: v.description || v.about,
+          status: v.status ? v.status : (v.isVerified ? 'active' : 'pending'),
+          isApproved: v.isApproved !== undefined ? v.isApproved : (v.isVerified !== undefined ? v.isVerified : false)
+        } as ApiVendor;
+      })
+    );
   }
 
   /** POST /Vendor – register a new vendor */

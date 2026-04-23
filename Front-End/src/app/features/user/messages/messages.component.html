@@ -9,39 +9,39 @@
             <input #chatSearch type="text" placeholder="Search messages..."
                 style="width:100%;padding:10px;border:1px solid var(--lgray);border-radius:8px;font-size:.9rem" />
         </div>
-        <div *ngFor="let c of chats" (click)="selectChat(c)"
-            [style.background]="selectedChat.id === c.id ? 'var(--cream)' : 'transparent'"
+        <div *ngFor="let c of conversations" (click)="selectChat(c)"
+            [style.background]="selectedConversation?.userId === c.userId ? 'var(--cream)' : 'transparent'"
             style="padding:20px;border-bottom:1px solid var(--lgray);cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:background .2s">
             <div
                 style="width:44px;height:44px;border-radius:50%;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;font-weight:700;color:var(--navy)">
-                {{c.avatar}}</div>
+                {{c.userAvatar || c.userName?.charAt(0) || 'U'}}</div>
             <div style="flex:1;overflow:hidden">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                    <strong style="color:var(--navy);font-size:.95rem">{{c.sender}}</strong>
-                    <span style="color:var(--gray);font-size:.75rem">{{c.time}}</span>
+                    <strong style="color:var(--navy);font-size:.95rem">{{c.userName}}</strong>
+                    <span style="color:var(--gray);font-size:.75rem">{{c.lastMessageAt | date:'shortTime'}}</span>
                 </div>
                 <div style="color:var(--gray);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
-                    [style.fontWeight]="c.unread ? 700 : 400" [style.color]="c.unread ? 'var(--navy)' : 'var(--gray)'">
-                    {{c.lastMessage}}
+                    [style.fontWeight]="c.unreadCount ? 700 : 400" [style.color]="c.unreadCount ? 'var(--navy)' : 'var(--gray)'">
+                    {{c.lastMessage || 'No messages yet'}}
                 </div>
             </div>
-            <div *ngIf="c.unread"
+            <div *ngIf="c.unreadCount"
                 style="width:10px;height:10px;border-radius:50%;background:var(--gold);margin-top:6px;flex-shrink:0">
             </div>
         </div>
     </div>
 
     <!-- Chat View -->
-    <div style="display:flex;flex-direction:column;background:var(--white)">
+    <div style="display:flex;flex-direction:column;background:var(--white)" *ngIf="selectedConversation">
         <div
             style="padding:20px 24px;border-bottom:1px solid var(--lgray);display:flex;justify-content:space-between;align-items:center;z-index:10;background:var(--white)">
             <div style="display:flex;align-items:center;gap:12px">
                 <div
                     style="width:48px;height:48px;border-radius:50%;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:var(--navy)">
-                    {{selectedChat.avatar}}</div>
+                    {{selectedConversation.userAvatar || selectedConversation.userName?.charAt(0) || 'U'}}</div>
                 <div>
                     <strong
-                        style="display:block;color:var(--navy);font-size:1.1rem;margin-bottom:4px">{{selectedChat.sender}}</strong>
+                        style="display:block;color:var(--navy);font-size:1.1rem;margin-bottom:4px">{{selectedConversation.userName}}</strong>
                     <span style="color:#16a34a;font-size:.8rem;display:flex;align-items:center;gap:5px">
                         <span style="width:8px;height:8px;background:#16a34a;border-radius:50%"></span> Online
                     </span>
@@ -55,16 +55,16 @@
 
         <div #scrollContainer
             style="flex:1;padding:24px;overflow-y:auto;background:var(--cream);display:flex;flex-direction:column;gap:16px">
-            <div *ngFor="let msg of selectedChat.history" [style.alignSelf]="msg.isMe ? 'flex-end' : 'flex-start'"
-                [style.background]="msg.isMe ? 'var(--navy)' : 'var(--white)'"
-                [style.color]="msg.isMe ? 'var(--white)' : 'var(--navy)'"
+            <div *ngFor="let msg of messages" [style.alignSelf]="msg.senderId === currentUserId ? 'flex-end' : 'flex-start'"
+                [style.background]="msg.senderId === currentUserId ? 'var(--navy)' : 'var(--white)'"
+                [style.color]="msg.senderId === currentUserId ? 'var(--white)' : 'var(--navy)'"
                 style="max-width:70%;padding:14px 18px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.04);position:relative">
 
                 <!-- Bubble Tail logic could be added here if needed -->
-                <p style="font-size:.92rem;line-height:1.5;margin:0">{{msg.text}}</p>
+                <p style="font-size:.92rem;line-height:1.5;margin:0">{{msg.content}}</p>
                 <span style="display:block;text-align:right;font-size:.65rem;margin-top:8px"
-                    [style.color]="msg.isMe ? 'rgba(255,255,255,.6)' : 'var(--gray)'">
-                    {{msg.time}}
+                    [style.color]="msg.senderId === currentUserId ? 'rgba(255,255,255,.6)' : 'var(--gray)'">
+                    {{msg.sentAt | date:'shortTime'}}
                 </span>
             </div>
         </div>
@@ -73,15 +73,19 @@
             <div style="display:flex;gap:12px;align-items:center">
                 <button
                     style="background:none;border:none;font-size:1.5rem;color:var(--gray);cursor:pointer;padding:0 5px">+</button>
-                <input #msgInput type="text" placeholder="Type a message..."
-                    (keyup.enter)="sendMessage(msgInput.value); msgInput.value=''"
+                <input #msgInput type="text" placeholder="Type a message..." [(ngModel)]="newMessageText"
+                    (keyup.enter)="sendMessage()"
                     style="flex:1;padding:14px 20px;border:1px solid var(--lgray);border-radius:50px;font-size:.95rem;outline:none;transition:border-color .2s"
                     onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--lgray)'" />
-                <button class="btn btn-navy" (click)="sendMessage(msgInput.value); msgInput.value=''"
+                <button class="btn btn-navy" (click)="sendMessage()"
                     style="width:48px;height:48px;border-radius:50%;padding:0;justify-content:center;flex-shrink:0">
                     <span style="font-size:1.2rem">→</span>
                 </button>
             </div>
         </div>
+    </div>
+    
+    <div *ngIf="!selectedConversation" style="display:flex;align-items:center;justify-content:center;background:var(--cream);color:var(--gray)">
+        Select a conversation to start chatting.
     </div>
 </div>

@@ -1,27 +1,43 @@
 <div class="vd-section active" style="display:block">
   <div class="vd-page-header">
     <div><div class="vd-page-title">Notifications</div><div class="vd-page-sub">Stay up to date on bookings, messages, reviews, and payouts.</div></div>
-    <div style="display:flex;gap:7px"><button class="vd-btn vd-btn-ghost vd-btn-sm">Mark All Read</button><button class="vd-btn vd-btn-ghost vd-btn-sm"> Preferences</button></div>
+    <div style="display:flex;gap:7px"><button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="markAllAsRead()">Mark All Read</button><button class="vd-btn vd-btn-ghost vd-btn-sm"> Preferences</button></div>
   </div>
   <div class="vd-tab-bar">
-    <button class="vd-tab active">All (5)</button>
-    <button class="vd-tab">Bookings</button>
-    <button class="vd-tab">Messages</button>
-    <button class="vd-tab">Reviews</button>
-    <button class="vd-tab">Finance</button>
+    <button *ngFor="let tab of tabs" 
+            class="vd-tab" 
+            [class.active]="activeTab === tab"
+            (click)="setTab(tab)">
+      {{tab}} <span *ngIf="tab === 'All' && getUnreadCount() > 0">({{getUnreadCount()}})</span>
+    </button>
   </div>
   <div class="vd-tab-pane active" id="nf-all">
     <div class="vd-card">
-      <div id="vd-notifs-all">
-        <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-            <div style="font-size:1.4rem"></div>
-            <div>
-                <div style="font-weight:600;font-size:.9rem;margin-bottom:4px">Payout Processed Successfully</div>
-                <div style="font-size:.8rem;color:var(--gray)">Your requested payout of 24,000 EGP was sent to your bank.</div>
-                <div style="font-size:.7rem;color:rgba(255,255,255,.3);margin-top:6px">Yesterday at 11:30 AM</div>
+      <div id="vd-notifs-all" *ngIf="filteredNotifications.length > 0; else noNotifs">
+        <div *ngFor="let notif of filteredNotifications" 
+             (click)="markAsRead(notif)"
+             [style.background]="!notif.isRead ? 'var(--cream)' : 'transparent'"
+             style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;border-radius:8px">
+            <div style="font-size:1.4rem">
+              <span *ngIf="notif.type === 'booking'">📅</span>
+              <span *ngIf="notif.type === 'message'">💬</span>
+              <span *ngIf="notif.type === 'review'">⭐</span>
+              <span *ngIf="notif.type === 'finance'">💰</span>
+              <span *ngIf="!['booking', 'message', 'review', 'finance'].includes(notif.type || '')">🔔</span>
             </div>
+            <div style="flex:1">
+                <div style="font-weight:600;font-size:.9rem;margin-bottom:4px" [style.color]="!notif.isRead ? 'var(--navy)' : 'inherit'">{{notif.title}}</div>
+                <div style="font-size:.8rem;color:var(--gray)">{{notif.message}}</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.3);margin-top:6px">{{notif.createdAt | date:'medium'}}</div>
+            </div>
+            <div *ngIf="!notif.isRead" style="width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:6px"></div>
         </div>
       </div>
+      <ng-template #noNotifs>
+        <div style="padding: 40px; text-align: center; color: var(--gray);">
+          No notifications found.
+        </div>
+      </ng-template>
     </div>
   </div>
 </div>

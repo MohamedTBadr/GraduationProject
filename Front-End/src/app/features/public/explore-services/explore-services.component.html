@@ -1,0 +1,160 @@
+<div class="explore-container">
+  <!-- ═══ EXPLORE HERO ═══════════════════════════════════════ -->
+  <section class="explore-hero">
+    <div class="eh-bg-mesh"></div>
+    <div class="eh-orb eh-orb-1"></div>
+    <div class="eh-orb eh-orb-2"></div>
+    <div class="eh-inner">
+      <div class="eh-eyebrow">✦ Discovery Engine</div>
+      <h1 class="eh-title">Explore Services<br />Like You <em>Scroll Instagram</em></h1>
+      <p class="eh-sub">Discover, compare, and instantly book what fits your event vibe. 340+ verified vendors across Egypt.</p>
+      <div class="eh-search-wrap">
+        <div class="eh-search-inner">
+          <div class="eh-search-icon">🔍</div>
+          <input type="text" class="eh-search-input" placeholder="Search catering, decor, photography…" [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()" />
+          <div class="eh-search-divider"></div>
+          <input type="date" class="eh-search-date" title="Filter by availability" />
+        </div>
+        <button class="eh-search-btn" (click)="applyFilters()">Search →</button>
+      </div>
+      <div class="eh-quick-tags">
+        <div class="eh-quick-tag" [class.active]="selectedCategory === 'all'" (click)="toggleCategory('all')">✨ All Services</div>
+        <div class="eh-quick-tag" *ngFor="let cat of categories.slice(0, 5)" [class.active]="selectedCategory === cat.id" (click)="toggleCategory(cat.id)">
+          {{cat.name}}
+        </div>
+      </div>
+    </div>
+    <div class="eh-stats">
+      <div class="eh-stat"><div class="eh-stat-num">340+</div><div class="eh-stat-lbl">Verified Vendors</div></div>
+      <div class="eh-stat"><div class="eh-stat-num">1,200+</div><div class="eh-stat-lbl">Events Planned</div></div>
+      <div class="eh-stat"><div class="eh-stat-num">4.9★</div><div class="eh-stat-lbl">Avg. Rating</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ CONTROLS BAR ════════════════════════════════════════ -->
+  <div class="controls-bar">
+    <div class="controls-inner">
+      <div class="view-toggle">
+        <button class="vt-btn" [class.active]="viewMode === 'grid'" (click)="setView('grid')" title="Grid View">⊞</button>
+        <button class="vt-btn" [class.active]="viewMode === 'list'" (click)="setView('list')" title="List View">☰</button>
+        <button class="vt-btn" [class.active]="viewMode === 'map'" (click)="setView('map')" title="Map View">📍</button>
+      </div>
+      <div class="results-info"><strong>{{filteredServices.length}}</strong> services found — <span>{{selectedCategory === 'all' ? 'All categories' : selectedCategory}}</span></div>
+      <div class="sort-wrap">
+        Sort by:
+        <select class="sort-sel" [(ngModel)]="sortOption" (change)="applyFilters()">
+          <option value="recommended">Recommended</option>
+          <option value="rating">Top Rated</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN LAYOUT ════════════════════════════════════════ -->
+  <div class="explore-layout">
+    <!-- FILTER SIDEBAR -->
+    <aside class="fs-sidebar">
+      <div class="fs-sticky">
+        <div class="fs-header">
+          <div class="fs-title">🎛️ Filters</div>
+          <button class="fs-clear" (click)="selectedCategory='all'; searchQuery=''; applyFilters()">Clear All</button>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="filter-block">
+          <div class="fb-title">Service Category <span class="fb-toggle open">▾</span></div>
+          <div class="fb-chip-row">
+            <div class="fb-chip" [class.sel]="selectedCategory === 'all'" (click)="toggleCategory('all')">All</div>
+            <div class="fb-chip" *ngFor="let cat of categories" [class.sel]="selectedCategory === cat.id" (click)="toggleCategory(cat.id)">
+              {{cat.name}}
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Range -->
+        <div class="filter-block">
+          <div class="fb-title">Price Range (EGP) <span class="fb-toggle open">▾</span></div>
+          <div class="price-range-display">
+            <span>0</span><span>{{maxPrice | number}} EGP</span>
+          </div>
+          <input type="range" min="0" max="100000" step="1000" [(ngModel)]="maxPrice" (input)="updatePrice($event)" />
+        </div>
+
+        <!-- Rating -->
+        <div class="filter-block">
+          <div class="fb-title">Minimum Rating <span class="fb-toggle open">▾</span></div>
+          <div class="rating-options">
+            <label class="rating-row" (click)="minRating=4.5; applyFilters()"><input type="radio" name="rating" [checked]="minRating===4.5" /> 4.5+</label>
+            <label class="rating-row" (click)="minRating=4.0; applyFilters()"><input type="radio" name="rating" [checked]="minRating===4.0" /> 4.0+</label>
+            <label class="rating-row" (click)="minRating=0; applyFilters()"><input type="radio" name="rating" [checked]="minRating===0" /> Any</label>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main>
+      <!-- AI BANNER -->
+      <div class="ai-banner">
+        <div class="ai-title">🧠 AI Picks For You</div>
+        <div class="ai-sub">Based on popular events in Egypt this season</div>
+        <div class="ai-chips">
+          <div class="ai-chip">Recommended for you</div>
+          <div class="ai-chip">🔥 Trending this week</div>
+          <div class="ai-chip">Editor's Picks ✦</div>
+        </div>
+      </div>
+
+      <!-- SERVICE GRID -->
+      <div class="svc-grid" [class.list-view]="viewMode === 'list'">
+        <div class="svc-card" *ngFor="let svc of filteredServices" (click)="openPreview(svc)">
+          <div class="svc-card-img">
+            <img *ngIf="svc.imageUrl" [src]="svc.imageUrl" />
+            <span *ngIf="!svc.imageUrl">🎨</span>
+            <div class="svc-card-top">
+              <span class="svc-cat-badge">{{svc.categoryName}}</span>
+              <div class="svc-card-actions">
+                <button class="svc-action-btn" [class.active]="isInWishlist(svc.id)" (click)="toggleWishlist(svc, $event)">♡</button>
+                <button class="svc-action-btn" [class.compare-active]="isInCompare(svc.id)" (click)="addToCompare(svc, $event)">⚖️</button>
+              </div>
+            </div>
+          </div>
+          <div class="svc-card-body">
+            <div class="svc-name">{{svc.name}}</div>
+            <div class="svc-price">{{svc.price | currency:'EGP':'symbol':'1.0-0'}}</div>
+            <p class="svc-desc" style="font-size: 0.8rem; color: #6b7280; margin-top: 8px;">{{svc.description | slice:0:80}}...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="filteredServices.length === 0 && !loading" style="text-align: center; padding: 60px;">
+        <div style="font-size: 3rem;">🔍</div>
+        <h3>No services found</h3>
+        <p>Try adjusting your filters or search terms.</p>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" style="text-align: center; padding: 60px;">
+        <p>Searching for the best services...</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══ COMPARE BAR ════════════════════════════════════════ -->
+  <div class="compare-bar" [class.show]="showCompareBar">
+    <div class="cb-title">⚖️ Compare ({{compareList.length}}/3)</div>
+    <div class="cb-slots">
+      <div class="cb-slot" *ngFor="let s of compareList" class="cb-slot filled">
+        {{s.name}}
+      </div>
+      <div class="cb-slot" *ngIf="compareList.length < 3">+ Add service</div>
+    </div>
+    <div class="cb-actions">
+      <button class="btn btn-ghost btn-sm" style="color: white; border-color: rgba(255,255,255,0.2); background: transparent;" (click)="clearCompare()">Clear</button>
+      <button class="btn btn-gold btn-sm" routerLink="/compare">Compare Now →</button>
+    </div>
+  </div>
+</div>

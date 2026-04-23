@@ -5,11 +5,15 @@
                 <h2 class="section-title">My Favorites</h2>
                 <p class="section-sub">Vendors and packages you've saved for later.</p>
             </div>
-            <button class="btn btn-outline" *ngIf="mockFavorites.length > 0" (click)="clearFavorites()">Clear
+            <button class="btn btn-outline" *ngIf="favorites.length > 0" (click)="clearFavorites()">Clear
                 All</button>
         </div>
 
-        <div *ngIf="mockFavorites.length === 0"
+        <div *ngIf="loading" style="text-align:center;padding:40px;color:var(--gray)">
+            Loading favorites...
+        </div>
+
+        <div *ngIf="!loading && favorites.length === 0"
             style="text-align:center;padding:80px 20px;background:var(--cream);border-radius:12px">
             <div style="font-size:3rem;margin-bottom:16px"></div>
             <h3 style="font-family:var(--ff-d);font-size:1.4rem;color:var(--navy);margin-bottom:8px">No favourites yet
@@ -19,25 +23,25 @@
             <button class="btn btn-gold" routerLink="/explore">Explore Vendors</button>
         </div>
 
-        <div class="explore-grid" *ngIf="mockFavorites.length > 0">
-            <div class="vendor-card" routerLink="/vendor/{{v.id}}" *ngFor="let v of mockFavorites">
+        <div class="explore-grid" *ngIf="!loading && favorites.length > 0">
+            <div class="vendor-card" routerLink="/vendor/{{v.id}}" *ngFor="let v of favorites">
                 <div class="vc-photo">
-                    <div class="vc-photo-inner">{{v.icon}}</div>
+                    <div class="vc-photo-inner" style="background: linear-gradient(135deg, hsl(230, 40%, 25%) 0%, hsl(250, 45%, 30%) 100%)">{{v.name.charAt(0)}}</div>
                     <div class="vc-top-row">
-                        <div class="vc-cat-badge">{{v.category}}</div>
+                        <div class="vc-cat-badge">{{v.categoryName || 'Vendor'}}</div>
                         <button class="vc-fav-btn" style="color:var(--gold)"
-                            (click)="removeFromFavorites(v.id, $event)"></button>
+                            (click)="removeFromFavorites(v.id, $event)">❤️</button>
                     </div>
                 </div>
                 <div class="vc-body">
                     <div class="vc-name">{{v.name}}</div>
-                    <div class="vc-loc">📍 {{v.location}}</div>
+                    <div class="vc-loc" *ngIf="v.location">📍 {{v.location}}</div>
                     <div class="vc-rating-row">
                         <span class="stars"></span>
-                        <span class="vc-review-count">{{v.rating}}</span>
+                        <span class="vc-review-count">{{v.rating || 'New'}}</span>
                     </div>
                     <div class="vc-footer">
-                        <div class="vc-price">From <strong>{{v.price | number}} EGP</strong></div>
+                        <div class="vc-price"><strong>Ask for price</strong></div>
                         <button class="vc-view-btn">View Profile</button>
                     </div>
                 </div>

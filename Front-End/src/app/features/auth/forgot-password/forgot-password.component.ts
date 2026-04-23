@@ -3,7 +3,9 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
-import { RouterModule } from '@angular/router';
+import { ModalService } from '../../../shared/services/modal.service';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-forgot-password',
@@ -12,14 +14,24 @@ import { RouterModule } from '@angular/router';
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss'
 })
-export class ForgotPasswordComponent {
+export class ForgotPasswordComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
+  private route = inject(ActivatedRoute);
+  private modalService = inject(ModalService);
+  private router = inject(Router);
 
   forgotForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]]
   });
+
+  ngOnInit() {
+    const email = this.route.snapshot.queryParamMap.get('email');
+    if (email) {
+      this.forgotForm.patchValue({ email });
+    }
+  }
 
   isLoading = false;
   isSubmitted = false;
@@ -49,6 +61,18 @@ export class ForgotPasswordComponent {
         // But we handle it accordingly
         this.toastService.show(err.message || 'Failed to request password reset', 'error');
       }
+    });
+  }
+
+  switchToRegister() {
+    this.router.navigate(['/']).then(() => {
+      this.modalService.open('signup');
+    });
+  }
+
+  goToLogin() {
+    this.router.navigate(['/']).then(() => {
+      this.modalService.open('login');
     });
   }
 }

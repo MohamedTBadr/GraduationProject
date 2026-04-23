@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { EventService } from '../../../core/services/event.service';
 import { EventResponseDto, EventItemResponseDto } from '../../../shared/types/api.interfaces';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
 export interface Booking {
   id: string; // itemId
@@ -39,7 +40,8 @@ export class BookingsComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private eventService: EventService
+    private eventService: EventService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -61,6 +63,7 @@ export class BookingsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading bookings', err);
+        this.toastService.show('Failed to load bookings.', 'error');
         this.loading.set(false);
       }
     });
@@ -155,8 +158,13 @@ export class BookingsComponent implements OnInit {
     if (this.selectedBooking) {
       this.eventService.approveItem(this.selectedBooking.eventId, this.selectedBooking.id, { approve: true }).subscribe({
         next: () => {
+          this.toastService.show('Booking accepted successfully.', 'success');
           this.loadBookings();
           this.closeDetails();
+        },
+        error: (err) => {
+          console.error('Error accepting booking', err);
+          this.toastService.show('Failed to accept booking.', 'error');
         }
       });
     }
@@ -167,8 +175,13 @@ export class BookingsComponent implements OnInit {
       const fullReason = `${this.declineReason}${this.declineNote ? ': ' + this.declineNote : ''}`;
       this.eventService.approveItem(this.selectedBooking.eventId, this.selectedBooking.id, { approve: false, reason: fullReason }).subscribe({
         next: () => {
+          this.toastService.show('Booking declined.', 'info');
           this.loadBookings();
           this.closeDeclineForm();
+        },
+        error: (err) => {
+          console.error('Error declining booking', err);
+          this.toastService.show('Failed to decline booking.', 'error');
         }
       });
     }
