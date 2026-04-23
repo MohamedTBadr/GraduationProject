@@ -17,5 +17,9 @@ namespace Domain.Contracts
         Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken);
         Task<bool> DeleteByEventIdAsync(Guid eventId, CancellationToken cancellationToken);
         Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken);
+
+        Task<IEnumerable<EventItem>> GetVendorBookingsAsync(
+    Guid vendorId,
+    CancellationToken cancellationToken);
     }
 }

@@ -12,7 +12,7 @@ using System.Linq.Expressions;
 
 namespace Application.Services
 {
-    public class VendorService(IUserRepository userRepository, UserManager<ApplicationUser> userManager,IVendorRepository vendorRepository, IMapper mapper) : IVendorService
+    public class VendorService(IUserRepository userRepository, UserManager<ApplicationUser> userManager,IVendorRepository vendorRepository, IEventItemRepository _eventItemRepository, IMapper mapper) : IVendorService
     {
         public async Task<Result<PaginatedResponse<VendorListDTO>>> GetVendorsAsync(
       PaginatedRequest paginatedRequest,
@@ -50,7 +50,29 @@ namespace Application.Services
             var vendorDTO = mapper.Map<VendorDetailsDTO>(vendor);
             return Result<VendorDetailsDTO>.Success(vendorDTO);
         }
+        public async Task<List<VendorBookingDto>> GetVendorBookingsAsync(
+                   Guid vendorId,
+                   CancellationToken cancellationToken = default)
+        {
+            var bookings = await _eventItemRepository.GetVendorBookingsAsync(vendorId, cancellationToken);
 
+            return bookings.Select(ei => new VendorBookingDto
+            {
+                EventItemId = ei.Id,
+                ServiceName = ei.ServiceName,
+                Price = ei.Price,
+                BookingStatus = ei.ItemStatus,
+                Notes = ei.Event.Notes,
+
+                EventId = ei.EventId,
+                EventTitle = ei.Event.Title,
+                EventType = ei.Event.EventType?.Name ?? string.Empty,
+                EventDate = ei.Event.EventDate,
+                EventStatus = ei.Event.EventStatus,
+                GuestCount = ei.Event.GuestCount,
+                Location = ei.Event.Location?.ToString() ?? string.Empty
+            }).ToList();
+        }
         public async Task<Result<VendorDetailsDTO>> AddVendorAsync(CreateVendorRequest request, CancellationToken cancellationToken)
         {
       
@@ -76,7 +98,7 @@ namespace Application.Services
                 PhoneNumber = request.Phone,
             };
 
-            var identityResult = await userRepository.CreateAsync(user, request.Password);
+            var identityResult = await userRepository.CreateAsync(user, request.Password, cancellationToken);
             if (!identityResult.Succeeded)
             {
                 var errors = string.Join(", ", identityResult.Errors.Select(e => e.Description));

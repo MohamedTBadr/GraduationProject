@@ -5,19 +5,17 @@ namespace Application.Interfaces
 {
     public interface IAuthenticationService
     {
-        Task<UserResponse> LogIn(LoginRequest loginRequest);
+        Task<UserResponse> LogIn(LoginRequest loginRequest, CancellationToken cancellationToken);
 
-        Task<UserResponse> RegisterAsync(SignUpRequest request);
-
-        Task<bool> CheckIfEmailExists(string email);
+        Task<UserResponse> RegisterAsync(SignUpRequest request, CancellationToken cancellationToken);
+        Task<bool> CheckIfEmailExists(string email, CancellationToken cancellationToken);
 
         // 🚨 ENHANCEMENT: Changed method name and signature for secure Refresh Token flow.
         // It now accepts a DTO containing the old refresh token and returns new tokens.
-        Task<UserResponse> RefreshTokenAsync(RefreshTokenRequest request);
+        Task<UserResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken);
+        Task ForgetPassword(string email, CancellationToken cancellationToken);
+        Task ResetPassword(ResetPasswordRequest request, CancellationToken cancellationToken);
 
-        Task ForgetPassword(string email);
-        Task ResetPassword(ResetPasswordRequest request);
-
-        Task LogoutAsync(Guid userId);
+        Task LogoutAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

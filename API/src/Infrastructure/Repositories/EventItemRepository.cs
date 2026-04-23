@@ -28,7 +28,20 @@ namespace Infrastructure.Repositories
                 .Include(i => i.Event)
                 .FirstOrDefaultAsync(i => i.Id == id, token), cancellationToken);
         }
-
+        public async Task<IEnumerable<EventItem>> GetVendorBookingsAsync(
+  Guid vendorId,
+  CancellationToken cancellationToken)
+        {
+            return await _context.EventItems
+                .Include(ei => ei.Event)
+                    .ThenInclude(e => e.EventType)
+                .Include(ei => ei.Event)
+                    .ThenInclude(e => e.Location)
+                .Where(ei => ei.VendorId == vendorId)
+                .OrderByDescending(ei => ei.Event.EventDate)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
         public async Task<IEnumerable<EventItem>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await _pipeline.ExecuteAsync(async token => await _context.EventItems
