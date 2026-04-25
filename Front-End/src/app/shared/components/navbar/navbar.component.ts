@@ -3,18 +3,18 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ModalService } from '../../services/modal.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
   imports: [RouterLink, CommonModule],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.scss']
+  styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent {
-
   isMenuOpen = false;
-  isScrolled = false; 
+  isScrolled = false;
 
   private modalService = inject(ModalService);
   private router = inject(Router);
@@ -23,7 +23,7 @@ export class NavbarComponent {
   //  scroll listener
   @HostListener('window:scroll', [])
   onWindowScroll() {
-    this.isScrolled = window.scrollY > 50; 
+    this.isScrolled = window.scrollY > 50;
   }
 
   toggleMenu() {
@@ -49,4 +49,6 @@ export class NavbarComponent {
       this.modalService.open('login');
     }
   }
+
+  constructor(public theme: ThemeService) {}
 }

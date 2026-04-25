@@ -1,6 +1,6 @@
 <!-- NAV -->
 <nav class="nav" [class.scrolled]="isScrolled">
-    <div class="nav-inner">
+  <div class="nav-inner">
     <div class="nav-logo" routerLink="/">Epic<span>Hub</span></div>
 
     <ul class="nav-links">
@@ -18,6 +18,10 @@
         title="My Favorites"
       >
         <div class="fav-count" id="favCount">0</div>
+      </button>
+
+      <button (click)="theme.toggle()">
+        {{ theme.isDark ? "☀️" : "🌙" }}
       </button>
 
       <!-- Not Logged In -->
