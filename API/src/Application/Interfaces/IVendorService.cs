@@ -14,5 +14,8 @@ namespace Application.Interfaces
         Task<Result<VendorDetailsDTO>> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken);
         Task<Result<VendorDetailsDTO>> ApproveVendorAsync(Guid id, CancellationToken cancellationToken);
         Task<Result<VendorDetailsDTO>> RateVendorAsync(Guid id, RatingVendorRequest request, CancellationToken cancellationToken);
+        Task<List<VendorBookingDto>> GetVendorBookingsAsync(
+            Guid vendorId,
+            CancellationToken cancellationToken);
     }
 }

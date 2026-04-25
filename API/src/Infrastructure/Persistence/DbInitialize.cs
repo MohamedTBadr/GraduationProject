@@ -33,6 +33,7 @@ namespace Infrastructure.Persistence
                 await SeedServiceTypesAsync();
                 await SeedServicesAsync();   // ✅ add
                 await SeedPackagesAsync();
+                await SeedEventTypeAsync();
             }
             catch (Exception E)
             {
@@ -42,7 +43,19 @@ namespace Infrastructure.Persistence
         }
 
 
-
+        private async Task SeedEventTypeAsync() { 
+            if (!context.EventTypes.Any())
+            {
+                var eventTypes = new List<EventType>
+                {
+                    new EventType { Id = Guid.NewGuid(), Name = "Weeding" },
+                    new EventType { Id = Guid.NewGuid(), Name = "Birthday" },
+                    new EventType { Id = Guid.NewGuid(), Name = "Graduation" },
+                };
+                context.EventTypes.AddRange(eventTypes);
+                await context.SaveChangesAsync();
+            }
+        }
         private async Task SeedRolesAsync()
         {
 

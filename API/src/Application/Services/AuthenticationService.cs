@@ -26,28 +26,28 @@ namespace Application.Services
     {
         // Define Refresh Token duration (e.g., 30 days)
         private const int RefreshTokenDurationDays = 30;
-        public async Task<UserResponse> LogIn(LoginRequest loginRequest)
+        public async Task<UserResponse> LogIn(LoginRequest loginRequest,CancellationToken cancellationToken)
         {
             // 1. Check if User exists via Repository
-            var user = await userRepository.GetByEmailAsync(loginRequest.email) ??
+            var user = await userRepository.GetByEmailAsync(loginRequest.email, cancellationToken) ??
                 throw new UserNotFoundException(loginRequest.email);
 
             if (user.IsSuspended)
                 throw new UnauthorizedException("Your account is suspended. Please contact support.");
 
             // 2. Validate password via Repository
-            var isValid = await userRepository.CheckPasswordAsync(user, loginRequest.password);
+            var isValid = await userRepository.CheckPasswordAsync(user, loginRequest.password, cancellationToken);
 
             if (!isValid)
                 throw new UnauthorizedException("Invalid credentials.");
 
             // 3. Check roles and vendor verification
-            var roles = await userRepository.GetUserRolesAsync(user);
+            var roles = await userRepository.GetUserRolesAsync(user, cancellationToken);
             var role = roles.FirstOrDefault() ?? string.Empty;
 
             if (role == "Vendor")
             {
-                var isVerified = await userRepository.IsVendorVerifiedAsync(user.Id);
+                var isVerified = await userRepository.IsVendorVerifiedAsync(user.Id, cancellationToken);
                 if (!isVerified)
                     throw new BadRequestException(new List<string> { "Your vendor account is not verified yet. Please wait for approval." });
             }
@@ -57,21 +57,21 @@ namespace Application.Services
             var refreshToken = GenerateNewRefreshToken();
 
             // 5. Update user entity via Repository
-            await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays);
+            await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays, cancellationToken);
 
             return new(user.UserName!, user.Email!, accessToken, refreshToken, role);
         }
 
-        public async Task<bool> CheckIfEmailExists(string email)
-                    => (await userRepository.GetByEmailAsync(email)) != null;
-        public async Task<UserResponse> RegisterAsync(SignUpRequest request)
+        public async Task<bool> CheckIfEmailExists(string email, CancellationToken cancellationToken)
+                    => (await userRepository.GetByEmailAsync(email, cancellationToken)) != null;
+        public async Task<UserResponse> RegisterAsync(SignUpRequest request, CancellationToken cancellationToken)
         {
             // Input validation and existing user checks
-            if (await userRepository.GetByNameAsync(request.name) != null)
+            if (await userRepository.GetByNameAsync(request.name, cancellationToken) != null)
             {
                 throw new UserAlreadyExistException($"User name '{request.name}' already exists.");
             }
-            if (await userRepository.GetByEmailAsync(request.email) != null)
+            if (await userRepository.GetByEmailAsync(request.email, cancellationToken) != null)
             {
                 throw new UserAlreadyExistException($"Email '{request.email}' already registered.");
             }
@@ -86,17 +86,17 @@ namespace Application.Services
             };
 
             // 1. Create User
-            var result = await userRepository.CreateAsync(user, request.password);
+            var result = await userRepository.CreateAsync(user, request.password, cancellationToken);
 
             if (result.Succeeded)
             {
                 // 2. Generate and set Tokens
                 var accessToken = await GenerateAccessTokenAsync(user);
                 var refreshToken = GenerateNewRefreshToken();
-                await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays);
+                await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays, cancellationToken);
 
                 // 3. Return both tokens
-                var roles = await userRepository.GetUserRolesAsync(user);
+                var roles = await userRepository.GetUserRolesAsync(user, cancellationToken);
                 var role = roles.FirstOrDefault() ?? string.Empty;
                 return new(request.name, request.email, accessToken, refreshToken, role);
             }
@@ -105,12 +105,12 @@ namespace Application.Services
             throw new BadRequestException(errors);
         }
 
-        public async Task ForgetPassword(string email)
+        public async Task ForgetPassword(string email, CancellationToken cancellationToken)
         {
-            var user = await userRepository.GetByEmailAsync(email) ?? throw new UserNotFoundException(email);
+            var user = await userRepository.GetByEmailAsync(email, cancellationToken) ?? throw new UserNotFoundException(email);
 
             // 1) create token
-            var token = await userRepository.GeneratePasswordResetTokenAsync(user);
+            var token = await userRepository.GeneratePasswordResetTokenAsync(user, cancellationToken);
 
             // 2) encode token so it's safe in a URL
             var tokenBytes = Encoding.UTF8.GetBytes(token);
@@ -230,14 +230,14 @@ namespace Application.Services
             // 5) send email (use your IEmailSender implementation)
             await emailSender.SendEmailAsync(user.Email!, subject, body);
         }
-        public async Task ResetPassword(ResetPasswordRequest request)
+        public async Task ResetPassword(ResetPasswordRequest request,CancellationToken cancellationToken)
         {
-            var user = await userRepository.GetByEmailAsync(request.email) ?? throw new UserNotFoundException(request.email);
+            var user = await userRepository.GetByEmailAsync(request.email,cancellationToken) ?? throw new UserNotFoundException(request.email);
             // 1) decode the token from URL
             var decodedTokenBytes = WebEncoders.Base64UrlDecode(request.token);
             var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
             // 2) reset password
-            var result = await userRepository.ResetPasswordAsync(user, decodedToken, request.newPassword);
+            var result = await userRepository.ResetPasswordAsync(user, decodedToken, request.newPassword, cancellationToken);
             if (!result.Succeeded)
             {
                 var errors = result.Errors.Select(e => e.Description).ToList();
@@ -246,10 +246,10 @@ namespace Application.Services
         }
 
         // 💡 NEW SECURE REFRESH LOGIC
-        public async Task<UserResponse> RefreshTokenAsync(RefreshTokenRequest request)
+        public async Task<UserResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
         {
             // 1. Find the user by the Refresh Token in the database
-            var user = await userRepository.GetByRefreshTokenAsync(request.RefreshToken);
+            var user = await userRepository.GetByRefreshTokenAsync(request.RefreshToken, cancellationToken);
 
             if (user == null)
             {
@@ -261,7 +261,7 @@ namespace Application.Services
             if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
                 // The token is expired. Revoke it and force user to log in again.
-                await ClearRefreshTokenAsync(user);
+                await ClearRefreshTokenAsync(user, cancellationToken);
                 throw new UnauthorizedException("Refresh token expired. Please log in again.");
             }
 
@@ -272,10 +272,10 @@ namespace Application.Services
             var newRefreshToken = GenerateNewRefreshToken();
 
             // 5. Update user with the new Refresh Token and expiry time (Revoke old token)
-            await SetRefreshTokenAsync(user, newRefreshToken, RefreshTokenDurationDays);
+            await SetRefreshTokenAsync(user, newRefreshToken, RefreshTokenDurationDays, cancellationToken);
 
             // 6. Return the new tokens
-            var roles = await userRepository.GetUserRolesAsync(user);
+            var roles = await userRepository.GetUserRolesAsync(user, cancellationToken);
             var role = roles.FirstOrDefault() ?? string.Empty;
             return new UserResponse(user.UserName!, user.Email!, newAccessToken, newRefreshToken, role);
         }
@@ -296,7 +296,7 @@ namespace Application.Services
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // JWT ID
             };
 
-            var roles = await userRepository.GetUserRolesAsync(user);
+            var roles = await userRepository.GetUserRolesAsync(user, CancellationToken.None);
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey));
@@ -330,29 +330,29 @@ namespace Application.Services
         /// <summary>
         /// Updates the user entity in the database with the new Refresh Token details.
         /// </summary>
-        private async Task SetRefreshTokenAsync(ApplicationUser user, string token, int durationDays)
+        private async Task SetRefreshTokenAsync(ApplicationUser user, string token, int durationDays, CancellationToken cancellationToken)
         {
             user.RefreshToken = token;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(durationDays);
-            await userRepository.UpdateAsync(user);
+            await userRepository.UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
         /// Clears the Refresh Token from the user entity (revocation).
         /// </summary>
-        private async Task ClearRefreshTokenAsync(ApplicationUser user)
+        private async Task ClearRefreshTokenAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
             user.RefreshToken = null;
             user.RefreshTokenExpiryTime = DateTime.MinValue;
-            await userRepository.UpdateAsync(user);
+            await userRepository.UpdateAsync(user, cancellationToken);
         }
 
-        public async Task LogoutAsync(Guid userId)
+        public async Task LogoutAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var user = await userRepository.GetByIdAsync(userId.ToString())
+            var user = await userRepository.GetByIdAsync(userId.ToString(), cancellationToken)
                 ?? throw new UserNotFoundException(userId.ToString());
 
-            await ClearRefreshTokenAsync(user); // revoke refresh token
+            await ClearRefreshTokenAsync(user, cancellationToken); // revoke refresh token
             sseManager.Remove(userId);          // close SSE connection
         }
     }

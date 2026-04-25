@@ -1,9 +1,11 @@
 ﻿using Application;
 using Application.DTOs.VendorDTOs;
 using Application.Interfaces;
+using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using System.Security.Claims;
 using Web.Api.Attributes;
 using Web.Api.Controllers.Attributes;
 
@@ -29,6 +31,29 @@ namespace Web.Api.Controllers
         {
            var vendor= await vendorService.GetVendorByIdAsync(id, cancellationToken);
             return Ok(vendor);
+        }
+
+
+        /// <summary>
+        /// Get all bookings for the authenticated vendor.
+        /// GET /api/vendor/bookings
+        /// </summary>
+        /// 
+        [HttpGet("bookings")]
+        [Authorize(Roles = "Vendor")]
+        public async Task<IActionResult> GetMyBookings(CancellationToken cancellationToken)
+        {
+            var vendorIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(vendorIdClaim) || !Guid.TryParse(vendorIdClaim, out var vendorId))
+                return Unauthorized(new { message = "Invalid or missing vendor identity." });
+
+            var bookings = await vendorService.GetVendorBookingsAsync(vendorId, cancellationToken);
+
+            if (!bookings.Any())
+                return NotFound(new { message = "No bookings found for this vendor." });
+
+            return Ok(bookings);
         }
 
         [HttpPost]

@@ -54,6 +54,8 @@ namespace Infrastructure.Repositories
                 cancellationToken);
         }
 
+ 
+
         public async Task<IEnumerable<Event>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
             return await _pipeline.ExecuteAsync(async token =>

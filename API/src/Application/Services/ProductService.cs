@@ -162,7 +162,7 @@ namespace Application.Services
             var updated = await _ServiceRepository.UpdateAsync(service, cancellationToken);
             return Result<ServiceDTO>.Success(_mapper.Map<ServiceDTO>(updated));
         }
-}
+
         public async Task AddRatingAsync(ServiceRatingRequest dto, CancellationToken cancellationToken)
         {
             if (dto.UserId is not Guid userId)

@@ -71,7 +71,23 @@ namespace Application.DTOs
     }
 }
 
+public class VendorBookingDto
+{
+    public Guid EventItemId { get; set; }
+    public string ServiceName { get; set; }
+    public decimal Price { get; set; }
+    public string BookingStatus { get; set; }
+    public string? Notes { get; set; }
 
+    // Event details
+    public Guid EventId { get; set; }
+    public string EventTitle { get; set; }
+    public string EventType { get; set; }
+    public DateTime EventDate { get; set; }
+    public string EventStatus { get; set; }
+    public int GuestCount { get; set; }
+    public string Location { get; set; }
+}
 //// add to your existing EventDTOs file
 
 //public class CreateEventItemDto

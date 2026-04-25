@@ -20,7 +20,7 @@ namespace Web.Api.Controllers
         [HttpPost("Login")]
         [AllowAnonymous]
         //[Idecmpotent]
-        public async Task<IActionResult> Login(LoginRequest loginRequest)
+        public async Task<IActionResult> Login(LoginRequest loginRequest, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -35,7 +35,7 @@ namespace Web.Api.Controllers
 
                 throw new UnprocessableContentException(errors);
             }
-            var user = await ServiceManager.AuthenticationService.LogIn(loginRequest);
+            var user = await ServiceManager.AuthenticationService.LogIn(loginRequest, cancellationToken);
 
             var response = Result<UserResponse>.Success(user);
             return Ok(response);
@@ -58,7 +58,7 @@ namespace Web.Api.Controllers
 
                 throw new BadRequestException(errors);
             }
-            var result = await ServiceManager.AuthenticationService.RegisterAsync(request);
+            var result = await ServiceManager.AuthenticationService.RegisterAsync(request, cancellationToken);
             var response = Result<UserResponse>.Success(result);
             return Ok(response);
         }
@@ -80,7 +80,7 @@ namespace Web.Api.Controllers
                 throw new BadRequestException(errors);
             }
 
-            return Ok(await ServiceManager.AuthenticationService.CheckIfEmailExists(email));
+            return Ok(await ServiceManager.AuthenticationService.CheckIfEmailExists(email, cancellationToken));
         }
 
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -98,7 +98,7 @@ namespace Web.Api.Controllers
             try
             {
                 // Call the secure Service method with the token provided by the client
-                var response = await ServiceManager.AuthenticationService.RefreshTokenAsync(request);
+                var response = await ServiceManager.AuthenticationService.RefreshTokenAsync(request, cancellationToken);
                 var result = Result<UserResponse>.Success(response);
                 // The UserResponse now contains the new AccessToken and the new RefreshToken
                 return Ok(response);
@@ -123,14 +123,14 @@ namespace Web.Api.Controllers
                     .ToList();
                 throw new BadRequestException(errors);
             }
-            await ServiceManager.AuthenticationService.ForgetPassword(email);
+            await ServiceManager.AuthenticationService.ForgetPassword(email, cancellationToken);
             var result = Result<string>.Success("Email Has Send Succussfully");
             return Ok(result);
 
 
         }
         [HttpPost("ResetPassword")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -141,7 +141,7 @@ namespace Web.Api.Controllers
                     .ToList();
                 throw new BadRequestException(errors);
             }
-            await ServiceManager.AuthenticationService.ResetPassword(request);
+            await ServiceManager.AuthenticationService.ResetPassword(request, cancellationToken);
 
             var result = Result<string>.Success("Email Has Send Succussfully");
 
@@ -150,14 +150,14 @@ namespace Web.Api.Controllers
 
         [HttpPost("Logout")]
         [Authorize]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout(CancellationToken cancellationToken)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
             {
                 return Unauthorized();
             }
-            await ServiceManager.AuthenticationService.LogoutAsync(Guid.Parse(userId));
+            await ServiceManager.AuthenticationService.LogoutAsync(Guid.Parse(userId), cancellationToken);
             var result = Result<string>.Success("Logged out successfully");
             return Ok(result);
         }
