@@ -1,10 +1,10 @@
-<div class="ad-section active" style="display:block">
+<div class="ad-section active block">
   <div class="ad-page-hd">
     <div>
       <div class="ad-page-title">Reports & Analytics</div>
       <div class="ad-page-sub">Deep dives into platform performance, growth, and retention.</div>
     </div>
-    <div style="display:flex;gap:7px"><button class="ad-btn ad-btn-ghost">Export PDF</button><button class="ad-btn ad-btn-gold">Schedule Report</button></div>
+    <div class="flex gap-[7px]"><button class="ad-btn ad-btn-ghost">Export PDF</button><button class="ad-btn ad-btn-gold">Schedule Report</button></div>
   </div>
   <div class="ad-kpi-grid">
     <div class="ad-kpi ak-blue"><div class="ad-kpi-val">38%</div><div class="ad-kpi-lbl">Month-over-month Growth</div><div class="ad-kpi-trend akt-up">Best month ever</div></div>
@@ -15,18 +15,18 @@
   <div class="ad-g2">
     <div class="ad-card">
       <div class="ad-card-title">User Acquisition (Last 6 Months)</div>
-      <div class="ad-bar-chart" id="ad-acq-chart" style="display:flex;align-items:flex-end;gap:15px;height:120px;padding-top:20px;margin-top:10px;justify-content:center">
-          <div style="width:25px;background:#3b82f6;height:62%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Oct</span></div>
-          <div style="width:25px;background:#3b82f6;height:71%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Nov</span></div>
-          <div style="width:25px;background:#3b82f6;height:98%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Dec</span></div>
-          <div style="width:25px;background:#3b82f6;height:82%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Jan</span></div>
-          <div style="width:25px;background:#3b82f6;height:91%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Feb</span></div>
+      <div class="ad-bar-chart flex items-end gap-[15px] h-[120px] pt-[20px] mt-[10px] justify-center" id="ad-acq-chart">
+          <div class="w-[25px] bg-[#3b82f6] h-[62%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Oct</span></div>
+          <div class="w-[25px] bg-[#3b82f6] h-[71%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Nov</span></div>
+          <div class="w-[25px] bg-[#3b82f6] h-[98%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Dec</span></div>
+          <div class="w-[25px] bg-[#3b82f6] h-[82%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Jan</span></div>
+          <div class="w-[25px] bg-[#3b82f6] h-[91%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Feb</span></div>
       </div>
     </div>
     <div class="ad-card">
       <div class="ad-card-title">Traffic Sources</div>
       <div id="ad-traffic-sources">
-          <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Organic Search</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:#10b981;width:44%"></div></div><div style="width:30px;text-align:right">44%</div></div>
+          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Organic Search</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[#10b981] w-[44%]"></div></div><div class="w-[30px] text-right">44%</div></div>
       </div>
     </div>
   </div>
@@ -34,19 +34,19 @@
     <div class="ad-card">
       <div class="ad-card-title">Event Type Distribution</div>
       <div id="ad-event-dist">
-          <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Wedding</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--gold);width:44%"></div></div><div style="width:30px;text-align:right">44%</div></div>
+          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Wedding</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[44%]"></div></div><div class="w-[30px] text-right">44%</div></div>
       </div>
     </div>
     <div class="ad-card">
       <div class="ad-card-title">Top Performing Cities</div>
       <div id="ad-cities">
-          <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Cairo</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--gold);width:58%"></div></div><div style="width:30px;text-align:right">58%</div></div>
+          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Cairo</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[58%]"></div></div><div class="w-[30px] text-right">58%</div></div>
       </div>
     </div>
     <div class="ad-card">
       <div class="ad-card-title">Seasonal Trends</div>
       <div id="ad-seasonal">
-          <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Q4 (Oct-Dec)</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--gold);width:38%"></div></div><div style="width:30px;text-align:right">38%</div></div>
+          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Q4 (Oct-Dec)</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[38%]"></div></div><div class="w-[30px] text-right">38%</div></div>
       </div>
     </div>
   </div>

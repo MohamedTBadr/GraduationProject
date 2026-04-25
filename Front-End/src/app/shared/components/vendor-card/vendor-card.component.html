@@ -3,7 +3,7 @@
         <div class="vc-photo-inner" [style.background]="getGradient(vendor.id)">{{vendor.name.charAt(0)}}</div>
         <div class="vc-top-row">
             <span class="vc-cat-badge">{{vendor.categoryName || 'Vendor'}}</span>
-            <div style="display:flex;gap:7px">
+            <div class="flex gap-[7px]">
                 <button class="compare-btn" [class.active]="compareService.isInCompare(vendor.id)"
                     (click)="onToggleCompare($event)">️</button>
                 <button class="vc-fav-btn" [class.active]="isFavorite()"
@@ -15,8 +15,8 @@
         <div class="vc-name">{{vendor.name}}</div>
         <div class="vc-loc" *ngIf="vendor.location">📍 {{vendor.location}}</div>
         <div class="vc-rating-row">
-            <span class="stars" style="color:var(--gold);font-size:.8rem"></span>
-            <span style="font-weight:700;font-size:.85rem;color:var(--navy);margin-left:4px">{{vendor.rating || 'New'}}</span>
+            <span class="stars text-[var(--gold)] text-[.8rem]"></span>
+            <span class="font-bold text-[.85rem] text-[var(--navy)] ml-[4px]">{{vendor.rating || 'New'}}</span>
             <span class="vc-review-count"></span>
         </div>
         <div class="vc-footer">

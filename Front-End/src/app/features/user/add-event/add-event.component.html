@@ -4,7 +4,7 @@
     <p>Start with a quickstart template or build your event from scratch</p>
   </div>
   
-  <div class="container" style="padding-top:0;padding-bottom:60px;max-width:860px">
+  <div class="container pt-[0] pb-[60px] max-w-[860px]">
     <!-- Step indicator -->
     <div class="ae-step-bar">
       <div class="ae-step" [class.active]="step >= 1" [class.done]="step > 1">
@@ -25,10 +25,10 @@
 
     <!-- Step 1: Quickstart type select -->
     <div id="ae-panel-1" *ngIf="step === 1">
-      <div style="text-align:center;margin-bottom:24px">
+      <div class="text-center mb-[24px]">
         <div class="tag">⚡ Quickstart</div>
-        <h2 class="section-title" style="font-size:1.8rem">What type of event are you planning?</h2>
-        <p style="color:var(--gray);font-size:.9rem;margin-top:8px">We'll pre-fill suggested vendors, checklist items, and budget splits for you.</p>
+        <h2 class="section-title text-[1.8rem]">What type of event are you planning?</h2>
+        <p class="text-[var(--gray)] text-[.9rem] mt-[8px]">We'll pre-fill suggested vendors, checklist items, and budget splits for you.</p>
       </div>
       
       <div class="qs-grid">
@@ -42,8 +42,8 @@
         </div>
       </div>
       
-      <div style="text-align:center">
-        <button class="btn btn-gold" (click)="goToStep2()" [disabled]="!selectedEventType" [style.opacity]="!selectedEventType ? '0.5' : '1'" style="padding:12px 36px">Continue →</button>
+      <div class="text-center">
+        <button class="btn btn-gold py-[12px] px-[36px]" (click)="goToStep2()" [disabled]="!selectedEventType" [ngClass]="!selectedEventType ? 'opacity-50' : 'opacity-100'">Continue →</button>
       </div>
     </div>
 
@@ -81,8 +81,8 @@
         </div>
 
         <!-- Budget breakdown -->
-        <div style="margin-bottom:18px">
-          <div style="font-size:.84rem;font-weight:600;color:var(--navy);margin-bottom:6px">💰 Suggested Budget Breakdown</div>
+        <div class="mb-[18px]">
+          <div class="text-[.84rem] font-semibold text-[var(--navy)] mb-[6px]">💰 Suggested Budget Breakdown</div>
           <div class="ae-budget-breakdown">
              <div class="ae-budget-row"><span>Venue</span> <span><strong>20,000 EGP</strong> (40%)</span></div>
              <div class="ae-budget-row"><span>Catering</span> <span><strong>15,000 EGP</strong> (30%)</span></div>
@@ -95,7 +95,7 @@
 
         <div class="form-group">
           <label>Services You Need</label>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+          <div class="flex gap-[8px] mt-[6px] flex-wrap">
             <button *ngFor="let s of servicesRequired" type="button" 
                 class="service-pill" [class.selected]="s.selected" (click)="toggleService(s)">
                 {{s.label}}
@@ -110,7 +110,7 @@
 
         <div class="ae-nav-btns">
           <button class="btn btn-ghost" (click)="goToStep1()">← Back</button>
-          <button class="btn btn-gold" (click)="createEvent()" style="padding:11px 32px">Create Event 🎉</button>
+          <button class="btn btn-gold py-[11px] px-[32px]" (click)="createEvent()">Create Event 🎉</button>
         </div>
       </div>
     </div>

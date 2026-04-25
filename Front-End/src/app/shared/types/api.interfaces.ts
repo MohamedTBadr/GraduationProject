@@ -300,6 +300,7 @@ export interface EventResponseDto {
 
 export interface CreateEventItemDto {
   eventId: string;
+  serviceId?: string;
   serviceImage: string;
   serviceName: string;
   price: number;

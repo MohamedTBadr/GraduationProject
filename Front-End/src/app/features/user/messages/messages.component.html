@@ -1,91 +1,71 @@
-<h2 style="font-family:var(--ff-d);font-size:2rem;color:var(--navy);margin-bottom:24px">Messages</h2>
+<h2 class="text-[2rem] text-[var(--navy)] mb-[24px] font-[var(--ff-d)]">Messages</h2>
 
-<div
-    style="background:var(--white);border-radius:var(--r2);box-shadow:var(--sh1);display:grid;grid-template-columns:300px 1fr;height:650px;overflow:hidden">
+<div class="bg-[var(--white)] rounded-[var(--r2)] [box-shadow:var(--sh1)] grid [grid-template-columns:300px_1fr] h-[650px] overflow-hidden">
 
     <!-- Inbox List -->
-    <div style="border-right:1px solid var(--lgray);overflow-y:auto;background:var(--white)">
-        <div style="padding:20px;border-bottom:1px solid var(--lgray)">
-            <input #chatSearch type="text" placeholder="Search messages..."
-                style="width:100%;padding:10px;border:1px solid var(--lgray);border-radius:8px;font-size:.9rem" />
+    <div class="overflow-y-auto bg-[var(--white)] [border-right:1px_solid_var(--lgray)]">
+        <div class="p-[20px] [border-bottom:1px_solid_var(--lgray)]">
+            <input class="w-[100%] p-[10px] [border:1px_solid_var(--lgray)] rounded-[8px] text-[.9rem]" #chatSearch type="text" placeholder="Search messages..." />
         </div>
-        <div *ngFor="let c of conversations" (click)="selectChat(c)"
-            [style.background]="selectedConversation?.userId === c.userId ? 'var(--cream)' : 'transparent'"
-            style="padding:20px;border-bottom:1px solid var(--lgray);cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:background .2s">
-            <div
-                style="width:44px;height:44px;border-radius:50%;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;font-weight:700;color:var(--navy)">
+        <div class="p-[20px] [border-bottom:1px_solid_var(--lgray)] cursor-pointer flex gap-[12px] items-start [transition:background_.2s]" *ngFor="let c of conversations" (click)="selectChat(c)" [ngClass]="selectedConversation?.userId === c.userId ? 'bg-[var(--cream)]' : 'bg-transparent'">
+            <div class="w-[44px] h-[44px] rounded-[50%] bg-[var(--cream2)] flex items-center justify-center text-[1.3rem] shrink-0 font-bold text-[var(--navy)]">
                 {{c.userAvatar || c.userName?.charAt(0) || 'U'}}</div>
-            <div style="flex:1;overflow:hidden">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                    <strong style="color:var(--navy);font-size:.95rem">{{c.userName}}</strong>
-                    <span style="color:var(--gray);font-size:.75rem">{{c.lastMessageAt | date:'shortTime'}}</span>
+            <div class="flex-1 overflow-hidden">
+                <div class="flex justify-between items-center mb-[4px]">
+                    <strong class="text-[var(--navy)] text-[.95rem]">{{c.userName}}</strong>
+                    <span class="text-[var(--gray)] text-[.75rem]">{{c.lastMessageAt | date:'shortTime'}}</span>
                 </div>
-                <div style="color:var(--gray);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
-                    [style.fontWeight]="c.unreadCount ? 700 : 400" [style.color]="c.unreadCount ? 'var(--navy)' : 'var(--gray)'">
+                <div class="text-[var(--gray)] text-[.85rem] overflow-hidden whitespace-nowrap text-ellipsis" [ngClass]="c.unreadCount ? 'font-bold text-[var(--navy)]' : 'font-normal text-[var(--gray)]'">
                     {{c.lastMessage || 'No messages yet'}}
                 </div>
             </div>
-            <div *ngIf="c.unreadCount"
-                style="width:10px;height:10px;border-radius:50%;background:var(--gold);margin-top:6px;flex-shrink:0">
+            <div class="w-[10px] h-[10px] rounded-[50%] bg-[var(--gold)] mt-[6px] shrink-0" *ngIf="c.unreadCount">
             </div>
         </div>
     </div>
 
     <!-- Chat View -->
-    <div style="display:flex;flex-direction:column;background:var(--white)" *ngIf="selectedConversation">
-        <div
-            style="padding:20px 24px;border-bottom:1px solid var(--lgray);display:flex;justify-content:space-between;align-items:center;z-index:10;background:var(--white)">
-            <div style="display:flex;align-items:center;gap:12px">
-                <div
-                    style="width:48px;height:48px;border-radius:50%;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:var(--navy)">
+    <div class="flex flex-col bg-[var(--white)]" *ngIf="selectedConversation">
+        <div class="py-[20px] px-[24px] [border-bottom:1px_solid_var(--lgray)] flex justify-between items-center bg-[var(--white)] z-[10]">
+            <div class="flex items-center gap-[12px]">
+                <div class="w-[48px] h-[48px] rounded-[50%] bg-[var(--cream2)] flex items-center justify-center text-[1.4rem] font-bold text-[var(--navy)]">
                     {{selectedConversation.userAvatar || selectedConversation.userName?.charAt(0) || 'U'}}</div>
                 <div>
-                    <strong
-                        style="display:block;color:var(--navy);font-size:1.1rem;margin-bottom:4px">{{selectedConversation.userName}}</strong>
-                    <span style="color:#16a34a;font-size:.8rem;display:flex;align-items:center;gap:5px">
-                        <span style="width:8px;height:8px;background:#16a34a;border-radius:50%"></span> Online
+                    <strong class="block text-[var(--navy)] text-[1.1rem] mb-[4px]">{{selectedConversation.userName}}</strong>
+                    <span class="text-[#16a34a] text-[.8rem] flex items-center gap-[5px]">
+                        <span class="w-[8px] h-[8px] bg-[#16a34a] rounded-[50%]"></span> Online
                     </span>
                 </div>
             </div>
-            <div style="display:flex;gap:10px">
+            <div class="flex gap-[10px]">
                 <button class="btn btn-outline btn-sm">Archive</button>
                 <button class="btn btn-navy btn-sm">View Profile</button>
             </div>
         </div>
 
-        <div #scrollContainer
-            style="flex:1;padding:24px;overflow-y:auto;background:var(--cream);display:flex;flex-direction:column;gap:16px">
-            <div *ngFor="let msg of messages" [style.alignSelf]="msg.senderId === currentUserId ? 'flex-end' : 'flex-start'"
-                [style.background]="msg.senderId === currentUserId ? 'var(--navy)' : 'var(--white)'"
-                [style.color]="msg.senderId === currentUserId ? 'var(--white)' : 'var(--navy)'"
-                style="max-width:70%;padding:14px 18px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.04);position:relative">
+        <div class="flex-1 p-[24px] overflow-y-auto bg-[var(--cream)] flex flex-col gap-[16px]" #scrollContainer>
+            <div class="max-w-[70%] py-[14px] px-[18px] rounded-[12px] [box-shadow:0_2px_8px_rgba(0,0,0,.04)] relative" *ngFor="let msg of messages" [ngClass]="msg.senderId === currentUserId ? 'self-end bg-[var(--navy)] text-[var(--white)]' : 'self-start bg-[var(--white)] text-[var(--navy)]'">
 
                 <!-- Bubble Tail logic could be added here if needed -->
-                <p style="font-size:.92rem;line-height:1.5;margin:0">{{msg.content}}</p>
-                <span style="display:block;text-align:right;font-size:.65rem;margin-top:8px"
-                    [style.color]="msg.senderId === currentUserId ? 'rgba(255,255,255,.6)' : 'var(--gray)'">
+                <p class="text-[.92rem] m-[0] leading-[1.5]">{{msg.content}}</p>
+                <span class="block text-right text-[.65rem] mt-[8px]" [ngClass]="msg.senderId === currentUserId ? 'text-[rgba(255,255,255,.6)]' : 'text-[var(--gray)]'">
                     {{msg.sentAt | date:'shortTime'}}
                 </span>
             </div>
         </div>
 
-        <div style="padding:20px;border-top:1px solid var(--lgray);background:var(--white)">
-            <div style="display:flex;gap:12px;align-items:center">
-                <button
-                    style="background:none;border:none;font-size:1.5rem;color:var(--gray);cursor:pointer;padding:0 5px">+</button>
-                <input #msgInput type="text" placeholder="Type a message..." [(ngModel)]="newMessageText"
-                    (keyup.enter)="sendMessage()"
-                    style="flex:1;padding:14px 20px;border:1px solid var(--lgray);border-radius:50px;font-size:.95rem;outline:none;transition:border-color .2s"
-                    onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--lgray)'" />
-                <button class="btn btn-navy" (click)="sendMessage()"
-                    style="width:48px;height:48px;border-radius:50%;padding:0;justify-content:center;flex-shrink:0">
-                    <span style="font-size:1.2rem">→</span>
+        <div class="p-[20px] bg-[var(--white)] [border-top:1px_solid_var(--lgray)]">
+            <div class="flex gap-[12px] items-center">
+                <button class="bg-[none] [border:none] text-[1.5rem] text-[var(--gray)] cursor-pointer py-[0] px-[5px]">+</button>
+                <input class="flex-1 py-[14px] px-[20px] [border:1px_solid_var(--lgray)] rounded-[50px] text-[.95rem] [transition:border-color_.2s] outline-none" #msgInput type="text" placeholder="Type a message..." [(ngModel)]="newMessageText" (keyup.enter)="sendMessage()" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--lgray)'" />
+                <button class="btn btn-navy w-[48px] h-[48px] rounded-[50%] p-[0] justify-center shrink-0" (click)="sendMessage()">
+                    <span class="text-[1.2rem]">→</span>
                 </button>
             </div>
         </div>
     </div>
     
-    <div *ngIf="!selectedConversation" style="display:flex;align-items:center;justify-content:center;background:var(--cream);color:var(--gray)">
+    <div class="flex items-center justify-center bg-[var(--cream)] text-[var(--gray)]" *ngIf="!selectedConversation">
         Select a conversation to start chatting.
     </div>
 </div>

@@ -1,4 +1,4 @@
-<div class="vd-section active" style="display:block">
+<div class="vd-section active block">
   <div class="vd-page-header">
     <div><div class="vd-page-title">My Services</div><div class="vd-page-sub">Manage the services you offer clients. Changes go live immediately.</div></div>
     <button class="vd-btn vd-btn-gold" (click)="openAddServiceModal()">+ Add Service</button>
@@ -9,19 +9,19 @@
     <button class="vd-tab" [class.active]="activeTab === 'paused'" (click)="setTab('paused')">Paused ({{ pausedServices.length }})</button>
   </div>
 
-  <div *ngIf="loading" style="padding: 40px; text-align: center; color: #94a3b8;">
+  <div class="p-[40px] text-center text-[#94a3b8]" *ngIf="loading">
     Loading services...
   </div>
 
   <div *ngIf="!loading">
-    <div style="display:grid;gap:11px">
+    <div class="grid gap-[11px]">
       <app-service-card 
         *ngFor="let service of currentServices" 
         [service]="service" 
         (actionClick)="handleAction($event, service)">
       </app-service-card>
       
-      <div *ngIf="currentServices.length === 0" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 0.95rem; background: white; border-radius: 12px; border: 1px dashed #cbd5e1;">
+      <div class="p-[40px] text-center text-[#94a3b8] text-[0.95rem] bg-[white] rounded-[12px] [border:1px_dashed_#cbd5e1]" *ngIf="currentServices.length === 0">
         No services found.
       </div>
     </div>
@@ -30,66 +30,66 @@
 
 <!-- ADD/EDIT SERVICE MODAL -->
 <div class="vd-modal-overlay" [class.open]="isAddServiceModalOpen">
-  <div class="vd-modal" style="max-width: 540px;">
+  <div class="vd-modal max-w-[540px]">
     <button class="vd-modal-close" (click)="closeAddServiceModal()">&times;</button>
-    <div class="vd-modal-title" style="font-size: 1.6rem;">{{ editingId ? 'Edit Service' : 'Add New Service' }}</div>
-    <div class="vd-modal-sub" style="margin-bottom: 24px;">{{ editingId ? 'Update the details for this service.' : 'Create a new listing that will appear on your vendor profile.' }}</div>
+    <div class="vd-modal-title text-[1.6rem]">{{ editingId ? 'Edit Service' : 'Add New Service' }}</div>
+    <div class="vd-modal-sub mb-[24px]">{{ editingId ? 'Update the details for this service.' : 'Create a new listing that will appear on your vendor profile.' }}</div>
     
     <form [formGroup]="serviceForm" (ngSubmit)="createService()">
       <div class="vd-form-group">
         <label>Service Name *</label>
-        <input type="text" formControlName="name" placeholder="e.g. Wedding Stage Floral Design" style="border-radius: 8px; font-size: 0.9rem; padding: 12px 14px; border: 1.5px solid var(--lgray);">
-        <div *ngIf="serviceForm.get('name')?.invalid && serviceForm.get('name')?.touched" style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">Service Name is required</div>
+        <input class="rounded-[8px] text-[0.9rem] py-[12px] px-[14px] [border:1.5px_solid_var(--lgray)]" type="text" formControlName="name" placeholder="e.g. Wedding Stage Floral Design">
+        <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('name')?.invalid && serviceForm.get('name')?.touched">Service Name is required</div>
       </div>
       
-      <div class="vd-form-row" style="margin-bottom: 16px;">
-        <div style="flex: 1;">
+      <div class="vd-form-row mb-[16px]">
+        <div class="flex-1">
           <label>Category *</label>
-          <select formControlName="categoryId" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray); width: 100%; background-color: white; appearance: auto;">
+          <select class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%] bg-[white] appearance-auto" formControlName="categoryId">
             <option value="" disabled selected>Select a category</option>
             <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
           </select>
-          <div *ngIf="serviceForm.get('categoryId')?.invalid && serviceForm.get('categoryId')?.touched" style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">Category is required</div>
+          <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('categoryId')?.invalid && serviceForm.get('categoryId')?.touched">Category is required</div>
         </div>
-        <div style="flex: 1;">
+        <div class="flex-1">
           <label>Service Type *</label>
           <app-service-type-dropdown formControlName="serviceTypeId"></app-service-type-dropdown>
-          <div *ngIf="serviceForm.get('serviceTypeId')?.invalid && serviceForm.get('serviceTypeId')?.touched" style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">Service Type is required</div>
+          <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('serviceTypeId')?.invalid && serviceForm.get('serviceTypeId')?.touched">Service Type is required</div>
         </div>
       </div>
       
-      <div class="vd-form-row" style="margin-bottom: 16px;">
-        <div style="flex: 1;">
+      <div class="vd-form-row mb-[16px]">
+        <div class="flex-1">
           <label>Starting Price (EGP) *</label>
-          <input type="text" formControlName="price" placeholder="e.g. 8000" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray); width: 100%;">
-          <div *ngIf="serviceForm.get('price')?.invalid && serviceForm.get('price')?.touched" style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">Starting Price is required</div>
+          <input class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" type="text" formControlName="price" placeholder="e.g. 8000">
+          <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('price')?.invalid && serviceForm.get('price')?.touched">Starting Price is required</div>
         </div>
       </div>
       
-      <div class="vd-form-group" style="margin-bottom: 16px;">
+      <div class="vd-form-group mb-[16px]">
         <label>Description *</label>
-        <textarea formControlName="description" placeholder="Describe the service in detail — what's included, materials, setup time..." rows="4" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray); width: 100%;"></textarea>
-        <div *ngIf="serviceForm.get('description')?.invalid && serviceForm.get('description')?.touched" style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">Description is required</div>
+        <textarea class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" formControlName="description" placeholder="Describe the service in detail — what's included, materials, setup time..." rows="4"></textarea>
+        <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('description')?.invalid && serviceForm.get('description')?.touched">Description is required</div>
       </div>
       
       <div class="vd-form-row">
-        <div style="flex: 1;">
+        <div class="flex-1">
           <label>Setup Duration</label>
-          <input type="text" formControlName="duration" placeholder="e.g. 4-6 hours" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray); width: 100%;">
+          <input class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" type="text" formControlName="duration" placeholder="e.g. 4-6 hours">
         </div>
-        <div style="flex: 1;">
+        <div class="flex-1">
           <label>Lead Time Required</label>
-          <input type="text" formControlName="leadTime" placeholder="e.g. 2 weeks minimum" style="border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray); width: 100%;">
+          <input class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" type="text" formControlName="leadTime" placeholder="e.g. 2 weeks minimum">
         </div>
       </div>
 
-      <div class="vd-form-group" style="margin-top: 16px;">
+      <div class="vd-form-group mt-[16px]">
         <label>Service Images</label>
         <app-image-upload (imagesChanged)="onImagesChanged($event)"></app-image-upload>
       </div>
       
-      <div class="vd-submit-bar" style="border: none; margin-top: 24px; padding-top: 0; display: flex; justify-content: flex-end; gap: 10px;">
-        <button type="button" class="vd-btn vd-btn-ghost" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;" (click)="closeAddServiceModal()">Cancel</button>
+      <div class="vd-submit-bar [border:none] mt-[24px] pt-[0] flex justify-end gap-[10px]">
+        <button type="button" class="vd-btn vd-btn-ghost rounded-[50px] font-semibold py-[10px] px-[24px]" (click)="closeAddServiceModal()">Cancel</button>
         <button type="submit" class="vd-btn vd-btn-gold">{{ editingId ? 'Save Changes' : 'Create Service' }}</button>
       </div>
     </form>
@@ -98,51 +98,49 @@
 
 <!-- DETAILS MODAL -->
 <div class="vd-modal-overlay" [class.open]="isDetailModalOpen">
-  <div class="vd-modal" style="max-width: 500px;" *ngIf="selectedService">
+  <div class="vd-modal max-w-[500px]" *ngIf="selectedService">
     <button class="vd-modal-close" (click)="closeDetailModal()">&times;</button>
     
-    <div style="display:flex; align-items:center; gap: 16px; margin-bottom: 20px;">
-      <img *ngIf="selectedService.imageUrl; else detailFallbackIcon" 
-           [src]="selectedService.imageUrl"
-           style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+    <div class="flex items-center gap-[16px] mb-[20px]">
+      <img class="w-[80px] h-[80px] rounded-[12px] object-cover shrink-0 [box-shadow:0_4px_12px_rgba(0,0,0,0.08)]" *ngIf="selectedService.imageUrl; else detailFallbackIcon" [src]="selectedService.imageUrl">
       <ng-template #detailFallbackIcon>
-        <div style="font-size: 3rem; background: #f8fafc; border-radius: 12px; width: 80px; height: 80px; display:flex; align-items:center; justify-content:center; flex-shrink: 0;">
+        <div class="text-[3rem] bg-[#f8fafc] rounded-[12px] w-[80px] h-[80px] flex items-center justify-center shrink-0">
           🛠️
         </div>
       </ng-template>
       
       <div>
-        <div style="font-size: 1.4rem; font-weight: 700; color: #1e3a5f;">{{ selectedService.name }}</div>
-        <div style="color: #b34a6c; font-weight: 600; font-size: 1.1rem; margin-top: 4px;">{{ selectedService.price | currency:'EGP' }}</div>
+        <div class="text-[1.4rem] font-bold text-[#1e3a5f]">{{ selectedService.name }}</div>
+        <div class="text-[#b34a6c] font-semibold text-[1.1rem] mt-[4px]">{{ selectedService.price | currency:'EGP' }}</div>
       </div>
     </div>
 
     <!-- Additional Images Gallery Strip -->
-    <div *ngIf="false" style="display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 8px;">
+    <div class="flex gap-[8px] mb-[20px] pb-[8px] overflow-x-auto" *ngIf="false">
        <!-- Replaced by a single image -->
     </div>
 
-    <div style="color: #64748b; line-height: 1.6; margin-bottom: 20px; font-size: 0.95rem;">
+    <div class="text-[#64748b] mb-[20px] text-[0.95rem] leading-[1.6]">
       {{ selectedService.description }}
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 12px;">
+    <div class="grid [grid-template-columns:1fr_1fr] gap-[12px] mb-[24px] p-[16px] bg-[#f8fafc] rounded-[12px]">
       <div>
-        <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 600; margin-bottom: 4px;">STATUS</div>
-        <div style="font-weight: 600; color: #1e293b; text-transform: capitalize;">Active</div>
+        <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">STATUS</div>
+        <div class="font-semibold text-[#1e293b] capitalize">Active</div>
       </div>
       <div>
-        <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 600; margin-bottom: 4px;">CATEGORY</div>
-        <div style="font-weight: 600; color: #1e293b;">{{ selectedService.categoryName || 'Not specified' }}</div>
+        <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">CATEGORY</div>
+        <div class="font-semibold text-[#1e293b]">{{ selectedService.categoryName || 'Not specified' }}</div>
       </div>
       <div>
-        <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 600; margin-bottom: 4px;">SERVICE TYPE</div>
-        <div style="font-weight: 600; color: #1e293b;">{{ selectedService.serviceTypeName || 'Not specified' }}</div>
+        <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">SERVICE TYPE</div>
+        <div class="font-semibold text-[#1e293b]">{{ selectedService.serviceTypeName || 'Not specified' }}</div>
       </div>
     </div>
 
-    <div style="display: flex; justify-content: flex-end;">
-      <button class="vd-btn vd-btn-ghost" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;" (click)="closeDetailModal()">Close</button>
+    <div class="flex justify-end">
+      <button class="vd-btn vd-btn-ghost rounded-[50px] font-semibold py-[10px] px-[24px]" (click)="closeDetailModal()">Close</button>
     </div>
   </div>
 </div>

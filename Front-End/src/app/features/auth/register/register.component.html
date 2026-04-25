@@ -3,8 +3,8 @@
     <div class="modal-sub">Join the Eventora community.</div>
     
     <div class="modal-form">
-        <div class="form-group" style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
+        <div class="form-group flex gap-[10px]">
+            <div class="flex-1">
                 <label>First Name *</label>
                 <input type="text" placeholder="Sara" formControlName="firstName"
                     [class.is-invalid]="firstNameControl?.invalid && firstNameControl?.touched" />
@@ -12,7 +12,7 @@
                     <small *ngIf="firstNameControl?.hasError('required')">Required.</small>
                 </div>
             </div>
-            <div style="flex: 1;">
+            <div class="flex-1">
                 <label>Last Name *</label>
                 <input type="text" placeholder="Mohamed" formControlName="lastName"
                     [class.is-invalid]="lastNameControl?.invalid && lastNameControl?.touched" />

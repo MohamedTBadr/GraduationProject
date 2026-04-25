@@ -1,6 +1,6 @@
 <div class="page active" id="page-favorites">
-    <div class="container" style="padding:60px 0;min-height:70vh">
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px">
+    <div class="container py-[60px] px-[0] min-h-[70vh]">
+        <div class="flex justify-between items-end mb-[40px]">
             <div>
                 <h2 class="section-title">My Favorites</h2>
                 <p class="section-sub">Vendors and packages you've saved for later.</p>
@@ -9,16 +9,15 @@
                 All</button>
         </div>
 
-        <div *ngIf="loading" style="text-align:center;padding:40px;color:var(--gray)">
+        <div class="text-center p-[40px] text-[var(--gray)]" *ngIf="loading">
             Loading favorites...
         </div>
 
-        <div *ngIf="!loading && favorites.length === 0"
-            style="text-align:center;padding:80px 20px;background:var(--cream);border-radius:12px">
-            <div style="font-size:3rem;margin-bottom:16px"></div>
-            <h3 style="font-family:var(--ff-d);font-size:1.4rem;color:var(--navy);margin-bottom:8px">No favourites yet
+        <div class="text-center py-[80px] px-[20px] bg-[var(--cream)] rounded-[12px]" *ngIf="!loading && favorites.length === 0">
+            <div class="text-[3rem] mb-[16px]"></div>
+            <h3 class="text-[1.4rem] text-[var(--navy)] mb-[8px] font-[var(--ff-d)]">No favourites yet
             </h3>
-            <p style="color:var(--gray);margin-bottom:24px">Start exploring vendors and tap the heart icon to save them
+            <p class="text-[var(--gray)] mb-[24px]">Start exploring vendors and tap the heart icon to save them
                 here.</p>
             <button class="btn btn-gold" routerLink="/explore">Explore Vendors</button>
         </div>
@@ -26,11 +25,10 @@
         <div class="explore-grid" *ngIf="!loading && favorites.length > 0">
             <div class="vendor-card" routerLink="/vendor/{{v.id}}" *ngFor="let v of favorites">
                 <div class="vc-photo">
-                    <div class="vc-photo-inner" style="background: linear-gradient(135deg, hsl(230, 40%, 25%) 0%, hsl(250, 45%, 30%) 100%)">{{v.name.charAt(0)}}</div>
+                    <div class="vc-photo-inner bg-[linear-gradient(135deg,_hsl(230,_40%,_25%)_0%,_hsl(250,_45%,_30%)_100%)]">{{v.name.charAt(0)}}</div>
                     <div class="vc-top-row">
                         <div class="vc-cat-badge">{{v.categoryName || 'Vendor'}}</div>
-                        <button class="vc-fav-btn" style="color:var(--gold)"
-                            (click)="removeFromFavorites(v.id, $event)">❤️</button>
+                        <button class="vc-fav-btn text-[var(--gold)]" (click)="removeFromFavorites(v.id, $event)">❤️</button>
                     </div>
                 </div>
                 <div class="vc-body">

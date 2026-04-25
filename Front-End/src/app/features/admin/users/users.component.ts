@@ -79,14 +79,16 @@ export class UsersComponent implements OnInit {
   }
 
   deleteUser(user: ApiUser) {
-    if (confirm(`Are you sure you want to delete user ${user.name}?`)) {
+    if (confirm(`Are you sure you want to permanently delete ${user.name}? This action cannot be undone.`)) {
+      this.loading = true;
       this.userService.delete(user.id).subscribe({
         next: () => {
-          this.toastService.show('User deleted successfully', 'success');
+          this.toastService.show(`User ${user.name} deleted successfully.`, 'success');
           this.loadUsers();
         },
-        error: () => {
-          this.toastService.show('Error deleting user', 'error');
+        error: (err) => {
+          this.toastService.show('Failed to delete user. They might have active dependencies.', 'error');
+          this.loading = false;
         }
       });
     }

@@ -4,7 +4,7 @@
     <p>Start with a quickstart template or build your event from scratch</p>
   </div>
   
-  <div class="container" style="padding-top:0;padding-bottom:60px;max-width:860px">
+  <div class="container pt-[0] pb-[60px] max-w-[860px]">
     <!-- Step indicator -->
     <div class="ae-step-bar">
       <div class="ae-step" [class.active]="step >= 1" [class.done]="step > 1">
@@ -25,15 +25,15 @@
 
     <!-- Step 1: Quickstart type select -->
     <div id="ae-panel-1" *ngIf="step === 1">
-      <div style="text-align:center;margin-bottom:24px">
+      <div class="text-center mb-[24px]">
         <div class="tag">⚡ Quickstart</div>
-        <h2 class="section-title" style="font-size:1.8rem">What type of event are you planning?</h2>
-        <p style="color:var(--gray);font-size:.9rem;margin-top:8px">We'll pre-fill suggested vendors, checklist items, and budget splits for you.</p>
+        <h2 class="section-title text-[1.8rem]">What type of event are you planning?</h2>
+        <p class="text-[var(--gray)] text-[.9rem] mt-[8px]">We'll pre-fill suggested vendors, checklist items, and budget splits for you.</p>
       </div>
       
-      <div *ngIf="loadingCategories" style="text-align: center; padding: 40px; color: var(--gray);">
-        <span class="spinner" style="display:inline-block; border: 3px solid rgba(0,0,0,0.1); border-top-color: var(--gold); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></span>
-        <div style="margin-top: 10px;">Loading event types...</div>
+      <div class="text-center p-[40px] text-[var(--gray)]" *ngIf="loadingCategories">
+        <span class="spinner inline-block [border:3px_solid_rgba(0,0,0,0.1)] rounded-[50%] w-[24px] h-[24px] border-t-[var(--gold)] animate-[spin_1s_linear_infinite]"></span>
+        <div class="mt-[10px]">Loading event types...</div>
       </div>
       
       <div class="qs-grid" *ngIf="!loadingCategories">
@@ -47,8 +47,8 @@
         </div>
       </div>
       
-      <div style="text-align:center">
-        <button class="btn btn-gold" (click)="goToStep2()" [disabled]="!selectedEventType" [style.opacity]="!selectedEventType ? '0.5' : '1'" style="padding:12px 36px">Continue →</button>
+      <div class="text-center">
+        <button class="btn btn-gold py-[12px] px-[36px]" (click)="goToStep2()" [disabled]="!selectedEventType" [ngClass]="!selectedEventType ? 'opacity-50' : 'opacity-100'">Continue →</button>
       </div>
     </div>
 
@@ -86,10 +86,10 @@
         </div>
 
         <!-- Budget breakdown -->
-        <div style="margin-bottom:18px">
-          <div style="font-size:.84rem;font-weight:600;color:var(--navy);margin-bottom:6px">💰 Suggested Budget Breakdown</div>
+        <div class="mb-[18px]">
+          <div class="text-[.84rem] font-semibold text-[var(--navy)] mb-[6px]">💰 Suggested Budget Breakdown</div>
           
-          <div class="ae-budget-breakdown" *ngIf="!totalBudget" style="padding: 24px; text-align: center; color: var(--gray);">
+          <div class="ae-budget-breakdown p-[24px] text-center text-[var(--gray)]" *ngIf="!totalBudget">
             Enter your budget above to see the suggested allocation.
           </div>
 
@@ -99,13 +99,13 @@
              <div class="ae-budget-row"><span>Decoration</span> <span><strong>{{ budgetBreakdownCalculated.decoration.val | number:'1.0-0' }} EGP</strong> ({{ budgetBreakdownCalculated.decoration.pct }}%)</span></div>
              <div class="ae-budget-row"><span>Photography</span> <span><strong>{{ budgetBreakdownCalculated.photography.val | number:'1.0-0' }} EGP</strong> ({{ budgetBreakdownCalculated.photography.pct }}%)</span></div>
              <div class="ae-budget-row"><span>Other</span> <span><strong>{{ budgetBreakdownCalculated.other.val | number:'1.0-0' }} EGP</strong> ({{ budgetBreakdownCalculated.other.pct }}%)</span></div>
-             <div class="ae-budget-row total" style="padding-top:10px; margin-top:5px;"><span>Total Budget</span> <span><strong>{{ totalBudget | number:'1.0-0' }} EGP</strong></span></div>
+             <div class="ae-budget-row total pt-[10px] mt-[5px]"><span>Total Budget</span> <span><strong>{{ totalBudget | number:'1.0-0' }} EGP</strong></span></div>
           </div>
         </div>
 
         <div class="form-group">
           <label>Services You Need</label>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+          <div class="flex gap-[8px] mt-[6px] flex-wrap">
             <button *ngFor="let s of servicesRequired" type="button" 
                 class="service-pill" [class.selected]="s.selected" (click)="toggleService(s)">
                 {{s.label}}
@@ -120,7 +120,7 @@
 
         <div class="ae-nav-btns">
           <button class="btn btn-ghost" (click)="goToStep1()" [disabled]="submitting">← Back</button>
-          <button class="btn btn-gold" (click)="createEvent()" [disabled]="submitting" style="padding:11px 32px">
+          <button class="btn btn-gold py-[11px] px-[32px]" (click)="createEvent()" [disabled]="submitting">
             {{ submitting ? 'Creating...' : 'Create Event 🎉' }}
           </button>
         </div>

@@ -24,12 +24,7 @@
       </button>
 
       <!-- Notifications -->
-      <button
-        *ngIf="authService.isLoggedIn()"
-        class="nav-icon-btn"
-        title="Notifications"
-        style="position: relative;"
-      >
+      <button *ngIf="authService.isLoggedIn()" class="nav-icon-btn relative" title="Notifications">
         🔔
         <div class="fav-count" *ngIf="signalRService.unreadCount() > 0">
           {{signalRService.unreadCount()}}
@@ -89,11 +84,7 @@
           My Portal
         </button>
 
-        <button
-          class="btn btn-navy btn-sm"
-          (click)="logout()"
-          style="border-color: #dc2626; color: #dc2626; background: transparent; margin-left: 12px;"
-        >
+        <button class="btn btn-navy btn-sm text-[#dc2626] bg-[transparent] ml-[12px] border-[#dc2626]" (click)="logout()">
           Logout
         </button>
       </ng-container>

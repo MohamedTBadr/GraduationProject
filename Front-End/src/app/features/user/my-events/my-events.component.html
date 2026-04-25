@@ -22,7 +22,7 @@
             <div class="event-hero-meta">
                 📅 {{activeEvent.date}} · {{activeEvent.type}} · {{activeEvent.guests}} guests
             </div>
-            <button class="btn btn-gold btn-sm mt-3" style="display: inline-flex; align-items: center; gap: 6px;" (click)="openAiStudio()">
+            <button class="btn btn-gold btn-sm mt-3 inline-flex items-center gap-[6px]" (click)="openAiStudio()">
                 <span>✨</span> Gemini Event Studio
             </button>
         </div>
@@ -39,7 +39,7 @@
         <div class="dash-card">
             <div class="dash-card-header">
                 <h3>Checklist</h3>
-                <button class="btn-text" style="color:var(--gold);font-weight:600;font-size:.9rem">+ Add Task</button>
+                <button class="btn-text text-[var(--gold)] font-semibold text-[.9rem]">+ Add Task</button>
             </div>
             <div class="checklist-container">
                 <div *ngFor="let item of activeEvent.checklist; let i = index" class="checklist-item">
@@ -79,12 +79,9 @@
                 </div>
             </div>
             <!-- Paymob Checkout -->
-            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--border); text-align: center;">
-                <p style="font-size: 0.85rem; color: var(--gray); margin-bottom: 12px;">A 25% deposit is required to confirm bookings.</p>
-                <button class="btn btn-gold w-100" 
-                        [disabled]="isPaying || spent === 0" 
-                        (click)="payDeposit()"
-                        style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <div class="mt-[24px] pt-[16px] text-center [border-top:1px_dashed_var(--border)]">
+                <p class="text-[0.85rem] text-[var(--gray)] mb-[12px]">A 25% deposit is required to confirm bookings.</p>
+                <button class="btn btn-gold w-100 flex justify-center items-center gap-[8px]" [disabled]="isPaying || spent === 0" (click)="payDeposit()">
                     <span *ngIf="!isPaying">💳 Pay Deposit ({{(spent * 0.25) | number}} EGP)</span>
                     <span *ngIf="isPaying">Loading Gateway...</span>
                 </button>

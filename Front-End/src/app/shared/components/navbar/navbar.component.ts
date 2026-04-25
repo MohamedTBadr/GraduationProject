@@ -52,4 +52,13 @@ export class NavbarComponent {
       this.modalService.open('login');
     }
   }
+
+  goToMessages() {
+    if (this.authService.isLoggedIn()) {
+      const route = this.authService.role() === 'Vendor' ? '/vendor/messages' : '/user/messages';
+      this.router.navigate([route]);
+    }
+  }
+
+  constructor(public theme: ThemeService) {}
 }

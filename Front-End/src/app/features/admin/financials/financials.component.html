@@ -1,4 +1,4 @@
-<div class="ad-section active" style="display:block">
+<div class="ad-section active block">
   <div class="ad-page-hd">
     <div><div class="ad-page-title">Financials</div><div class="ad-page-sub">Platform-wide revenue, commission breakdown, and financial health.</div></div>
     <button class="ad-btn ad-btn-ghost">Export Report</button>
@@ -12,19 +12,19 @@
   <div class="ad-g2">
     <div class="ad-card">
       <div class="ad-card-title">Revenue Trend (Monthly)</div>
-      <div class="ad-bar-chart" id="ad-fin-chart" style="display:flex;align-items:flex-end;gap:15px;height:120px;padding-top:20px;margin-top:10px;justify-content:center">
-          <div style="width:25px;background:var(--gold);height:62%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Oct</span></div>
-          <div style="width:25px;background:var(--gold);height:71%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Nov</span></div>
-          <div style="width:25px;background:var(--gold);height:98%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Dec</span></div>
-          <div style="width:25px;background:var(--gold);height:82%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Jan</span></div>
-          <div style="width:25px;background:var(--gold);height:91%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;bottom:-20px;font-size:10px;left:-4px">Feb</span></div>
+      <div class="ad-bar-chart flex items-end gap-[15px] h-[120px] pt-[20px] mt-[10px] justify-center" id="ad-fin-chart">
+          <div class="w-[25px] bg-[var(--gold)] h-[62%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Oct</span></div>
+          <div class="w-[25px] bg-[var(--gold)] h-[71%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Nov</span></div>
+          <div class="w-[25px] bg-[var(--gold)] h-[98%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Dec</span></div>
+          <div class="w-[25px] bg-[var(--gold)] h-[82%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Jan</span></div>
+          <div class="w-[25px] bg-[var(--gold)] h-[91%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Feb</span></div>
       </div>
     </div>
     <div class="ad-card">
       <div class="ad-card-title">Commission Breakdown</div>
       <div id="ad-commission-breakdown">
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Venue (15%)</span><div style="flex:1;margin:0 14px"><div class="ad-prog"><div class="ad-prog-fill" style="width:57%"></div></div></div><span class="ad-rev-val">48K EGP</span></div>
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Photography (10%)</span><div style="flex:1;margin:0 14px"><div class="ad-prog"><div class="ad-prog-fill" style="width:11%"></div></div></div><span class="ad-rev-val">9K EGP</span></div>
+          <div class="ad-rev-row"><span class="ad-rev-lbl">Venue (15%)</span><div class="flex-1 my-[0] mx-[14px]"><div class="ad-prog"><div class="ad-prog-fill w-[57%]"></div></div></div><span class="ad-rev-val">48K EGP</span></div>
+          <div class="ad-rev-row"><span class="ad-rev-lbl">Photography (10%)</span><div class="flex-1 my-[0] mx-[14px]"><div class="ad-prog"><div class="ad-prog-fill w-[11%]"></div></div></div><span class="ad-rev-val">9K EGP</span></div>
       </div>
     </div>
   </div>
@@ -32,17 +32,17 @@
     <div class="ad-card">
       <div class="ad-card-title">Revenue by Event Type</div>
       <div id="ad-rev-event-type">
-          <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Wedding</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--gold);width:48%"></div></div><div style="width:30px;text-align:right">48%</div></div>
-          <div style="display:flex;align-items:center;margin:12px 0;font-size:.8rem"><div style="flex:1">Engagement</div><div style="flex:2;margin:0 12px;display:flex;align-items:center;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><div style="height:100%;background:#10b981;width:20%"></div></div><div style="width:30px;text-align:right">20%</div></div>
+          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Wedding</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[48%]"></div></div><div class="w-[30px] text-right">48%</div></div>
+          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Engagement</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[#10b981] w-[20%]"></div></div><div class="w-[30px] text-right">20%</div></div>
       </div>
     </div>
     <div class="ad-card">
       <div class="ad-card-title">Monthly P&L Summary</div>
       <div id="ad-pnl">
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Gross Revenue</span><span class="ad-rev-val" style="color:#4ade80">847,000 EGP</span></div>
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Platform Commission (10%)</span><span class="ad-rev-val" style="color:#4ade80">84,700 EGP</span></div>
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Vendor Payouts Processed</span><span class="ad-rev-val" style="color:#f87171">(142,500 EGP)</span></div>
-          <div class="ad-rev-row"><span class="ad-rev-lbl ad-rev-val">Platform Operating Revenue</span><span class="ad-rev-val" style="color:var(--gold);font-size:.95rem;">76,500 EGP</span></div>
+          <div class="ad-rev-row"><span class="ad-rev-lbl">Gross Revenue</span><span class="ad-rev-val text-[#4ade80]">847,000 EGP</span></div>
+          <div class="ad-rev-row"><span class="ad-rev-lbl">Platform Commission (10%)</span><span class="ad-rev-val text-[#4ade80]">84,700 EGP</span></div>
+          <div class="ad-rev-row"><span class="ad-rev-lbl">Vendor Payouts Processed</span><span class="ad-rev-val text-[#f87171]">(142,500 EGP)</span></div>
+          <div class="ad-rev-row"><span class="ad-rev-lbl ad-rev-val">Platform Operating Revenue</span><span class="ad-rev-val text-[var(--gold)] text-[.95rem]">76,500 EGP</span></div>
       </div>
     </div>
   </div>

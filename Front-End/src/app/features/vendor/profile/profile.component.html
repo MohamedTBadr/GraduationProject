@@ -1,8 +1,8 @@
-<div *ngIf="loading" style="padding: 40px; text-align: center; color: #94a3b8;">
+<div class="p-[40px] text-center text-[#94a3b8]" *ngIf="loading">
   Loading profile...
 </div>
 
-<div class="vd-section active" style="display:block" *ngIf="!loading && vendor">
+<div class="vd-section active block" *ngIf="!loading && vendor">
   <div class="vd-page-header">
     <div>
       <div class="vd-page-title">My Profile</div>
@@ -10,7 +10,7 @@
     </div>
     <button class="vd-btn vd-btn-ghost" [routerLink]="['/vendor', vendor.id]">View Public Profile →</button>
   </div>
-  <div class="vd-cover"><div class="vd-cover-avatar"></div><div style="position:absolute;top:11px;right:11px"><button class="vd-btn vd-btn-ghost vd-btn-sm" style="background:rgba(255,255,255,.1);color:white;border-color:rgba(255,255,255,.2)">Change Cover</button></div></div>
+  <div class="vd-cover"><div class="vd-cover-avatar"></div><div class="absolute top-[11px] right-[11px]"><button class="vd-btn vd-btn-ghost vd-btn-sm bg-[rgba(255,255,255,.1)] text-[white] border-[rgba(255,255,255,.2)]">Change Cover</button></div></div>
   <div class="vd-tab-bar">
     <button class="vd-tab active">Business Info</button>
   </div>
@@ -23,7 +23,7 @@
         </div>
         <div class="vd-form-group">
           <label>Category (Read Only)</label>
-          <input [value]="vendor.categoryName || 'Not specified'" disabled style="background-color: #f1f5f9; cursor: not-allowed;" />
+          <input class="bg-[#f1f5f9] cursor-not-allowed" [value]="vendor.categoryName || 'Not specified'" disabled />
         </div>
       </div>
       <div class="vd-form-group">
@@ -37,13 +37,13 @@
         </div>
         <div class="vd-form-group">
           <label>Status</label>
-          <input [value]="vendor.isApproved ? 'Approved' : 'Pending Approval'" disabled style="background-color: #f1f5f9; cursor: not-allowed; font-weight: bold;" [style.color]="vendor.isApproved ? '#16a34a' : '#d97706'" />
+          <input class="bg-[#f1f5f9] font-bold cursor-not-allowed" [value]="vendor.isApproved ? 'Approved' : 'Pending Approval'" disabled [ngClass]="vendor.isApproved ? 'text-[#16a34a]' : 'text-[#d97706]'" />
         </div>
       </div>
       <div class="vd-form-section"><div class="vd-form-section-lbl">Contact Details</div>
         <div class="vd-form-row">
           <div class="vd-form-group"><label>Phone / WhatsApp</label><input type="tel" [(ngModel)]="vendor.phone"/></div>
-          <div class="vd-form-group"><label>Email (Read Only)</label><input type="email" [value]="vendor.email" disabled style="background-color: #f1f5f9; cursor: not-allowed;"/></div>
+          <div class="vd-form-group"><label>Email (Read Only)</label><input class="bg-[#f1f5f9] cursor-not-allowed" type="email" [value]="vendor.email" disabled /></div>
         </div>
       </div>
       <div class="vd-submit-bar">
