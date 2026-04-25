@@ -15,5 +15,7 @@ namespace Domain.Contracts
         Task CreateAsync(EventType eventType,CancellationToken cancellationToken);
         Task UpdateAsync(EventType eventType,CancellationToken cancellationToken);
         Task DeleteAsync(EventType eventType, CancellationToken cancellationToken);
+
+        Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken);
     }
 }

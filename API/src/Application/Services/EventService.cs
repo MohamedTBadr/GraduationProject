@@ -12,13 +12,15 @@ namespace Application.Services
     public class EventService : IEventService
     {
         private readonly IEventRepository _eventRepo;
+        private readonly IEventTypeRepository _eventTypeRepo;
 
         private static readonly HashSet<string> ValidStatuses =
             new() { "Planned", "Approved", "Completed", "Cancelled" };
 
-        public EventService(IEventRepository eventRepo)
+        public EventService(IEventRepository eventRepo, IEventTypeRepository eventTypeRepo)
         {
             _eventRepo = eventRepo;
+            _eventTypeRepo = eventTypeRepo;
         }
 
         // ── Read ──────────────────────────────────────────────────
@@ -61,6 +63,10 @@ namespace Application.Services
 
         public async Task<EventResponseDto> CreateAsync(CreateEventDto dto, CancellationToken cancellationToken)
         {
+            var types = await _eventTypeRepo.ExistsAsync(dto.EventTypeId, cancellationToken);
+            if (!types)
+                throw new KeyNotFoundException($"Event type with id '{dto.EventTypeId}' was not found.");
+
             var created = await _eventRepo.CreateAsync(dto.ToEntity(), cancellationToken);
             return created.ToResponseDto();
         }
