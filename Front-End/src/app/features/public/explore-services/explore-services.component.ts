@@ -30,8 +30,9 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
   
   // Filters
   searchQuery = '';
-  selectedCategory = 'all';
+  selectedCategories: string[] = []; // Changed to array for multi-select
   selectedEventTypes: string[] = [];
+  selectedClassification: string = 'all'; // Personal, Corporate, all
   maxPrice = 100000;
   minRating = 0;
   selectedLocation = 'All Egypt';
@@ -58,8 +59,9 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadData();
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      if (params['category']) this.selectedCategory = params['category'];
+      if (params['category']) this.selectedCategories = [params['category']];
       if (params['q']) this.searchQuery = params['q'];
+      if (params['eventTypeId']) this.selectedEventTypes = [params['eventTypeId']];
       this.applyFilters();
     });
   }
@@ -77,8 +79,10 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
       this.categories = cats;
     });
 
-    // Fetch products
-    this.productService.getAll().subscribe({
+    // Fetch products. Passing eventTypeId if any is selected (sending to backend as requested)
+    const filters = this.selectedEventTypes.length > 0 ? { eventTypeId: this.selectedEventTypes[0] } : {};
+    
+    this.productService.getAll(filters).subscribe({
       next: (data) => {
         this.services = data;
         this.applyFilters();
@@ -103,12 +107,17 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Category
-    if (this.selectedCategory !== 'all') {
+    // Category (Multi-select)
+    if (this.selectedCategories.length > 0) {
       filtered = filtered.filter(s => 
-        s.serviceTypeId === this.selectedCategory || 
-        s.categoryName === this.selectedCategory
+        (s.serviceTypeId && this.selectedCategories.includes(s.serviceTypeId)) || 
+        (s.categoryName && this.selectedCategories.includes(s.categoryName))
       );
+    }
+
+    // Classification
+    if (this.selectedClassification !== 'all') {
+      filtered = filtered.filter(s => s.classification === this.selectedClassification);
     }
 
     // Price
@@ -134,8 +143,37 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
   }
 
   toggleCategory(cat: string) {
-    this.selectedCategory = this.selectedCategory === cat ? 'all' : cat;
+    const idx = this.selectedCategories.indexOf(cat);
+    if (idx > -1) {
+      this.selectedCategories.splice(idx, 1);
+    } else {
+      this.selectedCategories.push(cat);
+    }
     this.applyFilters();
+  }
+
+  toggleEventType(evtId: string) {
+    const idx = this.selectedEventTypes.indexOf(evtId);
+    if (idx > -1) {
+      this.selectedEventTypes.splice(idx, 1);
+    } else {
+      this.selectedEventTypes.push(evtId);
+    }
+    // As per requirement, sending event type to backend
+    this.loadData();
+  }
+
+  setClassification(classification: string) {
+    this.selectedClassification = classification;
+    this.applyFilters();
+  }
+
+  clearAllFilters() {
+    this.selectedCategories = [];
+    this.selectedEventTypes = [];
+    this.selectedClassification = 'all';
+    this.searchQuery = '';
+    this.loadData();
   }
 
   updatePrice(event: any) {

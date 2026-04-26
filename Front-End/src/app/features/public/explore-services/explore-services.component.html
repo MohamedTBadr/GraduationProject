@@ -18,8 +18,8 @@
         <button class="eh-search-btn" (click)="applyFilters()">Search →</button>
       </div>
       <div class="eh-quick-tags">
-        <div class="eh-quick-tag" [class.active]="selectedCategory === 'all'" (click)="toggleCategory('all')">✨ All Services</div>
-        <div class="eh-quick-tag" *ngFor="let cat of categories.slice(0, 5)" [class.active]="selectedCategory === cat.id" (click)="toggleCategory(cat.id)">
+        <div class="eh-quick-tag" [class.active]="selectedCategories.length === 0" (click)="clearAllFilters()">✨ All Services</div>
+        <div class="eh-quick-tag" *ngFor="let cat of categories.slice(0, 5)" [class.active]="selectedCategories.includes(cat.id)" (click)="toggleCategory(cat.id)">
           {{cat.name}}
         </div>
       </div>
@@ -39,7 +39,7 @@
         <button class="vt-btn" [class.active]="viewMode === 'list'" (click)="setView('list')" title="List View">☰</button>
         <button class="vt-btn" [class.active]="viewMode === 'map'" (click)="setView('map')" title="Map View">📍</button>
       </div>
-      <div class="results-info"><strong>{{filteredServices.length}}</strong> services found — <span>{{selectedCategory === 'all' ? 'All categories' : selectedCategory}}</span></div>
+      <div class="results-info"><strong>{{filteredServices.length}}</strong> services found — <span>{{selectedCategories.length === 0 ? 'All categories' : selectedCategories.length + ' Categories selected'}}</span></div>
       <div class="sort-wrap">
         Sort by:
         <select class="sort-sel" [(ngModel)]="sortOption" (change)="applyFilters()">
@@ -59,15 +59,38 @@
       <div class="fs-sticky">
         <div class="fs-header">
           <div class="fs-title">🎛️ Filters</div>
-          <button class="fs-clear" (click)="selectedCategory='all'; searchQuery=''; applyFilters()">Clear All</button>
+          <button class="fs-clear" (click)="clearAllFilters()">Clear All</button>
+        </div>
+
+        <!-- Event Type Filter -->
+        <div class="filter-block">
+          <div class="fb-title">Event Type <span class="fb-toggle open">▾</span></div>
+          <div class="fb-chip-row">
+            <div class="fb-chip" [class.sel]="selectedEventTypes.length === 0" (click)="clearAllFilters()">All</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('wedding')" (click)="toggleEventType('wedding')">Wedding</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('birthday')" (click)="toggleEventType('birthday')">Birthday</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('corporate')" (click)="toggleEventType('corporate')">Corporate</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('graduation')" (click)="toggleEventType('graduation')">Graduation</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('engagement')" (click)="toggleEventType('engagement')">Engagement</div>
+          </div>
+        </div>
+
+        <!-- Classification Filter -->
+        <div class="filter-block">
+          <div class="fb-title">Classification <span class="fb-toggle open">▾</span></div>
+          <div class="rating-options">
+            <label class="rating-row" (click)="setClassification('all')"><input type="radio" name="class" [checked]="selectedClassification==='all'" /> Any</label>
+            <label class="rating-row" (click)="setClassification('Personal')"><input type="radio" name="class" [checked]="selectedClassification==='Personal'" /> Personal</label>
+            <label class="rating-row" (click)="setClassification('Corporate')"><input type="radio" name="class" [checked]="selectedClassification==='Corporate'" /> Corporate</label>
+          </div>
         </div>
 
         <!-- Category Filter -->
         <div class="filter-block">
           <div class="fb-title">Service Category <span class="fb-toggle open">▾</span></div>
           <div class="fb-chip-row">
-            <div class="fb-chip" [class.sel]="selectedCategory === 'all'" (click)="toggleCategory('all')">All</div>
-            <div class="fb-chip" *ngFor="let cat of categories" [class.sel]="selectedCategory === cat.id" (click)="toggleCategory(cat.id)">
+            <div class="fb-chip" [class.sel]="selectedCategories.length === 0" (click)="clearAllFilters()">All</div>
+            <div class="fb-chip" *ngFor="let cat of categories" [class.sel]="selectedCategories.includes(cat.id)" (click)="toggleCategory(cat.id)">
               {{cat.name}}
             </div>
           </div>

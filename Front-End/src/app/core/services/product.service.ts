@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -25,8 +25,15 @@ export class ProductService {
   }
 
   /** GET /Service – returns all products */
-  getAll(): Observable<ApiProduct[]> {
-    return this.http.get<any>(`${this.apiUrl}/Service`).pipe(
+  getAll(filters?: { classification?: string; eventTypeId?: string }): Observable<ApiProduct[]> {
+    let params = new HttpParams();
+    if (filters?.classification && filters.classification !== 'all') {
+      params = params.set('classification', filters.classification);
+    }
+    if (filters?.eventTypeId) {
+      params = params.set('eventTypeId', filters.eventTypeId);
+    }
+    return this.http.get<any>(`${this.apiUrl}/Service`, { params }).pipe(
       map(res => this.extractArrayData(res))
     );
   }

@@ -67,9 +67,8 @@ I will tackle the remaining work in the following prioritized phases:
 ## Open Questions
 
 > [!IMPORTANT]
-> 1. **Event Creation Payload**: In `api.interfaces.ts` and `event.service.ts`, we don't currently have a `CreateEventRequest` model or a `POST /Event` endpoint defined. When a User checks out or uses `add-event` to book vendors, how should we structure that payload? Does the backend have a `POST /Event` endpoint ready? If so, what does it expect?
-> 2. **File Uploads**: The Vendor Services form has an `ImageUploadComponent`. Does the backend have a dedicated `POST /upload` endpoint for images, or should images be sent as Base64 strings?
-> 3. **Order of Execution**: Are you okay with me starting with **Phase 1: Complete Admin Portal** next, or would you prefer I jump into the **User Portal** first?
+> 1. **File Uploads**: The Vendor Services form has an `ImageUploadComponent`. Does the backend have a dedicated `POST /upload` endpoint for images, or should images be sent as Base64 strings?
+> 2. **Order of Execution**: Are you okay with me starting with **Phase 1: Complete Admin Portal** next, or would you prefer I jump into the **User Portal** first?
 
 ## Verification Plan
 

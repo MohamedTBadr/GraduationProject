@@ -65,39 +65,30 @@ sequenceDiagram
     API (ServiceController)-->>Frontend (Service Form): 201 Created
 ```
 
-### C. The Event Creation & Booking Flow (Client Checkout)
-Events represent a single user occasion (e.g., a Wedding) composed of multiple `EventItems` (the specific Vendor Services being hired). 
+### C. The Event Creation & Booking Flow (Direct-to-Event)
+Events represent a single user occasion (e.g., a Wedding) composed of multiple `EventItems` (the specific Vendor Services being hired). There is no "Cart"; services are added directly to Events.
 
-> [!WARNING]
-> **CRITICAL ARCHITECTURAL GAP IDENTIFIED:**
-> Based on our cross-reference of the codebase, the backend features `EventItemService` and `CreateEventItemDto`, but **lacks an `EventItemController` or an endpoint to actually add items to a created event.** For the system to be cohesive, a new controller or a compound endpoint (e.g., `POST /api/Event/{id}/items`) MUST be implemented in the backend before the frontend booking flow can be finalized.
-
-**Target Business Rules (Once Gap is resolved):**
-1. **Authentication Required**: Clients must be logged in (authorized) to access the Event Creation / Cart interfaces. Unauthenticated users are redirected by `authGuard`.
-2. The Frontend maintains a local state/cart of selected vendor services.
-3. The User fills out the Event Details (Title, Date, Budget, Location) and hits "Book".
-4. The Frontend executes a two-step transaction: First creating the master Event, then iterating through the cart to create associated Event Items.
+**Business Rules:**
+1. **Authentication Required**: Clients must be logged in (authorized) to add services to an event.
+2. **Direct to Event Workflow**: When a user selects a service and clicks "Add to event", the system checks the user's existing events:
+   - **Scenario A (No existing events)**: An "Untitled Event" is created (backend), and the user is prompted to enter Event Details (No. of guests, Date, Location, Specific requirements). Once entered, the event is finalized and the item is added to it.
+   - **Scenario B (One existing event)**: The item is automatically added to this existing event.
+   - **Scenario C (Multiple existing events)**: The "Add to event" button dynamically transforms into an inline dropdown containing the user's existing events and a "+ Create New Event" option, allowing the user to select the destination or spin up a new event directly.
 
 ```mermaid
-sequenceDiagram
-    participant Client
-    participant Frontend (Cart/Add Event)
-    participant API (EventController)
-    participant API (EventItemController) MILSING
+flowchart TD
+    A[Explore services] --> B[Select service]
+    B --> C[Add to event]
     
-    Client->>Frontend (Cart/Add Event): Selects Vendor Services
-    Client->>Frontend (Cart/Add Event): Fills Event Details & Submits
+    C -->|If user didn't create event| D[Create Untitled Event backend only]
+    C -->|If user already created event| E[Item added to event]
+    C -->|If user have more than one event| F[Choose from inline dropdown]
     
-    Frontend (Cart/Add Event)->>API (EventController): POST /api/Event (CreateEventDto)
-    API (EventController)-->>Frontend (Cart/Add Event): Returns Event ID (e.g. 201 Created)
+    D --> G[Enter Event Details: Guests, Date, Location]
+    G --> H[Event Created]
+    H --> E
     
-    Note over Frontend (Cart/Add Event),API (EventItemController) MILSING: Next Step Requires Backend Update
-    loop For Each Item in Cart
-        Frontend (Cart/Add Event)->>API (EventItemController) MILSING: POST /api/EventItem (CreateEventItemDto w/ Event ID)
-        API (EventItemController) MILSING-->>Frontend (Cart/Add Event): 201 Created
-    end
-    
-    Frontend (Cart/Add Event)-->>Client: Booking Successful Route to Dashboard
+    F --> E
 ```
 
 ### D. Vendor Booking Moderation (Approve/Reject Requests)
@@ -124,7 +115,34 @@ sequenceDiagram
 
 ---
 
-## 3. Recommended Remediation & Next Steps
+### E. Taxonomy & Classification Rules
 
-1. **Backend Integration Required**: A backend developer must expose `POST /api/EventItem` (or similar) using the existing `IEventItemService` logic.
-2. **Phase 1 Execution (Current Frontend Scope)**: Since `Admin Users/Vendors` do not rely on the missing endpoints, we can execute the administrative interfaces seamlessly without blockers.
+The marketplace organizes its providers and offerings based on a three-dimensional taxonomy to optimize search relevance and matching.
+
+**1. Vendor Type (Primary Category)**
+- **What it is:** "What are you?" (e.g., Photographer, Venue, Decor Company).
+- **Rule:** A `Vendor` MUST have exactly ONE `VendorType`.
+- **Purpose:** Used for the **Vendor Explore Page**, allowing users to browse providers by category (e.g., "Browse Photographers").
+
+**2. Service Type (Secondary Subcategory)**
+- **What it is:** "What services do you offer?" (e.g., Wedding Photography, DJ, Balloon Styling).
+- **Rule:** A `Vendor` can have MULTIPLE `ServiceTypes`. However, the selectable `ServiceTypes` MUST be dependent on the vendor's primary `VendorType` (e.g., A "Photographer" can select "Wedding Photography" but not "Catering").
+- **Purpose:** Used for the **Service Explore Page**, allowing users to search by specific need (e.g., "Browse DJs").
+
+**3. Event Types Served (Supply & Demand Matching)**
+- **What it is:** "What events do you serve?" (e.g., Weddings, Corporate Events).
+- **Rule:** A `Vendor` can select MULTIPLE `EventTypes` they cater to.
+- **Purpose:** Drives recommendation relevance. When a user creates a "Corporate Event", the system prioritizes and suggests vendors who have explicitly marked that they serve "Corporate Events".
+
+**Matching Logic (The Recommendation Engine):**
+- **Match by Need:** User searches for a specific service (e.g., DJ) → Show vendors with the DJ `ServiceType`.
+- **Match by Event Relevance:** User plans a Corporate Event → Prioritize vendors serving Corporate Events.
+- **Perfect Match:** User plans a Corporate Event and needs a DJ → Show vendors matching BOTH criteria (High Relevance Score).
+
+---
+
+## 3. Current Status & Next Steps
+
+1. **Taxonomy Realignment**: Update the database schema and API to support the defined taxonomy (`VendorType` dependency for `ServiceType`, and `VendorEventType` mappings).
+2. **Explore Pages Separation**: Implement distinct routing and UI for "Vendor Explore" and "Service Explore" on the frontend.
+3. **Smart Checklist Flow**: Develop the flow where choosing an Event Type suggests relevant Service Types to the user.

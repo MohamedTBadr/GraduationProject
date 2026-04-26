@@ -57,6 +57,36 @@
           <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('serviceTypeId')?.invalid && serviceForm.get('serviceTypeId')?.touched">Service Type is required</div>
         </div>
       </div>
+
+      <div class="vd-form-group mb-[16px]">
+        <label>Service Classification (Optional)</label>
+        <div class="flex gap-[16px] mt-[8px]">
+          <label class="flex items-center gap-[8px] cursor-pointer">
+            <input type="radio" formControlName="classification" value="Personal" class="accent-[#b34a6c]"> Personal Events
+          </label>
+          <label class="flex items-center gap-[8px] cursor-pointer">
+            <input type="radio" formControlName="classification" value="Corporate" class="accent-[#b34a6c]"> Corporate Events
+          </label>
+        </div>
+      </div>
+
+      <div class="vd-form-group mb-[16px]">
+        <label>Supported Event Types</label>
+        <div class="text-[0.85rem] text-[#64748b] mb-[8px]">Select the events you want to offer this service for.</div>
+        <div class="flex flex-wrap gap-[8px]">
+          <button type="button" 
+                  *ngFor="let evt of AVAILABLE_EVENT_TYPES"
+                  (click)="toggleEventType(evt.id)"
+                  [class.bg-[#b34a6c]]="serviceForm.get('allowedEventTypes')?.value.includes(evt.id)"
+                  [class.text-[white]]="serviceForm.get('allowedEventTypes')?.value.includes(evt.id)"
+                  [class.border-[#b34a6c]]="serviceForm.get('allowedEventTypes')?.value.includes(evt.id)"
+                  [class.bg-[white]]="!serviceForm.get('allowedEventTypes')?.value.includes(evt.id)"
+                  [class.text-[#475569]]="!serviceForm.get('allowedEventTypes')?.value.includes(evt.id)"
+                  class="rounded-[50px] px-[16px] py-[6px] text-[0.9rem] font-medium border-[1.5px] border-[#cbd5e1] transition-all cursor-pointer hover:border-[#b34a6c]">
+            {{ evt.name }}
+          </button>
+        </div>
+      </div>
       
       <div class="vd-form-row mb-[16px]">
         <div class="flex-1">
@@ -136,6 +166,17 @@
       <div>
         <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">SERVICE TYPE</div>
         <div class="font-semibold text-[#1e293b]">{{ selectedService.serviceTypeName || 'Not specified' }}</div>
+      </div>
+      <div>
+        <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">CLASSIFICATION</div>
+        <div class="font-semibold text-[#1e293b]">{{ selectedService.classification || 'Not specified' }}</div>
+      </div>
+      <div class="col-span-2">
+        <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">SUPPORTED EVENTS</div>
+        <div class="flex flex-wrap gap-[6px] mt-[4px]">
+          <span *ngIf="!selectedService.allowedEventTypes || selectedService.allowedEventTypes.length === 0" class="text-[0.85rem] text-[#94a3b8]">No specific events mapped</span>
+          <span *ngFor="let evt of selectedService.allowedEventTypes" class="bg-[#e2e8f0] text-[#475569] px-[10px] py-[2px] rounded-[50px] text-[0.8rem] font-medium capitalize">{{ evt }}</span>
+        </div>
       </div>
     </div>
 
