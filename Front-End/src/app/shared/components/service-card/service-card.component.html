@@ -1,40 +1,38 @@
-<div class="vd-svc-card" [class.grid-mode]="viewMode === 'grid'" (click)="actionClick.emit('detail')" style="cursor: pointer;">
+<div class="vd-svc-card cursor-pointer" [class.grid-mode]="viewMode === 'grid'" (click)="actionClick.emit('detail')">
   <!-- Image or Fallback Icon -->
-  <img class="svc-media" *ngIf="coverImage; else fallbackIcon" 
-       [src]="coverImage"
-       style="width: 70px; height: 70px; border-radius: 12px; object-fit: cover; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <img class="svc-media w-[70px] h-[70px] rounded-[12px] object-cover shrink-0 [box-shadow:0_2px_8px_rgba(0,0,0,0.05)]" *ngIf="coverImage; else fallbackIcon" [src]="coverImage">
   <ng-template #fallbackIcon>
-    <div class="vd-svc-icon" style="background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; width: 70px; height: 70px; font-size: 2rem; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">🛠️</div>
+    <div class="vd-svc-icon bg-[#f8fafc] rounded-[12px] flex items-center justify-center w-[70px] h-[70px] text-[2rem] shrink-0 [box-shadow:0_2px_8px_rgba(0,0,0,0.05)]">🛠️</div>
   </ng-template>
 
   <!-- Content -->
-  <div class="svc-content" style="flex: 1; padding: 0 16px;">
-    <div class="vd-svc-name" style="font-weight: 700; color: #1e3a5f; margin-bottom: 4px; font-size: 1.05rem;">
+  <div class="svc-content flex-1 py-[0] px-[16px]">
+    <div class="vd-svc-name font-bold text-[#1e3a5f] mb-[4px] text-[1.05rem]">
       {{ service.name }}
     </div>
-    <div class="vd-svc-price" style="color: #b34a6c; font-weight: 600; margin-bottom: 6px; font-size: 0.95rem;">
+    <div class="vd-svc-price text-[#b34a6c] font-semibold mb-[6px] text-[0.95rem]">
       {{ service.price | currency:'EGP' }}
     </div>
-    <div class="vd-svc-desc" style="color: #64748b; font-size: 0.85rem; margin-bottom: 8px;">
+    <div class="vd-svc-desc text-[#64748b] text-[0.85rem] mb-[8px]">
       {{ service.description }}
     </div>
     
-    <div class="vd-svc-meta" style="font-size: 0.8rem; color: #64748b; display: flex; gap: 12px; align-items: center;">
+    <div class="vd-svc-meta text-[0.8rem] text-[#64748b] flex gap-[12px] items-center">
       <span *ngIf="service.status === 'active'">0 bookings</span>
       <span *ngIf="service.status === 'paused'">Paused since today</span>
     </div>
   </div>
 
   <!-- Actions -->
-  <div class="vd-svc-actions" style="display: flex; gap: 8px; align-items: center;">
-    <span *ngIf="service.status === 'paused'" style="background: rgba(253, 230, 138, 0.4); color: #b45309; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Paused</span>
-    <span *ngIf="service.status !== 'paused'" style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Active</span>
+  <div class="vd-svc-actions flex gap-[8px] items-center">
+    <span class="bg-[rgba(253,_230,_138,_0.4)] text-[#b45309] py-[4px] px-[12px] rounded-[20px] text-[0.75rem] font-semibold" *ngIf="service.status === 'paused'">Paused</span>
+    <span class="bg-[#dcfce7] text-[#166534] py-[4px] px-[12px] rounded-[20px] text-[0.75rem] font-semibold" *ngIf="service.status !== 'paused'">Active</span>
     
-    <button *ngIf="service.status === 'paused'" style="background: rgba(220, 252, 231, 0.4); border: 1px solid #bbf7d0; border-radius: 20px; padding: 6px 16px; font-size: 0.85rem; color: #16a34a; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='rgba(220, 252, 231, 0.4)'" (click)="$event.stopPropagation(); actionClick.emit('activate')">Activate</button>
-    <button *ngIf="service.status !== 'paused'" style="background: white; border: 1px solid #cbd5e1; border-radius: 20px; padding: 6px 16px; font-size: 0.85rem; color: #334155; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'" (click)="$event.stopPropagation(); actionClick.emit('pause')">Pause</button>
+    <button class="bg-[rgba(220,_252,_231,_0.4)] [border:1px_solid_#bbf7d0] rounded-[20px] py-[6px] px-[16px] text-[0.85rem] text-[#16a34a] font-semibold cursor-pointer [transition:all_0.2s]" *ngIf="service.status === 'paused'" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='rgba(220, 252, 231, 0.4)'" (click)="$event.stopPropagation(); actionClick.emit('activate')">Activate</button>
+    <button class="bg-[white] [border:1px_solid_#cbd5e1] rounded-[20px] py-[6px] px-[16px] text-[0.85rem] text-[#334155] cursor-pointer [transition:all_0.2s]" *ngIf="service.status !== 'paused'" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'" (click)="$event.stopPropagation(); actionClick.emit('pause')">Pause</button>
 
-    <button *ngIf="service.status !== 'paused'" style="background: white; border: 1px solid #cbd5e1; border-radius: 20px; padding: 6px 16px; font-size: 0.85rem; color: #334155; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'" (click)="$event.stopPropagation(); actionClick.emit('edit')">Edit</button>
+    <button class="bg-[white] [border:1px_solid_#cbd5e1] rounded-[20px] py-[6px] px-[16px] text-[0.85rem] text-[#334155] cursor-pointer [transition:all_0.2s]" *ngIf="service.status !== 'paused'" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'" (click)="$event.stopPropagation(); actionClick.emit('edit')">Edit</button>
     
-    <button *ngIf="service.status === 'paused'" style="background: white; border: 1px solid #fecaca; border-radius: 20px; padding: 6px 16px; font-size: 0.85rem; color: #ef4444; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'" (click)="$event.stopPropagation(); actionClick.emit('delete')">Delete</button>
+    <button class="bg-[white] [border:1px_solid_#fecaca] rounded-[20px] py-[6px] px-[16px] text-[0.85rem] text-[#ef4444] font-semibold cursor-pointer [transition:all_0.2s]" *ngIf="service.status === 'paused'" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'" (click)="$event.stopPropagation(); actionClick.emit('delete')">Delete</button>
   </div>
 </div>

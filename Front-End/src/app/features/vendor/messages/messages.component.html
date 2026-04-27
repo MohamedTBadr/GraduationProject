@@ -1,34 +1,27 @@
-<div class="vd-section active" style="display:block">
+<div class="vd-section active block">
   <div class="vd-page-header">
     <div>
-      <div class="vd-page-title" style="font-size: 1.45rem;">Messages</div>
+      <div class="vd-page-title text-[1.45rem]">Messages</div>
       <div class="vd-page-sub">Stay connected with clients — fast replies win more bookings.</div>
     </div>
   </div>
 
-  <div class="vd-msg-layout" style="height: 600px;">
+  <div class="vd-msg-layout h-[600px]">
     <!-- Conversation List -->
     <div class="vd-msg-list">
       <div class="vd-msg-list-head">Conversations</div>
       <div id="vd-msg-threads">
-        <div *ngFor="let c of conversations" (click)="selectChat(c)" class="vd-msg-thread"
-          [class.active]="selectedConversation?.userId === c.userId"
-          style="padding: 14px 18px; border-bottom: 1px solid var(--cream); cursor: pointer; display: flex; flex-direction: column; gap: 6px;"
-          [style.border-left]="selectedConversation?.userId === c.userId ? '3px solid var(--gold)' : 'none'"
-          [style.background]="selectedConversation?.userId === c.userId ? 'var(--white)' : 'transparent'">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div
-              style="font-weight: 600; font-size: 0.85rem; color: var(--navy); display: flex; align-items: center; gap: 8px;">
+        <div *ngFor="let c of conversations" (click)="selectChat(c)" class="vd-msg-thread py-[14px] px-[18px] [border-bottom:1px_solid_var(--cream)] cursor-pointer flex flex-col gap-[6px]" [class.active]="selectedConversation?.userId === c.userId" [ngClass]="selectedConversation?.userId === c.userId ? 'border-l-[3px] border-l-[var(--gold)] bg-[var(--white)]' : 'border-l-0 bg-transparent'">
+          <div class="flex justify-between items-center">
+            <div class="font-semibold text-[0.85rem] text-[var(--navy)] flex items-center gap-[8px]">
               <span>{{c.userAvatar || c.userName?.charAt(0) || 'U'}}</span> {{c.userName}}
             </div>
-            <div style="font-size: 0.75rem; color: var(--gray);">{{c.lastMessageAt | date:'shortTime'}}</div>
+            <div class="text-[0.75rem] text-[var(--gray)]">{{c.lastMessageAt | date:'shortTime'}}</div>
           </div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div
-              style="font-size: 0.8rem; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-              [style.fontWeight]="c.unreadCount ? 700 : 400">
+          <div class="flex justify-between items-center">
+            <div class="text-[0.8rem] text-[var(--gray)] overflow-hidden whitespace-nowrap text-ellipsis" [ngClass]="c.unreadCount ? 'font-bold' : 'font-normal'">
               {{c.lastMessage || 'No messages yet'}}</div>
-            <div *ngIf="c.unreadCount" class="vd-unread-dot" style="background: #e11d48; margin: 0;"></div>
+            <div *ngIf="c.unreadCount" class="vd-unread-dot bg-[#e11d48] m-[0]"></div>
           </div>
         </div>
       </div>
@@ -37,41 +30,37 @@
     <!-- Message Pane -->
     <div class="vd-msg-pane">
       <!-- Pane Head -->
-      <div class="vd-msg-pane-head" *ngIf="selectedConversation"
-        style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--lgray);">
-        <div style="display: flex; gap: 12px; align-items: center;">
-          <div style="font-size: 1.6rem; margin-top:-4px;">{{selectedConversation.userAvatar || selectedConversation.userName?.charAt(0) || 'U'}}</div>
+      <div class="vd-msg-pane-head py-[16px] px-[24px] flex justify-between items-center [border-bottom:1px_solid_var(--lgray)]" *ngIf="selectedConversation">
+        <div class="flex gap-[12px] items-center">
+          <div class="text-[1.6rem] mt-[-4px]">{{selectedConversation.userAvatar || selectedConversation.userName?.charAt(0) || 'U'}}</div>
           <div>
-            <div class="vd-msg-pane-name" style="font-size: 1rem; color: #1a2540;">{{selectedConversation.userName}}</div>
-            <div class="vd-msg-pane-status" style="font-size: 0.78rem; color: var(--green); margin-top: 1px;">Online</div>
+            <div class="vd-msg-pane-name text-[1rem] text-[#1a2540]">{{selectedConversation.userName}}</div>
+            <div class="vd-msg-pane-status text-[0.78rem] text-[var(--green)] mt-[1px]">Online</div>
           </div>
         </div>
-        <div style="display: flex; gap: 10px;">
-          <button class="vd-btn vd-btn-ghost vd-btn-sm" style="font-weight: 600;">View Booking</button>
-          <button class="vd-btn vd-btn-ghost vd-btn-sm" style="font-weight: 600;">WhatsApp</button>
+        <div class="flex gap-[10px]">
+          <button class="vd-btn vd-btn-ghost vd-btn-sm font-semibold">View Booking</button>
+          <button class="vd-btn vd-btn-ghost vd-btn-sm font-semibold">WhatsApp</button>
         </div>
       </div>
 
       <!-- Messages Body -->
-      <div class="vd-msg-body" #scrollContainer style="padding: 24px; gap: 16px; overflow-y: auto;" *ngIf="selectedConversation">
+      <div class="vd-msg-body p-[24px] gap-[16px] overflow-y-auto" #scrollContainer *ngIf="selectedConversation">
         <div *ngFor="let msg of messages" class="vd-msg-bubble" [ngClass]="msg.senderId === currentUserId ? 'me' : 'them'">
           <div class="vd-msg-text">{{msg.content}}</div>
-          <span style="display:block;font-size:.65rem;margin-top:4px"
-                [style.color]="msg.senderId === currentUserId ? 'rgba(255,255,255,.7)' : 'var(--gray)'"
-                [style.textAlign]="msg.senderId === currentUserId ? 'right' : 'left'">
+          <span class="block text-[.65rem] mt-[4px]" [ngClass]="msg.senderId === currentUserId ? 'text-[rgba(255,255,255,.7)] text-right' : 'text-[var(--gray)] text-left'">
             {{msg.sentAt | date:'shortTime'}}
           </span>
         </div>
       </div>
 
       <!-- Input Area -->
-      <div class="vd-msg-input" style="padding: 18px 24px;" *ngIf="selectedConversation">
-        <input type="text" placeholder="Type your reply.." [(ngModel)]="newMessageText" (keyup.enter)="sendMessage()"
-          style="flex: 1; border: 1.5px solid var(--lgray); font-size: 0.88rem; padding: 12px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);" />
-        <button class="vd-btn vd-btn-navy" (click)="sendMessage()" style="border-radius: 50px; padding: 0 26px; font-weight: 600;">Send</button>
+      <div class="vd-msg-input py-[18px] px-[24px]" *ngIf="selectedConversation">
+        <input class="flex-1 [border:1.5px_solid_var(--lgray)] text-[0.88rem] py-[12px] px-[18px] [box-shadow:0_2px_8px_rgba(0,0,0,0.03)]" type="text" placeholder="Type your reply.." [(ngModel)]="newMessageText" (keyup.enter)="sendMessage()" />
+        <button class="vd-btn vd-btn-navy rounded-[50px] py-[0] px-[26px] font-semibold" (click)="sendMessage()">Send</button>
       </div>
 
-      <div *ngIf="!selectedConversation" style="height: 100%; display: flex; align-items: center; justify-content: center; color: var(--gray);">
+      <div class="h-[100%] flex items-center justify-center text-[var(--gray)]" *ngIf="!selectedConversation">
         Select a conversation to start chatting.
       </div>
     </div>

@@ -6,7 +6,7 @@
 
     <!-- Smart Filter Bar -->
     <div class="filter-bar-wrap" id="filterBarWrap">
-        <div class="container" style="position:relative">
+        <div class="container relative">
             <!-- Scrollable pills row -->
             <div class="filter-bar-scroll">
                 <div class="filter-bar">
@@ -31,7 +31,7 @@
                     </div>
                     <div class="filter-divider"></div>
 
-                    <button class="filter-pill" (click)="clearAllFilters()" style="color:#dc2626;border-color:#fecaca">
+                    <button class="filter-pill text-[#dc2626] border-[#fecaca]" (click)="clearAllFilters()">
                         Clear All</button>
                 </div>
             </div>
@@ -39,7 +39,7 @@
             <!-- Filter panels rendered OUTSIDE the overflow scroll layer -->
             <div class="filter-panels-layer" *ngIf="activePanel">
                 <!-- Panel: Type -->
-                <div class="filter-panel open" *ngIf="activePanel === 'type'" style="left:0">
+                <div class="filter-panel open left-[0]" *ngIf="activePanel === 'type'">
                     <div class="fp-title">Service Type</div>
                     <div class="fp-chips">
                         <div class="fp-chip"
@@ -53,7 +53,7 @@
                 </div>
 
                 <!-- Panel: Location -->
-                <div class="filter-panel open" *ngIf="activePanel === 'loc'" style="left:140px">
+                <div class="filter-panel open left-[140px]" *ngIf="activePanel === 'loc'">
                     <div class="fp-title">Location</div>
                     <div class="fp-chips">
                         <div class="fp-chip" *ngFor="let l of ['Cairo','New Cairo','Giza','Alexandria','North Coast']"
@@ -66,7 +66,7 @@
                 </div>
 
                 <!-- Panel: Rating -->
-                <div class="filter-panel open" *ngIf="activePanel === 'rating'" style="left:280px">
+                <div class="filter-panel open left-[280px]" *ngIf="activePanel === 'rating'">
                     <div class="fp-title">Minimum Rating</div>
                     <div class="fp-chips">
                         <div class="fp-chip" *ngFor="let r of [3,4,4.5,4.8]" [class.selected]="activeRating === r"
@@ -97,14 +97,14 @@
     <div class="container">
         <div class="results-header">
             <div class="results-count">Showing <strong>{{vendorCount}}</strong> vendors</div>
-            <div style="display:flex;gap:10px;align-items:center">
+            <div class="flex gap-[10px] items-center">
                 <select class="sort-select" [(ngModel)]="sortOption" (change)="triggerSearch()">
                     <option value="rating">Top Rated</option>
                 </select>
             </div>
         </div>
 
-        <div *ngIf="loading" style="padding: 40px; text-align: center; color: #94a3b8;">
+        <div class="p-[40px] text-center text-[#94a3b8]" *ngIf="loading">
             Loading vendors...
         </div>
 
@@ -112,10 +112,10 @@
         <div class="explore-grid" *ngIf="!loading">
             <app-vendor-card *ngFor="let v of displayVendors" [vendor]="v"></app-vendor-card>
             <div class="no-results" *ngIf="displayVendors.length === 0">
-                <div style="font-size:3rem;margin-bottom:12px">🔍</div>
+                <div class="text-[3rem] mb-[12px]">🔍</div>
                 <h3>No vendors found</h3>
                 <p>Try adjusting your filters or search query.</p>
-                <button class="btn btn-gold btn-sm" (click)="clearAllFilters()" style="margin-top:16px">Clear All
+                <button class="btn btn-gold btn-sm mt-[16px]" (click)="clearAllFilters()">Clear All
                     Filters</button>
             </div>
         </div>

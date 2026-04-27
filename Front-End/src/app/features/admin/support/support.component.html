@@ -1,28 +1,96 @@
-<div class="ad-section active" style="display:block">
+<div class="ad-section active block">
   <div class="ad-page-hd">
     <div>
       <div class="ad-page-title">Support Tickets</div>
       <div class="ad-page-sub">Resolve user and vendor disputes and issues.</div>
     </div>
-    <div style="display:flex;gap:7px"><button class="ad-btn ad-btn-ghost">Export log</button></div>
+    <div class="flex gap-[7px]">
+      <button class="ad-btn ad-btn-ghost">Export Log</button>
+    </div>
   </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" *ngIf="stats">
+    <div class="ad-card p-4 border-l-4 border-red-500">
+      <div class="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)] mb-1">Critical</div>
+      <div class="text-2xl font-bold text-red-500">{{stats.critical}}</div>
+    </div>
+    <div class="ad-card p-4 border-l-4 border-blue-500">
+      <div class="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)] mb-1">Open</div>
+      <div class="text-2xl font-bold text-blue-500">{{stats.open}}</div>
+    </div>
+    <div class="ad-card p-4 border-l-4 border-orange-500">
+      <div class="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)] mb-1">In Progress</div>
+      <div class="text-2xl font-bold text-orange-500">{{stats.in_progress}}</div>
+    </div>
+    <div class="ad-card p-4 border-l-4 border-green-500">
+      <div class="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.5)] mb-1">Resolution Rate</div>
+      <div class="text-2xl font-bold text-green-500">{{stats.resolution_rate}}%</div>
+    </div>
+  </div>
+
   <div class="ad-tab-bar">
-    <button class="ad-tab active">Open (7) <span class="ad-badge red" style="margin-left:4px">2</span></button>
-    <button class="ad-tab">In Progress (4)</button>
-    <button class="ad-tab">Resolved</button>
+    <button class="ad-tab" [class.active]="activeTab === 'open'" (click)='setTab("open")'>
+      Open <span class="ad-badge red ml-[4px]" *ngIf="stats">{{stats.open}}</span>
+    </button>
+    <button class="ad-tab" [class.active]="activeTab === 'in_progress'" (click)='setTab("in_progress")'>
+      In Progress <span class="ad-badge orange ml-[4px]" *ngIf="stats">{{stats.in_progress}}</span>
+    </button>
+    <button class="ad-tab" [class.active]="activeTab === 'resolved'" (click)='setTab("resolved")'>
+      Resolved
+    </button>
   </div>
-  <div class="ad-tbl-wrap">
+
+  <div class="ad-tbl-wrap relative min-h-[400px]">
+    <div *ngIf="loading" class="absolute inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center z-10">
+      <div class="ad-loader"></div>
+    </div>
+
     <table class="ad-tbl">
-      <thead><tr><th>Ticket ID</th><th>Subject</th><th>From</th><th>Priority</th><th>Opened</th><th>Assigned To</th><th>Action</th></tr></thead>
-      <tbody id="ad-support-tbody">
+      <thead>
         <tr>
-          <td style="font-family:monospace;font-size:.76rem;color:rgba(255,255,255,.5)">TK-082</td>
-          <td style="font-weight:600">Vendor unresponsive for 3 days</td>
-          <td>Client <div style="font-size:.7rem;color:var(--gray);font-weight:400">Omar I.</div></td>
-          <td><span class="ad-pill ap-red">High</span></td>
-          <td>4 hrs ago</td>
-          <td><span style="font-size:.7rem;background:rgba(255,255,255,.05);padding:3px 6px;border-radius:4px">Unassigned</span></td>
-          <td><button class="ad-btn ad-btn-ghost ad-btn-sm">Resolve</button></td>
+          <th>Ticket ID</th>
+          <th>Subject</th>
+          <th>From</th>
+          <th>Priority</th>
+          <th>Opened</th>
+          <th>Assigned To</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ticket of tickets" [routerLink]="['/admin/support', ticket.ticket_id]" class="cursor-pointer hover:bg-white/5 transition-colors">
+          <td class="text-[.76rem] text-[rgba(255,255,255,.5)] font-[monospace]">{{ticket.ticket_id}}</td>
+          <td class="font-semibold">{{ticket.title}}</td>
+          <td>
+            {{ticket.type}} 
+            <div class="text-[.7rem] text-[var(--gray)] font-normal">{{ticket.from}}</div>
+          </td>
+          <td>
+            <span class="ad-pill" [ngClass]="{
+              'ap-red': ticket.priority === 'critical',
+              'ap-orange': ticket.priority === 'high',
+              'ap-blue': ticket.priority === 'medium',
+              'ap-gray': ticket.priority === 'low'
+            }">{{ticket.priority | titlecase}}</span>
+          </td>
+          <td class="text-sm">{{ticket.opened_at | date:'shortDate'}}</td>
+          <td>
+            <span *ngIf="ticket.assigned_to" class="text-[.7rem] bg-[rgba(59,130,246,0.1)] text-blue-400 py-[3px] px-[6px] rounded-[4px]">
+              {{ticket.assigned_to.name}}
+            </span>
+            <span *ngIf="!ticket.assigned_to" class="text-[.7rem] bg-[rgba(255,255,255,.05)] py-[3px] px-[6px] rounded-[4px]">
+              Unassigned
+            </span>
+          </td>
+          <td>
+            <button class="ad-btn ad-btn-ghost ad-btn-sm" [routerLink]="['/admin/support', ticket.ticket_id]">View</button>
+          </td>
+        </tr>
+        <tr *ngIf="!loading && tickets.length === 0">
+          <td colspan="7" class="text-center py-10 text-[rgba(255,255,255,0.4)]">
+            No tickets found in this category.
+          </td>
         </tr>
       </tbody>
     </table>

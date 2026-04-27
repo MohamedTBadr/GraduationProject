@@ -15,7 +15,7 @@
         </div>
 
         <!-- Password Block -->
-        <div class="form-group" style="margin-bottom: 5px;">
+        <div class="form-group mb-[5px]">
             <label>Password</label>
             <input type="password" placeholder="••••••••" formControlName="password"
                 [class.is-invalid]="passwordControl?.invalid && passwordControl?.touched" />
@@ -25,8 +25,8 @@
             </div>
         </div>
         
-        <div style="text-align: right; margin-bottom: 20px;">
-            <a (click)="goToForgotPassword()" style="font-size: 0.85rem; color: var(--gold); cursor: pointer; text-decoration: underline;">Forgot Password?</a>
+        <div class="text-right mb-[20px]">
+            <a class="text-[0.85rem] text-[var(--gold)] cursor-pointer underline" (click)="goToForgotPassword()">Forgot Password?</a>
         </div>
 
         <!-- Role Selection

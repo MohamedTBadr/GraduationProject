@@ -40,6 +40,16 @@ export class ServicesComponent implements OnInit {
   isDetailModalOpen = false;
   selectedService: ApiProduct | null = null;
 
+  AVAILABLE_EVENT_TYPES = [
+    { id: 'wedding', name: 'Wedding' },
+    { id: 'birthday', name: 'Birthday' },
+    { id: 'graduation', name: 'Graduation' },
+    { id: 'engagement', name: 'Engagement' },
+    { id: 'conference', name: 'Conference / Seminar' },
+    { id: 'product_launch', name: 'Product Launch' },
+    { id: 'exhibition', name: 'Exhibition' }
+  ];
+
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
@@ -85,6 +95,8 @@ export class ServicesComponent implements OnInit {
       name: ['', Validators.required],
       categoryId: ['', Validators.required],
       serviceTypeId: ['', Validators.required],
+      classification: ['Corporate'], // Default or optional
+      allowedEventTypes: [[]], // Array of strings
       price: [0, [Validators.required, Validators.min(0)]],
       description: ['', Validators.required],
       duration: [''],
@@ -118,6 +130,8 @@ export class ServicesComponent implements OnInit {
         name: serviceToEdit.name,
         categoryId: serviceToEdit.categoryId || '',
         serviceTypeId: serviceToEdit.serviceTypeId || '',
+        classification: serviceToEdit.classification || '',
+        allowedEventTypes: serviceToEdit.allowedEventTypes || [],
         price: serviceToEdit.price || 0,
         description: serviceToEdit.description || '',
         duration: serviceToEdit.duration || '',
@@ -126,7 +140,7 @@ export class ServicesComponent implements OnInit {
       this.uploadedImages = serviceToEdit.imageUrl ? [{ previewUrl: serviceToEdit.imageUrl, status: 'done' }] : [];
     } else {
       this.editingId = null;
-      this.serviceForm.reset({ name: '', categoryId: '', serviceTypeId: '', price: 0, description: '' });
+      this.serviceForm.reset({ name: '', categoryId: '', serviceTypeId: '', classification: 'Corporate', allowedEventTypes: [], price: 0, description: '' });
       this.uploadedImages = [];
     }
     this.isAddServiceModalOpen = true;
@@ -135,6 +149,17 @@ export class ServicesComponent implements OnInit {
   closeAddServiceModal() {
     this.isAddServiceModalOpen = false;
     this.serviceForm.reset();
+  }
+
+  toggleEventType(evtId: string) {
+    const currentList = this.serviceForm.get('allowedEventTypes')?.value || [];
+    const index = currentList.indexOf(evtId);
+    if (index > -1) {
+      currentList.splice(index, 1);
+    } else {
+      currentList.push(evtId);
+    }
+    this.serviceForm.get('allowedEventTypes')?.setValue(currentList);
   }
   
   onImagesChanged(images: any[]) {
@@ -159,6 +184,8 @@ export class ServicesComponent implements OnInit {
         name: val.name,
         categoryId: val.categoryId,
         serviceTypeId: val.serviceTypeId,
+        classification: val.classification,
+        allowedEventTypes: val.allowedEventTypes,
         price: Number(val.price),
         description: val.description,
         imageUrl: imageUrl, // Keep existing if not changed, API update doesn't handle files right now
@@ -185,6 +212,12 @@ export class ServicesComponent implements OnInit {
       formData.append('Description', val.description);
       formData.append('CategoryId', val.categoryId);
       formData.append('ServiceTypeId', val.serviceTypeId);
+      if (val.classification) formData.append('Classification', val.classification);
+      if (val.allowedEventTypes && val.allowedEventTypes.length) {
+        val.allowedEventTypes.forEach((evtId: string) => {
+          formData.append('AllowedEventTypes', evtId);
+        });
+      }
       formData.append('Price', (val.price || 0).toString());
       if (val.duration) formData.append('SetupDuration', val.duration);
       if (val.leadTime) formData.append('LeadTimeRequired', val.leadTime);
@@ -248,6 +281,8 @@ export class ServicesComponent implements OnInit {
       name: service.name,
       categoryId: service.categoryId,
       serviceTypeId: service.serviceTypeId,
+      classification: service.classification,
+      allowedEventTypes: service.allowedEventTypes,
       price: service.price,
       description: service.description,
       imageUrl: service.imageUrl,

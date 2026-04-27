@@ -130,6 +130,7 @@ export class ModalComponent implements OnInit {
     this.submitting = true;
     const itemDto: CreateEventItemDto = {
       eventId: eventId,
+      serviceId: product.id,
       serviceImage: product.imageUrl || '',
       serviceName: product.name,
       price: product.price,
@@ -142,12 +143,14 @@ export class ModalComponent implements OnInit {
       next: () => {
         this.submitting = false;
         this.showEventDropdown = false;
-        this.toastService.show('Service added to event successfully!', 'success');
+        this.toastService.show(`${product.name} added to your event!`, 'success');
         this.modalService.close();
+        // Redirect to event detail to show progress
+        this.router.navigate(['/user/my-events'], { queryParams: { id: eventId } });
       },
       error: (err) => {
         this.submitting = false;
-        this.toastService.show('Failed to add service', 'error');
+        this.toastService.show('Failed to add service to event.', 'error');
       }
     });
   }

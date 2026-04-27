@@ -1,0 +1,29 @@
+/* Ticket Detail Styles */
+.ad-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.ad-pill {
+    &.ap-red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    &.ap-orange { background: rgba(249, 115, 22, 0.1); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.2); }
+    &.ap-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+    &.ap-green { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+    &.ap-gray { background: rgba(107, 114, 128, 0.1); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.2); }
+}
+
+.ad-btn-success {
+    background: #22c55e;
+    color: white;
+    &:hover { background: #16a34a; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.ad-btn-danger {
+    background: #ef4444;
+    color: white;
+    &:hover { background: #dc2626; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}

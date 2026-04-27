@@ -1,28 +1,26 @@
 <div class="page active" id="page-corporate">
     <div class="corp-hero">
         <div>
-            <div class="hero-eyebrow"
-                style="display:inline-flex;align-items:center;gap:9px;background:rgba(201,168,76,.13);border:1px solid rgba(201,168,76,.3);padding:6px 16px;border-radius:50px;font-size:.75rem;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px">
+            <div class="hero-eyebrow inline-flex items-center gap-[9px] bg-[rgba(201,168,76,.13)] [border:1px_solid_rgba(201,168,76,.3)] py-[6px] px-[16px] rounded-[50px] text-[.75rem] font-bold text-[var(--gold)] mb-[24px] tracking-[1.5px] uppercase">
                 B2B Corporate Solutions
             </div>
-            <h1
-                style="font-family:var(--ff-d);font-size:clamp(2.2rem,5vw,4rem);color:var(--white);font-weight:300;margin-bottom:14px;max-width:660px">
-                Professional Events, <em style="color:var(--gold)">Flawlessly</em> Executed
+            <h1 class="text-[clamp(2.2rem,5vw,4rem)] text-[var(--white)] mb-[14px] max-w-[660px] font-[var(--ff-d)] font-light">
+                Professional Events, <em class="text-[var(--gold)]">Flawlessly</em> Executed
             </h1>
-            <p style="color:rgba(255,255,255,.52);font-size:.97rem;max-width:460px;margin-bottom:34px;line-height:1.7">
+            <p class="text-[rgba(255,255,255,.52)] text-[.97rem] max-w-[460px] mb-[34px] leading-[1.7]">
                 From 50-person conferences to 2,000-guest brand activations — precision and reliability every time.
             </p>
-            <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div class="flex gap-[12px] flex-wrap">
                 <button class="btn btn-gold" (click)="scrollToForm()">Request a Quote</button>
                 <button class="btn btn-outline" routerLink="/contact">Talk to an Expert</button>
             </div>
         </div>
     </div>
 
-    <section style="background:var(--cream);padding:72px 0">
+    <section class="bg-[var(--cream)] py-[72px] px-[0]">
         <div class="container">
             <div class="tag">Services</div>
-            <h2 class="section-title" style="margin-bottom:38px">Corporate Event Solutions</h2>
+            <h2 class="section-title mb-[38px]">Corporate Event Solutions</h2>
             <div class="corp-services">
                 <div class="corp-service-card">
                     <div class="cs-icon">️</div>
@@ -60,10 +58,10 @@
                 </div>
             </div>
 
-            <div style="margin-top:52px">
-                <h3 style="font-family:var(--ff-d);font-size:1.55rem;color:var(--navy);margin-bottom:14px">Industries We
+            <div class="mt-[52px]">
+                <h3 class="text-[1.55rem] text-[var(--navy)] mb-[14px] font-[var(--ff-d)]">Industries We
                     Serve</h3>
-                <div style="display:flex;flex-wrap:wrap;gap:10px">
+                <div class="flex gap-[10px] flex-wrap">
                     <div class="industry-tag"> Banking & Finance</div>
                     <div class="industry-tag"> Telecommunications</div>
                     <div class="industry-tag"> FMCG & Retail</div>
@@ -77,25 +75,25 @@
         </div>
     </section>
 
-    <div style="background:var(--cream2);padding:72px 0" id="corp-quote">
-        <div class="container" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start">
+    <div class="bg-[var(--cream2)] py-[72px] px-[0]" id="corp-quote">
+        <div class="container grid [grid-template-columns:1fr_1fr] gap-[56px] items-start">
             <div>
                 <div class="tag">Get in Touch</div>
                 <h2 class="section-title">Request a Custom Quote</h2>
                 <p class="section-sub">We respond to all corporate inquiries within 4 business hours with a tailored
                     proposal.</p>
-                <div style="display:grid;gap:14px;margin-top:28px">
-                    <div style="display:flex;gap:12px">
-                        <span style="font-size:1.3rem">⚡</span>
-                        <div><strong style="color:var(--navy)">Fast Response</strong>
-                            <p style="font-size:.83rem;color:var(--gray);margin-top:2px">All corporate inquiries
+                <div class="grid gap-[14px] mt-[28px]">
+                    <div class="flex gap-[12px]">
+                        <span class="text-[1.3rem]">⚡</span>
+                        <div><strong class="text-[var(--navy)]">Fast Response</strong>
+                            <p class="text-[.83rem] text-[var(--gray)] mt-[2px]">All corporate inquiries
                                 answered within 4 hours.</p>
                         </div>
                     </div>
-                    <div style="display:flex;gap:12px">
-                        <span style="font-size:1.3rem"></span>
-                        <div><strong style="color:var(--navy)">Dedicated Manager</strong>
-                            <p style="font-size:.83rem;color:var(--gray);margin-top:2px">Every corporate client gets a
+                    <div class="flex gap-[12px]">
+                        <span class="text-[1.3rem]"></span>
+                        <div><strong class="text-[var(--navy)]">Dedicated Manager</strong>
+                            <p class="text-[.83rem] text-[var(--gray)] mt-[2px]">Every corporate client gets a
                                 dedicated event manager.</p>
                         </div>
                     </div>
@@ -103,7 +101,7 @@
             </div>
 
             <form class="corp-form" [formGroup]="corpForm" (ngSubmit)="submitCorpForm()">
-                <h3 style="font-family:var(--ff-d);font-size:1.45rem;color:var(--navy);margin-bottom:22px">Event Details
+                <h3 class="text-[1.45rem] text-[var(--navy)] mb-[22px] font-[var(--ff-d)]">Event Details
                 </h3>
 
                 <div class="form-row">

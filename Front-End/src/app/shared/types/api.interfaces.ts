@@ -168,6 +168,8 @@ export interface ApiProduct {
   status?: 'active' | 'paused';
   duration?: string;
   leadTime?: string;
+  classification?: 'Personal' | 'Corporate';
+  allowedEventTypes?: string[];
   createdAt?: string;
 }
 
@@ -181,6 +183,8 @@ export interface CreateProductRequest {
   status?: 'active' | 'paused';
   duration?: string;
   leadTime?: string;
+  classification?: 'Personal' | 'Corporate';
+  allowedEventTypes?: string[];
 }
 
 export interface UpdateProductRequest {
@@ -193,6 +197,8 @@ export interface UpdateProductRequest {
   status?: 'active' | 'paused';
   duration?: string;
   leadTime?: string;
+  classification?: 'Personal' | 'Corporate';
+  allowedEventTypes?: string[];
 }
 
 // ─────────────────────────────────────────────
@@ -300,6 +306,7 @@ export interface EventResponseDto {
 
 export interface CreateEventItemDto {
   eventId: string;
+  serviceId?: string;
   serviceImage: string;
   serviceName: string;
   price: number;
@@ -397,4 +404,70 @@ export interface PaymobPaymentRequest {
 
 export interface PaymobPaymentResponse {
   iframeUrl: string;
+}
+
+// ─────────────────────────────────────────────
+// Support Tickets
+// ─────────────────────────────────────────────
+export interface SupportTicket {
+  ticket_id: string;
+  title: string;
+  from: string;
+  type: 'Client' | 'Vendor';
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  status: 'open' | 'in_progress' | 'resolved';
+  opened_at: string;
+  description: string;
+  booking_ref?: string | null;
+  assigned_to?: {
+    agent_id: string;
+    name: string;
+  } | null;
+  resolved_at?: string | null;
+  replies?: TicketReply[];
+}
+
+export interface TicketReply {
+  reply_id: string;
+  ticket_id: string;
+  message: string;
+  replied_by: string;
+  replied_at: string;
+  notified_via: string[];
+}
+
+export interface TicketStats {
+  critical: number;
+  open: number;
+  in_progress: number;
+  resolution_rate: number;
+}
+
+export interface TicketFilters {
+  status?: 'open' | 'in_progress' | 'resolved';
+  priority?: 'critical' | 'high' | 'medium' | 'low';
+  type?: 'Client' | 'Vendor';
+  page?: number;
+  limit?: number;
+}
+
+export interface ReplyTicketRequest {
+  message: string;
+  send_email?: boolean;
+  send_sms?: boolean;
+}
+
+export interface AssignTicketRequest {
+  agent_id: string;
+  note?: string;
+}
+
+export interface ResolveTicketRequest {
+  resolution_note: string;
+}
+
+export interface EscalateTicketRequest {
+  reason: string;
+  escalate_to: 'senior_management' | 'legal_team' | 'cto';
+  notify_finance?: boolean;
 }

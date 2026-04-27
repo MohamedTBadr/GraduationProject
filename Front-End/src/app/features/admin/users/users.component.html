@@ -1,11 +1,11 @@
-<div class="ad-section active" style="display:block">
+<div class="ad-section active block">
   <div class="ad-page-hd">
     <div>
       <div class="ad-page-title">User Management</div>
       <div class="ad-page-sub">All registered event planners and clients on the platform.</div>
     </div>
   </div>
-  <div class="ad-kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+  <div class="ad-kpi-grid [grid-template-columns:repeat(3,1fr)]">
     <div class="ad-kpi ak-blue"><div class="ad-kpi-val">{{ totalCount }}</div><div class="ad-kpi-lbl">Total Users</div></div>
   </div>
   <div class="ad-search-row">
@@ -15,29 +15,29 @@
     </div>
   </div>
   
-  <div *ngIf="loading" style="padding: 2rem; text-align: center; color: var(--gold);">Loading users...</div>
+  <div class="p-[2rem] text-center text-[var(--gold)]" *ngIf="loading">Loading users...</div>
 
   <div *ngIf="!loading" class="ad-tbl-wrap">
     <table class="ad-tbl">
       <thead><tr><th>User</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead>
       <tbody>
         <tr *ngFor="let u of users">
-          <td><div><div>{{ u.name }}</div><div style="font-size:.7rem;color:rgba(255,255,255,.35)">{{ u.email }}</div></div></td>
+          <td><div><div>{{ u.name }}</div><div class="text-[.7rem] text-[rgba(255,255,255,.35)]">{{ u.email }}</div></div></td>
           <td><span class="ad-pill ap-green">{{ u.role || 'User' }}</span></td>
           <td>{{ (u.createdAt | date:'mediumDate') || 'N/A' }}</td>
-          <td><div style="display:flex;gap:5px">
+          <td><div class="flex gap-[5px]">
              <button (click)="deleteUser(u)" class="ad-btn ad-btn-red ad-btn-sm">Delete</button>
           </div></td>
         </tr>
         <tr *ngIf="users.length === 0">
-          <td colspan="4" style="text-align:center; padding: 2rem; color: #888;">No users found.</td>
+          <td class="text-center p-[2rem] text-[#888]" colspan="4">No users found.</td>
         </tr>
       </tbody>
     </table>
     
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; color: #fff;">
+    <div class="flex justify-between items-center p-[1rem] text-[#fff]">
        <span>Page {{ pageNumber }} of {{ totalPages }}</span>
-       <div style="display: flex; gap: 10px;">
+       <div class="flex gap-[10px]">
           <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === 1" (click)="changePage(-1)">Previous</button>
           <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === totalPages" (click)="changePage(1)">Next</button>
        </div>

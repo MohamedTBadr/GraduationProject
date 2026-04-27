@@ -111,24 +111,33 @@ export class VendorsComponent implements OnInit {
 
   approveVendor(vendor: ApiVendor) {
     if (confirm(`Are you sure you want to approve ${vendor.name}?`)) {
+      this.loading = true;
       this.vendorService.approve(vendor.id).subscribe({
         next: () => {
-          this.toastService.show('Vendor approved successfully', 'success');
+          this.toastService.show(`${vendor.name} has been approved.`, 'success');
           this.loadVendors();
         },
-        error: () => this.toastService.show('Error approving vendor', 'error')
+        error: (err) => {
+          this.toastService.show('Error approving vendor. Please try again.', 'error');
+          this.loading = false;
+        }
       });
     }
   }
 
   deleteVendor(vendor: ApiVendor) {
-    if (confirm(`Are you sure you want to delete/suspend ${vendor.name}? This cannot be undone.`)) {
+    const action = vendor.status === 'suspended' ? 'delete' : 'suspend';
+    if (confirm(`Are you sure you want to ${action} ${vendor.name}?`)) {
+      this.loading = true;
       this.vendorService.delete(vendor.id).subscribe({
         next: () => {
-          this.toastService.show('Vendor deleted/suspended', 'success');
+          this.toastService.show(`Vendor ${vendor.name} has been ${action}ed.`, 'success');
           this.loadVendors();
         },
-        error: () => this.toastService.show('Error suspending vendor', 'error')
+        error: (err) => {
+          this.toastService.show(`Error attempting to ${action} vendor.`, 'error');
+          this.loading = false;
+        }
       });
     }
   }

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { TicketDetailComponent } from './support/ticket-detail/ticket-detail.component';
 
 export const ADMIN_ROUTES: Routes = [
     {
@@ -28,6 +29,10 @@ export const ADMIN_ROUTES: Routes = [
     {
         path: 'support',
         loadComponent: () => import('./support/support.component').then(m => m.SupportComponent)
+    },
+    {
+        path: 'support/:id',
+        component: TicketDetailComponent
     },
     {
         path: 'settings',

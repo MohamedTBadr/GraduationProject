@@ -18,7 +18,7 @@
 
   <!-- Packages list -->
   <div class="vd-tab-pane active" id="packages-active">
-    <div *ngIf="filteredPackages.length === 0" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 0.95rem; background: white; border-radius: 12px; border: 1px dashed #cbd5e1;">
+    <div class="p-[40px] text-center text-[#94a3b8] text-[0.95rem] bg-[white] rounded-[12px] [border:1px_dashed_#cbd5e1]" *ngIf="filteredPackages.length === 0">
       No {{ activeTab.toLowerCase() }} packages found.
     </div>
 
@@ -57,8 +57,8 @@
 
       <div class="card-actions">
         <div>
-          <button class="btn-edit" (click)="openCreateModal(pkg)" style="margin-bottom:8px; display:block">Edit</button>
-          <button class="btn-pause" (click)="togglePackageStatus(pkg)" style="margin-bottom:8px; display:block">
+          <button class="btn-edit mb-[8px] block" (click)="openCreateModal(pkg)">Edit</button>
+          <button class="btn-pause mb-[8px] block" (click)="togglePackageStatus(pkg)">
             {{ pkg.status === 'Active' ? 'Pause' : 'Activate' }}
           </button>
         </div>
@@ -69,54 +69,49 @@
 
   <!-- Create/Edit Package Modal -->
   <div class="vd-modal-overlay" [class.open]="isModalOpen">
-    <div class="vd-modal" style="max-width: 600px;">
+    <div class="vd-modal max-w-[600px]">
       <button class="vd-modal-close" (click)="closeModal()">&times;</button>
 
-      <div class="vd-modal-title" style="font-size: 1.6rem;">{{ editingPackageId !== null ? 'Edit Package' : 'Create Package' }}</div>
-      <div class="vd-modal-sub" style="margin-bottom: 24px;">{{ editingPackageId !== null ? 'Update the details of your package.' : 'Bundle your services for a complete event solution.' }}</div>
+      <div class="vd-modal-title text-[1.6rem]">{{ editingPackageId !== null ? 'Edit Package' : 'Create Package' }}</div>
+      <div class="vd-modal-sub mb-[24px]">{{ editingPackageId !== null ? 'Update the details of your package.' : 'Bundle your services for a complete event solution.' }}</div>
 
       <form [formGroup]="packageForm" (ngSubmit)="createPackage()">
         <div class="vd-form-group">
           <label>Package Name *</label>
-          <input type="text" formControlName="name" placeholder="e.g. Full Wedding Package" style="width: 100%; border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+          <input class="w-[100%] rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)]" type="text" formControlName="name" placeholder="e.g. Full Wedding Package">
         </div>
 
-        <div class="vd-form-group" style="margin-top: 16px;">
+        <div class="vd-form-group mt-[16px]">
           <label>Description *</label>
-          <textarea formControlName="description" rows="3"
-            placeholder="What does this package include? Who is it for?" style="width: 100%; border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);"></textarea>
+          <textarea class="w-[100%] rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)]" formControlName="description" rows="3" placeholder="What does this package include? Who is it for?"></textarea>
         </div>
 
-        <div class="vd-form-row" style="margin-top: 16px;">
+        <div class="vd-form-row mt-[16px]">
           <div>
             <label>Total Price (EGP) *</label>
-            <input type="number" formControlName="price" placeholder="e.g. 32000" style="width: 100%; border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+            <input class="w-[100%] rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)]" type="number" formControlName="price" placeholder="e.g. 32000">
           </div>
           <div>
             <label>Price Type *</label>
-            <select formControlName="priceType" style="width: 100%; border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; border: 1.5px solid var(--lgray);">
+            <select class="w-[100%] rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)]" formControlName="priceType">
               <option value="Fixed">Fixed</option>
               <option value="Starting From">Starting From</option>
             </select>
           </div>
         </div>
 
-        <div class="services-selection" style="margin-top: 24px; margin-bottom: 24px;">
-          <label style="display: block; font-weight: 600; color: #1e3a5f; font-size: 0.9rem; margin-bottom: 12px;">Services Included</label>
-          <div class="services-tags" style="display: flex; flex-wrap: wrap; gap: 10px;">
-            <div class="sel-tag" *ngFor="let srv of vendorServices" 
-              [style.background]="isServiceSelected(srv.id) ? '#1e3a5f' : 'white'"
-              [style.color]="isServiceSelected(srv.id) ? 'white' : '#475569'"
-              style="padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: 1px solid #cbd5e1; transition: all 0.2s; user-select: none;"
-              (click)="toggleServiceSelection(srv.id)">
+        <div class="services-selection mt-[24px] mb-[24px]">
+          <label class="block font-semibold text-[#1e3a5f] text-[0.9rem] mb-[12px]">Services Included</label>
+          <div class="services-tags flex gap-[10px] flex-wrap">
+            <div class="sel-tag py-[6px] px-[14px] rounded-[20px] text-[0.85rem] cursor-pointer [border:1px_solid_#cbd5e1] [transition:all_0.2s] select-none" *ngFor="let srv of vendorServices" [ngClass]="isServiceSelected(srv.id) ? 'bg-[#1e3a5f] text-white' : 'bg-white text-[#475569]'" (click)="toggleServiceSelection(srv.id)">
               {{ srv.name }}
             </div>
           </div>
         </div>
 
-        <div class="vd-submit-bar" style="border: none; margin-top: 24px; padding-top: 0; display: flex; justify-content: flex-end; gap: 10px;">
-          <button type="button" class="vd-btn vd-btn-ghost" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;" (click)="closeModal()">Cancel</button>
-          <button type="submit" class="vd-btn vd-btn-gold" style="border-radius: 50px; font-weight: 600; padding: 10px 24px;">{{ editingPackageId !== null ? 'Save Changes' : 'Create Package' }}</button>
+        <div class="vd-submit-bar [border:none] mt-[24px] pt-[0] flex justify-end gap-[10px]">
+          <button type="button" class="vd-btn vd-btn-ghost rounded-[50px] font-semibold py-[10px] px-[24px]" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="vd-btn vd-btn-gold rounded-[50px] font-semibold py-[10px] px-[24px]">{{ editingPackageId !== null ? 'Save Changes' : 'Create Package' }}</button>
         </div>
       </form>
     </div>

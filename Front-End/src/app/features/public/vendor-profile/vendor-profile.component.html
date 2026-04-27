@@ -48,7 +48,7 @@
                         <div class="card-price text-gold">{{product.price | currency:'EGP'}}</div>
                         <p class="card-desc">{{product.description}}</p>
                     </div>
-                    <div *ngIf="products.length === 0" style="padding: 40px; text-align: center; color: #94a3b8;">
+                    <div class="p-[40px] text-center text-[#94a3b8]" *ngIf="products.length === 0">
                         No services available at this time.
                     </div>
                 </div>
@@ -63,9 +63,9 @@
             <div *ngIf="activeTab === 'contact'" class="vp-section">
                 <h2 class="section-title">Contact {{vendor.name}}</h2>
                 <p class="section-text">Send a message to discuss your event details.</p>
-                <div style="margin-top: 20px;">
-                    <div *ngIf="vendor.email" style="margin-bottom: 10px;"><strong>Email:</strong> {{vendor.email}}</div>
-                    <div *ngIf="vendor.phone" style="margin-bottom: 10px;"><strong>Phone:</strong> {{vendor.phone}}</div>
+                <div class="mt-[20px]">
+                    <div class="mb-[10px]" *ngIf="vendor.email"><strong>Email:</strong> {{vendor.email}}</div>
+                    <div class="mb-[10px]" *ngIf="vendor.phone"><strong>Phone:</strong> {{vendor.phone}}</div>
                 </div>
             </div>
 

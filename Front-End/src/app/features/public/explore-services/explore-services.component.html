@@ -18,8 +18,8 @@
         <button class="eh-search-btn" (click)="applyFilters()">Search →</button>
       </div>
       <div class="eh-quick-tags">
-        <div class="eh-quick-tag" [class.active]="selectedCategory === 'all'" (click)="toggleCategory('all')">✨ All Services</div>
-        <div class="eh-quick-tag" *ngFor="let cat of categories.slice(0, 5)" [class.active]="selectedCategory === cat.id" (click)="toggleCategory(cat.id)">
+        <div class="eh-quick-tag" [class.active]="selectedCategories.length === 0" (click)="clearAllFilters()">✨ All Services</div>
+        <div class="eh-quick-tag" *ngFor="let cat of categories.slice(0, 5)" [class.active]="selectedCategories.includes(cat.id)" (click)="toggleCategory(cat.id)">
           {{cat.name}}
         </div>
       </div>
@@ -39,7 +39,7 @@
         <button class="vt-btn" [class.active]="viewMode === 'list'" (click)="setView('list')" title="List View">☰</button>
         <button class="vt-btn" [class.active]="viewMode === 'map'" (click)="setView('map')" title="Map View">📍</button>
       </div>
-      <div class="results-info"><strong>{{filteredServices.length}}</strong> services found — <span>{{selectedCategory === 'all' ? 'All categories' : selectedCategory}}</span></div>
+      <div class="results-info"><strong>{{filteredServices.length}}</strong> services found — <span>{{selectedCategories.length === 0 ? 'All categories' : selectedCategories.length + ' Categories selected'}}</span></div>
       <div class="sort-wrap">
         Sort by:
         <select class="sort-sel" [(ngModel)]="sortOption" (change)="applyFilters()">
@@ -59,15 +59,38 @@
       <div class="fs-sticky">
         <div class="fs-header">
           <div class="fs-title">🎛️ Filters</div>
-          <button class="fs-clear" (click)="selectedCategory='all'; searchQuery=''; applyFilters()">Clear All</button>
+          <button class="fs-clear" (click)="clearAllFilters()">Clear All</button>
+        </div>
+
+        <!-- Event Type Filter -->
+        <div class="filter-block">
+          <div class="fb-title">Event Type <span class="fb-toggle open">▾</span></div>
+          <div class="fb-chip-row">
+            <div class="fb-chip" [class.sel]="selectedEventTypes.length === 0" (click)="clearAllFilters()">All</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('wedding')" (click)="toggleEventType('wedding')">Wedding</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('birthday')" (click)="toggleEventType('birthday')">Birthday</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('corporate')" (click)="toggleEventType('corporate')">Corporate</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('graduation')" (click)="toggleEventType('graduation')">Graduation</div>
+            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('engagement')" (click)="toggleEventType('engagement')">Engagement</div>
+          </div>
+        </div>
+
+        <!-- Classification Filter -->
+        <div class="filter-block">
+          <div class="fb-title">Classification <span class="fb-toggle open">▾</span></div>
+          <div class="rating-options">
+            <label class="rating-row" (click)="setClassification('all')"><input type="radio" name="class" [checked]="selectedClassification==='all'" /> Any</label>
+            <label class="rating-row" (click)="setClassification('Personal')"><input type="radio" name="class" [checked]="selectedClassification==='Personal'" /> Personal</label>
+            <label class="rating-row" (click)="setClassification('Corporate')"><input type="radio" name="class" [checked]="selectedClassification==='Corporate'" /> Corporate</label>
+          </div>
         </div>
 
         <!-- Category Filter -->
         <div class="filter-block">
           <div class="fb-title">Service Category <span class="fb-toggle open">▾</span></div>
           <div class="fb-chip-row">
-            <div class="fb-chip" [class.sel]="selectedCategory === 'all'" (click)="toggleCategory('all')">All</div>
-            <div class="fb-chip" *ngFor="let cat of categories" [class.sel]="selectedCategory === cat.id" (click)="toggleCategory(cat.id)">
+            <div class="fb-chip" [class.sel]="selectedCategories.length === 0" (click)="clearAllFilters()">All</div>
+            <div class="fb-chip" *ngFor="let cat of categories" [class.sel]="selectedCategories.includes(cat.id)" (click)="toggleCategory(cat.id)">
               {{cat.name}}
             </div>
           </div>
@@ -124,20 +147,20 @@
           <div class="svc-card-body">
             <div class="svc-name">{{svc.name}}</div>
             <div class="svc-price">{{svc.price | currency:'EGP':'symbol':'1.0-0'}}</div>
-            <p class="svc-desc" style="font-size: 0.8rem; color: #6b7280; margin-top: 8px;">{{svc.description | slice:0:80}}...</p>
+            <p class="svc-desc text-[0.8rem] text-[#6b7280] mt-[8px]">{{svc.description | slice:0:80}}...</p>
           </div>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="filteredServices.length === 0 && !loading" style="text-align: center; padding: 60px;">
-        <div style="font-size: 3rem;">🔍</div>
+      <div class="text-center p-[60px]" *ngIf="filteredServices.length === 0 && !loading">
+        <div class="text-[3rem]">🔍</div>
         <h3>No services found</h3>
         <p>Try adjusting your filters or search terms.</p>
       </div>
 
       <!-- Loading State -->
-      <div *ngIf="loading" style="text-align: center; padding: 60px;">
+      <div class="text-center p-[60px]" *ngIf="loading">
         <p>Searching for the best services...</p>
       </div>
     </main>
@@ -153,7 +176,7 @@
       <div class="cb-slot" *ngIf="compareList.length < 3">+ Add service</div>
     </div>
     <div class="cb-actions">
-      <button class="btn btn-ghost btn-sm" style="color: white; border-color: rgba(255,255,255,0.2); background: transparent;" (click)="clearCompare()">Clear</button>
+      <button class="btn btn-ghost btn-sm text-[white] bg-[transparent] border-[rgba(255,255,255,0.2)]" (click)="clearCompare()">Clear</button>
       <button class="btn btn-gold btn-sm" routerLink="/compare">Compare Now →</button>
     </div>
   </div>

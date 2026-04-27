@@ -1,7 +1,7 @@
 <!-- NAV -->
 <nav class="nav" [class.scrolled]="isScrolled">
-    <div class="nav-inner">
-    <div class="nav-logo" routerLink="/">Event<span>ora</span></div>
+  <div class="nav-inner">
+    <div class="nav-logo" routerLink="/">Epic<span>Hub</span></div>
 
     <ul class="nav-links">
       <li><a routerLink="/explore-services">Explore Services</a></li>
@@ -24,12 +24,7 @@
       </button>
 
       <!-- Notifications -->
-      <button
-        *ngIf="authService.isLoggedIn()"
-        class="nav-icon-btn"
-        title="Notifications"
-        style="position: relative;"
-      >
+      <button *ngIf="authService.isLoggedIn()" class="nav-icon-btn relative" title="Notifications">
         🔔
         <div class="fav-count" *ngIf="signalRService.unreadCount() > 0">
           {{signalRService.unreadCount()}}
@@ -43,6 +38,10 @@
         title="My Favorites"
       >
         <div class="fav-count" id="favCount">0</div>
+      </button>
+
+      <button (click)="theme.toggle()">
+        {{ theme.isDark ? "☀️" : "🌙" }}
       </button>
 
       <!-- Not Logged In -->
@@ -85,11 +84,7 @@
           My Portal
         </button>
 
-        <button
-          class="btn btn-navy btn-sm"
-          (click)="logout()"
-          style="border-color: #dc2626; color: #dc2626; background: transparent; margin-left: 12px;"
-        >
+        <button class="btn btn-navy btn-sm text-[#dc2626] bg-[transparent] ml-[12px] border-[#dc2626]" (click)="logout()">
           Logout
         </button>
       </ng-container>

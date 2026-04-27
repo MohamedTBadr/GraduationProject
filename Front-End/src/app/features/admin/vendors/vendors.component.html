@@ -1,4 +1,4 @@
-<div class="ad-section active" style="display:block">
+<div class="ad-section active block">
     <div class="ad-page-hd">
         <div>
             <div class="ad-page-title">Vendor Management</div>
@@ -8,7 +8,7 @@
     <div class="ad-tab-bar">
         <button [class.active]="activeTab === 'all'" (click)="setTab('all')" class="ad-tab">All ({{ vendors.length }})</button>
         <button [class.active]="activeTab === 'pending'" (click)="setTab('pending')" class="ad-tab">
-            Pending ({{ pendingCount }}) <span *ngIf="pendingCount > 0" class="ad-badge gold" style="margin-left:4px">!</span>
+            Pending ({{ pendingCount }}) <span *ngIf="pendingCount > 0" class="ad-badge gold ml-1">!</span>
         </button>
         <button [class.active]="activeTab === 'active'" (click)="setTab('active')" class="ad-tab">Active ({{ activeCount }})</button>
     </div>
@@ -19,7 +19,7 @@
         </div>
     </div>
     
-    <div *ngIf="loading" style="padding: 2rem; text-align: center; color: var(--gold);">Loading vendors...</div>
+    <div class="p-[2rem] text-center text-[var(--gold)]" *ngIf="loading">Loading vendors...</div>
 
     <div *ngIf="!loading" class="ad-tab-pane active" id="v-all">
         <div class="ad-tbl-wrap">
@@ -27,37 +27,37 @@
                 <thead><tr><th>Vendor</th><th>Category</th><th>Location</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
                     <tr *ngFor="let v of paginatedVendors">
-                        <td><div style="display:flex;align-items:center;gap:9px">
-                            <span style="font-size:1.2rem">🏛️</span>
+                        <td><div class="flex items-center gap-[9px]">
+                            <span class="text-[1.2rem]">🏛️</span>
                             <div>
                                 <div>{{ v.name }}</div>
-                                <div style="font-size:.7rem;color:rgba(255,255,255,.35)">Joined {{ v.createdAt | date:'MMM yyyy' }}</div>
+                                <div class="text-[.7rem] text-[rgba(255,255,255,.35)]">Joined {{ v.createdAt | date:'MMM yyyy' }}</div>
                             </div>
                         </div></td>
                         <td>{{ v.categoryName || 'General' }}</td>
                         <td>{{ v.location || 'Not Specified' }}</td>
-                        <td><span style="color:var(--gold)">★</span> {{ v.rating || 0 }}</td>
+                        <td><span class="text-[var(--gold)]">★</span> {{ v.rating || 0 }}</td>
                         <td>
                             <span *ngIf="!v.isApproved" class="ad-pill ap-gold">Pending</span>
                             <span *ngIf="v.isApproved && v.status === 'active'" class="ad-pill ap-green">Active</span>
                             <span *ngIf="v.status === 'suspended'" class="ad-pill ap-red">Suspended</span>
                         </td>
                         <td>
-                            <div style="display:flex;gap:5px">
+                            <div class="flex gap-[5px]">
                                 <button *ngIf="!v.isApproved" (click)="approveVendor(v)" class="ad-btn ad-btn-gold ad-btn-sm">Approve</button>
                                 <button (click)="deleteVendor(v)" class="ad-btn ad-btn-red ad-btn-sm">Delete</button>
                             </div>
                         </td>
                     </tr>
                     <tr *ngIf="paginatedVendors.length === 0">
-                        <td colspan="6" style="text-align:center; padding: 2rem; color: #888;">No vendors found matching criteria.</td>
+                        <td class="text-center p-[2rem] text-[#888]" colspan="6">No vendors found matching criteria.</td>
                     </tr>
                 </tbody>
             </table>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; color: #fff;" *ngIf="totalCount > 0">
+            <div class="flex justify-between items-center p-[1rem] text-[#fff]" *ngIf="totalCount> 0">
                <span>Page {{ pageNumber }} of {{ totalPages }} ({{ totalCount }} Total)</span>
-               <div style="display: flex; gap: 10px;">
+               <div class="flex gap-[10px]">
                   <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === 1" (click)="changePage(-1)">Previous</button>
                   <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === totalPages" (click)="changePage(1)">Next</button>
                </div>

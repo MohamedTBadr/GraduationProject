@@ -1,0 +1,168 @@
+<div class="ad-section active block">
+  <div class="ad-page-hd">
+    <div class="flex items-center gap-4">
+      <button routerLink="/admin/support" class="ad-btn ad-btn-ghost ad-btn-sm">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+      <div>
+        <div class="ad-page-title">Ticket Detail</div>
+        <div class="ad-page-sub">Manage and resolve ticket #{{ticketId}}</div>
+      </div>
+    </div>
+    <div class="flex gap-2" *ngIf="ticket">
+      <span class="ad-pill" [ngClass]="{
+        'ap-red': ticket.priority === 'critical',
+        'ap-orange': ticket.priority === 'high',
+        'ap-blue': ticket.priority === 'medium',
+        'ap-gray': ticket.priority === 'low'
+      }">{{ticket.priority | titlecase}}</span>
+      <span class="ad-pill" [ngClass]="{
+        'ap-green': ticket.status === 'resolved',
+        'ap-blue': ticket.status === 'in_progress',
+        'ap-red': ticket.status === 'open'
+      }">{{ticket.status | titlecase}}</span>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center p-10">
+    <div class="ad-loader"></div>
+  </div>
+
+  <div *ngIf="error" class="ad-alert ad-alert-error">
+    {{error}}
+  </div>
+
+  <div *ngIf="ticket" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+    <!-- Left Column: Ticket Info & History -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Ticket Content -->
+      <div class="ad-card p-6">
+        <h2 class="text-xl font-bold mb-2">{{ticket.title}}</h2>
+        <div class="flex items-center gap-4 text-sm text-[rgba(255,255,255,0.6)] mb-6">
+          <span><i class="far fa-user mr-1"></i> {{ticket.from}} ({{ticket.type}})</span>
+          <span><i class="far fa-calendar mr-1"></i> {{ticket.opened_at | date:'medium'}}</span>
+          <span *ngIf="ticket.booking_ref"><i class="fas fa-link mr-1"></i> Ref: {{ticket.booking_ref}}</span>
+        </div>
+        <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-lg border border-[rgba(255,255,255,0.05)] text-lg leading-relaxed">
+          {{ticket.description}}
+        </div>
+      </div>
+
+      <!-- Replies Thread -->
+      <div class="ad-card p-6">
+        <h3 class="text-lg font-semibold mb-4">Replies</h3>
+        <div class="space-y-4">
+          <div *ngFor="let reply of ticket.replies" class="p-4 rounded-lg border" [ngClass]="{
+            'bg-[rgba(59,130,246,0.05)] border-[rgba(59,130,246,0.2)] ml-8': reply.replied_by === 'Super Admin',
+            'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.1)] mr-8': reply.replied_by !== 'Super Admin'
+          }">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-bold text-sm">{{reply.replied_by}}</span>
+              <span class="text-xs text-[rgba(255,255,255,0.5)]">{{reply.replied_at | date:'short'}}</span>
+            </div>
+            <p class="text-sm">{{reply.message}}</p>
+            <div class="mt-2 flex gap-2">
+              <span *ngFor="let via of reply.notified_via" class="text-[10px] uppercase tracking-wider bg-[rgba(255,255,255,0.1)] px-2 py-0.5 rounded">
+                {{via}}
+              </span>
+            </div>
+          </div>
+          <div *ngIf="!ticket.replies?.length" class="text-center py-6 text-[rgba(255,255,255,0.4)]">
+            No replies yet.
+          </div>
+        </div>
+
+        <!-- Reply Form -->
+        <div class="mt-6 pt-6 border-t border-[rgba(255,255,255,0.1)]">
+          <textarea [(ngModel)]="replyMessage" placeholder="Write your reply..." class="ad-input w-full min-h-[120px] mb-4"></textarea>
+          <div class="flex items-center justify-between">
+            <div class="flex gap-4">
+              <label class="flex items-center gap-2 cursor-pointer text-sm">
+                <input type="checkbox" [(ngModel)]="sendEmail"> Notify via Email
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-sm">
+                <input type="checkbox" [(ngModel)]="sendSms"> Notify via SMS
+              </label>
+            </div>
+            <button (click)="onReply()" [disabled]="!replyMessage.trim()" class="ad-btn ad-btn-primary">
+              Send Reply
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Actions -->
+    <div class="space-y-6">
+      <!-- Status & Assignment -->
+      <div class="ad-card p-6">
+        <h3 class="text-lg font-semibold mb-4">Management</h3>
+        
+        <!-- Assignment -->
+        <div class="mb-6">
+          <label class="block text-xs font-bold uppercase tracking-wider text-[rgba(255,255,255,0.5)] mb-2">Assigned Agent</label>
+          <div *ngIf="ticket.assigned_to" class="flex items-center gap-3 p-3 bg-[rgba(255,255,255,0.03)] rounded-lg mb-4">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold">
+              {{ticket.assigned_to.name.charAt(0)}}
+            </div>
+            <div>
+              <div class="text-sm font-semibold">{{ticket.assigned_to.name}}</div>
+              <div class="text-[10px] text-[rgba(255,255,255,0.4)]">Agent ID: {{ticket.assigned_to.agent_id}}</div>
+            </div>
+          </div>
+          
+          <div class="space-y-3">
+            <select [(ngModel)]="agentId" class="ad-input w-full">
+              <option value="">Select Agent...</option>
+              <option value="AGT-012">Sara Hassan</option>
+              <option value="AGT-005">Ahmed Ali</option>
+            </select>
+            <textarea [(ngModel)]="assignNote" placeholder="Internal assignment note..." class="ad-input w-full text-sm" rows="2"></textarea>
+            <button (click)="onAssign()" [disabled]="!agentId" class="ad-btn ad-btn-ghost w-full">Assign Ticket</button>
+          </div>
+        </div>
+
+        <hr class="border-[rgba(255,255,255,0.1)] mb-6">
+
+        <!-- Resolution -->
+        <div *ngIf="ticket.status !== 'resolved'">
+          <label class="block text-xs font-bold uppercase tracking-wider text-[rgba(255,255,255,0.5)] mb-2">Resolve Ticket</label>
+          <textarea [(ngModel)]="resolutionNote" placeholder="Final resolution note..." class="ad-input w-full text-sm mb-3" rows="3"></textarea>
+          <button (click)="onResolve()" [disabled]="!resolutionNote.trim()" class="ad-btn ad-btn-success w-full">
+            Mark as Resolved
+          </button>
+        </div>
+        
+        <div *ngIf="ticket.status === 'resolved'" class="p-4 bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)] rounded-lg">
+          <div class="text-green-500 font-bold text-sm mb-1"><i class="fas fa-check-circle mr-1"></i> Resolved</div>
+          <div class="text-xs text-[rgba(255,255,255,0.6)]">Resolved at: {{ticket.resolved_at | date:'medium'}}</div>
+        </div>
+      </div>
+
+      <!-- Escalation -->
+      <div class="ad-card p-6 border-red-900/30">
+        <h3 class="text-lg font-semibold mb-4 text-red-400">Escalation</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs text-[rgba(255,255,255,0.5)] mb-1">Escalate To</label>
+            <select [(ngModel)]="escalateTo" class="ad-input w-full">
+              <option value="senior_management">Senior Management</option>
+              <option value="legal_team">Legal Team</option>
+              <option value="cto">CTO</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-[rgba(255,255,255,0.5)] mb-1">Reason</label>
+            <textarea [(ngModel)]="escalateReason" placeholder="Reason for escalation..." class="ad-input w-full text-sm" rows="3"></textarea>
+          </div>
+          <label class="flex items-center gap-2 cursor-pointer text-sm">
+            <input type="checkbox" [(ngModel)]="notifyFinance"> Notify Finance Team
+          </label>
+          <button (click)="onEscalate()" [disabled]="!escalateReason.trim()" class="ad-btn ad-btn-danger w-full">
+            Escalate Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
