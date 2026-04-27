@@ -1,5 +1,5 @@
-﻿using Application.DTOs.CategoryDTOs;
-using Application.DTOs.CompanyInquiryDTOs;
+﻿using Application.DTOs.CompanyInquiryDTOs;
+using Application.DTOs.EventTypesDTOs;
 using Application.Interfaces;
 using Domain.Contracts;
 using Domain.Entities;
@@ -25,7 +25,7 @@ namespace Application.Services
                 ContactPerson = dto.ContactPerson,
                 PhoneNumber = dto.PhoneNumber,
                 Email = dto.Email,
-                CategoryId = dto.CategoryId,
+                EventTypeId = dto.EventTypeId,
                 ExpectedDate = dto.ExpectedDate,
                 EstimatedAttendees = dto.EstimatedAttendees,
                 ApproximateBudget = dto.ApproximateBudget,
@@ -45,7 +45,7 @@ namespace Application.Services
                 ContactPerson = dto.ContactPerson,
                 PhoneNumber = dto.PhoneNumber,
                 Email = dto.Email,
-                CategoryId = dto.CategoryId,
+                EventTypeId = dto.EventTypeId,
                 ExpectedDate = dto.ExpectedDate,
                 EstimatedAttendees = dto.EstimatedAttendees,
                 ApproximateBudget = dto.ApproximateBudget,
@@ -96,11 +96,10 @@ namespace Application.Services
                 ApproximateBudget = entity.ApproximateBudget,
                 AdditionalRequirements = entity.AdditionalRequirements,
                 Status = entity.Status,
-                Category = entity.Category == null ? null : new CategoryDTO
-                {
-                    Id = entity.Category.Id,
-                    Name = entity.Category.Name
-                }
+                EventType = entity.EventType == null ? null : new EventTypeResponseDto(
+    entity.EventType.Id,
+    entity.EventType.Name
+)
             };
         }
     }

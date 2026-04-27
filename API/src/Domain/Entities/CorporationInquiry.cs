@@ -15,8 +15,8 @@ namespace Domain.Entities
 
         public string Email { get; set; }
 
-        public Category Category { get; set; }
-        public Guid CategoryId { get; set; }
+        public EventType EventType { get; set; }
+        public Guid EventTypeId { get; set; }
 
         public DateTime ExpectedDate { get; set; }
 

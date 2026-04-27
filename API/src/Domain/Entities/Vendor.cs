@@ -21,7 +21,6 @@ namespace Domain.Entities
        
         public string BusinessName { get; set; }
         //public string OwnerName { get; set; }
-        public ICollection<VendorServiceType> VendorServiceTypes { get; set; }
         public ICollection<Service> Services { get; set; }
         public ICollection<Package> Packages { get; set; } 
         public ICollection<ServiceRating> VendorRatings { get; set; } 
@@ -31,9 +30,12 @@ namespace Domain.Entities
         public string PortfolioLink { get; set; }
         public Address Address { get; set; }
         public bool IsVerified { get; set; }
-        
-        
-     
+
+        public VendorType VendorType { get; set; }
+        public Guid VendorTypeId { get; set; }
+
+
+
 
 
     }

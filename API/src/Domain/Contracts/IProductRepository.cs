@@ -15,11 +15,11 @@ namespace Domain.Contracts
             Expression<Func<Service, bool>> visibilityFilter,
             CancellationToken ct);
 
-        Task<PaginatedResponse<Service>> GetByCategoryIdAsync(
-            Guid categoryId,
-            PaginatedRequest request,
-            Expression<Func<Service, bool>> visibilityFilter,
-            CancellationToken cancellationToken);
+        //Task<PaginatedResponse<Service>> GetByCategoryIdAsync(
+        //    Guid categoryId,
+        //    PaginatedRequest request,
+        //    Expression<Func<Service, bool>> visibilityFilter,
+        //    CancellationToken cancellationToken);
 
         Task<List<ServiceImage>> GetServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken);
 

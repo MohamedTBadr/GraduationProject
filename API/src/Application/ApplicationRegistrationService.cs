@@ -28,7 +28,6 @@ namespace Application
             Services.AddScoped<IServiceManager, ServiceManager>();
             Services.AddScoped<IVendorService, VendorService>();
             Services.AddScoped<IServiceTypeService, ServiceTypeService>();
-            Services.AddScoped<ICategoryService, CategoryService>();
             Services.AddScoped<IEventService, EventService>();
             Services.AddScoped<IEventItemService, EventItemService>();
             Services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -39,6 +38,7 @@ namespace Application
             Services.AddScoped<NotificationService>();
             Services.AddScoped<IFileService, FileService>();
             Services.AddScoped<IEventTypeService, EventTypeService>();
+            Services.AddScoped<IVendorTypeService, VendorTypeService>();
             Services.AddScoped<ICompanyInquiryService, CompanyInquiryService>();
             //Services.AddScoped<IUs
             //Services.AddScoped<Ime>

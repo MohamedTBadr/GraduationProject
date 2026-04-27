@@ -12,7 +12,6 @@ namespace Application.Interfaces
         IEmailSender EmailSender { get; }
         IAuthenticationService AuthenticationService { get; }
         IServiceTypeService ServiceTypeService { get; }
-        ICategoryService CategoryService { get; }
 
     }
 }

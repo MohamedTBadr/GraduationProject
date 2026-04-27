@@ -45,7 +45,7 @@ namespace Application.Services
             var vendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken);
             if (vendor == null)
             {
-                return Result<VendorDetailsDTO>.NotFound("Vendor not found");
+                return Result<VendorDetailsDTO>.NotFound(404,"Vendor not found");
             }
             var vendorDTO = mapper.Map<VendorDetailsDTO>(vendor);
             return Result<VendorDetailsDTO>.Success(vendorDTO);
@@ -84,7 +84,7 @@ namespace Application.Services
             var existingServiceTypes = await vendorRepository.GetServiceTypesByIdsAsync(ServiceTypeIds, cancellationToken);
 
             if (existingServiceTypes.Count != ServiceTypeIds.Count)
-                return Result<VendorDetailsDTO>.Failure(ErrorType.NotFound, "One or more ServiceTypes not found.");
+                return Result<VendorDetailsDTO>.Failure(new Error(ErrorType.NotFound, 404, "One or more ServiceTypes not found"));
 
 
             // 1. Create the ApplicationUser via Identity
@@ -102,7 +102,7 @@ namespace Application.Services
             if (!identityResult.Succeeded)
             {
                 var errors = string.Join(", ", identityResult.Errors.Select(e => e.Description));
-                return Result<VendorDetailsDTO>.Failure(ErrorType.AlreadyExists, errors);
+                return Result<VendorDetailsDTO>.Failure(new Error(ErrorType.AlreadyExists, 409, errors));
             }
 
 
@@ -117,11 +117,8 @@ namespace Application.Services
                 PortfolioLink = request.PortfolioLink,
                 Address = request.Address,
                 IsVerified = false,
-                VendorServiceTypes = existingServiceTypes.Select(s => new VendorServiceType
-                {
-                    ServiceTypeId = s.Id,
-                    ServiceType = s       // ✅ tracked entity, EF won't re-insert it
-                }).ToList()
+                VendorTypeId = request.VendorTypeId
+                
             };
 
             await vendorRepository.AddVendorAsync(vendor, cancellationToken);
@@ -136,7 +133,7 @@ namespace Application.Services
             var existingVendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken);
             if (existingVendor == null)
             {
-                return Result<VendorDetailsDTO>.NotFound("Vendor not found");
+                return Result<VendorDetailsDTO>.NotFound(404, "Vendor not found");
             }
             var vendorMapped = mapper.Map(request, existingVendor);
             await vendorRepository.UpdateVendorAsync(vendorMapped, cancellationToken);
@@ -149,7 +146,7 @@ namespace Application.Services
             var vendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken);
             if (vendor == null)
             {
-                return Result<VendorDetailsDTO>.NotFound("Vendor not found");
+                return Result<VendorDetailsDTO>.NotFound(404, "Vendor not found");
             }
 
             await vendorRepository.DeleteVendorAsync(vendor, cancellationToken);
@@ -163,7 +160,7 @@ namespace Application.Services
             var vendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken);
             if (vendor == null)
             {
-                return Result<VendorDetailsDTO>.NotFound("Vendor not found");
+                return Result<VendorDetailsDTO>.NotFound(404, "Vendor not found");
             }
             vendor.IsVerified = true;
             await vendorRepository.UpdateVendorAsync(vendor, cancellationToken);

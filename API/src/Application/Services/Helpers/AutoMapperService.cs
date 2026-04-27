@@ -15,12 +15,8 @@ namespace Application.Services.Helpers
     {
         public AutoMapperService()
         {
-            #region Category
-            CreateMap<CreateCategoryRequest, Category>();
-            CreateMap<UpdateCategoryRequest, Category>();
-            CreateMap<CategoryDTO, Category>().ReverseMap();
-            CreateMap<Category,CategoryDTO>().ReverseMap();
-            #endregion
+ 
+          
 
             #region User
             CreateMap<UserDTO, ApplicationUser>();
@@ -37,7 +33,6 @@ namespace Application.Services.Helpers
             #region Service
             // Entity → Read DTO
             CreateMap<Service, ServiceDTO>()
-                .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category.Name))
                 .ForMember(d => d.VendorName, o => o.MapFrom(s => s.Vendor.BusinessName))
 
                 .ForMember(d => d.ServiceTypeName, o => o.MapFrom(s => s.ServiceType.Name))

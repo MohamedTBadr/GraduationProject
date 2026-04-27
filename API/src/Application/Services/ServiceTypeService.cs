@@ -26,7 +26,7 @@ namespace Application.Services
             var type = await repository.GetServiceTypeByIdAsync(id, cancellationToken);
             if (type == null)
             {
-                return Result<ServiceTypeDTO>.NotFound("Service type not found");
+                return Result<ServiceTypeDTO>.NotFound(404,"Service type not found");
             }
 
             await repository.DeleteTypeAsync(id, cancellationToken);
@@ -46,7 +46,7 @@ namespace Application.Services
             var type = await repository.GetServiceTypeByIdAsync(id, cancellationToken);
             if (type == null)
             {
-                return Result<ServiceTypeDTO>.NotFound("Service type not found");
+                return Result<ServiceTypeDTO>.NotFound(404,"Service type not found");
             }
             return Result<ServiceTypeDTO>.Success(mapper.Map<ServiceTypeDTO>(type));
         }
@@ -56,7 +56,7 @@ namespace Application.Services
             var existingType = await repository.GetServiceTypeByIdAsync(id, cancellationToken);
             if (existingType == null)
             {
-                return Result<ServiceTypeDTO>.NotFound("Service type not found");
+                return Result<ServiceTypeDTO>.NotFound(404,"Service type not found");
             }
 
             // ✅ Map request properties onto the tracked existing entity

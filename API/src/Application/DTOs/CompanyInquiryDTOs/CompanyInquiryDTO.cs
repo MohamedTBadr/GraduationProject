@@ -19,7 +19,7 @@ namespace Application.DTOs.CompanyInquiryDTOs
 
         public string Email { get; set; }
 
-        public CategoryDTO Category { get; set; }
+        public EventTypesDTOs.EventTypeResponseDto EventType { get; set; }
 
         public DateTime ExpectedDate { get; set; }
 
@@ -42,7 +42,7 @@ namespace Application.DTOs.CompanyInquiryDTOs
 
         public string Email { get; set; }
 
-        public Guid CategoryId { get; set; }
+        public Guid EventTypeId { get; set; }
 
         public DateTime ExpectedDate { get; set; }
 
@@ -70,7 +70,7 @@ namespace Application.DTOs.CompanyInquiryDTOs
         [Required, EmailAddress]
         public string Email { get; set; }
 
-        public Guid CategoryId { get; set; }
+        public Guid EventTypeId { get; set; }
 
         public DateTime ExpectedDate { get; set; }
 

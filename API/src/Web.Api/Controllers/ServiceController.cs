@@ -39,13 +39,13 @@ namespace Web.Api.Controllers
         }
 
         // GET api/Services/by-category/{categoryId}
-        [HttpGet("by-category/{categoryId:guid}")]
-        [HybridCache(1800, "services")]
-        public async Task<IActionResult> GetByCategoryAsync(Guid categoryId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
-        {
-            var result = await ServiceService.GetByCategoryIdAsync(categoryId, request, IsAdmin, IsVendor, UserId, cancellationToken);
-            return Ok(result);
-        }
+        //[HttpGet("by-category/{categoryId:guid}")]
+        //[HybridCache(1800, "services")]
+        //public async Task<IActionResult> GetByCategoryAsync(Guid categoryId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
+        //{
+        //    var result = await ServiceService.GetByCategoryIdAsync(categoryId, request, IsAdmin, IsVendor, UserId, cancellationToken);
+        //    return Ok(result);
+        //}
 
         // GET api/Services/by-vendor/{vendorId}
         [HttpGet("by-vendor/{vendorId:guid}")]
@@ -87,7 +87,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> UpdateAsync(Guid id, [FromForm] UpdateServiceDTO dto, CancellationToken cancellationToken)
         {
             if (id != dto.Id)
-                return BadRequest(Error.Validation("Service.Id Mismatch", "Route id and body id do not match."));
+                return BadRequest(Error.Validation(422, "Route id and body id do not match."));
 
             if (!IsAdmin) // Vendor: verify ownership and force their own VendorId
             {

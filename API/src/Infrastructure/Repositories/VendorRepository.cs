@@ -58,8 +58,7 @@ namespace Infrastructure.Repositories
                 .Include(x => x.Services)
                     .ThenInclude(s => s.ServiceRatings)
                         .ThenInclude(r => r.User)
-                .Include(x => x.Services)
-                    .ThenInclude(s => s.Category)
+               
                 .Include(x => x.Services)
                     .ThenInclude(s => s.ServiceType)
                 .Include(x => x.Services)

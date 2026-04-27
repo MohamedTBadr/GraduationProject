@@ -29,19 +29,7 @@ namespace Infrastructure.Persistence
            builder.Entity<OrderInsight>()
         .ToView("View_OrderInsights")
         .HasNoKey();
-            builder.Entity<VendorServiceType>()
-      .HasKey(vs => new { vs.VendorId, vs.ServiceTypeId });
-
-            builder.Entity<VendorServiceType>()
-                .HasOne(vs => vs.Vendor)
-                .WithMany(v => v.VendorServiceTypes)
-                .HasForeignKey(vs => vs.VendorId);
-
-            builder.Entity<VendorServiceType>()
-                .HasOne(vs => vs.ServiceType)
-                .WithMany(st => st.VendorServiceTypes)
-                .HasForeignKey(vs => vs.ServiceTypeId);
-
+     
 
 
             builder.Entity<ServiceRating>()
@@ -80,17 +68,19 @@ namespace Infrastructure.Persistence
                 .WithMany(e => e.EventItems)
                 .HasForeignKey(i => i.EventId)
                 .OnDelete(DeleteBehavior.NoAction); // ← fixes the cycle error
+
+
+            builder.Entity<Service>().HasMany(s=>s.EventTypes).WithMany(e=>e.Services)
+                .UsingEntity(j => j.ToTable("ServiceEventTypes"));
         }
 
 
         public DbSet<OrderInsight> OrderInsights { get; set; }
-        public DbSet<Category> Categories { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
-        public DbSet<VendorServiceType> VendorServiceTypes { get; set; }
         public DbSet<ServiceRating> ServiceRatings { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<EventItem> EventItems { get; set; }
@@ -105,7 +95,7 @@ namespace Infrastructure.Persistence
 
         public DbSet<ServiceImage> ServiceImages { get; set; }
 
-
+        public DbSet<VendorType> VendorTypes { get; set; }
         public DbSet<CorporationInquiry> CorporationInquiries { get; set; }
 
 

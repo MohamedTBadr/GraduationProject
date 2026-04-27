@@ -40,7 +40,7 @@ namespace Infrastructure.Repositories
             return await _pipeline.ExecuteAsync(async token =>
             {
                 var inquiry = await _context.CorporationInquiries
-                    .Include(x => x.Category)
+                    .Include(x => x.EventType)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x => x.Id == id, token);
 
@@ -70,7 +70,7 @@ namespace Infrastructure.Repositories
             return await _pipeline.ExecuteAsync(async token =>
             {
                 var query = _context.CorporationInquiries
-                    .Include(x => x.Category)
+                    .Include(x => x.EventType)
                     .AsNoTracking();
 
                 var totalCount = await query.CountAsync(token);

@@ -65,7 +65,7 @@ namespace Web.Api.Controllers
             var result=  await vendorService.AddVendorAsync(request, cancellationToken);
             if (result.IsFailure)
             {
-                return BadRequest(result.ErrorMessage);
+                return BadRequest(result.Error);
             }
             return Created();
         }

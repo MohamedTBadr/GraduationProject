@@ -29,7 +29,6 @@ namespace Infrastructure.Persistence
                 await SeedAdminUserAsync();
                 await SeedVendorUserAsync();
                 await SeedCustomerAsync();
-                await SeedCategoriesAsync();
                 await SeedServiceTypesAsync();
                 await SeedServicesAsync();   // ✅ add
                 await SeedPackagesAsync();
@@ -167,21 +166,7 @@ namespace Infrastructure.Persistence
                 }
             }
         }
-        private async Task SeedCategoriesAsync()
-        {
-            if (!context.Categories.Any())
-            {
-                var categories = new List<Category>
-                {
-                    new Category { Id = Guid.NewGuid(), Name = "Weeding" },
-                    new Category { Id = Guid.NewGuid(), Name = "Birthday" },
-                    new Category { Id = Guid.NewGuid(), Name = "Graduation" },
 
-                };
-                context.Categories.AddRange(categories);
-                await context.SaveChangesAsync();
-            }
-        }
 
         private async Task SeedServiceTypesAsync()
         {
@@ -206,8 +191,8 @@ namespace Infrastructure.Persistence
             var photography = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Photography");
             var catering = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Catering");
             var decoration = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Decoration");
-            var wedding = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Weeding");
-            var birthday = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Birthday");
+            var wedding = await context.EventTypes.FirstOrDefaultAsync(c => c.Name == "Weeding");
+            var birthday = await context.EventTypes.FirstOrDefaultAsync(c => c.Name == "Birthday");
 
             if (vendor == null || photography == null || catering == null || wedding == null)
             {
@@ -215,41 +200,41 @@ namespace Infrastructure.Persistence
                 return;
             }
 
-            var Services = new List<Service>
+            var services = new List<Service>
+{
+    new Service
     {
-        new Service
-        {
-            Id = Guid.NewGuid(),
-            Name = "Wedding Photography Package",
-            Description = "Full-day wedding photography coverage with edited photos.",
-            Price = 5000m,
-            VendorId = vendor.UserId,
-            ServiceTypeId = photography.Id,
-            CategoryId = wedding.Id
-        },
-        new Service
-        {
-            Id = Guid.NewGuid(),
-            Name = "Birthday Catering Set",
-            Description = "Catering Service for up to 50 guests with custom menu.",
-            Price = 3000m,
-            VendorId = vendor.UserId,
-            ServiceTypeId = catering.Id,
-            CategoryId = birthday.Id
-        },
-        new Service
-        {
-            Id = Guid.NewGuid(),
-            Name = "Wedding Hall Decoration",
-            Description = "Full wedding hall decoration with flowers and lighting.",
-            Price = 7000m,
-            VendorId = vendor.UserId,
-            ServiceTypeId = decoration.Id,
-            CategoryId = wedding.Id
-        }
-    };
+        Id            = Guid.NewGuid(),
+        Name          = "Wedding Photography Package",
+        Description   = "Full-day wedding photography coverage with edited photos.",
+        Price         = 5000m,
+        VendorId      = vendor.UserId,
+        ServiceTypeId = photography.Id,
+        EventTypes    = new List<EventType> { wedding }   // ← pass the entity
+    },
+    new Service
+    {
+        Id            = Guid.NewGuid(),
+        Name          = "Birthday Catering Set",
+        Description   = "Catering Service for up to 50 guests with custom menu.",
+        Price         = 3000m,
+        VendorId      = vendor.UserId,
+        ServiceTypeId = catering.Id,
+        EventTypes    = new List<EventType> { birthday }  // ← pass the entity
+    },
+    new Service
+    {
+        Id            = Guid.NewGuid(),
+        Name          = "Wedding Hall Decoration",
+        Description   = "Full wedding hall decoration with flowers and lighting.",
+        Price         = 7000m,
+        VendorId      = vendor.UserId,
+        ServiceTypeId = decoration.Id,
+        EventTypes    = new List<EventType> { wedding }   // ← pass the entity
+    }
+};
 
-            await context.Services.AddRangeAsync(Services);
+            await context.Services.AddRangeAsync(services);
             await context.SaveChangesAsync();
         }
 

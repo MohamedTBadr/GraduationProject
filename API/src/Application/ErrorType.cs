@@ -1,26 +1,26 @@
 ﻿namespace Application
 {
-    public record Error(ErrorType Type, string Code, string Description)
+    public record Error(ErrorType Type, int Code, string Description)
     {
-        public static Error Validation(string code, string description)
+        public static Error Validation(int code, string description)
             => new(ErrorType.Validation, code, description);
 
-        public static Error NotFound(string code, string description)
+        public static Error NotFound(int code, string description)
             => new(ErrorType.NotFound, code, description);
 
-        public static Error Conflict(string code, string description)
+        public static Error Conflict(int code, string description)
             => new(ErrorType.Conflict, code, description);
 
-        public static Error Unauthorized(string code, string description)
+        public static Error Unauthorized(int code, string description)
             => new(ErrorType.Unauthorized, code, description);
 
-        public static Error Forbidden(string code, string description)
+        public static Error Forbidden(int code, string description)
             => new(ErrorType.Forbidden, code, description);
 
-        public static Error BusinessRule(string code, string description)
+        public static Error BusinessRule(int code, string description)
             => new(ErrorType.BusinessRule, code, description);
 
-        public static Error Unexpected(string code, string description)
+        public static Error Unexpected(int code, string description)
             => new(ErrorType.Unexpected, code, description);
     }
     public enum ErrorType

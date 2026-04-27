@@ -10,5 +10,9 @@ namespace Domain.Entities
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+
+        public ICollection<Event> Events { get; set; }
+
+        public ICollection<Service> Services { get; set; }
     }
 }

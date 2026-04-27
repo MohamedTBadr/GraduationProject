@@ -9,13 +9,14 @@ namespace Domain.Entities
        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public ServiceType ServiceType { get; set; }
         public decimal Price { get; set; }
+
+        public ServiceType ServiceType { get; set; }
         public Guid ServiceTypeId { get; set; }
 
-        public Category Category { get; set; }
+        public ICollection<EventType> EventTypes { get; set; }
 
-        public Guid CategoryId { get; set; } 
+        //public Guid CategoryId { get; set; } 
 
          public decimal SetupDuration { get; set; } // in hours
         public decimal LeadTimeRequired { get; set; } // in weeks

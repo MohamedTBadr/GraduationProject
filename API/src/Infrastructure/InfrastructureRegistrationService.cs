@@ -18,7 +18,6 @@ namespace Infrastructure
             public static async Task<IServiceCollection> AddInfrastructureServices(this IServiceCollection Services, IConfiguration configuration)
             {
             //Services.AddScoped<IDbIntialize, DbIntialize>();
-            Services.AddScoped<ICategoryRepository, CategoryRepository>();
             Services.AddScoped<IServiceTypeRepository, ServiceTypeRepository>();
             Services.AddScoped<IVendorRepository, VendorRepository>();
             Services.AddScoped<IEventRepository, EventRepository>();
@@ -30,6 +29,7 @@ namespace Infrastructure
             Services.AddScoped<IOrderRepository, OrderRepository>();
             Services.AddScoped<IEventTypeRepository, EventTypeRespository>();
             Services.AddScoped<INotificationRepository, NotificationRepository>();
+            Services.AddScoped<IVendorTypeRepository, VendorTypeRepository>();
             Services.AddScoped<ICacheRepository, CacheRepository>();
             Services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
             Services.AddScoped<IUserRepository, UserRepository>();

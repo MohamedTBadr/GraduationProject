@@ -42,16 +42,16 @@ namespace Application.Services
             return visibilityFilter;
         }
 
-        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByCategoryIdAsync(
-            Guid categoryId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken)
-        {
-            Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
+        //public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByCategoryIdAsync(
+        //    Guid categoryId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken)
+        //{
+        //    Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
 
-            var result = await _ServiceRepository.GetByCategoryIdAsync(categoryId, request, visibilityFilter, cancellationToken);
-            var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
-            return Result<PaginatedResponse<ServiceDTO>>.Success(
-                new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
-        }
+        //    var result = await _ServiceRepository.GetByCategoryIdAsync(categoryId, request, visibilityFilter, cancellationToken);
+        //    var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
+        //    return Result<PaginatedResponse<ServiceDTO>>.Success(
+        //        new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
+        //}
 
         public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByVendorIdAsync(
             Guid vendorId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken)
@@ -78,7 +78,7 @@ namespace Application.Services
         {
             var Service = await _ServiceRepository.GetByIdAsync(id, cancellationToken);
             if (Service is null)
-                return Result<ServiceDTO>.NotFound("Service not found");
+                return Result<ServiceDTO>.NotFound(404, "Service not found");
             return Result<ServiceDTO>.Success(_mapper.Map<ServiceDTO>(Service));
         }
 
@@ -125,7 +125,7 @@ namespace Application.Services
         {
             var exists = await _ServiceRepository.ExistsAsync(dto.Id, cancellationToken);
             if (!exists)
-                return Result<ServiceDTO>.NotFound("Service not found");
+                return Result<ServiceDTO>.NotFound(404, "Service not found");
 
             var service = _mapper.Map<Service>(dto);
 
@@ -191,7 +191,7 @@ namespace Application.Services
         {
             var exists = await _ServiceRepository.ExistsAsync(id, cancellationToken);
             if (!exists)
-                return Result<bool>.NotFound("Service not found");
+                return Result<bool>.NotFound(404, "Service not found");
 
             await _ServiceRepository.DeleteAsync(id, cancellationToken);
             await _fileService.DeleteAsync(new List<string> { id.ToString() }, cancellationToken); // Assuming you want to delete associated images as well

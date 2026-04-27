@@ -186,7 +186,21 @@ namespace Web.Api.Controllers
             if (!result.Succeeded)
             {
                 var (errorType, message) = ToError(result);
-                return Result<UserDTO>.Failure(errorType, message);
+
+                var error = errorType switch
+                {
+                    ErrorType.Validation => Error.Validation(400, message),
+                    ErrorType.Conflict => Error.Conflict(409, message),
+                    ErrorType.Unauthorized => Error.Unauthorized(401, message),
+                    _ => Error.Unexpected(500, message)
+                };
+
+                return Result<UserDTO>.Failure(error);
+            }
+            if (!result.Succeeded)
+            {
+                var (errorType, message) = ToError(result);
+                return Result<UserDTO>.Failure(new Error(errorType, 500 , message));
             }
             return Result<UserDTO>.Success(new UserDTO
             {

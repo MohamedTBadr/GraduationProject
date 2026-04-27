@@ -11,7 +11,7 @@ namespace Application.Interfaces
     {
         // PaginatedResult<ServiceDto> → PaginatedResponse<ServiceDto>
         Task<Result<PaginatedResponse<ServiceDTO>>> GetAllAsync(PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
-        Task<Result<PaginatedResponse<ServiceDTO>>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
+        //Task<Result<PaginatedResponse<ServiceDTO>>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
         Task<Result<PaginatedResponse<ServiceDTO>>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
         Task<Result<PaginatedResponse<ServiceDTO>>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
 
