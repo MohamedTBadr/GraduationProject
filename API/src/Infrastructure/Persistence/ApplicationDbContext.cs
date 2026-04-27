@@ -88,6 +88,9 @@ namespace Infrastructure.Persistence
         public DbSet<IdentityRole<Guid>> IdentityRoles { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Conversation> Conversations { get; set; }
+        public DbSet<SupportTicket> SupportTickets { get; set; }
+        public DbSet<SupportAgent> SupportAgents { get; set; }
+        public DbSet<TicketReply> TicketReplies { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
 
