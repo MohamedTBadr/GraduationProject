@@ -15,7 +15,6 @@ namespace Application.DTOs.VendorDTOs
         public string Name { get; set; }
         public string BusinessName { get; set; }
         public string OwnerName { get; set; }
-        public List<ServiceTypesDTOs.ServiceTypeDTO> ServiceTypes { get; set; } = new List<ServiceTypesDTOs.ServiceTypeDTO>();
         public Guid VendorTypeId { get; set; }
         public decimal YearsInBusiness { get; set; }
 

@@ -32,10 +32,3 @@ namespace Domain.Contracts
 }
 
 
-// ─── SupportTicketRepository.cs ──────────────────────────────────────────────
-
-using Domain.Contracts;
-using Domain.Entities;
-using Domain.Enums;
-using Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;

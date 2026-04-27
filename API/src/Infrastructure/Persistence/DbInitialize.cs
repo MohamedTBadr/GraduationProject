@@ -1,5 +1,4 @@
-﻿
-using Domain.Contracts;
+﻿using Domain.Contracts;
 using Domain.Entities;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -16,33 +15,46 @@ namespace Infrastructure.Persistence
     {
         public async Task IntializeAsync()
         {
-            //Serviceion =>Seeding + Intialize Db
             if ((await context.Database.GetPendingMigrationsAsync()).Any())
             {
                 await context.Database.MigrateAsync();
             }
 
-            //Dev =>Seeding
             try
             {
+                await SeedVendorTypeAsync();
                 await SeedRolesAsync();
                 await SeedAdminUserAsync();
                 await SeedVendorUserAsync();
                 await SeedCustomerAsync();
                 await SeedServiceTypesAsync();
-                await SeedServicesAsync();   // ✅ add
+                await SeedEventTypeAsync();   // ✅ Fix #2: moved BEFORE SeedServicesAsync
+                await SeedServicesAsync();
                 await SeedPackagesAsync();
-                await SeedEventTypeAsync();
             }
             catch (Exception E)
             {
                 Console.WriteLine($"Error Occurred during seeding: {E.Message}");
             }
-
         }
 
+        private async Task SeedVendorTypeAsync()
+        {
+            if (!context.VendorTypes.Any())
+            {
+                var vendorTypes = new List<VendorType>
+                {
+                    new VendorType { Id = Guid.NewGuid(), Name = "Photographer" },
+                    new VendorType { Id = Guid.NewGuid(), Name = "Caterer" },
+                    new VendorType { Id = Guid.NewGuid(), Name = "Decorator" },
+                };
+                context.VendorTypes.AddRange(vendorTypes);
+                await context.SaveChangesAsync();
+            }
+        }
 
-        private async Task SeedEventTypeAsync() { 
+        private async Task SeedEventTypeAsync()
+        {
             if (!context.EventTypes.Any())
             {
                 var eventTypes = new List<EventType>
@@ -55,9 +67,9 @@ namespace Infrastructure.Persistence
                 await context.SaveChangesAsync();
             }
         }
+
         private async Task SeedRolesAsync()
         {
-
             string[] roles = { "Admin", "Vendor", "Customer" };
 
             foreach (var role in roles)
@@ -99,7 +111,6 @@ namespace Infrastructure.Persistence
                         await userManager.AddToRoleAsync(newAdminUser, "Admin");
                     }
                 }
-
             }
         }
 
@@ -128,7 +139,7 @@ namespace Infrastructure.Persistence
                         PortfolioLink = "...",
                         Description = "Test1",
                         IsVerified = true,
-
+                        VendorTypeId = context.VendorTypes.FirstOrDefault().Id
                     };
                     var result = await userManager.CreateAsync(newVendorUser, "Vendor@123");
 
@@ -136,10 +147,12 @@ namespace Infrastructure.Persistence
                     {
                         await userManager.AddToRoleAsync(newVendorUser, "Vendor");
                         await context.Vendors.AddAsync(vendorProfile);
+                        await context.SaveChangesAsync(); // ✅ Fix #1: persist the vendor
                     }
                 }
             }
         }
+
         private async Task SeedCustomerAsync()
         {
             string customerEmail = "customer@example.com";
@@ -167,7 +180,6 @@ namespace Infrastructure.Persistence
             }
         }
 
-
         private async Task SeedServiceTypesAsync()
         {
             if (!context.ServiceTypes.Any())
@@ -182,11 +194,11 @@ namespace Infrastructure.Persistence
                 await context.SaveChangesAsync();
             }
         }
+
         private async Task SeedServicesAsync()
         {
             if (context.Services.Any()) return;
 
-            // Pull existing seeded data to use as FKs
             var vendor = await context.Vendors.FirstOrDefaultAsync();
             var photography = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Photography");
             var catering = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Catering");
@@ -201,38 +213,38 @@ namespace Infrastructure.Persistence
             }
 
             var services = new List<Service>
-{
-    new Service
-    {
-        Id            = Guid.NewGuid(),
-        Name          = "Wedding Photography Package",
-        Description   = "Full-day wedding photography coverage with edited photos.",
-        Price         = 5000m,
-        VendorId      = vendor.UserId,
-        ServiceTypeId = photography.Id,
-        EventTypes    = new List<EventType> { wedding }   // ← pass the entity
-    },
-    new Service
-    {
-        Id            = Guid.NewGuid(),
-        Name          = "Birthday Catering Set",
-        Description   = "Catering Service for up to 50 guests with custom menu.",
-        Price         = 3000m,
-        VendorId      = vendor.UserId,
-        ServiceTypeId = catering.Id,
-        EventTypes    = new List<EventType> { birthday }  // ← pass the entity
-    },
-    new Service
-    {
-        Id            = Guid.NewGuid(),
-        Name          = "Wedding Hall Decoration",
-        Description   = "Full wedding hall decoration with flowers and lighting.",
-        Price         = 7000m,
-        VendorId      = vendor.UserId,
-        ServiceTypeId = decoration.Id,
-        EventTypes    = new List<EventType> { wedding }   // ← pass the entity
-    }
-};
+            {
+                new Service
+                {
+                    Id            = Guid.NewGuid(),
+                    Name          = "Wedding Photography Package",
+                    Description   = "Full-day wedding photography coverage with edited photos.",
+                    Price         = 5000m,
+                    VendorId      = vendor.UserId,
+                    ServiceTypeId = photography.Id,
+                    EventTypes    = new List<EventType> { wedding }
+                },
+                new Service
+                {
+                    Id            = Guid.NewGuid(),
+                    Name          = "Birthday Catering Set",
+                    Description   = "Catering Service for up to 50 guests with custom menu.",
+                    Price         = 3000m,
+                    VendorId      = vendor.UserId,
+                    ServiceTypeId = catering.Id,
+                    EventTypes    = new List<EventType> { birthday }
+                },
+                new Service
+                {
+                    Id            = Guid.NewGuid(),
+                    Name          = "Wedding Hall Decoration",
+                    Description   = "Full wedding hall decoration with flowers and lighting.",
+                    Price         = 7000m,
+                    VendorId      = vendor.UserId,
+                    ServiceTypeId = decoration.Id,
+                    EventTypes    = new List<EventType> { wedding }
+                }
+            };
 
             await context.Services.AddRangeAsync(services);
             await context.SaveChangesAsync();
@@ -251,59 +263,58 @@ namespace Infrastructure.Persistence
             }
 
             var packages = new List<Package>
-    {
-        new Package
-        {
-            Id = Guid.NewGuid(),
-            Name = "Basic Wedding Package",
-            Description = "Essential wedding Services bundle.",
-            Price = 10000m,
-            Discount = 10m,
-            Items = new List<string>
             {
-                "Wedding Photography Coverage",
-                "Basic Hall Decoration",
-                "Catering for 50 guests"
-            },
-            VendorId = vendor.UserId
-        },
-        new Package
-        {
-            Id = Guid.NewGuid(),
-            Name = "Premium Wedding Package",
-            Description = "All-inclusive luxury wedding experience.",
-            Price = 25000m,
-            Discount = 15m,
-            Items = new List<string>
-            {
-                "Full-Day Photography & Videography",
-                "Premium Floral Decoration",
-                "Catering for 200 guests",
-                "Live Music Band",
-                "Luxury Car Rental"
-            },
-            VendorId = vendor.UserId
-        },
-        new Package
-        {
-            Id = Guid.NewGuid(),
-            Name = "Birthday Starter Package",
-            Description = "Fun birthday bundle for small gatherings.",
-            Price = 4000m,
-            Discount = 5m,
-            Items = new List<string>
-            {
-                "Birthday Photography",
-                "Balloon Decoration",
-                "Catering for 30 guests"
-            },
-            VendorId = vendor.UserId
-        }
-    };
+                new Package
+                {
+                    Id          = Guid.NewGuid(),
+                    Name        = "Basic Wedding Package",
+                    Description = "Essential wedding Services bundle.",
+                    Price       = 10000m,
+                    Discount    = 10m,
+                    Items       = new List<string>
+                    {
+                        "Wedding Photography Coverage",
+                        "Basic Hall Decoration",
+                        "Catering for 50 guests"
+                    },
+                    VendorId = vendor.UserId
+                },
+                new Package
+                {
+                    Id          = Guid.NewGuid(),
+                    Name        = "Premium Wedding Package",
+                    Description = "All-inclusive luxury wedding experience.",
+                    Price       = 25000m,
+                    Discount    = 15m,
+                    Items       = new List<string>
+                    {
+                        "Full-Day Photography & Videography",
+                        "Premium Floral Decoration",
+                        "Catering for 200 guests",
+                        "Live Music Band",
+                        "Luxury Car Rental"
+                    },
+                    VendorId = vendor.UserId
+                },
+                new Package
+                {
+                    Id          = Guid.NewGuid(),
+                    Name        = "Birthday Starter Package",
+                    Description = "Fun birthday bundle for small gatherings.",
+                    Price       = 4000m,
+                    Discount    = 5m,
+                    Items       = new List<string>
+                    {
+                        "Birthday Photography",
+                        "Balloon Decoration",
+                        "Catering for 30 guests"
+                    },
+                    VendorId = vendor.UserId
+                }
+            };
 
             await context.Packages.AddRangeAsync(packages);
             await context.SaveChangesAsync();
         }
-
     }
 }

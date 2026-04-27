@@ -77,14 +77,14 @@ namespace Application.Services
         {
       
     
-            // 2. Create the Vendor linked to that user
-            var ServiceTypeIds = request.ServiceTypes.Select(s => s.Id).ToList();
+            //// 2. Create the Vendor linked to that user
+            //var ServiceTypeIds = request.ServiceTypes.Select(s => s.Id).ToList();
 
-            // Fetch real ServiceType entities from DB
-            var existingServiceTypes = await vendorRepository.GetServiceTypesByIdsAsync(ServiceTypeIds, cancellationToken);
+            //// Fetch real ServiceType entities from DB
+            //var existingServiceTypes = await vendorRepository.GetServiceTypesByIdsAsync(ServiceTypeIds, cancellationToken);
 
-            if (existingServiceTypes.Count != ServiceTypeIds.Count)
-                return Result<VendorDetailsDTO>.Failure(new Error(ErrorType.NotFound, 404, "One or more ServiceTypes not found"));
+            //if (existingServiceTypes.Count != ServiceTypeIds.Count)
+            //    return Result<VendorDetailsDTO>.Failure(new Error(ErrorType.NotFound, 404, "One or more ServiceTypes not found"));
 
 
             // 1. Create the ApplicationUser via Identity
@@ -96,6 +96,7 @@ namespace Application.Services
                 UserName = request.Name,
                 Email = request.Email,
                 PhoneNumber = request.Phone,
+               
             };
 
             var identityResult = await userRepository.CreateAsync(user, request.Password, cancellationToken);

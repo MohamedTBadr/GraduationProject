@@ -72,7 +72,7 @@ namespace Application.Services
             var ticket = await repository.GetByTicketNumberAsync(ticketNumber, ct);
             if (ticket is null)
                 return Result<TicketDetailsDTO>.Failure(
-                    Error.NotFound("TICKET_NOT_FOUND", $"Ticket {ticketNumber} not found"));
+                    Error.NotFound(404, $"Ticket {ticketNumber} not found"));
 
             return Result<TicketDetailsDTO>.Success(ToDetailsDTO(ticket));
         }
@@ -87,7 +87,7 @@ namespace Application.Services
             var ticket = await repository.GetByTicketNumberAsync(ticketNumber, ct);
             if (ticket is null)
                 return Result<TicketReplyResponseDTO>.Failure(
-                    Error.NotFound("TICKET_NOT_FOUND", $"Ticket {ticketNumber} not found"));
+                    Error.NotFound(404, $"Ticket {ticketNumber} not found"));
 
             var replyCount  = ticket.Replies.Count + 1;
             var replyNumber = $"RPL-{replyCount:D3}";
@@ -131,12 +131,12 @@ namespace Application.Services
             var ticket = await repository.GetByTicketNumberAsync(ticketNumber, ct);
             if (ticket is null)
                 return Result<TicketAssignResponseDTO>.Failure(
-                    Error.NotFound("TICKET_NOT_FOUND", $"Ticket {ticketNumber} not found"));
+                    Error.NotFound(404, $"Ticket {ticketNumber} not found"));
 
             var agent = await repository.GetAgentByCodeAsync(request.AgentId, ct);
             if (agent is null)
                 return Result<TicketAssignResponseDTO>.Failure(
-                    Error.NotFound("AGENT_NOT_FOUND", $"Agent {request.AgentId} not found"));
+                    Error.NotFound(404, $"Agent {request.AgentId} not found"));
 
             ticket.AssignedAgentId = agent.Id;
             ticket.AssignmentNote  = request.Note;
@@ -164,11 +164,11 @@ namespace Application.Services
             var ticket = await repository.GetByTicketNumberAsync(ticketNumber, ct);
             if (ticket is null)
                 return Result<TicketResolveResponseDTO>.Failure(
-                    Error.NotFound("TICKET_NOT_FOUND", $"Ticket {ticketNumber} not found"));
+                    Error.NotFound(404, $"Ticket {ticketNumber} not found"));
 
             if (ticket.Status == TicketStatus.Resolved)
                 return Result<TicketResolveResponseDTO>.Failure(
-                    Error.BusinessRule("TICKET_ALREADY_RESOLVED", "Ticket is already resolved"));
+                    Error.BusinessRule(400, "Ticket is already resolved"));
 
             ticket.Status         = TicketStatus.Resolved;
             ticket.ResolvedAt     = DateTime.UtcNow;
@@ -197,12 +197,11 @@ namespace Application.Services
             var ticket = await repository.GetByTicketNumberAsync(ticketNumber, ct);
             if (ticket is null)
                 return Result<TicketEscalateResponseDTO>.Failure(
-                    Error.NotFound("TICKET_NOT_FOUND", $"Ticket {ticketNumber} not found"));
+                    Error.NotFound(404, $"Ticket {ticketNumber} not found"));
 
             if (ticket.IsEscalated)
                 return Result<TicketEscalateResponseDTO>.Failure(
-                    Error.BusinessRule("TICKET_ALREADY_ESCALATED", "Ticket has already been escalated"));
-
+                    Error.BusinessRule(400, "Ticket has already been escalated"));
             ticket.IsEscalated      = true;
             ticket.EscalatedTo      = request.EscalateTo;
             ticket.EscalationReason = request.Reason;

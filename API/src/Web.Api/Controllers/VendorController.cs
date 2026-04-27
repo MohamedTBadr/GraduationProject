@@ -2,6 +2,7 @@
 using Application.DTOs.VendorDTOs;
 using Application.Interfaces;
 using Application.Services;
+using IdempotentAPI.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -60,8 +61,9 @@ namespace Web.Api.Controllers
         [SuccessStatusCode(201)]
         [ProducesResponseType(400)]
         [InvalidateCache]
-        public async Task<IActionResult> CreateVendorAsync(CreateVendorRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateVendorAsync([FromBody]CreateVendorRequest request, CancellationToken cancellationToken)
         {
+            if (request is null) return BadRequest();
             var result=  await vendorService.AddVendorAsync(request, cancellationToken);
             if (result.IsFailure)
             {
