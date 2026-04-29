@@ -79,6 +79,11 @@ export class EventService {
     return this.http.patch<void>(`${this.apiUrl}/${eventId}/items/${itemId}/approve`, payload);
   }
 
+  /** PATCH /Event/{eventId}/items/{itemId}/status - Update item status (e.g., Done, Completed) */
+  updateItemStatus(eventId: string, itemId: string, status: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${eventId}/items/${itemId}/status`, { status });
+  }
+
   /** PATCH /Event/{id}/cancel - Cancel an event */
   cancelEvent(id: string, payload: CancelEventRequest): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${id}/cancel`, payload);

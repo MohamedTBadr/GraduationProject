@@ -1,7 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { EventService } from '../../../core/services/event.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../shared/components/toast/toast.service';
+import { CreateEventDto } from '../../../shared/types/api.interfaces';
+import { EventTypeService } from '../../../core/services/event-type.service';
+
 
 @Component({
   selector: 'app-add-event',
@@ -10,8 +16,9 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
   templateUrl: './add-event.component.html',
   styleUrls: ['./add-event.component.scss']
 })
-export class AddEventComponent {
+export class AddEventComponent implements OnInit {
   step = 1;
+  isSubmitting = false;
   
   eventTypes = [
     { id: 'wedding', title: 'Wedding', icon: '💍', desc: 'Romantic ceremony & reception for your big day', services: 'Venue · Catering · Decor · Photography · DJ' },
@@ -34,14 +41,48 @@ export class AddEventComponent {
     { id: 'lighting', label: 'Lighting', selected: false }
   ];
 
-  constructor(private router: Router, private fb: FormBuilder) {
+  constructor(
+    private router: Router, 
+    private fb: FormBuilder,
+    private eventService: EventService,
+    private authService: AuthService,
+    private toastService: ToastService,
+    private eventTypeService: EventTypeService
+  ) {
     this.eventForm = this.fb.group({
-      name: ['', Validators.required],
+      name: ['', [Validators.required, Validators.minLength(3)]],
       date: ['', Validators.required],
-      guests: [''],
-      location: [''],
-      budget: ['50000', Validators.required],
+      guests: ['', [Validators.min(1)]],
+      city: ['', Validators.required],
+      state: ['', Validators.required],
+      street: [''],
+      budget: ['50000', [Validators.required, Validators.min(1000)]],
       notes: ['']
+    });
+  }
+
+  getBudgetPart(percent: number): number {
+    const b = this.eventForm.get('budget')?.value;
+    return (Number(b) || 0) * percent;
+  }
+
+  ngOnInit() {
+    this.eventTypeService.getAll().subscribe({
+      next: (backendTypes) => {
+        if (backendTypes && backendTypes.length > 0) {
+          this.eventTypes = backendTypes.map(bt => {
+            const hardcoded = this.eventTypes.find(h => h.title.toLowerCase() === bt.name.toLowerCase()) 
+              || { id: bt.id, title: bt.name, icon: '✨', desc: 'Custom Event', services: 'Choose any services' };
+            return {
+              ...hardcoded,
+              id: bt.id
+            };
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Failed to fetch event types', err);
+      }
     });
   }
 
@@ -67,10 +108,47 @@ export class AddEventComponent {
   }
 
   createEvent() {
-    if (this.eventForm.valid) {
-      // In a real app we would call an API here
-      this.router.navigate(['/user/dashboard']);
+    if (this.eventForm.invalid) {
+      this.toastService.show('Please fill in all required fields.', 'error');
+      return;
     }
+
+    const user = this.authService.user();
+    if (!user) {
+      this.toastService.show('Please login to create an event.', 'error');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    this.isSubmitting = true;
+    const formValues = this.eventForm.value;
+
+    const createDto: CreateEventDto = {
+      userId: user.id,
+      title: formValues.name,
+      eventTypeId: this.selectedEventType?.id || '',
+      eventDate: new Date(formValues.date).toISOString(),
+      totalBudget: Number(formValues.budget) || 0,
+      guestCount: Number(formValues.guests) || 0,
+      notes: formValues.notes,
+      location: {
+        street: formValues.street || 'Unknown',
+        city: formValues.city,
+        state: formValues.state
+      }
+    };
+
+    this.eventService.create(createDto).subscribe({
+      next: (res) => {
+        this.isSubmitting = false;
+        this.toastService.show('Event created successfully!', 'success');
+        this.router.navigate(['/user/my-events'], { queryParams: { id: res.id } });
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.toastService.show('Failed to create event. Please try again.', 'error');
+      }
+    });
   }
 
   goBackToDash() {

@@ -139,6 +139,61 @@ The marketplace organizes its providers and offerings based on a three-dimension
 - **Match by Event Relevance:** User plans a Corporate Event → Prioritize vendors serving Corporate Events.
 - **Perfect Match:** User plans a Corporate Event and needs a DJ → Show vendors matching BOTH criteria (High Relevance Score).
 
+### F. Post-Service Completion & Review Flow
+
+After a vendor's service is approved and eventually delivered, the booking goes through a completion lifecycle allowing clients to review the service.
+
+**Business Rules:**
+- **Done**: The Vendor marks the item as `Done` when the service is delivered/finished.
+- **Completed**: The Client (User) marks the item as `Completed` to acknowledge the delivery and finalize the transaction.
+- **Review**: Once `Completed`, the Client is prompted with a Review Modal to submit a rating and feedback text. This rating influences the vendor's overall profile score.
+
+```mermaid
+sequenceDiagram
+    participant Vendor
+    participant Frontend
+    participant API (EventController)
+    participant Client
+    
+    Vendor->>Frontend: Clicks "Mark Done" on Vendor Dashboard
+    Frontend->>API (EventController): PATCH /api/Event/{eventId}/items/{itemId}/status (Done)
+    API (EventController)-->>Frontend: 204 NoContent
+    Note right of Client: Time elapses...
+    Client->>Frontend: Views "My Bookings" page
+    Frontend->>Frontend: Shows "Mark Complete" for Done items
+    Client->>Frontend: Clicks "Mark Complete"
+    Frontend->>API (EventController): PATCH /api/Event/{eventId}/items/{itemId}/status (Completed)
+    API (EventController)-->>Frontend: 204 NoContent
+    Frontend->>Client: Opens Review Modal
+    Client->>Frontend: Submits Rating & Review
+    Frontend->>API (EventController): POST /api/Event/{eventId}/items/{itemId}/review
+    API (EventController)-->>Frontend: 201 Created
+```
+
+### G. Admin User Management Flow
+
+Administrators have the authority to suspend or unsuspend Users and Vendors based on platform policy violations.
+
+**Business Rules:**
+- Only users with the `Admin` role can invoke the suspend/unsuspend endpoints.
+- When an account is `Suspended`, the user/vendor cannot log into the platform (`UnauthorizedException` is thrown).
+- Existing valid JWT tokens might still work until expiration unless revoked, but new logins are blocked.
+- Suspending or unsuspending an account automatically triggers an email notification to the user detailing the action and the reason (if suspended).
+
+```mermaid
+sequenceDiagram
+    participant Admin
+    participant Frontend
+    participant API (UserController)
+    participant EmailService
+    
+    Admin->>Frontend: Clicks "Suspend" & Enters Reason
+    Frontend->>API (UserController): PATCH /api/user/suspend/{id} (Body: reason)
+    API (UserController)->>EmailService: Send "Account Suspended" Email
+    API (UserController)-->>Frontend: 204 NoContent
+    Note over API (UserController): User's IsSuspended flag is set to true
+```
+
 ---
 
 ## 3. Current Status & Next Steps

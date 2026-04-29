@@ -16,11 +16,13 @@ export interface RegisterRequest {
 }
 
 export interface AuthApiResponse {
-  value: { name: string;
+  value: {
+    name: string;
     email: string;
     accessToken: string;
-    refreshToken: string; 
-    role: string; }
+    refreshToken: string;
+    role: string;
+  }
 }
 
 export interface RefreshTokenRequest {
@@ -59,19 +61,7 @@ export interface PagedResult<T> {
   totalPages: number;
 }
 
-// ─────────────────────────────────────────────
-// Category
-// ─────────────────────────────────────────────
-export interface Category {
-  id: string;
-  name: string;
-  // description?: string;
-}
-
-export interface CreateCategoryRequest {
-  name: string;
-  // description?: string;
-}
+// Category interfaces removed in favor of taxonomy.models.ts
 
 // ─────────────────────────────────────────────
 // Service Type
@@ -102,6 +92,7 @@ export interface ApiUser {
   role?: string;
   phone?: string;
   createdAt?: string;
+  status?: 'active' | 'suspended';
 }
 
 export interface CreateUserRequest {
@@ -202,22 +193,6 @@ export interface UpdateProductRequest {
 }
 
 // ─────────────────────────────────────────────
-// Payment
-// ─────────────────────────────────────────────
-export interface PaymobPaymentRequest {
-  amount: number;
-  currency?: string;
-  productId?: string;
-  description?: string;
-}
-
-export interface PaymobPaymentResponse {
-  paymentUrl?: string;
-  paymentKey?: string;
-  orderId?: string;
-}
-
-// ─────────────────────────────────────────────
 // File Upload
 // ─────────────────────────────────────────────
 export interface FileUploadResponse {
@@ -282,7 +257,7 @@ export interface EventItemResponseDto {
   vendorId: string;
   vendorName: string;
   quantity: number;
-  itemStatus: 'Pending' | 'Approved' | 'Rejected';
+  itemStatus: 'Pending' | 'Approved' | 'Rejected' | 'Done' | 'Completed';
   rejectionReason?: string;
 }
 
@@ -318,28 +293,6 @@ export interface CreateEventItemDto {
 export interface CartItem {
   product: ApiProduct;
   quantity: number;
-}
-
-export interface CreateEventDto {
-  userId?: string;
-  title: string;
-  eventTypeId: string;
-  eventDate: string;
-  location?: AddressDto;
-  totalBudget: number;
-  guestCount: number;
-  notes?: string;
-}
-
-export interface UpdateEventDto {
-  title: string;
-  eventTypeId: string;
-  eventDate: string;
-  location?: AddressDto;
-  totalBudget: number;
-  guestCount: number;
-  notes?: string;
-  eventStatus: string;
 }
 
 export interface CreateEventDto {
@@ -470,4 +423,15 @@ export interface EscalateTicketRequest {
   reason: string;
   escalate_to: 'senior_management' | 'legal_team' | 'cto';
   notify_finance?: boolean;
+}
+
+// ─────────────────────────────────────────────
+// Reviews & Ratings
+// ─────────────────────────────────────────────
+export interface CreateReviewDto {
+  userId: string;
+  serviceId: string;
+  rating: number;
+  review: string;
+  photoUrl?: string; // Optional: Uploaded event photo URL
 }

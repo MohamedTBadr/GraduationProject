@@ -4,8 +4,8 @@ import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { CompanyInquiryService } from '../../../core/services/company-inquiry.service';
-import { CategoryService } from '../../../core/services/category.service';
-import { Category } from '../../../shared/types/api.interfaces';
+import { VendorTypeService } from '../../../core/services/vendor-type.service';
+import { VendorType } from '../../../core/models/taxonomy.models';
 
 @Component({
   selector: 'app-corporate',
@@ -16,14 +16,14 @@ import { Category } from '../../../shared/types/api.interfaces';
 })
 export class CorporateComponent implements OnInit {
   corpForm!: FormGroup;
-  categories: Category[] = [];
+  categories: VendorType[] = [];
   isSubmitting = false;
 
   constructor(
     private fb: FormBuilder,
     private toastService: ToastService,
     private companyInquiryService: CompanyInquiryService,
-    private categoryService: CategoryService,
+    private vendorTypeService: VendorTypeService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -47,7 +47,7 @@ export class CorporateComponent implements OnInit {
   }
 
   private loadCategories() {
-    this.categoryService.getAll().subscribe({
+    this.vendorTypeService.getAll().subscribe({
       next: (data) => this.categories = data,
       error: (err) => {
         console.error('Failed to load categories', err);

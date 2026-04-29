@@ -11,6 +11,7 @@
             Pending ({{ pendingCount }}) <span *ngIf="pendingCount > 0" class="ad-badge gold ml-1">!</span>
         </button>
         <button [class.active]="activeTab === 'active'" (click)="setTab('active')" class="ad-tab">Active ({{ activeCount }})</button>
+        <button [class.active]="activeTab === 'suspended'" (click)="setTab('suspended')" class="ad-tab">Suspended ({{ suspendedCount }})</button>
     </div>
     <div class="ad-search-row">
         <div class="ad-search-wrap">
@@ -28,7 +29,7 @@
                 <tbody>
                     <tr *ngFor="let v of paginatedVendors">
                         <td><div class="flex items-center gap-[9px]">
-                            <span class="text-[1.2rem]">🏛️</span>
+                            <!-- <span class="text-[1.2rem]">🏛️</span> -->
                             <div>
                                 <div>{{ v.name }}</div>
                                 <div class="text-[.7rem] text-[rgba(255,255,255,.35)]">Joined {{ v.createdAt | date:'MMM yyyy' }}</div>

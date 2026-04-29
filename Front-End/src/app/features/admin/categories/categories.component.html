@@ -1,50 +1,71 @@
 <div class="ad-section active block">
   <div class="ad-page-hd">
     <div>
-      <div class="ad-page-title">Categories</div>
-      <div class="ad-page-sub">Manage vendor service categories and event types shown across the platform.</div>
+      <div class="ad-page-title">Manage Categories</div>
+      <div class="ad-page-sub">Manage vendor types, service types, and event types across the platform.</div>
     </div>
-    <button class="ad-btn ad-btn-gold" (click)="openAddModal()">+ Add Category</button>
+    <button class="ad-btn ad-btn-gold" (click)="openAddModal()">+ Add New</button>
   </div>
 
-  <div class="ad-g2">
-    <!-- Left Card: Service Categories -->
+  <div class="ad-g3">
+    <!-- Card 1: Vendor Types -->
     <div class="ad-card p-[0] overflow-hidden h-[fit-content]">
       <div class="py-[18px] px-[20px] [border-bottom:1px_solid_rgba(255,255,255,0.06)] font-bold text-[1rem] text-[var(--white)]">
-        Service Categories
+        Vendor Types
       </div>
-      <div class="p-[20px] text-center text-[gray]" *ngIf="loadingCategories">Loading categories...</div>
+      <div class="p-[20px] text-center text-[gray]" *ngIf="loadingVendorTypes">Loading vendor types...</div>
       
-      <div *ngFor="let cat of categories; let i = index" class="ad-vendor-row justify-between">
+      <div *ngFor="let vt of vendorTypes; let i = index" class="ad-vendor-row justify-between">
         <div class="flex items-center gap-[12px]">
-          <div class="text-[1.4rem]">{{ getIconForCategory(cat.name) }}</div>
+          <div class="text-[1.4rem]">{{ getIconForVendorType(vt.name) }}</div>
           <div>
-            <div class="ad-vendor-name">{{ cat.name }}</div>
-            <!-- <div class="ad-vendor-sub">{{ cat.description || ((12 - (i % 5)) + ' vendors') }}</div> -->
+            <div class="ad-vendor-name">{{ vt.name }}</div>
           </div>
         </div>
         
         <div class="flex items-center gap-[12px]">
           <span class="ad-pill ap-green">active</span>
-          <button class="ad-btn ad-btn-ghost ad-btn-sm" (click)="openEditCategory(cat)">Edit</button>
-          <button class="ad-btn ad-btn-red ad-btn-sm" (click)="deleteCategory(cat.id)">Delete</button>
+          <button class="ad-btn ad-btn-ghost ad-btn-sm" (click)="openEditVendorType(vt)">Edit</button>
+          <button class="ad-btn ad-btn-red ad-btn-sm" (click)="deleteVendorType(vt.id)">Delete</button>
         </div>
       </div>
     </div>
 
-    <!-- Right Card: Event Types -->
+    <!-- Card 2: Service Types -->
     <div class="ad-card p-[0] overflow-hidden h-[fit-content]">
       <div class="py-[18px] px-[20px] [border-bottom:1px_solid_rgba(255,255,255,0.06)] font-bold text-[1rem] text-[var(--white)]">
         Service Types
       </div>
-      <div class="p-[20px] text-center text-[gray]" *ngIf="loadingEventTypes">Loading Service types...</div>
+      <div class="p-[20px] text-center text-[gray]" *ngIf="loadingServiceTypes">Loading service types...</div>
+      
+      <div *ngFor="let st of serviceTypes; let i = index" class="ad-vendor-row justify-between">
+        <div class="flex items-center gap-[12px]">
+          <div class="text-[1.4rem]">{{ getIconForVendorType(st.name) }}</div>
+          <div>
+            <div class="ad-vendor-name">{{ st.name }}</div>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-[12px]">
+          <span class="ad-pill ap-green">active</span>
+          <button class="ad-btn ad-btn-ghost ad-btn-sm" (click)="openEditServiceType(st)">Edit</button>
+          <button class="ad-btn ad-btn-red ad-btn-sm" (click)="deleteServiceType(st.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Event Types -->
+    <div class="ad-card p-[0] overflow-hidden h-[fit-content]">
+      <div class="py-[18px] px-[20px] [border-bottom:1px_solid_rgba(255,255,255,0.06)] font-bold text-[1rem] text-[var(--white)]">
+        Event Types
+      </div>
+      <div class="p-[20px] text-center text-[gray]" *ngIf="loadingEventTypes">Loading event types...</div>
       
       <div *ngFor="let ev of eventTypes; let i = index" class="ad-vendor-row justify-between">
         <div class="flex items-center gap-[12px]">
           <div class="text-[1.4rem]">{{ getIconForEventType(ev.name) }}</div>
           <div>
             <div class="ad-vendor-name">{{ ev.name }}</div>
-            <!-- <div class="ad-vendor-sub">{{ ev.description || ((150 - (i * 12)) + ' events') }}</div> -->
           </div>
         </div>
         
@@ -62,11 +83,15 @@
 <div class="ad-modal-overlay" [class.open]="showModal">
   <div class="ad-modal">
     <button class="ad-modal-close" (click)="closeModal()">×</button>
-    <div class="ad-modal-title">{{ isEditMode ? 'Edit' : 'Add' }} {{ activeType === 'category' ? 'Service Category' : 'Event Type' }}</div>
+    <div class="ad-modal-title">
+      {{ isEditMode ? 'Edit' : 'Add' }} 
+      {{ activeType === 'vendorType' ? 'Vendor Type' : activeType === 'serviceType' ? 'Service Type' : 'Event Type' }}
+    </div>
     <div class="ad-modal-sub">Fill in the details below.</div>
 
     <div class="flex gap-[10px] mb-[20px]" *ngIf="!isEditMode">
-      <button class="ad-btn" [class.ad-btn-gold]="activeType === 'category'" [class.ad-btn-ghost]="activeType !== 'category'" (click)="setType('category')">Service Category</button>
+      <button class="ad-btn" [class.ad-btn-gold]="activeType === 'vendorType'" [class.ad-btn-ghost]="activeType !== 'vendorType'" (click)="setType('vendorType')">Vendor Type</button>
+      <button class="ad-btn" [class.ad-btn-gold]="activeType === 'serviceType'" [class.ad-btn-ghost]="activeType !== 'serviceType'" (click)="setType('serviceType')">Service Type</button>
       <button class="ad-btn" [class.ad-btn-gold]="activeType === 'eventType'" [class.ad-btn-ghost]="activeType !== 'eventType'" (click)="setType('eventType')">Event Type</button>
     </div>
 
@@ -75,10 +100,6 @@
         <label>Name</label>
         <input type="text" formControlName="name" placeholder="e.g. Photography" />
       </div>
-      <!-- <div class="form-group">
-        <label>Description</label>
-        <textarea formControlName="description" placeholder="Briefly describe what this covers..."></textarea>
-      </div> -->
 
       <div class="ad-submit-bar">
         <button type="button" class="ad-btn ad-btn-ghost" (click)="closeModal()">Cancel</button>
@@ -87,3 +108,4 @@
     </form>
   </div>
 </div>
+

@@ -70,7 +70,10 @@
             <td>
               <div class="vd-badge-pill vdb-green">Confirmed</div>
             </td>
-            <td><button class="vd-btn vd-btn-ghost vd-btn-sm rounded-[50px] py-[4px] px-[14px]" (click)="openDetails(cb)">View</button></td>
+            <td>
+              <button class="vd-btn vd-btn-ghost vd-btn-sm rounded-[50px] py-[4px] px-[14px] mr-[8px]" (click)="openDetails(cb)">View</button>
+              <button class="vd-btn vd-btn-green vd-btn-sm rounded-[50px] py-[4px] px-[14px]" (click)="markAsDone(cb)">Mark Done</button>
+            </td>
           </tr>
           <tr *ngIf="confirmedBookings.length === 0">
             <td class="text-center p-[20px] text-[var(--gray)]" colspan="7">No confirmed bookings yet.</td>

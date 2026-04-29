@@ -53,9 +53,9 @@ export class LoginComponent {
                 this.isLoading = false;
 
                 this.toastService.show('Logged in successfully!', 'success');
-                
+
                 this.modalService.close();
-                
+
                 if (response.value.role === 'Admin') {
                     this.router.navigate(['/admin']);
                 }

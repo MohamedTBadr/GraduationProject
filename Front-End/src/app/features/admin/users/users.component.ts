@@ -18,24 +18,24 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 export class UsersComponent implements OnInit {
   users: ApiUser[] = [];
   loading = false;
-  
+
   // Pagination & Search State
   searchQuery: string = '';
   pageNumber = 1;
   pageSize = 10;
   totalCount = 0;
   totalPages = 1;
-  
+
   private searchSubject = new Subject<string>();
 
   constructor(
     private userService: UserService,
     private toastService: ToastService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadUsers();
-    
+
     // Setup debounce for typed searching
     this.searchSubject.pipe(
       debounceTime(300),
@@ -52,10 +52,10 @@ export class UsersComponent implements OnInit {
 
   loadUsers() {
     this.loading = true;
-    this.userService.getAll({ 
-      pageNumber: this.pageNumber, 
+    this.userService.getAll({
+      pageNumber: this.pageNumber,
       pageSize: this.pageSize,
-      searchTerm: this.searchQuery 
+      searchTerm: this.searchQuery
     }).subscribe({
       next: (res: any) => {
         this.users = res.items || [];
@@ -88,6 +88,39 @@ export class UsersComponent implements OnInit {
         },
         error: (err) => {
           this.toastService.show('Failed to delete user. They might have active dependencies.', 'error');
+          this.loading = false;
+        }
+      });
+    }
+  }
+
+  suspendUser(user: ApiUser) {
+    const reason = prompt(`Please enter a reason for suspending ${user.name}:`, 'Violation of terms');
+    if (reason) {
+      this.loading = true;
+      this.userService.suspend(user.id, reason).subscribe({
+        next: () => {
+          this.toastService.show(`User ${user.name} has been suspended.`, 'success');
+          this.loadUsers();
+        },
+        error: (err) => {
+          this.toastService.show('Failed to suspend user.', 'error');
+          this.loading = false;
+        }
+      });
+    }
+  }
+
+  unsuspendUser(user: ApiUser) {
+    if (confirm(`Are you sure you want to unsuspend ${user.name}?`)) {
+      this.loading = true;
+      this.userService.unsuspend(user.id).subscribe({
+        next: () => {
+          this.toastService.show(`User ${user.name} has been unsuspended.`, 'success');
+          this.loadUsers();
+        },
+        error: (err) => {
+          this.toastService.show('Failed to unsuspend user.', 'error');
           this.loading = false;
         }
       });

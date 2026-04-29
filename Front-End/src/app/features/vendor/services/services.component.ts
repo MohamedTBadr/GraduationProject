@@ -8,8 +8,8 @@ import { ServiceTypeDropdownComponent } from '../../../shared/components/service
 import { ProductService } from '../../../core/services/product.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
-import { CategoryService } from '../../../core/services/category.service';
-import { Category } from '../../../shared/types/api.interfaces';
+import { VendorTypeService } from '../../../core/services/vendor-type.service';
+import { VendorType } from '../../../core/models/taxonomy.models';
 
 @Component({
   selector: 'app-services',
@@ -35,7 +35,7 @@ export class ServicesComponent implements OnInit {
   
   serviceForm!: FormGroup;
   uploadedImages: any[] = [];
-  categories: Category[] = [];
+  categories: VendorType[] = [];
 
   isDetailModalOpen = false;
   selectedService: ApiProduct | null = null;
@@ -55,7 +55,7 @@ export class ServicesComponent implements OnInit {
     private productService: ProductService,
     private authService: AuthService,
     private toastService: ToastService,
-    private categoryService: CategoryService
+    private vendorTypeService: VendorTypeService
   ) {}
 
   ngOnInit(): void {
@@ -65,7 +65,7 @@ export class ServicesComponent implements OnInit {
   }
 
   loadCategories(): void {
-    this.categoryService.getAll().subscribe({
+    this.vendorTypeService.getAll().subscribe({
       next: (data) => this.categories = data,
       error: (err) => {
         console.error('Failed to load categories', err);
