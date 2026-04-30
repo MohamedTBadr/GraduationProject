@@ -9,10 +9,9 @@ namespace Domain.Entities
     public class Order: BaseEntity
     {
     public Guid Id { get; set; }
-    public Guid? UserId { get; set; }
+    public Guid UserId { get; set; }
 
 
-    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public decimal Amount { get; set; }
     public string Currency { get; set; } = "EGP";
 
@@ -21,8 +20,8 @@ namespace Domain.Entities
 
     public DateTime? Appointment { get; set; }
 
-     public Event? Event { get; set; }
-        public Guid? EventId { get; set; }
+     public Event Event { get; set; }
+        public Guid EventId { get; set; }
         public Address ShippingAddress { get; set; } = new Address();
     }
 

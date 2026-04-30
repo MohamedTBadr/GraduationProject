@@ -16,25 +16,24 @@ namespace Infrastructure.Repositories
 
         public async Task<Order?> GetByIdWithItemsAsync(Guid id, CancellationToken ct = default)
             => await _pipeline.ExecuteAsync(async token => await db.Orders
-                .Include(o => o.OrderItems)
-                .Include(o => o.Event)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems)
                 .FirstOrDefaultAsync(o => o.Id == id, token), ct);
 
         public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken ct = default)
             => await _pipeline.ExecuteAsync(async token => await db.Orders
-                .Include(o => o.OrderItems)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems)
                 .AsNoTracking()
                 .ToListAsync(token), ct);
 
         public async Task<IEnumerable<Order>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
             => await _pipeline.ExecuteAsync(async token => await db.Orders
-                .Include(o => o.OrderItems)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems)
                 .Where(o => o.UserId == userId)
                 .AsNoTracking()
                 .ToListAsync(token), ct);
         public async Task<Order?> GetByPaymentIntentIdAsync(string paymentIntentId, CancellationToken ct = default)
             => await _pipeline.ExecuteAsync(async token => await db.Orders
-                .Include(o => o.OrderItems)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems)
                 .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId, token), ct);
         public async Task AddAsync(Order order, CancellationToken ct = default)
         {
@@ -65,5 +64,12 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
             => await _pipeline.ExecuteAsync(async token => await db.Orders.AnyAsync(o => o.Id == id, token), ct);
+
+        public async Task<decimal> GetOrderAmountAsync(Guid id,CancellationToken ct = default)
+        {
+            return await _pipeline.ExecuteAsync(async token => await db.EventItems
+                .Where(ei => ei.EventId == id)
+                .SumAsync(ei => ei.Quantity * ei.Price, token), ct);
+        }
     }
 }

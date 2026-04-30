@@ -6,8 +6,7 @@ namespace Application.DTOs.Orders
 
     public record CreateOrderRequest(
         Guid UserId,
-        Guid? EventId,
-        List<OrderItemRequest> Items,
+        Guid EventId,
         string Currency,
         AddressDto ShippingAddress,
         DateTime? Appointment
@@ -35,8 +34,7 @@ namespace Application.DTOs.Orders
 
     public record OrderResponse(
         Guid Id,
-        Guid? UserId,
-        List<OrderItemResponse> Items,
+        Guid UserId,
         decimal Amount,
         string Currency,
         string? PaymentIntentId,

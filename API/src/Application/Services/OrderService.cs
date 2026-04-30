@@ -14,21 +14,15 @@ namespace Application.Services
 
         public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request, CancellationToken ct = default)
         {
-            var items = request.Items.Select(i => new OrderItem
-            {
-                Id = Guid.NewGuid(),
-                ServiceName = i.ServiceName,
-                Quantity = i.Quantity,
-                Price = i.UnitPrice
-            }).ToList();
+
 
             var order = new Order
             {
                 Id = Guid.NewGuid(),
                 UserId = request.UserId,
                 EventId = request.EventId,
-                OrderItems = items,
-                Amount = items.Sum(i => i.Quantity * i.Price),
+
+                Amount = await orderRepo.GetOrderAmountAsync(request.EventId, ct),
                 Currency = request.Currency ?? "EGP",
                 Appointment = request.Appointment,
                 ShippingAddress = new Address
@@ -42,16 +36,16 @@ namespace Application.Services
 
             await orderRepo.AddAsync(order, ct);
 
-            if (order.UserId.HasValue)
+            if (order.UserId != Guid.Empty)
             {
                 await notificationService.SendAsync(
-                    order.UserId.Value,
+                    order.UserId    ,
                     nameof(NotificationType.ORDER_PLACED),
                     "Order Placed",
                     $"Your order #{order.Id} has been placed successfully. Total: {order.Amount} {order.Currency}.");
 
                 // ✅ Group items by vendor and bulk notify all vendors at once
-                var vendorNotifications = order.OrderItems
+                var vendorNotifications = order.Event!.EventItems
                     .GroupBy(i => i.VendorId)
                     .Select(g => (
                         UserId: g.Key,
@@ -95,7 +89,7 @@ namespace Application.Services
             order.PaymentStatus = request.PaymentStatus;
             await orderRepo.UpdateAsync(order, ct);
 
-            if (order.UserId.HasValue)
+            if (order.UserId != Guid.Empty)
             {
                 var (type, title, msg) = request.PaymentStatus switch
                 {
@@ -107,7 +101,7 @@ namespace Application.Services
                 };
 
                 if (type.HasValue)
-                    await notificationService.SendAsync(order.UserId.Value, type.Value.ToString(), title!, msg!);
+                    await notificationService.SendAsync(order.UserId, type.Value.ToString(), title!, msg!);
             }
 
             return MapToResponse(order);
@@ -133,9 +127,9 @@ namespace Application.Services
             order.PaymentStatus = "Cancelled";
             await orderRepo.UpdateAsync(order, ct);
 
-            if (order.UserId.HasValue)
+            if (order.UserId != Guid.Empty)
                 await notificationService.SendAsync(
-                    order.UserId.Value,
+                    order.UserId,
                     nameof(NotificationType.ORDER_CANCELLED),
                     "Order Cancelled",
                     $"Your order #{order.Id} has been cancelled.");
@@ -154,13 +148,6 @@ namespace Application.Services
         private static OrderResponse MapToResponse(Order o) => new(
             o.Id,
             o.UserId,
-            o.OrderItems.Select(i => new OrderItemResponse(
-                i.Id,
-              
-                i.ServiceName,
-                i.Quantity,
-                i.Price,
-                i.Quantity * i.Price)).ToList(),
             o.Amount,
             o.Currency,
             o.PaymentIntentId,

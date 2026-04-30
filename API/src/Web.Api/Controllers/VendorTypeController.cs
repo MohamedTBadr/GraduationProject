@@ -26,7 +26,7 @@ namespace API.Controllers
             var result = await vendorTypeService.GetVendorTypesAsync(cancellationToken);
             return result.IsSuccess
                 ? Ok(result)
-                : StatusCode(result.Error.Code, result);
+                : result.ToActionResult();
         }
 
         // ─── GET BY ID ───────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ namespace API.Controllers
             var result = await vendorTypeService.GetVendorTypeByIdAsync(id, cancellationToken);
             return result.IsSuccess
                 ? Ok(result)
-                : StatusCode(result.Error.Code, result);
+                : result.ToActionResult();
         }
 
         // ─── CREATE ──────────────────────────────────────────────────────────────────
@@ -58,9 +58,7 @@ namespace API.Controllers
                 return BadRequest(ModelState);
 
             var result = await vendorTypeService.AddVendorTypeAsync(request, cancellationToken);
-            return result.IsSuccess
-                ? CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result)
-                : StatusCode(result.Error.Code, result);
+            return result.IsSuccess ? Created() : result.ToActionResult();
         }
 
         // ─── UPDATE ──────────────────────────────────────────────────────────────────
@@ -82,7 +80,7 @@ namespace API.Controllers
             var result = await vendorTypeService.UpdateVendorTypeAsync(id, request, cancellationToken);
             return result.IsSuccess
                 ? Ok(result)
-                : StatusCode(result.Error.Code, result);
+                : result.ToActionResult();
         }
 
         // ─── DELETE ──────────────────────────────────────────────────────────────────
@@ -97,7 +95,7 @@ namespace API.Controllers
             var result = await vendorTypeService.DeleteVendorTypeAsync(id, cancellationToken);
             return result.IsSuccess
                 ? Ok(result)
-                : StatusCode(result.Error.Code, result);
+                : result.ToActionResult();
         }
     }
 }

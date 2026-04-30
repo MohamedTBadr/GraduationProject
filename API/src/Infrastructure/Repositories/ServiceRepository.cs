@@ -225,10 +225,11 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> HasUserPurchasedAsync(Guid userId, Guid serviceId, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
-                await _context.Orders
-                    .AnyAsync(o => o.UserId == userId && o.OrderItems.Any(oi => oi.ServiceId == serviceId), token),
-                cancellationToken);
+            return await _pipeline.ExecuteAsync(async token => {
+                var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == serviceId, token);
+                return await _context.Orders
+                    .AnyAsync(o => o.UserId == userId && o.Event.EventItems.Any(oi => oi.ServiceName == service.Name), token);
+            }, cancellationToken);
         }
     }
 }

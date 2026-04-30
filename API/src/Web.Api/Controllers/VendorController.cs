@@ -4,6 +4,7 @@ using Application.Interfaces;
 using Application.Services;
 using IdempotentAPI.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 using System.Security.Claims;
@@ -22,16 +23,16 @@ namespace Web.Api.Controllers
         {
             var isAdmin = User.IsInRole("Admin");
 
-            var vendors = await vendorService.GetVendorsAsync(paginatedRequest,isAdmin, cancellationToken);
-            return Ok(vendors);
+            var result = await vendorService.GetVendorsAsync(paginatedRequest,isAdmin, cancellationToken);
+            return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
         }
 
         [HttpGet("{id}")]
         [HybridCache(1800, "vendors", "vendors/{id}")]
         public async Task<IActionResult> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-           var vendor= await vendorService.GetVendorByIdAsync(id, cancellationToken);
-            return Ok(vendor);
+           var result= await vendorService.GetVendorByIdAsync(id, cancellationToken);
+            return result.IsSuccess? Ok(result.Value) : result.ToActionResult();
         }
 
 
@@ -60,16 +61,13 @@ namespace Web.Api.Controllers
         [HttpPost]
         [SuccessStatusCode(201)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(409)]
         [InvalidateCache]
         public async Task<IActionResult> CreateVendorAsync([FromBody]CreateVendorRequest request, CancellationToken cancellationToken)
         {
             if (request is null) return BadRequest();
             var result=  await vendorService.AddVendorAsync(request, cancellationToken);
-            if (result.IsFailure)
-            {
-                return BadRequest(result.Error);
-            }
-            return Created();
+            return result.IsSuccess ? Created() : result.ToActionResult();
         }
 
 
@@ -78,8 +76,8 @@ namespace Web.Api.Controllers
         [InvalidateCache]
         public async Task<IActionResult> RateVendorAsync(Guid id, RatingVendorRequest request, CancellationToken cancellationToken)
         {
-             await vendorService.RateVendorAsync(id, request, cancellationToken);
-            return NoContent();
+            var result= await vendorService.RateVendorAsync(id, request, cancellationToken);
+            return result.IsSuccess? NoContent():result.ToActionResult();
         }
 
         [HttpDelete("{id}")]
@@ -95,8 +93,8 @@ namespace Web.Api.Controllers
         [InvalidateCache]
         public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken)
         {
-             await vendorService.UpdateVendorAsync(id, request, cancellationToken);
-            return NoContent();
+            var result = await vendorService.UpdateVendorAsync(id, request, cancellationToken);
+            return result.IsSuccess? NoContent(): result.ToActionResult();
         }
 
         [Authorize(Roles = "Admin")]
@@ -104,8 +102,8 @@ namespace Web.Api.Controllers
         [InvalidateCache]
         public async Task<IActionResult> ApproveVendorAsync(Guid id, CancellationToken cancellationToken)
         {
-             await vendorService.ApproveVendorAsync(id, cancellationToken);
-            return NoContent();
+            var result=  await vendorService.ApproveVendorAsync(id, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToActionResult();
         }
     }
 }

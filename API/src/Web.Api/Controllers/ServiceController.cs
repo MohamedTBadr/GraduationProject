@@ -26,7 +26,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var result = await ServiceService.GetAllAsync(request, IsAdmin, IsVendor, UserId, cancellationToken);
-            return Ok(result);
+            return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
         // GET api/Services/{id}
@@ -35,7 +35,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var result = await ServiceService.GetByIdAsync(id, cancellationToken);
-            return Ok(result);
+            return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
         // GET api/Services/by-category/{categoryId}
@@ -53,7 +53,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var result = await ServiceService.GetByVendorIdAsync(vendorId, request, IsAdmin, IsVendor, UserId, cancellationToken);
-            return Ok(result);
+            return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
         // GET api/Services/by-service-type/{serviceTypeId}
@@ -62,7 +62,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetByServiceTypeAsync(Guid serviceTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var result = await ServiceService.GetByServiceTypeIdAsync(serviceTypeId, request, IsAdmin, IsVendor, UserId, cancellationToken);
-            return Ok(result);
+            return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
         // POST api/Services
         [Authorize(Roles = "Vendor")]
@@ -76,7 +76,7 @@ namespace Web.Api.Controllers
             if (result.IsFailure)
                 return BadRequest(result); // filter handles the failure
 
-            return Created(); // filter handles the failure
+            return  result.IsSuccess ? Created() : result.ToActionResult();
         }
 
         // PUT api/Services/{id}
@@ -102,7 +102,7 @@ namespace Web.Api.Controllers
 
             var result = await ServiceService.UpdateAsync(dto, cancellationToken);
 
-            return NoContent();
+            return  result.IsSuccess ? NoContent() : result.ToActionResult();
         }
         [Authorize(Roles = "Admin,Vendor")]
 
@@ -122,7 +122,7 @@ namespace Web.Api.Controllers
             if (result.IsSuccess)
                 return NoContent();
 
-            return Ok(result); // filter handles the failure
+            return  result.IsSuccess ? NoContent() : result.ToActionResult();
         }
     
         [HttpPatch("{id}/status")]

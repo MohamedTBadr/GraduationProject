@@ -79,7 +79,6 @@ namespace Infrastructure.Persistence
         public DbSet<ServiceType> ServiceTypes { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<ServiceRating> ServiceRatings { get; set; }
         public DbSet<Event> Events { get; set; }
