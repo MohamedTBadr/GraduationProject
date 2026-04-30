@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ModalService } from '../../services/modal.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { EventService } from '../../../core/services/event.service';
-import { CategoryService } from '../../../core/services/category.service';
+import { EventTypeService } from '../../../core/services/event-type.service';
 import { ToastService } from '../../components/toast/toast.service';
 import { Router } from '@angular/router';
 import { LoginComponent } from '../../../features/auth/login/login.component';
 import { RegisterComponent } from '../../../features/auth/register/register.component';
-import { CreateEventItemDto, CreateEventDto, EventResponseDto, Category } from '../../types/api.interfaces';
+import { CreateEventItemDto, CreateEventDto, EventResponseDto } from '../../types/api.interfaces';
+import { EventType } from '../../../core/models/taxonomy.models';
 
 @Component({
   selector: 'app-modal',
@@ -23,7 +24,7 @@ export class ModalComponent implements OnInit {
   authService = inject(AuthService);
   router = inject(Router);
   eventService = inject(EventService);
-  categoryService = inject(CategoryService);
+  eventTypeService = inject(EventTypeService);
   toastService = inject(ToastService);
 
   // For enter-event-details
@@ -36,7 +37,7 @@ export class ModalComponent implements OnInit {
     location: '',
     notes: ''
   };
-  eventTypes: Category[] = [];
+  eventTypes: EventType[] = [];
 
   // For choose-event
   userEvents: EventResponseDto[] = [];
@@ -45,8 +46,8 @@ export class ModalComponent implements OnInit {
   submitting = false;
 
   ngOnInit() {
-    this.categoryService.getAll().subscribe({
-      next: (categories) => this.eventTypes = categories
+    this.eventTypeService.getAll().subscribe({
+      next: (types) => this.eventTypes = types
     });
   }
 

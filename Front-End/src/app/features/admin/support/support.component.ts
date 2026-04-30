@@ -24,6 +24,8 @@ export class SupportComponent implements OnInit {
     status: 'open'
   };
 
+  errorMessage: string | null = null;
+
   constructor(private supportService: SupportService) {}
 
   ngOnInit(): void {
@@ -34,12 +36,16 @@ export class SupportComponent implements OnInit {
   loadStats(): void {
     this.supportService.getStats().subscribe({
       next: (data) => this.stats = data,
-      error: (err) => console.error('Failed to load stats', err)
+      error: (err) => {
+        console.error('Failed to load stats', err);
+        this.errorMessage = 'Failed to load ticket statistics. Please check if the backend service is running correctly.';
+      }
     });
   }
 
   loadTickets(): void {
     this.loading = true;
+    this.errorMessage = null; // Reset error on new load
     this.supportService.listTickets(this.filters).subscribe({
       next: (res) => {
         this.tickets = res.data;
@@ -48,6 +54,7 @@ export class SupportComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load tickets', err);
+        this.errorMessage = 'Failed to load tickets. Please check if the backend service is running correctly.';
         this.loading = false;
       }
     });

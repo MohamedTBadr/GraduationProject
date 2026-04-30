@@ -15,7 +15,7 @@ import {
 export class UserService {
   private readonly apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /** GET /User?pageNumber=1&pageSize=10 */
   getAll(pagination?: PaginationParams): Observable<PagedResult<ApiUser>> {
@@ -33,11 +33,21 @@ export class UserService {
     }
     return this.http.get<any>(`${this.apiUrl}/User`, { params }).pipe(
       map(res => {
-        const data = res.value || res;
+        const data = res.value || res.Value || res;
         const totalCount = data.totalCount || data.TotalCount || 0;
         const pageSize = data.pageSize || data.PageSize || 10;
+        const items = data.items || data.Items || [];
+        const mappedItems = items.map((u: any) => ({
+          ...u,
+          id: u.id || u.Id,
+          name: u.name || u.Name || u.userName || u.UserName,
+          email: u.email || u.Email,
+          role: u.role || u.Role || 'User',
+          status: u.status || u.Status || 'active'
+        }));
+
         return {
-          items: data.items || data.Items || [],
+          items: mappedItems,
           totalCount: totalCount,
           pageNumber: data.pageNumber || data.PageNumber || 1,
           pageSize: pageSize,
@@ -60,6 +70,17 @@ export class UserService {
   /** PATCH /User/{userId} */
   update(userId: string, payload: UpdateUserRequest): Observable<ApiUser> {
     return this.http.patch<ApiUser>(`${this.apiUrl}/User/${userId}`, payload);
+  }
+
+  /** PATCH /User/suspend/{userId} */
+  suspend(userId: string, reason: string = 'Admin suspension'): Observable<void> {
+    const headers = { 'Content-Type': 'application/json' };
+    return this.http.patch<void>(`${this.apiUrl}/User/suspend/${userId}`, JSON.stringify(reason), { headers });
+  }
+
+  /** PATCH /User/unsuspend/{userId} */
+  unsuspend(userId: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/User/unsuspend/${userId}`, {});
   }
 
   /** DELETE /User/{userId} */

@@ -13,23 +13,28 @@ Based on a thorough system audit:
 
 ### ✅ Completed & Integrated
 - **Shared Infrastructure**: Global Error Handler and HTTP Interceptors (Auth/Error) are active. API Interfaces are largely defined.
-- **Admin Portal**: Categories & Event Types management is fully functional and responsive, integrated with real endpoints.
+- **Admin Portal**: 
+  - Categories & Event Types management is fully functional and responsive, integrated with real endpoints.
+  - User Management (`users.component`) is fully functional with paginated list and Suspend/Unsuspend flow.
+  - Vendor Management (`vendors.component`) is fully functional with Approve/Reject/Suspend flows.
 - **Vendor Portal**:
   - Profile updates and loading.
   - Services (Products) CRUD operations and Active/Paused logic.
   - Bookings List logic (approving/rejecting requests via `EventItem` status).
   - Dashboard Statistics (aggregated via `getByUser`).
-- **Public Portal**: Home page dynamically loads and filters top-rated active vendors.
+- **User Portal**:
+  - `my-bookings` is integrated with `EventService.getByUser`, displaying dynamic data and Post-Service Completion actions (Done, Completed, Review).
+- **Public Portal**: 
+  - Home page dynamically loads and filters top-rated active vendors.
+  - Search/Explore pages are implemented with taxonomy filtering.
+- **Post-Service Completion Flow**:
+  - Complete backend & frontend lifecycle: `Done` -> `Completed` -> `Review` rating submissions.
 
 ### ⏳ Pending Implementation
-- **Admin Portal**: 
-  - `vendors.component`: Needs to list vendors and implement the Approve/Reject flow.
-  - `users.component`: Needs paginated list and management of users.
 - **User Portal**:
-  - `dashboard`, `my-bookings`, `my-events`, `favorites` components exist but are mostly static/mock data and need connection to `EventService`.
+  - `dashboard`, `my-events`, `favorites` need finalized connection to `EventService`.
 - **Public Portal**:
   - `Add Event` flow: The complete checkout/booking flow where a user selects vendor services and creates an event. (User must login first)
-  - Search/Explore pages: Connecting the search queries to backend vendor/product filtering.
 
 ---
 
@@ -37,38 +42,29 @@ Based on a thorough system audit:
 
 I will tackle the remaining work in the following prioritized phases:
 
-### Phase 1: Complete Admin Portal (Users & Vendors)
-#### [MODIFY] `features/admin/vendors/vendors.component.ts`
-- Implement `VendorService.getAll()` to list vendors in a datatable.
-- Add "Approve" functionality triggering `PATCH /vendor/{vendorId}/approve`.
-#### [MODIFY] `features/admin/users/users.component.ts`
-- Implement `UserService.getAll(pagination)` with dynamic tables.
-
-### Phase 2: Complete User Portal (My Bookings & Events)
-#### [MODIFY] `features/user/my-bookings/my-bookings.component.ts`
-- Replace mock arrays with real data via `EventService.getByUser()`.
-- Group events dynamically and display them by status tabs.
+### Phase 1: Complete User Portal (Dashboard & Events)
 #### [MODIFY] `features/user/dashboard/dashboard.component.ts`
 - Create aggregate statistics (Total Spent, Total Events, Pending Requests).
+#### [MODIFY] `features/user/my-events/my-events.component.ts`
+- Connect event checklist and details to `EventService`.
 
-### Phase 3: Public Portal & Event Creation (The Booking Engine)
+### Phase 2: Public Portal & Event Creation (The Booking Engine)
 #### [MODIFY] `features/user/add-event/add-event.component.ts` (or Public Booking Flow)
 - *Pending clarification from Open Questions.* Will assemble the cart of selected Vendor Services and submit the master Event payload to the backend.
-#### [MODIFY] `features/public/explore/explore.component.ts`
-- Hook up search inputs and sidebar filters (categories/event types) to the backend API.
 
-### Phase 4: Advanced Integrations
+### Phase 3: Advanced Integrations
 - **AI Integration**: Implement `GeminiService` for AI-generated event suggestions.
 - **Payments**: Integrate Paymob for checkout processing.
 - **Real-Time**: Connect WebSockets for chat and Server-Sent Events (SSE) for Notifications.
 
 ---
 
-## Open Questions
+## Open Questions / Backend Status
 
 > [!IMPORTANT]
-> 1. **File Uploads**: The Vendor Services form has an `ImageUploadComponent`. Does the backend have a dedicated `POST /upload` endpoint for images, or should images be sent as Base64 strings?
-> 2. **Order of Execution**: Are you okay with me starting with **Phase 1: Complete Admin Portal** next, or would you prefer I jump into the **User Portal** first?
+> 1. **File Uploads [RESOLVED]**: The backend has a dedicated `POST /api/files/upload` endpoint (in `FileController.cs`) that uploads directly to AWS S3 and returns `{ key, url }`. 
+> 2. **Post-Service Backend APIs [RESOLVED]**: The backend now supports transitioning EventItems to `Done` and `Completed`, along with Review submission and User Suspension endpoints.
+> 3. **Event Creation Flow [ACTION REQUIRED]**: The complete checkout/booking flow where a user selects vendor services and creates an event still needs clarification. How should the frontend submit multiple services to a single Event in the current API schema?
 
 ## Verification Plan
 

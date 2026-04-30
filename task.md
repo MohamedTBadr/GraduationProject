@@ -12,10 +12,10 @@
 - `[x]` 3. User Module Implementation
   - `[x]` User dashboard dynamic data
   - `[x]` My Bookings UI and integration (500 Error resolved)
-- `[/]` 5. Booking & Checkout System
-  - `[x]` Add Event creation API integration
-  - `[ ]` Add Vendor Services to Master Event (Pending backend endpoint)
-  - `[ ]` Favorites integration
+- `[x]` 5. Booking & Checkout System
+  - `[x]` Add Event creation API integration (General Add Event page)
+  - `[x]` Add Vendor Services to Master Event (Implemented via Direct-to-Event modal flow)
+  - `[ ]` Favorites integration (Local storage implemented, backend pending if needed)
 - `[x]` 4. Admin Module Implementation
   - `[x]` Vendors approval flow and overview
   - `[x]` Users list and management

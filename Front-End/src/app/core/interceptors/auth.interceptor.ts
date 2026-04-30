@@ -12,7 +12,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
     if (token) {
         headersConfig['Authorization'] = `Bearer ${token}`;
     }
-    
+
     // Auto-inject IdempotencyKey for mutating requests if not explicitly provided
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) && !req.headers.has('IdempotencyKey')) {
         let idempotencyKey = '';
@@ -32,7 +32,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
         catchError((error: HttpErrorResponse) => {
             // Attempt token refresh on 401 Unauthorized
             if (
-                error.status === 401 && 
+                error.status === 401 &&
                 !req.url.includes('RefreshToken') &&
                 !req.url.includes('Login') &&
                 !req.url.includes('Register')

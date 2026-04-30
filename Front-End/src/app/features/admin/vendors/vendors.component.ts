@@ -89,6 +89,10 @@ export class VendorsComponent implements OnInit {
     return this.vendors.filter(v => v.isApproved && v.status === 'active').length;
   }
 
+  get suspendedCount(): number {
+    return this.vendors.filter(v => v.status === 'suspended').length;
+  }
+
   setTab(tab: 'all' | 'pending' | 'active' | 'suspended') {
     this.activeTab = tab;
     this.resetPagination();

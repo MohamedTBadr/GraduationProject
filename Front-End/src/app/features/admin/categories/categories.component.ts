@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CategoryService } from '../../../core/services/category.service';
+import { VendorTypeService } from '../../../core/services/vendor-type.service';
 import { ServiceTypeService } from '../../../core/services/service-type.service';
-import { Category, ServiceType } from '../../../shared/types/api.interfaces';
+import { EventTypeService } from '../../../core/services/event-type.service';
+import { VendorType, ServiceType, EventType } from '../../../core/models/taxonomy.models';
 
 @Component({
   selector: 'app-categories',
@@ -13,49 +14,63 @@ import { Category, ServiceType } from '../../../shared/types/api.interfaces';
   styleUrls: ['./categories.component.scss']
 })
 export class CategoriesComponent implements OnInit {
-  categories: Category[] = [];
-  eventTypes: ServiceType[] = [];
+  vendorTypes: VendorType[] = [];
+  serviceTypes: ServiceType[] = [];
+  eventTypes: EventType[] = [];
 
-  loadingCategories = false;
+  loadingVendorTypes = false;
+  loadingServiceTypes = false;
   loadingEventTypes = false;
 
   showModal = false;
   isEditMode = false;
-  activeType: 'category' | 'eventType' = 'category';
+  activeType: 'vendorType' | 'serviceType' | 'eventType' = 'vendorType';
   selectedId: string | null = null;
 
   form: FormGroup;
 
   constructor(
-    private categoryService: CategoryService,
+    private vendorTypeService: VendorTypeService,
     private serviceTypeService: ServiceTypeService,
+    private eventTypeService: EventTypeService,
     private fb: FormBuilder
   ) {
     this.form = this.fb.group({
-      name: ['', Validators.required],
-      // description: ['']
+      name: ['', Validators.required]
     });
   }
 
   ngOnInit(): void {
-    this.loadCategories();
+    this.loadVendorTypes();
+    this.loadServiceTypes();
     this.loadEventTypes();
   }
 
-  loadCategories() {
-    this.loadingCategories = true;
-    this.categoryService.getAll().subscribe({
+  loadVendorTypes() {
+    this.loadingVendorTypes = true;
+    this.vendorTypeService.getAll().subscribe({
       next: (data) => {
-        this.categories = data;
-        this.loadingCategories = false;
+        this.vendorTypes = data;
+        this.loadingVendorTypes = false;
       },
-      error: () => this.loadingCategories = false
+      error: () => this.loadingVendorTypes = false
+    });
+  }
+
+  loadServiceTypes() {
+    this.loadingServiceTypes = true;
+    this.serviceTypeService.getAll().subscribe({
+      next: (data) => {
+        this.serviceTypes = data;
+        this.loadingServiceTypes = false;
+      },
+      error: () => this.loadingServiceTypes = false
     });
   }
 
   loadEventTypes() {
     this.loadingEventTypes = true;
-    this.serviceTypeService.getAll().subscribe({
+    this.eventTypeService.getAll().subscribe({
       next: (data) => {
         this.eventTypes = data;
         this.loadingEventTypes = false;
@@ -66,25 +81,33 @@ export class CategoriesComponent implements OnInit {
 
   openAddModal() {
     this.isEditMode = false;
-    this.activeType = 'category';
+    this.activeType = 'vendorType';
     this.selectedId = null;
     this.form.reset();
     this.showModal = true;
   }
 
-  openEditCategory(cat: Category) {
+  openEditVendorType(vt: VendorType) {
     this.isEditMode = true;
-    this.activeType = 'category';
-    this.selectedId = cat.id;
-    this.form.patchValue({ name: cat.name });
+    this.activeType = 'vendorType';
+    this.selectedId = vt.id;
+    this.form.patchValue({ name: vt.name });
     this.showModal = true;
   }
 
-  openEditEventType(ev: ServiceType) {
+  openEditServiceType(st: ServiceType) {
+    this.isEditMode = true;
+    this.activeType = 'serviceType';
+    this.selectedId = st.id;
+    this.form.patchValue({ name: st.name });
+    this.showModal = true;
+  }
+
+  openEditEventType(et: EventType) {
     this.isEditMode = true;
     this.activeType = 'eventType';
-    this.selectedId = ev.id;
-    this.form.patchValue({ name: ev.name });
+    this.selectedId = et.id;
+    this.form.patchValue({ name: et.name });
     this.showModal = true;
   }
 
@@ -92,7 +115,7 @@ export class CategoriesComponent implements OnInit {
     this.showModal = false;
   }
 
-  setType(type: 'category' | 'eventType') {
+  setType(type: 'vendorType' | 'serviceType' | 'eventType') {
     if (!this.isEditMode) {
       this.activeType = type;
     }
@@ -103,15 +126,22 @@ export class CategoriesComponent implements OnInit {
     const val = this.form.value;
 
     if (this.isEditMode && this.selectedId) {
-      if (this.activeType === 'category') {
-        this.categoryService.update(this.selectedId, val).subscribe({
+      if (this.activeType === 'vendorType') {
+        this.vendorTypeService.update(this.selectedId, val).subscribe({
           next: () => {
-            this.loadCategories();
+            this.loadVendorTypes();
+            this.closeModal();
+          }
+        });
+      } else if (this.activeType === 'serviceType') {
+        this.serviceTypeService.update(this.selectedId, val).subscribe({
+          next: () => {
+            this.loadServiceTypes();
             this.closeModal();
           }
         });
       } else {
-        this.serviceTypeService.update(this.selectedId, val).subscribe({
+        this.eventTypeService.update(this.selectedId, { id: this.selectedId, name: val.name }).subscribe({
           next: () => {
             this.loadEventTypes();
             this.closeModal();
@@ -119,15 +149,22 @@ export class CategoriesComponent implements OnInit {
         });
       }
     } else {
-      if (this.activeType === 'category') {
-        this.categoryService.create(val).subscribe({
+      if (this.activeType === 'vendorType') {
+        this.vendorTypeService.create(val).subscribe({
           next: () => {
-            this.loadCategories();
+            this.loadVendorTypes();
+            this.closeModal();
+          }
+        });
+      } else if (this.activeType === 'serviceType') {
+        this.serviceTypeService.create(val).subscribe({
+          next: () => {
+            this.loadServiceTypes();
             this.closeModal();
           }
         });
       } else {
-        this.serviceTypeService.create(val).subscribe({
+        this.eventTypeService.create(val).subscribe({
           next: () => {
             this.loadEventTypes();
             this.closeModal();
@@ -137,23 +174,53 @@ export class CategoriesComponent implements OnInit {
     }
   }
 
-  deleteCategory(id: string) {
-    if (confirm('Are you sure you want to delete this category?')) {
-      this.categoryService.delete(id).subscribe({
-        next: () => this.loadCategories()
-      });
-    }
+  deleteVendorType(id: string) {
+    console.log('deleteVendorType called with ID:', id);
+    this.vendorTypeService.delete(id).subscribe({
+      next: () => {
+        console.log('deleteVendorType success');
+        this.loadVendorTypes();
+      },
+      error: (err) => {
+        console.error('deleteVendorType error:', err);
+        alert('Failed to delete: This type may be in use by existing vendors.');
+      }
+    });
+  }
+
+  deleteServiceType(id: string) {
+    console.log('deleteServiceType called with ID:', id);
+    this.serviceTypeService.delete(id).subscribe({
+      next: () => {
+        console.log('deleteServiceType success');
+        this.loadServiceTypes();
+      },
+      error: (err) => {
+        console.error('deleteServiceType error:', err);
+        alert('Failed to delete: This type may be in use by existing services.');
+      }
+    });
   }
 
   deleteEventType(id: string) {
-    if (confirm('Are you sure you want to delete this event type?')) {
-      this.serviceTypeService.delete(id).subscribe({
-        next: () => this.loadEventTypes()
-      });
-    }
+    console.log('deleteEventType called with ID:', id);
+    this.eventTypeService.delete(id).subscribe({
+      next: () => {
+        console.log('deleteEventType success');
+        this.loadEventTypes();
+      },
+      error: (err) => {
+        console.error('deleteEventType error:', err);
+        alert('Failed to delete: This type may be in use by existing events.');
+      }
+    });
   }
 
-  getIconForCategory(name: string): string {
+
+
+
+
+  getIconForVendorType(name: string): string {
     const n = name.toLowerCase();
     if (n.includes('venue')) return '🏛️';
     if (n.includes('cater') || n.includes('food')) return '🍽️';

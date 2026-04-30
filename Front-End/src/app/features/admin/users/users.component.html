@@ -26,6 +26,8 @@
           <td><span class="ad-pill ap-green">{{ u.role || 'User' }}</span></td>
           <td>{{ (u.createdAt | date:'mediumDate') || 'N/A' }}</td>
           <td><div class="flex gap-[5px]">
+             <button *ngIf="u.status !== 'suspended'" (click)="suspendUser(u)" class="ad-btn ad-btn-gold ad-btn-sm">Suspend</button>
+             <button *ngIf="u.status === 'suspended'" (click)="unsuspendUser(u)" class="ad-btn ad-btn-green ad-btn-sm">Unsuspend</button>
              <button (click)="deleteUser(u)" class="ad-btn ad-btn-red ad-btn-sm">Delete</button>
           </div></td>
         </tr>
