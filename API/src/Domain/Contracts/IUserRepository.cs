@@ -15,7 +15,7 @@ namespace Domain.Contracts
         Task<ApplicationUser?> GetByIdAsync(string userId, CancellationToken cancellationToken);
         Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
         Task<IList<string>> GetUserRolesAsync(ApplicationUser user, CancellationToken cancellationToken);
-        Task<IdentityResult> CreateAsync(ApplicationUser user, string password, CancellationToken cancellationToken);
+        Task<IdentityResult> CreateAsync(ApplicationUser user, string password, string role, CancellationToken cancellationToken);
         Task<IdentityResult> UpdateAsync(ApplicationUser user, CancellationToken cancellationToken);
         Task<bool> CheckPasswordAsync(ApplicationUser user, string password, CancellationToken cancellationToken);
         Task<string> GeneratePasswordResetTokenAsync(ApplicationUser user, CancellationToken cancellationToken);

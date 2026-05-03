@@ -35,8 +35,20 @@ namespace Infrastructure.Repositories
         public async Task<IList<string>> GetUserRolesAsync(ApplicationUser user, CancellationToken cancellationToken = default)
             => await _pipeline.ExecuteAsync(async _ => await userManager.GetRolesAsync(user), cancellationToken);
 
-        public async Task<IdentityResult> CreateAsync(ApplicationUser user, string password, CancellationToken cancellationToken = default)
-            => await _pipeline.ExecuteAsync(async _ => await userManager.CreateAsync(user, password), cancellationToken);
+        public async Task<IdentityResult> CreateAsync(ApplicationUser user, string password, string role, CancellationToken cancellationToken = default)
+        {
+            var result = await _pipeline.ExecuteAsync(async _ => await userManager.CreateAsync(user, password), cancellationToken);
+
+            if (result.Succeeded)
+            {
+                var roleResult = await _pipeline.ExecuteAsync(async _ => await userManager.AddToRoleAsync(user, role), cancellationToken);
+
+                if (!roleResult.Succeeded)
+                    return roleResult;
+            }
+
+            return result;
+        }
 
         public async Task<IdentityResult> UpdateAsync(ApplicationUser user, CancellationToken cancellationToken = default)
             => await _pipeline.ExecuteAsync(async _ => await userManager.UpdateAsync(user), cancellationToken);

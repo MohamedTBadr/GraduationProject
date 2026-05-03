@@ -11,17 +11,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db;Database=GraduationProject;User=sa;Password=MyPass@word;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=GraduationProject;User Id=sa;Password=MyPass@word;TrustServerCertificate=True;Connect Timeout=60;
       - ConnectionStrings__Redis=redis:6379
       - Ollama__Url=http://ollama:11434
       - Ollama__Model=llama3.2
     restart: unless-stopped
-    mem_limit: 512m
+    mem_limit: 1g
     cpus: 0.75
-
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -46,6 +44,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 30s
 
   redis:
     image: redis:7.2-alpine
