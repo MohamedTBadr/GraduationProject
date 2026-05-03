@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.CategoryDTOs;
+using Application.DTOs.PackageDTOs;
 using Application.DTOs.ServiceDTOs;
 using Application.DTOs.ServiceTypesDTOs;
 using Application.DTOs.UserDTOs;
@@ -58,9 +59,14 @@ namespace Application.Services.Helpers
             CreateMap<ServiceRating, VendorRatingDTO>()
                 .ForMember(dest => dest.VendorName, opt => opt.MapFrom(src => src.Service.Vendor.BusinessName))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName));
-                
+
             // Remove .ReverseMap() — mapping back from DTO to Entity doesn't make sense here
             #endregion
+
+
+
+            CreateMap<Package, PackageDTO>();  // ✅ this was missing
+
         }
     }
 }

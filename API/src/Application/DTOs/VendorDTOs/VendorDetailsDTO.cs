@@ -11,11 +11,11 @@ namespace Application.DTOs.VendorDTOs
         public decimal Rating { get; set; }
         public string Description { get; set; }
 
-        public decimal YearsInBusiness { get; set; }
+        public decimal YearsInBusiness { get; set; } 
         public decimal StartingPrice { get; set; }
-        public List<VendorRatingDTO> VendorRating { get; set; } = new List<VendorRatingDTO>();
-         public List<ServiceDTOs.ServiceDTO> Services { get; set; } = new List<ServiceDTOs.ServiceDTO>();
-        public List<PackageDTOs.PackageDTO> Packages { get; set; } = new List<PackageDTOs.PackageDTO>();
+        public ICollection<VendorRatingDTO> VendorRating { get; set; } = new List<VendorRatingDTO>();
+         public ICollection<ServiceDTOs.ServiceDTO> Services { get; set; } = new List<ServiceDTOs.ServiceDTO>();
+        public ICollection<PackageDTOs.PackageDTO> Packages { get; set; } = new List<PackageDTOs.PackageDTO>();
 
 
     }
