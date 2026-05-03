@@ -38,9 +38,9 @@ namespace Infrastructure.Persistence
 
                 entity.OwnsOne(v => v.Address, address =>
                 {
-                    address.Property(a => a.Street).HasMaxLength(255);
-                    address.Property(a => a.City).HasMaxLength(100);
-                    address.Property(a => a.State).HasMaxLength(100);
+                    address.Property(a => a.Street).HasMaxLength(255).IsRequired(false);
+                    address.Property(a => a.City).HasMaxLength(100).IsRequired(false);
+                    address.Property(a => a.State).HasMaxLength(100).IsRequired(false);
                 });
 
                 entity.HasOne(v => v.User)

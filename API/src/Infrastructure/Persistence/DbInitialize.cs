@@ -139,7 +139,14 @@ namespace Infrastructure.Persistence
                         PortfolioLink = "...",
                         Description = "Test1",
                         IsVerified = true,
-                        VendorTypeId = context.VendorTypes.FirstOrDefault().Id
+                        VendorTypeId = context.VendorTypes.FirstOrDefault().Id,
+                        Address = new Address          // ← add this
+                        {
+                            Street = "N/A",
+                            City = "N/A",
+                            State = "N/A",
+                            PostalCode = "N/A"
+                        }
                     };
                     var result = await userManager.CreateAsync(newVendorUser, "Vendor@123");
 
