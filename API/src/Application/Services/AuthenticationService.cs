@@ -86,7 +86,7 @@ namespace Application.Services
             };
 
             // 1. Create User
-            var result = await userRepository.CreateAsync(user, request.password, cancellationToken);
+            var result = await userRepository.CreateAsync(user, request.password, "Customer", cancellationToken);
 
             if (result.Succeeded)
             {

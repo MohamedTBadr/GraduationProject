@@ -99,7 +99,7 @@ namespace Application.Services
                
             };
 
-            var identityResult = await userRepository.CreateAsync(user, request.Password, cancellationToken);
+            var identityResult = await userRepository.CreateAsync(user, request.Password, "Vendor", cancellationToken);
             if (!identityResult.Succeeded)
             {
                 var errors = string.Join(", ", identityResult.Errors.Select(e => e.Description));
