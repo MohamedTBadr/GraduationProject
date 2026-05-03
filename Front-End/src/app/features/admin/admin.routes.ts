@@ -11,6 +11,14 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () => import('./vendors/vendors.component').then(m => m.VendorsComponent)
     },
     {
+        path: 'vendors/create',
+        loadComponent: () => import('./vendors/vendor-create/vendor-create.component').then(m => m.VendorCreateComponent)
+    },
+    {
+        path: 'vendors/:id',
+        loadComponent: () => import('./vendors/vendor-detail/vendor-detail.component').then(m => m.VendorDetailComponent)
+    },
+    {
         path: 'users',
         loadComponent: () => import('./users/users.component').then(m => m.UsersComponent)
     },

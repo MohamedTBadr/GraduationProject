@@ -1,0 +1,105 @@
+<div class="ad-section active block">
+    <div class="ad-page-hd">
+        <div>
+            <div class="ad-page-title">Register New Vendor</div>
+            <div class="ad-page-sub">Manually onboard a new partner to the Eventora platform.</div>
+        </div>
+        <button class="ad-btn ad-btn-ghost" routerLink="/admin/vendors">Cancel</button>
+    </div>
+
+    <div class="ad-card max-w-[900px] mx-auto mt-[2rem]">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="ad-form">
+            
+            <!-- Section: Account Information -->
+            <h3 class="form-section-title">Account Information</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" formControlName="firstName" placeholder="First Name"/>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" formControlName="lastName" placeholder="Last Name"/>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" formControlName="name" placeholder="Unique username"/>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" formControlName="email" placeholder="vendor@example.com"/>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" formControlName="phone" placeholder="+20 1..."/>
+                </div>
+                <div class="form-group">
+                    <label>Temporary Password</label>
+                    <input type="text" formControlName="password" placeholder="Set a password"/>
+                </div>
+            </div>
+
+            <!-- Section: Business Details -->
+            <h3 class="form-section-title mt-[2rem]">Business Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Business Name</label>
+                    <input type="text" formControlName="businessName" placeholder="e.g. Elite Catering"/>
+                </div>
+                <div class="form-group">
+                    <label>Owner Full Name</label>
+                    <input type="text" formControlName="ownerName" placeholder="Full name of owner"/>
+                </div>
+                <div class="form-group">
+                    <label>Vendor Type</label>
+                    <select formControlName="vendorTypeId">
+                        <option value="">Select a type...</option>
+                        <option *ngFor="let vt of vendorTypes" [value]="vt.id">{{ vt.name }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Years in Business</label>
+                    <input type="number" formControlName="yearsInBusiness" min="0"/>
+                </div>
+                <div class="form-group full-width">
+                    <label>Portfolio / Website Link</label>
+                    <input type="text" formControlName="portfolioLink" placeholder="https://..."/>
+                </div>
+                <div class="form-group full-width">
+                    <label>Description</label>
+                    <textarea formControlName="description" rows="3" placeholder="Business description..."></textarea>
+                </div>
+            </div>
+
+            <!-- Section: Address -->
+            <h3 class="form-section-title mt-[2rem]">Location / Address</h3>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>Street Address</label>
+                    <input type="text" formControlName="street" placeholder="Building, Street name..."/>
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" formControlName="city" placeholder="e.g. Cairo"/>
+                </div>
+                <div class="form-group">
+                    <label>State / Governorate</label>
+                    <input type="text" formControlName="state" placeholder="e.g. Giza"/>
+                </div>
+                <div class="form-group">
+                    <label>Postal Code (Optional)</label>
+                    <input type="text" formControlName="postalCode" placeholder="00000"/>
+                </div>
+            </div>
+
+            <div class="form-actions mt-[3rem]">
+                <button type="submit" class="ad-btn ad-btn-gold w-full py-[15px] text-[1.2rem]" [disabled]="submitting || form.invalid">
+                    {{ submitting ? 'Processing...' : '⚡ Register & Onboard Vendor' }}
+                </button>
+                <p class="text-center text-[.8rem] text-[#8c8fa7] mt-[10px]" *ngIf="form.invalid && form.touched">
+                    Please fill out all required fields to proceed.
+                </p>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,45 @@
+.ad-back-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--gold);
+    }
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.95rem;
+
+    span {
+        color: #8c8fa7;
+    }
+
+    strong {
+        color: white;
+        font-weight: 500;
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.ad-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 24px;
+}

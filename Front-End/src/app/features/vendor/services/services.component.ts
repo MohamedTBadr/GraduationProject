@@ -35,7 +35,7 @@ export class ServicesComponent implements OnInit {
   
   serviceForm!: FormGroup;
   uploadedImages: any[] = [];
-  categories: VendorType[] = [];
+  vendorTypes: VendorType[] = [];
 
   isDetailModalOpen = false;
   selectedService: ApiProduct | null = null;
@@ -61,15 +61,15 @@ export class ServicesComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadProducts();
-    this.loadCategories();
+    this.loadVendorTypes();
   }
 
-  loadCategories(): void {
+  loadVendorTypes(): void {
     this.vendorTypeService.getAll().subscribe({
-      next: (data) => this.categories = data,
+      next: (data) => this.vendorTypes = data,
       error: (err) => {
-        console.error('Failed to load categories', err);
-        this.toastService.show('Failed to load categories', 'error');
+        console.error('Failed to load vendor types', err);
+        this.toastService.show('Failed to load vendor types', 'error');
       }
     });
   }
@@ -93,7 +93,7 @@ export class ServicesComponent implements OnInit {
   initForm(): void {
     this.serviceForm = this.fb.group({
       name: ['', Validators.required],
-      categoryId: ['', Validators.required],
+      vendorTypeId: ['', Validators.required],
       serviceTypeId: ['', Validators.required],
       classification: ['Corporate'], // Default or optional
       allowedEventTypes: [[]], // Array of strings
@@ -128,7 +128,7 @@ export class ServicesComponent implements OnInit {
       this.editingId = serviceToEdit.id;
       this.serviceForm.patchValue({
         name: serviceToEdit.name,
-        categoryId: serviceToEdit.categoryId || '',
+        vendorTypeId: serviceToEdit.vendorTypeId || '',
         serviceTypeId: serviceToEdit.serviceTypeId || '',
         classification: serviceToEdit.classification || '',
         allowedEventTypes: serviceToEdit.allowedEventTypes || [],
@@ -140,7 +140,7 @@ export class ServicesComponent implements OnInit {
       this.uploadedImages = serviceToEdit.imageUrl ? [{ previewUrl: serviceToEdit.imageUrl, status: 'done' }] : [];
     } else {
       this.editingId = null;
-      this.serviceForm.reset({ name: '', categoryId: '', serviceTypeId: '', classification: 'Corporate', allowedEventTypes: [], price: 0, description: '' });
+      this.serviceForm.reset({ name: '', vendorTypeId: '', serviceTypeId: '', classification: 'Corporate', allowedEventTypes: [], price: 0, description: '' });
       this.uploadedImages = [];
     }
     this.isAddServiceModalOpen = true;
@@ -182,7 +182,7 @@ export class ServicesComponent implements OnInit {
             
       const updateData: UpdateProductRequest = {
         name: val.name,
-        categoryId: val.categoryId,
+        vendorTypeId: val.vendorTypeId,
         serviceTypeId: val.serviceTypeId,
         classification: val.classification,
         allowedEventTypes: val.allowedEventTypes,
@@ -210,7 +210,7 @@ export class ServicesComponent implements OnInit {
       const formData = new FormData();
       formData.append('Name', val.name);
       formData.append('Description', val.description);
-      formData.append('CategoryId', val.categoryId);
+      formData.append('VendorTypeId', val.vendorTypeId);
       formData.append('ServiceTypeId', val.serviceTypeId);
       if (val.classification) formData.append('Classification', val.classification);
       if (val.allowedEventTypes && val.allowedEventTypes.length) {
@@ -279,7 +279,7 @@ export class ServicesComponent implements OnInit {
   updateServiceStatus(service: ApiProduct, newStatus: 'active' | 'paused') {
     const updateData: UpdateProductRequest = {
       name: service.name,
-      categoryId: service.categoryId,
+      vendorTypeId: service.vendorTypeId,
       serviceTypeId: service.serviceTypeId,
       classification: service.classification,
       allowedEventTypes: service.allowedEventTypes,

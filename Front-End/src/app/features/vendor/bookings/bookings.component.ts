@@ -56,7 +56,7 @@ export class BookingsComponent implements OnInit {
     if (!this.vendorId) return;
     this.loading.set(true);
 
-    this.eventService.getByUser(this.vendorId).subscribe({
+    this.eventService.getForVendor(this.vendorId).subscribe({
       next: (events) => {
         this.processBookings(events);
         this.loading.set(false);

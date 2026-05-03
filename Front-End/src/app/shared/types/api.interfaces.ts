@@ -61,7 +61,7 @@ export interface PagedResult<T> {
   totalPages: number;
 }
 
-// Category interfaces removed in favor of taxonomy.models.ts
+// Category concept replaced by Vendor Type, Service Type, and Event Type (taxonomy.models.ts)
 
 // ─────────────────────────────────────────────
 // Service Type
@@ -116,8 +116,8 @@ export interface ApiVendor {
   name: string;
   email?: string;
   phone?: string;
-  categoryId?: string;
-  categoryName?: string;
+  vendorTypeId?: string;
+  vendorTypeName?: string;
   location?: string;
   rating?: number;
   isApproved?: boolean;
@@ -127,11 +127,24 @@ export interface ApiVendor {
 }
 
 export interface CreateVendorRequest {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  phone?: string;
-  categoryId?: string;
-  location?: string;
+  password?: string; // Admin can set a default or leave it to auto-gen
+  phone: string;
+  name: string; // UserName
+  businessName: string;
+  ownerName: string;
+  vendorTypeId: string;
+  yearsInBusiness: number;
+  description: string;
+  portfolioLink?: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    postalCode?: string;
+  };
 }
 
 export interface UpdateVendorRequest {
@@ -149,8 +162,8 @@ export interface ApiProduct {
   name: string;
   description?: string;
   price: number;
-  categoryId?: string;
-  categoryName?: string;
+  vendorTypeId?: string;
+  vendorTypeName?: string;
   vendorId?: string;
   vendorName?: string;
   serviceTypeId?: string;
@@ -168,7 +181,7 @@ export interface CreateProductRequest {
   name: string;
   description?: string;
   price: number;
-  categoryId?: string;
+  vendorTypeId?: string;
   serviceTypeId?: string;
   imageUrl?: string;
   status?: 'active' | 'paused';
@@ -182,7 +195,7 @@ export interface UpdateProductRequest {
   name?: string;
   description?: string;
   price?: number;
-  categoryId?: string;
+  vendorTypeId?: string;
   serviceTypeId?: string;
   imageUrl?: string;
   status?: 'active' | 'paused';
@@ -251,6 +264,7 @@ export interface AddressDto {
 export interface EventItemResponseDto {
   id: string;
   eventId: string;
+  serviceId?: string; // ← Add this
   serviceImage?: string;
   serviceName: string;
   price: number;
@@ -353,6 +367,7 @@ export interface PaymobBillingData {
 export interface PaymobPaymentRequest {
   amount: number;
   billing: PaymobBillingData;
+  orderId?: string;
 }
 
 export interface PaymobPaymentResponse {

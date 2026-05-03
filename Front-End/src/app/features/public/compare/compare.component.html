@@ -33,7 +33,7 @@
                         <button class="absolute bg-[none] [border:none] cursor-pointer text-[var(--gray)] [transition:color_.2s] top-[10px] right-[10px]" (click)="compareService.toggleCompare(v)" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--gray)'" title="Remove"></button>
                         <!-- class="text-[2.5rem] mb-[10px] mt-[20px]" <div>{{v.emoji}}</div> -->
                         <strong class="block text-[var(--navy)] text-[1.1rem] mb-[4px] overflow-hidden whitespace-nowrap text-ellipsis">{{v.name}}</strong>
-                        <div class="text-[var(--gray)] text-[.75rem] mb-[12px]">{{v.categoryId}}</div>
+                        <div class="text-[var(--gray)] text-[.75rem] mb-[12px]">{{v.vendorTypeName || 'Vendor'}}</div>
                     </div>
 
                     <!-- <div class="comp-cell" *ngFor="let f of getFeatures()">

@@ -19,7 +19,7 @@
       </div>
       <div class="eh-quick-tags">
         <div class="eh-quick-tag" [class.active]="selectedCategories.length === 0" (click)="clearAllFilters()">✨ All Services</div>
-        <div class="eh-quick-tag" *ngFor="let cat of categories.slice(0, 5)" [class.active]="selectedCategories.includes(cat.id)" (click)="toggleCategory(cat.id)">
+        <div class="eh-quick-tag" *ngFor="let cat of (categories || []).slice(0, 5)" [class.active]="selectedCategories.includes(cat.id)" (click)="toggleCategory(cat.id)">
           {{cat.name}}
         </div>
       </div>
@@ -85,9 +85,9 @@
           </div>
         </div>
 
-        <!-- Category Filter -->
+        <!-- Service Type Filter -->
         <div class="filter-block">
-          <div class="fb-title">Service Category <span class="fb-toggle open">▾</span></div>
+          <div class="fb-title">Service Type <span class="fb-toggle open">▾</span></div>
           <div class="fb-chip-row">
             <div class="fb-chip" [class.sel]="selectedCategories.length === 0" (click)="clearAllFilters()">All</div>
             <div class="fb-chip" *ngFor="let cat of categories" [class.sel]="selectedCategories.includes(cat.id)" (click)="toggleCategory(cat.id)">
@@ -137,7 +137,7 @@
             <img *ngIf="svc.imageUrl" [src]="svc.imageUrl" />
             <span *ngIf="!svc.imageUrl">🎨</span>
             <div class="svc-card-top">
-              <span class="svc-cat-badge">{{svc.categoryName}}</span>
+              <span class="svc-cat-badge">{{svc.vendorTypeName || svc.serviceTypeName}}</span>
               <div class="svc-card-actions">
                 <button class="svc-action-btn" [class.active]="isInWishlist(svc.id)" (click)="toggleWishlist(svc, $event)">♡</button>
                 <button class="svc-action-btn" [class.compare-active]="isInCompare(svc.id)" (click)="addToCompare(svc, $event)">⚖️</button>
@@ -147,7 +147,7 @@
           <div class="svc-card-body">
             <div class="svc-name">{{svc.name}}</div>
             <div class="svc-price">{{svc.price | currency:'EGP':'symbol':'1.0-0'}}</div>
-            <p class="svc-desc text-[0.8rem] text-[#6b7280] mt-[8px]">{{svc.description | slice:0:80}}...</p>
+            <p class="svc-desc text-[0.8rem] text-[#6b7280] mt-[8px]">{{ (svc.description || '') | slice:0:80 }}<ng-container *ngIf="(svc.description || '').length > 80">…</ng-container></p>
           </div>
         </div>
       </div>

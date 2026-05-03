@@ -56,7 +56,7 @@ export class VendorDashboardComponent implements OnInit {
     
     forkJoin({
       vendor: this.vendorService.getById(this.vendorId),
-      events: this.eventService.getByUser(this.vendorId)
+      events: this.eventService.getForVendor(this.vendorId)
     }).subscribe({
       next: (data) => {
         this.processVendorStats(data.vendor, data.events);

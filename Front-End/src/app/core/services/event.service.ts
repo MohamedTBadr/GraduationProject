@@ -53,6 +53,16 @@ export class EventService {
     return this.http.get<EventResponseDto>(`${this.apiUrl}/${id}`);
   }
 
+  /**
+   * Vendor dashboard: events this vendor is involved in.
+   * When the backend adds `GET /Event/for-vendor/{vendorUserId}`, switch the HTTP URL here;
+   * response shape should remain `EventResponseDto[]`.
+   * Until then this delegates to {@link getByUser} (current behavior).
+   */
+  getForVendor(vendorUserId: string): Observable<EventResponseDto[]> {
+    return this.getByUser(vendorUserId);
+  }
+
   /** GET /Event/user/{userId} - Get events for a specific user/vendor */
   getByUser(userId: string): Observable<EventResponseDto[]> {
     return this.http.get<any>(`${this.apiUrl}/user/${userId}`).pipe(

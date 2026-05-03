@@ -103,12 +103,12 @@ export class ExploreComponent implements OnInit {
 
   triggerSearch() {
     let filtered = this.allVendors.filter(v => {
-      const matchType = !this.filters.type || (v.categoryName && v.categoryName.toLowerCase() === this.filters.type.toLowerCase());
+      const matchType = !this.filters.type || (v.vendorTypeName && v.vendorTypeName.toLowerCase() === this.filters.type.toLowerCase());
       const matchLoc = !this.filters.loc || (v.location && v.location.toLowerCase() === this.filters.loc.toLowerCase());
       const matchRating = (v.rating || 0) >= this.filters.rating;
       const matchQuery = !this.filters.searchQuery ||
         v.name.toLowerCase().includes(this.filters.searchQuery.toLowerCase()) ||
-        (v.categoryName && v.categoryName.toLowerCase().includes(this.filters.searchQuery.toLowerCase()));
+        (v.vendorTypeName && v.vendorTypeName.toLowerCase().includes(this.filters.searchQuery.toLowerCase()));
 
       return matchType && matchLoc && matchRating && matchQuery;
     });

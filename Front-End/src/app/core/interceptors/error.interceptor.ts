@@ -19,17 +19,20 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                 errorMessage = 'You do not have permission to perform this action.';
             } else if (error.error) {
                 // Parse .NET specific errors
-                if (typeof error.error === 'string') {
+                if (error.error.errorDescription || error.error.ErrorDescription) { // New Result<T> error format
+                    errorMessage = error.error.errorDescription || error.error.ErrorDescription;
+                } else if (typeof error.error === 'string') {
                     errorMessage = error.error;
-                } else if (error.error.detail) {
-                    errorMessage = error.error.detail;
-                } else if (error.error.message) {
-                    errorMessage = error.error.message;
-                } else if (error.error.errors) {
+                } else if (error.error.detail || error.error.Detail) {
+                    errorMessage = error.error.detail || error.error.Detail;
+                } else if (error.error.message || error.error.Message) {
+                    errorMessage = error.error.message || error.error.Message;
+                } else if (error.error.errors || error.error.Errors) {
+                    const errorsObj = error.error.errors || error.error.Errors;
                     const errorMessages = [];
-                    for (const key in error.error.errors) {
-                        if (Object.prototype.hasOwnProperty.call(error.error.errors, key)) {
-                            errorMessages.push(...error.error.errors[key]);
+                    for (const key in errorsObj) {
+                        if (Object.prototype.hasOwnProperty.call(errorsObj, key)) {
+                            errorMessages.push(...errorsObj[key]);
                         }
                     }
                     if (errorMessages.length > 0) {

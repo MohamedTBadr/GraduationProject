@@ -15,13 +15,69 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Unwraps Result&lt;T&gt;, PaginatedResponse, or plain arrays from GET endpoints.
+   */
   private extractArrayData(res: any): any[] {
     if (!res) return [];
     if (Array.isArray(res)) return res;
-    if (res.value && Array.isArray(res.value.items)) return res.value.items;
-    if (res.value && Array.isArray(res.value)) return res.value;
-    if (Array.isArray(res.items)) return res.items;
+
+    const inner = res.value ?? res.Value;
+    if (inner != null) {
+      const items = inner.items ?? inner.Items;
+      if (Array.isArray(items)) return items;
+      if (Array.isArray(inner)) return inner;
+    }
+
+    const top = res.items ?? res.Items;
+    if (Array.isArray(top)) return top;
+
     return [];
+  }
+
+  /** Maps API / ServiceDTO fields (incl. PascalCase & ServiceImages) to ApiProduct. */
+  private normalizeProduct(raw: any): ApiProduct {
+    if (raw == null || typeof raw !== 'object') {
+      return { id: '', name: 'Unknown', description: '', price: 0 };
+    }
+    const images = raw?.serviceImages ?? raw?.ServiceImages;
+    const firstImage =
+      raw?.imageUrl ||
+      raw?.ImageUrl ||
+      (Array.isArray(images) && images.length > 0 ? images[0] : undefined);
+
+    const priceRaw = raw?.price ?? raw?.Price ?? 0;
+    const price = typeof priceRaw === 'number' ? priceRaw : parseFloat(String(priceRaw));
+
+    return {
+      id: String(raw?.id ?? raw?.Id ?? ''),
+      name: (raw?.name ?? raw?.Name ?? 'Service').toString(),
+      description: (raw?.description ?? raw?.Description ?? '')?.toString(),
+      price: Number.isFinite(price) ? price : 0,
+      vendorTypeId: raw?.vendorTypeId ?? raw?.VendorTypeId ?? raw?.categoryId ?? raw?.CategoryId,
+      vendorTypeName: raw?.vendorTypeName ?? raw?.VendorTypeName ?? raw?.categoryName ?? raw?.CategoryName,
+      vendorId: raw?.vendorId ?? raw?.VendorId,
+      vendorName: raw?.vendorName ?? raw?.VendorName,
+      serviceTypeId: raw?.serviceTypeId ?? raw?.ServiceTypeId,
+      serviceTypeName: raw?.serviceTypeName ?? raw?.ServiceTypeName,
+      imageUrl: firstImage,
+      status: raw?.status ?? raw?.Status ?? 'active',
+      duration:
+        raw?.duration ??
+        raw?.Duration ??
+        (raw?.setupDuration != null ? String(raw.setupDuration ?? raw.SetupDuration) : undefined),
+      leadTime:
+        raw?.leadTime ??
+        raw?.LeadTime ??
+        (raw?.leadTimeRequired != null ? String(raw.leadTimeRequired ?? raw.LeadTimeRequired) : undefined),
+      classification: raw?.classification ?? raw?.Classification,
+      allowedEventTypes: raw?.allowedEventTypes ?? raw?.AllowedEventTypes,
+      createdAt: raw?.createdAt ?? raw?.CreatedAt
+    };
+  }
+
+  private mapProductList(res: any): ApiProduct[] {
+    return this.extractArrayData(res).map(item => this.normalizeProduct(item));
   }
 
   /** GET /Service – returns all products */
@@ -34,49 +90,46 @@ export class ProductService {
       params = params.set('eventTypeId', filters.eventTypeId);
     }
     return this.http.get<any>(`${this.apiUrl}/Service`, { params }).pipe(
-      map(res => this.extractArrayData(res))
+      map(res => this.mapProductList(res))
     );
   }
 
   /** GET /Service/{productId} */
   getById(productId: string): Observable<ApiProduct> {
     return this.http.get<any>(`${this.apiUrl}/Service/${productId}`).pipe(
-      map(res => res.value || res)
+      map(res => {
+        const raw = res?.value ?? res?.Value ?? res;
+        return this.normalizeProduct(raw);
+      })
     );
   }
 
-  /** GET /Service/by-category/{categoryId} */
-  getByCategory(categoryId: string): Observable<ApiProduct[]> {
-    return this.http.get<any>(`${this.apiUrl}/Service/by-category/${categoryId}`).pipe(
-      map(res => this.extractArrayData(res))
-    );
-  }
 
   /** GET /Service/by-vendor/{vendorId} */
   getByVendor(vendorId: string): Observable<ApiProduct[]> {
     return this.http.get<any>(`${this.apiUrl}/Service/by-vendor/${vendorId}`).pipe(
-      map(res => this.extractArrayData(res))
+      map(res => this.mapProductList(res))
     );
   }
 
   /** GET /Service/by-service-type/{serviceTypeId} */
   getByServiceType(serviceTypeId: string): Observable<ApiProduct[]> {
     return this.http.get<any>(`${this.apiUrl}/Service/by-service-type/${serviceTypeId}`).pipe(
-      map(res => this.extractArrayData(res))
+      map(res => this.mapProductList(res))
     );
   }
 
   /** POST /Service */
   create(payload: FormData): Observable<ApiProduct> {
     return this.http.post<any>(`${this.apiUrl}/Service`, payload).pipe(
-      map(res => res.value || res)
+      map(res => this.normalizeProduct(res?.value ?? res?.Value ?? res))
     );
   }
 
   /** PUT /Service/{productId} */
   update(productId: string, payload: UpdateProductRequest): Observable<ApiProduct> {
     return this.http.put<any>(`${this.apiUrl}/Service/${productId}`, payload).pipe(
-      map(res => res.value || res)
+      map(res => this.normalizeProduct(res?.value ?? res?.Value ?? res))
     );
   }
 

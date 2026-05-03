@@ -8,7 +8,7 @@ export interface CompanyInquiryDto {
     contactPerson: string;
     phoneNumber: string;
     email: string;
-    categoryId: string;
+    vendorTypeId: string;
     expectedDate: string;
     estimatedAttendees: number;
     approximateBudget: number;

@@ -75,8 +75,14 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
     this.loading = true;
     
     // Fetch categories
-    this.serviceTypeService.getAll().subscribe(cats => {
-      this.categories = cats;
+    this.serviceTypeService.getAll().subscribe({
+      next: (cats) => {
+        this.categories = Array.isArray(cats) ? cats : [];
+      },
+      error: (err) => {
+        console.error('Error loading service types', err);
+        this.categories = [];
+      }
     });
 
     // Fetch products. Passing eventTypeId if any is selected (sending to backend as requested)
@@ -84,12 +90,14 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
     
     this.productService.getAll(filters).subscribe({
       next: (data) => {
-        this.services = data;
+        this.services = Array.isArray(data) ? data : [];
         this.applyFilters();
         this.loading = false;
       },
       error: (err) => {
         console.error('Error loading services', err);
+        this.services = [];
+        this.applyFilters();
         this.loading = false;
       }
     });
@@ -101,17 +109,18 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
     // Search
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(s => 
-        s.name.toLowerCase().includes(q) || 
-        (s.description && s.description.toLowerCase().includes(q))
-      );
+      filtered = filtered.filter(s => {
+        const name = (s.name ?? '').toLowerCase();
+        const desc = (s.description ?? '').toLowerCase();
+        return name.includes(q) || desc.includes(q);
+      });
     }
 
-    // Category (Multi-select)
+    // Service Type / Vendor Type (Multi-select)
     if (this.selectedCategories.length > 0) {
       filtered = filtered.filter(s => 
         (s.serviceTypeId && this.selectedCategories.includes(s.serviceTypeId)) || 
-        (s.categoryName && this.selectedCategories.includes(s.categoryName))
+        (s.vendorTypeName && this.selectedCategories.includes(s.vendorTypeName))
       );
     }
 
@@ -121,7 +130,10 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
     }
 
     // Price
-    filtered = filtered.filter(s => s.price <= this.maxPrice);
+    filtered = filtered.filter(s => {
+      const p = typeof s.price === 'number' && !Number.isNaN(s.price) ? s.price : 0;
+      return p <= this.maxPrice;
+    });
 
     // Rating (Assuming 5 as default if not provided, or 0)
     filtered = filtered.filter(s => ((s as any).rating || 5) >= this.minRating);

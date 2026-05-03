@@ -1,6 +1,6 @@
 <div class="mb-header">
-  <div class="mb-title">My Bookings</div>
-  <div class="mb-subtitle">9 total bookings across all events</div>
+  <div class="mb-title">My Bookings & Orders</div>
+  <div class="mb-subtitle">Manage your reservations and financial transactions</div>
 </div>
 
 <div class="mb-stats-grid">
@@ -16,9 +16,9 @@
     <div class="val">{{stats.completed}}</div>
     <div class="lbl">Completed</div>
   </div>
-  <div class="mb-stat-card card-cancelled">
-    <div class="val">{{stats.cancelled}}</div>
-    <div class="lbl">Cancelled</div>
+  <div class="mb-stat-card card-loyalty" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+    <div class="val">{{loyaltyPoints}}</div>
+    <div class="lbl" style="color: rgba(255,255,255,0.8);">Loyalty Points 🌟</div>
   </div>
 </div>
 
@@ -26,7 +26,7 @@
   <div class="mb-tab" 
        [class.active]="activeTab === 'all'"
        (click)="setTab('all')">
-    All <span class="mb-tab-badge" [class.inactive]="activeTab !== 'all'">{{stats.all}}</span>
+    All Bookings <span class="mb-tab-badge" [class.inactive]="activeTab !== 'all'">{{stats.all}}</span>
   </div>
   <div class="mb-tab" 
        [class.active]="activeTab === 'pending'"
@@ -43,9 +43,14 @@
        (click)="setTab('completed')">
     Completed <span class="mb-tab-badge" [class.inactive]="activeTab !== 'completed'">{{stats.completed}}</span>
   </div>
+  <div class="mb-tab" 
+       [class.active]="activeTab === 'orders'"
+       (click)="setTab('orders')">
+    Order History <span class="mb-tab-badge" [class.inactive]="activeTab !== 'orders'">{{orders.length}}</span>
+  </div>
 </div>
 
-<div class="mb-list">
+<div class="mb-list" *ngIf="activeTab !== 'orders'">
   <div class="mb-booking-card" *ngFor="let bk of filteredBookings">
     <div class="bk-top">
       <div class="bk-info">
@@ -67,29 +72,59 @@
 
     <div class="bk-actions-bar">
       <div class="bk-actions">
-        <!-- Default Actions -->
         <ng-container *ngIf="bk.status !== 'Done' && bk.status !== 'Completed'">
           <button class="btn">Message</button>
           <button class="btn">View Contract</button>
           <button class="btn cancel" *ngIf="bk.status === 'Pending' || bk.status === 'Confirmed'">Cancel</button>
         </ng-container>
 
-        <!-- Actions for 'Done' status -->
         <ng-container *ngIf="bk.status === 'Done'">
           <button class="btn" style="background-color: #10b981; color: white; border-color: #10b981;" (click)="confirmCompletion(bk)">Confirm Service Completion ✅</button>
           <button class="btn cancel" (click)="reportIssue(bk)">Report an Issue ⚠️</button>
-          <button class="btn">Request Support</button>
         </ng-container>
 
-        <!-- Actions for 'Completed' status -->
         <ng-container *ngIf="bk.status === 'Completed'">
           <button class="btn" style="background-color: #eba834; color: white; border-color: #eba834;" (click)="openReviewModal(bk)">Leave Review ⭐</button>
-          <button class="btn">View Invoice / Receipt</button>
-          <button class="btn">Rebook Vendor</button>
         </ng-container>
       </div>
       <div class="bk-id">{{bk.id}}</div>
     </div>
+  </div>
+</div>
+
+<div class="mb-list" *ngIf="activeTab === 'orders'">
+  <div class="mb-booking-card" *ngFor="let order of orders">
+    <div class="bk-top">
+      <div class="bk-info">
+        <div class="bk-icon">💰</div>
+        <div>
+          <div class="bk-vendor-name">Order #{{order.id.substring(0,8)}}</div>
+          <div class="bk-service-type">Event Order</div>
+          <div class="bk-event-ref">Placed on {{order.createdAt | date:'mediumDate'}}</div>
+        </div>
+      </div>
+      
+      <div class="bk-status-col">
+        <div class="bk-status-chip" [ngClass]="order.paymentStatus.toLowerCase()">{{order.paymentStatus}}</div>
+        <div class="bk-price">{{order.amount | number}} {{order.currency}}</div>
+      </div>
+    </div>
+    
+    <div class="bk-divider"></div>
+
+    <div class="bk-actions-bar">
+      <div class="bk-actions">
+        <div class="bk-order-items" style="font-size: 0.9rem; color: #6b7280;">
+          <span>Event booking payment</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="empty-state" *ngIf="orders.length === 0" style="text-align: center; padding: 3rem; color: #6b7280;">
+    <div style="font-size: 3rem; margin-bottom: 1rem;">🛍️</div>
+    <h3>No orders found</h3>
+    <p>You haven't made any transactions yet.</p>
   </div>
 </div>
 

@@ -46,9 +46,9 @@ export class AdminDashboardComponent {
   ];
 
   applications = [
-    { id: 1, name: 'Lumiere Events', category: 'Photography', location: 'Cairo, Egypt', date: 'Oct 24, 2026', status: 'Reviewing' },
-    { id: 2, name: 'The Golden Plate', category: 'Catering', location: 'Giza, Egypt', date: 'Oct 23, 2026', status: 'Approved' },
-    { id: 3, name: 'White Rose Decor', category: 'Decoration', location: 'New Cairo, Egypt', date: 'Oct 22, 2026', status: 'Pending' }
+    { id: 1, name: 'Lumiere Events', vendorTypeName: 'Photography', location: 'Cairo, Egypt', date: 'Oct 24, 2026', status: 'Reviewing' },
+    { id: 2, name: 'The Golden Plate', vendorTypeName: 'Catering', location: 'Giza, Egypt', date: 'Oct 23, 2026', status: 'Approved' },
+    { id: 3, name: 'White Rose Decor', vendorTypeName: 'Decoration', location: 'New Cairo, Egypt', date: 'Oct 22, 2026', status: 'Pending' }
   ];
 
   approveApp(id: number) {

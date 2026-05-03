@@ -103,7 +103,7 @@
                     <button class="ad-btn ad-btn-blue justify-center rounded-[10px] p-[14px]" (click)="modalService.open('add-package')"> Create Package</button>
                     <button class="ad-btn ad-btn-red justify-center rounded-[10px] p-[14px]" (click)="modalService.open('schedule-report')"> Schedule Report</button>
                     <button class="ad-btn ad-btn-green justify-center rounded-[10px] p-[14px]" (click)="modalService.open('add-banner')"> Add Banner</button>
-                    <button class="ad-btn ad-btn-ghost justify-center rounded-[10px] p-[14px]" (click)="modalService.open('add-category')">️ Categories</button>
+                    <button class="ad-btn ad-btn-ghost justify-center rounded-[10px] p-[14px]" (click)="modalService.open('manage-taxonomy')">️ Taxonomy</button>
                     <button class="ad-btn ad-btn-ghost justify-center rounded-[10px] p-[14px]" (click)="modalService.close()"> Close</button>
                 </div>
             </div>
@@ -219,7 +219,7 @@
                 <div class="grid [grid-template-columns:1fr_1fr] gap-[11px]">
                     <div class="form-group"><label>Business Name *</label><input type="text"
                             placeholder="e.g. Cairo Flowers" /></div>
-                    <div class="form-group"><label>Category *</label><select>
+                    <div class="form-group"><label>Vendor Type *</label><select>
                             <option>Decoration</option>
                             <option>Venue</option>
                             <option>Catering</option>
@@ -306,10 +306,10 @@
                 </div>
             </div>
 
-            <!-- Add Category Modal -->
-            <div *ngSwitchCase="'add-category'">
-                <div class="ad-modal-title">Add Category</div>
-                <div class="ad-modal-sub">Create a new service category or event type.</div>
+            <!-- Manage Taxonomy Modal -->
+            <div *ngSwitchCase="'manage-taxonomy'">
+                <div class="ad-modal-title">Manage Taxonomy</div>
+                <div class="ad-modal-sub">Add or update vendor types and event types.</div>
                 <div class="form-group"><label>Name *</label><input type="text" placeholder="e.g. Makeup & Beauty" />
                 </div>
                 <div class="grid [grid-template-columns:1fr_1fr] gap-[11px]">
@@ -321,7 +321,7 @@
                 </div>
                 <div class="ad-submit-bar">
                     <button class="ad-btn ad-btn-ghost" (click)="modalService.close()">Cancel</button>
-                    <button class="ad-btn ad-btn-gold" (click)="modalService.close()">Create Category</button>
+                    <button class="ad-btn ad-btn-gold" (click)="modalService.close()">Create Vendor Type</button>
                 </div>
             </div>
 

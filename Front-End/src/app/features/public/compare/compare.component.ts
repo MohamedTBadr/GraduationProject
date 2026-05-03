@@ -16,7 +16,7 @@ export class CompareComponent {
 
   getFeatures(): { key: keyof ApiVendor; label: string }[] {
     return [
-      { key: 'categoryName', label: 'Category' },
+      { key: 'vendorTypeName', label: 'Vendor Type' },
       { key: 'location', label: 'Location' },
       { key: 'rating', label: 'Rating ()' },
       { key: 'phone', label: 'Phone Number' },

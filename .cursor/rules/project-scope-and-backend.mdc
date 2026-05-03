@@ -1,0 +1,25 @@
+---
+description: Scope (frontend + business logic only); backend is hands-off—escalate to backend dev
+alwaysApply: true
+---
+
+# Project scope and backend boundary
+
+The maintainer is the **project lead**, **frontend**, and **business logic** developer—not the backend developer.
+
+## What to change in this repo
+
+- **Do**: Work on the **Front-End**, shared frontend types/interfaces used by the UI, **business logic** docs or specs that live with the product (e.g. `business_logic_reference.md` when relevant).
+- **Do not**: Edit, refactor, or “fix” the **API / backend** (`API/`, server C#, middleware, etc.). Treat the backend as read-only from this agent’s perspective.
+
+## Backend issues
+
+If a bug, missing endpoint, contract mismatch, or any change is needed in the backend:
+
+1. **Do not** implement backend changes.
+2. **Summarize** clearly for the backend developer: what’s wrong, expected vs actual, suggested API shape or behavior (if helpful), and file/area hints only as observation—not as edits.
+
+## Uncertainty and inconsistencies
+
+- **Ask** the user when something is ambiguous (API behavior, env, ownership of a file).
+- **Surface** unclear or inconsistent behavior (e.g. types vs real responses, docs vs code) so the user can align with the backend dev or product.

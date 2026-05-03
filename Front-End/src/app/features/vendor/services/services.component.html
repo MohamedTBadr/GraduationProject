@@ -44,12 +44,12 @@
       
       <div class="vd-form-row mb-[16px]">
         <div class="flex-1">
-          <label>Category *</label>
-          <select class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%] bg-[white] appearance-auto" formControlName="categoryId">
-            <option value="" disabled selected>Select a category</option>
-            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          <label>Vendor Type *</label>
+          <select class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%] bg-[white] appearance-auto" formControlName="vendorTypeId">
+            <option value="" disabled selected>Select a vendor type</option>
+            <option *ngFor="let vt of vendorTypes" [value]="vt.id">{{ vt.name }}</option>
           </select>
-          <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('categoryId')?.invalid && serviceForm.get('categoryId')?.touched">Category is required</div>
+          <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('vendorTypeId')?.invalid && serviceForm.get('vendorTypeId')?.touched">Vendor Type is required</div>
         </div>
         <div class="flex-1">
           <label>Service Type *</label>
@@ -160,8 +160,8 @@
         <div class="font-semibold text-[#1e293b] capitalize">Active</div>
       </div>
       <div>
-        <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">CATEGORY</div>
-        <div class="font-semibold text-[#1e293b]">{{ selectedService.categoryName || 'Not specified' }}</div>
+        <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">VENDOR TYPE</div>
+        <div class="font-semibold text-[#1e293b]">{{ selectedService.vendorTypeName || 'Not specified' }}</div>
       </div>
       <div>
         <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">SERVICE TYPE</div>

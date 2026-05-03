@@ -22,7 +22,8 @@ export class ServiceTypeService {
     return this.http.get<any>(`${this.apiUrl}/ServiceType`).pipe(
       map(res => {
         const data = res.value || res.Value || res;
-        return Array.isArray(data) ? data : (data.items || data.Items || []);
+        const arr = Array.isArray(data) ? data : (data?.items || data?.Items || []);
+        return Array.isArray(arr) ? arr : [];
       }),
       tap(data => {
         const normalizedData = data.map((item: any) => ({
@@ -32,7 +33,7 @@ export class ServiceTypeService {
         }));
         this.cachedServiceTypes = normalizedData;
       }),
-      map(data => this.cachedServiceTypes as ServiceType[])
+      map(() => this.cachedServiceTypes as ServiceType[])
     );
   }
 

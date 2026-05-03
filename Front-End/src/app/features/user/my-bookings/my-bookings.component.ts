@@ -5,10 +5,12 @@ import { EventResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReviewModalComponent } from './review-modal.component';
+import { OrderService, OrderResponse } from '../../../core/services/order.service';
 
 interface Booking {
   id: string;
   eventId: string;
+  serviceId?: string;
   vendorName: string;
   serviceType: string;
   eventRef: string;
@@ -35,6 +37,8 @@ export class MyBookingsComponent implements OnInit {
 
   activeTab = 'all';
   bookings: Booking[] = [];
+  orders: OrderResponse[] = [];
+  loyaltyPoints = 0;
   loading = true;
   userId = '';
 
@@ -44,7 +48,8 @@ export class MyBookingsComponent implements OnInit {
   constructor(
     private eventService: EventService,
     private authService: AuthService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private orderService: OrderService
   ) {}
 
   ngOnInit() {
@@ -82,6 +87,7 @@ export class MyBookingsComponent implements OnInit {
               allBookings.push({
                 id: item.id || `BK-${Math.floor(Math.random() * 10000)}`,
                 eventId: ev.id,
+                serviceId: item.serviceId,
                 vendorName: item.vendorName || 'Unknown Vendor',
                 serviceType: item.serviceName || 'Service',
                 eventRef: `${ev.title} · ${new Date(ev.eventDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`,
@@ -99,7 +105,8 @@ export class MyBookingsComponent implements OnInit {
         this.stats.pending = allBookings.filter(b => b.status === 'Pending').length;
         this.stats.completed = allBookings.filter(b => b.status === 'Completed').length;
         this.stats.cancelled = allBookings.filter(b => b.status === 'Cancelled').length;
-        this.loading = false;
+        
+        this.loadOrders();
       },
       error: (err) => {
         console.error('Failed to load bookings', err);
@@ -107,6 +114,29 @@ export class MyBookingsComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  loadOrders() {
+    this.orderService.getOrdersByUser(this.userId).subscribe({
+      next: (orders: OrderResponse[]) => {
+        this.orders = orders;
+        this.calculateLoyaltyPoints();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load orders', err);
+        this.toastService.show('Failed to load your order history.', 'error');
+        this.loading = false;
+      }
+    });
+  }
+
+  calculateLoyaltyPoints() {
+    const eligibleOrders = this.orders.filter(o => 
+      o.paymentStatus === 'Paid' || o.paymentStatus === 'Completed'
+    );
+    const totalSpent = eligibleOrders.reduce((sum, o) => sum + o.amount, 0);
+    this.loyaltyPoints = Math.floor(totalSpent / 10);
   }
 
   get filteredBookings() {
@@ -132,9 +162,8 @@ export class MyBookingsComponent implements OnInit {
   }
 
   openReviewModal(bk: Booking) {
-    // We assume booking.id is the serviceId, or we could pass it if it's stored.
-    // For now, let's use a mock service id or the booking's vendor service ref.
-    this.selectedServiceId = bk.id; 
+    // Priority: serviceId from backend > item.id as fallback
+    this.selectedServiceId = bk.serviceId || bk.id; 
     this.isReviewModalOpen = true;
   }
 

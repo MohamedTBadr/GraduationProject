@@ -27,7 +27,7 @@
                 <div class="vc-photo">
                     <div class="vc-photo-inner bg-[linear-gradient(135deg,_hsl(230,_40%,_25%)_0%,_hsl(250,_45%,_30%)_100%)]">{{v.name.charAt(0)}}</div>
                     <div class="vc-top-row">
-                        <div class="vc-cat-badge">{{v.categoryName || 'Vendor'}}</div>
+                        <div class="vc-cat-badge">{{v.vendorTypeName || 'Vendor'}}</div>
                         <button class="vc-fav-btn text-[var(--gold)]" (click)="removeFromFavorites(v.id, $event)">❤️</button>
                     </div>
                 </div>

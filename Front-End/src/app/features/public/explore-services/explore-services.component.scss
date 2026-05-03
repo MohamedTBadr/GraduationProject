@@ -108,6 +108,7 @@
   min-height: 420px;
   display: flex;
   align-items: center;
+  user-select: none;
 }
 
 .eh-bg-mesh {
@@ -128,7 +129,6 @@
   top: -150px;
   right: -100px;
   background: radial-gradient(circle, rgba(201, 168, 76, .12) 0%, transparent 65%);
-  animation: floatOrb 9s ease-in-out infinite;
 }
 
 .eh-orb-2 {
@@ -137,12 +137,6 @@
   bottom: -120px;
   left: -80px;
   background: radial-gradient(circle, rgba(201, 168, 76, .08) 0%, transparent 65%);
-  animation: floatOrb 12s ease-in-out infinite reverse;
-}
-
-@keyframes floatOrb {
-  0%, 100% { transform: translateY(0) }
-  50% { transform: translateY(-20px) }
 }
 
 .eh-inner {

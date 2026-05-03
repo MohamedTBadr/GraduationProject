@@ -1,0 +1,65 @@
+<div class="ad-section active block" *ngIf="vendor">
+    <div class="ad-page-hd">
+        <div class="flex items-center gap-[15px]">
+            <div class="ad-back-btn" routerLink="/admin/vendors">←</div>
+            <div>
+                <div class="ad-page-title">{{ vendor.name }}</div>
+                <div class="ad-page-sub">Vendor ID: {{ vendor.id }} · Joined {{ vendor.createdAt | date:'mediumDate' }}</div>
+            </div>
+        </div>
+        <div class="flex gap-[10px]">
+            <button *ngIf="!vendor.isApproved" (click)="approveVendor()" class="ad-btn ad-btn-gold">Approve Application</button>
+            <button (click)="suspendVendor()" [class.ad-btn-red]="vendor.status !== 'suspended'" [class.ad-btn-green]="vendor.status === 'suspended'" class="ad-btn">
+                {{ vendor.status === 'suspended' ? 'Activate Vendor' : 'Suspend Vendor' }}
+            </button>
+        </div>
+    </div>
+
+    <div class="ad-kpi-grid [grid-template-columns:repeat(4,1fr)] mt-[1rem]">
+        <div class="ad-kpi ak-blue"><div class="ad-kpi-val">{{ vendor.rating || 0 }}</div><div class="ad-kpi-lbl">Overall Rating</div></div>
+        <div class="ad-kpi ak-gold"><div class="ad-kpi-val">{{ vendor.vendorTypeName || 'General' }}</div><div class="ad-kpi-lbl">Vendor Type</div></div>
+        <div class="ad-kpi ak-green"><div class="ad-kpi-val">Active</div><div class="ad-kpi-lbl">Status</div></div>
+        <div class="ad-kpi ak-purple"><div class="ad-kpi-val">EGP 0</div><div class="ad-kpi-lbl">Total Earnings</div></div>
+    </div>
+
+    <div class="ad-tab-bar mt-[2rem]">
+        <button [class.active]="activeTab === 'info'" (click)="activeTab = 'info'" class="ad-tab">Overview & Info</button>
+        <button [class.active]="activeTab === 'services'" (click)="activeTab = 'services'" class="ad-tab">Offered Services</button>
+        <button [class.active]="activeTab === 'history'" (click)="activeTab = 'history'" class="ad-tab">Booking History</button>
+    </div>
+
+    <div class="mt-[1.5rem]">
+        <!-- Info Tab -->
+        <div *ngIf="activeTab === 'info'" class="ad-card">
+            <div class="grid grid-cols-2 gap-[30px]">
+                <div>
+                    <h3 class="text-[1.2rem] font-medium mb-[15px] text-[var(--gold)]">Business Information</h3>
+                    <div class="detail-row"><span>Email</span><strong>{{ vendor.email }}</strong></div>
+                    <div class="detail-row"><span>Phone</span><strong>{{ vendor.phone || 'N/A' }}</strong></div>
+                    <div class="detail-row"><span>Location</span><strong>{{ vendor.location || 'N/A' }}</strong></div>
+                    <div class="detail-row"><span>Verified</span><strong>{{ vendor.isApproved ? 'Yes ✓' : 'Pending Review' }}</strong></div>
+                </div>
+                <div>
+                    <h3 class="text-[1.2rem] font-medium mb-[15px] text-[var(--gold)]">About the Business</h3>
+                    <p class="text-[#8c8fa7] leading-[1.6]">{{ vendor.about || 'No description provided by the vendor.' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Tab -->
+        <div *ngIf="activeTab === 'services'" class="ad-card text-center p-[4rem]">
+            <div class="text-[3rem] mb-[1rem]">📦</div>
+            <h3 class="text-[1.1rem] text-[#8c8fa7]">Service listing integration coming soon...</h3>
+        </div>
+
+        <!-- History Tab -->
+        <div *ngIf="activeTab === 'history'" class="ad-card text-center p-[4rem]">
+            <div class="text-[3rem] mb-[1rem]">🕒</div>
+            <h3 class="text-[1.1rem] text-[#8c8fa7]">Booking history integration coming soon...</h3>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="loading" class="p-[5rem] text-center text-[var(--gold)]">
+    Loading vendor profile...
+</div>

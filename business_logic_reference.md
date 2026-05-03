@@ -194,10 +194,73 @@ sequenceDiagram
     Note over API (UserController): User's IsSuspended flag is set to true
 ```
 
+### H. Payment & Order Integration (Paymob)
+
+The platform uses Paymob to handle financial transactions. Orders are the bridge between an Event (planning) and Payment (finalization).
+
+**Business Rules:**
+- **Order Creation**: An order is created directly from an `Event`. The backend dynamically calculates the order amount based on the `Approved` Event Items within the Event. `OrderItem` entities have been removed to simplify the data model.
+- **Paymob iFrame**: The frontend requests a payment session from the backend, which returns an iFrame URL where the user enters card details securely.
+- **Status Sync**: Paymob notifies the backend via Webhooks upon successful or failed payment. The Order status is then updated to `Paid` or `Failed`.
+- **Billing Data**: Users must provide a billing address and contact info (first name, last name, email, phone) to initiate payment.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Frontend
+    participant API (OrderController)
+    participant API (PaymentsController)
+    participant Paymob
+    
+    Client->>Frontend: Clicks "Pay Now" on Booking
+    Frontend->>API (OrderController): POST /api/order (Create Order)
+    API (OrderController)-->>Frontend: 201 Created (Order ID)
+    Frontend->>API (PaymentsController): POST /api/payments/paymob (Amount + Billing)
+    API (PaymentsController)->>Paymob: Authenticates & Registers Order
+    Paymob-->>API (PaymentsController): Returns Payment Key/URL
+    API (PaymentsController)-->>Frontend: Returns iFrame URL
+    Frontend->>Client: Displays Paymob iFrame
+    Client->>Paymob: Enters Card Details & Submits
+    Paymob->>API (PaymentsController): Webhook: Transaction Success
+    API (PaymentsController)->>API (OrderController): Update Order Status (Paid)
+    Paymob-->>Frontend: Redirects back to Success Page
+```
+
+### I. Support Ticket System
+
+To maintain marketplace trust, a centralized Support Ticket system allows users to report issues and admins to resolve them.
+
+**Business Rules:**
+- **Categorization**: Tickets are typed by `Technical`, `Booking`, `Payment`, or `General`.
+- **Prioritization**: Ranging from `Low` to `Critical`. Critical tickets (e.g., "Vendor didn't show up") are flagged for immediate action.
+- **Lifecycle**: `Open` → `In Progress` → `Resolved`.
+- **Escalation**: Admins can escalate complex tickets to `Senior Management`, `Legal`, or `CTO`.
+
+```mermaid
+graph LR
+    A[User Reports Issue] --> B{Ticket Created}
+    B --> C[Admin Assigns Agent]
+    C --> D[Agent/User Communication]
+    D --> E{Resolved?}
+    E -- Yes --> F[Close Ticket]
+    E -- No --> G[Escalate to Management]
+    G --> D
+```
+
+### J. Loyalty & Rewards Program
+
+The platform rewards frequent users through a loyalty points system to encourage retention.
+
+**Business Rules:**
+- **Earning Logic**: Users earn **1 Point for every 10 EGP spent** on successful bookings.
+- **Eligibility**: Points are only awarded once an Order is marked as `Paid` or `Completed`.
+- **Point Value**: Points can be redeemed for discounts (Implementation in progress).
+- **Visibility**: Users can view their current point balance on their Personal Dashboard.
+
 ---
 
 ## 3. Current Status & Next Steps
 
-1. **Taxonomy Realignment**: Update the database schema and API to support the defined taxonomy (`VendorType` dependency for `ServiceType`, and `VendorEventType` mappings).
-2. **Explore Pages Separation**: Implement distinct routing and UI for "Vendor Explore" and "Service Explore" on the frontend.
-3. **Smart Checklist Flow**: Develop the flow where choosing an Event Type suggests relevant Service Types to the user.
+1. **Loyalty Redemption**: Implement the backend logic and frontend UI for users to redeem their loyalty points as discounts on future bookings.
+2. **AI-Powered Matching**: Enhance the "Smart Checklist" to use Gemini AI for more personalized vendor recommendations based on event descriptions.
+3. **Advanced Support Analytics**: Develop an Admin dashboard for tracking ticket resolution rates and common platform pain points.

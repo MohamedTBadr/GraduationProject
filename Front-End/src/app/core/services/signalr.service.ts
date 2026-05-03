@@ -25,11 +25,13 @@ export class SignalRService {
 
     if (this.hubConnection) return;
 
-    const connectionUrl = `${environment.signalRUrl}?accessToken=${token}`;
+    const connectionUrl = environment.signalRUrl;
 
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(connectionUrl, {
         accessTokenFactory: () => token,
+        skipNegotiation: false,
+        transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
         headers: { 'IdempotencyKey': crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() }
       })
       .withAutomaticReconnect()

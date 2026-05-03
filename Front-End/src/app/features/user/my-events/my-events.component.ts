@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
-import { EventResponseDto } from '../../../shared/types/api.interfaces';
+import { EventItemResponseDto, EventResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PaymentService } from '../../../core/services/payment.service';
 import { EventStudioComponent } from '../event-studio/event-studio.component';
+import { ProductService } from '../../../core/services/product.service';
+import { OrderService } from '../../../core/services/order.service';
 
 @Component({
   selector: 'app-my-events',
@@ -21,6 +23,8 @@ export class MyEventsComponent implements OnInit {
   loading = true;
   showAiStudio = false;
   isPaying = false;
+  /** Sub-tab under event detail: all line items vs vendor-approved only */
+  eventServicesTab: 'all' | 'approved' = 'all';
 
   constructor(
     private route: ActivatedRoute, 
@@ -28,7 +32,9 @@ export class MyEventsComponent implements OnInit {
     private eventService: EventService,
     private authService: AuthService,
     private toastService: ToastService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private productService: ProductService,
+    private orderService: OrderService
   ) {}
 
   ngOnInit() {
@@ -89,12 +95,35 @@ export class MyEventsComponent implements OnInit {
       budget: ev.totalBudget || 0,
       vendors: mappedVendors,
       checklist: defaultChecklist,
-      status: ev.eventStatus || 'Pending'
+      status: ev.eventStatus || 'Pending',
+      eventItems: ev.eventItems || []
     };
   }
 
   get activeEvent() {
     return this.events.find(e => e.id === this.activeEventId);
+  }
+
+  /** Line items for the active event, filtered by {@link eventServicesTab}. */
+  get displayedEventItems(): EventItemResponseDto[] {
+    const items = this.activeEvent?.eventItems as EventItemResponseDto[] | undefined;
+    if (!items?.length) return [];
+    if (this.eventServicesTab === 'approved') {
+      return items.filter(i => i.itemStatus === 'Approved');
+    }
+    return items;
+  }
+
+  get hasApprovedServices(): boolean {
+    const items = this.activeEvent?.eventItems as EventItemResponseDto[] | undefined;
+    return !!items?.some(i => i.itemStatus === 'Approved');
+  }
+
+  itemBadgeClass(item: EventItemResponseDto): string {
+    const s = (item.itemStatus || '').toLowerCase();
+    if (s === 'approved' || s === 'done' || s === 'completed') return 'badge-confirmed';
+    if (s === 'rejected') return 'badge-rejected';
+    return 'badge-pending';
   }
 
   get spent() {
@@ -114,6 +143,7 @@ export class MyEventsComponent implements OnInit {
 
   switchEvent(id: string) {
     this.activeEventId = id;
+    this.eventServicesTab = 'all';
   }
 
   toggleCheck(index: number) {
@@ -131,37 +161,121 @@ export class MyEventsComponent implements OnInit {
   }
 
   onAiPlanAccepted(plan: any) {
-    this.loadEvents();
+    if (!this.activeEventId || !plan || !plan.selected_items || plan.selected_items.length === 0) {
+      return;
+    }
+
+    this.toastService.show('Adding recommended vendors to your event...', 'info');
+    this.loading = true;
+
+    let completedCount = 0;
+    let errorCount = 0;
+    const items = plan.selected_items;
+
+    const processNext = (index: number) => {
+      if (index >= items.length) {
+        this.loading = false;
+        if (errorCount === 0) {
+          this.toastService.show('All vendors added successfully!', 'success');
+        } else {
+          this.toastService.show(`Added ${completedCount} vendors. ${errorCount} failed.`, 'info');
+        }
+        this.loadEvents();
+        return;
+      }
+
+      const item = items[index];
+      const serviceId = item.ServiceId || item.serviceId;
+
+      if (!serviceId) {
+        errorCount++;
+        processNext(index + 1);
+        return;
+      }
+
+      this.productService.getById(serviceId).subscribe({
+        next: (product) => {
+          const payload = {
+            eventId: this.activeEventId!,
+            serviceImage: product.imageUrl || '',
+            serviceName: product.name,
+            price: product.price,
+            vendorId: product.vendorId || '',
+            vendorName: product.vendorName || item.vendor || '',
+            quantity: 1
+          };
+
+          this.eventService.addItem(this.activeEventId!, payload).subscribe({
+            next: () => {
+              completedCount++;
+              processNext(index + 1);
+            },
+            error: (err) => {
+              console.error(`Failed to add item ${serviceId}:`, err);
+              errorCount++;
+              processNext(index + 1);
+            }
+          });
+        },
+        error: (err) => {
+          console.error(`Failed to fetch service ${serviceId}:`, err);
+          errorCount++;
+          processNext(index + 1);
+        }
+      });
+    };
+
+    processNext(0);
   }
 
   payDeposit() {
-    if (!this.activeEvent || this.spent === 0) return;
+    if (!this.activeEvent || this.spent === 0 || !this.hasApprovedServices) return;
     
     this.isPaying = true;
     const user = this.authService.user();
     
-    // Deposit is 25% of total spent for the event items
     const depositAmount = this.spent * 0.25;
-
     const nameParts = user?.name ? user.name.split(' ') : ['User', 'Name'];
 
-    this.paymentService.initiatePaymob({
-      amount: depositAmount,
-      billing: {
-        first_name: nameParts[0] || 'User',
-        last_name: nameParts[1] || 'Name',
-        email: user?.email || 'test@example.com',
-        phone_number: '+201234567890'
-      }
-    }).subscribe({
-      next: (res) => {
-        this.isPaying = false;
-        // The user selected to open the URL in a new tab
-        window.open(res.iframeUrl, '_blank');
+    const orderPayload = {
+      userId: user?.id || '',
+      eventId: this.activeEvent.id,
+      currency: 'EGP',
+      shippingAddress: {
+        street: 'Default Street',
+        city: 'Cairo',
+        state: 'Cairo',
+        postalCode: '12345'
+      },
+      appointment: new Date(this.activeEvent.date).toISOString()
+    };
+
+    this.orderService.createOrder(orderPayload).subscribe({
+      next: (order) => {
+        this.paymentService.initiatePaymob({
+          amount: depositAmount,
+          billing: {
+            first_name: nameParts[0] || 'User',
+            last_name: nameParts[1] || 'Name',
+            email: user?.email || 'test@example.com',
+            phone_number: '+201234567890'
+          },
+          orderId: order.id
+        }).subscribe({
+          next: (res) => {
+            this.isPaying = false;
+            window.open(res.iframeUrl, '_blank');
+          },
+          error: (err) => {
+            this.isPaying = false;
+            this.toastService.show('Failed to initialize payment gateway.', 'error');
+            console.error(err);
+          }
+        });
       },
       error: (err) => {
         this.isPaying = false;
-        this.toastService.show('Failed to initialize payment gateway.', 'error');
+        this.toastService.show('Failed to create order.', 'error');
         console.error(err);
       }
     });

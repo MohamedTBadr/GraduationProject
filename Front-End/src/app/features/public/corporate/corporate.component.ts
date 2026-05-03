@@ -16,7 +16,7 @@ import { VendorType } from '../../../core/models/taxonomy.models';
 })
 export class CorporateComponent implements OnInit {
   corpForm!: FormGroup;
-  categories: VendorType[] = [];
+  vendorTypes: VendorType[] = [];
   isSubmitting = false;
 
   constructor(
@@ -29,7 +29,7 @@ export class CorporateComponent implements OnInit {
 
   ngOnInit() {
     this.initForm();
-    this.loadCategories();
+    this.loadVendorTypes();
   }
 
   private initForm() {
@@ -38,7 +38,7 @@ export class CorporateComponent implements OnInit {
       contactPerson: ['', Validators.required],
       phoneNumber: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      categoryId: ['', [Validators.required]],
+      vendorTypeId: ['', [Validators.required]],
       expectedDate: ['', Validators.required],
       estimatedAttendees: [null, [Validators.min(1)]],
       approximateBudget: [null, [Validators.min(0)]],
@@ -46,12 +46,12 @@ export class CorporateComponent implements OnInit {
     });
   }
 
-  private loadCategories() {
+  private loadVendorTypes() {
     this.vendorTypeService.getAll().subscribe({
-      next: (data) => this.categories = data,
+      next: (data) => this.vendorTypes = data,
       error: (err) => {
-        console.error('Failed to load categories', err);
-        this.toastService.show('Failed to load categories.', 'error');
+        console.error('Failed to load vendor types', err);
+        this.toastService.show('Failed to load vendor types.', 'error');
       }
     });
   }

@@ -120,10 +120,10 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Event Type *</label>
-                        <select formControlName="categoryId">
-                            <option value="">Select Event Type</option>
-                            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+                        <label>Vendor Type *</label>
+                        <select formControlName="vendorTypeId">
+                            <option value="">Select Vendor Type</option>
+                            <option *ngFor="let vt of vendorTypes" [value]="vt.id">{{ vt.name }}</option>
                         </select>
                     </div>
                     <div class="form-group"><label>Expected Date</label><input formControlName="expectedDate" type="date" /></div>

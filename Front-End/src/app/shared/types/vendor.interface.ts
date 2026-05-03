@@ -21,7 +21,7 @@ export interface VendorPackage {
 export interface Vendor {
     id: number;
     name: string;
-    category: string;
+    vendorTypeName: string;
     location: string;
     rating: number;
     reviews: number;

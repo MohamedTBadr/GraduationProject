@@ -16,11 +16,12 @@ import { ProductService } from '../../../core/services/product.service';
   styleUrls: ['./vendor-profile.component.scss']
 })
 export class VendorProfileComponent implements OnInit {
-  activeTab = 'about';
+  activeTab = 'services';
   vendorId: string | null = null;
-  vendor: ApiVendor | undefined;
+  vendor: ApiVendor | null = null;
   products: ApiProduct[] = [];
-  loading = false;
+  loading = true;
+  error = false;
 
   favoriteService = inject(FavoriteService);
   modalService = inject(ModalService);
@@ -34,24 +35,42 @@ export class VendorProfileComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.vendorId = this.route.snapshot.paramMap.get('id');
-    if (this.vendorId) {
-      this.loadVendorProfile();
-      this.loadVendorProducts();
-    }
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id && id !== this.vendorId) {
+        this.vendorId = id;
+        this.resetState();
+        this.loadVendorProfile();
+        this.loadVendorProducts();
+      } else if (id && !this.vendorId) {
+        this.vendorId = id;
+        this.loadVendorProfile();
+        this.loadVendorProducts();
+      }
+    });
+  }
+
+  private resetState() {
+    this.loading = true;
+    this.error = false;
+    this.vendor = null;
+    this.products = [];
   }
 
   loadVendorProfile() {
     if (!this.vendorId) return;
     this.loading = true;
+    this.error = false;
     this.vendorService.getById(this.vendorId).subscribe({
       next: (data) => {
         this.vendor = data;
         this.loading = false;
       },
       error: (err) => {
-        this.toastService.show('Failed to load profile details.', 'error');
+        console.error('Error loading vendor profile:', err);
+        this.toastService.show('Failed to load profile details. Please try again later.', 'error');
         this.loading = false;
+        this.error = true;
       }
     });
   }
@@ -60,11 +79,10 @@ export class VendorProfileComponent implements OnInit {
     if (!this.vendorId) return;
     this.productService.getByVendor(this.vendorId).subscribe({
       next: (data) => {
-        this.products = data;
+        this.products = data || [];
       },
       error: (err) => {
-        console.error('Failed to load vendor products', err);
-        this.toastService.show('Failed to load vendor products.', 'error');
+        console.error('Error loading vendor products:', err);
       }
     });
   }

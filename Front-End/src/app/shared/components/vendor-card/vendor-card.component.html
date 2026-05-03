@@ -2,7 +2,7 @@
     <div class="vc-photo">
         <div class="vc-photo-inner" [style.background]="getGradient(vendor.id)">{{vendor.name.charAt(0)}}</div>
         <div class="vc-top-row">
-            <span class="vc-cat-badge">{{vendor.categoryName || 'Vendor'}}</span>
+            <span class="vc-cat-badge">{{vendor.vendorTypeName || 'Vendor'}}</span>
             <div class="flex gap-[7px]">
                 <button class="compare-btn" [class.active]="compareService.isInCompare(vendor.id)"
                     (click)="onToggleCompare($event)">️</button>

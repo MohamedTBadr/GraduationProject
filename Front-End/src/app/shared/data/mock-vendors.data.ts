@@ -13,7 +13,7 @@ const DEFAULT_PACKAGES = [
 
 export const MOCK_VENDORS: Vendor[] = [
     {
-        id: 1, name: 'White Rose Decor', category: 'Decoration', location: 'New Cairo', rating: 4.9, reviews: 124, startPrice: 5000, emoji: '',
+        id: 1, name: 'White Rose Decor', vendorTypeName: 'Decoration', location: 'New Cairo', rating: 4.9, reviews: 124, startPrice: 5000, emoji: '',
         events: ['Wedding', 'Engagement'],
         services: DEFAULT_SERVICES,
         packages: DEFAULT_PACKAGES,
@@ -22,7 +22,7 @@ export const MOCK_VENDORS: Vendor[] = [
         amenities: ['Floral Design', 'Custom Table Settings', 'Stage Setup', 'Lighting Control']
     },
     {
-        id: 2, name: 'Royal Hall Cairo', category: 'Venue', location: 'Heliopolis', rating: 4.8, reviews: 89, startPrice: 20000, emoji: '️',
+        id: 2, name: 'Royal Hall Cairo', vendorTypeName: 'Venue', location: 'Heliopolis', rating: 4.8, reviews: 89, startPrice: 20000, emoji: '️',
         events: ['Wedding', 'Corporate', 'Graduation'],
         services: DEFAULT_SERVICES,
         packages: DEFAULT_PACKAGES,
@@ -30,7 +30,7 @@ export const MOCK_VENDORS: Vendor[] = [
         status: 'active', joined: 'Feb 2024', bookings: 32, revenue: '640,000'
     },
     {
-        id: 3, name: 'Studio Lens', category: 'Photography', location: 'Giza', rating: 4.9, reviews: 310, startPrice: 3000, emoji: '',
+        id: 3, name: 'Studio Lens', vendorTypeName: 'Photography', location: 'Giza', rating: 4.9, reviews: 310, startPrice: 3000, emoji: '',
         events: ['Wedding', 'Engagement', 'Birthday'],
         services: DEFAULT_SERVICES,
         packages: DEFAULT_PACKAGES,
@@ -38,37 +38,37 @@ export const MOCK_VENDORS: Vendor[] = [
         status: 'active', joined: 'Mar 2024', bookings: 88, revenue: '264,000'
     },
     {
-        id: 4, name: 'Elite Catering', category: 'Catering', location: 'Cairo', rating: 4.7, reviews: 92, startPrice: 8000, emoji: '️',
+        id: 4, name: 'Elite Catering', vendorTypeName: 'Catering', location: 'Cairo', rating: 4.7, reviews: 92, startPrice: 8000, emoji: '️',
         events: ['Wedding', 'Birthday', 'Corporate'],
         services: DEFAULT_SERVICES,
         packages: DEFAULT_PACKAGES,
         status: 'pending', applied: 'Mar 2', docs: 'Under Review'
     },
     {
-        id: 5, name: 'DJ Mido Events', category: 'Entertainment', location: 'Alexandria', rating: 4.6, reviews: 205, startPrice: 4000, emoji: '',
+        id: 5, name: 'DJ Mido Events', vendorTypeName: 'Entertainment', location: 'Alexandria', rating: 4.6, reviews: 205, startPrice: 4000, emoji: '',
         events: ['Wedding', 'Birthday', 'Corporate'],
         services: DEFAULT_SERVICES,
         packages: DEFAULT_PACKAGES,
         status: 'active'
     },
     {
-        id: 6, name: 'Sweet Dreams Cakes', category: 'Catering', location: 'New Cairo', rating: 4.9, reviews: 45, startPrice: 1500, emoji: '',
+        id: 6, name: 'Sweet Dreams Cakes', vendorTypeName: 'Catering', location: 'New Cairo', rating: 4.9, reviews: 45, startPrice: 1500, emoji: '',
         status: 'active'
     },
     {
-        id: 7, name: 'Nile City Venue', category: 'Venue', location: 'Cairo', rating: 4.9, reviews: 412, startPrice: 35000, emoji: '',
+        id: 7, name: 'Nile City Venue', vendorTypeName: 'Venue', location: 'Cairo', rating: 4.9, reviews: 412, startPrice: 35000, emoji: '',
         status: 'active'
     },
     {
-        id: 8, name: 'Elite Events', category: 'Decoration', location: 'New Cairo', rating: 4.8, reviews: 156, startPrice: 12000, emoji: '✨',
+        id: 8, name: 'Elite Events', vendorTypeName: 'Decoration', location: 'New Cairo', rating: 4.8, reviews: 156, startPrice: 12000, emoji: '✨',
         status: 'active'
     },
     {
-        id: 9, name: 'Lumiere Studios', category: 'Photography', location: 'Maadi', rating: 4.7, reviews: 67, startPrice: 4500, emoji: '✨',
+        id: 9, name: 'Lumiere Studios', vendorTypeName: 'Photography', location: 'Maadi', rating: 4.7, reviews: 67, startPrice: 4500, emoji: '✨',
         status: 'active'
     },
     {
-        id: 10, name: 'The Golden Plate', category: 'Catering', location: 'Giza', rating: 4.9, reviews: 189, startPrice: 15000, emoji: '️',
+        id: 10, name: 'The Golden Plate', vendorTypeName: 'Catering', location: 'Giza', rating: 4.9, reviews: 189, startPrice: 15000, emoji: '️',
         status: 'active'
     }
 ];

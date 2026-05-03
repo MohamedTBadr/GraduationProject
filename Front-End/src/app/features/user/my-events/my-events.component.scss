@@ -44,6 +44,45 @@
     color: #a16207;
 }
 
+.badge-rejected {
+    background: rgba(185, 28, 28, .1);
+    color: #b91c1c;
+}
+
+.event-services-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.event-service-tab {
+    padding: 8px 14px;
+    border-radius: 50px;
+    border: 1px solid var(--lgray);
+    background: var(--white);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gray);
+    cursor: pointer;
+    transition: background .2s, border-color .2s, color .2s;
+
+    &.active {
+        background: var(--navy);
+        border-color: var(--navy);
+        color: var(--white);
+    }
+}
+
+.empty-services-hint {
+    font-size: 0.9rem;
+    color: var(--gray);
+    margin: 8px 0 0;
+    padding: 12px;
+    background: var(--cream2);
+    border-radius: var(--r2);
+}
+
 .btn-text {
     background: none;
     border: none;

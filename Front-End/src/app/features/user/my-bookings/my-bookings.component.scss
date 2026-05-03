@@ -211,3 +211,7 @@
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+
+.bk-status-chip.paid, .bk-status-chip.Completed, .bk-status-chip.Done { background: rgba(34,197,94,0.15); color: #10b981; }
+.bk-status-chip.pending, .bk-status-chip.Pending { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.bk-status-chip.failed, .bk-status-chip.Cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; }

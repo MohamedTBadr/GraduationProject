@@ -4,6 +4,7 @@
             <div class="ad-page-title">Vendor Management</div>
             <div class="ad-page-sub">Review, approve, suspend, and manage all registered vendors.</div>
         </div>
+        <button class="ad-btn ad-btn-gold" routerLink="/admin/vendors/create">⚡ Add Vendor</button>
     </div>
     <div class="ad-tab-bar">
         <button [class.active]="activeTab === 'all'" (click)="setTab('all')" class="ad-tab">All ({{ vendors.length }})</button>
@@ -16,7 +17,7 @@
     <div class="ad-search-row">
         <div class="ad-search-wrap">
             <span class="ad-search-icon">🔍</span>
-            <input type="text" placeholder="Search vendors (Name, Category, Location)…" [(ngModel)]="searchQuery" (input)="onSearchChange()"/>
+            <input type="text" placeholder="Search vendors (Name, Type, Location)…" [(ngModel)]="searchQuery" (input)="onSearchChange()"/>
         </div>
     </div>
     
@@ -25,17 +26,17 @@
     <div *ngIf="!loading" class="ad-tab-pane active" id="v-all">
         <div class="ad-tbl-wrap">
             <table class="ad-tbl">
-                <thead><tr><th>Vendor</th><th>Category</th><th>Location</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Vendor</th><th>Type</th><th>Location</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
                     <tr *ngFor="let v of paginatedVendors">
                         <td><div class="flex items-center gap-[9px]">
-                            <!-- <span class="text-[1.2rem]">🏛️</span> -->
+                            <div class="w-[35px] h-[35px] rounded-[8px] bg-[rgba(255,255,255,.05)] flex items-center justify-center text-[1.1rem]">🏛️</div>
                             <div>
-                                <div>{{ v.name }}</div>
+                                <a [routerLink]="['/admin/vendors', v.id]" class="text-[var(--gold)] font-medium hover:underline cursor-pointer">{{ v.name }}</a>
                                 <div class="text-[.7rem] text-[rgba(255,255,255,.35)]">Joined {{ v.createdAt | date:'MMM yyyy' }}</div>
                             </div>
                         </div></td>
-                        <td>{{ v.categoryName || 'General' }}</td>
+                        <td>{{ v.vendorTypeName || 'General' }}</td>
                         <td>{{ v.location || 'Not Specified' }}</td>
                         <td><span class="text-[var(--gold)]">★</span> {{ v.rating || 0 }}</td>
                         <td>

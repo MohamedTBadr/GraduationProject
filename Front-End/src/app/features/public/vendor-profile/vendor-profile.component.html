@@ -1,109 +1,156 @@
-<div class="page active" id="page-vendor-profile" *ngIf="vendor">
-    <!-- Header -->
-    <div class="vp-header-dark">
-        <div class="container vp-header-content">
-            <h1 class="vp-title">{{vendor.name}}</h1>
-            <div class="vp-meta">
-                <span class="stars"></span>
-                <span class="rating">{{vendor.rating || 'New'}}</span>
-                <span class="location" *ngIf="vendor.location">📍 {{vendor.location}}</span>
-                <button class="btn-text save-btn" (click)="toggleFav()">
-                    {{isFavorite() ? ' Saved' : ' Save'}}
-                </button>
-            </div>
-            <div class="carousel-dots">
-                <span class="dot active"></span>
-            </div>
-        </div>
+<div class="page-vendor-profile">
+    <!-- Loading State -->
+    <div class="container loading-screen" *ngIf="loading">
+        <div class="loader"></div>
+        <p class="text-muted">Curating vendor details for you...</p>
     </div>
 
-    <!-- Navigation -->
-    <div class="vp-nav">
-        <div class="container">
-            <div class="tabs">
-                <div class="tab" [class.active]="activeTab === 'services'" (click)="activeTab = 'services'" id="vp-services">Services
-                </div>
-                <div class="tab" [class.active]="activeTab === 'packages'" (click)="activeTab = 'packages'">Packages
-                </div>
-                <div class="tab" [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">Reviews</div>
-                <div class="tab" [class.active]="activeTab === 'contact'" (click)="activeTab = 'contact'">Contact Vendor
-                </div>
-                <div class="tab" [class.active]="activeTab === 'about'" (click)="activeTab = 'about'">About</div>
-            </div>
-        </div>
+    <!-- Error State -->
+    <div class="container error-screen" *ngIf="!loading && error">
+        <h2 class="text-3xl font-bold mb-4">Something went wrong</h2>
+        <p class="text-muted mb-8">We couldn't load this vendor's profile. It might be temporarily unavailable.</p>
+        <button class="btn-gold max-w-[200px]" (click)="loadVendorProfile()">Try Again</button>
     </div>
 
     <!-- Main Content -->
-    <div class="container vp-main-grid">
-        <!-- Left Column -->
-        <div class="vp-content-left">
-            <div *ngIf="activeTab === 'services' || activeTab === 'packages'" class="vp-section">
-                <div class="services-grid">
-                    <div class="service-card" *ngFor="let product of products" (click)="openServiceModal(product)">
-                        <div class="card-header">
-                            <span class="icon">🛠️</span>
-                            <span class="view-details">View details →</span>
+    <ng-container *ngIf="!loading && !error && vendor">
+        <!-- Header -->
+        <header class="vp-header-dark">
+            <div class="container vp-header-content">
+                <div class="flex justify-between items-end gap-6 flex-wrap">
+                    <div class="flex-1">
+                        <h1 class="vp-title">{{vendor.name}}</h1>
+                        <div class="vp-meta">
+                            <div class="badge-item rating-badge">
+                                <span>⭐</span> {{vendor.rating || 'New'}}
+                            </div>
+                            <div class="badge-item" *ngIf="vendor.location">
+                                <span>📍</span> {{vendor.location}}
+                            </div>
+                            <div class="badge-item">
+                                <span>🏷️</span> {{vendor.vendorTypeName || 'Vendor'}}
+                            </div>
                         </div>
-                        <h3 class="card-title">{{product.name}}</h3>
-                        <div class="card-price text-gold">{{product.price | currency:'EGP'}}</div>
-                        <p class="card-desc">{{product.description}}</p>
                     </div>
-                    <div class="p-[40px] text-center text-[#94a3b8]" *ngIf="products.length === 0">
-                        No services available at this time.
+                    <button class="save-btn" [class.active]="isFavorite()" (click)="toggleFav()">
+                        {{isFavorite() ? '★ Saved' : '☆ Save to Favorites'}}
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="vp-nav">
+            <div class="container">
+                <div class="tabs">
+                    <div class="tab" [class.active]="activeTab === 'services'" (click)="activeTab = 'services'">Services</div>
+                    <div class="tab" [class.active]="activeTab === 'packages'" (click)="activeTab = 'packages'">Packages</div>
+                    <div class="tab" [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">Reviews</div>
+                    <div class="tab" [class.active]="activeTab === 'about'" (click)="activeTab = 'about'">Story</div>
+                    <div class="tab" [class.active]="activeTab === 'contact'" (click)="activeTab = 'contact'">Inquiry</div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container vp-main-grid">
+            <!-- Left Column Content -->
+            <div class="vp-content-left">
+                
+                <!-- Services Tab -->
+                <section *ngIf="activeTab === 'services'" class="animate-fade-in">
+                    <div class="services-grid" *ngIf="products.length > 0">
+                        <div class="service-card" *ngFor="let product of products" (click)="openServiceModal(product)">
+                            <div class="card-header">
+                                <span class="text-2xl">✨</span>
+                                <span class="text-xs uppercase tracking-widest text-gold">Details →</span>
+                            </div>
+                            <h3 class="card-title">{{product.name}}</h3>
+                            <div class="card-price text-gold">{{product.price | currency:'EGP'}}</div>
+                            <p class="card-desc">{{product.description | slice:0:120}}{{product.description && product.description.length > 120 ? '...' : ''}}</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div *ngIf="activeTab === 'about'" class="vp-section">
-                <h2 class="section-title">About the Vendor</h2>
-                <p class="section-text" *ngIf="vendor.about">{{vendor.about}}</p>
-                <p class="section-text" *ngIf="!vendor.about">This vendor has not provided an about description yet.</p>
-            </div>
-
-            <div *ngIf="activeTab === 'contact'" class="vp-section">
-                <h2 class="section-title">Contact {{vendor.name}}</h2>
-                <p class="section-text">Send a message to discuss your event details.</p>
-                <div class="mt-[20px]">
-                    <div class="mb-[10px]" *ngIf="vendor.email"><strong>Email:</strong> {{vendor.email}}</div>
-                    <div class="mb-[10px]" *ngIf="vendor.phone"><strong>Phone:</strong> {{vendor.phone}}</div>
-                </div>
-            </div>
-
-            <div *ngIf="activeTab === 'reviews'" class="vp-section">
-                <h2 class="section-title">Client Reviews</h2>
-                <div class="reviews-summary">
-                    <div class="rating-big">
-                        <div class="rating-score">{{vendor.rating || '-'}}</div>
-                        <div class="stars"></div>
-                        <div class="rating-count">Reviews coming soon</div>
+                    <div class="py-20 text-center" *ngIf="products.length === 0">
+                        <p class="text-muted text-lg italic">No services listed at the moment.</p>
                     </div>
-                </div>
+                </section>
+
+                <!-- About Tab -->
+                <section *ngIf="activeTab === 'about'" class="animate-fade-in">
+                    <h2 class="text-2xl font-bold mb-6">Our Story</h2>
+                    <p class="text-muted leading-relaxed text-lg" *ngIf="vendor.about">
+                        {{vendor.about}}
+                    </p>
+                    <div class="py-10" *ngIf="!vendor.about">
+                        <p class="text-muted italic">This vendor is letting their work speak for itself (no description provided).</p>
+                    </div>
+                </section>
+
+                <!-- Contact Tab -->
+                <section *ngIf="activeTab === 'contact'" class="animate-fade-in">
+                    <h2 class="text-2xl font-bold mb-6">Send an Inquiry</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-[var(--glass-bg)] p-8 rounded-3xl border border-[var(--glass-border)]">
+                            <h3 class="text-xl font-semibold mb-4">Direct Contact</h3>
+                            <p class="mb-4" *ngIf="vendor.email"><strong class="text-gold">Email:</strong> {{vendor.email}}</p>
+                            <p class="mb-4" *ngIf="vendor.phone"><strong class="text-gold">Phone:</strong> {{vendor.phone}}</p>
+                        </div>
+                        <div class="bg-[var(--glass-bg)] p-8 rounded-3xl border border-[var(--glass-border)]">
+                            <h3 class="text-xl font-semibold mb-4">Business Hours</h3>
+                            <p class="text-muted">Available for consultations and site visits by appointment.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reviews Tab -->
+                <section *ngIf="activeTab === 'reviews'" class="animate-fade-in">
+                    <div class="flex items-center gap-10 bg-[var(--glass-bg)] p-10 rounded-[32px] border border-[var(--glass-border)]">
+                        <div class="text-center">
+                            <div class="text-6xl font-black text-gold mb-2">{{vendor.rating || '-'}}</div>
+                            <div class="text-xs uppercase tracking-tighter text-muted">Overall Rating</div>
+                        </div>
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-bold mb-2">Verified Reviews</h2>
+                            <p class="text-muted italic">Reviews are verified bookings only. Currently collecting feedback.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Packages Tab -->
+                <section *ngIf="activeTab === 'packages'" class="animate-fade-in">
+                    <div class="py-20 text-center">
+                        <p class="text-muted text-lg italic">Custom event packages are available upon request.</p>
+                    </div>
+                </section>
             </div>
-        </div>
 
-        <!-- Right Column (Sticky Widget) -->
-        <div class="vp-sidebar">
-            <div class="booking-widget">
-                <div class="widget-price">Booking Request</div>
-                <div class="widget-sub">Contact vendor for exact quote based on your requirements</div>
+            <!-- Right Column Sidebar -->
+            <aside class="vp-sidebar">
+                <div class="booking-widget">
+                    <div class="widget-price">Booking Request</div>
+                    <p class="widget-sub">Secure your date and get a personalized quote today.</p>
 
-                <div class="form-group">
-                    <label>Event Date</label>
-                    <input type="date" />
+                    <div class="form-group">
+                        <label>Target Date</label>
+                        <input type="date" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Guest Count</label>
+                        <select>
+                            <option>10 - 50</option>
+                            <option>50 - 200</option>
+                            <option>200 - 500</option>
+                            <option>500+</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-gold" (click)="scrollToServices()">✨ View Available Services</button>
+                    <button class="btn-whatsapp flex items-center justify-center gap-2" *ngIf="vendor.phone">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.012l-.582 2.128 2.18-.571c.703.351 1.446.543 2.226.543h.001c3.181 0 5.766-2.586 5.767-5.766 0-3.18-2.585-5.766-5.766-5.766zm3.377 8.203c-.145-.072-.858-.423-.99-.471-.132-.048-.229-.072-.325.072-.096.144-.372.471-.456.567-.084.096-.168.108-.313.036-.145-.072-.611-.225-1.164-.718-.431-.384-.722-.859-.806-1.003-.084-.144-.009-.223.063-.294.065-.064.145-.168.217-.252.072-.084.096-.144.145-.24.048-.096.024-.18-.012-.252-.036-.072-.325-.783-.445-1.071-.117-.282-.236-.243-.325-.248-.084-.004-.18-.005-.276-.005s-.252.036-.384.18c-.132.144-.504.492-.504 1.2s.516 1.392.588 1.488c.072.096 1.015 1.55 2.459 2.173.344.149.611.238.819.304.346.11.66.095.909.058.277-.041.858-.351.978-.69s.12-.63.084-.69c-.036-.06-.132-.096-.277-.168z"/></svg>
+                        WhatsApp Us
+                    </button>
                 </div>
-
-                <div class="form-group">
-                    <label>Event Type</label>
-                    <select>
-                        <option>Wedding</option>
-                        <option>Corporate</option>
-                        <option>Birthday</option>
-                    </select>
-                </div>
-
-                <button class="btn btn-gold btn-block" (click)="scrollToServices()">✨ Select a Service</button>
-                <button class="btn btn-green btn-block" *ngIf="vendor.phone">💬 WhatsApp {{vendor.phone}}</button>
-            </div>
-        </div>
-    </div>
+            </aside>
+        </main>
+    </ng-container>
 </div>

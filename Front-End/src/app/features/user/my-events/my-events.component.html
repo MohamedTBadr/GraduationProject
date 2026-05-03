@@ -81,7 +81,10 @@
             <!-- Paymob Checkout -->
             <div class="mt-[24px] pt-[16px] text-center [border-top:1px_dashed_var(--border)]">
                 <p class="text-[0.85rem] text-[var(--gray)] mb-[12px]">A 25% deposit is required to confirm bookings.</p>
-                <button class="btn btn-gold w-100 flex justify-center items-center gap-[8px]" [disabled]="isPaying || spent === 0" (click)="payDeposit()">
+                <p *ngIf="spent > 0 && !hasApprovedServices" class="text-[0.85rem] text-[#b45309] mb-[12px] text-left">
+                    At least one service must be vendor-approved before you can pay a deposit.
+                </p>
+                <button class="btn btn-gold w-100 flex justify-center items-center gap-[8px]" [disabled]="isPaying || spent === 0 || !hasApprovedServices" (click)="payDeposit()">
                     <span *ngIf="!isPaying">💳 Pay Deposit ({{(spent * 0.25) | number}} EGP)</span>
                     <span *ngIf="isPaying">Loading Gateway...</span>
                 </button>
@@ -89,25 +92,38 @@
         </div>
     </div>
 
-    <!-- Booked Vendors -->
+    <!-- Event services: all items vs approved-only -->
     <div class="dash-card">
         <div class="dash-card-header">
-            <h3>Booked Vendors</h3>
+            <h3>Event services</h3>
             <button class="btn btn-outline btn-sm" routerLink="/explore">+ Add Vendor</button>
         </div>
-        <div class="vendors-list">
-            <div *ngFor="let v of activeEvent.vendors" class="vendor-row">
-                <div class="vendor-emoji">{{v.emoji}}</div>
+        <div class="event-services-tabs" role="tablist">
+            <button type="button" role="tab" class="event-service-tab"
+                [class.active]="eventServicesTab === 'all'"
+                [attr.aria-selected]="eventServicesTab === 'all'"
+                (click)="eventServicesTab = 'all'">All services</button>
+            <button type="button" role="tab" class="event-service-tab"
+                [class.active]="eventServicesTab === 'approved'"
+                [attr.aria-selected]="eventServicesTab === 'approved'"
+                (click)="eventServicesTab = 'approved'">Approved only</button>
+        </div>
+        <div class="vendors-list" *ngIf="displayedEventItems.length > 0">
+            <div *ngFor="let item of displayedEventItems" class="vendor-row">
+                <div class="vendor-emoji">🏪</div>
                 <div class="vendor-info">
-                    <div class="vi-name">{{v.name}}</div>
-                    <div class="vi-type">{{v.type}} {{v.price > 0 ? '· ' + (v.price | number) + ' EGP' : ''}}</div>
+                    <div class="vi-name">{{ item.vendorName }}</div>
+                    <div class="vi-type">{{ item.serviceName }} {{ item.price > 0 ? '· ' + (item.price | number) + ' EGP' : '' }}</div>
                 </div>
-                <span class="badge" [class.badge-confirmed]="v.status === 'confirmed'"
-                    [class.badge-pending]="v.status === 'pending'">
-                    {{v.status}}
-                </span>
+                <span class="badge" [ngClass]="itemBadgeClass(item)">{{ item.itemStatus }}</span>
             </div>
         </div>
+        <p *ngIf="displayedEventItems.length === 0 && eventServicesTab === 'approved'" class="empty-services-hint">
+            No approved services yet. Vendors must approve items before they appear here.
+        </p>
+        <p *ngIf="displayedEventItems.length === 0 && eventServicesTab === 'all' && (!activeEvent.eventItems || activeEvent.eventItems.length === 0)" class="empty-services-hint">
+            No services added yet. Use Explore to add vendors to this event.
+        </p>
     </div>
 </div>
 

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { VendorService } from '../../../core/services/vendor.service';
 import { ApiVendor } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-vendors',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './vendors.component.html',
   styleUrls: ['./vendors.component.scss']
 })
@@ -60,7 +61,7 @@ export class VendorsComponent implements OnInit {
       const q = this.searchQuery.toLowerCase();
       result = result.filter(v => 
         (v.name || '').toLowerCase().includes(q) || 
-        (v.categoryName || '').toLowerCase().includes(q) ||
+        (v.vendorTypeName || '').toLowerCase().includes(q) ||
         (v.location || '').toLowerCase().includes(q)
       );
     }
