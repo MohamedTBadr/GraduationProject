@@ -16,7 +16,7 @@ namespace Web.Api.Controllers
     [Route("api/[controller]")]
     public class ServiceController(IServiceService ServiceService) : BaseController
     {
-        private Guid? UserId =>GetUserIdFromToken();
+        private Guid? UserId =>TryGetUserId();
         private bool IsAdmin => IsAdmin();
         private bool IsVendor => IsVendor();
 
