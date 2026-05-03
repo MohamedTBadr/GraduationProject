@@ -14,14 +14,15 @@ namespace Application.Services
 
         public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request, CancellationToken ct = default)
         {
-
+            // ✅ Guard against null ShippingAddress from caller
+            if (request.ShippingAddress is null)
+                throw new ArgumentException("Shipping address is required.", nameof(request));
 
             var order = new Order
             {
                 Id = Guid.NewGuid(),
                 UserId = request.UserId,
                 EventId = request.EventId,
-
                 Amount = await orderRepo.GetOrderAmountAsync(request.EventId, ct),
                 Currency = request.Currency ?? "EGP",
                 Appointment = request.Appointment,
@@ -39,22 +40,30 @@ namespace Application.Services
             if (order.UserId != Guid.Empty)
             {
                 await notificationService.SendAsync(
-                    order.UserId    ,
+                    order.UserId,
                     nameof(NotificationType.ORDER_PLACED),
                     "Order Placed",
                     $"Your order #{order.Id} has been placed successfully. Total: {order.Amount} {order.Currency}.");
 
-                // ✅ Group items by vendor and bulk notify all vendors at once
-                var vendorNotifications = order.Event!.EventItems
-                    .GroupBy(i => i.VendorId)
-                    .Select(g => (
-                        UserId: g.Key,
-                        Type: nameof(NotificationType.ORDER_PLACED),
-                        Title: "Order Details",
-                        Message: $"Order #{order.Id} details: {string.Join(", ", g.Select(i => $"{i.Quantity}x {i.ServiceName}"))}."))
-                    .ToList();
-                await notificationService.SendBulkAsync(vendorNotifications);
+                // ✅ Load the Event with its items — don't rely on the navigation property
+                // being auto-populated after AddAsync
+                var eventWithItems = await orderRepo.GetEventWithItemsAsync(request.EventId, ct);
+
+                if (eventWithItems?.EventItems is { Count: > 0 })
+                {
+                    var vendorNotifications = eventWithItems.EventItems
+                        .GroupBy(i => i.VendorId)
+                        .Select(g => (
+                            UserId: g.Key,
+                            Type: nameof(NotificationType.ORDER_PLACED),
+                            Title: "Order Details",
+                            Message: $"Order #{order.Id} details: {string.Join(", ", g.Select(i => $"{i.Quantity}x {i.ServiceName}"))}."))
+                        .ToList();
+
+                    await notificationService.SendBulkAsync(vendorNotifications);
+                }
             }
+
             return MapToResponse(order);
         }
 

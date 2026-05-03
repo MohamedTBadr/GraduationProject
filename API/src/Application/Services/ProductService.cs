@@ -205,5 +205,16 @@ namespace Application.Services
             var mapped = _mapper.Map<List<ServiceDTO>>(Services);
             return Result<List<ServiceDTO>>.Success(mapped);                  // ← async returns Task automatically
         }
+
+        public async Task<Result<PaginatedResponse<ServiceDTO>>> GetByEventTypeIdAsync(Guid eventTypeId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken)
+        {
+
+            Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
+
+            var result = await _ServiceRepository.GetByEventTypeIdAsync(eventTypeId, request, visibilityFilter, cancellationToken);
+            var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
+            return Result<PaginatedResponse<ServiceDTO>>.Success(
+                new PaginatedResponse<ServiceDTO>(mapped, result.TotalCount, result.PageNumber, result.PageSize));
+        }
+        }
     }
-}

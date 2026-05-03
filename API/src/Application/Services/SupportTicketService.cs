@@ -1,29 +1,44 @@
 
 using Application;
 using Application.DTOs.Support;
-// ─── SupportTicketService.cs ──────────────────────────────────────────────────
 
-using Application;
-using Application.DTOs.Support;
 using Application.Interfaces;
 using Domain.Contracts;
 using Domain.Entities;
 using Domain.Enums;
 
-// ─── SupportTicketService.cs ──────────────────────────────────────────────────
-
-using Application;
-using Application.DTOs.Support;
-using Application.Interfaces;
-using Domain.Contracts;
-using Domain.Entities;
-using Domain.Enums;
 
 namespace Application.Services
 {
     public class SupportTicketService(ISupportTicketRepository repository) : ISupportTicketService
     {
         // ── Stats ────────────────────────────────────────────────────────────────
+
+        public async Task<Result<TicketDetailsDTO>> CreateAsync(CreateTicketRequestDTO request, string fromUser, CancellationToken ct)
+        {
+            var ticketCount = await repository.CountByStatusAsync(TicketStatus.Open, ct); 
+            // In a real system, you might want to generate a better unique standard ticket number
+            var ticketNumber = $"TK-{DateTime.UtcNow.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}";
+
+            var ticket = new SupportTicket
+            {
+                Id = Guid.NewGuid(),
+                TicketNumber = ticketNumber,
+                Title = request.Title,
+                Description = request.Description,
+                From = fromUser,
+                Type = ParseEnum<TicketType>(request.Type) ?? TicketType.Client,
+                Priority = ParseEnum<TicketPriority>(request.Priority) ?? TicketPriority.Low,
+                Status = TicketStatus.Open,
+                OpenedAt = DateTime.UtcNow,
+                BookingRef = request.BookingRef
+            };
+
+            await repository.AddAsync(ticket, ct);
+            await repository.SaveChangesAsync(ct);
+
+            return Result<TicketDetailsDTO>.Success(ToDetailsDTO(ticket));
+        }
 
         public async Task<Result<TicketStatsDTO>> GetStatsAsync(CancellationToken ct)
         {

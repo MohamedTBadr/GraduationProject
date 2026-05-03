@@ -14,5 +14,7 @@ namespace Domain.Contracts
         Task UpdateAsync(Order order, CancellationToken ct = default);
         Task DeleteAsync(Guid id, CancellationToken ct = default);
         Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
+        Task<Event?> GetEventWithItemsAsync(Guid eventId, CancellationToken ct);
+
     }
 }

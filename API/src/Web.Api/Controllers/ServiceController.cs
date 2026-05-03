@@ -38,14 +38,14 @@ namespace Web.Api.Controllers
             return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
-        // GET api/Services/by-category/{categoryId}
-        //[HttpGet("by-category/{categoryId:guid}")]
-        //[HybridCache(1800, "services")]
-        //public async Task<IActionResult> GetByCategoryAsync(Guid categoryId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
-        //{
-        //    var result = await ServiceService.GetByCategoryIdAsync(categoryId, request, IsAdmin, IsVendor, UserId, cancellationToken);
-        //    return Ok(result);
-        //}
+        // GET api/Services/by-event-type/{eventTypeId}
+        [HttpGet("by-event-type/{eventTypeId:guid}")]
+        [HybridCache(1800, "services")]
+        public async Task<IActionResult> GetByEventTypeAsync(Guid eventTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
+        {
+            var result = await ServiceService.GetByEventTypeIdAsync(eventTypeId, request, IsAdmin, IsVendor, UserId, cancellationToken);
+            return Ok(result);
+        }
 
         // GET api/Services/by-vendor/{vendorId}
         [HttpGet("by-vendor/{vendorId:guid}")]

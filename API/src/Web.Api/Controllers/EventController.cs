@@ -106,6 +106,11 @@ namespace Web.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CreateEventItemsByAI(Guid eventId, CancellationToken cancellationToken)
         {
+            return await AIRecommendation(eventId, cancellationToken);
+        }
+
+        private async Task<IActionResult> AIRecommendation(Guid eventId, CancellationToken cancellationToken)
+        {
             try
             {
                 var eventObject = await _eventService.GetByIdAsync(eventId, cancellationToken);
@@ -230,6 +235,11 @@ Only return JSON. No markdown. No explanation.
                     return Forbid();
 
                 var updated = await _eventService.UpdateAsync(id, dto, cancellationToken);
+                if(dto.EventStatus == "Completed")
+                {
+                    // Send email notification logic here, e.g.:
+                    // await _emailService.SendEventCompletedNotificationAsync(existing.UserId, updated.Id);
+                }
                 return Ok(updated);
             }
             catch (KeyNotFoundException ex)

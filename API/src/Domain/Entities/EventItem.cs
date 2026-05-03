@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 
-public class EventItem
+public class 
+    EventItem
 {
     public Guid Id { get; set; }
     public Event Event { get; set; }

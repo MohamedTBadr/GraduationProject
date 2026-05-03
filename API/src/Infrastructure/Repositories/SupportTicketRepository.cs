@@ -70,6 +70,9 @@ namespace Infrastructure.Repositories
 
         // ── Commands ─────────────────────────────────────────────────────────────
 
+        public async Task AddAsync(SupportTicket ticket, CancellationToken ct)
+            => await context.SupportTickets.AddAsync(ticket, ct);
+
         public async Task AddReplyAsync(TicketReply reply, CancellationToken ct)
             => await context.TicketReplies.AddAsync(reply, ct);
 

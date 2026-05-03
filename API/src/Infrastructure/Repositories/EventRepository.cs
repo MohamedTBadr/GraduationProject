@@ -111,7 +111,7 @@ namespace Infrastructure.Repositories
 
                 return await _context.Events
                     .Include(e => e.EventType)
-                    .Include(e => e.Location)
+                    //.Include(e => e.Location)?
                     .Include(e => e.EventItems)
                     .FirstAsync(e => e.Id == entity.Id, token);
             }, cancellationToken);

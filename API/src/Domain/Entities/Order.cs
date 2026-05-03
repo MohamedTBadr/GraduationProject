@@ -9,6 +9,7 @@ namespace Domain.Entities
     public class Order: BaseEntity
     {
     public Guid Id { get; set; }
+    public ApplicationUser User { get; set; }
     public Guid UserId { get; set; }
 
 

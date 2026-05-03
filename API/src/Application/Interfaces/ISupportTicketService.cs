@@ -6,6 +6,7 @@ namespace Application.Interfaces
 {
     public interface ISupportTicketService
     {
+        Task<Result<TicketDetailsDTO>>            CreateAsync(CreateTicketRequestDTO request, string fromUser, CancellationToken ct);
         Task<Result<TicketStatsDTO>>              GetStatsAsync(CancellationToken ct);
         Task<Result<PagedResult<TicketSummaryDTO>>> GetAllAsync(TicketQueryDTO query, CancellationToken ct);
         Task<Result<TicketDetailsDTO>>            GetByIdAsync(string ticketNumber, CancellationToken ct);

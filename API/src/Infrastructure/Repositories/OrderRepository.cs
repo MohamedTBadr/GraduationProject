@@ -1,5 +1,6 @@
 ﻿using Domain.Contracts;
 using Domain.Entities;
+using Google.GenAI.Types;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Polly;
@@ -11,6 +12,11 @@ namespace Infrastructure.Repositories
     {
         private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
 
+
+        public async Task<Event?> GetEventWithItemsAsync(Guid eventId, CancellationToken ct)
+    => await db.Events
+        .Include(e => e.EventItems)
+        .FirstOrDefaultAsync(e => e.Id == eventId, ct);
         public async Task<Order?> GetByIdAsync(Guid id, CancellationToken ct = default)
             => await _pipeline.ExecuteAsync(async token => await db.Orders.FindAsync([id], token), ct);
 

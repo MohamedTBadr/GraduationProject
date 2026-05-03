@@ -40,6 +40,7 @@ namespace Application
             Services.AddScoped<IEventTypeService, EventTypeService>();
             Services.AddScoped<IVendorTypeService, VendorTypeService>();
             Services.AddScoped<ICompanyInquiryService, CompanyInquiryService>();
+            Services.AddScoped<ISupportTicketService, SupportTicketService>();
             //Services.AddScoped<IUs
             //Services.AddScoped<Ime>
             Services.AddAutoMapper(cfg =>

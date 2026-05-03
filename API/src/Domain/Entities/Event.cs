@@ -32,6 +32,8 @@ namespace Domain.Entities
         public string? CancellationReason { get; set; }
         public string? AdditionalNotes { get; set; }
         public DateTime? CancelledAt { get; set; }
+
+        public Order Order { get; set; }
     }
 
 }

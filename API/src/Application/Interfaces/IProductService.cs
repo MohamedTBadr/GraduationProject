@@ -13,7 +13,8 @@ namespace Application.Interfaces
         Task<Result<PaginatedResponse<ServiceDTO>>> GetAllAsync(PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
         //Task<Result<PaginatedResponse<ServiceDTO>>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
         Task<Result<PaginatedResponse<ServiceDTO>>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
-        Task<Result<PaginatedResponse<ServiceDTO>>> GetByServiceTypeIdAsync(Guid ServiceTypeId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
+        Task<Result<PaginatedResponse<ServiceDTO>>> GetByServiceTypeIdAsync(Guid serviceTypeId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
+        Task<Result<PaginatedResponse<ServiceDTO>>> GetByEventTypeIdAsync(Guid eventTypeId, PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken cancellationToken);
 
         Task<Result<List<ServiceDTO>>> AIFilterAsync(AIRequest AIRequest, CancellationToken cancellationToken);
         Task<Result<ServiceDTO>> GetByIdAsync(Guid id, CancellationToken cancellationToken);

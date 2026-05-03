@@ -12,12 +12,12 @@ namespace Application.DTOs.Orders
         DateTime? Appointment
     );
 
-    public record OrderItemRequest(
-        Guid ServiceId,
-        string ServiceName,
-        int Quantity,
-        decimal UnitPrice
-    );
+    //public record OrderItemRequest(
+    //    Guid ServiceId,
+    //    string ServiceName,
+    //    int Quantity,
+    //    decimal UnitPrice
+    //);
 
     public record AddressDto(
         string Street,

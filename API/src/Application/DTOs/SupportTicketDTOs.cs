@@ -89,6 +89,22 @@ namespace Application.DTOs.Support
         IList<string> NotifiedVia
     );
 
+    // ─── CREATE REQUEST ────────────────────────────────────────────────────────
+
+    public class CreateTicketRequestDTO
+    {
+        [Required]
+        public string Title { get; set; } = default!;
+        [Required]
+        public string Description { get; set; } = default!;
+        [Required]
+        public string Type { get; set; } = default!;
+        [Required]
+        public string Priority { get; set; } = default!;
+
+        public string? BookingRef { get; set; }
+    }
+
     // ─── ASSIGN REQUEST / RESPONSE ───────────────────────────────────────────────
 
     public class TicketAssignRequestDTO

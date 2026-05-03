@@ -33,6 +33,8 @@ namespace Infrastructure
             Services.AddScoped<ICacheRepository, CacheRepository>();
             Services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
             Services.AddScoped<IUserRepository, UserRepository>();
+            Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
+
             Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             Services.AddScoped<ICompanyInquiryRepository, CompanyInquiryRepository>();
             // 1. Configure DbContext with SQL Server

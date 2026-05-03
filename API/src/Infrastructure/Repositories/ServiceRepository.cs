@@ -62,31 +62,31 @@ namespace Infrastructure.Repositories
             }, ct);
         }
 
-        //public async Task<PaginatedResponse<Service>> GetByCategoryIdAsync(Guid categoryId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken)
-        //{
-        //    return await _pipeline.ExecuteAsync(async token =>
-        //    {
-        //        var query = _context.Services
-                   
-        //            .Include(p => p.Vendor)
-        //            .Include(p => p.ServiceType)
-        //            .Include(p => p.ServiceImages)
-        //            .Where(p => p.CategoryId == categoryId)
-        //            .Where(visibilityFilter)
-        //            .AsNoTracking();
+        public async Task<PaginatedResponse<Service>> GetByEventTypeIdAsync(Guid eventTypeId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken)
+        {
+            return await _pipeline.ExecuteAsync(async token =>
+            {
+                var query = _context.Services
 
-        //        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-        //            query = query.Where(p => p.Name.Contains(request.SearchTerm) || p.Description.Contains(request.SearchTerm));
+                    .Include(p => p.Vendor)
+                    .Include(p => p.ServiceType)
+                    .Include(p => p.ServiceImages)
+                    .Where(p => p.EventTypes.Any(x => x.Id == eventTypeId))
+                    .Where(visibilityFilter)
+                    .AsNoTracking();
 
-        //        var totalCount = await query.CountAsync(token);
-        //        var items = await query
-        //            .Skip((request.PageIndex - 1) * request.PageSize)
-        //            .Take(request.PageSize)
-        //            .ToListAsync(token);
+                if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+                    query = query.Where(p => p.Name.Contains(request.SearchTerm) || p.Description.Contains(request.SearchTerm));
 
-        //        return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
-        //    }, cancellationToken);
-        //}
+                var totalCount = await query.CountAsync(token);
+                var items = await query
+                    .Skip((request.PageIndex - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToListAsync(token);
+
+                return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+            }, cancellationToken);
+        }
 
         public async Task<PaginatedResponse<Service>> GetByVendorIdAsync(Guid vendorId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken)
         {

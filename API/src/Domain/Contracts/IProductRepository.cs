@@ -20,6 +20,8 @@ namespace Domain.Contracts
         //    PaginatedRequest request,
         //    Expression<Func<Service, bool>> visibilityFilter,
         //    CancellationToken cancellationToken);
+        Task<PaginatedResponse<Service>> GetByEventTypeIdAsync(Guid eventTypeId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken);
+
 
         Task<List<ServiceImage>> GetServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken);
 

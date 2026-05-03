@@ -25,6 +25,7 @@ namespace Domain.Contracts
         Task<SupportAgent?> GetAgentByCodeAsync(string agentCode, CancellationToken ct);
 
         // ── Commands ─────────────────────────────────────────────────────────────
+        Task AddAsync(SupportTicket ticket, CancellationToken ct);
         Task AddReplyAsync(TicketReply reply, CancellationToken ct);
         Task UpdateAsync(SupportTicket ticket, CancellationToken ct);
         Task SaveChangesAsync(CancellationToken ct);

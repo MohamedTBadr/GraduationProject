@@ -13,14 +13,16 @@ namespace Application.Services
     {
         private readonly IEventRepository _eventRepo;
         private readonly IEventTypeRepository _eventTypeRepo;
+        private readonly NotificationService _notificationService;
 
         private static readonly HashSet<string> ValidStatuses =
             new() { "Planned", "Approved", "Completed", "Cancelled" };
 
-        public EventService(IEventRepository eventRepo, IEventTypeRepository eventTypeRepo)
+        public EventService(IEventRepository eventRepo, IEventTypeRepository eventTypeRepo, NotificationService notificationService)
         {
             _eventRepo = eventRepo;
             _eventTypeRepo = eventTypeRepo;
+            _notificationService = notificationService;
         }
 
         // ── Read ──────────────────────────────────────────────────
@@ -100,6 +102,11 @@ namespace Application.Services
 
             entity.EventStatus = status;
             await _eventRepo.UpdateAsync(entity, cancellationToken);
+            await _notificationService.SendAsync(
+                entity.Order.UserId,
+                nameof(NotificationType.EVENT_STATUS_UPDATED),  // type
+                "Event Status Updated",                          // title
+                $"Your event status has been updated to '{status}'.");
             return true;
         }
 
