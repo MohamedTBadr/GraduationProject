@@ -1,4 +1,6 @@
-﻿using Application.DTOs.PaymobDTOs;
+﻿using Application.DTOs.Orders;
+using Application.DTOs.PaymobDTOs;
+using Application.Interfaces.Services;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -7,7 +9,9 @@ namespace Infrastructure.Payments; // Moved to Infrastructure (Clean Arch)
 
 public class PaymobService(
     IHttpClientFactory httpClientFactory,
-    IOptions<PaymobOptions> options) 
+    IOptions<PaymobOptions> options,
+    IOrderService orderService
+    ) 
 {
     private readonly PaymobOptions _options = options.Value;
 
@@ -61,7 +65,7 @@ public class PaymobService(
             throw new HttpRequestException($"Paymob Order Error: {error}");
         }
 
-        var data = await response.Content.ReadFromJsonAsync<OrderResponse>(ct);
+        var data = await response.Content.ReadFromJsonAsync<Application.DTOs.PaymobDTOs.OrderResponse>(ct);
         return data!.id.ToString();
     }
 
@@ -91,13 +95,16 @@ public class PaymobService(
         return data!.token;
     }
 
-    public async Task HandleWebhookAsync(PaymobWebhookPayload payload)
+    public async Task HandleWebhookAsync(PaymobWebhookPayload payload, CancellationToken ct)
     {
         // In Clean Arch, this would likely trigger a Domain Event or MediatR Command
         if (payload.Success)
         {
 
             // Logic to fulfill order
+            var status = new UpdateOrderStatusRequest("Paid");
+                await orderService.UpdatePaymentStatusAsync(payload.Order, status, ct);
+
         }
         await Task.CompletedTask;
     }

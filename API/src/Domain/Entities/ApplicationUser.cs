@@ -23,5 +23,8 @@ namespace Domain.Entities
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public ICollection<Order> Orders { get; set; }
+        public ICollection<Event> Events { get; set; }
+
     }
 }

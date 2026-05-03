@@ -26,10 +26,10 @@ namespace Web.Api.Controllers
         }
 
         [HttpPost("paymob/webhook")]
-        public async Task<IActionResult> Webhook([FromQuery] PaymobWebhookPayload payload)
+        public async Task<IActionResult> Webhook([FromQuery] PaymobWebhookPayload payload, CancellationToken cancellationToken)
         {
             var raw = Request.Body; // optionally read as string to log raw payload
-            await _paymob.HandleWebhookAsync(payload);
+            await _paymob.HandleWebhookAsync(payload, cancellationToken);
             return Ok();
         }
     }

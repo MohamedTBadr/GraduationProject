@@ -5,7 +5,7 @@ namespace Application.DTOs.PaymobDTOs
     public class PaymobWebhookPayload
     {
         [JsonPropertyName("id")]
-        public long Id { get; set; }
+        public Guid Id { get; set; }
 
         [JsonPropertyName("success")]
         public bool Success { get; set; }
@@ -14,7 +14,7 @@ namespace Application.DTOs.PaymobDTOs
         public int Amount_Cents { get; set; }
 
         [JsonPropertyName("order")]
-        public long Order { get; set; }
+        public Guid Order { get; set; }
 
         [JsonPropertyName("hmac")]
         public string Hmac { get; set; }

@@ -2,6 +2,6 @@
 {
     public class PaymobOrder
     {
-        public long Id { get; set; } // Paymob order ID
+        public Guid Id { get; set; } // Paymob order ID
     }
 }

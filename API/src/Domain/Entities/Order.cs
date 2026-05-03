@@ -24,6 +24,8 @@ namespace Domain.Entities
      public Event Event { get; set; }
         public Guid EventId { get; set; }
         public Address ShippingAddress { get; set; } = new Address();
+
+
     }
 
 }

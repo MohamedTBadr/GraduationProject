@@ -83,6 +83,20 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SupportAgents",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AgentCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SupportAgents", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "VendorTypes",
                 columns: table => new
                 {
@@ -280,15 +294,19 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     EventTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EventDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Location_Street = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Location_City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Location_State = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Location_PostalCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TotalBudget = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     GuestCount = table.Column<int>(type: "int", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EventStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CancellationReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AdditionalNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    EventStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CancellationReason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    AdditionalNotes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -301,13 +319,50 @@ namespace Infrastructure.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Events_EventTypes_EventTypeId",
                         column: x => x.EventTypeId,
                         principalTable: "EventTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SupportTickets",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TicketNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    From = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    BookingRef = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OpenedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ResolvedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ResolutionNote = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ResolvedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AssignedAgentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    AssignmentNote = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsEscalated = table.Column<bool>(type: "bit", nullable: false),
+                    EscalatedTo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EscalatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EscalationReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FinanceNotified = table.Column<bool>(type: "bit", nullable: false),
+                    EscalatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SupportTickets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SupportTickets_SupportAgents_AssignedAgentId",
+                        column: x => x.AssignedAgentId,
+                        principalTable: "SupportAgents",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -315,11 +370,15 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BusinessName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    YearsInBusiness = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PortfolioLink = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsVerified = table.Column<bool>(type: "bit", nullable: false),
+                    BusinessName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    YearsInBusiness = table.Column<decimal>(type: "decimal(5,1)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    PortfolioLink = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Address_Street = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Address_City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Address_State = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Address_PostalCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsVerified = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     VendorTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -338,7 +397,7 @@ namespace Infrastructure.Migrations
                         column: x => x.VendorTypeId,
                         principalTable: "VendorTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -411,13 +470,17 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PaymentIntentId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PaymentStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    PaymentIntentId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    PaymentStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Appointment = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShippingAddress_Street = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ShippingAddress_City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ShippingAddress_State = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ShippingAddress_PostalCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -425,10 +488,41 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Orders_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Orders_Events_EventId",
                         column: x => x.EventId,
                         principalTable: "Events",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TicketReplies",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReplyNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RepliedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SentViaEmail = table.Column<bool>(type: "bit", nullable: false),
+                    SentViaSms = table.Column<bool>(type: "bit", nullable: false),
+                    RepliedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TicketReplies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TicketReplies_SupportTickets_TicketId",
+                        column: x => x.TicketId,
+                        principalTable: "SupportTickets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -486,30 +580,6 @@ namespace Infrastructure.Migrations
                         column: x => x.VendorId,
                         principalTable: "Vendors",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OrderItems",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VendorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ServiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ServiceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PackageItems = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OrderItems", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_OrderItems_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -683,14 +753,15 @@ namespace Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItems_OrderId",
-                table: "OrderItems",
-                column: "OrderId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Orders_EventId",
                 table: "Orders",
-                column: "EventId");
+                column: "EventId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_UserId",
+                table: "Orders",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Packages_VendorId",
@@ -733,6 +804,16 @@ namespace Infrastructure.Migrations
                 column: "VendorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SupportTickets_AssignedAgentId",
+                table: "SupportTickets",
+                column: "AssignedAgentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketReplies_TicketId",
+                table: "TicketReplies",
+                column: "TicketId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Vendors_VendorTypeId",
                 table: "Vendors",
                 column: "VendorTypeId");
@@ -769,7 +850,7 @@ namespace Infrastructure.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "OrderItems");
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Packages");
@@ -784,19 +865,25 @@ namespace Infrastructure.Migrations
                 name: "ServiceRatings");
 
             migrationBuilder.DropTable(
+                name: "TicketReplies");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Conversations");
 
             migrationBuilder.DropTable(
-                name: "Orders");
+                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "Services");
 
             migrationBuilder.DropTable(
-                name: "Events");
+                name: "SupportTickets");
+
+            migrationBuilder.DropTable(
+                name: "EventTypes");
 
             migrationBuilder.DropTable(
                 name: "ServiceTypes");
@@ -805,7 +892,7 @@ namespace Infrastructure.Migrations
                 name: "Vendors");
 
             migrationBuilder.DropTable(
-                name: "EventTypes");
+                name: "SupportAgents");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

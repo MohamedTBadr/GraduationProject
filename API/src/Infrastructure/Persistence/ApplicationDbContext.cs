@@ -16,22 +16,98 @@ namespace Infrastructure.Persistence
         {
             base.OnModelCreating(builder); // 🔥 REQUIRED
 
-            builder.Entity<Vendor>()
-                .HasKey(v => v.UserId);
+            builder.Entity<Vendor>(entity =>
+            {
+                entity.HasKey(v => v.UserId);
 
-            builder.Entity<Vendor>()
-                .HasOne(v => v.User)
-                .WithOne()
-                .HasForeignKey<Vendor>(v => v.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(v => v.BusinessName)
+                      .HasMaxLength(255)
+                      .IsRequired();
 
+                entity.Property(v => v.Description)
+                      .HasMaxLength(1000);
 
-           builder.Entity<OrderInsight>()
+                entity.Property(v => v.PortfolioLink)
+                      .HasMaxLength(500);
+
+                entity.Property(v => v.YearsInBusiness)
+                      .HasColumnType("decimal(5,1)");
+
+                entity.Property(v => v.IsVerified)
+                      .HasDefaultValue(false);
+
+                entity.OwnsOne(v => v.Address, address =>
+                {
+                    address.Property(a => a.Street).HasMaxLength(255);
+                    address.Property(a => a.City).HasMaxLength(100);
+                    address.Property(a => a.State).HasMaxLength(100);
+                });
+
+                entity.HasOne(v => v.User)
+                      .WithOne()
+                      .HasForeignKey<Vendor>(v => v.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(v => v.VendorType)
+                      .WithMany(vt => vt.Vendors)
+                      .HasForeignKey(v => v.VendorTypeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(v => v.Services)
+                      .WithOne(s => s.Vendor)
+                      .HasForeignKey(s => s.VendorId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(v => v.Packages)
+                      .WithOne(p => p.Vendor)
+                      .HasForeignKey(p => p.VendorId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+            
+            });
+
+            builder.Entity<OrderInsight>()
         .ToView("View_OrderInsights")
         .HasNoKey();
-     
 
+            builder.Entity<Order>(entity =>
+            {
+                entity.HasKey(o => o.Id);
 
+                entity.Property(o => o.Amount)
+                      .HasColumnType("decimal(18,2)")
+                      .IsRequired();
+
+                entity.Property(o => o.Currency)
+                      .HasMaxLength(10)
+                      .IsRequired();
+
+                entity.Property(o => o.PaymentIntentId)
+                      .HasMaxLength(255);
+
+                entity.Property(o => o.PaymentStatus)
+                      .HasMaxLength(50)
+                      .IsRequired();
+
+                entity.OwnsOne(o => o.ShippingAddress, address =>
+                {
+                    address.Property(a => a.Street).HasMaxLength(255);
+                    address.Property(a => a.City).HasMaxLength(100);
+                    address.Property(a => a.State).HasMaxLength(100);
+                });
+
+                entity.HasOne(o => o.User)
+                      .WithMany(u => u.Orders)
+                      .HasForeignKey(o => o.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(o => o.Event)
+                      .WithOne(e => e.Order)
+                      .HasForeignKey<Order>(o => o.EventId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(o => o.EventId); // remove .IsUnique() since multiple orders per event is valid
+            });
             builder.Entity<ServiceRating>()
                 .HasOne(vr => vr.User)
                 .WithMany()
@@ -62,8 +138,62 @@ namespace Infrastructure.Persistence
                 .HasForeignKey(m => m.SenderId)
                 .OnDelete(DeleteBehavior.NoAction); // ✅ No cascade
 
-      
-              builder.Entity<EventItem>()
+
+            builder.Entity<Event>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Title)
+                      .HasMaxLength(255)
+                      .IsRequired();
+
+                entity.Property(e => e.EventStatus)
+                      .HasMaxLength(50)
+                      .IsRequired();
+
+                entity.Property(e => e.TotalBudget)
+                      .HasColumnType("decimal(18,2)")
+                      .IsRequired();
+
+                entity.Property(e => e.GuestCount)
+                      .IsRequired();
+
+                entity.Property(e => e.Notes)
+                      .HasMaxLength(1000);
+
+                entity.Property(e => e.AdditionalNotes)
+                      .HasMaxLength(1000);
+
+                entity.Property(e => e.CancellationReason)
+                      .HasMaxLength(500);
+
+                entity.OwnsOne(e => e.Location, address =>
+                {
+                    address.Property(a => a.Street).HasMaxLength(255);
+                    address.Property(a => a.City).HasMaxLength(100);
+                    address.Property(a => a.State).HasMaxLength(100);
+                });
+
+                entity.HasOne(e => e.User)
+                      .WithMany(u => u.Events)
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.EventType)
+                      .WithMany(et => et.Events)
+                      .HasForeignKey(e => e.EventTypeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(e => e.EventItems)
+                      .WithOne(ei => ei.Event)
+                      .HasForeignKey(ei => ei.EventId)
+                      .OnDelete(DeleteBehavior.Cascade); // deleting event removes its items
+
+                entity.HasOne(e => e.Order)
+                      .WithOne(o => o.Event)
+                      .HasForeignKey<Order>(o => o.EventId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            }); builder.Entity<EventItem>()
                 .HasOne(i => i.Event)
                 .WithMany(e => e.EventItems)
                 .HasForeignKey(i => i.EventId)
