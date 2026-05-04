@@ -53,7 +53,7 @@
         </div>
         <div class="flex-1">
           <label>Service Type *</label>
-          <app-service-type-dropdown formControlName="serviceTypeId"></app-service-type-dropdown>
+          <app-service-type-dropdown formControlName="serviceTypeId" [vendorTypeId]="serviceForm.get('vendorTypeId')?.value"></app-service-type-dropdown>
           <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('serviceTypeId')?.invalid && serviceForm.get('serviceTypeId')?.touched">Service Type is required</div>
         </div>
       </div>

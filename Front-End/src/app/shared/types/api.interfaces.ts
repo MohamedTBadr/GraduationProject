@@ -16,13 +16,11 @@ export interface RegisterRequest {
 }
 
 export interface AuthApiResponse {
-  value: {
-    name: string;
-    email: string;
-    accessToken: string;
-    refreshToken: string;
-    role: string;
-  }
+  name: string;
+  email: string;
+  accessToken: string;
+  refreshToken: string;
+  role: string;
 }
 
 export interface RefreshTokenRequest {

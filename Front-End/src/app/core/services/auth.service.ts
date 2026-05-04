@@ -58,8 +58,8 @@ export class AuthService {
       .pipe(
         tap((res) => {
           // Persist the raw RefreshToken before mapping
-          localStorage.setItem('eventora_refresh_token', res.value.refreshToken);
-          localStorage.setItem('eventora_token', res.value.accessToken);
+          localStorage.setItem('eventora_refresh_token', res.refreshToken);
+          localStorage.setItem('eventora_token', res.accessToken);
         }),
         map((res) => this.mapToAuthResponse(res)),
         tap((response) => {
@@ -93,8 +93,8 @@ export class AuthService {
       .pipe(
         tap((res) => {
           // Persist the raw RefreshToken before mapping
-          localStorage.setItem('eventora_refresh_token', res.value.refreshToken);
-          localStorage.setItem('eventora_token', res.value.accessToken);
+          localStorage.setItem('eventora_refresh_token', res.refreshToken);
+          localStorage.setItem('eventora_token', res.accessToken);
         }),
         map((res) => this.mapToAuthResponse(res)),
         tap((response) => {
@@ -154,8 +154,8 @@ export class AuthService {
       .post<AuthApiResponse>(`${this.apiUrl}/Authentication/RefreshToken`, body)
       .pipe(
         tap((res) => {
-          localStorage.setItem('eventora_token', res.value.accessToken);
-          localStorage.setItem('eventora_refresh_token', res.value.refreshToken);
+          localStorage.setItem('eventora_token', res.accessToken);
+          localStorage.setItem('eventora_refresh_token', res.refreshToken);
         })
       );
   }
@@ -258,7 +258,7 @@ export class AuthService {
 
   private mapToAuthResponse(res: AuthApiResponse): AuthResponse {
     // Derive claims from JWT
-    const claims = this.extractClaimsFromToken(res.value.accessToken);
+    const claims = this.extractClaimsFromToken(res.accessToken);
     const tokenRole = claims.role;
     
     // Attempt to extract user id from standard JWT claims (sub, nameidentifier, or id)
@@ -266,13 +266,13 @@ export class AuthService {
 
     const user: UserSession = {
       id: userId,
-      name: res.value.name,
-      email: res.value.email,
+      name: res.name,
+      email: res.email,
       role: tokenRole as UserRole
     };
     
     // Use the role from the token if the api response role is empty or missing
-    let apiRole = res.value.role;
+    let apiRole = res.role;
     if (!apiRole) {
       apiRole = tokenRole;
     } else {
@@ -280,7 +280,7 @@ export class AuthService {
     }
     if (apiRole === 'Customer') apiRole = 'User';
 
-    return { value: { user, token: res.value.accessToken, refreshToken: res.value.refreshToken, role: apiRole as UserRole } };
+    return { value: { user, token: res.accessToken, refreshToken: res.refreshToken, role: apiRole as UserRole } };
   }
 
   private setSession(response: AuthResponse) {
