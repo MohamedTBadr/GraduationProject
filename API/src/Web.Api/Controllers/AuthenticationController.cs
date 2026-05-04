@@ -19,7 +19,6 @@ namespace Web.Api.Controllers
     {
         [HttpPost("Login")]
         [AllowAnonymous]
-        //[Idecmpotent]
         public async Task<IActionResult> Login(LoginRequest loginRequest, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -42,7 +41,6 @@ namespace Web.Api.Controllers
         }
 
         [HttpPost("Register")]
-        [Idempotent]
         public async Task<IActionResult> Register(SignUpRequest request,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)

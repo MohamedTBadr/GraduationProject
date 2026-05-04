@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +16,7 @@ namespace Application.DTOs.VendorDTOs
         public string OwnerName { get; set; }
         public List<ServiceTypesDTOs.ServiceTypeDTO> ServiceTypes { get; set; } = new List<ServiceTypesDTOs.ServiceTypeDTO>();
 
+        public IFormFile ProfilePicture { get; set; }
         public decimal YearsInBusiness { get; set; }
 
         public string Description { get; set; }

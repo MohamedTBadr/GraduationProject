@@ -29,7 +29,8 @@ namespace Application.DTOs.ServiceDTOs
         public List<IFormFile> ServiceImages { get; set; }
         public List<Guid> EventTypeIds { get; set; }
         //public Guid CategoryId { get; set; }
-        //CategoryId
+        public decimal Price { get; set; }
+      
         public Guid? VendorId { get; set; }
         public Guid ServiceTypeId { get; set; }
         public decimal SetupDuration { get; set; } // in hours
@@ -44,6 +45,7 @@ namespace Application.DTOs.ServiceDTOs
         //public Guid CategoryId { get; set; }
         public Guid? VendorId { get; set; }
         public List<IFormFile>? Images { get; set; } // ✅ nullable — if null, keep old
+        public decimal Price { get; set; }
 
         public Guid ServiceTypeId { get; set; }
         public List<Guid> EventTypeIds { get; set; }

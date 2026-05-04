@@ -12,7 +12,7 @@ using System.Linq.Expressions;
 
 namespace Application.Services
 {
-    public class VendorService(IUserRepository userRepository, UserManager<ApplicationUser> userManager,IVendorRepository vendorRepository, IEventItemRepository _eventItemRepository, IMapper mapper) : IVendorService
+    public class VendorService(IUserRepository userRepository, UserManager<ApplicationUser> userManager,IVendorRepository vendorRepository, IEventItemRepository _eventItemRepository, IMapper mapper, IFileService _fileService) : IVendorService
     {
         public async Task<Result<PaginatedResponse<VendorListDTO>>> GetVendorsAsync(
       PaginatedRequest paginatedRequest,
@@ -75,17 +75,6 @@ namespace Application.Services
         }
         public async Task<Result<VendorDetailsDTO>> AddVendorAsync(CreateVendorRequest request, CancellationToken cancellationToken)
         {
-      
-    
-            //// 2. Create the Vendor linked to that user
-            //var ServiceTypeIds = request.ServiceTypes.Select(s => s.Id).ToList();
-
-            //// Fetch real ServiceType entities from DB
-            //var existingServiceTypes = await vendorRepository.GetServiceTypesByIdsAsync(ServiceTypeIds, cancellationToken);
-
-            //if (existingServiceTypes.Count != ServiceTypeIds.Count)
-            //    return Result<VendorDetailsDTO>.Failure(new Error(ErrorType.NotFound, 404, "One or more ServiceTypes not found"));
-
 
             // 1. Create the ApplicationUser via Identity
             var user = new ApplicationUser
@@ -107,7 +96,7 @@ namespace Application.Services
             }
 
 
-
+            var profilePicture = await _fileService.Upload("Vendors", request.ProfilePicture, cancellationToken);
             var vendor = new Vendor
             {
                 UserId = user.Id,
@@ -118,7 +107,8 @@ namespace Application.Services
                 PortfolioLink = request.PortfolioLink,
                 Address = request.Address,
                 IsVerified = false,
-                VendorTypeId = request.VendorTypeId
+                VendorTypeId = request.VendorTypeId,
+                ProfilePicture = profilePicture
                 
             };
 

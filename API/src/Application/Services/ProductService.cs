@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace Application.Services
 {
-    public class ServiceService(IServiceRepository _ServiceRepository,IFileService _fileService, IMapper _mapper): IServiceService
+    public class ServiceService(IServiceRepository _ServiceRepository,IFileService _fileService, IMapper _mapper,IVendorRepository _vendorRepository) : IServiceService
     {
 
 
@@ -33,10 +33,6 @@ namespace Application.Services
             if (isAdmin && request.IncludeHidden)
             {
                 visibilityFilter = s => true; // See everything
-            }
-            else if (isVendor && userId.HasValue)
-            {
-                visibilityFilter = s => !s.IsHidden || s.VendorId == userId.Value;
             }
 
             return visibilityFilter;
@@ -97,6 +93,9 @@ namespace Application.Services
         }
         public async Task<Result<ServiceDTO>> CreateAsync(CreateServiceRequest dto, CancellationToken cancellationToken)
         {
+            var vendor = await _vendorRepository.GetVendorByIdAsync(dto.VendorId.Value,cancellationToken);
+            if (vendor is null)
+                throw new Exception("Vendor not found");
             var service = _mapper.Map<Service>(dto);
 
             if (dto.ServiceImages != null && dto.ServiceImages.Count > 0)

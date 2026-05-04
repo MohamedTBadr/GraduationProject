@@ -20,6 +20,7 @@ namespace Domain.Entities
         public ApplicationUser User { get; set; }
        
         public string BusinessName { get; set; }
+        public string ProfilePicture { get; set; }
         //public string OwnerName { get; set; }
         public ICollection<Service> Services { get; set; }
         public ICollection<Package> Packages { get; set; } 
