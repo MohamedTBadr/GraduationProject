@@ -13,7 +13,9 @@ import { ServiceType } from '../../types/api.interfaces';
 })
 export class ServiceTypeDropdownComponent implements ControlValueAccessor, OnInit {
   @Input() placeholder: string = 'Select a service type';
+  @Input() vendorTypeId?: string | null = null;
   
+  allServiceTypes: ServiceType[] = [];
   serviceTypes: ServiceType[] = [];
   loading: boolean = false;
   error: string | null = null;
@@ -43,7 +45,8 @@ export class ServiceTypeDropdownComponent implements ControlValueAccessor, OnIni
     
     this.serviceTypesService.getAll().subscribe({
       next: (data) => {
-        this.serviceTypes = data;
+        this.allServiceTypes = data;
+        this.applyFilter();
         this.loading = false;
       },
       error: (err) => {
@@ -52,6 +55,36 @@ export class ServiceTypeDropdownComponent implements ControlValueAccessor, OnIni
         console.error('Error fetching service types:', err);
       }
     });
+  }
+
+  ngOnChanges(changes: any): void {
+    if (changes['vendorTypeId']) {
+      this.applyFilter();
+    }
+  }
+
+  applyFilter() {
+    if (!this.vendorTypeId) {
+      this.serviceTypes = this.allServiceTypes;
+      return;
+    }
+
+    try {
+      const storedMap = localStorage.getItem('serviceTypeToVendorTypeMap');
+      if (storedMap) {
+        const map = JSON.parse(storedMap);
+        this.serviceTypes = this.allServiceTypes.filter(st => map[st.id] === this.vendorTypeId);
+        
+        // Fallback to all if mapping is too strict and returns empty (unless explicitly empty)
+        if (this.serviceTypes.length === 0) {
+           this.serviceTypes = this.allServiceTypes;
+        }
+      } else {
+        this.serviceTypes = this.allServiceTypes;
+      }
+    } catch (e) {
+      this.serviceTypes = this.allServiceTypes;
+    }
   }
 
   writeValue(obj: any): void {

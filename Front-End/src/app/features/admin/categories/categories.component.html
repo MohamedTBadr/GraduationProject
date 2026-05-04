@@ -1,20 +1,76 @@
 <div class="ad-section active block">
   <div class="ad-page-hd">
     <div>
-      <div class="ad-page-title">Manage Categories</div>
-      <div class="ad-page-sub">Manage vendor types, service types, and event types across the platform.</div>
+      <div class="ad-page-title">Taxonomy Management</div>
+      <div class="ad-page-sub">3-dimensional classification engine — VendorType -> ServiceType (dependent) -> EventTypes served. Controls all explore pages and the recommendation engine.</div>
     </div>
-    <button class="ad-btn ad-btn-gold" (click)="openAddModal()">+ Add New</button>
+    <button class="ad-btn ad-btn-gold" (click)="openAddModal()">+ Add Category</button>
   </div>
 
   <div class="ad-g3">
-    <!-- Card 1: Vendor Types -->
-    <div class="ad-card p-[0] overflow-hidden h-[fit-content]">
-      <div class="py-[18px] px-[20px] [border-bottom:1px_solid_rgba(255,255,255,0.06)] font-bold text-[1rem] text-[var(--white)]">
-        Vendor Types
+    <!-- DIMENSION 1 -->
+    <div class="ad-card" style="border-color: rgba(255, 215, 0, 0.3)">
+      <div class="text-[0.7rem] uppercase tracking-wider text-[var(--gold)] mb-[10px] font-bold">DIMENSION 1</div>
+      <div class="flex items-center gap-[10px] mb-[10px]">
+        <span class="text-[1.2rem]">🗂️</span>
+        <h3 class="text-[1.1rem] font-bold m-0 text-white">Vendor Type</h3>
+      </div>
+      <p class="text-[0.85rem] text-[gray] m-0">"What are you?" — Each vendor has exactly ONE. Drives the Vendor Explore page browsing.</p>
+    </div>
+
+    <!-- DIMENSION 2 -->
+    <div class="ad-card" style="border-color: rgba(65, 105, 225, 0.3)">
+      <div class="text-[0.7rem] uppercase tracking-wider text-[#6495ED] mb-[10px] font-bold">DIMENSION 2</div>
+      <div class="flex items-center gap-[10px] mb-[10px]">
+        <span class="text-[1.2rem]">🛠️</span>
+        <h3 class="text-[1.1rem] font-bold m-0 text-white">Service Type</h3>
+      </div>
+      <p class="text-[0.85rem] text-[gray] m-0">"What do you offer?" — Multiple per vendor, but <span class="italic text-[#6495ED]">must belong to their Vendor Type</span>. Drives Service Explore page.</p>
+    </div>
+
+    <!-- DIMENSION 3 -->
+    <div class="ad-card" style="border-color: rgba(46, 139, 87, 0.3)">
+      <div class="text-[0.7rem] uppercase tracking-wider text-[#2E8B57] mb-[10px] font-bold">DIMENSION 3</div>
+      <div class="flex items-center gap-[10px] mb-[10px]">
+        <span class="text-[1.2rem]">🎉</span>
+        <h3 class="text-[1.1rem] font-bold m-0 text-white">Event Types Served</h3>
+      </div>
+      <p class="text-[0.85rem] text-[gray] m-0">"Who do you serve?" — Multiple per vendor. Powers the recommendation engine matching score.</p>
+    </div>
+  </div>
+
+  <div class="flex gap-[30px] mt-[30px] border-b border-[rgba(255,255,255,0.1)]">
+    <button class="pb-[10px] text-[0.95rem] font-bold transition-all bg-transparent border-0 cursor-pointer"
+            [class.text-[var(--gold)]]="activeTab === 'vendorTypes'" [class.border-b-2]="activeTab === 'vendorTypes'" [class.border-[var(--gold)]]="activeTab === 'vendorTypes'" [class.text-[gray]]="activeTab !== 'vendorTypes'"
+            (click)="activeTab = 'vendorTypes'">
+      🗂️ Vendor Types
+    </button>
+    <button class="pb-[10px] text-[0.95rem] font-bold transition-all bg-transparent border-0 cursor-pointer"
+            [class.text-[var(--gold)]]="activeTab === 'serviceTypes'" [class.border-b-2]="activeTab === 'serviceTypes'" [class.border-[var(--gold)]]="activeTab === 'serviceTypes'" [class.text-[gray]]="activeTab !== 'serviceTypes'"
+            (click)="activeTab = 'serviceTypes'">
+      🛠️ Service Types
+    </button>
+    <button class="pb-[10px] text-[0.95rem] font-bold transition-all bg-transparent border-0 cursor-pointer"
+            [class.text-[var(--gold)]]="activeTab === 'eventTypes'" [class.border-b-2]="activeTab === 'eventTypes'" [class.border-[var(--gold)]]="activeTab === 'eventTypes'" [class.text-[gray]]="activeTab !== 'eventTypes'"
+            (click)="activeTab = 'eventTypes'">
+      🎉 Event Types
+    </button>
+    <button class="pb-[10px] text-[0.95rem] font-bold transition-all bg-transparent border-0 cursor-pointer"
+            [class.text-[var(--gold)]]="activeTab === 'dependencyMap'" [class.border-b-2]="activeTab === 'dependencyMap'" [class.border-[var(--gold)]]="activeTab === 'dependencyMap'" [class.text-[gray]]="activeTab !== 'dependencyMap'"
+            (click)="activeTab = 'dependencyMap'">
+      🔗 Dependency Map
+    </button>
+  </div>
+
+  <div class="mt-[20px]">
+    
+    <!-- Vendor Types Tab -->
+    <div *ngIf="activeTab === 'vendorTypes'" class="ad-card p-[0] overflow-hidden h-[fit-content]">
+      <div class="py-[18px] px-[20px] [border-bottom:1px_solid_rgba(255,255,255,0.06)] font-bold text-[1rem] text-[var(--white)] flex justify-between items-center">
+        <span>Vendor Types ({{vendorTypes.length}})</span>
+        <button class="ad-btn ad-btn-gold ad-btn-sm" (click)="openAddModal('vendorType')">+ Add Vendor Type</button>
       </div>
       <div class="p-[20px] text-center text-[gray]" *ngIf="loadingVendorTypes">Loading vendor types...</div>
-      
       <div *ngFor="let vt of vendorTypes; let i = index" class="ad-vendor-row justify-between">
         <div class="flex items-center gap-[12px]">
           <div class="text-[1.4rem]">{{ getIconForVendorType(vt.name) }}</div>
@@ -22,7 +78,6 @@
             <div class="ad-vendor-name">{{ vt.name }}</div>
           </div>
         </div>
-        
         <div class="flex items-center gap-[12px]">
           <span class="ad-pill ap-green">active</span>
           <button class="ad-btn ad-btn-ghost ad-btn-sm" (click)="openEditVendorType(vt)">Edit</button>
@@ -31,21 +86,21 @@
       </div>
     </div>
 
-    <!-- Card 2: Service Types -->
-    <div class="ad-card p-[0] overflow-hidden h-[fit-content]">
-      <div class="py-[18px] px-[20px] [border-bottom:1px_solid_rgba(255,255,255,0.06)] font-bold text-[1rem] text-[var(--white)]">
-        Service Types
+    <!-- Service Types Tab -->
+    <div *ngIf="activeTab === 'serviceTypes'" class="ad-card p-[0] overflow-hidden h-[fit-content]">
+      <div class="py-[18px] px-[20px] [border-bottom:1px_solid_rgba(255,255,255,0.06)] font-bold text-[1rem] text-[var(--white)] flex justify-between items-center">
+        <span>Service Types ({{serviceTypes.length}})</span>
+        <button class="ad-btn ad-btn-gold ad-btn-sm" (click)="openAddModal('serviceType')">+ Add Service Type</button>
       </div>
       <div class="p-[20px] text-center text-[gray]" *ngIf="loadingServiceTypes">Loading service types...</div>
-      
       <div *ngFor="let st of serviceTypes; let i = index" class="ad-vendor-row justify-between">
         <div class="flex items-center gap-[12px]">
-          <div class="text-[1.4rem]">{{ getIconForVendorType(st.name) }}</div>
+          <div class="text-[1.4rem]">{{ getIconForServiceType(st.name) }}</div>
           <div>
             <div class="ad-vendor-name">{{ st.name }}</div>
+            <div class="text-[0.8rem] text-[gray]" *ngIf="getVendorTypeNameForService(st.id)">Belongs to: {{ getVendorTypeNameForService(st.id) }}</div>
           </div>
         </div>
-        
         <div class="flex items-center gap-[12px]">
           <span class="ad-pill ap-green">active</span>
           <button class="ad-btn ad-btn-ghost ad-btn-sm" (click)="openEditServiceType(st)">Edit</button>
@@ -54,13 +109,13 @@
       </div>
     </div>
 
-    <!-- Card 3: Event Types -->
-    <div class="ad-card p-[0] overflow-hidden h-[fit-content]">
-      <div class="py-[18px] px-[20px] [border-bottom:1px_solid_rgba(255,255,255,0.06)] font-bold text-[1rem] text-[var(--white)]">
-        Event Types
+    <!-- Event Types Tab -->
+    <div *ngIf="activeTab === 'eventTypes'" class="ad-card p-[0] overflow-hidden h-[fit-content]">
+      <div class="py-[18px] px-[20px] [border-bottom:1px_solid_rgba(255,255,255,0.06)] font-bold text-[1rem] text-[var(--white)] flex justify-between items-center">
+        <span>Event Types ({{eventTypes.length}})</span>
+        <button class="ad-btn ad-btn-gold ad-btn-sm" (click)="openAddModal('eventType')">+ Add Event Type</button>
       </div>
       <div class="p-[20px] text-center text-[gray]" *ngIf="loadingEventTypes">Loading event types...</div>
-      
       <div *ngFor="let ev of eventTypes; let i = index" class="ad-vendor-row justify-between">
         <div class="flex items-center gap-[12px]">
           <div class="text-[1.4rem]">{{ getIconForEventType(ev.name) }}</div>
@@ -68,11 +123,44 @@
             <div class="ad-vendor-name">{{ ev.name }}</div>
           </div>
         </div>
-        
         <div class="flex items-center gap-[12px]">
           <span class="ad-pill ap-green">active</span>
           <button class="ad-btn ad-btn-ghost ad-btn-sm" (click)="openEditEventType(ev)">Edit</button>
           <button class="ad-btn ad-btn-red ad-btn-sm" (click)="deleteEventType(ev.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dependency Map Tab -->
+    <div *ngIf="activeTab === 'dependencyMap'" class="fade-in">
+      <p class="text-[0.9rem] text-[gray] mb-[20px]">
+        Visual overview of which Service Types belong to each Vendor Type. Used to enforce selection constraints during vendor registration and profile editing.
+      </p>
+
+      <div class="flex flex-col gap-[20px]">
+        <div *ngFor="let vt of vendorTypes" class="ad-card border border-[rgba(255,255,255,0.05)] bg-[rgba(20,20,25,0.6)] relative">
+          <div class="flex justify-between items-start mb-[15px]">
+            <div class="flex items-center gap-[15px]">
+              <div class="text-[1.8rem]">{{ getIconForVendorType(vt.name) }}</div>
+              <div>
+                <h4 class="text-[1.2rem] text-white font-bold m-0">{{ vt.name }}</h4>
+                <div class="text-[0.8rem] text-[gray] mt-[3px]">
+                  <span>{{ getMappedServices(vt.id).length }} allowed service types</span>
+                </div>
+              </div>
+            </div>
+            <span class="text-[0.8rem] font-bold text-[#6495ED] bg-[rgba(100,149,237,0.1)] px-[10px] py-[3px] rounded-full">VendorType</span>
+          </div>
+
+          <div class="flex flex-wrap gap-[10px]">
+            <div *ngFor="let st of getMappedServices(vt.id)" class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-full border border-[rgba(255,255,255,0.1)] bg-[rgba(0,0,0,0.2)] text-[0.85rem] text-[var(--white)]">
+              <span>{{ getIconForServiceType(st.name) }}</span>
+              <span>{{ st.name }}</span>
+            </div>
+            <button class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-full border border-[rgba(255,215,0,0.3)] bg-[rgba(255,215,0,0.05)] text-[0.85rem] text-[var(--gold)] cursor-pointer hover:bg-[rgba(255,215,0,0.1)] transition-colors" (click)="openAddModal('serviceType', vt.id)">
+              + Add Service Type
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -85,20 +173,28 @@
     <button class="ad-modal-close" (click)="closeModal()">×</button>
     <div class="ad-modal-title">
       {{ isEditMode ? 'Edit' : 'Add' }} 
-      {{ activeType === 'vendorType' ? 'Vendor Type' : activeType === 'serviceType' ? 'Service Type' : 'Event Type' }}
+      {{ activeModalType === 'vendorType' ? 'Vendor Type' : activeModalType === 'serviceType' ? 'Service Type' : 'Event Type' }}
     </div>
     <div class="ad-modal-sub">Fill in the details below.</div>
 
-    <div class="flex gap-[10px] mb-[20px]" *ngIf="!isEditMode">
-      <button class="ad-btn" [class.ad-btn-gold]="activeType === 'vendorType'" [class.ad-btn-ghost]="activeType !== 'vendorType'" (click)="setType('vendorType')">Vendor Type</button>
-      <button class="ad-btn" [class.ad-btn-gold]="activeType === 'serviceType'" [class.ad-btn-ghost]="activeType !== 'serviceType'" (click)="setType('serviceType')">Service Type</button>
-      <button class="ad-btn" [class.ad-btn-gold]="activeType === 'eventType'" [class.ad-btn-ghost]="activeType !== 'eventType'" (click)="setType('eventType')">Event Type</button>
+    <div class="flex gap-[10px] mb-[20px]" *ngIf="!isEditMode && showTypeSelector">
+      <button class="ad-btn" [class.ad-btn-gold]="activeModalType === 'vendorType'" [class.ad-btn-ghost]="activeModalType !== 'vendorType'" (click)="setModalType('vendorType')">Vendor Type</button>
+      <button class="ad-btn" [class.ad-btn-gold]="activeModalType === 'serviceType'" [class.ad-btn-ghost]="activeModalType !== 'serviceType'" (click)="setModalType('serviceType')">Service Type</button>
+      <button class="ad-btn" [class.ad-btn-gold]="activeModalType === 'eventType'" [class.ad-btn-ghost]="activeModalType !== 'eventType'" (click)="setModalType('eventType')">Event Type</button>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label>Name</label>
         <input type="text" formControlName="name" placeholder="e.g. Photography" />
+      </div>
+
+      <div class="form-group" *ngIf="activeModalType === 'serviceType'">
+        <label>Parent Vendor Type <span class="text-[gray] text-[0.8rem]">(Optional mapping)</span></label>
+        <select formControlName="vendorTypeId" class="w-full bg-[rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.1)] text-white p-[10px] rounded-[6px] outline-none">
+          <option [ngValue]="null">-- Select Vendor Type --</option>
+          <option *ngFor="let vt of vendorTypes" [ngValue]="vt.id">{{ vt.name }}</option>
+        </select>
       </div>
 
       <div class="ad-submit-bar">
@@ -108,4 +204,3 @@
     </form>
   </div>
 </div>
-
