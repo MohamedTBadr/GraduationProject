@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260503211549_IntialCreate")]
+    [Migration("20260504005136_IntialCreate")]
     partial class IntialCreate
     {
         /// <inheritdoc />
@@ -562,7 +562,12 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("VendorTypeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("VendorTypeId");
 
                     b.ToTable("ServiceTypes");
                 });
@@ -1014,7 +1019,8 @@ namespace Infrastructure.Migrations
 
                             b1.Property<string>("PostalCode")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
 
                             b1.Property<string>("State")
                                 .IsRequired()
@@ -1192,6 +1198,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Service");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ServiceType", b =>
+                {
+                    b.HasOne("Domain.Entities.VendorType", "VendorType")
+                        .WithMany("ServiceTypes")
+                        .HasForeignKey("VendorTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("VendorType");
                 });
 
             modelBuilder.Entity("Domain.Entities.SupportTicket", b =>
@@ -1403,6 +1420,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.VendorType", b =>
                 {
+                    b.Navigation("ServiceTypes");
+
                     b.Navigation("Vendors");
                 });
 #pragma warning restore 612, 618

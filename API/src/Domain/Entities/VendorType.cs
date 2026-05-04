@@ -11,5 +11,6 @@ namespace Domain.Entities
         public Guid Id { get; set; }
         public string Name { get; set; }
         public ICollection<Vendor> Vendors { get; set; }
+        public ICollection<ServiceType> ServiceTypes { get; set; }
     }
 }

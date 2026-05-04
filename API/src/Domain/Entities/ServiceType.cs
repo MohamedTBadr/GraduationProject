@@ -13,6 +13,8 @@ namespace Domain.Entities
         public Guid Id { get; set; }
         public string Name { get; set; }
 
+        public VendorType VendorType { get; set; }
+        public Guid VendorTypeId { get; set; }
 
     }
 }

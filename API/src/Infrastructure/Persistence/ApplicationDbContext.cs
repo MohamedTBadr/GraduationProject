@@ -172,6 +172,7 @@ namespace Infrastructure.Persistence
                     address.Property(a => a.Street).HasMaxLength(255);
                     address.Property(a => a.City).HasMaxLength(100);
                     address.Property(a => a.State).HasMaxLength(100);
+                    address.Property(a => a.PostalCode).HasMaxLength(100);
                 });
 
                 entity.HasOne(e => e.User)

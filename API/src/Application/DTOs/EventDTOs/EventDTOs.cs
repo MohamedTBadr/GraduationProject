@@ -12,7 +12,7 @@ namespace Application.DTOs
         public string Title { get; set; } = string.Empty;
         public Guid EventTypeId { get; set; }
         public DateTime EventDate { get; set; }
-        public AddressDto? Location { get; set; }           // ← nullable (optional field)
+        public AddressDto Location { get; set; }       
         public decimal TotalBudget { get; set; }
         public int GuestCount { get; set; }
         public string? Notes { get; set; }                  // ← nullable (optional field)
@@ -35,6 +35,7 @@ namespace Application.DTOs
         public string Street { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string State { get; set; } = string.Empty;
+        public string PostalCode { get; set; } = string.Empty;
     }
 
     // ── Response DTOs ─────────────────────────────────────────────

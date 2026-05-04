@@ -71,18 +71,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ServiceTypes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ServiceTypes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "SupportAgents",
                 columns: table => new
                 {
@@ -300,7 +288,7 @@ namespace Infrastructure.Migrations
                     Location_Street = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Location_City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Location_State = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Location_PostalCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Location_PostalCode = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     TotalBudget = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     GuestCount = table.Column<int>(type: "int", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
@@ -363,6 +351,25 @@ namespace Infrastructure.Migrations
                         column: x => x.AssignedAgentId,
                         principalTable: "SupportAgents",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ServiceTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VendorTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServiceTypes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ServiceTypes_VendorTypes_VendorTypeId",
+                        column: x => x.VendorTypeId,
+                        principalTable: "VendorTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -802,6 +809,11 @@ namespace Infrastructure.Migrations
                 name: "IX_Services_VendorId",
                 table: "Services",
                 column: "VendorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ServiceTypes_VendorTypeId",
+                table: "ServiceTypes",
+                column: "VendorTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SupportTickets_AssignedAgentId",

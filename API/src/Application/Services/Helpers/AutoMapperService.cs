@@ -1,4 +1,6 @@
-﻿using Application.DTOs.CategoryDTOs;
+﻿using Application.DTOs;
+using Application.DTOs.CategoryDTOs;
+using Application.DTOs.Orders;
 using Application.DTOs.PackageDTOs;
 using Application.DTOs.ServiceDTOs;
 using Application.DTOs.ServiceTypesDTOs;
@@ -63,6 +65,7 @@ namespace Application.Services.Helpers
             // Remove .ReverseMap() — mapping back from DTO to Entity doesn't make sense here
             #endregion
 
+            CreateMap<DTOs.AddressDto, Address>();  // or whatever your owned type is called
 
 
             CreateMap<Package, PackageDTO>();  // ✅ this was missing

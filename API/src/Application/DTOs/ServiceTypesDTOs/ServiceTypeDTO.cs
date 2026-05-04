@@ -9,17 +9,22 @@ namespace Application.DTOs.ServiceTypesDTOs
 
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public Guid VendorTypeId { get; set; }
+
     }
 
 
     public record CreateServiceTypeRequest
     {
         public string Name { get; set; }
+        public Guid VendorTypeId { get; set; }
     }
 
 
     public record UpdateServiceTypeRequest
     {
         public string Name { get; set; }
+        public Guid VendorTypeId { get; set; }
+
     }
 }

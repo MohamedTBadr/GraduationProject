@@ -191,17 +191,28 @@ namespace Infrastructure.Persistence
         {
             if (!context.ServiceTypes.Any())
             {
-                var ServiceTypes = new List<ServiceType>
+                // Load the already-seeded vendor types by name
+                var photographer = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Photographer");
+                var caterer = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Caterer");
+                var decorator = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Decorator");
+
+                if (photographer == null || caterer == null || decorator == null)
                 {
-                    new ServiceType { Id = Guid.NewGuid(), Name = "Photography" },
-                    new ServiceType { Id = Guid.NewGuid(), Name = "Catering" },
-                    new ServiceType { Id = Guid.NewGuid(), Name = "Decoration" },
-                };
-                context.ServiceTypes.AddRange(ServiceTypes);
+                    Console.WriteLine("Skipping ServiceType seeding: VendorTypes not found.");
+                    return;
+                }
+
+                var serviceTypes = new List<ServiceType>
+        {
+            new ServiceType { Id = Guid.NewGuid(), Name = "Photography", VendorTypeId = photographer.Id },
+            new ServiceType { Id = Guid.NewGuid(), Name = "Catering",    VendorTypeId = caterer.Id      },
+            new ServiceType { Id = Guid.NewGuid(), Name = "Decoration",  VendorTypeId = decorator.Id    },
+        };
+
+                context.ServiceTypes.AddRange(serviceTypes);
                 await context.SaveChangesAsync();
             }
         }
-
         private async Task SeedServicesAsync()
         {
             if (context.Services.Any()) return;

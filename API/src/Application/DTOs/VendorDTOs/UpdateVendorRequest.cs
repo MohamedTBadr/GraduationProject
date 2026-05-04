@@ -19,6 +19,6 @@ namespace Application.DTOs.VendorDTOs
 
         public string Description { get; set; }
         public string PortfolioLink { get; set; }
-        public Address Address { get; set; }
+        public AddressDto Address { get; set; }
     }
 }

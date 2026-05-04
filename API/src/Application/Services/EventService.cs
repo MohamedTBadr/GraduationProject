@@ -267,6 +267,7 @@ namespace Application.Services
             Street = a.Street,
             City = a.City,
             State = a.State
+           
         };
 
         // ── DTOs → Entity ─────────────────────────────────────────
@@ -313,7 +314,8 @@ namespace Application.Services
         {
             Street = dto.Street,
             City = dto.City,
-            State = dto.State
+            State = dto.State,
+            PostalCode=dto.PostalCode
         };
 
         internal static void ApplyTo(this AddressDto dto, Address address)
@@ -321,6 +323,7 @@ namespace Application.Services
             address.Street = dto.Street;
             address.City = dto.City;
             address.State = dto.State;
+            address.PostalCode = dto.PostalCode;
         }
     }
 }
