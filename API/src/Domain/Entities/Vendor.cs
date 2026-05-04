@@ -34,6 +34,6 @@ namespace Domain.Entities
         public VendorType VendorType { get; set; }
         public Guid VendorTypeId { get; set; }
 
-       //56
+     
     }
 }
