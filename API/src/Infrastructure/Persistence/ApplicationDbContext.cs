@@ -234,5 +234,7 @@ namespace Infrastructure.Persistence
 
         public DbSet<EventType> EventTypes { get; set; } 
 
+        public DbSet<ServiceArea> ServiceAreas { get; set; }
+
     }
 }

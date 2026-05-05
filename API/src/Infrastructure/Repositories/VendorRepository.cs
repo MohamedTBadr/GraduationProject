@@ -19,6 +19,7 @@ namespace Infrastructure.Repositories
             // 1. Start with the IQueryable
             var query = dbContext.Vendors.Where(visibilityFilter)
                 .Include(x => x.User)
+                .Include(x=>x.ServiceAreas)
                 .Include(x => x.Services)
                     .ThenInclude(s => s.ServiceRatings)
                 .AsNoTracking();
@@ -32,6 +33,19 @@ namespace Infrastructure.Repositories
                      (v.Description ?? "").ToLower().Contains(search) ||
                      (v.User != null && (v.User.FirstName ?? "").ToLower().Contains(search)) ||
                      (v.User != null && (v.User.LastName ?? "").ToLower().Contains(search)));
+            }
+
+            if (request?.LocationFilter != null)
+            {
+
+                //filter by lcoation which is in serviceareas
+                query = query.Where(v => v.ServiceAreas.Any(sa =>
+                        sa.City.ToLower() == request.LocationFilter.City.ToLower() ||
+                        sa.Region.ToLower() == request.LocationFilter.Region.ToLower() ||
+                        sa.Longitude == request.LocationFilter.Longitude ||
+                        sa.Latitude == request.LocationFilter.Latitude
+                        ));
+
             }
 
             // 3. Apply Ordering by Average Rating (Highest First)

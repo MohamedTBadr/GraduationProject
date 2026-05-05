@@ -17,6 +17,6 @@ namespace Application.DTOs.VendorDTOs
          public ICollection<ServiceDTOs.ServiceDTO> Services { get; set; } = new List<ServiceDTOs.ServiceDTO>();
         public ICollection<PackageDTOs.PackageDTO> Packages { get; set; } = new List<PackageDTOs.PackageDTO>();
 
-
+        public ICollection<ServiceAreaDTO> ServiceAreas { get; set; } = new List<ServiceAreaDTO>();
     }
 }

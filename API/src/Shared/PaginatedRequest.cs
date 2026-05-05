@@ -4,13 +4,24 @@ using System.Text;
 
 namespace Shared
 {
-    public record PaginatedRequest(int PageIndex = 1,
+    public record PaginatedRequest(
+         LocationFilter? LocationFilter,
+         int PageIndex = 1,
         int PageSize = 10,
         string? SearchTerm = null,
         string? SortBy = null,
         bool IsDescending = false,
         bool IncludeHidden = false
+       
     );
+
+
+    public record LocationFilter(
+                string City ,
+     string Region,
+ decimal Latitude,
+     decimal Longitude 
+        );
 
     // ✅ Change to class or non-positional record
     public record AIRequest

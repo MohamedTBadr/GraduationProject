@@ -24,5 +24,22 @@ namespace Application.DTOs.VendorDTOs
         public string Description { get; set; }
         public string PortfolioLink { get; set; }
         public Address Address { get; set; }
+
+
+        public ICollection<ServiceAreaDTO> ServiceAreas { get; set; } = new List<ServiceAreaDTO>();
+
+
+    }
+
+
+
+    public record ServiceAreaDTO
+    {
+
+        public string City { get; set; }
+        public  string Region { get; set; }
+        public decimal lattitude { get; set; }
+        public decimal longitude { get; set; }
+
     }
 }
