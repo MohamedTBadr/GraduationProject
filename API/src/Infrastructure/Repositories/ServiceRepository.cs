@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Registry;
 using Shared;
+using System.Drawing;
 using System.Linq.Expressions;
+
 
 namespace Infrastructure.Repositories
 {
@@ -22,9 +24,9 @@ namespace Infrastructure.Repositories
         }
 
         public async Task<PaginatedResponse<Service>> GetAllAsync(
-          PaginatedRequest request,
-          Expression<Func<Service, bool>> visibilityFilter,
-          CancellationToken ct)
+    PaginatedRequest request,
+    Expression<Func<Service, bool>> visibilityFilter,
+    CancellationToken ct)
         {
             return await _pipeline.ExecuteAsync(async token =>
             {
@@ -48,20 +50,117 @@ namespace Infrastructure.Repositories
                     _ => query.OrderBy(p => p.Name)
                 };
 
+                // ✅ Phase 1 — SQL only (bounding box + city/region), stays IQueryable
+                query = ApplyLocationSqlFilter(request, query);
+
+                // ✅ Count runs on EF IQueryable — no ToList yet
                 var totalCount = await query.CountAsync(token);
+
+                // ✅ Paginate + fetch from DB
                 var items = await query
-                 
                     .Include(p => p.Vendor)
+                        .ThenInclude(v => v.ServiceAreas)   // 👈 needed for Haversine phase
                     .Include(p => p.ServiceType)
                     .Include(p => p.ServiceImages)
                     .Skip((request.PageIndex - 1) * request.PageSize)
                     .Take(request.PageSize)
-                    .ToListAsync(token);
+                    .ToListAsync(token);                    // ← only DB round-trip
 
-                return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
+                // ✅ Phase 2 — Haversine in-memory on paged items only
+                var filtered = ApplyHaversineFilter(request, items);
+
+                return new PaginatedResponse<Service>(filtered, totalCount, request.PageIndex, request.PageSize);
             }, ct);
         }
 
+        // ─────────────────────────────────────────────────────────────
+        // Phase 1 — SQL bounding box (IQueryable, EF translatable ✅)
+        // ─────────────────────────────────────────────────────────────
+        private static IQueryable<Service> ApplyLocationSqlFilter(PaginatedRequest request, IQueryable<Service> query)
+        {
+            if (request?.LocationFilter == null) return query;
+
+            var hasCityOrRegion = !string.IsNullOrEmpty(request.LocationFilter.City) ||
+                                  !string.IsNullOrEmpty(request.LocationFilter.Region);
+
+            var hasCoords = request.LocationFilter.Latitude != 0 &&
+                            request.LocationFilter.Longitude != 0;
+
+            if (!hasCityOrRegion && !hasCoords) return query;
+
+            if (hasCoords)
+            {
+                const double kmPerDegree = 111.0;
+                double radiusKm = request.LocationFilter.RadiusKm;
+
+                double lat = (double)request.LocationFilter.Latitude;
+                double lon = (double)request.LocationFilter.Longitude;
+
+                double latDelta = radiusKm / kmPerDegree;
+                double lonDelta = radiusKm / (kmPerDegree * Math.Cos(lat * Math.PI / 180.0));
+
+                decimal minLat = (decimal)(lat - latDelta), maxLat = (decimal)(lat + latDelta);
+                decimal minLon = (decimal)(lon - lonDelta), maxLon = (decimal)(lon + lonDelta);
+
+                return query
+                    .Include(x => x.Vendor.ServiceAreas)
+                    .Where(v => v.Vendor.ServiceAreas.Any(sa =>
+                        (hasCityOrRegion && (
+                            sa.City.ToLower() == request.LocationFilter.City.ToLower() ||
+                            sa.Region.ToLower() == request.LocationFilter.Region.ToLower()
+                        )) ||
+                        (
+                            sa.Latitude >= minLat && sa.Latitude <= maxLat &&
+                            sa.Longitude >= minLon && sa.Longitude <= maxLon
+                        )
+                    ));
+            }
+
+            // City/Region only
+            return query
+                .Include(x => x.Vendor.ServiceAreas)
+                .Where(v => v.Vendor.ServiceAreas.Any(sa =>
+                    sa.City.ToLower() == request.LocationFilter.City.ToLower() ||
+                    sa.Region.ToLower() == request.LocationFilter.Region.ToLower()
+                ));
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // Phase 2 — Haversine in-memory on already-fetched list ✅
+        // ─────────────────────────────────────────────────────────────
+        private static List<Service> ApplyHaversineFilter(PaginatedRequest request, List<Service> items)
+        {
+            if (request?.LocationFilter == null) return items;
+
+            var hasCoords = request.LocationFilter.Latitude != 0 &&
+                            request.LocationFilter.Longitude != 0;
+
+            if (!hasCoords) return items;
+
+            double userLat = (double)request.LocationFilter.Latitude;
+            double userLon = (double)request.LocationFilter.Longitude;
+            double radiusKm = request.LocationFilter.RadiusKm;
+
+            return items.Where(v => v.Vendor.ServiceAreas.Any(sa =>
+                (!string.IsNullOrEmpty(sa.City) && sa.City.ToLower() == request.LocationFilter.City?.ToLower()) ||
+                (!string.IsNullOrEmpty(sa.Region) && sa.Region.ToLower() == request.LocationFilter.Region?.ToLower()) ||
+                HaversineDistance((double)sa.Latitude, (double)sa.Longitude, userLat, userLon) <= radiusKm
+            )).ToList();
+        }
+
+        private static double HaversineDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371;
+            double dLat = (lat2 - lat1) * Math.PI / 180.0;
+            double dLon = (lon2 - lon1) * Math.PI / 180.0;
+
+            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                       Math.Cos(lat1 * Math.PI / 180.0) *
+                       Math.Cos(lat2 * Math.PI / 180.0) *
+                       Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            return R * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        }
         public async Task<PaginatedResponse<Service>> GetByEventTypeIdAsync(Guid eventTypeId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken)
         {
             return await _pipeline.ExecuteAsync(async token =>
@@ -77,6 +176,8 @@ namespace Infrastructure.Repositories
 
                 if (!string.IsNullOrWhiteSpace(request.SearchTerm))
                     query = query.Where(p => p.Name.Contains(request.SearchTerm) || p.Description.Contains(request.SearchTerm));
+
+                query = ApplyLocationSqlFilter(request, query);
 
                 var totalCount = await query.CountAsync(token);
                 var items = await query
@@ -96,6 +197,7 @@ namespace Infrastructure.Repositories
                     .Where(p => p.VendorId == vendorId)
                     .Where(visibilityFilter)
                     .AsNoTracking();
+                query = ApplyLocationSqlFilter(request, query);
 
                 var totalCount = await query.CountAsync(token);
                 var items = await query
@@ -112,6 +214,8 @@ namespace Infrastructure.Repositories
             return await _pipeline.ExecuteAsync(async token =>
             {
                 var query = _context.Services.Where(p => p.ServiceTypeId == ServiceTypeId).Where(visibilityFilter).AsNoTracking();
+                query = ApplyLocationSqlFilter(request, query);
+
                 var totalCount = await query.CountAsync(token);
                 var items = await query.Skip((request.PageIndex - 1) * request.PageSize).Take(request.PageSize).ToListAsync(token);
                 return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);

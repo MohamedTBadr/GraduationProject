@@ -5,6 +5,7 @@ namespace Domain.Entities
     public class ServiceArea
     {
         [Key]
+        public Guid Id { get; set; }
         public Guid VendorId { get; set; } 
         public Vendor Vendor { get; set; }
         public string City { get; set; }
