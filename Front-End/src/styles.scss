@@ -189,8 +189,10 @@ img {
 }
 .tag {
   display: inline-block;
-  background: rgba(201, 168, 76, 0.12);
-  color: var(--gold);
+  // background: rgba(201, 168, 76, 0.12);
+  // color: var(--gold);
+  background:rgba(132,26,79,.1)!important;
+  color:#841A4F;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -3003,12 +3005,14 @@ table.ad-tbl {
   overflow: hidden;
   display: flex;
   align-items: center;
-  background: var(--dark);
+  // background: var(--dark);
+  background:linear-gradient(135deg,#1A0F20 0%,#2A1535 35%,#841A4F 70%,#FFC554 100%)
 }
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #161022 0%, #7a114c 100%);
+  // background: linear-gradient(135deg, #161022 0%, #7a114c 100%);
+  background:linear-gradient(135deg,rgba(26,15,32,.97) 0%,rgba(42,21,53,.92) 35%,rgba(132,26,79,.85) 70%,rgba(255,197,84,.6) 100%)
 }
 .hero-orb {
   position: absolute;
@@ -3074,12 +3078,13 @@ table.ad-tbl {
   color: var(--white);
   margin-bottom: 22px;
   max-width: 720px;
+  
 }
 .hero h1 em {
   font-style: italic;
-  background: linear-gradient(135deg, #e11d48, #eab308);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color:#841A4F;
+  // -webkit-background-clip: text;
+  // -webkit-text-fill-color: transparent;
 }
 .hero-sub {
   font-size: 1.05rem;
