@@ -51,7 +51,7 @@ namespace Web.Api.Controllers
 
             var response = Result<PaginatedResponse<UserDTO>>.Success(new PaginatedResponse<UserDTO>(userDtos,totalCount,request.PageIndex,request.PageSize));
 
-            return Ok(response);
+            return response.IsSuccess ? Ok(response) : response.ToActionResult();
         }
 
         [Authorize(Roles = "Admin")]

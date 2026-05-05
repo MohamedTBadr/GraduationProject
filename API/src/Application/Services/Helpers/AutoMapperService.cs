@@ -37,11 +37,11 @@ namespace Application.Services.Helpers
             // Entity → Read DTO
             CreateMap<Service, ServiceDTO>()
                 .ForMember(d => d.VendorName, o => o.MapFrom(s => s.Vendor.BusinessName))
-
+                .ForMember(d=>d.ServiceAreas,o=>o.MapFrom(s=>s.Vendor.ServiceAreas))
                 .ForMember(d => d.ServiceTypeName, o => o.MapFrom(s => s.ServiceType.Name))
                 .ForMember(d => d.ServiceImages, o => o.MapFrom(s => s.ServiceImages.Select(i => i.ImagePath).ToList()));
 
-
+            CreateMap<ServiceArea,ServiceAreaDTO>().ReverseMap();
             // Create DTO → Entity
             // In your mapping profile
             CreateMap<CreateServiceRequest, Service>()

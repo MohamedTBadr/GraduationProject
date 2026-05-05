@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application.DTOs.VendorDTOs;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,6 +21,8 @@ namespace Application.DTOs.ServiceDTOs
         public List<string> ServiceImages { get; set; }
         public decimal SetupDuration { get; set; } // in hours
         public decimal LeadTimeRequired { get; set; } // in weeks
+
+        public ICollection<ServiceAreaDTO> ServiceAreas { get; set; }
     }
 
     public record CreateServiceRequest
