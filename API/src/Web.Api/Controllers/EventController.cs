@@ -32,7 +32,7 @@ namespace Web.Api.Controllers
                 ? await _eventService.GetAllAsync( cancellationToken)
                 : await _eventService.GetByUserIdAsync(UserId, cancellationToken); // ← was calling GetUserIdFromToken() directly, use property instead
 
-            return Ok(result);
+            return result.IsSuccess ? Ok(result) : NotFound(result);
         }
 
         // ─────────────────────────────────────────────────────────
@@ -44,18 +44,13 @@ namespace Web.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
-            try
-            {
+           
                 var result = await _eventService.GetByIdAsync(id, cancellationToken);
                 if (!IsAdminOrOwner(result.Value.UserId))
                     return Forbid();
 
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+                return result.IsSuccess ? Ok(result) : NotFound(result);
+            
         }
 
         // ─────────────────────────────────────────────────────────
@@ -70,7 +65,7 @@ namespace Web.Api.Controllers
                 return Forbid();
 
             var result = await _eventService.GetByUserIdAsync(userId, cancellationToken);
-            return Ok(result);
+            return result.IsSuccess ? Ok(result) : NotFound(result);
         }
 
         // ─────────────────────────────────────────────────────────
@@ -81,8 +76,7 @@ namespace Web.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetByStatus(string status, CancellationToken cancellationToken)
         {
-            try
-            {
+          
                 if (IsAdmin())
                 {
                     var all = await _eventService.GetByStatusAsync(status, cancellationToken);
@@ -90,12 +84,9 @@ namespace Web.Api.Controllers
                 }
 
                 var result = await _eventService.GetByUserIdAndStatusAsync(UserId, status, cancellationToken);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+                return result.IsSuccess ? Ok(result) : NotFound(result);
+            
+           
         }
 
         // ─────────────────────────────────────────────────────────
@@ -216,15 +207,12 @@ Only return JSON. No markdown. No explanation.
             if (IsClient())
                 dto.UserId = UserId;
 
-            try
-            {
+           
                 var created = await _eventService.CreateAsync(dto, cancellationToken);
-                return CreatedAtAction(nameof(GetById), new { id = created.Value.Id }, created); // ← was Created() with no body or location
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+                return created.IsSuccess
+                    ? Created()
+                    : created.ToActionResult();
+
         }
 
         // ─────────────────────────────────────────────────────────
@@ -240,8 +228,7 @@ Only return JSON. No markdown. No explanation.
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
+           
                 var existing = await _eventService.GetByIdAsync(id, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.Value.UserId))
@@ -256,16 +243,8 @@ Only return JSON. No markdown. No explanation.
                     // Send email notification logic here, e.g.:
                     // await _emailService.SendEventCompletedNotificationAsync(existing.UserId, updated.Id);
                 }
-                return Ok(updated);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+                return updated.IsSuccess ? Ok(updated) : updated.ToActionResult();
+       
         }
 
 
@@ -291,18 +270,14 @@ Only return JSON. No markdown. No explanation.
             if (IsVendor())
                 return Forbid();
 
-            try
-            {
                 var existing = await _eventService.GetByIdAsync(eventId, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
                 var result = await _eventService.AddItemAsync(eventId, dto, cancellationToken);
-                return CreatedAtAction(nameof(GetById), new { id = eventId }, result);
-            }
-            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+                return result.IsSuccess ? CreatedAtAction(nameof(GetById), new { id = eventId }, result) : result.ToActionResult();
+           
         }
 
         // ─────────────────────────────────────────────────────────
@@ -325,18 +300,15 @@ Only return JSON. No markdown. No explanation.
             if (IsVendor())
                 return Forbid();
 
-            try
-            {
+           
                 var existing = await _eventService.GetByIdAsync(eventId, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
                 var result = await _eventService.UpdateItemAsync(eventId, itemId, dto, cancellationToken);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+                return result.IsSuccess ? Ok(result) : result.ToActionResult();
+        
         }
         // ─────────────────────────────────────────────────────────
         // PATCH api/events/{eventId}/items/{itemId}/approve
@@ -355,23 +327,11 @@ Only return JSON. No markdown. No explanation.
             if (!IsVendor())
                 return Forbid();
 
-            try
-            {
-                await _eventService.ApproveItemAsync(eventId, itemId, UserId, request.Approve, request.Reason, cancellationToken);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            
+                var result = await _eventService.ApproveItemAsync(eventId, itemId, UserId, request.Approve, request.Reason, cancellationToken);
+                return result.IsSuccess ? NoContent() : result.ToActionResult();
+           
+      
         }
 
         // ─────────────────────────────────────────────────────────
@@ -384,8 +344,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CancelEvent(Guid id, [FromBody] CancelEventRequest cancelEventRequest, CancellationToken cancellationToken)
         {
-            try
-            {
+           
                 var existing = await _eventService.GetByIdAsync(id, cancellationToken);
                 if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
@@ -399,17 +358,9 @@ Only return JSON. No markdown. No explanation.
                 if (IsClient() && existing.Value.EventDate.Date <= DateTime.Today.AddDays(7))
                     return BadRequest(new { message = "You cannot cancel an event less than 7 days before it occurs." });
 
-                await _eventService.CancelEventAsync(id, cancelEventRequest, cancellationToken);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+                var result = await _eventService.CancelEventAsync(id, cancelEventRequest, cancellationToken);
+                return result.IsSuccess ? NoContent() : result.ToActionResult();
+          
         }
 
         // ─────────────────────────────────────────────────────────
@@ -425,8 +376,7 @@ Only return JSON. No markdown. No explanation.
             if (IsVendor())
                 return Forbid();
 
-            try
-            {
+          
                 var existing = await _eventService.GetByIdAsync(id, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.Value.UserId))
@@ -435,13 +385,9 @@ Only return JSON. No markdown. No explanation.
                 if (IsClient() && existing.Value.EventStatus != "Planned")
                     return BadRequest(new { message = "You can only delete events with 'Planned' status." });
 
-                await _eventService.DeleteAsync(id, cancellationToken);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+                var result = await _eventService.DeleteAsync(id, cancellationToken);
+                return result.IsSuccess ? NoContent() : result.ToActionResult();
+          
         }
     }
 }
