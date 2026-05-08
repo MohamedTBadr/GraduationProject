@@ -12,7 +12,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using OpenAI;
 using System;
+using System.ClientModel;
 using System.Collections.Generic;
 using System.Text;
 
@@ -41,6 +43,25 @@ namespace Application
             Services.AddScoped<IVendorTypeService, VendorTypeService>();
             Services.AddScoped<ICompanyInquiryService, CompanyInquiryService>();
             Services.AddScoped<ISupportTicketService, SupportTicketService>();
+
+
+
+            Services.AddSingleton(sp =>
+            {
+                var apiKey = configuration["Groq:ApiKey"]
+                             ?? throw new InvalidOperationException("Groq API key not set.");
+
+                var openAIClient = new OpenAIClient(
+                    new ApiKeyCredential(apiKey),
+                    new OpenAIClientOptions
+                    {
+                        Endpoint = new Uri("https://api.groq.com/openai/v1")
+                    }
+                );
+
+                return openAIClient.GetChatClient("llama-3.3-70b-versatile");
+            });
+
             //Services.AddScoped<IUs
             //Services.AddScoped<Ime>
             Services.AddAutoMapper(cfg =>

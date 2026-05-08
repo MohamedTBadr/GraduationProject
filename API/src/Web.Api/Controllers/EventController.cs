@@ -16,8 +16,8 @@ namespace Web.Api.Controllers
     [Route("api/[controller]")]
     public class EventController(
         IEventService _eventService,
-        GeminiService _geminiService,
-        IServiceService _ServiceService) : BaseController
+        LlamaService _llamaService,
+        IServiceService _serviceService) : BaseController
     {
         protected Guid UserId => GetUserIdFromToken();
 
@@ -47,7 +47,7 @@ namespace Web.Api.Controllers
             try
             {
                 var result = await _eventService.GetByIdAsync(id, cancellationToken);
-                if (!IsAdminOrOwner(result.UserId))
+                if (!IsAdminOrOwner(result.Value.UserId))
                     return Forbid();
 
                 return Ok(result);
@@ -104,82 +104,98 @@ namespace Web.Api.Controllers
         [HttpPost("createEventByAI/{eventId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> CreateEventItemsByAI(Guid eventId, CancellationToken cancellationToken)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateEventItemsByAI(
+            Guid eventId,
+            CancellationToken cancellationToken)
         {
-            return await AIRecommendation(eventId, cancellationToken);
-        }
+            // 1. Get event
+            var eventResult = await _eventService.GetByIdAsync(eventId, cancellationToken);
+            if (eventResult.IsFailure)
+                return eventResult.ToActionResult();
 
-        private async Task<IActionResult> AIRecommendation(Guid eventId, CancellationToken cancellationToken)
-        {
-            try
+            var eventObject = eventResult.Value;
+
+            // 2. Filter services by budget/type
+            var request = new AIRequest
             {
-                var eventObject = await _eventService.GetByIdAsync(eventId, cancellationToken);
-                var request = new AIRequest
-                {
-                    Budget = eventObject.TotalBudget,
-                    GuestCount = eventObject.GuestCount,
-                    EventTypeName = eventObject.EventTypeName
-                };
+                Budget = eventObject.TotalBudget,
+                GuestCount = eventObject.GuestCount,
+                EventTypeName = eventObject.EventTypeName
+            };
 
-                var ServiceLines = await _ServiceService.AIFilterAsync(request, cancellationToken);
+            var servicesResult = await _serviceService.AIFilterAsync(request, cancellationToken);
+            if (servicesResult.IsFailure)
+                return servicesResult.ToActionResult();
 
-                var prompt = $@"
-You are an event planning API that returns ONLY valid JSON. Do not include markdown, explanation, or extra text.
+            var serviceLines = servicesResult.Value;
 
-Plan a full event using the details and available Services below.
+            // 3. Build prompt
+            var prompt = $$"""
+You are an event planning API that returns ONLY valid JSON.
+Do not include markdown, explanation, or extra text.
+
+Plan a full event using the details and available services below.
 
 EVENT DETAILS:
-- Title: {eventObject.Title}
-- Event Type Name: {eventObject.EventTypeName}
-- Date: {eventObject.EventDate:yyyy-MM-dd}
-- Location: {eventObject.Location?.City}, {eventObject.Location?.State}  
-- Guest Count: {eventObject.GuestCount}
-- Total Budget: {eventObject.TotalBudget:C}
-- Notes: {eventObject.Notes ?? "None"}
+- Title: {{eventObject.Title}}
+- Event Type: {{eventObject.EventTypeName}}
+- Date: {{eventObject.EventDate:yyyy-MM-dd}}
+- Location: {{eventObject.Location?.City}}, {{eventObject.Location?.State}}
+- Guest Count: {{eventObject.GuestCount}}
+- Total Budget: {{eventObject.TotalBudget:C}}
+- Notes: {{eventObject.Notes ?? "None"}}
 
 AVAILABLE SERVICES (within budget):
-{string.Join("\n", ServiceLines)}
+{{string.Join("\n", serviceLines)}}
 
 Return a JSON object with this exact schema:
-{{
-  ""event_title"": string,
-  ""event_type"": string,
-  ""guest_count"": number,
-  ""total_budget"": number,
-  ""plan_summary"": string,
-  ""selected_items"": [
-    {{
-      ""ServiceId"": ""Guid"",
-      ""Service_name"": string,
-      ""category"": string,
-      ""vendor"": string,
-      ""price"": number,
-      ""reason"": string
-    }}
+{
+
+          "event_title": string,
+  "event_type": string,
+  "guest_count": number,
+  "total_budget": number,
+  "plan_summary": string,
+  "selected_items": [
+    {
+
+              "ServiceId": "Guid",
+      "Service_name": string,
+      "category": string,
+      "vendor": string,
+      "price": number,
+      "reason": string
+    }
   ],
-  ""total_cost"": number,
-  ""remaining_budget"": number,
-  ""tips"": [string]
-}}
+  "total_cost": number,
+  "remaining_budget": number,
+  "tips": [string]
+}
 
 Only return JSON. No markdown. No explanation.
-";
-                var aiResponse = await _geminiService.SendMessageAsync(prompt);
+""";
 
-                return Ok(new
-                {
-                    eventId = eventObject.Id,
-                    eventTitle = eventObject.Title,
-                    budget = eventObject.TotalBudget,
-                    eventTypeName = eventObject.EventTypeName,
-                    servicesConsidered = ServiceLines.Value.Count, // ← was capital S (inconsistent casing)
-                    aiPlan = aiResponse
-                });
-            }
-            catch (KeyNotFoundException ex) // ← was missing; GetByIdAsync throws, not returns null
+            // 4. Call Llama
+            var aiResult = await _llamaService.SendMessageAsync(
+                prompt,
+                systemPrompt: "You are an event planning engine. Respond with JSON only."
+            );
+
+            if (aiResult.IsFailure)
+                return aiResult.ToActionResult();
+
+            // 5. Return success
+            return Result<object>.Success(new
             {
-                return NotFound(new { message = ex.Message });
-            }
+                eventId = eventObject.Id,
+                eventTitle = eventObject.Title,
+                budget = eventObject.TotalBudget,
+                eventTypeName = eventObject.EventTypeName,
+                servicesConsidered = serviceLines.Count,
+                aiPlan = aiResult.Value
+            }).ToActionResult();
         }
 
         // ─────────────────────────────────────────────────────────
@@ -203,7 +219,7 @@ Only return JSON. No markdown. No explanation.
             try
             {
                 var created = await _eventService.CreateAsync(dto, cancellationToken);
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created); // ← was Created() with no body or location
+                return CreatedAtAction(nameof(GetById), new { id = created.Value.Id }, created); // ← was Created() with no body or location
             }
             catch (ArgumentException ex)
             {
@@ -228,7 +244,7 @@ Only return JSON. No markdown. No explanation.
             {
                 var existing = await _eventService.GetByIdAsync(id, cancellationToken);
 
-                if (!IsAdminOrOwner(existing.UserId))
+                if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
                 if ((IsVendor() || IsClient()) && dto.EventStatus == "Completed")
@@ -279,7 +295,7 @@ Only return JSON. No markdown. No explanation.
             {
                 var existing = await _eventService.GetByIdAsync(eventId, cancellationToken);
 
-                if (!IsAdminOrOwner(existing.UserId))
+                if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
                 var result = await _eventService.AddItemAsync(eventId, dto, cancellationToken);
@@ -313,7 +329,7 @@ Only return JSON. No markdown. No explanation.
             {
                 var existing = await _eventService.GetByIdAsync(eventId, cancellationToken);
 
-                if (!IsAdminOrOwner(existing.UserId))
+                if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
                 var result = await _eventService.UpdateItemAsync(eventId, itemId, dto, cancellationToken);
@@ -371,16 +387,16 @@ Only return JSON. No markdown. No explanation.
             try
             {
                 var existing = await _eventService.GetByIdAsync(id, cancellationToken);
-                if (!IsAdminOrOwner(existing.UserId))
+                if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
                 if (IsVendor())
                     return Forbid();
 
-                if (IsClient() && existing.EventStatus != "Approved")
+                if (IsClient() && existing.Value.EventStatus != "Approved")
                     return Forbid();
 
-                if (IsClient() && existing.EventDate.Date <= DateTime.Today.AddDays(7))
+                if (IsClient() && existing.Value.EventDate.Date <= DateTime.Today.AddDays(7))
                     return BadRequest(new { message = "You cannot cancel an event less than 7 days before it occurs." });
 
                 await _eventService.CancelEventAsync(id, cancelEventRequest, cancellationToken);
@@ -413,10 +429,10 @@ Only return JSON. No markdown. No explanation.
             {
                 var existing = await _eventService.GetByIdAsync(id, cancellationToken);
 
-                if (!IsAdminOrOwner(existing.UserId))
+                if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
-                if (IsClient() && existing.EventStatus != "Planned")
+                if (IsClient() && existing.Value.EventStatus != "Planned")
                     return BadRequest(new { message = "You can only delete events with 'Planned' status." });
 
                 await _eventService.DeleteAsync(id, cancellationToken);

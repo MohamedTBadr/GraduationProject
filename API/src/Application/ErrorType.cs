@@ -22,6 +22,11 @@
 
         public static Error Unexpected(int code, string description)
             => new(ErrorType.Unexpected, code, description);
+
+        public static Error InvalidOperation(int code, string description)
+            => new(ErrorType.InvalidOperation, code, description);
+
+
     }
     public enum ErrorType
     {

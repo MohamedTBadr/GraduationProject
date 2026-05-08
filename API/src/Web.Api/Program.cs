@@ -92,7 +92,7 @@ namespace Web
 
 
             //app.Logger.LogInformation("Application Starting Up");
-            app.MapPost("/AI-Chat", async ([FromServices] GeminiService geminiService) =>
+            app.MapPost("/AI-Chat", async ([FromServices] LlamaService geminiService) =>
             {
                 var budget = 3000;
                 var Services = new[]

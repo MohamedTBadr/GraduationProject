@@ -43,6 +43,10 @@ public class Result<T>
 
     public static Result<T> Unexpected(int code, string description)
         => Failure(Error.Unexpected(code, description));
+
+    public static Result<T> InvalidOperation(int code, string description)
+        => Failure(Error.InvalidOperation(code, description));
+     
 }
 
 // ── ResultExtensions.cs ──────────────────────────────────────────────────────

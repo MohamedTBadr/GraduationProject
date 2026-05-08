@@ -159,7 +159,7 @@ namespace Web.Api
 
                 return new Client(apiKey: apiKey);
             });
-            Services.AddScoped<GeminiService>();
+            Services.AddScoped<LlamaService>();
             #endregion
 
 

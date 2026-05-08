@@ -27,78 +27,81 @@ namespace Application.Services
 
         // ── Read ──────────────────────────────────────────────────
 
-        public async Task<EventResponseDto> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<Result<EventResponseDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var entity = await _eventRepo.GetByIdWithItemsAsync(id, cancellationToken)
-                ?? throw new KeyNotFoundException($"Event with id '{id}' was not found.");
+            var entity = await _eventRepo.GetByIdWithItemsAsync(id, cancellationToken);
+            if (entity == null)
+                return Result<EventResponseDto>.NotFound(404,$"Event with id '{id}' was not found.");
 
-            return entity.ToResponseDto();
+            return Result<EventResponseDto>.Success(entity.ToResponseDto());
         }
 
-        public async Task<IEnumerable<EventSummaryDto>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<EventSummaryDto>>> GetAllAsync(CancellationToken cancellationToken)
         {
             var entities = await _eventRepo.GetAllAsync(cancellationToken);
-            return entities.Select(e => e.ToSummaryDto());
+            return Result<IEnumerable<EventSummaryDto>>.Success(entities.Select(e => e.ToSummaryDto()));
         }
 
-        public async Task<IEnumerable<EventSummaryDto>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<EventSummaryDto>>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
             var entities = await _eventRepo.GetByUserIdAsync(userId, cancellationToken);
-            return entities.Select(e => e.ToSummaryDto());
+            return Result<IEnumerable<EventSummaryDto>>.Success(entities.Select(e => e.ToSummaryDto()));
         }
 
-        public async Task<IEnumerable<EventSummaryDto>> GetByUserIdAndStatusAsync(Guid userId, string status, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<EventSummaryDto>>> GetByUserIdAndStatusAsync(Guid userId, string status, CancellationToken cancellationToken)
         {
             ValidateStatus(status);
             var entities = await _eventRepo.GetByUserIdAsync(userId, cancellationToken);
-            return entities.Where(e => e.EventStatus == status).Select(e => e.ToSummaryDto());
+            return Result<IEnumerable<EventSummaryDto>>.Success(entities.Where(e => e.EventStatus == status).Select(e => e.ToSummaryDto()));
         }
 
-        public async Task<IEnumerable<EventSummaryDto>> GetByStatusAsync(string status, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<EventSummaryDto>>> GetByStatusAsync(string status, CancellationToken cancellationToken)
         {
             ValidateStatus(status);
             var entities = await _eventRepo.GetByStatusAsync(status, cancellationToken);
-            return entities.Select(e => e.ToSummaryDto());
+            return Result<IEnumerable<EventSummaryDto>>.Success(entities.Select(e => e.ToSummaryDto()));
         }
 
         // ── Write ─────────────────────────────────────────────────
 
-        public async Task<EventResponseDto> CreateAsync(CreateEventDto dto, CancellationToken cancellationToken)
+        public async Task<Result<EventResponseDto>> CreateAsync(CreateEventDto dto, CancellationToken cancellationToken)
         {
             var types = await _eventTypeRepo.ExistsAsync(dto.EventTypeId, cancellationToken);
             if (!types)
-                throw new KeyNotFoundException($"Event type with id '{dto.EventTypeId}' was not found.");
-
+                return Result<EventResponseDto>.NotFound(404,$"Event type with id '{dto.EventTypeId}' was not found."); 
             var created = await _eventRepo.CreateAsync(dto.ToEntity(), cancellationToken);
-            return created.ToResponseDto();
+            return Result<EventResponseDto>.Success(created.ToResponseDto());
         }
 
-        public async Task<EventResponseDto> UpdateAsync(Guid id, UpdateEventDto dto, CancellationToken cancellationToken)
+        public async Task<Result<EventResponseDto>> UpdateAsync(Guid id, UpdateEventDto dto, CancellationToken cancellationToken)
         {
-            var entity = await _eventRepo.GetByIdWithItemsAsync(id, cancellationToken)
-                ?? throw new KeyNotFoundException($"Event with id '{id}' was not found.");
+            var entity = await _eventRepo.GetByIdWithItemsAsync(id, cancellationToken);
+            if (entity == null)
+                return Result<EventResponseDto>.NotFound(404,$"Event with id '{id}' was not found.");
 
             ValidateStatus(dto.EventStatus);
             dto.ApplyTo(entity);
 
             var updated = await _eventRepo.UpdateAsync(entity, cancellationToken);
-            return updated.ToResponseDto();
+            return Result<EventResponseDto>.Success(updated.ToResponseDto());
         }
 
-        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<Result<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
             if (!await _eventRepo.ExistsAsync(id, cancellationToken))
-                throw new KeyNotFoundException($"Event with id '{id}' was not found.");
+                return Result<bool>.NotFound(404,$"Event with id '{id}' was not found.");
 
-            return await _eventRepo.DeleteAsync(id, cancellationToken);
+            var deleted = await _eventRepo.DeleteAsync(id, cancellationToken);
+            return Result<bool>.Success(deleted);
         }
 
-        public async Task<bool> UpdateStatusAsync(Guid id, string status, CancellationToken cancellationToken)
+        public async Task<Result<bool>> UpdateStatusAsync(Guid id, string status, CancellationToken cancellationToken)
         {
             ValidateStatus(status);
 
-            var entity = await _eventRepo.GetByIdAsync(id, cancellationToken)
-                ?? throw new KeyNotFoundException($"Event with id '{id}' was not found.");
+            var entity = await _eventRepo.GetByIdAsync(id, cancellationToken);
+            if (entity == null)
+                return Result<bool>.NotFound(404,$"Event with id '{id}' was not found.");
 
             entity.EventStatus = status;
             await _eventRepo.UpdateAsync(entity, cancellationToken);
@@ -107,54 +110,58 @@ namespace Application.Services
                 nameof(NotificationType.EVENT_STATUS_UPDATED),  // type
                 "Event Status Updated",                          // title
                 $"Your event status has been updated to '{status}'.");
-            return true;
+            return Result<bool>.Success(true);
         }
 
-        public async Task CancelEventAsync(Guid id, CancelEventRequest request, CancellationToken cancellationToken)
+        public async Task<Result<bool>> CancelEventAsync(Guid id, CancelEventRequest request, CancellationToken cancellationToken)
         {
-            var entity = await _eventRepo.GetByIdAsync(id, cancellationToken)
-                ?? throw new KeyNotFoundException($"Event with id '{id}' was not found.");
+            var entity = await _eventRepo.GetByIdAsync(id, cancellationToken);
+            if (entity == null)
+                return Result<bool>.NotFound(404,$"Event with id '{id}' was not found.");
 
             if (entity.EventStatus == "Cancelled")
-                throw new InvalidOperationException("Event is already cancelled.");
+                return Result<bool>.InvalidOperation(400,"Event is already cancelled.");
 
             if (entity.EventStatus == "Completed")
-                throw new InvalidOperationException("A completed event cannot be cancelled.");
+                return Result<bool>.InvalidOperation(400,"A completed event cannot be cancelled.");
 
             request.ApplyTo(entity);
             await _eventRepo.UpdateAsync(entity, cancellationToken);
+            return Result<bool>.Success(true);
         }
 
-        public async Task ApproveItemAsync(Guid eventId, Guid itemId, Guid vendorId, bool approve, string? reason, CancellationToken cancellationToken)
+        public async Task<Result<EventItemResponseDto>> ApproveItemAsync(Guid eventId, Guid itemId, Guid vendorId, bool approve, string? reason, CancellationToken cancellationToken)
         {
             var item = await _eventRepo.GetItemByIdAsync(itemId, cancellationToken);
 
             if (item == null || item.EventId != eventId)
-                throw new KeyNotFoundException("Item not found in this event.");
+                return Result<EventItemResponseDto>.NotFound(404, "Item not found in this event.");
 
             if (item.VendorId != vendorId)
-                throw new UnauthorizedAccessException("You do not own this item.");
+                return Result<EventItemResponseDto>.Unauthorized(401, "You do not own this item.");
 
             if (item.ItemStatus != "Pending")
-                throw new InvalidOperationException($"Item is already '{item.ItemStatus}'.");
+                return Result<EventItemResponseDto>.InvalidOperation(400, $"Item is already '{item.ItemStatus}'.");
 
             item.ItemStatus = approve ? "Approved" : "Rejected";
             item.RejectionReason = approve ? null : reason;
 
-            await _eventRepo.UpdateItemAsync(item, cancellationToken);
+            var updated = await _eventRepo.UpdateItemAsync(item, cancellationToken);
             await SyncEventStatusAsync(eventId,cancellationToken);
+            return Result<EventItemResponseDto>.Success(updated.ToResponseDto());
         }
 
 
 
         // EventService — add both methods
-        public async Task<EventItemResponseDto> AddItemAsync(Guid eventId, CreateEventItemDto dto, CancellationToken cancellationToken)
+        public async Task<Result<EventItemResponseDto>> AddItemAsync(Guid eventId, CreateEventItemDto dto, CancellationToken cancellationToken)
         {
-            var ev = await _eventRepo.GetByIdAsync(eventId, cancellationToken)
-                ?? throw new KeyNotFoundException($"Event '{eventId}' not found.");
+            var ev = await _eventRepo.GetByIdAsync(eventId, cancellationToken);
+            if (ev == null)
+                return Result<EventItemResponseDto>.NotFound(404, $"Event '{eventId}' not found.");
 
             if (ev.EventStatus is "Cancelled" or "Completed")
-                throw new InvalidOperationException($"Cannot add items to a '{ev.EventStatus}' event.");
+                return Result<EventItemResponseDto>.InvalidOperation(400, $"Cannot add items to a '{ev.EventStatus}' event.");
 
             var item = new EventItem
             {
@@ -169,18 +176,18 @@ namespace Application.Services
             };
 
             var created = await _eventRepo.AddItemAsync(item, cancellationToken);
-            return created.ToResponseDto();
+            return Result<EventItemResponseDto>.Success(created.ToResponseDto());
         }
 
-        public async Task<EventItemResponseDto> UpdateItemAsync(Guid eventId, Guid itemId, UpdateEventItemDto dto, CancellationToken cancellationToken)
+        public async Task<Result<EventItemResponseDto>> UpdateItemAsync(Guid eventId, Guid itemId, UpdateEventItemDto dto, CancellationToken cancellationToken)
         {
             var item = await _eventRepo.GetItemByIdAsync(itemId, cancellationToken);
 
             if (item == null || item.EventId != eventId)
-                throw new KeyNotFoundException("Item not found in this event.");
+                return Result<EventItemResponseDto>.NotFound(404, "Item not found in this event.");
 
             if (item.ItemStatus is "Approved" or "Rejected")
-                throw new InvalidOperationException($"Cannot edit an item that is already '{item.ItemStatus}'.");
+                return Result<EventItemResponseDto>.InvalidOperation(400, $"Cannot edit an item that is already '{item.ItemStatus}'.");
 
             item.ServiceName = dto.ServiceName;
             item.ServiceImage = dto.ServiceImage;
@@ -190,7 +197,7 @@ namespace Application.Services
             item.ItemStatus = "Pending"; // reset to pending after edit
 
             var updated = await _eventRepo.UpdateItemAsync(item, cancellationToken);
-            return updated.ToResponseDto();
+            return Result<EventItemResponseDto>.Success(updated.ToResponseDto());
         }
         // ── Helpers ───────────────────────────────────────────────
 
