@@ -21,7 +21,6 @@ using Polly.CircuitBreaker;
 using Polly.Retry;
 using Serilog;
 using Shared.Exceptions;
-//using PAL.Notifications;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
@@ -29,7 +28,9 @@ using System.Threading.RateLimiting;
 using Web.Api.Controllers.Attributes;
 using Web.Api.Middlewares;
 using Web.Api.Services;
-//using PAL.Notifications;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
 
 namespace Web.Api
 {
@@ -328,6 +329,30 @@ namespace Web.Api
 
 
             #endregion
+
+
+
+
+            Services.AddHttpContextAccessor();
+
+            Services.AddOpenTelemetry()
+                .WithTracing(t => t
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("MyApi"))
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddSource("MyApi")
+                .AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317"))
+                    )
+                .WithMetrics(m => m
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("MyApi"))
+            .AddAspNetCoreInstrumentation()
+            .AddRuntimeInstrumentation()
+    .AddMeter("MyApi")
+        .AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317"))
+            );
+
+
+
             return Services;
         }
     }
