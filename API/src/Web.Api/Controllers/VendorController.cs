@@ -63,7 +63,7 @@ namespace Web.Api.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(409)]
         [InvalidateCache]
-        public async Task<IActionResult> CreateVendorAsync([FromBody]CreateVendorRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateVendorAsync([FromForm]CreateVendorRequest request, CancellationToken cancellationToken)
         {
             if (request is null) return BadRequest();
             var result=  await vendorService.AddVendorAsync(request, cancellationToken);

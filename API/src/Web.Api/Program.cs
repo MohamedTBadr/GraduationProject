@@ -122,7 +122,7 @@ namespace Web
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Seeding failed: {ex.Message}");
+                    Console.WriteLine($"Seeding failed: {ex}");
                 }
             }
         }

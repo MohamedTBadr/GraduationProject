@@ -1,70 +1,127 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Entities;
-using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json;
 
 namespace Infrastructure.Persistence
 {
-    public class DbIntialize(ApplicationDbContext context
-        , UserManager<ApplicationUser> userManager
-        , RoleManager<IdentityRole<Guid>> roleManager
-) : IDbIntialize
+    public class DbIntialize(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole<Guid>> roleManager
+    ) : IDbIntialize
     {
         public async Task IntializeAsync()
         {
-            if ((await context.Database.GetPendingMigrationsAsync()).Any())
-            {
-                await context.Database.MigrateAsync();
-            }
+            // Always migrate
+            await context.Database.MigrateAsync();
 
-            try
+            // Optional retry logic for Docker startup timing
+            var retries = 5;
+
+            while (retries > 0)
             {
-                await SeedVendorTypeAsync();
-                await SeedRolesAsync();
-                await SeedAdminUserAsync();
-                await SeedVendorUserAsync();
-                await SeedCustomerAsync();
-                await SeedServiceTypesAsync();
-                await SeedEventTypeAsync();   // ✅ Fix #2: moved BEFORE SeedServicesAsync
-                await SeedServicesAsync();
-                await SeedPackagesAsync();
-            }
-            catch (Exception E)
-            {
-                Console.WriteLine($"Error Occurred during seeding: {E.Message}");
+                try
+                {
+                    using var transaction = await context.Database.BeginTransactionAsync();
+
+                    await SeedVendorTypeAsync();
+                    await SeedRolesAsync();
+                    await SeedAdminUserAsync();
+                    await SeedVendorUserAsync();
+                    await SeedCustomerAsync();
+                    await SeedServiceTypesAsync();
+                    await SeedEventTypeAsync();
+                    await SeedServicesAsync();
+                    await SeedPackagesAsync();
+
+                    await transaction.CommitAsync();
+
+                    Console.WriteLine("Database seeding completed successfully.");
+
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    retries--;
+
+                    Console.WriteLine("========================================");
+                    Console.WriteLine("DATABASE SEEDING ERROR");
+                    Console.WriteLine(ex);
+                    Console.WriteLine("========================================");
+
+                    if (retries == 0)
+                        throw;
+
+                    await Task.Delay(5000);
+                }
             }
         }
 
         private async Task SeedVendorTypeAsync()
         {
-            if (!context.VendorTypes.Any())
+            if (await context.VendorTypes.AnyAsync())
+                return;
+
+            var vendorTypes = new List<VendorType>
             {
-                var vendorTypes = new List<VendorType>
+                new VendorType
                 {
-                    new VendorType { Id = Guid.NewGuid(), Name = "Photographer" },
-                    new VendorType { Id = Guid.NewGuid(), Name = "Caterer" },
-                    new VendorType { Id = Guid.NewGuid(), Name = "Decorator" },
-                };
-                context.VendorTypes.AddRange(vendorTypes);
-                await context.SaveChangesAsync();
-            }
+                    Id = Guid.NewGuid(),
+                    Name = "Photographer"
+                },
+                new VendorType
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Caterer"
+                },
+                new VendorType
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Decorator"
+                }
+            };
+
+            await context.VendorTypes.AddRangeAsync(vendorTypes);
+            await context.SaveChangesAsync();
         }
 
         private async Task SeedEventTypeAsync()
         {
-            if (!context.EventTypes.Any())
+            if (!await context.EventTypes.AnyAsync())
             {
                 var eventTypes = new List<EventType>
                 {
-                    new EventType { Id = Guid.NewGuid(), Name = "Weeding" },
-                    new EventType { Id = Guid.NewGuid(), Name = "Birthday" },
-                    new EventType { Id = Guid.NewGuid(), Name = "Graduation" },
+                    new EventType
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Wedding"
+                    },
+                    new EventType
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Birthday"
+                    },
+                    new EventType
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Graduation"
+                    }
                 };
-                context.EventTypes.AddRange(eventTypes);
+
+                await context.EventTypes.AddRangeAsync(eventTypes);
                 await context.SaveChangesAsync();
+            }
+            else
+            {
+                var weeding = await context.EventTypes
+                    .FirstOrDefaultAsync(e => e.Name == "Weeding");
+
+                if (weeding != null)
+                {
+                    weeding.Name = "Wedding";
+                    await context.SaveChangesAsync();
+                }
             }
         }
 
@@ -89,144 +146,251 @@ namespace Infrastructure.Persistence
 
         private async Task SeedAdminUserAsync()
         {
-            string adminEmail = "admin@example.com";
-            if (userManager != null)
+            const string adminEmail = "admin@example.com";
+
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+            if (adminUser != null)
+                return;
+
+            var newAdminUser = new ApplicationUser
             {
-                var adminUser = await userManager.FindByEmailAsync(adminEmail);
-                if (adminUser == null)
-                {
-                    var newAdminUser = new ApplicationUser
-                    {
-                        Id = Guid.NewGuid(),
-                        FirstName = "Mohamed",
-                        LastName = "Tarek",
-                        UserName = "admin",
-                        Email = adminEmail,
-                        NormalizedEmail = adminEmail.ToUpper(),
-                        NormalizedUserName = "ADMIN"
-                    };
-                    var result = await userManager.CreateAsync(newAdminUser, "Admin@123");
-                    if (result.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(newAdminUser, "Admin");
-                    }
-                }
+                Id = Guid.NewGuid(),
+                FirstName = "Mohamed",
+                LastName = "Tarek",
+                UserName = "admin",
+                Email = adminEmail,
+                NormalizedEmail = adminEmail.ToUpper(),
+                NormalizedUserName = "ADMIN"
+            };
+
+            var result = await userManager.CreateAsync(
+                newAdminUser,
+                "Admin@123"
+            );
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(newAdminUser, "Admin");
+            }
+            else
+            {
+                Console.WriteLine(string.Join(",",
+                    result.Errors.Select(e => e.Description)));
             }
         }
 
         private async Task SeedVendorUserAsync()
         {
-            string vendorEmail = "vendor@example.com";
-            if (userManager != null)
-            {
-                var vendorUser = await userManager.FindByEmailAsync(vendorEmail);
-                if (vendorUser == null)
-                {
-                    var newVendorUser = new ApplicationUser
-                    {
-                        Id = Guid.NewGuid(),
-                        UserName = "vendor",
-                        FirstName = "Mohamed",
-                        LastName = "Tarek",
-                        Email = vendorEmail,
-                        NormalizedEmail = vendorEmail.ToUpper(),
-                        NormalizedUserName = "VENDOR"
-                    };
-                    var vendorProfile = new Vendor
-                    {
-                        UserId = newVendorUser.Id,
-                        BusinessName = "Test",
-                        PortfolioLink = "...",
-                        Description = "Test1",
-                        IsVerified = true,
-                        VendorTypeId = context.VendorTypes.FirstOrDefault().Id,
-                        Address = new Address          // ← add this
-                        {
-                            Street = "N/A",
-                            City = "N/A",
-                            State = "N/A",
-                            PostalCode = "N/A"
-                        }
-                    };
-                    var result = await userManager.CreateAsync(newVendorUser, "Vendor@123");
+            const string vendorEmail = "vendor@example.com";
 
-                    if (result.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(newVendorUser, "Vendor");
-                        await context.Vendors.AddAsync(vendorProfile);
-                        await context.SaveChangesAsync(); // ✅ Fix #1: persist the vendor
-                    }
-                }
+            var vendorUser = await userManager.FindByEmailAsync(vendorEmail);
+
+            if (vendorUser != null)
+                return;
+
+            var vendorType = await context.VendorTypes.FirstOrDefaultAsync();
+
+            if (vendorType == null)
+            {
+                Console.WriteLine("VendorType not found.");
+                return;
             }
+
+            var newVendorUser = new ApplicationUser
+            {
+                Id = Guid.NewGuid(),
+                UserName = "vendor",
+                FirstName = "Mohamed",
+                LastName = "Tarek",
+                Email = vendorEmail,
+                NormalizedEmail = vendorEmail.ToUpper(),
+                NormalizedUserName = "VENDOR",
+               
+            };
+
+            var result = await userManager.CreateAsync(
+                newVendorUser,
+                "Vendor@123"
+            );
+
+            if (!result.Succeeded)
+            {
+                Console.WriteLine(string.Join(",",
+                    result.Errors.Select(e => e.Description)));
+
+                return;
+            }
+
+            await userManager.AddToRoleAsync(newVendorUser, "Vendor");
+
+            var vendorProfile = new Vendor
+            {
+                UserId = newVendorUser.Id,
+                BusinessName = "Test Business",
+                PortfolioLink = "https://example.com",
+                Description = "Seeded Vendor",
+                YearsInBusiness = 5,
+                IsVerified = true,
+                VendorTypeId = vendorType.Id,
+                ProfilePicture = "https://example.com/profile.jpg",
+                Address = new Address
+                {
+                    Street = "123 Test Street",
+                    City = "Cairo",
+                    State = "Cairo Governorate",
+                    PostalCode = "11511"
+                }
+                ,
+                ServiceAreas = new List<ServiceArea>
+                {
+                   new ServiceArea
+                  {
+            Id = Guid.NewGuid(),
+            City = "Cairo",
+            Region = "Nasr City",
+            Latitude = 30.0561m,
+            Longitude = 31.3300m
+        },
+
+        new ServiceArea
+        {
+            Id = Guid.NewGuid(),
+            City = "Cairo",
+            Region = "Maadi",
+            Latitude = 29.9602m,
+            Longitude = 31.2569m
+        },
+
+        new ServiceArea
+        {
+            Id = Guid.NewGuid(),
+            City = "Giza",
+            Region = "Dokki",
+            Latitude = 30.0384m,
+            Longitude = 31.2122m
+        }
+           }
+            };
+
+            await context.Vendors.AddAsync(vendorProfile);
+            await context.SaveChangesAsync();
         }
 
         private async Task SeedCustomerAsync()
         {
-            string customerEmail = "customer@example.com";
-            if (userManager != null)
+            const string customerEmail = "customer@example.com";
+
+            var customerUser = await userManager.FindByEmailAsync(customerEmail);
+
+            if (customerUser != null)
+                return;
+
+            var newCustomerUser = new ApplicationUser
             {
-                var vendorUser = await userManager.FindByEmailAsync(customerEmail);
-                if (vendorUser == null)
-                {
-                    var newVendorUser = new ApplicationUser
-                    {
-                        Id = Guid.NewGuid(),
-                        UserName = "customer",
-                        FirstName = "Mohamed",
-                        LastName = "Tarek",
-                        Email = customerEmail,
-                        NormalizedEmail = customerEmail.ToUpper(),
-                        NormalizedUserName = "CUSTOMER"
-                    };
-                    var result = await userManager.CreateAsync(newVendorUser, "Customer@123");
-                    if (result.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(newVendorUser, "Customer");
-                    }
-                }
+                Id = Guid.NewGuid(),
+                UserName = "customer",
+                FirstName = "Mohamed",
+                LastName = "Tarek",
+                Email = customerEmail,
+                NormalizedEmail = customerEmail.ToUpper(),
+                NormalizedUserName = "CUSTOMER"
+            };
+
+            var result = await userManager.CreateAsync(
+                newCustomerUser,
+                "Customer@123"
+            );
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(newCustomerUser, "Customer");
+            }
+            else
+            {
+                Console.WriteLine(string.Join(",",
+                    result.Errors.Select(e => e.Description)));
             }
         }
-
+      
         private async Task SeedServiceTypesAsync()
         {
-            if (!context.ServiceTypes.Any())
+            if (await context.ServiceTypes.AnyAsync())
+                return;
+
+            var photographer = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Photographer");
+
+            var caterer = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Caterer");
+
+            var decorator = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Decorator");
+
+            if (photographer == null ||
+                caterer == null ||
+                decorator == null)
             {
-                // Load the already-seeded vendor types by name
-                var photographer = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Photographer");
-                var caterer = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Caterer");
-                var decorator = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Decorator");
-
-                if (photographer == null || caterer == null || decorator == null)
-                {
-                    Console.WriteLine("Skipping ServiceType seeding: VendorTypes not found.");
-                    return;
-                }
-
-                var serviceTypes = new List<ServiceType>
-        {
-            new ServiceType { Id = Guid.NewGuid(), Name = "Photography", VendorTypeId = photographer.Id },
-            new ServiceType { Id = Guid.NewGuid(), Name = "Catering",    VendorTypeId = caterer.Id      },
-            new ServiceType { Id = Guid.NewGuid(), Name = "Decoration",  VendorTypeId = decorator.Id    },
-        };
-
-                context.ServiceTypes.AddRange(serviceTypes);
-                await context.SaveChangesAsync();
+                Console.WriteLine("VendorTypes missing.");
+                return;
             }
+
+            var serviceTypes = new List<ServiceType>
+            {
+                new ServiceType
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Photography",
+                    VendorTypeId = photographer.Id
+                },
+                new ServiceType
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Catering",
+                    VendorTypeId = caterer.Id
+                },
+                new ServiceType
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Decoration",
+                    VendorTypeId = decorator.Id
+                }
+            };
+
+            await context.ServiceTypes.AddRangeAsync(serviceTypes);
+            await context.SaveChangesAsync();
         }
+
         private async Task SeedServicesAsync()
         {
-            if (context.Services.Any()) return;
+            if (await context.Services.AnyAsync())
+                return;
 
             var vendor = await context.Vendors.FirstOrDefaultAsync();
-            var photography = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Photography");
-            var catering = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Catering");
-            var decoration = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Decoration");
-            var wedding = await context.EventTypes.FirstOrDefaultAsync(c => c.Name == "Weeding");
-            var birthday = await context.EventTypes.FirstOrDefaultAsync(c => c.Name == "Birthday");
 
-            if (vendor == null || photography == null || catering == null || wedding == null)
+            var photography = await context.ServiceTypes
+                .FirstOrDefaultAsync(s => s.Name == "Photography");
+
+            var catering = await context.ServiceTypes
+                .FirstOrDefaultAsync(s => s.Name == "Catering");
+
+            var decoration = await context.ServiceTypes
+                .FirstOrDefaultAsync(s => s.Name == "Decoration");
+
+            var wedding = await context.EventTypes
+                .FirstOrDefaultAsync(e => e.Name == "Wedding");
+
+            var birthday = await context.EventTypes
+                .FirstOrDefaultAsync(e => e.Name == "Birthday");
+
+            if (vendor == null ||
+                photography == null ||
+                catering == null ||
+                decoration == null ||
+                wedding == null ||
+                birthday == null)
             {
-                Console.WriteLine("Skipping Service seeding: required vendor/ServiceType/category not found.");
+                Console.WriteLine("Missing required data for service seeding.");
                 return;
             }
 
@@ -234,33 +398,33 @@ namespace Infrastructure.Persistence
             {
                 new Service
                 {
-                    Id            = Guid.NewGuid(),
-                    Name          = "Wedding Photography Package",
-                    Description   = "Full-day wedding photography coverage with edited photos.",
-                    Price         = 5000m,
-                    VendorId      = vendor.UserId,
+                    Id = Guid.NewGuid(),
+                    Name = "Wedding Photography Package",
+                    Description = "Wedding photography coverage",
+                    Price = 5000,
+                    VendorId = vendor.UserId,
                     ServiceTypeId = photography.Id,
-                    EventTypes    = new List<EventType> { wedding }
+                    EventTypes = new List<EventType> { wedding }
                 },
                 new Service
                 {
-                    Id            = Guid.NewGuid(),
-                    Name          = "Birthday Catering Set",
-                    Description   = "Catering Service for up to 50 guests with custom menu.",
-                    Price         = 3000m,
-                    VendorId      = vendor.UserId,
+                    Id = Guid.NewGuid(),
+                    Name = "Birthday Catering Set",
+                    Description = "Birthday catering",
+                    Price = 3000,
+                    VendorId = vendor.UserId,
                     ServiceTypeId = catering.Id,
-                    EventTypes    = new List<EventType> { birthday }
+                    EventTypes = new List<EventType> { birthday }
                 },
                 new Service
                 {
-                    Id            = Guid.NewGuid(),
-                    Name          = "Wedding Hall Decoration",
-                    Description   = "Full wedding hall decoration with flowers and lighting.",
-                    Price         = 7000m,
-                    VendorId      = vendor.UserId,
+                    Id = Guid.NewGuid(),
+                    Name = "Wedding Decoration",
+                    Description = "Hall decoration",
+                    Price = 7000,
+                    VendorId = vendor.UserId,
                     ServiceTypeId = decoration.Id,
-                    EventTypes    = new List<EventType> { wedding }
+                    EventTypes = new List<EventType> { wedding }
                 }
             };
 
@@ -270,13 +434,14 @@ namespace Infrastructure.Persistence
 
         private async Task SeedPackagesAsync()
         {
-            if (context.Packages.Any()) return;
+            if (await context.Packages.AnyAsync())
+                return;
 
             var vendor = await context.Vendors.FirstOrDefaultAsync();
 
             if (vendor == null)
             {
-                Console.WriteLine("Skipping package seeding: no vendor found.");
+                Console.WriteLine("Vendor missing for package seeding.");
                 return;
             }
 
@@ -284,50 +449,33 @@ namespace Infrastructure.Persistence
             {
                 new Package
                 {
-                    Id          = Guid.NewGuid(),
-                    Name        = "Basic Wedding Package",
-                    Description = "Essential wedding Services bundle.",
-                    Price       = 10000m,
-                    Discount    = 10m,
-                    Items       = new List<string>
+                    Id = Guid.NewGuid(),
+                    Name = "Basic Wedding Package",
+                    Description = "Basic wedding package",
+                    Price = 10000,
+                    Discount = 10,
+                    VendorId = vendor.UserId,
+                    Items = new List<string>
                     {
-                        "Wedding Photography Coverage",
-                        "Basic Hall Decoration",
-                        "Catering for 50 guests"
-                    },
-                    VendorId = vendor.UserId
+                        "Photography",
+                        "Decoration",
+                        "Catering"
+                    }
                 },
                 new Package
                 {
-                    Id          = Guid.NewGuid(),
-                    Name        = "Premium Wedding Package",
-                    Description = "All-inclusive luxury wedding experience.",
-                    Price       = 25000m,
-                    Discount    = 15m,
-                    Items       = new List<string>
+                    Id = Guid.NewGuid(),
+                    Name = "Premium Wedding Package",
+                    Description = "Premium wedding package",
+                    Price = 25000,
+                    Discount = 15,
+                    VendorId = vendor.UserId,
+                    Items = new List<string>
                     {
-                        "Full-Day Photography & Videography",
-                        "Premium Floral Decoration",
-                        "Catering for 200 guests",
-                        "Live Music Band",
-                        "Luxury Car Rental"
-                    },
-                    VendorId = vendor.UserId
-                },
-                new Package
-                {
-                    Id          = Guid.NewGuid(),
-                    Name        = "Birthday Starter Package",
-                    Description = "Fun birthday bundle for small gatherings.",
-                    Price       = 4000m,
-                    Discount    = 5m,
-                    Items       = new List<string>
-                    {
-                        "Birthday Photography",
-                        "Balloon Decoration",
-                        "Catering for 30 guests"
-                    },
-                    VendorId = vendor.UserId
+                        "Luxury Photography",
+                        "Luxury Decoration",
+                        "Luxury Catering"
+                    }
                 }
             };
 
