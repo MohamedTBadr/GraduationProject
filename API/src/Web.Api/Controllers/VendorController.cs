@@ -62,7 +62,7 @@ namespace Web.Api.Controllers
         [SuccessStatusCode(201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(409)]
-        [InvalidateCache]
+        [InvalidateCache("vendors")]
         public async Task<IActionResult> CreateVendorAsync([FromForm]CreateVendorRequest request, CancellationToken cancellationToken)
         {
             if (request is null) return BadRequest();
@@ -73,7 +73,7 @@ namespace Web.Api.Controllers
 
         [HttpPost("{id}/rating")]
         [Authorize]
-        [InvalidateCache]
+        [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> RateVendorAsync(Guid id, RatingVendorRequest request, CancellationToken cancellationToken)
         {
             var result= await vendorService.RateVendorAsync(id, request, cancellationToken);
@@ -82,7 +82,7 @@ namespace Web.Api.Controllers
 
         [HttpDelete("{id}")]
         [SuccessStatusCode(204)]
-        [InvalidateCache]
+        [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> DeleteVendorAsync(Guid id, CancellationToken cancellationToken)
         {
           var result= await vendorService.DeleteVendorAsync(id, cancellationToken);
@@ -90,7 +90,7 @@ namespace Web.Api.Controllers
         }
         [Authorize]
         [HttpPatch("{id}")]
-        [InvalidateCache]
+        [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken)
         {
             var result = await vendorService.UpdateVendorAsync(id, request, cancellationToken);
@@ -99,7 +99,7 @@ namespace Web.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/approve")]
-        [InvalidateCache]
+        [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> ApproveVendorAsync(Guid id, CancellationToken cancellationToken)
         {
             var result=  await vendorService.ApproveVendorAsync(id, cancellationToken);
