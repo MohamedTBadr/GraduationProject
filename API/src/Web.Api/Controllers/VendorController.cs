@@ -24,7 +24,7 @@ namespace Web.Api.Controllers
             var isAdmin = User.IsInRole("Admin");
 
             var result = await vendorService.GetVendorsAsync(paginatedRequest,isAdmin, cancellationToken);
-            return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
+            return result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
         [HttpGet("{id}")]
@@ -81,6 +81,7 @@ namespace Web.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         [SuccessStatusCode(204)]
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> DeleteVendorAsync(Guid id, CancellationToken cancellationToken)
@@ -88,7 +89,7 @@ namespace Web.Api.Controllers
           var result= await vendorService.DeleteVendorAsync(id, cancellationToken);
             return NoContent();
         }
-        [Authorize]
+        [Authorize(Roles = "Vendor")]
         [HttpPatch("{id}")]
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken)
