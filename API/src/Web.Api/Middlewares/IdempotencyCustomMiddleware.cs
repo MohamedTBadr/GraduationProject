@@ -4,12 +4,18 @@ using System.Text.Json;
 
 namespace Web.Api.Middlewares
 {
-    public class IdempotencyCustomMiddleware(RequestDelegate next, ILogger<CustomExceptionHandlerMiddleware> _logger)
+    public class IdempotencyCustomMiddleware(RequestDelegate next, ILogger<IdempotencyCustomMiddleware> _logger)
     {
         public async Task InvokeAsync(HttpContext context)
         {
             try
             {
+                if (context.Request.Path.StartsWithSegments("/Hub"))
+                {
+                    await next(context);
+                    return;
+                }
+
                 if (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method))
                 { 
                 
@@ -18,11 +24,13 @@ namespace Web.Api.Middlewares
                     throw new IdempotencyKeyMissingException("Missing Idempotency Key header.");
                     }
 
-                     await next(context);
                     if (context.Response.StatusCode == StatusCodes.Status406NotAcceptable)
                     {
                         throw new IdempotencyKeyDuplicateException("Duplicate Idempotency Key Header");
                     }
+
+                    await next(context);
+
                 }
                 else
                 {
@@ -37,8 +45,8 @@ namespace Web.Api.Middlewares
                 context.Response.StatusCode = ex switch
                 {
                     IdempotencyKeyMissingException => (int)HttpStatusCode.BadRequest,
-                    IdempotencyKeyDuplicateException => (int)HttpStatusCode.NotAcceptable,
-
+                    IdempotencyKeyDuplicateException => (int)HttpStatusCode.Conflict,
+                    _ => (int)HttpStatusCode.InternalServerError
                 };
                 var response =new ErrorDetails
                 {
