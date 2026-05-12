@@ -1,5 +1,6 @@
 using Application.DTOs.AuthenticationDTOs;
 using Application.Interfaces;
+using Application.Interfaces.Services;
 using Domain.Contracts;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -9,10 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Shared.Exceptions;
+using Shared.Helpers;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Shared.Helpers;
 
 namespace Application.Services
 {
@@ -23,6 +24,8 @@ namespace Application.Services
             IConfiguration configuration,
             IOptions<JWTOptions> options,
             IEmailSender emailSender,
+                IVoucherService voucherService,   // ← add
+
             SseConnectionManager sseManager) : IAuthenticationService
     {
         // Define Refresh Token duration (e.g., 30 days)
@@ -93,6 +96,11 @@ namespace Application.Services
 
             if (result.Succeeded)
             {
+
+                // ← Apply referral reward if code was provided
+                if (!string.IsNullOrEmpty(request.referralCode))
+                    await voucherService.ApplyReferralAsync(request.referralCode, user.Id, cancellationToken);
+
                 // 2. Generate and set Tokens
                 var accessToken = await GenerateAccessTokenAsync(user);
                 var refreshToken = GenerateNewRefreshToken();
