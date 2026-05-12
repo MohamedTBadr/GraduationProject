@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.DTOs;
 using Application.Interfaces;
+using Application.Services;
 using Domain.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,7 +58,7 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await vendorTypeService.AddVendorTypeAsync(request, cancellationToken);
+            var result = await serviceManager.VendorTypeService.AddVendorTypeAsync(request, cancellationToken);
             return result.IsSuccess ? Created() : result.ToActionResult();
         }
 
@@ -77,7 +78,7 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await vendorTypeService.UpdateVendorTypeAsync(id, request, cancellationToken);
+            var result = await serviceManager.VendorTypeService.UpdateVendorTypeAsync(id, request, cancellationToken);
             return result.IsSuccess
                 ? Ok(result)
                 : result.ToActionResult();
@@ -92,7 +93,7 @@ namespace API.Controllers
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            var result = await vendorTypeService.DeleteVendorTypeAsync(id, cancellationToken);
+            var result = await serviceManager.VendorTypeService.DeleteVendorTypeAsync(id, cancellationToken);
             return result.IsSuccess
                 ? Ok(result)
                 : result.ToActionResult();

@@ -113,7 +113,7 @@ namespace Application.Services
                 {
                         City = sa.City,
                         Region = sa.Region,
-                        Latitude = sa.Lattitude,
+                        Latitude = sa.Latitude,
                         Longitude = sa.Longitude
                  }).ToList()
 
