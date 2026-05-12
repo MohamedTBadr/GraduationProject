@@ -234,6 +234,7 @@ namespace Infrastructure.Persistence
                 IsVerified = true,
                 VendorTypeId = vendorType.Id,
                 ProfilePicture = "https://example.com/profile.jpg",
+                Document = "https://example.com/document.pdf",
                 Address = new Address
                 {
                     Street = "123 Test Street",
