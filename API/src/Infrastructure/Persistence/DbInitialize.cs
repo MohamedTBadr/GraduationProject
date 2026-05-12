@@ -541,13 +541,13 @@ namespace Infrastructure.Persistence
         private async Task SeedEventAsync()
         {
             var user = context.ApplicationUsers
-                .FirstOrDefault(u => u.Email == "vendor@example.com");
+                .FirstOrDefault(u => u.Email == "customer@example.com");
 
             var eventType = context.EventTypes
                 .FirstOrDefault(x => x.Name == "Wedding");
 
             var vendor = context.ApplicationUsers
-                .FirstOrDefault(v => v.Email == "vendor2@example.com");
+                .FirstOrDefault(v => v.Email == "vendor@example.com");
 
             if (user == null || eventType == null || vendor == null)
                 return;
