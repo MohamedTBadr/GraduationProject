@@ -26,7 +26,7 @@ namespace Domain.Entities
         public ICollection<Order> Orders { get; set; }
         public ICollection<Event> Events { get; set; }
 
-        public string ReferralCode { get; set; }
+        public string? ReferralCode { get; set; }
         public ICollection<Voucher> Vouchers { get; set; } = [];
 
 
