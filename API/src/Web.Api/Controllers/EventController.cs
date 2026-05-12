@@ -17,7 +17,9 @@ namespace Web.Api.Controllers
     public class EventController(
         IEventService _eventService,
         LlamaService _llamaService,
-        IServiceService _serviceService) : BaseController
+        IServiceService _serviceService,
+        NotificationService notificationService
+        ) : BaseController
     {
         protected Guid UserId => GetUserIdFromToken();
 
@@ -241,7 +243,8 @@ Only return JSON. No markdown. No explanation.
                 if(dto.EventStatus == "Completed")
                 {
                     // Send email notification logic here, e.g.:
-                    // await _emailService.SendEventCompletedNotificationAsync(existing.UserId, updated.Id);
+                     //await _emailService.SendEventCompletedNotificationAsync(existing.UserId, updated.Id);
+                        await notificationService.SendAsync(existing.Value.UserId, "EVENT_COMPLETED", "Event Completed", $"Your event '{existing.Value.Title}' has been marked as completed.");
                 }
                 return updated.IsSuccess ? Ok(updated) : updated.ToActionResult();
        
@@ -329,6 +332,11 @@ Only return JSON. No markdown. No explanation.
 
             
                 var result = await _eventService.ApproveItemAsync(eventId, itemId, UserId, request.Approve, request.Reason, cancellationToken);
+                var eventDto = await _eventService.GetByIdAsync(eventId, cancellationToken);
+            if (result.IsSuccess)
+            {
+                await notificationService.SendAsync(eventDto.Value.UserId, "ITEM_APPROVAL_UPDATE" , "Item Approval Update", $"Your event item '{result.Value.ServiceName}' has been  approved");
+            }
                 return result.IsSuccess ? NoContent() : result.ToActionResult();
            
       
@@ -358,7 +366,21 @@ Only return JSON. No markdown. No explanation.
                 if (IsClient() && existing.Value.EventDate.Date <= DateTime.Today.AddDays(7))
                     return BadRequest(new { message = "You cannot cancel an event less than 7 days before it occurs." });
 
+
+
+
                 var result = await _eventService.CancelEventAsync(id, cancelEventRequest, cancellationToken);
+                if(result.IsSuccess)
+                {
+                await notificationService.SendBulkAsync(
+                    existing.Value.EventItems.Select(item =>
+                    (
+                        UserId: item.VendorId,
+                        Type: "EVENT_CANCELLED",
+                        Title: "Event Cancelled",
+                        Message: $"Your event '{existing.Value.Title}' has been cancelled. Reason: {cancelEventRequest.Reason}"
+                    )));
+            }
                 return result.IsSuccess ? NoContent() : result.ToActionResult();
           
         }

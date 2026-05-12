@@ -50,5 +50,7 @@ namespace Application.DTOs
         public int Quantity { get; set; }
         public string ItemStatus { get; set; } = "Pending"; // ← default value
         public string? RejectionReason { get; set; }
+
+        
     }
 }
