@@ -23,13 +23,13 @@ namespace Web.Api.Middlewares
                     {
                     throw new IdempotencyKeyMissingException("Missing Idempotency Key header.");
                     }
-
+                    await next(context);
                     if (context.Response.StatusCode == StatusCodes.Status406NotAcceptable)
                     {
                         throw new IdempotencyKeyDuplicateException("Duplicate Idempotency Key Header");
                     }
 
-                    await next(context);
+                    
 
                 }
                 else
