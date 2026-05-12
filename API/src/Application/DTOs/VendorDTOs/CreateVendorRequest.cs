@@ -25,6 +25,7 @@ namespace Application.DTOs.VendorDTOs
         public string PortfolioLink { get; set; }
         public Address Address { get; set; }
 
+        public IFormFile Document { get; set; }
 
         public ICollection<ServiceAreaDTO> ServiceAreas { get; set; } = new List<ServiceAreaDTO>();
 
@@ -38,8 +39,8 @@ namespace Application.DTOs.VendorDTOs
         public Guid Id { get; set; }
         public string City { get; set; }
         public  string Region { get; set; }
-        public decimal lattitude { get; set; }
-        public decimal longitude { get; set; }
+        public decimal Lattitude { get; set; }
+        public decimal Longitude { get; set; }
 
     }
 }

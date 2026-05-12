@@ -96,10 +96,10 @@ namespace Application.Services
 
 
             var profilePicture = await _fileService.Upload("Vendors", request.ProfilePicture, cancellationToken);
+            var document = await _fileService.Upload("VendorDocuments", request.Document, cancellationToken);
             var vendor = new Vendor
             {
                 UserId = user.Id,
-                User = user,
                 BusinessName = request.BusinessName,
                 YearsInBusiness = request.YearsInBusiness,
                 Description = request.Description,
@@ -107,8 +107,16 @@ namespace Application.Services
                 Address = request.Address,
                 IsVerified = false,
                 VendorTypeId = request.VendorTypeId,
-                ProfilePicture = profilePicture
-                
+                ProfilePicture = profilePicture,
+                Document = document,
+                 ServiceAreas = request.ServiceAreas?.Select(sa => new ServiceArea
+                {
+                        City = sa.City,
+                        Region = sa.Region,
+                        Latitude = sa.Lattitude,
+                        Longitude = sa.Longitude
+                 }).ToList()
+
             };
 
             await vendorRepository.AddVendorAsync(vendor, cancellationToken);

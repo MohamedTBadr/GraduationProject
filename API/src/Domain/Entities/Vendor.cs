@@ -37,6 +37,9 @@ namespace Domain.Entities
 
         public ICollection<ServiceArea> ServiceAreas { get; set; }
 
-     
+
+        public string Document { get; set; }
+
+
     }
 }
