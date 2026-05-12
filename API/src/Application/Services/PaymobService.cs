@@ -4,51 +4,114 @@ using Application.Interfaces.Services;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 
-namespace Infrastructure.Payments; // Moved to Infrastructure (Clean Arch)
+namespace Infrastructure.Payments;
 
 public class PaymobService(
     IHttpClientFactory httpClientFactory,
     IOptions<PaymobOptions> options,
-    IOrderService orderService
-    ) 
+    IOrderService orderService)
 {
     private readonly PaymobOptions _options = options.Value;
 
-    public async Task<string> CreatePaymentAsync(decimal amount, BillingData billing, CancellationToken ct )
+    // ─── Public Methods ────────────────────────────────────────────────────────
+
+    public async Task<string> CreatePaymentAsync(
+        Guid internalOrderId,
+        decimal amount,
+        BillingData billing,
+        CancellationToken ct)
     {
-        // 1. Authenticate
         var authToken = await AuthenticateAsync(ct);
-
-        // 2. Create Order
-        var orderId = await CreateOrderAsync(authToken, amount, ct);
-
-        // 3. Generate Payment Key
-        var paymentKey = await GeneratePaymentKeyAsync(authToken, orderId, amount, billing, ct);
+        var paymobOrderId = await CreateOrderAsync(authToken, internalOrderId, amount, ct);
+        var paymentKey = await GeneratePaymentKeyAsync(authToken, paymobOrderId, amount, billing, ct);
 
         return $"{_options.BaseUrl}/acceptance/iframes/{_options.IframeId}?payment_token={paymentKey}";
     }
+
+    public async Task HandleWebhookAsync(PaymobWebhookPayload payload, CancellationToken ct)
+    {
+        if (!Guid.TryParse(payload.Obj.Order.MerchantOrderId, out var internalOrderId))
+            throw new InvalidOperationException("Invalid merchant_order_id in Paymob callback.");
+
+        var status = payload.Obj.Success
+            ? new UpdateOrderStatusRequest("Paid")
+            : new UpdateOrderStatusRequest("Failed");
+
+        await orderService.UpdatePaymentStatusAsync(internalOrderId, status, ct);
+
+        // Store Paymob transaction ID for refund/support reference
+        await orderService.SetPaymentIntentAsync(internalOrderId, payload.Obj.Id.ToString(), ct);
+    }
+
+    public bool ValidateHmac(PaymobWebhookPayload payload, string receivedHmac)
+    {
+        // Paymob specifies exact fields in exact order — do NOT change
+        var message = string.Concat(
+            payload.Obj.AmountCents,
+            payload.Obj.CreatedAt,
+            payload.Obj.Currency,
+            payload.Obj.ErrorOccurred.ToString().ToLower(),
+            payload.Obj.HasParentTransaction.ToString().ToLower(),
+            payload.Obj.Id,
+            payload.Obj.IntegrationId,
+            payload.Obj.IsCaptured.ToString().ToLower(),
+            payload.Obj.IsRefunded.ToString().ToLower(),
+            payload.Obj.IsStandalonePayment.ToString().ToLower(),
+            payload.Obj.IsVoided.ToString().ToLower(),
+            payload.Obj.Order.Id,
+            payload.Obj.Owner,
+            payload.Obj.Pending.ToString().ToLower(),
+            payload.Obj.SourceData.Pan,
+            payload.Obj.SourceData.SubType,
+            payload.Obj.SourceData.Type,
+            payload.Obj.Success.ToString().ToLower()
+        );
+
+        var keyBytes = Encoding.UTF8.GetBytes(_options.HmacSecret);
+        var msgBytes = Encoding.UTF8.GetBytes(message);
+        var hash = new HMACSHA512(keyBytes).ComputeHash(msgBytes);
+        var computed = Convert.ToHexString(hash).ToLower();
+
+        return computed == receivedHmac;
+    }
+
+    // ─── Private Helpers ───────────────────────────────────────────────────────
 
     private async Task<string> AuthenticateAsync(CancellationToken ct)
     {
         var client = httpClientFactory.CreateClient("PaymobClient");
 
-        var response = await client.PostAsJsonAsync("auth/tokens", new { api_key = _options.ApiKey }, ct);
-        response.EnsureSuccessStatusCode();
+        var response = await client.PostAsJsonAsync(
+            "auth/tokens",
+            new { api_key = _options.ApiKey },
+            ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException($"Paymob Auth Error: {error}");
+        }
 
         var data = await response.Content.ReadFromJsonAsync<AuthResponse>(ct);
         return data!.token;
     }
 
-    private async Task<string> CreateOrderAsync(string token, decimal amount, CancellationToken ct)
+    private async Task<string> CreateOrderAsync(
+        string token,
+        Guid internalOrderId,
+        decimal amount,
+        CancellationToken ct)
     {
         var client = httpClientFactory.CreateClient("PaymobClient");
 
-        // Use HttpRequestMessage to avoid shared header pollution
         var request = new HttpRequestMessage(HttpMethod.Post, "ecommerce/orders")
         {
             Content = JsonContent.Create(new
             {
+                merchant_order_id = internalOrderId.ToString(),  // ← reconciliation key
                 amount_cents = (int)(amount * 100),
                 currency = "EGP",
                 delivery_needed = false,
@@ -69,7 +132,12 @@ public class PaymobService(
         return data!.id.ToString();
     }
 
-    private async Task<string> GeneratePaymentKeyAsync(string token, string orderId, decimal amount, BillingData billing, CancellationToken ct)
+    private async Task<string> GeneratePaymentKeyAsync(
+        string token,
+        string paymobOrderId,
+        decimal amount,
+        BillingData billing,
+        CancellationToken ct)
     {
         var client = httpClientFactory.CreateClient("PaymobClient");
 
@@ -77,10 +145,10 @@ public class PaymobService(
         {
             Content = JsonContent.Create(new
             {
-                auth_token = token, // Paymob accepts token in body or header for this endpoint
+                auth_token = token,
                 amount_cents = (int)(amount * 100),
                 expiration = 3600,
-                order_id = orderId,
+                order_id = paymobOrderId,
                 billing_data = billing,
                 currency = "EGP",
                 integration_id = _options.IntegrationId
@@ -89,23 +157,14 @@ public class PaymobService(
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var response = await client.SendAsync(request, ct);
-        response.EnsureSuccessStatusCode();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException($"Paymob Payment Key Error: {error}");
+        }
 
         var data = await response.Content.ReadFromJsonAsync<PaymentKeyResponse>(ct);
         return data!.token;
-    }
-
-    public async Task HandleWebhookAsync(PaymobWebhookPayload payload, CancellationToken ct)
-    {
-        // In Clean Arch, this would likely trigger a Domain Event or MediatR Command
-        if (payload.Success)
-        {
-
-            // Logic to fulfill order
-            var status = new UpdateOrderStatusRequest("Paid");
-                await orderService.UpdatePaymentStatusAsync(payload.Order, status, ct);
-
-        }
-        await Task.CompletedTask;
     }
 }

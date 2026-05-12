@@ -24,13 +24,18 @@ namespace Infrastructure.Repositories
         public async Task<ApplicationUser?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
             => await _pipeline.ExecuteAsync(async _ => await userManager.FindByNameAsync(name), cancellationToken);
 
-        public async Task<ApplicationUser?> GetByIdAsync(string userId, CancellationToken cancellationToken = default)
-            => await _pipeline.ExecuteAsync(async _ => await userManager.FindByIdAsync(userId), cancellationToken);
+        public async Task<ApplicationUser?> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default)
+            => await _pipeline.ExecuteAsync(async _ => await userManager.FindByIdAsync(userId.ToString()), cancellationToken);
 
         public async Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
             => await _pipeline.ExecuteAsync(async token =>
                 await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, token),
                 cancellationToken);
+
+
+        public async Task<ApplicationUser?> GetByReferralCodeAsync(string referralCode, CancellationToken ct) =>
+    await dbContext.Users
+            .FirstOrDefaultAsync(u => u.ReferralCode == referralCode, ct);
 
         public async Task<IList<string>> GetUserRolesAsync(ApplicationUser user, CancellationToken cancellationToken = default)
             => await _pipeline.ExecuteAsync(async _ => await userManager.GetRolesAsync(user), cancellationToken);

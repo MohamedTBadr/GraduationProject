@@ -1,6 +1,8 @@
 ﻿using Application.DTOs.PaymobDTOs;
+using Application.Interfaces.Services;
 using Application.Services;
 using Infrastructure.Payments;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Api.Controllers
@@ -10,25 +12,41 @@ namespace Web.Api.Controllers
     public class PaymentsController : ControllerBase
     {
         private readonly PaymobService _paymob;
+        private readonly IOrderService _orderService;
 
-        public PaymentsController(PaymobService paymob)
+        public PaymentsController(PaymobService paymob, IOrderService orderService)
         {
             _paymob = paymob;
+            _orderService = orderService;
         }
 
         [HttpPost("paymob")]
-        public async Task<IActionResult> CreatePayment([FromBody] PaymentRequest request, CancellationToken cancellationToken)
+        [Authorize]
+        public async Task<IActionResult> CreatePayment(
+        [FromBody] PaymentRequest request,
+        CancellationToken cancellationToken)
         {
-            var iframeUrl = await _paymob.CreatePaymentAsync(
-                request.Amount,
-                request.Billing, cancellationToken);
-            return Ok(new { iframeUrl });
-        }
+            // 1. Fetch the real order — don't trust client-provided amount
+            var order = await _orderService.GetOrderByIdAsync(request.OrderId, cancellationToken);
 
+            // 3. Use order's real amount, not request.Amount
+            var iframeUrl = await _paymob.CreatePaymentAsync(
+                order.Id,
+                order.Amount,   
+                request.Billing,
+                cancellationToken);
+
+            return Ok(iframeUrl);
+        }
         [HttpPost("paymob/webhook")]
-        public async Task<IActionResult> Webhook([FromQuery] PaymobWebhookPayload payload, CancellationToken cancellationToken)
+        public async Task<IActionResult> Webhook(
+     [FromBody] PaymobWebhookPayload payload,
+     [FromQuery] string hmac,           // ← Paymob sends this as query param
+     CancellationToken cancellationToken)
         {
-            var raw = Request.Body; // optionally read as string to log raw payload
+            if (!_paymob.ValidateHmac(payload, hmac))
+                return Unauthorized();
+
             await _paymob.HandleWebhookAsync(payload, cancellationToken);
             return Ok();
         }

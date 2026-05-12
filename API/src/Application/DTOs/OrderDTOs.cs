@@ -9,7 +9,8 @@ namespace Application.DTOs.Orders
         Guid EventId,
         string Currency,
         AddressDto ShippingAddress,
-        DateTime? Appointment
+        DateTime? Appointment,
+        string? VoucherCode
     );
 
     //public record OrderItemRequest(

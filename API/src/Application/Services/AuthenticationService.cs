@@ -12,6 +12,7 @@ using Shared.Exceptions;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Shared.Helpers;
 
 namespace Application.Services
 {
@@ -82,7 +83,9 @@ namespace Application.Services
                 LastName = request.lastName,
                 Email = request.email,
                 UserName = request.name,
-                PhoneNumber = request.phoneNumber
+                PhoneNumber = request.phoneNumber,
+                ReferralCode = ReferralCodeGenerator.Generate() // Optional: Generate a referral code based on the username
+
             };
 
             // 1. Create User
@@ -349,7 +352,7 @@ namespace Application.Services
 
         public async Task LogoutAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var user = await userRepository.GetByIdAsync(userId.ToString(), cancellationToken)
+            var user = await userRepository.GetByIdAsync(userId, cancellationToken)
                 ?? throw new UserNotFoundException(userId.ToString());
 
             await ClearRefreshTokenAsync(user, cancellationToken); // revoke refresh token

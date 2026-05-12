@@ -12,6 +12,7 @@ namespace Application.DTOs.PaymobDTOs
         public int IntegrationId { get; set; }
         public int IframeId { get; set; }
         public string BaseUrl { get; set; }
+        public string HmacSecret { get; set; }
     }
 
 }

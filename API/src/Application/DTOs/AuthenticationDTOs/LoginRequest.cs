@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.AuthenticationDTOs
 {
-    public record LoginRequest([Required][EmailAddress]string email,[Required]string password);
+    public record LoginRequest([Required][EmailAddress]string email,[Required]string password, string? referralCode = null);
 
 }

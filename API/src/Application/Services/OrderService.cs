@@ -8,22 +8,39 @@ namespace Application.Services
 {
     public class OrderService(
         IOrderRepository orderRepo,
-        NotificationService notificationService) : IOrderService
+        NotificationService notificationService,IVoucherService voucherService) : IOrderService
     {
         // ─── Create ───────────────────────────────────────────────────────────────
 
         public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request, CancellationToken ct = default)
         {
-            // ✅ Guard against null ShippingAddress from caller
             if (request.ShippingAddress is null)
                 throw new ArgumentException("Shipping address is required.", nameof(request));
+
+            // 1. Get base amount from event
+            var amount = await orderRepo.GetOrderAmountAsync(request.EventId, ct);
+
+            // 2. Apply voucher discount if provided
+            if (!string.IsNullOrEmpty(request.VoucherCode))
+            {
+                var voucherResult = await voucherService.ValidateVoucherAsync(
+                    request.VoucherCode, request.UserId, ct);
+
+                if (!voucherResult.IsValid)
+                    throw new InvalidOperationException(voucherResult.ErrorMessage);
+
+                var discount = amount * (voucherResult.DiscountPercent / 100);
+                amount -= discount;
+
+                await voucherService.MarkVoucherUsedAsync(request.VoucherCode, ct);
+            }
 
             var order = new Order
             {
                 Id = Guid.NewGuid(),
                 UserId = request.UserId,
                 EventId = request.EventId,
-                Amount = await orderRepo.GetOrderAmountAsync(request.EventId, ct),
+                Amount = amount,                        // ← discounted amount
                 Currency = request.Currency ?? "EGP",
                 Appointment = request.Appointment,
                 ShippingAddress = new Address
@@ -45,8 +62,6 @@ namespace Application.Services
                     "Order Placed",
                     $"Your order #{order.Id} has been placed successfully. Total: {order.Amount} {order.Currency}.");
 
-                // ✅ Load the Event with its items — don't rely on the navigation property
-                // being auto-populated after AddAsync
                 var eventWithItems = await orderRepo.GetEventWithItemsAsync(request.EventId, ct);
 
                 if (eventWithItems?.EventItems is { Count: > 0 })

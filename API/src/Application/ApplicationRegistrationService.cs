@@ -43,7 +43,7 @@ namespace Application
             Services.AddScoped<IVendorTypeService, VendorTypeService>();
             Services.AddScoped<ICompanyInquiryService, CompanyInquiryService>();
             Services.AddScoped<ISupportTicketService, SupportTicketService>();
-
+            Services.AddScoped<IVoucherService, VoucherService>();
 
 
             Services.AddSingleton(sp =>

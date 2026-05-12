@@ -139,6 +139,31 @@ namespace Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.NoAction); // ✅ No cascade
 
 
+
+
+            builder.Entity<Voucher>(
+                builder =>
+                {
+                    builder.HasKey(v => v.Id);
+
+                    builder.Property(v => v.Code)
+                           .IsRequired()
+                           .HasMaxLength(50);
+
+                    builder.HasIndex(v => v.Code).IsUnique();
+
+                    builder.Property(v => v.DiscountPercent)
+                           .HasPrecision(5, 2);
+
+                    builder.HasOne(v => v.Owner)
+                           .WithMany(u => u.Vouchers)
+                           .HasForeignKey(v => v.OwnerId)
+                           .OnDelete(DeleteBehavior.Cascade);
+                }
+                
+                
+                );
+
             builder.Entity<Event>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -236,5 +261,7 @@ namespace Infrastructure.Persistence
 
         public DbSet<ServiceArea> ServiceAreas { get; set; }
 
-    }
+        public DbSet<Voucher> Vouchers { get; set; }
+
+        }
 }

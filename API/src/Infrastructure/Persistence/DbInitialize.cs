@@ -294,7 +294,8 @@ namespace Infrastructure.Persistence
                 LastName = "Tarek",
                 Email = customerEmail,
                 NormalizedEmail = customerEmail.ToUpper(),
-                NormalizedUserName = "CUSTOMER"
+                NormalizedUserName = "CUSTOMER",
+                ReferralCode = "REF12345"
             };
 
             var result = await userManager.CreateAsync(

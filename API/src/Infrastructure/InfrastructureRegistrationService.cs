@@ -41,6 +41,7 @@ namespace Infrastructure
             Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                    configuration.GetConnectionString("DefaultConnection")));
+            Services.AddScoped<IVoucherRepository, VoucherRepository>();
 
 
 

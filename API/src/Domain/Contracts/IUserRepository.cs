@@ -12,7 +12,7 @@ namespace Domain.Contracts
     {
         Task<ApplicationUser?> GetByEmailAsync(string email,CancellationToken cancellationToken);
         Task<ApplicationUser?> GetByNameAsync(string name, CancellationToken cancellationToken);
-        Task<ApplicationUser?> GetByIdAsync(string userId, CancellationToken cancellationToken);
+        Task<ApplicationUser?> GetByIdAsync(Guid userId, CancellationToken cancellationToken);
         Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
         Task<IList<string>> GetUserRolesAsync(ApplicationUser user, CancellationToken cancellationToken);
         Task<IdentityResult> CreateAsync(ApplicationUser user, string password, string role, CancellationToken cancellationToken);
@@ -23,5 +23,7 @@ namespace Domain.Contracts
 
         // Vendor specific check logic moved here
         Task<bool> IsVendorVerifiedAsync(Guid userId, CancellationToken cancellationToken);
+
+        Task<ApplicationUser?> GetByReferralCodeAsync(string referralCode, CancellationToken ct);
     }
 }
