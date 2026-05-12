@@ -240,7 +240,6 @@ namespace Infrastructure.Persistence
                     Street = "123 Test Street",
                     City = "Cairo",
                     State = "Cairo Governorate",
-                    PostalCode = "11511"
                 }
                 ,
                 ServiceAreas = new List<ServiceArea>

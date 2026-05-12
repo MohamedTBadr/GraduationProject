@@ -48,7 +48,6 @@ namespace Application.Services
                     Street = request.ShippingAddress.Street,
                     City = request.ShippingAddress.City,
                     State = request.ShippingAddress.State,
-                    PostalCode = request.ShippingAddress.PostalCode
                 }
             };
 
