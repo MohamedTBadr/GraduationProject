@@ -14,7 +14,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ServiceController(IServiceService ServiceService) : BaseController
+    public class ServiceController(IServiceManager serviceManager) : BaseController
     {
         private Guid? UserId =>TryGetUserId();
         private bool IsAdmin => IsAdmin();
@@ -25,7 +25,7 @@ namespace Web.Api.Controllers
         [HybridCache(1800, "services")]
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetAllAsync(request, IsAdmin, IsVendor, UserId, cancellationToken);
+            var result = await serviceManager.ServiceService.GetAllAsync(request, IsAdmin, IsVendor, UserId, cancellationToken);
             return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
@@ -34,7 +34,7 @@ namespace Web.Api.Controllers
         [HybridCache(1800, "services", "services/{id}")]
         public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByIdAsync(id, cancellationToken);
+            var result = await serviceManager.ServiceService.GetByIdAsync(id, cancellationToken);
             return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
@@ -43,7 +43,7 @@ namespace Web.Api.Controllers
         [HybridCache(1800, "services")]
         public async Task<IActionResult> GetByEventTypeAsync(Guid eventTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByEventTypeIdAsync(eventTypeId, request, IsAdmin, IsVendor, UserId, cancellationToken);
+            var result = await serviceManager.ServiceService.GetByEventTypeIdAsync(eventTypeId, request, IsAdmin, IsVendor, UserId, cancellationToken);
             return Ok(result);
         }
 
@@ -52,7 +52,7 @@ namespace Web.Api.Controllers
         [HybridCache(1800)]
         public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByVendorIdAsync(vendorId, request, IsAdmin, IsVendor, UserId, cancellationToken);
+            var result = await serviceManager.ServiceService.GetByVendorIdAsync(vendorId, request, IsAdmin, IsVendor, UserId, cancellationToken);
             return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
@@ -61,7 +61,7 @@ namespace Web.Api.Controllers
         [HybridCache(1800)]
         public async Task<IActionResult> GetByServiceTypeAsync(Guid serviceTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await ServiceService.GetByServiceTypeIdAsync(serviceTypeId, request, IsAdmin, IsVendor, UserId, cancellationToken);
+            var result = await serviceManager.ServiceService.GetByServiceTypeIdAsync(serviceTypeId, request, IsAdmin, IsVendor, UserId, cancellationToken);
             return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
         // POST api/Services
@@ -71,7 +71,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> CreateAsync([FromForm] CreateServiceRequest dto, CancellationToken cancellationToken)
         {
             dto.VendorId = UserId; // Ensure the Service is associated with the authenticated vendor
-            var result = await ServiceService.CreateAsync(dto, cancellationToken);
+            var result = await serviceManager.ServiceService.CreateAsync(dto, cancellationToken);
 
             if (result.IsFailure)
                 return BadRequest(result); // filter handles the failure
@@ -91,7 +91,7 @@ namespace Web.Api.Controllers
 
             if (!IsAdmin) // Vendor: verify ownership and force their own VendorId
             {
-                var service = await ServiceService.GetByIdAsync(id, cancellationToken);
+                var service = await serviceManager.ServiceService.GetByIdAsync(id, cancellationToken);
 
                 if (service.Value.VendorId != UserId)
                     return Forbid();
@@ -100,7 +100,7 @@ namespace Web.Api.Controllers
             }
             // Admin: dto.VendorId is used as-is (they can assign any vendor)
 
-            var result = await ServiceService.UpdateAsync(dto, cancellationToken);
+            var result = await serviceManager.ServiceService.UpdateAsync(dto, cancellationToken);
 
             return  result.IsSuccess ? NoContent() : result.ToActionResult();
         }
@@ -113,12 +113,11 @@ namespace Web.Api.Controllers
         {
             if (UserId != null && !IsAdmin) // if user is authenticated and not admin, ensure they own the service
             {
-                var service = await ServiceService.GetByIdAsync(id, cancellationToken);
+                var service = await serviceManager.ServiceService.GetByIdAsync(id, cancellationToken);
                 if (service.Value.VendorId != UserId)
                     return Forbid(); // filter handles the failure
             }
-            var result = await ServiceService.DeleteAsync(id, cancellationToken);
-
+            var result = await serviceManager.ServiceService.DeleteAsync(id, cancellationToken);
             if (result.IsSuccess)
                 return NoContent();
 
@@ -130,7 +129,7 @@ namespace Web.Api.Controllers
         [InvalidateCache("services/{id}","services")]
         public async Task<IActionResult> ToggleStatus(Guid id, CancellationToken ct)
         {
-            await ServiceService.ToggleStatusAsync(id, ct);
+            await serviceManager.ServiceService.ToggleStatusAsync(id, ct);
             return NoContent();
         }
 
@@ -141,7 +140,7 @@ namespace Web.Api.Controllers
         {
             dto.UserId = UserId; // Ensure the rating is associated with the authenticated user
             dto.ServiceId = id; // Ensure the rating is associated with the correct service
-            await ServiceService.AddRatingAsync(dto, cancellationToken);
+            await serviceManager.ServiceService.AddRatingAsync(dto, cancellationToken);
             
             return Created(); // filter handles the failure
         }

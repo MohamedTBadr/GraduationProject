@@ -7,7 +7,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/admin/support/tickets")]
-    public class SupportTicketsController(ISupportTicketService ticketService) : ControllerBase
+    public class SupportTicketsController(IServiceManager serviceManager) : ControllerBase
     {
         // ─── GET STATS ───────────────────────────────────────────────────────────────
         [Authorize(Roles = "Admin")]
@@ -25,7 +25,7 @@ namespace API.Controllers
 
             var username = User.Identity?.Name ?? User.FindFirst("name")?.Value ?? "Unknown User";
 
-            var result = await ticketService.CreateAsync(request, username, cancellationToken);
+            var result = await serviceManager.SupportTicketService.CreateAsync(request, username, cancellationToken);
 
             if (!result.IsSuccess)
                 return result.ToActionResult();
@@ -37,7 +37,7 @@ namespace API.Controllers
         [ProducesResponseType(typeof(TicketStatsDTO), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetStats(CancellationToken cancellationToken)
         {
-            var result = await ticketService.GetStatsAsync(cancellationToken);
+            var result = await serviceManager.SupportTicketService.GetStatsAsync(cancellationToken);
             return result.ToActionResult();
         }
 
@@ -64,7 +64,7 @@ namespace API.Controllers
                 Limit    = limit
             };
 
-            var result = await ticketService.GetAllAsync(query, cancellationToken);
+            var result = await serviceManager.SupportTicketService.GetAllAsync(query, cancellationToken);
             return result.ToActionResult();
         }
 
@@ -79,7 +79,7 @@ namespace API.Controllers
             [FromRoute] string ticketId,
             CancellationToken cancellationToken)
         {
-            var result = await ticketService.GetByIdAsync(ticketId, cancellationToken);
+            var result = await serviceManager.SupportTicketService.GetByIdAsync(ticketId, cancellationToken);
             return result.ToActionResult();
         }
 
@@ -99,7 +99,7 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await ticketService.ReplyAsync(ticketId, request, cancellationToken);
+            var result = await serviceManager.SupportTicketService.ReplyAsync(ticketId, request, cancellationToken);
             return result.ToActionResult();
         }
 
@@ -119,7 +119,7 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await ticketService.AssignAsync(ticketId, request, cancellationToken);
+            var result = await serviceManager.SupportTicketService.AssignAsync(ticketId, request, cancellationToken);
             return result.ToActionResult();
         }
 
@@ -138,7 +138,7 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await ticketService.ResolveAsync(ticketId, request, cancellationToken);
+            var result = await serviceManager.SupportTicketService.ResolveAsync(ticketId, request, cancellationToken);
             return result.ToActionResult();
         }
         // ─── OPEN TICKET ─────────────────────────────────────────────────────────────
@@ -156,7 +156,7 @@ namespace API.Controllers
 
             var username = User.Identity?.Name ?? User.FindFirst("name")?.Value ?? "Unknown User";
 
-            var result = await ticketService.CreateAsync(request, username, cancellationToken);
+            var result = await serviceManager.SupportTicketService.CreateAsync(request, username, cancellationToken);
             return result.ToActionResult();
         }
         // ─── ESCALATE ────────────────────────────────────────────────────────────────
@@ -174,7 +174,7 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await ticketService.EscalateAsync(ticketId, request, cancellationToken);
+            var result = await serviceManager.SupportTicketService.EscalateAsync(ticketId, request, cancellationToken);
             return result.ToActionResult();
         }
     }

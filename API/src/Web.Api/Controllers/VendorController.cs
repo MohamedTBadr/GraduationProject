@@ -15,7 +15,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class VendorController(IVendorService vendorService) : BaseController
+    public class VendorController(IServiceManager serviceManager) : BaseController
     {
         [HttpGet]
         [HybridCache(1800,"vendors")]
@@ -23,7 +23,7 @@ namespace Web.Api.Controllers
         {
             var isAdmin = User.IsInRole("Admin");
 
-            var result = await vendorService.GetVendorsAsync(paginatedRequest,isAdmin, cancellationToken);
+            var result = await serviceManager.VendorService.GetVendorsAsync(paginatedRequest,isAdmin, cancellationToken);
             return result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
@@ -31,7 +31,7 @@ namespace Web.Api.Controllers
         [HybridCache(1800, "vendors", "vendors/{id}")]
         public async Task<IActionResult> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-           var result= await vendorService.GetVendorByIdAsync(id, cancellationToken);
+           var result= await serviceManager.VendorService.GetVendorByIdAsync(id, cancellationToken);
             return result.IsSuccess? Ok(result.Value) : result.ToActionResult();
         }
 
@@ -50,7 +50,7 @@ namespace Web.Api.Controllers
             if (string.IsNullOrEmpty(vendorIdClaim) || !Guid.TryParse(vendorIdClaim, out var vendorId))
                 return Unauthorized(new { message = "Invalid or missing vendor identity." });
 
-            var bookings = await vendorService.GetVendorBookingsAsync(vendorId, cancellationToken);
+            var bookings = await serviceManager.VendorService.GetVendorBookingsAsync(vendorId, cancellationToken);
 
             if (!bookings.Any())
                 return NotFound(new { message = "No bookings found for this vendor." });
@@ -66,7 +66,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> CreateVendorAsync([FromForm]CreateVendorRequest request, CancellationToken cancellationToken)
         {
             if (request is null) return BadRequest();
-            var result=  await vendorService.AddVendorAsync(request, cancellationToken);
+            var result=  await serviceManager.VendorService.AddVendorAsync(request, cancellationToken);
             return result.IsSuccess ? Created() : result.ToActionResult();
         }
 
@@ -76,7 +76,7 @@ namespace Web.Api.Controllers
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> RateVendorAsync(Guid id, RatingVendorRequest request, CancellationToken cancellationToken)
         {
-            var result= await vendorService.RateVendorAsync(id, request, cancellationToken);
+            var result= await serviceManager.VendorService.RateVendorAsync(id, request, cancellationToken);
             return result.IsSuccess? NoContent():result.ToActionResult();
         }
 
@@ -86,7 +86,7 @@ namespace Web.Api.Controllers
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> DeleteVendorAsync(Guid id, CancellationToken cancellationToken)
         {
-          var result= await vendorService.DeleteVendorAsync(id, cancellationToken);
+          var result= await serviceManager.VendorService.DeleteVendorAsync(id, cancellationToken);
             return NoContent();
         }
         [Authorize(Roles = "Vendor")]
@@ -94,7 +94,7 @@ namespace Web.Api.Controllers
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken)
         {
-            var result = await vendorService.UpdateVendorAsync(id, request, cancellationToken);
+            var result = await serviceManager.VendorService.UpdateVendorAsync(id, request, cancellationToken);
             return result.IsSuccess? NoContent(): result.ToActionResult();
         }
 
@@ -103,7 +103,7 @@ namespace Web.Api.Controllers
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> ApproveVendorAsync(Guid id, CancellationToken cancellationToken)
         {
-            var result=  await vendorService.ApproveVendorAsync(id, cancellationToken);
+            var result=  await serviceManager.VendorService.ApproveVendorAsync(id, cancellationToken);
             return result.IsSuccess ? NoContent() : result.ToActionResult();
         }
     }

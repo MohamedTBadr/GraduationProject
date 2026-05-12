@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Orders;
+using Application.Interfaces;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class OrderController(IOrderService orderService) : BaseController
+    public class OrderController(IServiceManager serviceManager) : BaseController
     {
         // POST api/orders
         [HttpPost]
@@ -17,7 +18,7 @@ namespace API.Controllers
         {
             var userId = GetUserIdFromToken();
             request = request with { UserId = userId };
-            var order = await orderService.CreateOrderAsync(request, ct);
+            var order = await serviceManager.OrderService.CreateOrderAsync(request, ct);
             return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
         }
 
@@ -26,7 +27,7 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
-            var orders = await orderService.GetAllOrdersAsync(ct);
+            var orders = await serviceManager.OrderService.GetAllOrdersAsync(ct);
             return Ok(orders);
         }
 
@@ -37,7 +38,7 @@ namespace API.Controllers
         {
             try
             {
-                var order = await orderService.GetOrderByIdAsync(id, ct);
+                var order = await serviceManager.OrderService.GetOrderByIdAsync(id, ct);
                 return Ok(order);
             }
             catch (KeyNotFoundException ex)
@@ -51,7 +52,7 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> GetByUser(Guid userId, CancellationToken ct)
         {
-            var orders = await orderService.GetOrdersByUserIdAsync(userId, ct);
+            var orders = await serviceManager.OrderService.GetOrdersByUserIdAsync(userId, ct);
             return Ok(orders);
         }
 
@@ -65,7 +66,7 @@ namespace API.Controllers
         {
             try
             {
-                var updated = await orderService.UpdatePaymentStatusAsync(id, request, ct);
+                var updated = await serviceManager.OrderService.UpdatePaymentStatusAsync(id, request, ct);
                 return Ok(updated);
             }
             catch (KeyNotFoundException ex)
@@ -84,7 +85,7 @@ namespace API.Controllers
         {
             try
             {
-                var updated = await orderService.SetPaymentIntentAsync(id, paymentIntentId, ct);
+                var updated = await serviceManager.OrderService.SetPaymentIntentAsync(id, paymentIntentId, ct);
                 return Ok(updated);
             }
             catch (KeyNotFoundException ex)
@@ -100,7 +101,7 @@ namespace API.Controllers
         {
             try
             {
-                await orderService.CancelOrderAsync(id, ct);
+                await serviceManager.OrderService.CancelOrderAsync(id, ct);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -116,7 +117,7 @@ namespace API.Controllers
         {
             try
             {
-                await orderService.DeleteOrderAsync(id, ct);
+                await serviceManager.OrderService.DeleteOrderAsync(id, ct);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

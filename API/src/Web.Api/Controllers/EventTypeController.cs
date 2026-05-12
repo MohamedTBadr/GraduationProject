@@ -8,13 +8,13 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class EventTypesController(IEventTypeService service) : ControllerBase
+    public class EventTypesController(IServiceManager serviceManager) : ControllerBase
     {
         [HttpGet]
         [HybridCache(1800, "EventTypes")]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
-            var result = await service.GetAllAsync(ct);
+            var result = await serviceManager.EventTypeService.GetAllAsync(ct);
             return Ok(result);
         }
 
@@ -23,7 +23,7 @@ namespace Web.Api.Controllers
         [HybridCache(1800, "EventType/{id}")]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
-            var result = await service.GetByIdAsync(id, ct);
+            var result = await serviceManager.EventTypeService.GetByIdAsync(id, ct);
             return result is null ? NotFound() : Ok(result);
         }
 
@@ -33,7 +33,7 @@ namespace Web.Api.Controllers
         [InvalidateCache("EventTypes")]
         public async Task<IActionResult> Create(EventTypeCreateDto dto, CancellationToken ct)
         {
-            var result = await service.CreateAsync(dto, ct);
+            var result = await serviceManager.EventTypeService.CreateAsync(dto, ct);
             //return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
             return Created();
         }
@@ -47,7 +47,7 @@ namespace Web.Api.Controllers
             // Ensure the ID in the URL matches the DTO or override it
             if (id != dto.Id) return BadRequest("ID mismatch");
 
-            await service.UpdateAsync(dto, ct);
+            await serviceManager.EventTypeService.UpdateAsync(dto, ct);
             return NoContent();
         }
 
@@ -57,7 +57,7 @@ namespace Web.Api.Controllers
         [InvalidateCache("EventTypes", "EventType/{id}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
-            var success = await service.DeleteAsync(id, ct);
+            var success = await serviceManager.EventTypeService.DeleteAsync(id, ct);
             return success ? NoContent() : NotFound();
         }
     }

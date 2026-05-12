@@ -12,7 +12,7 @@ namespace API.Controllers
     [ApiController]
     [Route("api/[controller]")]
    
-    public class VendorTypeController(IVendorTypeService vendorTypeService) : ControllerBase
+    public class VendorTypeController(IServiceManager serviceManager) : ControllerBase
     {
         private const string CacheKey = "VendorTypes";
 
@@ -23,7 +23,7 @@ namespace API.Controllers
         [ProducesResponseType(typeof(Result<IReadOnlyList<VendorTypeDetailsDTO>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            var result = await vendorTypeService.GetVendorTypesAsync(cancellationToken);
+            var result = await serviceManager.VendorTypeService.GetVendorTypesAsync(cancellationToken);
             return result.IsSuccess
                 ? Ok(result)
                 : result.ToActionResult();
@@ -37,7 +37,7 @@ namespace API.Controllers
         [ProducesResponseType(typeof(Result<VendorTypeDetailsDTO>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            var result = await vendorTypeService.GetVendorTypeByIdAsync(id, cancellationToken);
+            var result = await serviceManager.VendorTypeService.GetVendorTypeByIdAsync(id, cancellationToken);
             return result.IsSuccess
                 ? Ok(result)
                 : result.ToActionResult();

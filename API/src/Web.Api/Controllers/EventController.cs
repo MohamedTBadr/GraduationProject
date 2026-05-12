@@ -15,10 +15,7 @@ namespace Web.Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     public class EventController(
-        IEventService _eventService,
-        LlamaService _llamaService,
-        IServiceService _serviceService,
-        NotificationService notificationService
+IServiceManager serviceManager
         ) : BaseController
     {
         protected Guid UserId => GetUserIdFromToken();
@@ -31,8 +28,8 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var result = IsAdmin()
-                ? await _eventService.GetAllAsync( cancellationToken)
-                : await _eventService.GetByUserIdAsync(UserId, cancellationToken); // ← was calling GetUserIdFromToken() directly, use property instead
+                ? await serviceManager.EventService.GetAllAsync( cancellationToken)
+                : await serviceManager.EventService.GetByUserIdAsync(UserId, cancellationToken); // ← was calling GetUserIdFromToken() directly, use property instead
 
             return result.IsSuccess ? Ok(result) : NotFound(result);
         }
@@ -47,7 +44,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
            
-                var result = await _eventService.GetByIdAsync(id, cancellationToken);
+                var result = await serviceManager.EventService.GetByIdAsync(id, cancellationToken);
                 if (!IsAdminOrOwner(result.Value.UserId))
                     return Forbid();
 
@@ -66,7 +63,7 @@ namespace Web.Api.Controllers
             if (!IsAdminOrOwner(userId))
                 return Forbid();
 
-            var result = await _eventService.GetByUserIdAsync(userId, cancellationToken);
+            var result = await serviceManager.EventService.GetByUserIdAsync(userId, cancellationToken);
             return result.IsSuccess ? Ok(result) : NotFound(result);
         }
 
@@ -81,11 +78,11 @@ namespace Web.Api.Controllers
           
                 if (IsAdmin())
                 {
-                    var all = await _eventService.GetByStatusAsync(status, cancellationToken);
+                    var all = await serviceManager.EventService.GetByStatusAsync(status, cancellationToken);
                     return Ok(all);
                 }
 
-                var result = await _eventService.GetByUserIdAndStatusAsync(UserId, status, cancellationToken);
+                var result = await serviceManager.EventService.GetByUserIdAndStatusAsync(UserId, status, cancellationToken);
                 return result.IsSuccess ? Ok(result) : NotFound(result);
             
            
@@ -104,7 +101,7 @@ namespace Web.Api.Controllers
             CancellationToken cancellationToken)
         {
             // 1. Get event
-            var eventResult = await _eventService.GetByIdAsync(eventId, cancellationToken);
+            var eventResult = await serviceManager.EventService.GetByIdAsync(eventId, cancellationToken);
             if (eventResult.IsFailure)
                 return eventResult.ToActionResult();
 
@@ -118,7 +115,7 @@ namespace Web.Api.Controllers
                 EventTypeName = eventObject.EventTypeName
             };
 
-            var servicesResult = await _serviceService.AIFilterAsync(request, cancellationToken);
+            var servicesResult = await serviceManager.ServiceService.AIFilterAsync(request, cancellationToken);
             if (servicesResult.IsFailure)
                 return servicesResult.ToActionResult();
 
@@ -171,7 +168,7 @@ Only return JSON. No markdown. No explanation.
 """;
 
             // 4. Call Llama
-            var aiResult = await _llamaService.SendMessageAsync(
+            var aiResult = await serviceManager.LlamaService.SendMessageAsync(
                 prompt,
                 systemPrompt: "You are an event planning engine. Respond with JSON only."
             );
@@ -210,7 +207,7 @@ Only return JSON. No markdown. No explanation.
                 dto.UserId = UserId;
 
            
-                var created = await _eventService.CreateAsync(dto, cancellationToken);
+                var created = await serviceManager.EventService.CreateAsync(dto, cancellationToken);
                 return created.IsSuccess
                     ? Created()
                     : created.ToActionResult();
@@ -231,7 +228,7 @@ Only return JSON. No markdown. No explanation.
                 return BadRequest(ModelState);
 
            
-                var existing = await _eventService.GetByIdAsync(id, cancellationToken);
+                var existing = await serviceManager.EventService.GetByIdAsync(id, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
@@ -239,12 +236,12 @@ Only return JSON. No markdown. No explanation.
                 if ((IsVendor() || IsClient()) && dto.EventStatus == "Completed")
                     return Forbid();
 
-                var updated = await _eventService.UpdateAsync(id, dto, cancellationToken);
+                var updated = await serviceManager.EventService.UpdateAsync(id, dto, cancellationToken);
                 if(dto.EventStatus == "Completed")
                 {
                     // Send email notification logic here, e.g.:
                      //await _emailService.SendEventCompletedNotificationAsync(existing.UserId, updated.Id);
-                        await notificationService.SendAsync(existing.Value.UserId, "EVENT_COMPLETED", "Event Completed", $"Your event '{existing.Value.Title}' has been marked as completed.");
+                        await serviceManager.NotificationService.SendAsync(existing.Value.UserId, "EVENT_COMPLETED", "Event Completed", $"Your event '{existing.Value.Title}' has been marked as completed.");
                 }
                 return updated.IsSuccess ? Ok(updated) : updated.ToActionResult();
        
@@ -273,12 +270,12 @@ Only return JSON. No markdown. No explanation.
             if (IsVendor())
                 return Forbid();
 
-                var existing = await _eventService.GetByIdAsync(eventId, cancellationToken);
+                var existing = await serviceManager.EventService.GetByIdAsync(eventId, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
-                var result = await _eventService.AddItemAsync(eventId, dto, cancellationToken);
+                var result = await serviceManager.EventService.AddItemAsync(eventId, dto, cancellationToken);
                 return result.IsSuccess ? CreatedAtAction(nameof(GetById), new { id = eventId }, result) : result.ToActionResult();
            
         }
@@ -304,12 +301,12 @@ Only return JSON. No markdown. No explanation.
                 return Forbid();
 
            
-                var existing = await _eventService.GetByIdAsync(eventId, cancellationToken);
+                var existing = await serviceManager.EventService.GetByIdAsync(eventId, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
-                var result = await _eventService.UpdateItemAsync(eventId, itemId, dto, cancellationToken);
+                var result = await serviceManager.EventService.UpdateItemAsync(eventId, itemId, dto, cancellationToken);
                 return result.IsSuccess ? Ok(result) : result.ToActionResult();
         
         }
@@ -331,11 +328,11 @@ Only return JSON. No markdown. No explanation.
                 return Forbid();
 
             
-                var result = await _eventService.ApproveItemAsync(eventId, itemId, UserId, request.Approve, request.Reason, cancellationToken);
-                var eventDto = await _eventService.GetByIdAsync(eventId, cancellationToken);
+                var result = await serviceManager.EventService.ApproveItemAsync(eventId, itemId, UserId, request.Approve, request.Reason, cancellationToken);
+                var eventDto = await serviceManager.EventService.GetByIdAsync(eventId, cancellationToken);
             if (result.IsSuccess)
             {
-                await notificationService.SendAsync(eventDto.Value.UserId, "ITEM_APPROVAL_UPDATE" , "Item Approval Update", $"Your event item '{result.Value.ServiceName}' has been  approved");
+                await serviceManager.NotificationService.SendAsync(eventDto.Value.UserId, "ITEM_APPROVAL_UPDATE" , "Item Approval Update", $"Your event item '{result.Value.ServiceName}' has been  approved");
             }
                 return result.IsSuccess ? NoContent() : result.ToActionResult();
            
@@ -353,7 +350,7 @@ Only return JSON. No markdown. No explanation.
         public async Task<IActionResult> CancelEvent(Guid id, [FromBody] CancelEventRequest cancelEventRequest, CancellationToken cancellationToken)
         {
            
-                var existing = await _eventService.GetByIdAsync(id, cancellationToken);
+                var existing = await serviceManager.EventService.GetByIdAsync(id, cancellationToken);
                 if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
 
@@ -369,10 +366,10 @@ Only return JSON. No markdown. No explanation.
 
 
 
-                var result = await _eventService.CancelEventAsync(id, cancelEventRequest, cancellationToken);
+                var result = await serviceManager.EventService.CancelEventAsync(id, cancelEventRequest, cancellationToken);
                 if(result.IsSuccess)
                 {
-                await notificationService.SendBulkAsync(
+                await serviceManager.NotificationService.SendBulkAsync(
                     existing.Value.EventItems.Select(item =>
                     (
                         UserId: item.VendorId,
@@ -399,7 +396,7 @@ Only return JSON. No markdown. No explanation.
                 return Forbid();
 
           
-                var existing = await _eventService.GetByIdAsync(id, cancellationToken);
+                var existing = await serviceManager.EventService.GetByIdAsync(id, cancellationToken);
 
                 if (!IsAdminOrOwner(existing.Value.UserId))
                     return Forbid();
@@ -407,7 +404,7 @@ Only return JSON. No markdown. No explanation.
                 if (IsClient() && existing.Value.EventStatus != "Planned")
                     return BadRequest(new { message = "You can only delete events with 'Planned' status." });
 
-                var result = await _eventService.DeleteAsync(id, cancellationToken);
+                var result = await serviceManager.EventService.DeleteAsync(id, cancellationToken);
                 return result.IsSuccess ? NoContent() : result.ToActionResult();
           
         }
