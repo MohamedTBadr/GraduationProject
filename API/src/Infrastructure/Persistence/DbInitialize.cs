@@ -34,7 +34,8 @@ namespace Infrastructure.Persistence
                     await SeedEventTypeAsync();
                     await SeedServicesAsync();
                     await SeedPackagesAsync();
-
+                    await SeedNotificationAsnyc();
+                    await SeedEventAsync();
                     await transaction.CommitAsync();
 
                     Console.WriteLine("Database seeding completed successfully.");
@@ -481,6 +482,151 @@ namespace Infrastructure.Persistence
             };
 
             await context.Packages.AddRangeAsync(packages);
+            await context.SaveChangesAsync();
+        }
+
+        private async Task SeedNotificationAsnyc()
+        {
+                if (await context.Notifications.AnyAsync())
+                    return;
+
+
+            var vendor = context.ApplicationUsers
+       .FirstOrDefault(u => u.Email == "vendor@example.com");
+            var customer = context.ApplicationUsers
+       .FirstOrDefault(u => u.Email == "customer@example.com");
+
+            var notifications = new List<Notification>
+{
+    new Notification
+    {
+        Id = Guid.NewGuid(),
+        UserId = vendor.Id, // Replace with actual user ID
+        Message = "Welcome to our event management platform!",
+        Title = "Test",
+        Type = NotificationType.ACCOUNT_ACCEPTED,
+        IsRead = false,
+        CreatedAt = DateTime.UtcNow
+    },
+
+    new Notification
+    {
+        Id = Guid.NewGuid(),
+        UserId = vendor.Id,
+        Message = "Your vendor account has been approved.",
+        Title = "Account Approved",
+        Type = NotificationType.ACCOUNT_ACCEPTED,
+        IsRead = false,
+        CreatedAt = DateTime.UtcNow
+    },
+
+    new Notification
+    {
+        Id = Guid.NewGuid(),
+        UserId = customer.Id,
+        Message = "You received a new booking request.",
+        Title = "New Booking",
+        Type = NotificationType.ORDER_PLACED,
+        IsRead = false,
+        CreatedAt = DateTime.UtcNow
+    }
+};
+
+
+
+            await context.Notifications.AddRangeAsync(notifications);
+                await context.SaveChangesAsync();
+        }
+
+        private async Task SeedEventAsync()
+        {
+            var user = context.ApplicationUsers
+                .FirstOrDefault(u => u.Email == "vendor@example.com");
+
+            var eventType = context.EventTypes
+                .FirstOrDefault(x => x.Name == "Wedding");
+
+            var vendor = context.ApplicationUsers
+                .FirstOrDefault(v => v.Email == "vendor2@example.com");
+
+            if (user == null || eventType == null || vendor == null)
+                return;
+
+            var newEvent = new Event
+            {
+                Id = Guid.NewGuid(),
+
+                UserId = user.Id,
+                EventTypeId = eventType.Id,
+
+                Title = "Luxury Wedding Cairo 2026",
+                EventDate = DateTime.UtcNow.AddMonths(3),
+
+                Location = new Address
+                {
+                    City = "Cairo",
+                    State = "Giza",
+                    Street = "Pyramids Road"
+                },
+
+                TotalBudget = 75000m,
+                GuestCount = 250,
+                Notes = "Premium wedding with full vendor coordination",
+
+                EventStatus = "Planned",
+
+                EventItems = new List<EventItem>
+        {
+            new EventItem
+            {
+                Id = Guid.NewGuid(),
+                ServiceName = "Premium Catering",
+                ServiceImage = "catering.jpg",
+                Price = 20000m,
+                VendorName = "Elite Catering Co",
+                Quantity = 1,
+
+                VendorId = vendor.Id,
+                ItemStatus = "Approved",
+                RejectionReason = null
+            },
+            new EventItem
+            {
+                Id = Guid.NewGuid(),
+                ServiceName = "Photography Package",
+                ServiceImage = "photo.jpg",
+                Price = 12000m,
+                VendorName = "Pro Shots Studio",
+                Quantity = 1,
+
+                VendorId = vendor.Id,
+                ItemStatus = "Pending"
+            },
+            new EventItem
+            {
+                Id = Guid.NewGuid(),
+                ServiceName = "Decoration Setup",
+                ServiceImage = "decor.jpg",
+                Price = 15000m,
+                VendorName = "Dream Decor",
+                Quantity = 1,
+
+                VendorId = vendor.Id,
+                ItemStatus = "Pending"
+            }
+        },
+
+                Order = new Order
+                {
+                    Id = Guid.NewGuid(),
+                    // adapt fields based on your Order entity
+                    CreatedAt = DateTime.UtcNow
+                },
+
+                CreatedAt = DateTime.UtcNow
+            };
+
+            context.Events.Add(newEvent);
             await context.SaveChangesAsync();
         }
     }
