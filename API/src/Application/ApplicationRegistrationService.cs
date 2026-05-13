@@ -136,7 +136,7 @@ namespace Application
                         var path = context.HttpContext.Request.Path;
 
                         if (!string.IsNullOrEmpty(accessToken) &&
-                            path.StartsWithSegments("/Hub/chatHub"))
+                            (path.StartsWithSegments("/Hub/chatHub") || path.StartsWithSegments("/api/notifications/stream")))
                         {
                             context.Token = accessToken;
                         }
