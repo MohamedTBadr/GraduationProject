@@ -142,7 +142,12 @@ export class AddEventComponent implements OnInit {
       next: (res) => {
         this.isSubmitting = false;
         this.toastService.show('Event created successfully!', 'success');
-        this.router.navigate(['/user/my-events'], { queryParams: { id: res.id } });
+        
+        if (res && res.id) {
+          this.router.navigate(['/user/my-events'], { queryParams: { id: res.id } });
+        } else {
+          this.router.navigate(['/user/my-events']);
+        }
       },
       error: (err) => {
         this.isSubmitting = false;

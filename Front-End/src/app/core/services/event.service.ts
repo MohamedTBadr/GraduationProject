@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -7,12 +7,13 @@ import {
   EventResponseDto,
   EventSummaryDto,
   PagedResult,
-  PaginationParams,
+  PaginatedRequest,
   CreateEventDto,
   UpdateEventDto,
   ApproveItemRequest,
   CancelEventRequest,
-  CreateEventItemDto
+  CreateEventItemDto,
+  AiEventPlanResponse
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -22,10 +23,13 @@ export class EventService {
   constructor(private http: HttpClient) {}
 
   /** GET /Event - Get all events (paginated) */
-  getAll(params?: PaginationParams): Observable<PagedResult<EventSummaryDto>> {
-    const queryParams: any = {};
-    if (params?.pageNumber) queryParams.pageNumber = params.pageNumber;
-    if (params?.pageSize) queryParams.pageSize = params.pageSize;
+  getAll(params?: PaginatedRequest): Observable<PagedResult<EventSummaryDto>> {
+    let queryParams = new HttpParams();
+    if (params) {
+      if (params.pageIndex) queryParams = queryParams.set('pageIndex', params.pageIndex.toString());
+      if (params.pageSize) queryParams = queryParams.set('pageSize', params.pageSize.toString());
+      if (params.searchTerm) queryParams = queryParams.set('searchTerm', params.searchTerm);
+    }
     
     return this.http.get<PagedResult<EventSummaryDto>>(this.apiUrl, { params: queryParams });
   }
@@ -99,8 +103,8 @@ export class EventService {
     return this.http.patch<void>(`${this.apiUrl}/${id}/cancel`, payload);
   }
 
-  /** POST /Event/createEventByAI/{eventId} - Generate an event plan using Gemini */
-  generateEventByAI(eventId: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/createEventByAI/${eventId}`, {});
+  /** POST /Event/createEventByAI/{eventId} - Generate an event plan using AI (Llama 3) */
+  generateEventByAI(eventId: string): Observable<AiEventPlanResponse> {
+    return this.http.post<AiEventPlanResponse>(`${this.apiUrl}/createEventByAI/${eventId}`, {});
   }
 }

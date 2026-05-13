@@ -7,7 +7,7 @@ import {
   ApiUser,
   CreateUserRequest,
   UpdateUserRequest,
-  PaginationParams,
+  PaginatedRequest,
   PagedResult
 } from '../../shared/types/api.interfaces';
 
@@ -17,19 +17,20 @@ export class UserService {
 
   constructor(private http: HttpClient) { }
 
-  /** GET /User?pageNumber=1&pageSize=10 */
-  getAll(pagination?: PaginationParams): Observable<PagedResult<ApiUser>> {
+  /** GET /User */
+  getAll(pagination?: PaginatedRequest): Observable<PagedResult<ApiUser>> {
     let params = new HttpParams();
     if (pagination) {
-      if (pagination.pageNumber) {
-        params = params.set('PageIndex', pagination.pageNumber.toString()); // Note: backend uses PageIndex
-      }
-      if (pagination.pageSize) {
-        params = params.set('PageSize', pagination.pageSize.toString());
-      }
-      if (pagination.searchTerm) {
-        params = params.set('SearchTerm', pagination.searchTerm);
-      }
+      if (pagination.pageIndex) params = params.set('pageIndex', pagination.pageIndex.toString());
+      if (pagination.pageSize) params = params.set('pageSize', pagination.pageSize.toString());
+      if (pagination.searchTerm) params = params.set('searchTerm', pagination.searchTerm);
+      if (pagination.sortBy) params = params.set('sortBy', pagination.sortBy);
+      if (pagination.isDescending !== undefined) params = params.set('isDescending', pagination.isDescending.toString());
+      if (pagination.city) params = params.set('city', pagination.city);
+      if (pagination.region) params = params.set('region', pagination.region);
+      if (pagination.latitude) params = params.set('latitude', pagination.latitude.toString());
+      if (pagination.longitude) params = params.set('longitude', pagination.longitude.toString());
+      if (pagination.radiusKm) params = params.set('radiusKm', pagination.radiusKm.toString());
     }
     return this.http.get<any>(`${this.apiUrl}/User`, { params }).pipe(
       map(res => {

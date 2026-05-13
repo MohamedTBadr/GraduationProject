@@ -29,7 +29,8 @@ export class ServiceTypeService {
         const normalizedData = data.map((item: any) => ({
            ...item,
            id: item.id || item.Id,
-           name: item.name || item.Name
+           name: item.name || item.Name,
+           vendorTypeId: item.vendorTypeId || item.VendorTypeId
         }));
         this.cachedServiceTypes = normalizedData;
       }),
@@ -45,7 +46,8 @@ export class ServiceTypeService {
         return {
           ...item,
           id: item.id || item.Id,
-          name: item.name || item.Name
+          name: item.name || item.Name,
+          vendorTypeId: item.vendorTypeId || item.VendorTypeId
         };
       })
     );

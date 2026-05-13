@@ -44,13 +44,9 @@ export class ChatService implements OnDestroy {
   startConnection(): void {
     if (this.hubConnection) return; // already connected
 
-    const token = this.authService.getToken() ?? '';
-    const connectionUrl = `${environment.signalRUrl}?accessToken=${token}`;
-
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(connectionUrl, {
-        accessTokenFactory: () => token,
-        headers: { 'IdempotencyKey': crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() }
+      .withUrl(environment.signalRUrl, {
+        accessTokenFactory: () => this.authService.getToken() ?? ''
       })
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Warning)

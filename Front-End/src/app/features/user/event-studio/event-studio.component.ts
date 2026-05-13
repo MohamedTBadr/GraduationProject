@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../../core/services/event.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
+import { AiEventPlanParsed, AiEventPlanResponse } from '../../../shared/types/api.interfaces';
 
 @Component({
   selector: 'app-event-studio',
@@ -20,7 +21,7 @@ export class EventStudioComponent {
   toastService = inject(ToastService);
 
   isGenerating = false;
-  aiPlan: any = null;
+  aiPlan: AiEventPlanParsed | null = null;
   error: string | null = null;
 
   ngOnInit() {
@@ -33,11 +34,11 @@ export class EventStudioComponent {
     this.aiPlan = null;
 
     this.eventService.generateEventByAI(this.eventId).subscribe({
-      next: (response: any) => {
+      next: (response: AiEventPlanResponse) => {
         this.isGenerating = false;
         try {
           const planStr = response.aiPlan.replace(/```json/g, '').replace(/```/g, '').trim();
-          this.aiPlan = JSON.parse(planStr);
+          this.aiPlan = JSON.parse(planStr) as AiEventPlanParsed;
         } catch (e) {
           this.error = "Failed to parse the AI response. Please try again.";
           console.error("Parse error:", e, response.aiPlan);

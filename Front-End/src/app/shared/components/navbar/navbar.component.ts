@@ -55,7 +55,14 @@ export class NavbarComponent {
 
   goToMessages() {
     if (this.authService.isLoggedIn()) {
-      const route = this.authService.role() === 'Vendor' ? '/vendor/messages' : '/user/messages';
+      const route = this.authService.role() === 'Vendor' ? '/vendor-dashboard/messages' : '/user/messages';
+      this.router.navigate([route]);
+    }
+  }
+
+  goToNotifications() {
+    if (this.authService.isLoggedIn()) {
+      const route = this.authService.role() === 'Vendor' ? '/vendor-dashboard/notifications' : '/user/dashboard';
       this.router.navigate([route]);
     }
   }

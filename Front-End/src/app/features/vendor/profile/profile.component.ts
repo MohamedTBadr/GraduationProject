@@ -54,16 +54,23 @@ export class ProfileComponent implements OnInit {
 
     const payload: UpdateVendorRequest = {
       name: this.vendor.name,
+      businessName: this.vendor.name,
       phone: this.vendor.phone,
-      location: this.vendor.location,
-      about: this.vendor.about
+      description: this.vendor.about,
+      address: {
+        street: this.vendor.location || '',
+        city: 'Not Specified',
+        state: 'Not Specified',
+        postalCode: ''
+      }
     };
 
-    this.vendorService.update(this.vendor.id, payload).subscribe({
+    const vendorId = this.vendor.id;
+
+    this.vendorService.update(vendorId, payload).subscribe({
       next: (res) => {
-        this.vendor = { ...res };
         this.toastService.show('Profile updated successfully!', 'success');
-        this.router.navigate(['/vendor', this.vendor.id]);
+        this.router.navigate(['/vendor', vendorId]);
       },
       error: () => {
         this.toastService.show('Failed to update profile', 'error');
