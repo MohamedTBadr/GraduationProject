@@ -13,6 +13,8 @@
 	<PackageReference Include="AutoMapper" Version="16.1.1" />
 	<PackageReference Include="AWSSDK.S3" Version="4.0.15.1" />
 	<PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
+	<PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
+	<PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
 	
   </ItemGroup>
 	<ItemGroup>

@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+using Application.Interfaces;
 using Application.Interfaces.Services;
 using Application.Services.Helpers;
 
@@ -24,5 +24,7 @@ namespace Application.Interfaces
         IVoucherService VoucherService { get; }
         NotificationService NotificationService { get; }
         LlamaService LlamaService { get; }
+        ISearchService SearchService { get; }
+        IPlanningAIService PlanningAIService { get; }
     }
 }

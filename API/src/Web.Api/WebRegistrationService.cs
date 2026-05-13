@@ -1,4 +1,4 @@
-﻿using Application.DTOs.PaymobDTOs;
+using Application.DTOs.PaymobDTOs;
 using Application.Hubs;
 using Application.Interfaces;
 using Application.Services;
@@ -31,6 +31,8 @@ using Web.Api.Services;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
+using Hangfire;
+using Hangfire.SqlServer;
 
 namespace Web.Api
 {
@@ -243,18 +245,6 @@ namespace Web.Api
     IAuthorizationMiddlewareResultHandler,
     CustomAuthorizationResultHandler>();
          
-            #region Serilog
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .WriteTo.Console()
-                .WriteTo.File(
-                 path: "logs/app-.log",
-                 rollingInterval: RollingInterval.Day,   // new file each day
-                 retainedFileCountLimit: 7               // keep last 7 days
-                )
-                .CreateLogger();
-
-            #endregion
 
 
             #region Resilience 
@@ -350,6 +340,24 @@ namespace Web.Api
     .AddMeter("MyApi")
         .AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317"))
             );
+
+
+            #region Hangfire
+            Services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
+                {
+                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                    QueuePollInterval = TimeSpan.Zero,
+                    UseRecommendedIsolationLevel = true,
+                    DisableGlobalLocks = true
+                }));
+
+            Services.AddHangfireServer();
+            #endregion
 
 
 

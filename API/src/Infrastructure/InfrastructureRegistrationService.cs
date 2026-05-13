@@ -1,7 +1,9 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Contracts.Caching;
 using Domain.Contracts.Caching.Interfaces;
 using Infrastructure.Persistence;
+using Infrastructure.Search;
+using Application.Interfaces;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +44,7 @@ namespace Infrastructure
                 options.UseSqlServer(
                    configuration.GetConnectionString("DefaultConnection")));
             Services.AddScoped<IVoucherRepository, VoucherRepository>();
+            Services.AddSingleton<ISearchService, LuceneSearchService>();
 
 
 

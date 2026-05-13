@@ -1,7 +1,7 @@
-﻿using Application.DTOs.PaymobDTOs;
+using Application.DTOs.PaymobDTOs;
 using Application.Interfaces.Services;
-using Application.Services;
 using Infrastructure.Payments;
+using IdempotentAPI.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +22,7 @@ namespace Web.Api.Controllers
 
         [HttpPost("paymob")]
         [Authorize]
+ 
         public async Task<IActionResult> CreatePayment(
         [FromBody] PaymentRequest request,
         CancellationToken cancellationToken)
@@ -39,15 +40,16 @@ namespace Web.Api.Controllers
             return Ok(iframeUrl);
         }
         [HttpPost("paymob/webhook")]
-        public async Task<IActionResult> Webhook(
+        public IActionResult Webhook(
      [FromBody] PaymobWebhookPayload payload,
-     [FromQuery] string hmac,           // ← Paymob sends this as query param
-     CancellationToken cancellationToken)
+     [FromQuery] string hmac)           // ← Paymob sends this as query param
         {
             if (!_paymob.ValidateHmac(payload, hmac))
                 return Unauthorized();
 
-            await _paymob.HandleWebhookAsync(payload, cancellationToken);
+            // Offload to background job so we can return 200 OK to Paymob immediately
+            Hangfire.BackgroundJob.Enqueue<PaymobService>(s => s.HandleWebhookAsync(payload, CancellationToken.None));
+            
             return Ok();
         }
     }

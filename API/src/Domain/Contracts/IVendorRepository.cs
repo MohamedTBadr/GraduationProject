@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Shared;
 using System.Linq.Expressions;
 
@@ -11,5 +11,6 @@ namespace Domain.Contracts {
         Task<PaginatedResponse<Vendor>> GetVendorsAsync(PaginatedRequest paginatedRequest, Expression<Func<Vendor, bool>> visibilityFilter, CancellationToken cancellationToken);
         Task UpdateVendorAsync(Vendor vendor, CancellationToken cancellationToken);
         Task<List<ServiceType>> GetServiceTypesByIdsAsync(List<Guid> ids, CancellationToken cancellationToken);
+        Task<List<Vendor>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken);
     }
 }

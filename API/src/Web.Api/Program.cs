@@ -3,6 +3,7 @@
 using Application;
 using Application.Services.Helpers;
 using Domain.Contracts;
+using Hangfire;
 using Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -41,8 +42,14 @@ namespace Web
      
 
            
-            builder.Host.UseSerilog((ctx, config) => config
-                    .WriteTo.File("logs/app-.log", rollingInterval: RollingInterval.Day));
+            builder.Host.UseSerilog((ctx, config) =>
+            {
+                config.ReadFrom.Configuration(ctx.Configuration)
+                      .Enrich.FromLogContext()
+                      
+                      .WriteTo.File(new Serilog.Formatting.Json.JsonFormatter(), "logs/app-json-.log", rollingInterval: RollingInterval.Day)
+                      .WriteTo.File("logs/app-text-.log", rollingInterval: RollingInterval.Day);
+            });
             //builder.Services.AddOpenApi();
             builder.Services.AddResponseCompression(options =>
             {
@@ -98,10 +105,12 @@ namespace Web
             app.UseHttpsRedirection();
             app.UseResponseCompression();
             app.UseTelemetry();
+            app.UseSerilogRequestLogging();
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseMiddleware<IdempotencyCustomMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseHangfireDashboard();
             app.MapControllers();
             app.MapHub<ChatHub>("/Hub/chatHub");
             //app.Run($"https://localhost:{builder.Configuration["PORT"]}");

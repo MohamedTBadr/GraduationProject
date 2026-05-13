@@ -23,5 +23,10 @@ namespace Application.Interfaces
         // IEventService — add
         Task<Result<EventItemResponseDto>> AddItemAsync(Guid eventId, CreateEventItemDto dto, CancellationToken cancellationToken);
         Task<Result<EventItemResponseDto>> UpdateItemAsync(Guid eventId, Guid itemId, UpdateEventItemDto dto, CancellationToken cancellationToken);
+
+        Task<Result<bool>> AddCollaboratorAsync(Guid eventId, string userEmailOrName, Domain.Enums.CollaboratorRole role, CancellationToken cancellationToken);
+        Task<Result<bool>> RemoveCollaboratorAsync(Guid eventId, Guid userId, CancellationToken cancellationToken);
+        Task<Result<IEnumerable<EventCollaboratorDto>>> GetCollaboratorsAsync(Guid eventId, CancellationToken cancellationToken);
+        Task<bool> HasPermissionAsync(Guid eventId, Guid userId, bool requiresEdit, CancellationToken cancellationToken);
     }
 }

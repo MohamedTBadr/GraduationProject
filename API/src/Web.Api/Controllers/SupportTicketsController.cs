@@ -2,6 +2,7 @@ using Application.DTOs.Support;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using IdempotentAPI.Filters;
 
 namespace API.Controllers
 {
@@ -13,6 +14,7 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
 
         [HttpPost]
+        [Idempotent]
         [Authorize]
         [ProducesResponseType(typeof(TicketDetailsDTO), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -86,6 +88,7 @@ namespace API.Controllers
         // ─── REPLY ───────────────────────────────────────────────────────────────────
 
         [HttpPost("{ticketId}/reply")]
+        [Idempotent]
         [Authorize(Roles = "Admin")]
 
         [ProducesResponseType(typeof(TicketReplyResponseDTO), StatusCodes.Status200OK)]
@@ -106,6 +109,7 @@ namespace API.Controllers
         // ─── ASSIGN ──────────────────────────────────────────────────────────────────
 
         [HttpPost("{ticketId}/assign")]
+        [Idempotent]
         [Authorize(Roles = "Admin")]
 
         [ProducesResponseType(typeof(TicketAssignResponseDTO), StatusCodes.Status200OK)]
@@ -126,6 +130,7 @@ namespace API.Controllers
         // ─── RESOLVE ─────────────────────────────────────────────────────────────────
 
         [HttpPatch("{ticketId}/resolve")]
+        [Idempotent]
         [Authorize(Roles = "Admin")]
 
         [ProducesResponseType(typeof(TicketResolveResponseDTO), StatusCodes.Status200OK)]
@@ -144,6 +149,7 @@ namespace API.Controllers
         // ─── OPEN TICKET ─────────────────────────────────────────────────────────────
 
         [HttpPost("open-ticket")]
+        [Idempotent]
         [Authorize(Roles = "Vendor,Customer")]
         [ProducesResponseType(typeof(TicketDetailsDTO), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -162,6 +168,7 @@ namespace API.Controllers
         // ─── ESCALATE ────────────────────────────────────────────────────────────────
 
         [HttpPost("{ticketId}/escalate")]
+        [Idempotent]
         [Authorize(Roles ="Vendor,Customer")]
         [ProducesResponseType(typeof(TicketEscalateResponseDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

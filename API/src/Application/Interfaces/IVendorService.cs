@@ -1,4 +1,4 @@
-﻿using Application.DTOs.VendorDTOs;
+using Application.DTOs.VendorDTOs;
 using Domain.Entities;
 using Shared;
 using System.Linq.Expressions;
@@ -17,5 +17,7 @@ namespace Application.Interfaces
         Task<List<VendorBookingDto>> GetVendorBookingsAsync(
             Guid vendorId,
             CancellationToken cancellationToken);
+        Task<Result<VendorVibeDTO>> GetVendorVibeAsync(Guid vendorId, CancellationToken cancellationToken);
+        Task RebuildSearchIndexAsync();
     }
 }

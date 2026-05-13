@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -227,6 +227,23 @@ namespace Infrastructure.Persistence
 
             builder.Entity<Service>().HasMany(s=>s.EventTypes).WithMany(e=>e.Services)
                 .UsingEntity(j => j.ToTable("ServiceEventTypes"));
+
+            builder.Entity<EventCollaborator>(entity =>
+            {
+                entity.HasKey(ec => ec.Id);
+
+                entity.HasOne(ec => ec.Event)
+                      .WithMany(e => e.Collaborators)
+                      .HasForeignKey(ec => ec.EventId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ec => ec.User)
+                      .WithMany()
+                      .HasForeignKey(ec => ec.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(ec => new { ec.EventId, ec.UserId }).IsUnique();
+            });
         }
 
 
@@ -261,6 +278,7 @@ namespace Infrastructure.Persistence
         public DbSet<ServiceArea> ServiceAreas { get; set; }
 
         public DbSet<Voucher> Vouchers { get; set; }
+        public DbSet<EventCollaborator> EventCollaborators { get; set; }
 
         }
 }

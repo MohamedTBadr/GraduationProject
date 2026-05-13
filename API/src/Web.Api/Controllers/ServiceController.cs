@@ -1,4 +1,4 @@
-﻿using Application;
+using Application;
 using Application.DTOs.ServiceDTOs;
 using Application.Interfaces;
 using BLL;
@@ -9,6 +9,7 @@ using Shared;
 using System.Security.Claims;
 using Web.Api.Attributes;
 using Web.Api.Controllers.Attributes;
+using IdempotentAPI.Filters;
 
 namespace Web.Api.Controllers
 {
@@ -52,8 +53,9 @@ namespace Web.Api.Controllers
         [HybridCache(1800)]
         public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await serviceManager.ServiceService.GetByVendorIdAsync(vendorId, request, IsAdmin, IsVendor, UserId, cancellationToken);
-            return  result.IsSuccess ? Ok(result) : result.ToActionResult();
+            var filteredRequest = request with { VendorId = vendorId };
+            var result = await serviceManager.ServiceService.GetAllAsync(filteredRequest, IsAdmin, IsVendor, UserId, cancellationToken);
+            return result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
         // GET api/Services/by-service-type/{serviceTypeId}
@@ -61,12 +63,14 @@ namespace Web.Api.Controllers
         [HybridCache(1800)]
         public async Task<IActionResult> GetByServiceTypeAsync(Guid serviceTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await serviceManager.ServiceService.GetByServiceTypeIdAsync(serviceTypeId, request, IsAdmin, IsVendor, UserId, cancellationToken);
-            return  result.IsSuccess ? Ok(result) : result.ToActionResult();
+            var filteredRequest = request with { ServiceTypeId = serviceTypeId };
+            var result = await serviceManager.ServiceService.GetAllAsync(filteredRequest, IsAdmin, IsVendor, UserId, cancellationToken);
+            return result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
         // POST api/Services
         [Authorize(Roles = "Vendor")]
         [HttpPost]
+        [Idempotent]
         [InvalidateCache("services")]
         public async Task<IActionResult> CreateAsync([FromForm] CreateServiceRequest dto, CancellationToken cancellationToken)
         {
@@ -83,6 +87,7 @@ namespace Web.Api.Controllers
 
         [Authorize(Roles = "Admin,Vendor")]
         [HttpPut("{id:guid}")]
+        [Idempotent]
         [InvalidateCache("services/{id}")]
         public async Task<IActionResult> UpdateAsync(Guid id, [FromForm] UpdateServiceDTO dto, CancellationToken cancellationToken)
         {
@@ -108,6 +113,7 @@ namespace Web.Api.Controllers
 
         // DELETE api/Services/{id}
         [HttpDelete("{id:guid}")]
+        [Idempotent]
         [InvalidateCache("services/{id}", "services")]
         public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
@@ -125,6 +131,7 @@ namespace Web.Api.Controllers
         }
     
         [HttpPatch("{id}/status")]
+        [Idempotent]
         [Authorize(Roles = "Admin,Vendor")]
         [InvalidateCache("services/{id}","services")]
         public async Task<IActionResult> ToggleStatus(Guid id, CancellationToken ct)
@@ -134,6 +141,7 @@ namespace Web.Api.Controllers
         }
 
         [HttpPost("{id}/ratings")]
+        [Idempotent]
         [Authorize(Roles = "User")]
         [InvalidateCache("services/{id}")]
         public async Task<IActionResult> AddRatingAsync(Guid id, ServiceRatingRequest dto, CancellationToken cancellationToken)

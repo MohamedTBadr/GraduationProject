@@ -1,4 +1,4 @@
-﻿using Application;
+using Application;
 using Application.DTOs.VendorDTOs;
 using Application.Interfaces;
 using Application.Services;
@@ -10,6 +10,7 @@ using Shared;
 using System.Security.Claims;
 using Web.Api.Attributes;
 using Web.Api.Controllers.Attributes;
+using IdempotentAPI.Filters;
 
 namespace Web.Api.Controllers
 {
@@ -59,6 +60,7 @@ namespace Web.Api.Controllers
         }
 
         [HttpPost]
+        [Idempotent]
         [SuccessStatusCode(201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(409)]
@@ -72,6 +74,7 @@ namespace Web.Api.Controllers
 
 
         [HttpPost("{id}/rating")]
+        [Idempotent]
         [Authorize]
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> RateVendorAsync(Guid id, RatingVendorRequest request, CancellationToken cancellationToken)
@@ -81,6 +84,7 @@ namespace Web.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Idempotent]
         [Authorize(Roles = "Admin")]
         [SuccessStatusCode(204)]
         [InvalidateCache("vendors", "vendors/{id}")]
@@ -91,6 +95,7 @@ namespace Web.Api.Controllers
         }
         [Authorize(Roles = "Vendor")]
         [HttpPatch("{id}")]
+        [Idempotent]
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken)
         {
@@ -100,11 +105,20 @@ namespace Web.Api.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/approve")]
+        [Idempotent]
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> ApproveVendorAsync(Guid id, CancellationToken cancellationToken)
         {
             var result=  await serviceManager.VendorService.ApproveVendorAsync(id, cancellationToken);
             return result.IsSuccess ? NoContent() : result.ToActionResult();
+        }
+
+        [HttpGet("{id}/vibe")]
+        [HybridCache(3600, "vendors", "vendors/{id}/vibe")]
+        public async Task<IActionResult> GetVendorVibeAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await serviceManager.VendorService.GetVendorVibeAsync(id, cancellationToken);
+            return result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
     }
 }

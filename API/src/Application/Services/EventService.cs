@@ -13,16 +13,20 @@ namespace Application.Services
     {
         private readonly IEventRepository _eventRepo;
         private readonly IEventTypeRepository _eventTypeRepo;
+        private readonly IUserRepository _userRepo;
+        private readonly IEmailSender _emailSender;
         private readonly NotificationService _notificationService;
 
         private static readonly HashSet<string> ValidStatuses =
             new() { "Planned", "Approved", "Completed", "Cancelled" };
 
-        public EventService(IEventRepository eventRepo, IEventTypeRepository eventTypeRepo, NotificationService notificationService)
+        public EventService(IEventRepository eventRepo, IEventTypeRepository eventTypeRepo, NotificationService notificationService, IUserRepository userRepo, IEmailSender emailSender)
         {
             _eventRepo = eventRepo;
             _eventTypeRepo = eventTypeRepo;
             _notificationService = notificationService;
+            _userRepo = userRepo;
+            _emailSender = emailSender;
         }
 
         // ── Read ──────────────────────────────────────────────────
@@ -199,12 +203,115 @@ namespace Application.Services
             var updated = await _eventRepo.UpdateItemAsync(item, cancellationToken);
             return Result<EventItemResponseDto>.Success(updated.ToResponseDto());
         }
+
+        public async Task<Result<bool>> AddCollaboratorAsync(Guid eventId, string userEmailOrName, Domain.Enums.CollaboratorRole role, CancellationToken cancellationToken)
+        {
+            var ev = await _eventRepo.GetByIdAsync(eventId, cancellationToken);
+            if (ev == null)
+                return Result<bool>.NotFound(404, "Event not found.");
+
+            var user = await _userRepo.GetByEmailAsync(userEmailOrName, cancellationToken) 
+                       ?? await _userRepo.GetByNameAsync(userEmailOrName, cancellationToken);
+
+            if (user == null)
+            {
+                if (IsEmail(userEmailOrName))
+                {
+                    await _emailSender.SendEmailAsync(
+                        userEmailOrName,
+                        "Invitation to Collaborate",
+                        $"<p>You've been invited to collaborate on the event <strong>{ev.Title}</strong> as a {role}.</p><p>Register now to start planning!</p>");
+                    return Result<bool>.Success(true);
+                }
+                return Result<bool>.NotFound(404, "User not found.");
+            }
+
+            if (user.Id == ev.UserId)
+                return Result<bool>.InvalidOperation(400, "User is already the owner of this event.");
+
+            var existing = await _eventRepo.GetCollaboratorAsync(eventId, user.Id, cancellationToken);
+            if (existing != null)
+                return Result<bool>.InvalidOperation(400, "User is already a collaborator.");
+
+            var collaborator = new EventCollaborator
+            {
+                Id = Guid.NewGuid(),
+                EventId = eventId,
+                UserId = user.Id,
+                Role = role
+            };
+
+            await _eventRepo.AddCollaboratorAsync(collaborator, cancellationToken);
+            
+            await _notificationService.SendAsync(
+                user.Id,
+                "COLLABORATION_INVITE",
+                "New Collaboration Invite",
+                $"You have been invited to collaborate on event '{ev.Title}' as a {role}.");
+
+            return Result<bool>.Success(true);
+        }
+
+        public async Task<Result<bool>> RemoveCollaboratorAsync(Guid eventId, Guid userId, CancellationToken cancellationToken)
+        {
+            var ev = await _eventRepo.GetByIdAsync(eventId, cancellationToken);
+            if (ev == null)
+                return Result<bool>.NotFound(404, "Event not found.");
+
+            await _eventRepo.RemoveCollaboratorAsync(eventId, userId, cancellationToken);
+            return Result<bool>.Success(true);
+        }
+
+        public async Task<Result<IEnumerable<EventCollaboratorDto>>> GetCollaboratorsAsync(Guid eventId, CancellationToken cancellationToken)
+        {
+            var collabs = await _eventRepo.GetCollaboratorsAsync(eventId, cancellationToken);
+            var dtos = collabs.Select(c => new EventCollaboratorDto
+            {
+                UserId = c.UserId,
+                FullName = $"{c.User.FirstName} {c.User.LastName}",
+                Email = c.User.Email,
+                Role = c.Role,
+                InvitedAt = c.InvitedAt
+            });
+            return Result<IEnumerable<EventCollaboratorDto>>.Success(dtos);
+        }
+
+        public async Task<bool> HasPermissionAsync(Guid eventId, Guid userId, bool requiresEdit, CancellationToken cancellationToken)
+        {
+            var ev = await _eventRepo.GetByIdAsync(eventId, cancellationToken);
+            if (ev == null) return false;
+
+            if (ev.UserId == userId) return true; // Owner
+
+            var collaborator = await _eventRepo.GetCollaboratorAsync(eventId, userId, cancellationToken);
+            if (collaborator == null) return false;
+
+            if (requiresEdit)
+            {
+                return collaborator.Role == Domain.Enums.CollaboratorRole.Editor;
+            }
+
+            return true; // Viewer or Editor
+        }
         // ── Helpers ───────────────────────────────────────────────
 
         private void ValidateStatus(string status)
         {
             if (!ValidStatuses.Contains(status))
                 throw new ArgumentException($"Invalid status '{status}'. Valid values: Planned, Approved, Completed, Cancelled.");
+        }
+
+        private bool IsEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private async Task SyncEventStatusAsync(Guid eventId, CancellationToken cancellationToken)
@@ -242,7 +349,8 @@ namespace Application.Services
             AdditionalNotes = e.AdditionalNotes,
             CancelledAt = e.CancelledAt,
             Location = e.Location?.ToDto(),
-            EventItems = e.EventItems?.Select(i => i.ToResponseDto()).ToList() ?? new()
+            EventItems = e.EventItems?.Select(i => i.ToResponseDto()).ToList() ?? new(),
+            Collaborators = e.Collaborators?.Select(c => c.ToCollaboratorDto()).ToList() ?? new()
         };
 
         internal static EventSummaryDto ToSummaryDto(this Event e) => new()
@@ -275,6 +383,15 @@ namespace Application.Services
             City = a.City,
             State = a.State
            
+        };
+
+        internal static EventCollaboratorDto ToCollaboratorDto(this EventCollaborator c) => new()
+        {
+            UserId = c.UserId,
+            FullName = c.User != null ? $"{c.User.FirstName} {c.User.LastName}" : "Unknown",
+            Email = c.User?.Email ?? "Unknown",
+            Role = c.Role,
+            InvitedAt = c.InvitedAt
         };
 
         // ── DTOs → Entity ─────────────────────────────────────────

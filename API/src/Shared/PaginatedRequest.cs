@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -22,6 +22,13 @@ namespace Shared
         public string? SortBy { get; init; }
         public bool IsDescending { get; init; } = false;
         public bool IncludeHidden { get; init; } = false;
+
+        // 🎯 Advanced Filters
+       
+        public Guid? ServiceTypeId { get; init; }
+        public Guid? VendorId { get; init; }
+        public decimal? MinPrice { get; init; }
+        public decimal? MaxPrice { get; init; }
 
         // 🔄 Map to LocationFilter for the helper
         public LocationFilter? LocationFilter =>

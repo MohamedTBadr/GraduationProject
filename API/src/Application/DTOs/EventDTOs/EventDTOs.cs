@@ -57,6 +57,7 @@ namespace Application.DTOs
           // ← was missing
         public DateTime? CancelledAt { get; set; }          // ← was missing
         public List<EventItemResponseDto> EventItems { get; set; } = new();
+        public List<EventCollaboratorDto> Collaborators { get; set; } = new();
     }
 
     public class EventSummaryDto

@@ -196,5 +196,17 @@ namespace Infrastructure.Repositories
 
             return dbContext.ServiceTypes.Where(st => ids.Contains(st.Id)).ToListAsync(cancellationToken);
         }
+        public async Task<List<Vendor>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken)
+        {
+            return await _pipeline.ExecuteAsync(async token =>
+                await dbContext.Vendors
+                    .Include(x => x.User)
+                    .Include(x => x.VendorType)
+                    .Include(x => x.Services)
+                        .ThenInclude(s => s.ServiceRatings)
+                    .Where(v => ids.Contains(v.UserId))
+                    .ToListAsync(token),
+                cancellationToken);
+        }
     }
 }

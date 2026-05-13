@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+using Application.Interfaces;
 using Application.Interfaces.Services;
 using Application.Services.Helpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +25,8 @@ namespace Application.Services
         private readonly Lazy<IVoucherService> _voucherService;
         private readonly Lazy<NotificationService> _notificationService;
         private readonly Lazy<LlamaService> _llamaService;
+        private readonly Lazy<ISearchService> _searchService;
+        private readonly Lazy<IPlanningAIService> _planningAIService;
 
         public ServiceManager(IServiceProvider serviceProvider)
         {
@@ -46,6 +48,8 @@ namespace Application.Services
             _voucherService = new Lazy<IVoucherService>(() => serviceProvider.GetRequiredService<IVoucherService>());
             _notificationService = new Lazy<NotificationService>(() => serviceProvider.GetRequiredService<NotificationService>());
             _llamaService = new Lazy<LlamaService>(() => serviceProvider.GetRequiredService<LlamaService>());
+            _searchService = new Lazy<ISearchService>(() => serviceProvider.GetRequiredService<ISearchService>());
+            _planningAIService = new Lazy<IPlanningAIService>(() => serviceProvider.GetRequiredService<IPlanningAIService>());
         }
 
         public IEmailSender EmailSender => _emailSender.Value;
@@ -66,5 +70,7 @@ namespace Application.Services
         public IVoucherService VoucherService => _voucherService.Value;
         public NotificationService NotificationService => _notificationService.Value;
         public LlamaService LlamaService => _llamaService.Value;
+        public ISearchService SearchService => _searchService.Value;
+        public IPlanningAIService PlanningAIService => _planningAIService.Value;
     }
 }

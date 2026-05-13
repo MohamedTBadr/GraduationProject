@@ -1,4 +1,4 @@
-﻿
+
 using Domain.Entities;
 using Google.GenAI.Types;
 using Shared;
@@ -22,21 +22,9 @@ namespace Domain.Contracts
         //    CancellationToken cancellationToken);
         Task<PaginatedResponse<Service>> GetByEventTypeIdAsync(Guid eventTypeId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken);
 
-
         Task<List<ServiceImage>> GetServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken);
 
         Task DeleteServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken);
-        Task<PaginatedResponse<Service>> GetByVendorIdAsync(
-            Guid vendorId,
-            PaginatedRequest request,
-            Expression<Func<Service, bool>> visibilityFilter,
-            CancellationToken cancellationToken);
-
-        Task<PaginatedResponse<Service>> GetByServiceTypeIdAsync(
-            Guid serviceTypeId,
-            PaginatedRequest request,
-            Expression<Func<Service, bool>> visibilityFilter,
-            CancellationToken cancellationToken);
         Task<Service> CreateAsync(Service Service, CancellationToken cancellationToken);
             Task<Service> UpdateAsync(Service Service, CancellationToken cancellationToken);
             Task DeleteAsync(Guid id, CancellationToken cancellationToken);
@@ -48,5 +36,6 @@ namespace Domain.Contracts
         Task<bool> HasUserPurchasedAsync(Guid userId, Guid serviceId, CancellationToken cancellationToken);
 
         Task<List<Service>> AIFilterAsync(AIRequest AIRequest, CancellationToken cancellationToken);
+        Task<List<Service>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken);
     }
     }

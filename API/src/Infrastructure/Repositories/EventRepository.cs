@@ -30,6 +30,7 @@ namespace Infrastructure.Repositories
             return await _pipeline.ExecuteAsync(async token =>
                 await _context.Events
                     .Include(e => e.EventType)
+                    .Include(e => e.Collaborators)
                     .FirstOrDefaultAsync(e => e.Id == id, token),
                 cancellationToken);
         }
@@ -40,6 +41,8 @@ namespace Infrastructure.Repositories
                 await _context.Events
                     .Include(e => e.EventType)
                     .Include(e => e.EventItems)
+                    .Include(e => e.Collaborators)
+                        .ThenInclude(c => c.User)
                     .FirstOrDefaultAsync(e => e.Id == id, token),
                 cancellationToken);
         }
@@ -62,7 +65,7 @@ namespace Infrastructure.Repositories
                 await _context.Events
                     .Include(e => e.EventType)
                     .Include(e => e.EventItems)
-                    .Where(e => e.UserId == userId)
+                    .Where(e => e.UserId == userId || e.Collaborators.Any(c => c.UserId == userId))
                     .ToListAsync(token),
                 cancellationToken);
         }
@@ -156,6 +159,47 @@ namespace Infrastructure.Repositories
                 await _context.SaveChangesAsync(token);
                 return item;
             }, cancellationToken);
+        }
+
+        public async Task AddCollaboratorAsync(EventCollaborator collaborator, CancellationToken cancellationToken)
+        {
+            await _pipeline.ExecuteAsync(async token =>
+            {
+                await _context.EventCollaborators.AddAsync(collaborator, token);
+                await _context.SaveChangesAsync(token);
+            }, cancellationToken);
+        }
+
+        public async Task RemoveCollaboratorAsync(Guid eventId, Guid userId, CancellationToken cancellationToken)
+        {
+            await _pipeline.ExecuteAsync(async token =>
+            {
+                var collab = await _context.EventCollaborators
+                    .FirstOrDefaultAsync(ec => ec.EventId == eventId && ec.UserId == userId, token);
+                if (collab != null)
+                {
+                    _context.EventCollaborators.Remove(collab);
+                    await _context.SaveChangesAsync(token);
+                }
+            }, cancellationToken);
+        }
+
+        public async Task<IEnumerable<EventCollaborator>> GetCollaboratorsAsync(Guid eventId, CancellationToken cancellationToken)
+        {
+            return await _pipeline.ExecuteAsync(async token =>
+                await _context.EventCollaborators
+                    .Include(ec => ec.User)
+                    .Where(ec => ec.EventId == eventId)
+                    .ToListAsync(token),
+                cancellationToken);
+        }
+
+        public async Task<EventCollaborator?> GetCollaboratorAsync(Guid eventId, Guid userId, CancellationToken cancellationToken)
+        {
+            return await _pipeline.ExecuteAsync(async token =>
+                await _context.EventCollaborators
+                    .FirstOrDefaultAsync(ec => ec.EventId == eventId && ec.UserId == userId, token),
+                cancellationToken);
         }
     }
 }

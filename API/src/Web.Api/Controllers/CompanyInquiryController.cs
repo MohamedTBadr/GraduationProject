@@ -1,8 +1,9 @@
-﻿using Application.DTOs.CompanyInquiryDTOs;
+using Application.DTOs.CompanyInquiryDTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
+using IdempotentAPI.Filters;
 
 namespace API.Controllers
 {
@@ -19,6 +20,7 @@ namespace API.Controllers
 
         // PUBLIC - no auth required (corporations apply without login)
         [HttpPost]
+        [Idempotent]
         [AllowAnonymous]
         public async Task<IActionResult> Submit([FromBody] CreateCompanyInquiryDto dto)
         {
@@ -48,6 +50,7 @@ namespace API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id:guid}")]
+        [Idempotent]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCompanyInquiryDto dto)
         {
             if (!ModelState.IsValid)
@@ -62,6 +65,7 @@ namespace API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id:guid}")]
+        [Idempotent]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _service.DeleteAsync(id);

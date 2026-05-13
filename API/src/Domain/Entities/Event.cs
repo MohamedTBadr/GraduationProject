@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,6 +28,7 @@ namespace Domain.Entities
         public string EventStatus { get; set; } = "Planned"; // Planned,Approved, Completed, Cancelled
 
         public List<EventItem> EventItems { get; set; } = new List<EventItem>();
+        public ICollection<EventCollaborator> Collaborators { get; set; } = new List<EventCollaborator>();
 
         public string? CancellationReason { get; set; }
         public string? AdditionalNotes { get; set; }

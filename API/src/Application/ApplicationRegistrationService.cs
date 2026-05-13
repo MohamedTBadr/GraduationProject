@@ -1,4 +1,4 @@
-﻿using Amazon.S3;
+using Amazon.S3;
 using Application.DTOs;
 using Application.DTOs.AuthenticationDTOs;
 using Application.DTOs.PaymobDTOs;
@@ -24,7 +24,8 @@ namespace Application
     {
         public static async Task<IServiceCollection> AddApplicationServices(this IServiceCollection Services, IConfiguration configuration)
         {
-            Services.AddScoped<IEmailSender, EmailSenderService>();
+            Services.AddScoped<EmailSenderService>();
+            Services.AddScoped<IEmailSender, HangfireEmailSender>();
             Services.AddScoped<IAuthenticationService, AuthenticationService>();
             Services.AddScoped<IAttachmentService, AttachmentService>();
             Services.AddScoped<IServiceManager, ServiceManager>();
@@ -44,6 +45,7 @@ namespace Application
             Services.AddScoped<ICompanyInquiryService, CompanyInquiryService>();
             Services.AddScoped<ISupportTicketService, SupportTicketService>();
             Services.AddScoped<IVoucherService, VoucherService>();
+            Services.AddScoped<IPlanningAIService, PlanningAIService>();
 
 
             Services.AddSingleton(sp =>

@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+using Application.Interfaces;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
@@ -7,7 +7,7 @@ using System.Net.Mail;
 
 namespace Application.Services.Helpers
 {
-    public class EmailSenderService(IConfiguration _config) : IEmailSender
+    public class EmailSenderService(IConfiguration _config)
         {
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {

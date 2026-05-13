@@ -1,9 +1,10 @@
-﻿using Application.DTOs.Orders;
+using Application.DTOs.Orders;
 using Application.Interfaces;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Api.Controllers;
+using IdempotentAPI.Filters;
 
 namespace API.Controllers
 {
@@ -13,6 +14,7 @@ namespace API.Controllers
     {
         // POST api/orders
         [HttpPost]
+        [Idempotent]
         [Authorize]
         public async Task<IActionResult> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
         {
@@ -58,6 +60,7 @@ namespace API.Controllers
 
         // PATCH api/orders/{id}/payment-status
         [HttpPatch("{id:guid}/payment-status")]
+        [Idempotent]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdatePaymentStatus(
             Guid id,
@@ -77,6 +80,7 @@ namespace API.Controllers
 
         // PATCH api/orders/{id}/payment-intent
         [HttpPatch("{id:guid}/payment-intent")]
+        [Idempotent]
         [Authorize]
         public async Task<IActionResult> SetPaymentIntent(
             Guid id,
@@ -96,6 +100,7 @@ namespace API.Controllers
 
         // POST api/orders/{id}/cancel
         [HttpPost("{id:guid}/cancel")]
+        [Idempotent]
         [Authorize]
         public async Task<IActionResult> Cancel(Guid id, CancellationToken ct)
         {
@@ -112,6 +117,7 @@ namespace API.Controllers
 
         // DELETE api/orders/{id}
         [HttpDelete("{id:guid}")]
+        [Idempotent]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
