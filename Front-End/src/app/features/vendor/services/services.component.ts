@@ -9,7 +9,8 @@ import { ProductService } from '../../../core/services/product.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { VendorTypeService } from '../../../core/services/vendor-type.service';
-import { VendorType } from '../../../core/models/taxonomy.models';
+import { VendorType, EventType } from '../../../core/models/taxonomy.models';
+import { EventTypeService } from '../../../core/services/event-type.service';
 
 @Component({
   selector: 'app-services',
@@ -40,28 +41,31 @@ export class ServicesComponent implements OnInit {
   isDetailModalOpen = false;
   selectedService: ApiProduct | null = null;
 
-  AVAILABLE_EVENT_TYPES = [
-    { id: 'wedding', name: 'Wedding' },
-    { id: 'birthday', name: 'Birthday' },
-    { id: 'graduation', name: 'Graduation' },
-    { id: 'engagement', name: 'Engagement' },
-    { id: 'conference', name: 'Conference / Seminar' },
-    { id: 'product_launch', name: 'Product Launch' },
-    { id: 'exhibition', name: 'Exhibition' }
-  ];
+  eventTypes: EventType[] = [];
 
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
     private authService: AuthService,
     private toastService: ToastService,
-    private vendorTypeService: VendorTypeService
+    private vendorTypeService: VendorTypeService,
+    private eventTypeService: EventTypeService
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadProducts();
     this.loadVendorTypes();
+    this.loadEventTypes();
+  }
+
+  loadEventTypes(): void {
+    this.eventTypeService.getAll().subscribe({
+      next: (data) => this.eventTypes = data,
+      error: (err) => {
+        console.error('Failed to load event types', err);
+      }
+    });
   }
 
   loadVendorTypes(): void {
@@ -96,11 +100,11 @@ export class ServicesComponent implements OnInit {
       vendorTypeId: ['', Validators.required],
       serviceTypeId: ['', Validators.required],
       classification: ['Corporate'], // Default or optional
-      allowedEventTypes: [[]], // Array of strings
+      eventTypeIds: [[]], // Array of strings
       price: [0, [Validators.required, Validators.min(0)]],
       description: ['', Validators.required],
-      duration: [''],
-      leadTime: ['']
+      duration: [0],
+      leadTime: [0]
     });
   }
 
@@ -131,16 +135,16 @@ export class ServicesComponent implements OnInit {
         vendorTypeId: serviceToEdit.vendorTypeId || '',
         serviceTypeId: serviceToEdit.serviceTypeId || '',
         classification: serviceToEdit.classification || '',
-        allowedEventTypes: serviceToEdit.allowedEventTypes || [],
+        eventTypeIds: serviceToEdit.eventTypeIds || serviceToEdit.allowedEventTypes || [],
         price: serviceToEdit.price || 0,
         description: serviceToEdit.description || '',
-        duration: serviceToEdit.duration || '',
-        leadTime: serviceToEdit.leadTime || ''
+        duration: serviceToEdit.duration || 0,
+        leadTime: serviceToEdit.leadTime || 0
       });
       this.uploadedImages = serviceToEdit.imageUrl ? [{ previewUrl: serviceToEdit.imageUrl, status: 'done' }] : [];
     } else {
       this.editingId = null;
-      this.serviceForm.reset({ name: '', vendorTypeId: '', serviceTypeId: '', classification: 'Corporate', allowedEventTypes: [], price: 0, description: '' });
+      this.serviceForm.reset({ name: '', vendorTypeId: '', serviceTypeId: '', classification: 'Corporate', eventTypeIds: [], price: 0, description: '' });
       this.uploadedImages = [];
     }
     this.isAddServiceModalOpen = true;
@@ -152,14 +156,14 @@ export class ServicesComponent implements OnInit {
   }
 
   toggleEventType(evtId: string) {
-    const currentList = this.serviceForm.get('allowedEventTypes')?.value || [];
+    const currentList = this.serviceForm.get('eventTypeIds')?.value || [];
     const index = currentList.indexOf(evtId);
     if (index > -1) {
       currentList.splice(index, 1);
     } else {
       currentList.push(evtId);
     }
-    this.serviceForm.get('allowedEventTypes')?.setValue(currentList);
+    this.serviceForm.get('eventTypeIds')?.setValue(currentList);
   }
   
   onImagesChanged(images: any[]) {
@@ -175,26 +179,29 @@ export class ServicesComponent implements OnInit {
     const val = this.serviceForm.value;
 
     if (this.editingId) {
-      // NOTE: Using existing JSON approach for update since API expects JSON
-      const existing = this.services.find(s => s.id === this.editingId);
-      const imageUrl = this.uploadedImages.length > 0 && !this.uploadedImages[0].file 
-            ? this.uploadedImages[0].previewUrl : null;
-            
-      const updateData: UpdateProductRequest = {
-        name: val.name,
-        vendorTypeId: val.vendorTypeId,
-        serviceTypeId: val.serviceTypeId,
-        classification: val.classification,
-        allowedEventTypes: val.allowedEventTypes,
-        price: Number(val.price),
-        description: val.description,
-        imageUrl: imageUrl, // Keep existing if not changed, API update doesn't handle files right now
-        status: existing?.status || 'active',
-        duration: val.duration,
-        leadTime: val.leadTime
-      };
+      const formData = new FormData();
+      formData.append('Id', this.editingId);
+      formData.append('Name', val.name);
+      formData.append('Description', val.description);
+      formData.append('ServiceTypeId', val.serviceTypeId);
+      if (val.eventTypeIds && val.eventTypeIds.length) {
+        val.eventTypeIds.forEach((evtId: string) => {
+          formData.append('EventTypeIds', evtId);
+        });
+      }
+      formData.append('Price', (val.price || 0).toString());
+      if (val.duration != null) formData.append('SetupDuration', val.duration.toString());
+      if (val.leadTime != null) formData.append('LeadTimeRequired', val.leadTime.toString());
       
-      this.productService.update(this.editingId, updateData).subscribe({
+      if (this.uploadedImages && this.uploadedImages.length > 0) {
+        this.uploadedImages.forEach(img => {
+          if (img.file) {
+            formData.append('Images', img.file, img.file.name);
+          }
+        });
+      }
+      
+      this.productService.update(this.editingId, formData as any).subscribe({
         next: () => {
           this.toastService.show('Service updated successfully', 'success');
           this.loadProducts();
@@ -210,17 +217,15 @@ export class ServicesComponent implements OnInit {
       const formData = new FormData();
       formData.append('Name', val.name);
       formData.append('Description', val.description);
-      formData.append('VendorTypeId', val.vendorTypeId);
       formData.append('ServiceTypeId', val.serviceTypeId);
-      if (val.classification) formData.append('Classification', val.classification);
-      if (val.allowedEventTypes && val.allowedEventTypes.length) {
-        val.allowedEventTypes.forEach((evtId: string) => {
-          formData.append('AllowedEventTypes', evtId);
+      if (val.eventTypeIds && val.eventTypeIds.length) {
+        val.eventTypeIds.forEach((evtId: string) => {
+          formData.append('EventTypeIds', evtId);
         });
       }
       formData.append('Price', (val.price || 0).toString());
-      if (val.duration) formData.append('SetupDuration', val.duration);
-      if (val.leadTime) formData.append('LeadTimeRequired', val.leadTime);
+      if (val.duration != null) formData.append('SetupDuration', val.duration.toString());
+      if (val.leadTime != null) formData.append('LeadTimeRequired', val.leadTime.toString());
       
       // Append files
       if (this.uploadedImages && this.uploadedImages.length > 0) {
@@ -282,7 +287,7 @@ export class ServicesComponent implements OnInit {
       vendorTypeId: service.vendorTypeId,
       serviceTypeId: service.serviceTypeId,
       classification: service.classification,
-      allowedEventTypes: service.allowedEventTypes,
+      eventTypeIds: service.eventTypeIds || service.allowedEventTypes,
       price: service.price,
       description: service.description,
       imageUrl: service.imageUrl,

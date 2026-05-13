@@ -69,21 +69,11 @@ export class ServiceTypeDropdownComponent implements ControlValueAccessor, OnIni
       return;
     }
 
-    try {
-      const storedMap = localStorage.getItem('serviceTypeToVendorTypeMap');
-      if (storedMap) {
-        const map = JSON.parse(storedMap);
-        this.serviceTypes = this.allServiceTypes.filter(st => map[st.id] === this.vendorTypeId);
-        
-        // Fallback to all if mapping is too strict and returns empty (unless explicitly empty)
-        if (this.serviceTypes.length === 0) {
-           this.serviceTypes = this.allServiceTypes;
-        }
-      } else {
-        this.serviceTypes = this.allServiceTypes;
-      }
-    } catch (e) {
-      this.serviceTypes = this.allServiceTypes;
+    this.serviceTypes = this.allServiceTypes.filter((st: any) => st.vendorTypeId === this.vendorTypeId);
+    
+    // Fallback to all if mapping is too strict and returns empty (unless explicitly empty)
+    if (this.serviceTypes.length === 0) {
+       this.serviceTypes = this.allServiceTypes;
     }
   }
 

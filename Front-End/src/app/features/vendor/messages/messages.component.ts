@@ -44,8 +44,11 @@ export class MessagesComponent implements OnInit, OnDestroy {
       // If the message belongs to the currently open chat, append it
       if (this.selectedConversation && 
          (msg.senderId === this.selectedConversation.userId || msg.receiverId === this.selectedConversation.userId)) {
-        this.messages.push(msg);
-        this.scrollToBottom();
+        // Prevent duplicates
+        if (!this.messages.some(m => m.id === msg.id)) {
+          this.messages.push(msg);
+          this.scrollToBottom();
+        }
       }
       
       // Update conversations list with the new message
@@ -96,16 +99,8 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
     this.chatService.sendMessage(this.selectedConversation.userId, text)
       .then(() => {
-        // Optimistically add message
-        const optimisticMsg: ChatMessage = {
-          senderId: this.currentUserId,
-          receiverId: this.selectedConversation!.userId,
-          content: text,
-          sentAt: new Date().toISOString()
-        };
-        this.messages.push(optimisticMsg);
-        this.selectedConversation!.lastMessage = text;
-        this.selectedConversation!.lastMessageAt = optimisticMsg.sentAt;
+        // The server echoes the message back via SignalR ('ReceiveMessage'),
+        // which will trigger onMessageReceived$ and add the message to the list.
         this.newMessageText = '';
         this.scrollToBottom();
       })

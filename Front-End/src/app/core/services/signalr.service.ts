@@ -11,6 +11,7 @@ import { Subject } from 'rxjs';
 })
 export class SignalRService {
   private hubConnection: signalR.HubConnection | null = null;
+  private eventSource: EventSource | null = null;
 
   // Signals/Streams for consumers
   public notifications = signal<AppNotification[]>([]);
@@ -29,10 +30,7 @@ export class SignalRService {
 
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(connectionUrl, {
-        accessTokenFactory: () => token,
-        skipNegotiation: false,
-        transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
-        headers: { 'IdempotencyKey': crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() }
+        accessTokenFactory: () => token
       })
       .withAutomaticReconnect()
       .build();
@@ -41,9 +39,10 @@ export class SignalRService {
       .then(() => console.log('SignalR Hub connected via SignalRService'))
       .catch(err => console.error('Error while starting Hub connection:', err));
 
-    this.hubConnection.on('ReceiveMessage', (user: string, message: string) => {
+    this.hubConnection.on('ReceiveMessage', (message: any) => {
       // Basic global toast for new chat message if we want it
       this.unreadCount.update(c => c + 1);
+      this.chatMessageReceived.next(message);
     });
 
     this.hubConnection.on('ReceiveNotification', (notification: AppNotification) => {
@@ -55,10 +54,41 @@ export class SignalRService {
     this.hubConnection.on('UserPresence', (presence: any) => {
       // Ignore
     });
+
+    // Start SSE for Notifications
+    this.startSseNotifications(token);
+  }
+
+  private startSseNotifications(token: string) {
+    if (this.eventSource) return;
+
+    const sseUrl = `${environment.apiUrl}/notifications/stream?accessToken=${token}`;
+    this.eventSource = new EventSource(sseUrl);
+
+    this.eventSource.onmessage = (event) => {
+      try {
+        const notification: AppNotification = JSON.parse(event.data);
+        this.toastService.show(`New Notification: ${notification.title}`, 'info');
+        this.notifications.update(n => [notification, ...n]);
+        this.unreadCount.update(c => c + 1);
+      } catch (err) {
+        console.error('Error parsing SSE notification:', err);
+      }
+    };
+
+    this.eventSource.onerror = (error) => {
+      console.error('SSE Error:', error);
+      this.eventSource?.close();
+      this.eventSource = null;
+      // Reconnect after delay
+      setTimeout(() => this.startSseNotifications(token), 5000);
+    };
   }
 
   stopConnections() {
     this.hubConnection?.stop();
     this.hubConnection = null;
+    this.eventSource?.close();
+    this.eventSource = null;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
@@ -6,6 +6,7 @@ import { ProductService } from '../../../core/services/product.service';
 import { ServiceTypeService } from '../../../core/services/service-type.service';
 import { ApiProduct, ServiceType } from '../../../shared/types/api.interfaces';
 import { Subject, takeUntil } from 'rxjs';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-explore-services',
@@ -14,8 +15,12 @@ import { Subject, takeUntil } from 'rxjs';
   templateUrl: './explore-services.component.html',
   styleUrls: ['./explore-services.component.scss']
 })
-export class ExploreServicesComponent implements OnInit, OnDestroy {
+export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
+
+  // Map State
+  private map: L.Map | undefined;
+  private markersLayer: L.LayerGroup | undefined;
 
   // State
   services: ApiProduct[] = [];
@@ -30,12 +35,20 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
   
   // Filters
   searchQuery = '';
-  selectedCategories: string[] = []; // Changed to array for multi-select
+  selectedCategories: string[] = [];
   selectedEventTypes: string[] = [];
-  selectedClassification: string = 'all'; // Personal, Corporate, all
+  selectedClassification: string = 'all';
   maxPrice = 100000;
   minRating = 0;
-  selectedLocation = 'All Egypt';
+  
+  // 📍 Advanced Location Filters
+  selectedCity: string = '';
+  selectedRegion: string = '';
+  latitude?: number;
+  longitude?: number;
+  radiusKm: number = 50;
+  isLocating = false;
+
   showAvailableOnly = false;
   instantBookingOnly = false;
   sortOption = 'recommended';
@@ -53,7 +66,8 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
   constructor(
     private productService: ProductService,
     private serviceTypeService: ServiceTypeService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -66,9 +80,16 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
     });
   }
 
+  ngAfterViewInit() {
+    // Map will be initialized when viewMode changes to 'map'
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.map) {
+      this.map.remove();
+    }
   }
 
   loadData() {
@@ -85,10 +106,22 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Fetch products. Passing eventTypeId if any is selected (sending to backend as requested)
-    const filters = this.selectedEventTypes.length > 0 ? { eventTypeId: this.selectedEventTypes[0] } : {};
+    // Construct PaginatedRequest for backend
+    const request: any = {
+      searchTerm: this.searchQuery,
+      classification: this.selectedClassification !== 'all' ? this.selectedClassification : undefined,
+      city: this.selectedCity || undefined,
+      region: this.selectedRegion || undefined,
+      latitude: this.latitude,
+      longitude: this.longitude,
+      radiusKm: this.radiusKm
+    };
+
+    if (this.selectedEventTypes.length > 0) {
+      request.eventTypeId = this.selectedEventTypes[0];
+    }
     
-    this.productService.getAll(filters).subscribe({
+    this.productService.getAll(request).subscribe({
       next: (data) => {
         this.services = Array.isArray(data) ? data : [];
         this.applyFilters();
@@ -148,10 +181,88 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
     }
 
     this.filteredServices = filtered;
+    this.updateMapMarkers();
   }
 
   setView(mode: 'grid' | 'list' | 'map') {
     this.viewMode = mode;
+    if (mode === 'map') {
+      this.initMap();
+      if (this.map) {
+        setTimeout(() => this.map!.invalidateSize(), 100);
+      }
+    }
+  }
+
+  private initMap() {
+    if (this.map) return;
+    
+    setTimeout(() => {
+      this.map = L.map('service-map', {
+        zoomControl: false // Optional: hide default zoom controls
+      }).setView([30.0444, 31.2357], 11); // Cairo coordinates
+
+      // Add zoom control manually to right-bottom or something if needed
+      L.control.zoom({ position: 'bottomright' }).addTo(this.map);
+
+      // Using CARTO Voyager for a clean, light base map
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(this.map);
+
+      this.markersLayer = L.layerGroup().addTo(this.map);
+      this.updateMapMarkers();
+    }, 100);
+  }
+
+  private updateMapMarkers() {
+    if (!this.map || !this.markersLayer) return;
+
+    this.markersLayer.clearLayers();
+
+    // Generate pseudo-random coordinates around Cairo if none exist for demonstration
+    const baseLat = 30.0444;
+    const baseLng = 31.2357;
+
+    this.filteredServices.forEach((svc, index) => {
+      const areas = svc.serviceAreas && svc.serviceAreas.length > 0 ? svc.serviceAreas : [{ latitude: 0, longitude: 0 }];
+
+      areas.forEach((area, areaIdx) => {
+        let lat = area.latitude;
+        let lng = area.longitude;
+
+        // If no real coordinates, fallback to pseudo-random around Cairo
+        if (lat === 0 && lng === 0) {
+          const latOffset = (Math.sin((index + areaIdx) * 13) * 0.05);
+          const lngOffset = (Math.cos((index + areaIdx) * 17) * 0.05);
+          lat = baseLat + latOffset;
+          lng = baseLng + lngOffset;
+        }
+
+        const formattedPrice = (svc.price || 0).toLocaleString() + ' EGP';
+        const iconText = svc.imageUrl ? '🖼️' : '🎨';
+
+        const customIcon = L.divIcon({
+          className: 'custom-map-marker',
+          html: `<div style="background: white; border-radius: 50px; padding: 6px 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; border: 1.5px solid #e8e4dc; white-space: nowrap; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'; this.style.borderColor='#c9a84c'" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#e8e4dc'">
+                   <span style="font-size: 1rem;">${iconText}</span>
+                   <span style="color: #1a2540;">${svc.name}</span>
+                   <span style="color: #c9a84c;">${formattedPrice}</span>
+                 </div>`,
+          iconSize: [220, 40],
+          iconAnchor: [110, 20]
+        });
+
+        const marker = L.marker([lat, lng], { icon: customIcon }).addTo(this.markersLayer!);
+        marker.on('click', () => {
+          this.ngZone.run(() => {
+            this.openPreview(svc);
+          });
+        });
+      });
+    });
   }
 
   toggleCategory(cat: string) {
@@ -191,6 +302,36 @@ export class ExploreServicesComponent implements OnInit, OnDestroy {
   updatePrice(event: any) {
     this.maxPrice = event.target.value;
     this.applyFilters();
+  }
+
+  getCurrentLocation() {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    this.isLocating = true;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.latitude = position.coords.latitude;
+        this.longitude = position.coords.longitude;
+        this.isLocating = false;
+        this.loadData(); // Reload with lat/lng
+      },
+      (error) => {
+        console.error('Error getting location', error);
+        this.isLocating = false;
+        alert('Could not get your location. Please check your permissions.');
+      }
+    );
+  }
+
+  clearLocation() {
+    this.latitude = undefined;
+    this.longitude = undefined;
+    this.selectedCity = '';
+    this.selectedRegion = '';
+    this.loadData();
   }
 
   toggleWishlist(svc: ApiProduct, event: Event) {

@@ -43,18 +43,37 @@ export interface ChangePasswordRequest {
 }
 
 // ─────────────────────────────────────────────
-// Pagination
+// Pagination & Filtering
 // ─────────────────────────────────────────────
-export interface PaginationParams {
-  pageNumber?: number;
+export interface PaginatedRequest {
+  // 📍 Location filters (flattened)
+  city?: string;
+  region?: string;
+  latitude?: number;
+  longitude?: number;
+  radiusKm?: number;
+
+  // 📄 Pagination
+  pageIndex?: number;
   pageSize?: number;
+
+  // 🔍 Search & Sort
   searchTerm?: string;
+  sortBy?: string;
+  isDescending?: boolean;
+  includeHidden?: boolean;
+
+  // Taxonomy filters
+  classification?: string;
+  eventTypeId?: string;
+  vendorTypeId?: string;
+  serviceTypeId?: string;
 }
 
 export interface PagedResult<T> {
   items: T[];
   totalCount: number;
-  pageNumber: number;
+  pageNumber: number; // Keep for UI if used
   pageSize: number;
   totalPages: number;
 }
@@ -72,12 +91,12 @@ export interface ServiceType {
 
 export interface CreateServiceTypeRequest {
   name: string;
-  // description?: string;
+  vendorTypeId: string;
 }
 
 export interface UpdateServiceTypeRequest {
   name?: string;
-  // description?: string;
+  vendorTypeId?: string;
 }
 
 // ─────────────────────────────────────────────
@@ -122,6 +141,17 @@ export interface ApiVendor {
   status?: 'active' | 'suspended' | 'pending';
   createdAt?: string;
   about?: string;
+  documentUrl?: string;
+  profilePictureUrl?: string;
+  serviceAreas?: ServiceAreaDTO[];
+}
+
+export interface ServiceAreaDTO {
+  id?: string; // Guid
+  city: string;
+  region: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface CreateVendorRequest {
@@ -137,6 +167,9 @@ export interface CreateVendorRequest {
   yearsInBusiness: number;
   description: string;
   portfolioLink?: string;
+  document?: File;
+  profilePicture?: File;
+  serviceAreas?: ServiceAreaDTO[];
   address: {
     street: string;
     city: string;
@@ -146,10 +179,17 @@ export interface CreateVendorRequest {
 }
 
 export interface UpdateVendorRequest {
-  name?: string;
+  email?: string;
+  password?: string;
   phone?: string;
-  location?: string;
-  about?: string;
+  name?: string;
+  businessName?: string;
+  ownerName?: string;
+  serviceTypes?: any[];
+  yearsInBusiness?: number;
+  description?: string;
+  portfolioLink?: string;
+  address?: AddressDto;
 }
 
 // ─────────────────────────────────────────────
@@ -171,8 +211,10 @@ export interface ApiProduct {
   duration?: string;
   leadTime?: string;
   classification?: 'Personal' | 'Corporate';
-  allowedEventTypes?: string[];
+  eventTypeIds?: string[];
+  allowedEventTypes?: string[]; // backwards compatibility
   createdAt?: string;
+  serviceAreas?: ServiceAreaDTO[];
 }
 
 export interface CreateProductRequest {
@@ -186,6 +228,7 @@ export interface CreateProductRequest {
   duration?: string;
   leadTime?: string;
   classification?: 'Personal' | 'Corporate';
+  eventTypeIds?: string[];
   allowedEventTypes?: string[];
 }
 
@@ -200,6 +243,7 @@ export interface UpdateProductRequest {
   duration?: string;
   leadTime?: string;
   classification?: 'Personal' | 'Corporate';
+  eventTypeIds?: string[];
   allowedEventTypes?: string[];
 }
 
@@ -234,11 +278,37 @@ export interface Conversation {
 }
 
 // ─────────────────────────────────────────────
-// Gemini AI
+// AI Event Planning
 // ─────────────────────────────────────────────
-export interface GeminiResponse {
-  result: string;
-  prompt?: string;
+export interface AiPlanItem {
+  ServiceId?: string;
+  serviceId?: string;
+  Service_name?: string;
+  category: string;
+  vendor: string;
+  price: number;
+  reason: string;
+}
+
+export interface AiEventPlanParsed {
+  event_title: string;
+  event_type: string;
+  guest_count: number;
+  total_budget: number;
+  plan_summary: string;
+  selected_items: AiPlanItem[];
+  total_cost: number;
+  remaining_budget: number;
+  tips: string[];
+}
+
+export interface AiEventPlanResponse {
+  eventId: string;
+  eventTitle: string;
+  budget: number;
+  eventTypeName: string;
+  servicesConsidered: number;
+  aiPlan: string; // JSON string representing AiEventPlanParsed
 }
 
 // ─────────────────────────────────────────────
@@ -257,6 +327,7 @@ export interface AddressDto {
   street: string;
   city: string;
   state: string;
+  postalCode?: string;
 }
 
 export interface EventItemResponseDto {

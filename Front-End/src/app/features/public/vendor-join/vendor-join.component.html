@@ -1,69 +1,241 @@
 <div class="page active" id="page-vendor-join">
-    <div class="explore-hero bg-[linear-gradient(rgba(14,22,39,.85),rgba(14,22,39,.95)),url('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80')_center/cover]">
-        <div class="tag bg-[rgba(201,168,76,.2)] [border:none] mb-[20px] inline-block">For
-            Event Professionals</div>
-        <h1 class="text-[3rem]">Grow Your Event Business</h1>
-        <p class="max-w-[500px]">Join Egypt's premier network of event vendors. Get qualified leads, manage bookings,
-            and increase your revenue.</p>
+  <!-- HERO SECTION -->
+  <div class="vendor-join-hero">
+    <div class="tag">Join Our Elite Network</div>
+    <h1>Grow Your Event Business</h1>
+    <p>Join Egypt's fastest-growing event platform and connect with thousands of qualified clients looking for your expertise.</p>
+    <button class="btn-gold px-10 py-4 rounded-full font-bold shadow-lg" (click)="scrollToForm()">Register Your Business →</button>
+  </div>
+
+  <div class="container benefits-container">
+    <!-- BENEFITS GRID -->
+    <div class="vendor-benefits" *ngIf="currentStep === 1">
+      <div class="benefit-card">
+        <div class="benefit-icon">👥</div>
+        <div class="benefit-title">Reach More Clients</div>
+        <div class="benefit-desc">Get discovered by thousands of event planners, couples, and corporate managers across Egypt.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">📅</div>
+        <div class="benefit-title">Manage Bookings Easily</div>
+        <div class="benefit-desc">Your personal dashboard to manage requests, bookings, and your availability calendar in real-time.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💰</div>
+        <div class="benefit-title">Grow Your Revenue</div>
+        <div class="benefit-desc">Our platform drives high-intent leads directly to you. Pay only when you get a confirmed booking.</div>
+      </div>
     </div>
 
-    <div class="container py-[70px] px-[0] grid [grid-template-columns:1fr_1fr] gap-[60px] items-center">
-        <div>
-            <h2 class="section-title">Why Partner With Us?</h2>
-            <div class="grid gap-[24px] mt-[30px]">
-                <div class="flex gap-[16px]">
-                    <div class="text-[1.8rem]"></div>
-                    <div><strong class="text-[var(--navy)] text-[1.1rem] block mb-[6px]">More
-                            Bookings, Less Marketing</strong>
-                        <p class="text-[var(--gray)] text-[.9rem] leading-[1.6]">We invest heavily in marketing so
-                            you don't have to. Access a constant stream of couples and corporations planning events.</p>
-                    </div>
-                </div>
-                <div class="flex gap-[16px]">
-                    <div class="text-[1.8rem]"></div>
-                    <div><strong class="text-[var(--navy)] text-[1.1rem] block mb-[6px]">0%
-                            Commission Model Available</strong>
-                        <p class="text-[var(--gray)] text-[.9rem] leading-[1.6]">Keep what you earn. Choose between
-                            our commission-based model or flat monthly subscription tiers.</p>
-                    </div>
-                </div>
-                <div class="flex gap-[16px]">
-                    <div class="text-[1.8rem]"></div>
-                    <div><strong class="text-[var(--navy)] text-[1.1rem] block mb-[6px]">All-in-One
-                            Dashboard</strong>
-                        <p class="text-[var(--gray)] text-[.9rem] leading-[1.6]">Manage your calendar, chat with
-                            clients, send quotes, and track earnings from one unified dashboard.</p>
-                    </div>
-                </div>
+    <!-- REGISTRATION FORM BOX -->
+    <div class="vendor-reg-form" id="vendor-form" *ngIf="!isSuccess">
+      <div class="vrf-title">Vendor Registration</div>
+      <p class="vrf-sub">Step {{currentStep}} of {{totalSteps}}</p>
+
+      <!-- PROGRESS BAR -->
+      <div class="ae-step-bar">
+        <div class="ae-step" [class.active]="currentStep === 1" [class.done]="currentStep > 1" (click)="goToStep(1)">
+          <div class="ae-step-num">{{ currentStep > 1 ? '✓' : '1' }}</div>
+          <div class="ae-step-label">Account</div>
+        </div>
+        <div class="ae-step-connector"></div>
+        <div class="ae-step" [class.active]="currentStep === 2" [class.done]="currentStep > 2" (click)="goToStep(2)">
+          <div class="ae-step-num">{{ currentStep > 2 ? '✓' : '2' }}</div>
+          <div class="ae-step-label">Profile</div>
+        </div>
+        <div class="ae-step-connector"></div>
+        <div class="ae-step" [class.active]="currentStep === 3" [class.done]="currentStep > 3" (click)="goToStep(3)">
+          <div class="ae-step-num">3</div>
+          <div class="ae-step-label">Location</div>
+        </div>
+      </div>
+
+      <form [formGroup]="vendorForm" (ngSubmit)="onSubmit()">
+        
+        <!-- STEP 1: ACCOUNT & CONTACT -->
+        <div *ngIf="currentStep === 1" class="step-content animate-fade-in">
+          <div class="form-section">
+            <span class="section-label">Account Credentials</span>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Username *</label>
+                <input type="text" formControlName="name" placeholder="Choose a username"
+                       [class.error]="vendorForm.get('name')?.touched && vendorForm.get('name')?.invalid" />
+              </div>
+              <div class="form-group">
+                <label>Password *</label>
+                <input type="password" formControlName="password" placeholder="Min. 6 characters"
+                       [class.error]="vendorForm.get('password')?.touched && vendorForm.get('password')?.invalid" />
+              </div>
             </div>
+          </div>
+
+          <div class="form-section">
+            <span class="section-label">Contact Information</span>
+            <div class="form-row">
+              <div class="form-group">
+                <label>First Name *</label>
+                <input type="text" formControlName="firstName" placeholder="John"
+                       [class.error]="vendorForm.get('firstName')?.touched && vendorForm.get('firstName')?.invalid" />
+              </div>
+              <div class="form-group">
+                <label>Last Name *</label>
+                <input type="text" formControlName="lastName" placeholder="Doe"
+                       [class.error]="vendorForm.get('lastName')?.touched && vendorForm.get('lastName')?.invalid" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email Address *</label>
+                <input type="email" formControlName="email" placeholder="john@example.com"
+                       [class.error]="vendorForm.get('email')?.touched && vendorForm.get('email')?.invalid" />
+              </div>
+              <div class="form-group">
+                <label>Phone Number *</label>
+                <input type="tel" formControlName="phone" placeholder="+20 100 000 0000"
+                       [class.error]="vendorForm.get('phone')?.touched && vendorForm.get('phone')?.invalid" />
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-nav-row">
+            <button type="button" class="btn-next" (click)="nextStep()">Continue to Profile →</button>
+          </div>
         </div>
 
-        <div class="bg-[var(--white)] p-[40px] rounded-[var(--r2)] [box-shadow:var(--sh1)]">
-            <h3 class="text-[1.5rem] text-[var(--navy)] mb-[24px] font-[var(--ff-d)]">Apply to Join</h3>
+        <!-- STEP 2: BUSINESS PROFILE -->
+        <div *ngIf="currentStep === 2" class="step-content animate-fade-in">
+          <div class="form-section">
+            <span class="section-label">Business Identity</span>
             <div class="form-row">
-                <div class="form-group"><label>Business Name *</label><input type="text"
-                        placeholder="Your brand name" /></div>
-                <div class="form-group"><label>Vendor Type *</label><select>
-                        <option>Venue / Hall</option>
-                        <option>Catering & Food</option>
-                        <option>Decoration & Florist</option>
-                        <option>Photography & Video</option>
-                        <option>Entertainment / DJ</option>
-                        <option>Makeup / Styling</option>
-                        <option>Event Planner</option>
-                    </select></div>
+              <div class="form-group">
+                <label>Business Name *</label>
+                <input type="text" formControlName="businessName" placeholder="Elite Event Planners"
+                       [class.error]="vendorForm.get('businessName')?.touched && vendorForm.get('businessName')?.invalid" />
+              </div>
+              <div class="form-group">
+                <label>Owner Name *</label>
+                <input type="text" formControlName="ownerName" placeholder="Full Legal Name"
+                       [class.error]="vendorForm.get('ownerName')?.touched && vendorForm.get('ownerName')?.invalid" />
+              </div>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label>Contact Person *</label><input type="text" placeholder="Full name" />
+            
+            <div class="compact-profile-uploader">
+              <span class="uploader-label">Profile</span>
+              <div class="uploader-controls">
+                <div class="avatar-preview">
+                  <img *ngIf="profilePreviewUrl" [src]="profilePreviewUrl" alt="Profile Preview" />
+                  <span *ngIf="!profilePreviewUrl" class="placeholder-icon">👤</span>
                 </div>
-                <div class="form-group"><label>Phone *</label><input type="tel" placeholder="+20 100 000 0000" /></div>
+                <div class="uploader-actions">
+                  <input type="file" (change)="onProfilePictureSelected($event)" accept="image/*" class="hidden" #profileInput />
+                  <button type="button" class="btn-upload-compact" (click)="profileInput.click()">
+                    <i class="material-icons">file_upload</i>
+                    {{ selectedProfilePicture ? 'Change Image' : 'Upload Image' }}
+                  </button>
+                  <p class="text-[10px] text-gray-400 mt-2">JPG, PNG up to 5MB.</p>
+                </div>
+              </div>
             </div>
-            <div class="form-group"><label>Email *</label><input type="email" placeholder="email@business.com" /></div>
-            <div class="form-group"><label>Portfolio/Instagram Link</label><input type="url"
-                    placeholder="https://instagram.com/yourbrand" /></div>
-            <button class="btn btn-gold w-[100%] justify-center p-[12px] text-[.95rem]" (click)="submitVendorApplication()">Submit Application</button>
-            <p class="text-center text-[.8rem] text-[var(--gray)] mt-[16px]">Our vetting team will review
-                your application and contact you within 48 hours.</p>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Service Category *</label>
+                <select formControlName="vendorTypeId" [class.error]="vendorForm.get('vendorTypeId')?.touched && vendorForm.get('vendorTypeId')?.invalid">
+                  <option value="" disabled selected>Select Category</option>
+                  <option *ngFor="let type of vendorTypes" [value]="type.id">{{type.name}}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Years in Business *</label>
+                <input type="number" formControlName="yearsInBusiness" placeholder="e.g. 5"
+                       [class.error]="vendorForm.get('yearsInBusiness')?.touched && vendorForm.get('yearsInBusiness')?.invalid" />
+              </div>
+            </div>
+            <div class="form-group mb-5">
+              <label>Business Description * (Min. 20 chars)</label>
+              <textarea formControlName="description" placeholder="Describe your services, specialties, and what makes you unique..."
+                        [class.error]="vendorForm.get('description')?.touched && vendorForm.get('description')?.invalid"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Portfolio / Website Link (Optional)</label>
+              <input type="url" formControlName="portfolioLink" placeholder="Instagram, Website, or Google Drive link" />
+            </div>
+
+            <div class="form-group mt-6">
+              <label>Upload Portfolio / Documents (Optional)</label>
+              <div class="file-drop-zone" (click)="docInput.click()">
+                <input type="file" (change)="onDocumentSelected($event)" accept=".pdf,.doc,.docx,.jpg,.png" class="hidden" #docInput />
+                <span class="drop-icon">📂</span>
+                <span class="drop-text">{{ selectedDocument ? 'Change Documents' : 'Drop files here or click to upload' }}</span>
+                <span class="drop-subtext">PDF, JPG, PNG up to 10MB each. Portfolio photos, commercial register, etc.</span>
+                <div class="file-selected-name" *ngIf="selectedDocument">
+                  Selected: {{ selectedDocument.name }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-nav-row">
+            <button type="button" class="btn-back" (click)="prevStep()">← Back</button>
+            <button type="button" class="btn-next" (click)="nextStep()">Continue to Location →</button>
+          </div>
         </div>
+
+        <!-- STEP 3: LOCATION -->
+        <div *ngIf="currentStep === 3" class="step-content animate-fade-in">
+          <div class="form-section" formGroupName="address">
+            <span class="section-label">Business Location</span>
+            <div class="form-group mb-5">
+              <label>Street Address *</label>
+              <input type="text" formControlName="street" placeholder="123 El Horreya St."
+                     [class.error]="vendorForm.get('address.street')?.touched && vendorForm.get('address.street')?.invalid" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>City *</label>
+                <input type="text" formControlName="city" placeholder="Cairo"
+                       [class.error]="vendorForm.get('address.city')?.touched && vendorForm.get('address.city')?.invalid" />
+              </div>
+              <div class="form-group">
+                <label>State / Governorate *</label>
+                <input type="text" formControlName="state" placeholder="Cairo"
+                       [class.error]="vendorForm.get('address.state')?.touched && vendorForm.get('address.state')?.invalid" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Postal Code</label>
+              <input type="text" formControlName="postalCode" placeholder="11511" />
+            </div>
+          </div>
+
+          <div class="btn-nav-row">
+            <button type="button" class="btn-back" (click)="prevStep()">← Back</button>
+            <button type="submit" class="form-submit" [disabled]="isSubmitting">
+              <span *ngIf="!isSubmitting">Complete Registration →</span>
+              <span *ngIf="isSubmitting" class="flex items-center gap-2">
+                <i class="material-icons animate-spin">sync</i> Processing...
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <p class="text-center text-xs text-slate-400 mt-6" *ngIf="!isSubmitting">
+          By completing registration, you agree to Epic Hub's Terms of Service and Privacy Policy.
+        </p>
+      </form>
     </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="vendor-success" *ngIf="isSuccess">
+      <span class="success-emoji">🎉</span>
+      <h2>Application Submitted!</h2>
+      <p>
+        Thank you for choosing Epic Hub! Our onboarding team will review your business profile and reach out within <strong>24 hours</strong> to complete verification. 
+        Keep an eye on your email at <strong>{{vendorForm.get('email')?.value}}</strong> for updates.
+      </p>
+      <button class="btn-gold" (click)="goToHome()">Back to Home</button>
+    </div>
+  </div>
 </div>

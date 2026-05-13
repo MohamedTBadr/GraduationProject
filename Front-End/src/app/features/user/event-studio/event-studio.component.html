@@ -2,7 +2,7 @@
   <div class="ai-studio-modal">
     <div class="ai-header">
       <div class="ai-title">
-        <span class="sparkle-icon">✨</span> Gemini Event Studio
+        <span class="sparkle-icon">✨</span> AI Event Studio
       </div>
       <button class="close-btn" (click)="close.emit()">×</button>
     </div>
@@ -11,7 +11,7 @@
       <!-- Initial State -->
       <div class="ai-initial" *ngIf="!isGenerating && !aiPlan && !error">
         <h3>Let AI design your perfect event</h3>
-        <p>Gemini will analyze your budget of <strong>{{eventBudget | number}} EGP</strong> and instantly match you with the best available vendors in our database to build a complete package.</p>
+        <p>Our AI will analyze your budget of <strong>{{eventBudget | number}} EGP</strong> and instantly match you with the best available vendors in our database to build a complete package.</p>
         <button class="btn btn-gold btn-lg mt-4" (click)="generatePlan()">
           ✨ Generate Event Plan
         </button>
@@ -20,7 +20,7 @@
       <!-- Generating State -->
       <div class="ai-generating" *ngIf="isGenerating">
         <div class="loader-pulse"></div>
-        <h3>Gemini is thinking...</h3>
+        <h3>AI is thinking...</h3>
         <p>Analyzing vendors, crunching numbers, and building your dream event.</p>
       </div>
 
@@ -63,7 +63,7 @@
         </div>
 
         <div class="ai-tips mt-4" *ngIf="aiPlan.tips?.length">
-          <h4>💡 Gemini Tips</h4>
+          <h4>💡 AI Tips</h4>
           <ul>
             <li *ngFor="let tip of aiPlan.tips">{{tip}}</li>
           </ul>

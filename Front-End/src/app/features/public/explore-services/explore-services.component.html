@@ -96,6 +96,45 @@
           </div>
         </div>
 
+        <!-- 📍 Location Filter -->
+        <div class="filter-block">
+          <div class="fb-title">Location & Distance <span class="fb-toggle open">▾</span></div>
+          
+          <!-- City & Region -->
+          <div class="location-inputs mb-3">
+            <select class="fb-input mb-2" [(ngModel)]="selectedCity" (change)="loadData()">
+              <option value="">Select City</option>
+              <option value="Cairo">Cairo</option>
+              <option value="Giza">Giza</option>
+              <option value="Alexandria">Alexandria</option>
+              <option value="Mansoura">Mansoura</option>
+              <option value="Tanta">Tanta</option>
+            </select>
+            <input type="text" class="fb-input" placeholder="Region (e.g. Maadi)" [(ngModel)]="selectedRegion" (keyup.enter)="loadData()" />
+          </div>
+
+          <!-- GPS Location -->
+          <button class="btn btn-ghost w-full mb-3 text-[0.8rem] flex items-center justify-center gap-2 border-[rgba(0,0,0,0.1)]" 
+                  (click)="getCurrentLocation()" [disabled]="isLocating">
+            <span *ngIf="!isLocating">📍 Use My Current Location</span>
+            <span *ngIf="isLocating">⌛ Locating...</span>
+          </button>
+
+          <div *ngIf="latitude" class="text-[0.7rem] text-[#059669] mb-2 flex justify-between items-center">
+            <span>✓ Using GPS Coordinates</span>
+            <button class="text-[#ef4444]" (click)="clearLocation()">Clear</button>
+          </div>
+
+          <!-- Radius Slider (only show if location or city is picked) -->
+          <div class="radius-slider mt-2" *ngIf="latitude || selectedCity">
+            <div class="flex justify-between text-[0.7rem] mb-1">
+              <span>Radius</span>
+              <strong>{{radiusKm}} km</strong>
+            </div>
+            <input type="range" min="5" max="200" step="5" [(ngModel)]="radiusKm" (change)="loadData()" class="w-full" />
+          </div>
+        </div>
+
         <!-- Price Range -->
         <div class="filter-block">
           <div class="fb-title">Price Range (EGP) <span class="fb-toggle open">▾</span></div>
@@ -130,8 +169,13 @@
         </div>
       </div>
 
+      <!-- SERVICE MAP VIEW -->
+      <div class="svc-map-container" [class.hidden]="viewMode !== 'map'">
+        <div id="service-map" class="w-full h-[600px] rounded-[20px] border border-[rgba(0,0,0,0.1)] shadow-[0_8px_40px_rgba(26,37,64,0.18)] relative z-0"></div>
+      </div>
+
       <!-- SERVICE GRID -->
-      <div class="svc-grid" [class.list-view]="viewMode === 'list'">
+      <div class="svc-grid" [class.list-view]="viewMode === 'list'" *ngIf="viewMode !== 'map'">
         <div class="svc-card" *ngFor="let svc of filteredServices" (click)="openPreview(svc)">
           <div class="svc-card-img">
             <img *ngIf="svc.imageUrl" [src]="svc.imageUrl" />
@@ -178,6 +222,47 @@
     <div class="cb-actions">
       <button class="btn btn-ghost btn-sm text-[white] bg-[transparent] border-[rgba(255,255,255,0.2)]" (click)="clearCompare()">Clear</button>
       <button class="btn btn-gold btn-sm" routerLink="/compare">Compare Now →</button>
+    </div>
+  </div>
+
+  <!-- ═══ SERVICE PREVIEW MODAL ════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showPreview" (click)="closePreview()" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div class="modal-content" (click)="$event.stopPropagation()" style="background: white; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+      <button class="close-btn" (click)="closePreview()" style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.05); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.05)'">✕</button>
+      
+      <div *ngIf="selectedPreviewService">
+        <!-- Image Banner -->
+        <div style="width: 100%; height: 250px; background: #1a2540; border-radius: 12px; overflow: hidden; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+          <img *ngIf="selectedPreviewService.imageUrl" [src]="selectedPreviewService.imageUrl" style="width: 100%; height: 100%; object-fit: cover;" />
+          <span *ngIf="!selectedPreviewService.imageUrl">🎨</span>
+        </div>
+        
+        <!-- Header Info -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 16px;">
+          <div>
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a2540; margin-bottom: 8px; line-height: 1.2;">{{selectedPreviewService.name}}</h2>
+            <div style="font-size: 0.9rem; color: #6b7280; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <span style="background: rgba(201,168,76,0.15); color: #c9a84c; padding: 4px 10px; border-radius: 50px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">{{selectedPreviewService.vendorTypeName || selectedPreviewService.serviceTypeName || 'Service'}}</span>
+              <span *ngIf="selectedPreviewService.vendorName">by <strong style="color: #1a2540;">{{selectedPreviewService.vendorName}}</strong></span>
+            </div>
+          </div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: #1a2540; background: #f9f6f0; padding: 10px 16px; border-radius: 12px; white-space: nowrap;">
+            {{selectedPreviewService.price | currency:'EGP':'symbol':'1.0-0'}}
+          </div>
+        </div>
+        
+        <!-- Description -->
+        <div style="margin-top: 24px; border-top: 1.5px solid #e8e4dc; padding-top: 20px;">
+          <h3 style="font-size: 1.1rem; font-weight: 600; color: #1a2540; margin-bottom: 8px;">About this service</h3>
+          <p style="color: #6b7280; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap;">{{selectedPreviewService.description || 'No description available for this service.'}}</p>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; margin-top: 32px;">
+           <button class="btn btn-gold" style="flex: 1; justify-content: center; padding: 12px;" *ngIf="selectedPreviewService.vendorId" [routerLink]="['/vendor', selectedPreviewService.vendorId]">Visit Vendor Profile</button>
+           <button class="btn btn-outline" style="flex: 1; justify-content: center; padding: 12px;" (click)="addToCompare(selectedPreviewService, $event)">Add to Compare</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

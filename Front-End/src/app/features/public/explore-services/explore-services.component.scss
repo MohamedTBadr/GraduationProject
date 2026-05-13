@@ -446,6 +446,20 @@
   &.open { transform: rotate(180deg); }
 }
 
+.fb-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 50px;
+  border: 1.5px solid var(--lgray);
+  background: var(--white);
+  font-size: .84rem;
+  color: var(--navy);
+  outline: none;
+  font-family: var(--ff-b);
+  transition: border-color .2s;
+  &:focus { border-color: var(--gold); }
+}
+
 .fb-chip-row {
   display: flex;
   flex-wrap: wrap;

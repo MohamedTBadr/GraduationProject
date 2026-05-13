@@ -6,7 +6,8 @@ import { environment } from '../../../environments/environment';
 import {
   ApiProduct,
   CreateProductRequest,
-  UpdateProductRequest
+  UpdateProductRequest,
+  PaginatedRequest
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -16,7 +17,7 @@ export class ProductService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Unwraps Result&lt;T&gt;, PaginatedResponse, or plain arrays from GET endpoints.
+   * Unwraps Result<T>, PaginatedResponse, or plain arrays from GET endpoints.
    */
   private extractArrayData(res: any): any[] {
     if (!res) return [];
@@ -80,15 +81,30 @@ export class ProductService {
     return this.extractArrayData(res).map(item => this.normalizeProduct(item));
   }
 
-  /** GET /Service – returns all products */
-  getAll(filters?: { classification?: string; eventTypeId?: string }): Observable<ApiProduct[]> {
+  /** GET /Service – returns filtered/paginated products */
+  getAll(filters?: PaginatedRequest): Observable<ApiProduct[]> {
     let params = new HttpParams();
-    if (filters?.classification && filters.classification !== 'all') {
-      params = params.set('classification', filters.classification);
+    if (filters) {
+      if (filters.pageIndex) params = params.set('pageIndex', filters.pageIndex.toString());
+      if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
+      if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
+      if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
+      if (filters.isDescending !== undefined) params = params.set('isDescending', filters.isDescending.toString());
+      
+      // Location
+      if (filters.city) params = params.set('city', filters.city);
+      if (filters.region) params = params.set('region', filters.region);
+      if (filters.latitude) params = params.set('latitude', filters.latitude.toString());
+      if (filters.longitude) params = params.set('longitude', filters.longitude.toString());
+      if (filters.radiusKm) params = params.set('radiusKm', filters.radiusKm.toString());
+
+      // Taxonomy
+      if (filters.classification && filters.classification !== 'all') params = params.set('classification', filters.classification);
+      if (filters.eventTypeId) params = params.set('eventTypeId', filters.eventTypeId);
+      if (filters.vendorTypeId) params = params.set('vendorTypeId', filters.vendorTypeId);
+      if (filters.serviceTypeId) params = params.set('serviceTypeId', filters.serviceTypeId);
     }
-    if (filters?.eventTypeId) {
-      params = params.set('eventTypeId', filters.eventTypeId);
-    }
+
     return this.http.get<any>(`${this.apiUrl}/Service`, { params }).pipe(
       map(res => this.mapProductList(res))
     );
@@ -127,7 +143,7 @@ export class ProductService {
   }
 
   /** PUT /Service/{productId} */
-  update(productId: string, payload: UpdateProductRequest): Observable<ApiProduct> {
+  update(productId: string, payload: UpdateProductRequest | FormData | any): Observable<ApiProduct> {
     return this.http.put<any>(`${this.apiUrl}/Service/${productId}`, payload).pipe(
       map(res => this.normalizeProduct(res?.value ?? res?.Value ?? res))
     );

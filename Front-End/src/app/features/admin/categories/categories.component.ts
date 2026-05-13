@@ -32,9 +32,6 @@ export class CategoriesComponent implements OnInit {
 
   form: FormGroup;
 
-  // Local mock mapping since backend ServiceType doesn't store VendorTypeId yet
-  serviceTypeToVendorTypeMap: Record<string, string> = {};
-
   constructor(
     private vendorTypeService: VendorTypeService,
     private serviceTypeService: ServiceTypeService,
@@ -48,22 +45,12 @@ export class CategoriesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Load local storage mapping if exists
-    const storedMap = localStorage.getItem('serviceTypeToVendorTypeMap');
-    if (storedMap) {
-      try {
-        this.serviceTypeToVendorTypeMap = JSON.parse(storedMap);
-      } catch (e) {}
-    }
-
     this.loadVendorTypes();
     this.loadServiceTypes();
     this.loadEventTypes();
   }
 
-  saveMap() {
-    localStorage.setItem('serviceTypeToVendorTypeMap', JSON.stringify(this.serviceTypeToVendorTypeMap));
-  }
+
 
   loadVendorTypes() {
     this.loadingVendorTypes = true;
@@ -71,7 +58,6 @@ export class CategoriesComponent implements OnInit {
       next: (data) => {
         this.vendorTypes = data;
         this.loadingVendorTypes = false;
-        this.autoMapServiceTypes();
       },
       error: () => this.loadingVendorTypes = false
     });
@@ -83,7 +69,6 @@ export class CategoriesComponent implements OnInit {
       next: (data) => {
         this.serviceTypes = data;
         this.loadingServiceTypes = false;
-        this.autoMapServiceTypes();
       },
       error: () => this.loadingServiceTypes = false
     });
@@ -100,50 +85,14 @@ export class CategoriesComponent implements OnInit {
     });
   }
 
-  // Auto map unmapped service types based on string matching or just assign randomly for UI purposes
-  autoMapServiceTypes() {
-    if (this.vendorTypes.length === 0 || this.serviceTypes.length === 0) return;
-    
-    let changed = false;
-    this.serviceTypes.forEach(st => {
-      if (!this.serviceTypeToVendorTypeMap[st.id]) {
-        // Try to guess by name
-        const stLower = st.name.toLowerCase();
-        let matchedVtId = null;
-        
-        if (stLower.includes('photo') || stLower.includes('video') || stLower.includes('drone')) {
-          matchedVtId = this.vendorTypes.find(v => v.name.toLowerCase().includes('photo') || v.name.toLowerCase().includes('video'))?.id;
-        } else if (stLower.includes('cater') || stLower.includes('food') || stLower.includes('buffet') || stLower.includes('coffee')) {
-          matchedVtId = this.vendorTypes.find(v => v.name.toLowerCase().includes('cater'))?.id;
-        } else if (stLower.includes('venue') || stLower.includes('hall') || stLower.includes('room') || stLower.includes('garden')) {
-          matchedVtId = this.vendorTypes.find(v => v.name.toLowerCase().includes('venue'))?.id;
-        }
-        
-        // Default to first if not matched
-        if (!matchedVtId && this.vendorTypes.length > 0) {
-          matchedVtId = this.vendorTypes[0].id;
-        }
-        
-        if (matchedVtId) {
-          this.serviceTypeToVendorTypeMap[st.id] = matchedVtId;
-          changed = true;
-        }
-      }
-    });
-
-    if (changed) {
-      this.saveMap();
-    }
-  }
-
   getMappedServices(vendorTypeId: string): ServiceType[] {
-    return this.serviceTypes.filter(st => this.serviceTypeToVendorTypeMap[st.id] === vendorTypeId);
+    return this.serviceTypes.filter(st => st.vendorTypeId === vendorTypeId);
   }
 
   getVendorTypeNameForService(serviceTypeId: string): string {
-    const vtId = this.serviceTypeToVendorTypeMap[serviceTypeId];
-    if (!vtId) return 'Unmapped';
-    const vt = this.vendorTypes.find(v => v.id === vtId);
+    const st = this.serviceTypes.find(s => s.id === serviceTypeId);
+    if (!st || !st.vendorTypeId) return 'Unmapped';
+    const vt = this.vendorTypes.find(v => v.id === st.vendorTypeId);
     return vt ? vt.name : 'Unknown';
   }
 
@@ -167,6 +116,13 @@ export class CategoriesComponent implements OnInit {
       this.form.patchValue({ vendorTypeId: this.vendorTypes[0].id });
     }
 
+    if (type === 'serviceType') {
+      this.form.get('vendorTypeId')?.setValidators([Validators.required]);
+    } else {
+      this.form.get('vendorTypeId')?.clearValidators();
+    }
+    this.form.get('vendorTypeId')?.updateValueAndValidity();
+
     this.showModal = true;
   }
 
@@ -186,8 +142,10 @@ export class CategoriesComponent implements OnInit {
     this.selectedId = st.id;
     this.form.patchValue({ 
       name: st.name,
-      vendorTypeId: this.serviceTypeToVendorTypeMap[st.id] || null
+      vendorTypeId: st.vendorTypeId || ''
     });
+    this.form.get('vendorTypeId')?.setValidators([Validators.required]);
+    this.form.get('vendorTypeId')?.updateValueAndValidity();
     this.showModal = true;
   }
 
@@ -207,14 +165,23 @@ export class CategoriesComponent implements OnInit {
   setModalType(type: 'vendorType' | 'serviceType' | 'eventType') {
     if (!this.isEditMode) {
       this.activeModalType = type;
-      if (type === 'serviceType' && this.vendorTypes.length > 0) {
-        this.form.patchValue({ vendorTypeId: this.vendorTypes[0].id });
+      if (type === 'serviceType') {
+        this.form.get('vendorTypeId')?.setValidators([Validators.required]);
+        if (this.vendorTypes.length > 0) {
+          this.form.patchValue({ vendorTypeId: this.vendorTypes[0].id });
+        }
+      } else {
+        this.form.get('vendorTypeId')?.clearValidators();
       }
+      this.form.get('vendorTypeId')?.updateValueAndValidity();
     }
   }
 
   onSubmit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     const val = this.form.value;
 
     if (this.isEditMode && this.selectedId) {
@@ -226,12 +193,9 @@ export class CategoriesComponent implements OnInit {
           }
         });
       } else if (this.activeModalType === 'serviceType') {
-        this.serviceTypeService.update(this.selectedId, { name: val.name }).subscribe({
+        if (!val.vendorTypeId) return; // Guard
+        this.serviceTypeService.update(this.selectedId, { name: val.name, vendorTypeId: val.vendorTypeId }).subscribe({
           next: () => {
-            if (val.vendorTypeId) {
-              this.serviceTypeToVendorTypeMap[this.selectedId!] = val.vendorTypeId;
-              this.saveMap();
-            }
             this.loadServiceTypes();
             this.closeModal();
           }
@@ -253,13 +217,9 @@ export class CategoriesComponent implements OnInit {
           }
         });
       } else if (this.activeModalType === 'serviceType') {
-        this.serviceTypeService.create({ name: val.name }).subscribe({
-          next: (newServiceType: any) => {
-            // Update mapping locally
-            if (val.vendorTypeId && newServiceType && newServiceType.id) {
-               this.serviceTypeToVendorTypeMap[newServiceType.id] = val.vendorTypeId;
-               this.saveMap();
-            }
+        if (!val.vendorTypeId) return; // Guard
+        this.serviceTypeService.create({ name: val.name, vendorTypeId: val.vendorTypeId }).subscribe({
+          next: () => {
             this.loadServiceTypes();
             this.closeModal();
           }
@@ -289,9 +249,6 @@ export class CategoriesComponent implements OnInit {
   deleteServiceType(id: string) {
     this.serviceTypeService.delete(id).subscribe({
       next: () => {
-        // Remove from map
-        delete this.serviceTypeToVendorTypeMap[id];
-        this.saveMap();
         this.loadServiceTypes();
       },
       error: (err) => {

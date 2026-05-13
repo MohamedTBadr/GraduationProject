@@ -24,7 +24,12 @@
       </button>
 
       <!-- Notifications -->
-      <button *ngIf="authService.isLoggedIn()" class="nav-icon-btn relative" title="Notifications">
+      <button 
+        *ngIf="authService.isLoggedIn()" 
+        class="nav-icon-btn relative" 
+        title="Notifications"
+        (click)="goToNotifications()"
+      >
         🔔
         <div class="fav-count" *ngIf="signalRService.unreadCount() > 0">
           {{signalRService.unreadCount()}}
@@ -68,7 +73,7 @@
         <button
           *ngIf="authService.role() === 'Vendor'"
           class="btn-nav-vendor"
-          routerLink="/vendor/dashboard"
+          routerLink="/vendor-dashboard"
           title="Vendor Portal"
         >
           Dashboard

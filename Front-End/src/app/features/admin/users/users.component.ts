@@ -53,7 +53,7 @@ export class UsersComponent implements OnInit {
   loadUsers() {
     this.loading = true;
     this.userService.getAll({
-      pageNumber: this.pageNumber,
+      pageIndex: this.pageNumber,
       pageSize: this.pageSize,
       searchTerm: this.searchQuery
     }).subscribe({

@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   ApiVendor,
   CreateVendorRequest,
-  UpdateVendorRequest
+  UpdateVendorRequest,
+  PaginatedRequest
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -15,9 +16,28 @@ export class VendorService {
 
   constructor(private http: HttpClient) {}
 
-  /** GET /Vendor – returns all vendors */
-  getAll(): Observable<ApiVendor[]> {
-    return this.http.get<any>(`${this.apiUrl}/Vendor`).pipe(
+  /** GET /Vendor – returns all vendors (supports pagination & filters) */
+  getAll(filters?: PaginatedRequest): Observable<ApiVendor[]> {
+    let params = new HttpParams();
+    if (filters) {
+      if (filters.pageIndex) params = params.set('pageIndex', filters.pageIndex.toString());
+      if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
+      if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
+      if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
+      if (filters.isDescending !== undefined) params = params.set('isDescending', filters.isDescending.toString());
+      
+      // Location
+      if (filters.city) params = params.set('city', filters.city);
+      if (filters.region) params = params.set('region', filters.region);
+      if (filters.latitude) params = params.set('latitude', filters.latitude.toString());
+      if (filters.longitude) params = params.set('longitude', filters.longitude.toString());
+      if (filters.radiusKm) params = params.set('radiusKm', filters.radiusKm.toString());
+
+      // Taxonomy
+      if (filters.vendorTypeId) params = params.set('vendorTypeId', filters.vendorTypeId);
+    }
+
+    return this.http.get<any>(`${this.apiUrl}/Vendor`, { params }).pipe(
       map(res => {
         const data = res?.value || res?.Value || res;
         const items = Array.isArray(data) ? data : (data?.items || data?.Items || []);
@@ -49,13 +69,30 @@ export class VendorService {
       isApproved: v.isApproved !== undefined ? v.isApproved : (v.IsApproved !== undefined ? v.IsApproved : true),
       createdAt: v.createdAt || v.CreatedAt || new Date(),
       rating: v.rating || v.Rating || 0,
-      location: v.location || v.Location || v.address || v.Address || ''
+      location: v.location || v.Location || v.address || v.Address || '',
+      documentUrl: v.document || v.Document || v.documentUrl || v.DocumentUrl,
+      profilePictureUrl: v.profilePicture || v.ProfilePicture || v.profilePictureUrl || v.ProfilePictureUrl,
+      serviceAreas: (v.serviceAreas || v.ServiceAreas || []).map((sa: any) => ({
+        ...sa,
+        id: sa.id || sa.Id,
+        city: sa.city || sa.City,
+        region: sa.region || sa.Region,
+        latitude: sa.latitude !== undefined ? sa.latitude : (sa.Latitude !== undefined ? sa.Latitude : (sa.Lattitude || sa.lattitude || 0)),
+        longitude: sa.longitude !== undefined ? sa.longitude : (sa.Longitude !== undefined ? sa.Longitude : 0)
+      }))
     } as ApiVendor;
   }
 
   /** POST /Vendor – register a new vendor */
-  create(payload: CreateVendorRequest): Observable<ApiVendor> {
-    return this.http.post<ApiVendor>(`${this.apiUrl}/Vendor`, payload);
+  create(payload: CreateVendorRequest | FormData): Observable<ApiVendor> {
+    // If it's not FormData, we should probably convert it if it contains files
+    // But usually the component will pass FormData if files are involved
+    return this.http.post<any>(`${this.apiUrl}/Vendor`, payload).pipe(
+      map(res => {
+        const v = res?.value || res?.Value || res;
+        return this.normalizeVendor(v);
+      })
+    );
   }
 
   /** PATCH /Vendor/{vendorId}/approve – admin approves vendor */
