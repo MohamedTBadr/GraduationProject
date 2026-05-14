@@ -1,4 +1,4 @@
-﻿using Shared.Exceptions;
+using Shared.Exceptions;
 using System.Net;
 using System.Text.Json;
 
@@ -8,53 +8,65 @@ namespace Web.Api.Middlewares
     {
         public async Task InvokeAsync(HttpContext context)
         {
-            try
+            if (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method))
             {
-             
-
-                if (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method))
+                if (context.Request.Path.StartsWithSegments("/Hub") || context.Request.Path.StartsWithSegments("/api/notifications/stream"))
                 {
-                    if (context.Request.Path.StartsWithSegments("/Hub") || context.Request.Path.StartsWithSegments("/api/notifications/stream"))
-                    {
-                        await next(context);
-                        return;
-                    }
-
-                    if (!context.Request.Headers.ContainsKey("IdempotencyKey"))
-                    {
-                    throw new IdempotencyKeyMissingException("Missing Idempotency Key header.");
-                    }
                     await next(context);
-                    if (context.Response.StatusCode == StatusCodes.Status406NotAcceptable)
-                    {
-                        throw new IdempotencyKeyDuplicateException("Duplicate Idempotency Key Header");
-                    }
-
-                    
-
+                    return;
                 }
-                else
+
+                if (!context.Request.Headers.ContainsKey("IdempotencyKey"))
+                {
+                    throw new IdempotencyKeyMissingException("Missing Idempotency Key header.");
+                }
+
+                // Buffer the response so we can inspect it if it's an error
+                var originalBodyStream = context.Response.Body;
+                using var responseBody = new MemoryStream();
+                context.Response.Body = responseBody;
+
+                try
                 {
                     await next(context);
+
+                    // Check for idempotency errors (400, 409, or 406)
+                    if (context.Response.StatusCode == StatusCodes.Status400BadRequest || 
+                        context.Response.StatusCode == StatusCodes.Status409Conflict ||
+                        context.Response.StatusCode == StatusCodes.Status406NotAcceptable)
+                    {
+                        responseBody.Seek(0, SeekOrigin.Begin);
+                        var body = await new StreamReader(responseBody).ReadToEndAsync();
+
+                        // Detect messages from IdempotentAPI library
+                        if (body.Contains("The Idempotency header key value") || 
+                            body.Contains("was used in a different request") ||
+                            body.Contains("Duplicate Idempotency Key"))
+                        {
+                            // Clear and throw so CustomExceptionHandlerMiddleware can format it properly
+                            context.Response.Clear();
+                            throw new IdempotencyKeyDuplicateException(body);
+                        }
+
+                        // Not an idempotency error, copy back
+                        responseBody.Seek(0, SeekOrigin.Begin);
+                        await responseBody.CopyToAsync(originalBodyStream);
+                    }
+                    else
+                    {
+                        // Success or other status, copy back
+                        responseBody.Seek(0, SeekOrigin.Begin);
+                        await responseBody.CopyToAsync(originalBodyStream);
+                    }
+                }
+                finally
+                {
+                    context.Response.Body = originalBodyStream;
                 }
             }
-            catch (IdempotencyException ex)
+            else
             {
-
-                _logger.LogError(ex, "Something Wrong");
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = ex switch
-                {
-                    IdempotencyKeyMissingException => (int)HttpStatusCode.BadRequest,
-                    IdempotencyKeyDuplicateException => (int)HttpStatusCode.Conflict,
-                    _ => (int)HttpStatusCode.InternalServerError
-                };
-                var response =new ErrorDetails
-                {
-                    StatusCode = context.Response.StatusCode,
-                    ErrorMessage = ex.Message
-                };
-               await context.Response.WriteAsJsonAsync(response);
+                await next(context);
             }
         }
     }

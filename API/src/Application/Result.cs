@@ -1,6 +1,7 @@
 ﻿using Application;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 public class Result<T>
 {
@@ -9,6 +10,7 @@ public class Result<T>
     public T Value { get; }
     public Error? Error { get; }  // ← single property replaces ErrorType + ErrorMessage
 
+    [JsonConstructor]
     protected Result(bool isSuccess, T value, Error? error)
     {
         IsSuccess = isSuccess;

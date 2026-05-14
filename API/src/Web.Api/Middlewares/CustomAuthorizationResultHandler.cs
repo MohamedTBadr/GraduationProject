@@ -1,4 +1,4 @@
-﻿namespace Web.Api.Middlewares
+namespace Web.Api.Middlewares
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Authorization.Policy;
@@ -17,37 +17,35 @@
         {
             if (authorizeResult.Forbidden)
             {
-                var problem = new ProblemDetails
+                var errorResponse = new
                 {
-                    Status = 403,
-                    Title = "Forbidden",
-                    Detail = "You are not allowed to access this resource."
+                    IsSuccess = false,
+                    ErrorCode = 403,
+                    ErrorType = "Forbidden",
+                    ErrorDescription = "You are not allowed to access this resource."
                 };
 
-                problem.Extensions["code"] = "FORBIDDEN";
-
                 context.Response.StatusCode = 403;
-                context.Response.ContentType = "application/problem+json";
+                context.Response.ContentType = "application/json";
 
-                await context.Response.WriteAsJsonAsync(problem);
+                await context.Response.WriteAsJsonAsync(errorResponse);
                 return;
             }
 
             if (authorizeResult.Challenged)
             {
-                var problem = new ProblemDetails
+                var errorResponse = new
                 {
-                    Status = 401,
-                    Title = "Unauthorized",
-                    Detail = "Authentication is required."
+                    IsSuccess = false,
+                    ErrorCode = 401,
+                    ErrorType = "Unauthorized",
+                    ErrorDescription = "Authentication is required."
                 };
 
-                problem.Extensions["code"] = "UNAUTHORIZED";
-
                 context.Response.StatusCode = 401;
-                context.Response.ContentType = "application/problem+json";
+                context.Response.ContentType = "application/json";
 
-                await context.Response.WriteAsJsonAsync(problem);
+                await context.Response.WriteAsJsonAsync(errorResponse);
                 return;
             }
 

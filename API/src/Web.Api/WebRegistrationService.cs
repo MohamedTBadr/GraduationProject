@@ -84,13 +84,38 @@ namespace Web.Api
             // 2) Create Idempotency options and register the core with them
             var idempotencyOptions = new IdempotencyOptions
             {
+                
+                SerializerSettings = new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    // Handles objects with no parameterless constructor (like Result<T>)
+                    ConstructorHandling = Newtonsoft.Json.ConstructorHandling.AllowNonPublicDefaultConstructor,
+
+                    // Handles circular references
+                    ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+
+                    // Ignore null values to reduce cache size
+                    NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+
+                    // Preserves type info for polymorphic types
+                    TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto,
+
+                    // Handles missing members gracefully
+                    MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore,
+
+                    // Makes deserialization use private setters
+                    ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver
+                    {
+                        NamingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy()
+                    }
+                },
+
                 // prefer ExpiresInMilliseconds (ExpireHours is marked obsolete in README)
-                ExpiresInMilliseconds = TimeSpan.FromSeconds(240).TotalMilliseconds,
+                ExpiresInMilliseconds = TimeSpan.FromSeconds(500).TotalMilliseconds,
                 HeaderKeyName = "IdempotencyKey",
                 DistributedCacheKeysPrefix = "IdempAPI_",
                 CacheOnlySuccessResponses = true,
-                DistributedLockTimeoutMilli = 2000 // ms (only required if using distributed locks)
-
+                DistributedLockTimeoutMilli = 500 // ms (only required if using distributed locks)
+                
 
             };
 

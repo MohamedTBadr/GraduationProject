@@ -19,7 +19,6 @@ namespace Web.Api.Controllers
     {
         [HttpPost("Login")]
         [AllowAnonymous]
-        [Idempotent]
         public async Task<IActionResult> Login(LoginRequest loginRequest, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)

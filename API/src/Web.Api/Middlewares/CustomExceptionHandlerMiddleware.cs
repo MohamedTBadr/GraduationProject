@@ -3,6 +3,7 @@ using System.Text.Json;
 using Shared.Exceptions;
 using IdempotentAPI.Core;
 using Microsoft.AspNetCore.Mvc;
+using Application;
 
 namespace Web.Api.Middlewares
 {
@@ -25,37 +26,35 @@ namespace Web.Api.Middlewares
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
-            context.Response.ContentType = "application/problem+json";
+            context.Response.ContentType = "application/json";
 
-            var problem = ex switch
+            var (statusCode, errorResponse) = ex switch
             {
                 // ── Infrastructure / External Exceptions ──────────────────
-                UserAlreadyExistException => Problem(409, "Conflict", ex.Message, "USER_ALREADY_EXISTS"),
-                NotFoundException => Problem(404, "Not Found", ex.Message, "NOT_FOUND"),
-                RateLimitExceededException => Problem(429, "Too Many Requests", ex.Message, "RATE_LIMIT_EXCEEDED"),
-                UnauthorizedException => Problem(401, "Unauthorized", ex.Message, "UNAUTHORIZED"),
-                UnprocessableContentException => Problem(422, "Unprocessable Entity", ex.Message, "UNPROCESSABLE"),
-                IdempotencyKeyDuplicateException => Problem(406, "Not Acceptable", ex.Message, "IDEMPOTENCY_DUPLICATE"),
-                IdempotencyKeyMissingException => Problem(422, "Unprocessable Entity", ex.Message, "IDEMPOTENCY_MISSING"),
-                BadRequestException => Problem(400, "Bad Request", ex.Message, "BAD_REQUEST"),
-                GeminiException => Problem(422, "Unprocessable Entity", ex.Message, "GEMINI_ERROR"),
+                UserAlreadyExistException => (409, ErrorResponse(ErrorType.AlreadyExists, 409, ex.Message)),
+                NotFoundException => (404, ErrorResponse(ErrorType.NotFound, 404, ex.Message)),
+                RateLimitExceededException => (429, ErrorResponse(ErrorType.LimitExceeded, 429, ex.Message)),
+                UnauthorizedException => (401, ErrorResponse(ErrorType.Unauthorized, 401, ex.Message)),
+                UnprocessableContentException => (422, ErrorResponse(ErrorType.BusinessRule, 422, ex.Message)),
+                IdempotencyKeyDuplicateException => (406, ErrorResponse(ErrorType.Conflict, 406, ex.Message)),
+                IdempotencyKeyMissingException => (422, ErrorResponse(ErrorType.Validation, 422, ex.Message)),
+                BadRequestException => (400, ErrorResponse(ErrorType.Validation, 400, ex.Message)),
+                GeminiException => (422, ErrorResponse(ErrorType.ExternalService, 422, ex.Message)),
 
                 // ── Fallback ──────────────────────────────────────────────
-                _ => Problem(500, "Internal Server Error", ex.ToString(), "UNEXPECTED")
+                _ => (500, ErrorResponse(ErrorType.Unexpected, 500, ex.Message))
             };
 
-            context.Response.StatusCode = problem.Status!.Value;
-            await context.Response.WriteAsJsonAsync(problem);
-
-
+            context.Response.StatusCode = statusCode;
+            await context.Response.WriteAsJsonAsync(errorResponse);
         }
 
-        private static ProblemDetails Problem(int status, string title, string detail, string code) => new()
+        private static object ErrorResponse(ErrorType type, int code, string description) => new
         {
-            Status = status,
-            Title = title,
-            Detail = detail,
-            Extensions = { ["code"] = code }
+            IsSuccess = false,
+            ErrorCode = code,
+            ErrorType = type.ToString(),
+            ErrorDescription = description
         };
     }
 }

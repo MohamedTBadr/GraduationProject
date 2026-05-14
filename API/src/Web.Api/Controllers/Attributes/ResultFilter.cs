@@ -1,4 +1,4 @@
-﻿// PAL/Filters/ResultFilter.cs
+// PAL/Filters/ResultFilter.cs
 using Application;
 using BLL;
 using Microsoft.AspNetCore.Mvc;
@@ -35,15 +35,14 @@ namespace Web.Api.Controllers.Attributes
                 return;
             }
 
-            var errorType = (ErrorType?)type.GetProperty("ErrorType")!.GetValue(value);
-            var errorMessage = (string?)type.GetProperty("ErrorMessage")!.GetValue(value);
-            var problem = MapError(errorType, errorMessage);
-            context.Result = new ObjectResult(problem) { StatusCode = problem.Status };
+            var error = (Error?)type.GetProperty("Error")!.GetValue(value);
+            var (statusCode, errorResponse) = MapError(error);
+            context.Result = new ObjectResult(errorResponse) { StatusCode = statusCode };
         }
 
-        private static ProblemDetails MapError(ErrorType? errorType, string? message)
+        private static (int StatusCode, object ErrorResponse) MapError(Error? error)
         {
-            var statusCode = errorType switch
+            var statusCode = error?.Type switch
             {
                 ErrorType.Validation => 422,
                 ErrorType.NotFound => 404,
@@ -58,37 +57,13 @@ namespace Web.Api.Controllers.Attributes
                 _ => 500
             };
 
-            return new ProblemDetails
+            return (statusCode, new
             {
-                Status = statusCode,
-                Title = errorType?.ToString() ?? "Error",
-                Detail = message
-            };
-        }
-        private static ProblemDetails MapError(Error error)
-        {
-            var statusCode = error.Type switch
-            {
-                ErrorType.Validation => 422,
-                ErrorType.NotFound => 404,
-                ErrorType.Conflict => 409,
-                ErrorType.Unauthorized => 401,
-                ErrorType.Forbidden => 403,
-                ErrorType.BusinessRule => 400,
-                ErrorType.InvalidOperation => 400,
-                ErrorType.LimitExceeded => 429,
-                ErrorType.ExternalService => 502,
-                ErrorType.Unavailable => 503,
-                _ => 500
-            };
-
-            return new ProblemDetails
-            {
-                Status = statusCode,
-                Title = error.Type.ToString(),
-                Detail = error.Description,
-                Extensions = { ["code"] = error.Code }
-            };
+                IsSuccess = false,
+                ErrorCode = error?.Code ?? 500,
+                ErrorType = error?.Type.ToString() ?? "Unexpected",
+                ErrorDescription = error?.Description ?? "An unexpected error occurred."
+            });
         }
     }
-}
+}
