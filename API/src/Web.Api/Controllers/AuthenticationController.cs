@@ -19,6 +19,7 @@ namespace Web.Api.Controllers
     {
         [HttpPost("Login")]
         [AllowAnonymous]
+        [Idempotent]
         public async Task<IActionResult> Login(LoginRequest loginRequest, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -34,13 +35,14 @@ namespace Web.Api.Controllers
 
                 throw new UnprocessableContentException(errors);
             }
-            var user = await ServiceManager.AuthenticationService.LogIn(loginRequest, cancellationToken);
+            var result = await ServiceManager.AuthenticationService.LogIn(loginRequest, cancellationToken);
 
-            var response = Result<UserResponse>.Success(user);
-            return Ok(response);
+          
+            return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
         }
 
         [HttpPost("Register")]
+        [Idempotent]
         public async Task<IActionResult> Register(SignUpRequest request,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -57,8 +59,8 @@ namespace Web.Api.Controllers
                 throw new BadRequestException(errors);
             }
             var result = await ServiceManager.AuthenticationService.RegisterAsync(request, cancellationToken);
-            var response = Result<UserResponse>.Success(result);
-            return Ok(response);
+
+            return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
         }
 
         [HttpPost("CheckIfEmailExists")]
@@ -97,7 +99,7 @@ namespace Web.Api.Controllers
             {
                 // Call the secure Service method with the token provided by the client
                 var response = await ServiceManager.AuthenticationService.RefreshTokenAsync(request, cancellationToken);
-                var result = Result<UserResponse>.Success(response);
+               
                 // The UserResponse now contains the new AccessToken and the new RefreshToken
                 return Ok(response);
             }

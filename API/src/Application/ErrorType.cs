@@ -25,6 +25,9 @@
 
         public static Error InvalidOperation(int code, string description)
             => new(ErrorType.InvalidOperation, code, description);
+       
+        public static Error AlreadyExists(int code, string description)
+           => new(ErrorType.AlreadyExists, code, description);
 
 
     }

@@ -30,15 +30,20 @@ namespace Application.Services
     {
         // Define Refresh Token duration (e.g., 30 days)
         private const int RefreshTokenDurationDays = 30;
-        public async Task<UserResponse> LogIn(LoginRequest loginRequest,CancellationToken cancellationToken)
+        public async Task<Result<UserResponse>> LogIn(LoginRequest loginRequest,CancellationToken cancellationToken)
         {
             // 1. Check if User exists via Repository
-            var user = await userRepository.GetByEmailAsync(loginRequest.email, cancellationToken) ??
-                throw new UserNotFoundException(loginRequest.email);
+            var user = await userRepository.GetByEmailAsync(loginRequest.email, cancellationToken);
+            if (user == null) {
+               Result<UserResponse> failureResult = Result<UserResponse>.Failure(Error.NotFound(404, "User not found."));
+                return failureResult;
+            }
 
             if (user.IsSuspended)
-                throw new UnauthorizedException("Your account is suspended. Please contact support.");
-
+            {
+                 Result<UserResponse> result = Result<UserResponse>.Failure(Error.Unauthorized(401, "Your account got suspend "));
+                return result;
+            }
             // 2. Validate password via Repository
             var isValid = await userRepository.CheckPasswordAsync(user, loginRequest.password, cancellationToken);
 
@@ -63,21 +68,23 @@ namespace Application.Services
             // 5. Update user entity via Repository
             await SetRefreshTokenAsync(user, refreshToken, RefreshTokenDurationDays, cancellationToken);
 
-            return new(user.UserName!, user.Email!, accessToken, refreshToken, role);
+            return Result<UserResponse>.Success(new UserResponse(user.UserName!, user.Email!, accessToken.Value, refreshToken, role));
         }
 
         public async Task<bool> CheckIfEmailExists(string email, CancellationToken cancellationToken)
                     => (await userRepository.GetByEmailAsync(email, cancellationToken)) != null;
-        public async Task<UserResponse> RegisterAsync(SignUpRequest request, CancellationToken cancellationToken)
+        public async Task<Result<UserResponse>> RegisterAsync(SignUpRequest request, CancellationToken cancellationToken)
         {
             // Input validation and existing user checks
             if (await userRepository.GetByNameAsync(request.name, cancellationToken) != null)
             {
-                throw new UserAlreadyExistException($"User name '{request.name}' already exists.");
+                Result<UserResponse> failureResult = Result<UserResponse>.Failure(Error.Conflict(409, $"Username '{request.name}' is already taken."));
+                return failureResult;
             }
             if (await userRepository.GetByEmailAsync(request.email, cancellationToken) != null)
             {
-                throw new UserAlreadyExistException($"Email '{request.email}' already registered.");
+                Result<UserResponse> failureResult = Result<UserResponse>.Failure(Error.Conflict(409, $"Email '{request.email}' is already registered."));
+                return failureResult;
             }
 
             var user = new ApplicationUser
@@ -109,7 +116,7 @@ namespace Application.Services
                 // 3. Return both tokens
                 var roles = await userRepository.GetUserRolesAsync(user, cancellationToken);
                 var role = roles.FirstOrDefault() ?? string.Empty;
-                return new(request.name, request.email, accessToken, refreshToken, role);
+                return Result<UserResponse>.Success(new UserResponse(request.name, request.email, accessToken.Value, refreshToken, role));
             }
 
             var errors = result.Errors.Select(e => e.Description).ToList();
@@ -257,7 +264,7 @@ namespace Application.Services
         }
 
         // 💡 NEW SECURE REFRESH LOGIC
-        public async Task<UserResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
+        public async Task<Result<UserResponse>> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
         {
             // 1. Find the user by the Refresh Token in the database
             var user = await userRepository.GetByRefreshTokenAsync(request.RefreshToken, cancellationToken);
@@ -265,7 +272,8 @@ namespace Application.Services
             if (user == null)
             {
                 // Token not found or already revoked/used.
-                throw new UnauthorizedException("Invalid refresh token.");
+                 Result<UserResponse> failureResult = Result<UserResponse>.Failure(Error.Unauthorized(401, "Invalid refresh token. Please log in again."));
+                return failureResult;
             }
 
             // 2. Check if the Refresh Token has expired
@@ -273,8 +281,9 @@ namespace Application.Services
             {
                 // The token is expired. Revoke it and force user to log in again.
                 await ClearRefreshTokenAsync(user, cancellationToken);
-                throw new UnauthorizedException("Refresh token expired. Please log in again.");
-            }
+                Result<UserResponse> failureResult = Result<UserResponse>.Failure(Error.Unauthorized(401, "Refresh token expired. Please log in again."));
+                return failureResult;
+                    }
 
             // 3. Generate a new Access Token (short-lived)
             var newAccessToken = await GenerateAccessTokenAsync(user);
@@ -288,7 +297,8 @@ namespace Application.Services
             // 6. Return the new tokens
             var roles = await userRepository.GetUserRolesAsync(user, cancellationToken);
             var role = roles.FirstOrDefault() ?? string.Empty;
-            return new UserResponse(user.UserName!, user.Email!, newAccessToken, newRefreshToken, role);
+            return Result<UserResponse>.Success(new UserResponse(user.UserName!, user.Email!, newAccessToken.Value, newRefreshToken, role));
+          
         }
 
         // --- Private Utility Methods ---
@@ -296,7 +306,7 @@ namespace Application.Services
         /// <summary>
         /// Generates the short-lived JWT (Access Token).
         /// </summary>
-        private async Task<string> GenerateAccessTokenAsync(ApplicationUser user)
+        private async Task<Result<string>> GenerateAccessTokenAsync(ApplicationUser user)
         {
             var jwt = options.Value;
             var claims = new List<Claim>
@@ -323,7 +333,8 @@ namespace Application.Services
             );
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            return tokenHandler.WriteToken(token);
+            var accessToken = tokenHandler.WriteToken(token);
+            return Result<string>.Success(accessToken);
         }
 
         /// <summary>
