@@ -10,15 +10,16 @@ namespace Web.Api.Middlewares
         {
             try
             {
-                if (context.Request.Path.StartsWithSegments("/Hub"))
-                {
-                    await next(context);
-                    return;
-                }
+             
 
                 if (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method))
-                { 
-                
+                {
+                    if (context.Request.Path.StartsWithSegments("/Hub") || context.Request.Path.StartsWithSegments("/api/notifications/stream"))
+                    {
+                        await next(context);
+                        return;
+                    }
+
                     if (!context.Request.Headers.ContainsKey("IdempotencyKey"))
                     {
                     throw new IdempotencyKeyMissingException("Missing Idempotency Key header.");
