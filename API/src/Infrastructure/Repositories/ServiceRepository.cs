@@ -11,16 +11,15 @@ using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories
 {
-    public class ServiceRepository(ApplicationDbContext _context, ResiliencePipelineProvider<string> pipelineProvider) : IServiceRepository
+    public class ServiceRepository(ApplicationDbContext _context) : IServiceRepository
     {
-        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
 
         public async Task<List<ServiceImage>> GetServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
+            return 
                 await _context.ServiceImages
                     .Where(i => i.ServiceId == serviceId)
-                    .ToListAsync(token), cancellationToken);
+                    .ToListAsync(cancellationToken);
         }
 
         public async Task<PaginatedResponse<Service>> GetAllAsync(
@@ -28,8 +27,7 @@ namespace Infrastructure.Repositories
     Expression<Func<Service, bool>> visibilityFilter,
     CancellationToken ct)
         {
-            return await _pipeline.ExecuteAsync(async token =>
-            {
+           
                 var query = _context.Services.AsNoTracking().Where(visibilityFilter);
 
                 if (!string.IsNullOrWhiteSpace(request.SearchTerm))
@@ -66,7 +64,7 @@ namespace Infrastructure.Repositories
                 query = ApplyLocationSqlFilter(request, query);
 
                 // ✅ Count runs on EF IQueryable — no ToList yet
-                var totalCount = await query.CountAsync(token);
+                var totalCount = await query.CountAsync(ct);
 
                 // ✅ Paginate + fetch from DB
                 var items = await query
@@ -76,13 +74,13 @@ namespace Infrastructure.Repositories
                     .Include(p => p.ServiceImages)
                     .Skip((request.PageIndex - 1) * request.PageSize)
                     .Take(request.PageSize)
-                    .ToListAsync(token);                    // ← only DB round-trip
+                    .ToListAsync(ct);                    // ← only DB round-trip
 
                 // ✅ Phase 2 — Haversine in-memory on paged items only
                 var filtered = ApplyHaversineFilter(request, items);
 
                 return new PaginatedResponse<Service>(filtered, totalCount, request.PageIndex, request.PageSize);
-            }, ct);
+            
         }
 
         // ─────────────────────────────────────────────────────────────
@@ -175,8 +173,7 @@ namespace Infrastructure.Repositories
         }
         public async Task<PaginatedResponse<Service>> GetByEventTypeIdAsync(Guid eventTypeId, PaginatedRequest request, Expression<Func<Service, bool>> visibilityFilter, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
-            {
+     
                 var query = _context.Services
 
                     .Include(p => p.Vendor)
@@ -191,32 +188,31 @@ namespace Infrastructure.Repositories
 
                 query = ApplyLocationSqlFilter(request, query);
 
-                var totalCount = await query.CountAsync(token);
+                var totalCount = await query.CountAsync(cancellationToken);
                 var items = await query
                     .Skip((request.PageIndex - 1) * request.PageSize)
                     .Take(request.PageSize)
-                    .ToListAsync(token);
+                    .ToListAsync(cancellationToken);
 
                 return new PaginatedResponse<Service>(items, totalCount, request.PageIndex, request.PageSize);
-            }, cancellationToken);
+ 
         }
 
 
         public async Task<Service> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
+            return 
                 await _context.Services
                     .Include(p => p.Vendor).Include(p => p.ServiceType).Include(p => p.ServiceImages)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.Id == id, token), cancellationToken);
+                    .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         }
 
         public async Task<Service> CreateAsync(Service service, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
-            {
+          
                 service.Id = Guid.NewGuid();
-                await _context.Services.AddAsync(service, token);
+                await _context.Services.AddAsync(service, cancellationToken);
 
                 foreach (var img in service.ServiceImages)
                 {
@@ -224,108 +220,97 @@ namespace Infrastructure.Repositories
                     img.ServiceId = service.Id;
                 }
 
-                await _context.ServiceImages.AddRangeAsync(service.ServiceImages, token);
-                await _context.SaveChangesAsync(token);
+                await _context.ServiceImages.AddRangeAsync(service.ServiceImages, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
                 return service;
-            }, cancellationToken);
         }
 
         public async Task<Service> UpdateAsync(Service service, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
-            {
+           
                 _context.Services.Update(service);
                 if (service.ServiceImages?.Any() == true)
                 {
                     foreach (var image in service.ServiceImages) image.ServiceId = service.Id;
-                    await _context.ServiceImages.AddRangeAsync(service.ServiceImages, token);
+                    await _context.ServiceImages.AddRangeAsync(service.ServiceImages, cancellationToken);
                 }
-                await _context.SaveChangesAsync(token);
+                await _context.SaveChangesAsync(cancellationToken);
                 return service;
-            }, cancellationToken);
+          
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            await _pipeline.ExecuteAsync(async token =>
-            {
-                var service = await _context.Services.FindAsync([id], token);
+            
+                var service = await _context.Services.FindAsync([id], cancellationToken);
                 if (service is not null)
                 {
                     var images = _context.ServiceImages.Where(pi => pi.ServiceId == id);
                     _context.ServiceImages.RemoveRange(images);
                     _context.Services.Remove(service);
-                    await _context.SaveChangesAsync(token);
+                    await _context.SaveChangesAsync(cancellationToken);
                 }
-            }, cancellationToken);
         }
 
         public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
-                await _context.Services.AnyAsync(p => p.Id == id, token), cancellationToken);
+            return 
+                await _context.Services.AnyAsync(p => p.Id == id, cancellationToken);
         }
 
         public async Task<bool> UpdateStatusAsync(Guid id, bool isActive, CancellationToken ct)
         {
-            return await _pipeline.ExecuteAsync(async token =>
-            {
+          
                 var rowsAffected = await _context.Services
                     .Where(s => s.Id == id)
-                    .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.IsHidden, isActive), token);
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.IsHidden, isActive), ct);
                 return rowsAffected > 0;
-            }, ct);
+
         }
 
         public async Task AddRatingAsync(ServiceRating rating, CancellationToken cancellationToken)
         {
-            await _pipeline.ExecuteAsync(async token =>
-            {
+           
                 rating.Id = Guid.NewGuid();
-                await _context.ServiceRatings.AddAsync(rating, token);
-                await _context.SaveChangesAsync(token);
-            }, cancellationToken);
+                await _context.ServiceRatings.AddAsync(rating, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<List<Service>> AIFilterAsync(AIRequest AIRequest, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
+            return 
                 await _context.Services
                     .Where(p => p.Price < AIRequest.Budget && p.Price > 0)
                     .Include(p => p.Vendor).Include(p => p.ServiceType).Include(p => p.ServiceImages)
                     .AsNoTracking()
-                    .ToListAsync(token), cancellationToken);
+                    .ToListAsync(cancellationToken);
         }
 
         public async Task DeleteServiceImagesAsync(Guid serviceId, CancellationToken cancellationToken)
         {
-            await _pipeline.ExecuteAsync(async token =>
-            {
-                var oldImages = await _context.ServiceImages.Where(i => i.ServiceId == serviceId).ToListAsync(token);
+           
+                var oldImages = await _context.ServiceImages.Where(i => i.ServiceId == serviceId).ToListAsync(cancellationToken);
                 _context.ServiceImages.RemoveRange(oldImages);
-                await _context.SaveChangesAsync(token);
-            }, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<bool> HasUserPurchasedAsync(Guid userId, Guid serviceId, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token => {
-                var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == serviceId, token);
+           
+                var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == serviceId, cancellationToken);
                 return await _context.Orders
-                    .AnyAsync(o => o.UserId == userId && o.Event.EventItems.Any(oi => oi.ServiceName == service.Name), token);
-            }, cancellationToken);
+                    .AnyAsync(o => o.UserId == userId && o.Event.EventItems.Any(oi => oi.ServiceName == service.Name),cancellationToken);
         }
 
         public async Task<List<Service>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
+            return 
                 await _context.Services
                     .Include(p => p.Vendor)
                     .Include(p => p.ServiceType)
                     .Include(p => p.ServiceImages)
                     .Where(s => ids.Contains(s.Id))
-                    .ToListAsync(token),
-                cancellationToken);
+                    .ToListAsync(cancellationToken);
         }
     }
 }

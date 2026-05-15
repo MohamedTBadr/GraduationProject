@@ -273,27 +273,7 @@ namespace Web.Api
 
 
             #region Resilience 
-            #region Db Resiliency
-            Services.AddResiliencePipeline("db-pipeline", builder =>
-            {
-                builder
-                    .AddRetry(new RetryStrategyOptions
-                    {
-                        MaxRetryAttempts = 3,
-                        Delay = TimeSpan.FromMilliseconds(500),
-                        BackoffType = DelayBackoffType.Exponential,
-                        UseJitter = true
-                    })
-                    .AddCircuitBreaker(new CircuitBreakerStrategyOptions
-                    {
-                        FailureRatio = 0.5,
-                        MinimumThroughput = 5,
-                        BreakDuration = TimeSpan.FromSeconds(10)
-                    })
-                    .AddTimeout(TimeSpan.FromSeconds(3));
-            });
-            #endregion
-
+           
             #region External API Resiliency
            Services.AddResiliencePipeline("storage-pipeline", builder =>
             {
@@ -347,7 +327,7 @@ namespace Web.Api
 
 
 
-
+            #region Telemetry
             Services.AddHttpContextAccessor();
 
             Services.AddOpenTelemetry()
@@ -366,7 +346,7 @@ namespace Web.Api
         .AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317"))
             );
 
-
+            #endregion
             #region Hangfire
             Services.AddHangfire(config => config
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)

@@ -8,45 +8,33 @@ using Polly.Registry;
 namespace Infrastructure.Repositories;
 
 public class NotificationRepository(
-    ApplicationDbContext db,
-    ResiliencePipelineProvider<string> pipelineProvider) : INotificationRepository
+    ApplicationDbContext db) : INotificationRepository
 {
-    private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
 
     public async Task AddAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        await _pipeline.ExecuteAsync(async token =>
-        {
-            await db.Notifications.AddAsync(notification, token);
-            await db.SaveChangesAsync(token);
-        }, cancellationToken);
+        await db.Notifications.AddAsync(notification, cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<List<Notification>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await _pipeline.ExecuteAsync(async token =>
-            await db.Notifications
-                .Where(n => n.UserId == userId)
-                .OrderByDescending(n => n.CreatedAt)
-                .ToListAsync(token),
-            cancellationToken);
+        return await db.Notifications
+            .Where(n => n.UserId == userId)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task MarkAsReadAsync(Guid notificationId, CancellationToken cancellationToken = default)
     {
-        await _pipeline.ExecuteAsync(async token =>
-            await db.Notifications
-                .Where(n => n.Id == notificationId)
-                .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true), token),
-            cancellationToken);
+        await db.Notifications
+            .Where(n => n.Id == notificationId)
+            .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true), cancellationToken);
     }
 
     public async Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken cancellationToken = default)
     {
-        await _pipeline.ExecuteAsync(async token =>
-        {
-            await db.Notifications.AddRangeAsync(notifications, token);
-            await db.SaveChangesAsync(token);
-        }, cancellationToken);
+        await db.Notifications.AddRangeAsync(notifications, cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
     }
 }

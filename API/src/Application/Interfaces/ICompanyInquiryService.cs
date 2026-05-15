@@ -5,10 +5,10 @@ namespace Application.Interfaces
 {
     public interface ICompanyInquiryService
     {
-        Task AddAsync(CreateCompanyInquiryDto dto);
-        Task UpdateAsync(UpdateCompanyInquiryDto dto);
-        Task DeleteAsync(Guid id);
-        Task<CompanyInquiryDto> GetByIdAsync(Guid id);
-        Task<PaginatedResponse<CompanyInquiryDto>> GetAllAsync(PaginatedRequest request);
+        Task AddAsync(CreateCompanyInquiryDto dto,CancellationToken ct);
+        Task UpdateAsync(UpdateCompanyInquiryDto dto,CancellationToken ct);
+        Task DeleteAsync(Guid id,CancellationToken ct);
+        Task<CompanyInquiryDto> GetByIdAsync(Guid id, CancellationToken ct);
+        Task<PaginatedResponse<CompanyInquiryDto>> GetAllAsync(PaginatedRequest request, CancellationToken ct   );
     }
 }

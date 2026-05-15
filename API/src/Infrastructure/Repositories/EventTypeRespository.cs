@@ -9,63 +9,48 @@ using Polly.Registry;
 namespace Infrastructure.Repositories
 {
     public class EventTypeRespository(
-        ApplicationDbContext context,
-        ResiliencePipelineProvider<string> pipelineProvider) : IEventTypeRepository
+        ApplicationDbContext context) : IEventTypeRepository
     {
-        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
 
 
         // Infrastructure/Repositories/EventTypeRepository.cs
         public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken )
         {
-            return await _pipeline.ExecuteAsync(async token =>
-            {
-                return await context.EventTypes.AnyAsync(et => et.Id == id, token); // ✅ return + use token not cancellationToken
-            }, cancellationToken);
+            
+                return await context.EventTypes.AnyAsync(et => et.Id == id,cancellationToken);
         }
         public async Task CreateAsync(EventType eventType, CancellationToken cancellationToken)
         {
-            await _pipeline.ExecuteAsync(async token =>
-            {
-                await context.EventTypes.AddAsync(eventType, token);
-                await context.SaveChangesAsync(token);
-            }, cancellationToken);
+            
+                await context.EventTypes.AddAsync(eventType, cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task DeleteAsync(EventType eventType, CancellationToken cancellationToken)
         {
-            await _pipeline.ExecuteAsync(async token =>
-            {
+            
                 context.EventTypes.Remove(eventType);
-                await context.SaveChangesAsync(token);
-            }, cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<List<EventType>> GetAllAsync(CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
-                await context.EventTypes
+              return  await context.EventTypes
                     .AsNoTracking()
-                    .ToListAsync(token),
-                cancellationToken);
+                    .ToListAsync(cancellationToken);
         }
 
         public async Task<EventType> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
-            {
-                var type = await context.EventTypes.FirstOrDefaultAsync(t => t.Id == id, token);
+            
+                var type = await context.EventTypes.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
                 return type!;
-            }, cancellationToken);
         }
 
         public async Task UpdateAsync(EventType eventType, CancellationToken cancellationToken)
         {
-            await _pipeline.ExecuteAsync(async token =>
-            {
-                context.EventTypes.Update(eventType);
-                await context.SaveChangesAsync(token);
-            }, cancellationToken);
+                            context.EventTypes.Update(eventType);
+                await context.SaveChangesAsync(cancellationToken);
         }
 
 

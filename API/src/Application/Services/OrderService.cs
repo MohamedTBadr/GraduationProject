@@ -12,7 +12,7 @@ namespace Application.Services
     {
         // ─── Create ───────────────────────────────────────────────────────────────
 
-        public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request, CancellationToken ct = default)
+        public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request, CancellationToken ct )
         {
             if (request.ShippingAddress is null)
                 throw new ArgumentException("Shipping address is required.", nameof(request));
@@ -83,20 +83,20 @@ namespace Application.Services
 
         // ─── Read ─────────────────────────────────────────────────────────────────
 
-        public async Task<OrderResponse> GetOrderByIdAsync(Guid id, CancellationToken ct = default)
+        public async Task<OrderResponse> GetOrderByIdAsync(Guid id, CancellationToken ct )
         {
             var order = await orderRepo.GetByIdWithItemsAsync(id, ct)
                 ?? throw new KeyNotFoundException($"Order {id} not found.");
             return MapToResponse(order);
         }
 
-        public async Task<IEnumerable<OrderResponse>> GetAllOrdersAsync(CancellationToken ct = default)
+        public async Task<IEnumerable<OrderResponse>> GetAllOrdersAsync(CancellationToken ct )
         {
             var orders = await orderRepo.GetAllAsync(ct);
             return orders.Select(MapToResponse);
         }
 
-        public async Task<IEnumerable<OrderResponse>> GetOrdersByUserIdAsync(Guid userId, CancellationToken ct = default)
+        public async Task<IEnumerable<OrderResponse>> GetOrdersByUserIdAsync(Guid userId, CancellationToken ct )
         {
             var orders = await orderRepo.GetByUserIdAsync(userId, ct);
             return orders.Select(MapToResponse);
@@ -104,7 +104,7 @@ namespace Application.Services
 
         // ─── Update ───────────────────────────────────────────────────────────────
 
-        public async Task<OrderResponse> UpdatePaymentStatusAsync(Guid id, UpdateOrderStatusRequest request, CancellationToken ct = default)
+        public async Task<OrderResponse> UpdatePaymentStatusAsync(Guid id, UpdateOrderStatusRequest request, CancellationToken ct )
         {
             var order = await orderRepo.GetByIdWithItemsAsync(id, ct)
                 ?? throw new KeyNotFoundException($"Order {id} not found.");
@@ -130,7 +130,7 @@ namespace Application.Services
             return MapToResponse(order);
         }
 
-        public async Task<OrderResponse> SetPaymentIntentAsync(Guid id, string paymentIntentId, CancellationToken ct = default)
+        public async Task<OrderResponse> SetPaymentIntentAsync(Guid id, string paymentIntentId, CancellationToken ct )
         {
             var order = await orderRepo.GetByIdWithItemsAsync(id, ct)
                 ?? throw new KeyNotFoundException($"Order {id} not found.");
@@ -142,7 +142,7 @@ namespace Application.Services
 
         // ─── Cancel / Delete ──────────────────────────────────────────────────────
 
-        public async Task CancelOrderAsync(Guid id, CancellationToken ct = default)
+        public async Task CancelOrderAsync(Guid id, CancellationToken ct)
         {
             var order = await orderRepo.GetByIdAsync(id, ct)
                 ?? throw new KeyNotFoundException($"Order {id} not found.");
@@ -158,7 +158,7 @@ namespace Application.Services
                     $"Your order #{order.Id} has been cancelled.");
         }
 
-        public async Task DeleteOrderAsync(Guid id, CancellationToken ct = default)
+        public async Task DeleteOrderAsync(Guid id, CancellationToken ct )
         {
             if (!await orderRepo.ExistsAsync(id, ct))
                 throw new KeyNotFoundException($"Order {id} not found.");

@@ -42,7 +42,14 @@ namespace Infrastructure
             // 1. Configure DbContext with SQL Server
             Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                   configuration.GetConnectionString("DefaultConnection")));
+                   configuration.GetConnectionString("DefaultConnection"), sqloptions =>
+                   {
+                       sqloptions.EnableRetryOnFailure(
+                         maxRetryCount: 5,
+                         maxRetryDelay: TimeSpan.FromSeconds(10),
+                         errorNumbersToAdd: null
+                       );
+                   }));
             Services.AddScoped<IVoucherRepository, VoucherRepository>();
             Services.AddSingleton<ISearchService, LuceneSearchService>();
 

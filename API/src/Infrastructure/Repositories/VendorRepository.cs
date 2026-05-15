@@ -9,11 +9,9 @@ using System.Linq.Expressions;
 namespace Infrastructure.Repositories
 {
     public class VendorRepository(
-     ApplicationDbContext dbContext,
-     ResiliencePipelineProvider<string> pipelineProvider) : IVendorRepository
+     ApplicationDbContext dbContext) : IVendorRepository
     {
         // Resolve the specific pipeline by name using the provider
-        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
         public async Task<PaginatedResponse<Vendor>> GetVendorsAsync(
       PaginatedRequest request,
       Expression<Func<Vendor, bool>> visibilityFilter,
@@ -151,7 +149,7 @@ namespace Infrastructure.Repositories
         }
         public async Task<Vendor?> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var vendor = await _pipeline.ExecuteAsync(async token => await dbContext.Vendors
+            var vendor =  await dbContext.Vendors
                 .Include(x => x.Services)
                     .ThenInclude(s => s.ServiceRatings)
                         .ThenInclude(r => r.User)
@@ -161,7 +159,7 @@ namespace Infrastructure.Repositories
                 .Include(x => x.Services)
                     .ThenInclude(s => s.ServiceImages)
                 .Include(x => x.Packages)
-                .FirstOrDefaultAsync(v => v.UserId == id, token), cancellationToken);
+                .FirstOrDefaultAsync(v => v.UserId == id,cancellationToken);
             return vendor;
         }
 
@@ -171,24 +169,22 @@ namespace Infrastructure.Repositories
             if (vendor.User != null)
                 dbContext.Entry(vendor.User).State = EntityState.Unchanged;
 
-            await _pipeline.ExecuteAsync(async token =>
-            {
-                await dbContext.Vendors.AddAsync(vendor, token);
-                await dbContext.SaveChangesAsync(token);
-            }, cancellationToken);
+            
+                await dbContext.Vendors.AddAsync(vendor, cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task UpdateVendorAsync(Vendor vendor, CancellationToken cancellationToken)
         {
             dbContext.Vendors.Update(vendor);
-            await _pipeline.ExecuteAsync(async token => await dbContext.SaveChangesAsync(token), cancellationToken);  
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task DeleteVendorAsync(Vendor vendor, CancellationToken cancellationToken)
         {
             dbContext.Vendors.Remove(vendor);
 
-            await _pipeline.ExecuteAsync(async token => await dbContext.SaveChangesAsync(token), cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
 
         public Task<List<ServiceType>> GetServiceTypesByIdsAsync(List<Guid> ids, CancellationToken cancellationToken)
@@ -198,15 +194,14 @@ namespace Infrastructure.Repositories
         }
         public async Task<List<Vendor>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async token =>
+            return 
                 await dbContext.Vendors
                     .Include(x => x.User)
                     .Include(x => x.VendorType)
                     .Include(x => x.Services)
                         .ThenInclude(s => s.ServiceRatings)
                     .Where(v => ids.Contains(v.UserId))
-                    .ToListAsync(token),
-                cancellationToken);
+                    .ToListAsync(cancellationToken);
         }
     }
 }

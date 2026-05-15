@@ -22,36 +22,36 @@ namespace API.Controllers
         [HttpPost]
         [Idempotent]
         [AllowAnonymous]
-        public async Task<IActionResult> Submit([FromBody] CreateCompanyInquiryDto dto)
+        public async Task<IActionResult> Submit([FromBody] CreateCompanyInquiryDto dto,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _service.AddAsync(dto);
+            await _service.AddAsync(dto, cancellationToken);
             return Ok(new { message = "Your inquiry has been submitted. We will contact you soon." });
         }
 
         // ADMIN ONLY below this point
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] PaginatedRequest request)
+        public async Task<IActionResult> GetAll([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await _service.GetAllAsync(request);
+            var result = await _service.GetAllAsync(request, cancellationToken);
             return Ok(result);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
-            var result = await _service.GetByIdAsync(id);
+            var result = await _service.GetByIdAsync(id, cancellationToken);
             return Ok(result);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id:guid}")]
         [Idempotent]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCompanyInquiryDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCompanyInquiryDto dto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -59,16 +59,16 @@ namespace API.Controllers
             if (id != dto.Id)
                 return BadRequest(new { message = "ID in URL does not match ID in body." });
 
-            await _service.UpdateAsync(dto);
+            await _service.UpdateAsync(dto, cancellationToken);
             return NoContent();
         }
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id:guid}")]
         [Idempotent]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
-            await _service.DeleteAsync(id);
+            await _service.DeleteAsync(id, cancellationToken);
             return NoContent();
         }
     }

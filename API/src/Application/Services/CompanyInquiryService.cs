@@ -16,7 +16,7 @@ namespace Application.Services
             _repository = repository;
         }
 
-        public async Task AddAsync(CreateCompanyInquiryDto dto)
+        public async Task AddAsync(CreateCompanyInquiryDto dto, CancellationToken ct)
         {
             var entity = new CorporationInquiry
             {
@@ -33,10 +33,10 @@ namespace Application.Services
                 Status = dto.Status
             };
 
-            await _repository.AddCompanyInquiryAsync(entity);
+            await _repository.AddCompanyInquiryAsync(entity, ct);
         }
 
-        public async Task UpdateAsync(UpdateCompanyInquiryDto dto)
+        public async Task UpdateAsync(UpdateCompanyInquiryDto dto, CancellationToken ct)
         {
             var entity = new CorporationInquiry
             {
@@ -53,24 +53,24 @@ namespace Application.Services
                 Status = dto.Status
             };
 
-            await _repository.UpdateCompanyInquiryAsync(entity);
+            await _repository.UpdateCompanyInquiryAsync(entity, ct);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken ct)
         {
-            await _repository.DeleteCompanyInquiryAsync(id);
+            await _repository.DeleteCompanyInquiryAsync(id, ct);
         }
 
-        public async Task<CompanyInquiryDto> GetByIdAsync(Guid id)
+        public async Task<CompanyInquiryDto> GetByIdAsync(Guid id, CancellationToken ct)
         {
-            var entity = await _repository.GetCompanyInquiryByIdAsync(id);
+            var entity = await _repository.GetCompanyInquiryByIdAsync(id, ct);
 
             return MapToDto(entity);
         }
 
-        public async Task<PaginatedResponse<CompanyInquiryDto>> GetAllAsync(PaginatedRequest request)
+        public async Task<PaginatedResponse<CompanyInquiryDto>> GetAllAsync(PaginatedRequest request, CancellationToken ct)
         {
-            var result = await _repository.GetAllCompanyInquiriesAsync(request);
+            var result = await _repository.GetAllCompanyInquiriesAsync(request, ct);
 
             var dtoItems = result.Items.Select(MapToDto);
 

@@ -14,59 +14,48 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    public class VendorTypeRepository(ApplicationDbContext dbContext, ResiliencePipelineProvider<string> pipelineProvider) : IVendorTypeRepository
+    public class VendorTypeRepository(ApplicationDbContext dbContext) : IVendorTypeRepository
     {
 
-        private readonly ResiliencePipeline _pipeline = pipelineProvider.GetPipeline("db-pipeline");
 
         public async Task AddVendorTypeAsync(VendorType vendorType, CancellationToken cancellationToken)
         {
-            await _pipeline.ExecuteAsync(async ct =>
-            {
+            
                 dbContext.VendorTypes.Add(vendorType);
-                await dbContext.SaveChangesAsync(ct);
-            }, cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
+             
         }
 
         public async Task DeleteVendorTypeAsync(Guid id, CancellationToken cancellationToken)
         {
-            await _pipeline.ExecuteAsync(async ct =>
-            {
-                var vendorType = await dbContext.VendorTypes.FindAsync([id], ct);
+            
+                var vendorType = await dbContext.VendorTypes.FindAsync([id], cancellationToken);
                 if (vendorType != null)
                 {
                     dbContext.VendorTypes.Remove(vendorType);
-                    await dbContext.SaveChangesAsync(ct);
+                    await dbContext.SaveChangesAsync(cancellationToken);
                 }
-            }, cancellationToken);
         }
 
         public async Task<VendorType?> GetVendorTypeByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async ct =>
-            {
-                return await dbContext.VendorTypes.FindAsync(new object[] { id }, ct);
-            }, cancellationToken);
+            
+                return await dbContext.VendorTypes.FindAsync(new object[] { id }, cancellationToken);
         }
 
         public async Task<IReadOnlyList<VendorType>> GetVendorTypesAsync(CancellationToken cancellationToken)
         {
-            return await _pipeline.ExecuteAsync(async ct =>
-            {
+            
                 return await dbContext.VendorTypes
                     .AsNoTracking()
-                    .ToListAsync(ct);
-
-            }, cancellationToken);
+                    .ToListAsync(cancellationToken);
         }
 
         public async Task UpdateVendorTypeAsync(VendorType vendorType, CancellationToken cancellationToken)
         {
-            await _pipeline.ExecuteAsync(async ct =>
-            {
+           
                 dbContext.VendorTypes.Update(vendorType);
-                await dbContext.SaveChangesAsync(ct);
-            }, cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }
