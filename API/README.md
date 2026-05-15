@@ -117,5 +117,4 @@ Click below to join the project and explore the API:
 <sub>Powered by <strong>Apidog</strong> · Interactive testing · Full schema reference</sub>
 
 </div>
-```
 
