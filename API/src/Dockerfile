@@ -16,10 +16,9 @@ COPY Infrastructure/*.csproj Infrastructure/
 COPY Application/*.csproj Application/
 COPY Shared/*.csproj Shared/
 COPY Web.Api/*.csproj Web.Api/
-COPY ReverseProxy.csproj ReverseProxy/
-
+COPY ReverseProxy/*.csproj ReverseProxy/
 # Restore all dependencies
-RUN dotnet restore
+RUN dotnet restore "API.sln"
 
 # Copy the rest of the source code
 COPY . .
