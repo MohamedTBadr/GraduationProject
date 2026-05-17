@@ -332,19 +332,27 @@ namespace Web.Api
 
             Services.AddOpenTelemetry()
                 .WithTracing(t => t
-                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("MyApi"))
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddSource("MyApi")
-                .AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317"))
-                    )
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("GraduationProject-API"))
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation(options =>
+                    {
+                        options.SetDbStatementForText = true;
+                        options.SetDbStatementForStoredProcedure = true;
+                    })
+                    .AddRedisInstrumentation()
+                    .AddSource("GraduationProject-API")
+                    .AddOtlpExporter(o => o.Endpoint = new Uri(Environment.GetEnvironmentVariable("Telemetry__Endpoint") ?? "http://localhost:18889"))
+                )
                 .WithMetrics(m => m
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("MyApi"))
-            .AddAspNetCoreInstrumentation()
-            .AddRuntimeInstrumentation()
-    .AddMeter("MyApi")
-        .AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317"))
-            );
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("GraduationProject-API"))
+                    .AddAspNetCoreInstrumentation()
+                    .AddRuntimeInstrumentation()
+                    .AddProcessInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddMeter("GraduationProject-API")
+                    .AddOtlpExporter(o => o.Endpoint = new Uri(Environment.GetEnvironmentVariable("Telemetry__Endpoint") ?? "http://localhost:18889"))
+                );
 
             #endregion
             #region Hangfire

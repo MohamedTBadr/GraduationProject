@@ -72,7 +72,6 @@ namespace Web
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials(); // ← must for SignalR
-                           
                 });
             });
 
@@ -80,14 +79,13 @@ namespace Web
             builder.Logging.AddOpenTelemetry(logging =>
             {
                 logging.SetResourceBuilder(
-                    ResourceBuilder.CreateDefault().AddService("MyApi"));
+                    ResourceBuilder.CreateDefault().AddService("GraduationProject-API"));
 
                 logging.AddOtlpExporter(o =>
                 {
                     o.Endpoint = new Uri(
                         Environment.GetEnvironmentVariable("Telemetry__Endpoint")
                         ?? "http://localhost:18889");
-                    o.Protocol = OtlpExportProtocol.HttpProtobuf;
                 });
             });
 
