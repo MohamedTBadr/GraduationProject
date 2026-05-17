@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Vouchers;
+using Application.DTOs.Vouchers;
 using Application.Interfaces.Services;
 using Domain.Contracts;
 using Domain.Entities;
@@ -90,5 +90,15 @@ public class VoucherService(
 
         voucher.IsUsed = true;
         await voucherRepo.SaveChangesAsync(ct);
+    }
+
+    public async Task MarkVoucherUnusedAsync(string code, CancellationToken ct)
+    {
+        var voucher = await voucherRepo.GetByCodeAsync(code, ct);
+        if (voucher is not null)
+        {
+            voucher.IsUsed = false;
+            await voucherRepo.SaveChangesAsync(ct);
+        }
     }
 }

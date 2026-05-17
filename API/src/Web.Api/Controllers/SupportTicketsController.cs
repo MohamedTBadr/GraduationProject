@@ -3,12 +3,13 @@ using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using IdempotentAPI.Filters;
+using Web.Api.Controllers;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/admin/support/tickets")]
-    public class SupportTicketsController(IServiceManager serviceManager) : ControllerBase
+    public class SupportTicketsController(IServiceManager serviceManager) : BaseController
     {
         // ─── GET STATS ───────────────────────────────────────────────────────────────
         [Authorize(Roles = "Admin")]
@@ -36,6 +37,7 @@ namespace API.Controllers
         }
 
         [HttpGet("stats")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(TicketStatsDTO), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetStats(CancellationToken cancellationToken)
         {
@@ -180,6 +182,15 @@ namespace API.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            var username = User.Identity?.Name ?? User.FindFirst("name")?.Value ?? "Unknown User";
+            var ticket = await serviceManager.SupportTicketService.GetByIdAsync(ticketId, cancellationToken);
+            if (ticket.IsFailure)
+                return ticket.ToActionResult();
+
+            // Enforce ownership: only the ticket creator can escalate it
+            if (ticket.Value.From != username)
+                return Forbid();
 
             var result = await serviceManager.SupportTicketService.EscalateAsync(ticketId, request, cancellationToken);
             return result.ToActionResult();

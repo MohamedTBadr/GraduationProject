@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Orders;
+using Application.DTOs.Orders;
 using Application.DTOs.PaymobDTOs;
 using Application.Interfaces.Services;
 using Microsoft.Extensions.Options;
@@ -64,9 +64,9 @@ public class PaymobService(
             payload.Obj.Order.Id,
             payload.Obj.Owner,
             payload.Obj.Pending.ToString().ToLower(),
-            payload.Obj.SourceData.Pan,
-            payload.Obj.SourceData.SubType,
-            payload.Obj.SourceData.Type,
+            payload.Obj.SourceData?.Pan,
+            payload.Obj.SourceData?.SubType,
+            payload.Obj.SourceData?.Type,
             payload.Obj.Success.ToString().ToLower()
         );
 

@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Vouchers;
+using Application.DTOs.Vouchers;
 
 namespace Application.Interfaces.Services;
 
@@ -9,4 +9,5 @@ public interface IVoucherService
     Task<IEnumerable<VoucherDto>> GetMyVouchersAsync(Guid userId, CancellationToken ct);
     Task<ApplyVoucherResult> ValidateVoucherAsync(string code, Guid userId, CancellationToken ct);
     Task MarkVoucherUsedAsync(string code, CancellationToken ct);
+    Task MarkVoucherUnusedAsync(string code, CancellationToken ct);
 }

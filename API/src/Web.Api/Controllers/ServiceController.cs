@@ -18,15 +18,15 @@ namespace Web.Api.Controllers
     public class ServiceController(IServiceManager serviceManager) : BaseController
     {
         private Guid? UserId =>TryGetUserId();
-        private bool IsAdmin => IsAdmin();
-        private bool IsVendor => IsVendor();
+        private bool IsAdminUser => IsAdmin();
+        private bool IsVendorUser => IsVendor();
 
         // GET api/Services
         [HttpGet]
         [HybridCache(1800, "services")]
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await serviceManager.ServiceService.GetAllAsync(request, IsAdmin, IsVendor, UserId, cancellationToken);
+            var result = await serviceManager.ServiceService.GetAllAsync(request, IsAdminUser, IsVendorUser, UserId, cancellationToken);
             return  result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
@@ -44,7 +44,7 @@ namespace Web.Api.Controllers
         [HybridCache(1800, "services")]
         public async Task<IActionResult> GetByEventTypeAsync(Guid eventTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
-            var result = await serviceManager.ServiceService.GetByEventTypeIdAsync(eventTypeId, request, IsAdmin, IsVendor, UserId, cancellationToken);
+            var result = await serviceManager.ServiceService.GetByEventTypeIdAsync(eventTypeId, request, IsAdminUser, IsVendorUser, UserId, cancellationToken);
             return Ok(result);
         }
 
@@ -54,7 +54,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var filteredRequest = request with { VendorId = vendorId };
-            var result = await serviceManager.ServiceService.GetAllAsync(filteredRequest, IsAdmin, IsVendor, UserId, cancellationToken);
+            var result = await serviceManager.ServiceService.GetAllAsync(filteredRequest, IsAdminUser, IsVendorUser, UserId, cancellationToken);
             return result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
 
@@ -64,7 +64,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetByServiceTypeAsync(Guid serviceTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var filteredRequest = request with { ServiceTypeId = serviceTypeId };
-            var result = await serviceManager.ServiceService.GetAllAsync(filteredRequest, IsAdmin, IsVendor, UserId, cancellationToken);
+            var result = await serviceManager.ServiceService.GetAllAsync(filteredRequest, IsAdminUser, IsVendorUser, UserId, cancellationToken);
             return result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
         // POST api/Services
@@ -94,7 +94,7 @@ namespace Web.Api.Controllers
             if (id != dto.Id)
                 return BadRequest(Error.Validation(422, "Route id and body id do not match."));
 
-            if (!IsAdmin) // Vendor: verify ownership and force their own VendorId
+            if (!IsAdminUser) // Vendor: verify ownership and force their own VendorId
             {
                 var service = await serviceManager.ServiceService.GetByIdAsync(id, cancellationToken);
 
@@ -110,14 +110,13 @@ namespace Web.Api.Controllers
             return  result.IsSuccess ? NoContent() : result.ToActionResult();
         }
         [Authorize(Roles = "Admin,Vendor")]
-
         // DELETE api/Services/{id}
         [HttpDelete("{id:guid}")]
         [Idempotent]
         [InvalidateCache("services/{id}", "services")]
         public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            if (UserId != null && !IsAdmin) // if user is authenticated and not admin, ensure they own the service
+            if (UserId != null && !IsAdminUser) // if user is authenticated and not admin, ensure they own the service
             {
                 var service = await serviceManager.ServiceService.GetByIdAsync(id, cancellationToken);
                 if (service.Value.VendorId != UserId)
@@ -136,13 +135,20 @@ namespace Web.Api.Controllers
         [InvalidateCache("services/{id}","services")]
         public async Task<IActionResult> ToggleStatus(Guid id, CancellationToken ct)
         {
+            if (!IsAdminUser) // if vendor is authenticated, ensure they own the service
+            {
+                var service = await serviceManager.ServiceService.GetByIdAsync(id, ct);
+                if (service.Value.VendorId != UserId)
+                    return Forbid();
+            }
+
             await serviceManager.ServiceService.ToggleStatusAsync(id, ct);
             return NoContent();
         }
 
         [HttpPost("{id}/ratings")]
         [Idempotent]
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "Customer")]
         [InvalidateCache("services/{id}")]
         public async Task<IActionResult> AddRatingAsync(Guid id, ServiceRatingRequest dto, CancellationToken cancellationToken)
         {

@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Orders;
+using Application.DTOs.Orders;
 
 using Application.Interfaces.Services;
 using Domain.Contracts;
@@ -17,10 +17,17 @@ namespace Application.Services
             if (request.ShippingAddress is null)
                 throw new ArgumentException("Shipping address is required.", nameof(request));
 
-            // 1. Get base amount from event
-            var amount = await orderRepo.GetOrderAmountAsync(request.EventId, ct);
+            // 1. Fetch event and validate ownership (IDOR Fix)
+            var eventWithItems = await orderRepo.GetEventWithItemsAsync(request.EventId, ct)
+                ?? throw new KeyNotFoundException($"Event {request.EventId} was not found.");
 
-            // 2. Apply voucher discount if provided
+            if (eventWithItems.UserId != request.UserId)
+                throw new UnauthorizedAccessException("You are not authorized to create an order for this event.");
+
+            // 2. Calculate base amount in-memory (Performance Optimization)
+            var amount = eventWithItems.EventItems?.Sum(ei => ei.Quantity * ei.Price) ?? 0;
+
+            // 3. Apply voucher discount if provided
             if (!string.IsNullOrEmpty(request.VoucherCode))
             {
                 var voucherResult = await voucherService.ValidateVoucherAsync(
@@ -43,6 +50,7 @@ namespace Application.Services
                 Amount = amount,                        // ← discounted amount
                 Currency = request.Currency ?? "EGP",
                 Appointment = request.Appointment,
+                VoucherCode = request.VoucherCode,      // ← store applied voucher code
                 ShippingAddress = new Address
                 {
                     Street = request.ShippingAddress.Street,
@@ -61,9 +69,8 @@ namespace Application.Services
                     "Order Placed",
                     $"Your order #{order.Id} has been placed successfully. Total: {order.Amount} {order.Currency}.");
 
-                var eventWithItems = await orderRepo.GetEventWithItemsAsync(request.EventId, ct);
-
-                if (eventWithItems?.EventItems is { Count: > 0 })
+                // Reuse the previously loaded eventWithItems instead of querying SQL again!
+                if (eventWithItems.EventItems is { Count: > 0 })
                 {
                     var vendorNotifications = eventWithItems.EventItems
                         .GroupBy(i => i.VendorId)
@@ -109,8 +116,18 @@ namespace Application.Services
             var order = await orderRepo.GetByIdWithItemsAsync(id, ct)
                 ?? throw new KeyNotFoundException($"Order {id} not found.");
 
+            // Idempotency check: if status is already the same, skip processing
+            if (order.PaymentStatus.Equals(request.PaymentStatus, StringComparison.OrdinalIgnoreCase))
+                return MapToResponse(order);
+
             order.PaymentStatus = request.PaymentStatus;
             await orderRepo.UpdateAsync(order, ct);
+
+            // Revert voucher if payment fails or is rejected
+            if (request.PaymentStatus is "Failed" or "Rejected" && !string.IsNullOrEmpty(order.VoucherCode))
+            {
+                await voucherService.MarkVoucherUnusedAsync(order.VoucherCode, ct);
+            }
 
             if (order.UserId != Guid.Empty)
             {
@@ -147,8 +164,17 @@ namespace Application.Services
             var order = await orderRepo.GetByIdAsync(id, ct)
                 ?? throw new KeyNotFoundException($"Order {id} not found.");
 
+            if (order.PaymentStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+                return;
+
             order.PaymentStatus = "Cancelled";
             await orderRepo.UpdateAsync(order, ct);
+
+            // Revert voucher if order is cancelled
+            if (!string.IsNullOrEmpty(order.VoucherCode))
+            {
+                await voucherService.MarkVoucherUnusedAsync(order.VoucherCode, ct);
+            }
 
             if (order.UserId != Guid.Empty)
                 await notificationService.SendAsync(

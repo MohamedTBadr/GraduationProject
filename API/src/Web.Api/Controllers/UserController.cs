@@ -1,4 +1,4 @@
-﻿using Application;
+using Application;
 using Application.DTOs.UserDTOs;
 using Application.Interfaces;
 using Application.Services.Helpers;
@@ -76,8 +76,12 @@ namespace Web.Api.Controllers
 
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<UserDTO>> GetUserById(Guid id)
         {
+            if (!IsAdminOrOwner(id))
+                return Forbid();
+
             var user = await userManager.FindByIdAsync(id.ToString());
             if (user == null)
             {
@@ -151,8 +155,12 @@ namespace Web.Api.Controllers
 
 
         [HttpPatch("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserDTO userDto)
         {
+            if (!IsAdminOrOwner(id))
+                return Forbid();
+
             var user = await userManager.FindByIdAsync(id.ToString());
             if (user == null)
             {

@@ -1,4 +1,4 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -25,10 +25,10 @@ public class NotificationRepository(
             .ToListAsync(cancellationToken);
     }
 
-    public async Task MarkAsReadAsync(Guid notificationId, CancellationToken cancellationToken = default)
+    public async Task MarkAsReadAsync(Guid notificationId, Guid userId, CancellationToken cancellationToken = default)
     {
         await db.Notifications
-            .Where(n => n.Id == notificationId)
+            .Where(n => n.Id == notificationId && n.UserId == userId)
             .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true), cancellationToken);
     }
 

@@ -1,3 +1,4 @@
+using Application.DTOs.Orders;
 using Application.DTOs.PaymobDTOs;
 using Application.Interfaces.Services;
 using Infrastructure.Payments;
@@ -9,7 +10,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/payments")]
-    public class PaymentsController : ControllerBase
+    public class PaymentsController : BaseController
     {
         private readonly PaymobService _paymob;
         private readonly IOrderService _orderService;
@@ -30,7 +31,22 @@ namespace Web.Api.Controllers
             // 1. Fetch the real order — don't trust client-provided amount
             var order = await _orderService.GetOrderByIdAsync(request.OrderId, cancellationToken);
 
-            // 3. Use order's real amount, not request.Amount
+            // 2. Security Check: Enforce ownership (IDOR Fix)
+            if (!IsAdminOrOwner(order.UserId))
+                return Forbid();
+
+            // 3. Business Logic Check: Block payment attempts on already paid orders
+            if (order.PaymentStatus is "Paid" or "Completed")
+                return BadRequest("This order has already been paid.");
+
+            // 4. Free Order Bypass Logic (100% off voucher or free events)
+            if (order.Amount <= 0)
+            {
+                await _orderService.UpdatePaymentStatusAsync(order.Id, new UpdateOrderStatusRequest("Paid"), cancellationToken);
+                return Ok(new { isFree = true, message = "Order is free. Payment bypassed successfully.", redirectUrl = "/payment/success" });
+            }
+
+            // 5. Use order's real amount, not request.Amount
             var iframeUrl = await _paymob.CreatePaymentAsync(
                 order.Id,
                 order.Amount,   

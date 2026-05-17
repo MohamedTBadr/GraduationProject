@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +18,7 @@ namespace Domain.Entities
 
     public string? PaymentIntentId { get; set; } // Paymob order_id
     public string PaymentStatus { get; set; } = "Pending";
+    public string? VoucherCode { get; set; } // applied voucher code
 
     public DateTime? Appointment { get; set; }
 

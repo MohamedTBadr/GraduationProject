@@ -89,6 +89,9 @@ namespace Infrastructure.Persistence
                       .HasMaxLength(50)
                       .IsRequired();
 
+                entity.Property(o => o.VoucherCode)
+                      .HasMaxLength(50);
+
                 entity.OwnsOne(o => o.ShippingAddress, address =>
                 {
                     address.Property(a => a.Street).HasMaxLength(255);

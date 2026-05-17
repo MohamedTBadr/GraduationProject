@@ -99,6 +99,9 @@ namespace Web.Api.Controllers
         [InvalidateCache("vendors", "vendors/{id}")]
         public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken)
         {
+            if (!IsAdminOrOwner(id))
+                return Forbid();
+
             var result = await serviceManager.VendorService.UpdateVendorAsync(id, request, cancellationToken);
             return result.IsSuccess? NoContent(): result.ToActionResult();
         }

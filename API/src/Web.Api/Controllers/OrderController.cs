@@ -26,7 +26,7 @@ namespace API.Controllers
 
         // GET api/orders
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var orders = await serviceManager.OrderService.GetAllOrdersAsync(ct);
@@ -41,6 +41,9 @@ namespace API.Controllers
             try
             {
                 var order = await serviceManager.OrderService.GetOrderByIdAsync(id, ct);
+                if (!IsAdminOrOwner(order.UserId))
+                    return Forbid();
+
                 return Ok(order);
             }
             catch (KeyNotFoundException ex)
@@ -54,6 +57,9 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> GetByUser(Guid userId, CancellationToken ct)
         {
+            if (!IsAdminOrOwner(userId))
+                return Forbid();
+
             var orders = await serviceManager.OrderService.GetOrdersByUserIdAsync(userId, ct);
             return Ok(orders);
         }
@@ -106,6 +112,14 @@ namespace API.Controllers
         {
             try
             {
+                var order = await serviceManager.OrderService.GetOrderByIdAsync(id, ct);
+                if (!IsAdminOrOwner(order.UserId))
+                    return Forbid();
+
+                // Prevent clients from unilaterally cancelling Paid or Completed orders
+                if (!IsAdmin() && order.PaymentStatus is "Paid" or "Completed")
+                    return BadRequest(new { message = "Cannot cancel an order that has already been paid or completed." });
+
                 await serviceManager.OrderService.CancelOrderAsync(id, ct);
                 return NoContent();
             }

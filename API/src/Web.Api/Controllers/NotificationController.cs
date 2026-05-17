@@ -1,4 +1,4 @@
-﻿using Azure;
+using Azure;
 using Domain.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +50,8 @@ public class NotificationsController(
     [HttpPatch("{id:guid}/read")]
     public async Task<IActionResult> MarkRead(Guid id)
     {
-        await repo.MarkAsReadAsync(id);
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        await repo.MarkAsReadAsync(id, userId);
         return NoContent();
     }
 }

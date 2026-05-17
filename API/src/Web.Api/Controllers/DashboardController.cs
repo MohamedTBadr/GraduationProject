@@ -1,4 +1,4 @@
-﻿using Infrastructure.Persistence;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,8 +39,10 @@ namespace Web.Api.Controllers
             var insights = await _context.OrderInsights
                 .FirstOrDefaultAsync(x => x.Year == now.Year && x.Month == now.Month);
 
+            var paidStatuses = new[] { "Paid", "Completed" };
+
             var totalLifetime = await _context.Orders
-                .Where(o => o.PaymentStatus == "Success")
+                .Where(o => paidStatuses.Contains(o.PaymentStatus))
                 .SumAsync(o => o.Amount);
 
             var recent = await _context.Orders
@@ -76,19 +78,21 @@ namespace Web.Api.Controllers
         {
             var vendorId = GetUserIdFromToken();
 
+            var paidStatuses = new[] { "Paid", "Completed" };
+
             var lifetimeRevenue = await _context.EventItems
-                .Where(ei => ei.VendorId == vendorId && ei.Event.Order.PaymentStatus == "Success")
+                .Where(ei => ei.VendorId == vendorId && paidStatuses.Contains(ei.Event.Order.PaymentStatus))
                 .SumAsync(ei => ei.Price * ei.Quantity);
 
             var currentMonthRevenue = await _context.EventItems
                 .Where(ei => ei.VendorId == vendorId &&
-                             ei.Event.Order.PaymentStatus == "Success" &&
+                             paidStatuses.Contains(ei.Event.Order.PaymentStatus) &&
                              ei.Event.Order.CreatedAt >= startOfCurrentMonth)
                 .SumAsync(ei => ei.Price * ei.Quantity);
 
             var lastMonthRevenue = await _context.EventItems
                 .Where(ei => ei.VendorId == vendorId &&
-                             ei.Event.Order.PaymentStatus == "Success" &&
+                             paidStatuses.Contains(ei.Event.Order.PaymentStatus) &&
                              ei.Event.Order.CreatedAt >= startOfLastMonth &&
                              ei.Event.Order.CreatedAt < startOfCurrentMonth)
                 .SumAsync(ei => ei.Price * ei.Quantity);
@@ -101,7 +105,7 @@ namespace Web.Api.Controllers
 
             // ── Fix 1: filter by PaymentStatus so unpaid orders are excluded ──
             var recentItems = await _context.EventItems
-                .Where(ei => ei.VendorId == vendorId && ei.Event.Order.PaymentStatus == "Success")
+                .Where(ei => ei.VendorId == vendorId && paidStatuses.Contains(ei.Event.Order.PaymentStatus))
                 .OrderByDescending(ei => ei.Event.Order.CreatedAt)
                 .Take(5)
                 .Select(ei => new
@@ -114,7 +118,7 @@ namespace Web.Api.Controllers
                 .ToListAsync();
 
             var revenueHistory = await _context.EventItems
-                .Where(ei => ei.VendorId == vendorId && ei.Event.Order.PaymentStatus == "Success")
+                .Where(ei => ei.VendorId == vendorId && paidStatuses.Contains(ei.Event.Order.PaymentStatus))
                 .GroupBy(ei => new { ei.Event.Order.CreatedAt.Year, ei.Event.Order.CreatedAt.Month })
                 .Select(g => new
                 {
