@@ -1,5 +1,6 @@
 using Shared;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Application.Interfaces
@@ -43,14 +44,24 @@ namespace Application.Interfaces
         public string Importance { get; set; } // Low, Medium, High
     }
 
-    public class RecommendationResponse
-    {
-        public List<RecommendationItem> Recommendations { get; set; }
-    }
-
     public class RecommendationItem
     {
-        public Guid VendorId { get; set; }
+        [JsonPropertyName("ServiceId")]
+        public Guid ServiceId { get; set; }       // ✅ was VendorId — now actual ServiceId
+
+        [JsonPropertyName("ServiceName")]
+        public string ServiceName { get; set; }   // ✅ added — consumer knows what to show
+
+        [JsonPropertyName("VendorName")]
+        public string VendorName { get; set; }    // ✅ added — consumer knows who provides it
+
+        [JsonPropertyName("Reasoning")]
         public string Reasoning { get; set; }
+    }
+
+    public class RecommendationResponse
+    {
+        [JsonPropertyName("Recommendations")]
+        public List<RecommendationItem> Recommendations { get; set; } = new();
     }
 }

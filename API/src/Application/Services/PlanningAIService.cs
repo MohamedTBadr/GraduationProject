@@ -97,83 +97,123 @@ Return ONLY a JSON object with this structure:
                 .SelectMany(o => o.Event?.EventItems ?? new List<EventItem>())
                 .ToList();
 
-            var bookedVendorIdsStr = string.Join(" ", allBookedItems.Select(i => i.Service.VendorId.ToString()).Distinct());
-            var bookedCategoriesStr = string.Join(" ", allBookedItems.Select(i => i.Service.Name?.Replace(" ", "")).Distinct());
+            var bookedVendorIdsStr = string.Join(" ", allBookedItems
+                .Select(i => i.Service.VendorId.ToString())
+                .Distinct());
+
+            var bookedCategoriesStr = string.Join(" ", allBookedItems
+                .Select(i => i.Service.Name?.Replace(" ", ""))
+                .Distinct());
 
             string prompt;
 
             if (string.IsNullOrWhiteSpace(bookedVendorIdsStr) && string.IsNullOrWhiteSpace(bookedCategoriesStr))
             {
-                // Cold start: No booking history
+                // ── Cold Start: No booking history ────────────────────────────────────
                 prompt = $@"
-                    The user is planning a {currentEvent.EventType?.Name ?? "Event"} with a total budget of {currentEvent.TotalBudget}.
-                    They have no prior booking history on our platform. 
-                    Based on standard industry practices for this type of event, recommend 3 essential service categories they should book next.
-                    
-                    Return ONLY a JSON object with this structure:
+            The user is planning a {currentEvent.EventType?.Name ?? "Event"} with a total budget of {currentEvent.TotalBudget}.
+            They have no prior booking history on our platform.
+            Based on standard industry practices for this type of event, recommend 3 essential service categories they should consider booking.
+
+            Return ONLY a valid JSON object with this exact structure, no extra text:
+            {{
+                ""Recommendations"": [
                     {{
-                        ""Recommendations"": [
-                            {{ ""VendorId"": ""00000000-0000-0000-0000-000000000000"", ""Reasoning"": ""Why this category is essential."" }}
-                        ]
+                        ""ServiceId"":   ""00000000-0000-0000-0000-000000000000"",
+                        ""ServiceName"": ""<name of the service category>"",
+                        ""VendorName"":  ""General Recommendation"",
+                        ""Reasoning"":   ""Why this service is essential for this event type.""
                     }}
-                ";
+                ]
+            }}
+        ";
             }
             else
             {
-                // Collaborative Filtering
+                // ── Collaborative Filtering ───────────────────────────────────────────
                 var similarUserIds = await searchService.SearchSimilarUsersAsync(bookedVendorIdsStr, bookedCategoriesStr, 10);
-                
+
                 var candidateServices = new List<string>();
+
                 if (similarUserIds.Any())
                 {
                     foreach (var sUserId in similarUserIds)
                     {
                         if (sUserId == userId) continue;
-                        
+
                         var sUserOrders = await orderRepository.GetByUserIdAsync(sUserId, default);
-                        var sItems = sUserOrders.SelectMany(o => o.Event?.EventItems ?? new List<EventItem>()).ToList();
-                        
+                        var sItems = sUserOrders
+                            .SelectMany(o => o.Event?.EventItems ?? new List<EventItem>())
+                            .ToList();
+
                         foreach (var item in sItems)
                         {
-                            // Filter out already booked services by the current user
-                            if (!allBookedItems.Any(b => b.Service.VendorId == item.Service.VendorId && b.Service.Name == item.Service.Name))
+                            // Filter out services the current user already booked
+                            var alreadyBooked = allBookedItems.Any(b =>
+                                b.Service.Id == item.Service.Id);
+
+                            if (!alreadyBooked)
                             {
-                                candidateServices.Add($"{{ VendorName: '{item.Service.Vendor.BusinessName}', ServiceName: '{item.Service.Name}', VendorId: '{item.Service.VendorId}' }}");
+                                candidateServices.Add(
+                                    $"{{ " +
+                                    $"\"ServiceId\": \"{item.Service.Id}\", " +
+                                    $"\"ServiceName\": \"{item.Service.Name}\", " +
+                                    $"\"VendorName\": \"{item.Service.Vendor.BusinessName}\", " +
+                                    $"\"Price\": {item.Service.Price} " +
+                                    $"}}"
+                                );
                             }
                         }
                     }
                 }
 
                 candidateServices = candidateServices.Distinct().Take(15).ToList();
-                var candidateStr = candidateServices.Any() ? string.Join(", ", candidateServices) : "None available";
+                var candidateStr = candidateServices.Any()
+                    ? string.Join(", ", candidateServices)
+                    : "None available";
 
                 prompt = $@"
-                    The user is planning a {currentEvent.EventType?.Name ?? "Event"}.
-                    They have already booked these services: {string.Join(", ", allBookedItems.Select(i => i.Service.Name).Distinct())}.
-                    
-                    Based on our collaborative filtering model, users who planned similar events also booked these candidate services: 
-                    [{candidateStr}]
-                    
-                    Select the top 3 best matching services from the candidates that the user should book next. 
-                    If candidates list is 'None available', suggest 3 general essential services instead with empty VendorId (Guid.Empty).
-                    For the chosen candidates, use their actual VendorId as the VendorId for reference, and provide a convincing reasoning starting with 'People planning similar events also booked...'
-                    
-                    Return ONLY a JSON object with this structure:
+            The user is planning a {currentEvent.EventType?.Name ?? "Event"} with a budget of {currentEvent.TotalBudget}.
+            They have already booked these services: {string.Join(", ", allBookedItems.Select(i => i.Service.Name).Distinct())}.
+
+            Based on collaborative filtering, users who planned similar events also booked these candidate services:
+            [{candidateStr}]
+
+            Select the top 3 best matching services from the candidates that this user should book next.
+            - If candidates are available, use their exact ServiceId, ServiceName, and VendorName from the list above.
+            - If candidates list is 'None available', suggest 3 general essential services with ServiceId as ""00000000-0000-0000-0000-000000000000"".
+            - Reasoning must start with: 'People planning similar events also booked...'
+
+            Return ONLY a valid JSON object with this exact structure, no extra text:
+            {{
+                ""Recommendations"": [
                     {{
-                        ""Recommendations"": [
-                            {{ ""VendorId"": ""<VendorId or 00000000-0000-0000-0000-000000000000>"", ""Reasoning"": ""<reasoning string>"" }}
-                        ]
+                        ""ServiceId"":   ""<actual ServiceId or 00000000-0000-0000-0000-000000000000>"",
+                        ""ServiceName"": ""<service name>"",
+                        ""VendorName"":  ""<vendor business name>"",
+                        ""Reasoning"":   ""<reasoning string>""
                     }}
-                ";
+                ]
+            }}
+        ";
             }
 
-            var result = await llamaService.SendMessageAsync(prompt, "You are a personalized event recommendation engine. Return JSON only.");
+            var result = await llamaService.SendMessageAsync(
+                prompt,
+                "You are a personalized event recommendation engine. Return valid JSON only, no markdown, no explanation.");
 
             if (result.IsFailure) return Result<RecommendationResponse>.Failure(result.Error);
 
             try
             {
-                var responseObj = JsonSerializer.Deserialize<RecommendationResponse>(result.Value, JsonOptions);
+                // Strip markdown fences in case Llama wraps output in ```json ... ```
+                var raw = result.Value
+                    .Trim()
+                    .Replace("```json", "")
+                    .Replace("```", "")
+                    .Trim();
+
+                var responseObj = JsonSerializer.Deserialize<RecommendationResponse>(raw, JsonOptions);
                 return Result<RecommendationResponse>.Success(responseObj!);
             }
             catch (Exception ex)
