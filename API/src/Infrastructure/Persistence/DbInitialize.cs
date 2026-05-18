@@ -437,7 +437,22 @@ namespace Infrastructure.Persistence
 
         private async Task SeedEventAsync()
         {
-            var user = context.ApplicationUsers.FirstOrDefault(u => u.Email == "customer@example.com"); var eventType = context.EventTypes.FirstOrDefault(x => x.Name == "Wedding"); var vendor = context.ApplicationUsers.FirstOrDefault(v => v.Email == "vendor@example.com"); if (user == null || eventType == null || vendor == null) return; var newEvent = new Event
+            // ── Guards ────────────────────────────────────────────────────────
+            var user = context.ApplicationUsers.FirstOrDefault(u => u.Email == "customer@example.com");
+            var eventType = context.EventTypes.FirstOrDefault(x => x.Name == "Wedding");
+            var vendor = context.ApplicationUsers.FirstOrDefault(v => v.Email == "vendor@example.com");
+
+            if (user == null || eventType == null || vendor == null) return;
+
+            // ── Lookup real Services (seeded before this step) ────────────────
+            var cateringService = context.Services.FirstOrDefault(s => s.Name == "Premium Catering");
+            var photoService = context.Services.FirstOrDefault(s => s.Name == "Wedding Photography Package");
+            var decorService = context.Services.FirstOrDefault(s => s.Name == "Wedding Decoration");
+
+            if (cateringService == null || photoService == null || decorService == null) return;
+
+            // ── Build Event ───────────────────────────────────────────────────
+            var newEvent = new Event
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
@@ -449,12 +464,45 @@ namespace Infrastructure.Persistence
                 GuestCount = 250,
                 Notes = "Premium wedding with full vendor coordination",
                 EventStatus = "Planned",
-                EventItems = new List<EventItem> 
-                { new EventItem { Id = Guid.NewGuid(), ServiceName = "Premium Catering", ServiceImage = "catering.jpg", Price = 20000m, VendorName = "Elite Catering Co", Quantity = 1, VendorId = vendor.Id, ItemStatus = "Approved", RejectionReason = null }
-                , new EventItem { Id = Guid.NewGuid(), ServiceName = "Photography Package", ServiceImage = "photo.jpg", Price = 12000m, VendorName = "Pro Shots Studio", Quantity = 1, VendorId = vendor.Id, ItemStatus = "Pending" }
-                , new EventItem { Id = Guid.NewGuid(), ServiceName = "Decoration Setup", ServiceImage = "decor.jpg", Price = 15000m, VendorName = "Dream Decor", Quantity = 1, VendorId = vendor.Id, ItemStatus = "Pending" } },
 
+                // ── EventItems linked to real Services ────────────────────────
+                EventItems = new List<EventItem>
+        {
+            new EventItem
+            {
+                Id             = Guid.NewGuid(),
+                ServiceId      = cateringService.Id,
+                Service        = cateringService,          // nav property — EF won't double-insert
+                Price          = cateringService.Price,    // snapshot from actual service
+                Quantity       = 1,
+                ItemStatus     = "Approved",
+                RejectionReason = null
+            },
+            new EventItem
+            {
+                Id        = Guid.NewGuid(),
+                ServiceId = photoService.Id,
+                Service   = photoService,
+                Price     = photoService.Price,
+                Quantity  = 1,
+                ItemStatus = "Pending"
+            },
+            new EventItem
+            {
+                Id        = Guid.NewGuid(),
+                ServiceId = decorService.Id,
+                Service   = decorService,
+                Price     = decorService.Price,
+                Quantity  = 1,
+                ItemStatus = "Pending"
+            }
+        }
             };
+
+            // ── Skip if already seeded ────────────────────────────────────────
+            var alreadySeeded = context.Events.Any(e => e.Title == newEvent.Title);
+            if (alreadySeeded) return;
+
             await context.Events.AddAsync(newEvent);
             await context.SaveChangesAsync();
         }

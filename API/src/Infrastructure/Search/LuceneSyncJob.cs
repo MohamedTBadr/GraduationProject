@@ -87,8 +87,8 @@ namespace Infrastructure.Search
                 var userProfiles = usersBatch.Select(u => {
                     var allItems = u.Orders.SelectMany(o => o.Event?.EventItems ?? Enumerable.Empty<EventItem>()).ToList();
                     
-                    var bookedVendorIds = string.Join(" ", allItems.Select(ei => ei.VendorId.ToString()).Distinct());
-                    var bookedCategories = string.Join(" ", allItems.Select(ei => ei.ServiceName?.Replace(" ", "")).Distinct());
+                    var bookedVendorIds = string.Join(" ", allItems.Select(ei => ei.Service.VendorId.ToString()).Distinct());
+                    var bookedCategories = string.Join(" ", allItems.Select(ei => ei.Service.Name?.Replace(" ", "")).Distinct());
 
                     return (u.Id, bookedVendorIds, bookedCategories);
                 }).ToList();

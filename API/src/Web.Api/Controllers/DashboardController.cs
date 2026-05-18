@@ -81,17 +81,17 @@ namespace Web.Api.Controllers
             var paidStatuses = new[] { "Paid", "Completed" };
 
             var lifetimeRevenue = await _context.EventItems
-                .Where(ei => ei.VendorId == vendorId && paidStatuses.Contains(ei.Event.Order.PaymentStatus))
+                .Where(ei => ei.Service.VendorId == vendorId && paidStatuses.Contains(ei.Event.Order.PaymentStatus))
                 .SumAsync(ei => ei.Price * ei.Quantity);
 
             var currentMonthRevenue = await _context.EventItems
-                .Where(ei => ei.VendorId == vendorId &&
+                .Where(ei => ei.Service.VendorId == vendorId &&
                              paidStatuses.Contains(ei.Event.Order.PaymentStatus) &&
                              ei.Event.Order.CreatedAt >= startOfCurrentMonth)
                 .SumAsync(ei => ei.Price * ei.Quantity);
 
             var lastMonthRevenue = await _context.EventItems
-                .Where(ei => ei.VendorId == vendorId &&
+                .Where(ei => ei.Service.VendorId == vendorId &&
                              paidStatuses.Contains(ei.Event.Order.PaymentStatus) &&
                              ei.Event.Order.CreatedAt >= startOfLastMonth &&
                              ei.Event.Order.CreatedAt < startOfCurrentMonth)
@@ -105,7 +105,7 @@ namespace Web.Api.Controllers
 
             // ── Fix 1: filter by PaymentStatus so unpaid orders are excluded ──
             var recentItems = await _context.EventItems
-                .Where(ei => ei.VendorId == vendorId && paidStatuses.Contains(ei.Event.Order.PaymentStatus))
+                .Where(ei => ei.Service.VendorId == vendorId && paidStatuses.Contains(ei.Event.Order.PaymentStatus))
                 .OrderByDescending(ei => ei.Event.Order.CreatedAt)
                 .Take(5)
                 .Select(ei => new
@@ -118,7 +118,7 @@ namespace Web.Api.Controllers
                 .ToListAsync();
 
             var revenueHistory = await _context.EventItems
-                .Where(ei => ei.VendorId == vendorId && paidStatuses.Contains(ei.Event.Order.PaymentStatus))
+                .Where(ei => ei.Service.VendorId == vendorId && paidStatuses.Contains(ei.Event.Order.PaymentStatus))
                 .GroupBy(ei => new { ei.Event.Order.CreatedAt.Year, ei.Event.Order.CreatedAt.Month })
                 .Select(g => new
                 {

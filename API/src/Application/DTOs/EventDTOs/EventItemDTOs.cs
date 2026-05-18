@@ -7,21 +7,12 @@ namespace Application.DTOs
     public class CreateEventItemDto
     {
         public Guid EventId { get; set; }
-        public string ServiceImage { get; set; } = string.Empty;
-        public string ServiceName { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public Guid VendorId { get; set; }
-        public string VendorName { get; set; } = string.Empty;
+        public Guid ServiceId { get; set; }
         public int Quantity { get; set; }
     }
 
     public class UpdateEventItemDto
-    {
-        public string ServiceImage { get; set; } = string.Empty;
-        public string ServiceName { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public string VendorName { get; set; } = string.Empty;
-        public int Quantity { get; set; }
+    {        public int Quantity { get; set; }
     }
 
     public class ApproveItemRequest
@@ -42,15 +33,14 @@ namespace Application.DTOs
     {
         public Guid Id { get; set; }
         public Guid EventId { get; set; }
+        public Guid ServiceId { get; set; }
         public string ServiceName { get; set; } = string.Empty;
         public string ServiceImage { get; set; } = string.Empty;
-        public Guid VendorId { get; set; }                  // ← was missing
-        public string VendorName { get; set; } = string.Empty;
+         public Guid VendorId { get; set; }                  // ← was missing
+        public string VendorName { get; set; } = string.Empty; // ← was missing
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public string ItemStatus { get; set; } = "Pending"; // ← default value
         public string? RejectionReason { get; set; }
-
-        
     }
 }

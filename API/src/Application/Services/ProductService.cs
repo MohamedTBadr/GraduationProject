@@ -182,8 +182,29 @@ namespace Application.Services
 
         public async Task<Result<List<ServiceDTO>>> AIFilterAsync(AIRequest AIRequest, CancellationToken cancellationToken)
         {
-            var Services = await _ServiceRepository.AIFilterAsync(AIRequest, cancellationToken);
-            var mapped = _mapper.Map<List<ServiceDTO>>(Services);
+            // Phase 1: Use Lucene to get services relevant to the event type within budget
+            var luceneIds = await _searchService.SearchServicesAsync(
+                query: AIRequest.EventTypeName ?? string.Empty,
+                serviceTypeId: null,
+                minPrice: null,
+                maxPrice: AIRequest.Budget
+            );
+
+            var idList = luceneIds.ToList();
+
+            List<Service> services;
+            if (idList.Count > 0)
+            {
+                // Lucene found relevant services — load full entities by ID
+                services = await _ServiceRepository.GetByIdsAsync(idList, cancellationToken);
+            }
+            else
+            {
+                // Cold start / empty index — fall back to SQL budget filter
+                services = await _ServiceRepository.AIFilterAsync(AIRequest, cancellationToken);
+            }
+
+            var mapped = _mapper.Map<List<ServiceDTO>>(services);
             return Result<List<ServiceDTO>>.Success(mapped);
         }
 

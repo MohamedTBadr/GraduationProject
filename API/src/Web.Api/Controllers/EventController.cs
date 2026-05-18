@@ -121,7 +121,9 @@ namespace Web.Api.Controllers
             if (servicesResult.IsFailure)
                 return servicesResult.ToActionResult();
 
-            var serviceLines = servicesResult.Value;
+            var serviceLines = servicesResult.Value
+                .Select(s => $"- ServiceId: {s.Id} | Name: {s.Name} | Vendor: {s.VendorName} | Type: {s.ServiceTypeName} | Price: {s.Price:C}")
+                .ToList();
 
             var prompt = $$"""
 You are an event planning API that returns ONLY valid JSON.

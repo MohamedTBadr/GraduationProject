@@ -88,7 +88,7 @@ namespace Application.Services
             return bookings.Select(ei => new VendorBookingDto
             {
                 EventItemId = ei.Id,
-                ServiceName = ei.ServiceName,
+                ServiceName = ei.Service.Name,
                 Price = ei.Price,
                 BookingStatus = ei.ItemStatus,
                 Notes = ei.Event.Notes,

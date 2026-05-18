@@ -72,10 +72,7 @@ namespace Application.Services
             if (entity == null)
                 throw new KeyNotFoundException($"EventItem with id '{id}' was not found.");
 
-            entity.ServiceImage = dto.ServiceImage;
-            entity.ServiceName  = dto.ServiceName;
-            entity.Price        = dto.Price;
-            entity.VendorName   = dto.VendorName;
+       
             entity.Quantity     = dto.Quantity;
 
             var updated = await _itemRepo.UpdateAsync(entity, cancellationToken);
@@ -103,10 +100,7 @@ namespace Application.Services
         private static EventItem MapFromCreateDto(CreateEventItemDto dto) => new()
         {
             EventId      = dto.EventId,
-            ServiceImage = dto.ServiceImage,
-            ServiceName  = dto.ServiceName,
-            Price        = dto.Price,
-            VendorName   = dto.VendorName,
+ 
             Quantity     = dto.Quantity
         };
 
@@ -114,10 +108,9 @@ namespace Application.Services
         {
             Id           = i.Id,
             EventId      = i.EventId,
-            ServiceImage = i.ServiceImage,
-            ServiceName  = i.ServiceName,
+            ServiceImage = i.Service.ServiceImages.FirstOrDefault()?.ToString() ?? string.Empty,
+            ServiceName  = i.Service.Name,
             Price        = i.Price,
-            VendorName   = i.VendorName,
             Quantity     = i.Quantity
         };
     }

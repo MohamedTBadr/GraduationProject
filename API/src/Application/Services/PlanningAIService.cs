@@ -49,7 +49,7 @@ Return ONLY a JSON object with this structure:
             var ev = await eventRepository.GetByIdWithItemsAsync(eventId, default);
             if (ev == null) return Result<EventTimelineResponse>.NotFound(404, "Event not found.");
 
-            var bookedItems = string.Join(", ", ev.EventItems.Select(i => $"{i.ServiceName} ({i.ItemStatus})"));
+            var bookedItems = string.Join(", ", ev.EventItems.Select(i => $"{i.Service.Name} ({i.ItemStatus})"));
             var eventType = ev.EventType?.Name ?? "General Event";
 
             var prompt = $@"
@@ -97,8 +97,8 @@ Return ONLY a JSON object with this structure:
                 .SelectMany(o => o.Event?.EventItems ?? new List<EventItem>())
                 .ToList();
 
-            var bookedVendorIdsStr = string.Join(" ", allBookedItems.Select(i => i.VendorId.ToString()).Distinct());
-            var bookedCategoriesStr = string.Join(" ", allBookedItems.Select(i => i.ServiceName?.Replace(" ", "")).Distinct());
+            var bookedVendorIdsStr = string.Join(" ", allBookedItems.Select(i => i.Service.VendorId.ToString()).Distinct());
+            var bookedCategoriesStr = string.Join(" ", allBookedItems.Select(i => i.Service.Name?.Replace(" ", "")).Distinct());
 
             string prompt;
 
@@ -113,7 +113,7 @@ Return ONLY a JSON object with this structure:
                     Return ONLY a JSON object with this structure:
                     {{
                         ""Recommendations"": [
-                            {{ ""ServiceId"": ""00000000-0000-0000-0000-000000000000"", ""Reasoning"": ""Why this category is essential."" }}
+                            {{ ""VendorId"": ""00000000-0000-0000-0000-000000000000"", ""Reasoning"": ""Why this category is essential."" }}
                         ]
                     }}
                 ";
@@ -136,9 +136,9 @@ Return ONLY a JSON object with this structure:
                         foreach (var item in sItems)
                         {
                             // Filter out already booked services by the current user
-                            if (!allBookedItems.Any(b => b.VendorId == item.VendorId && b.ServiceName == item.ServiceName))
+                            if (!allBookedItems.Any(b => b.Service.VendorId == item.Service.VendorId && b.Service.Name == item.Service.Name))
                             {
-                                candidateServices.Add($"{{ VendorName: '{item.VendorName}', ServiceName: '{item.ServiceName}', VendorId: '{item.VendorId}' }}");
+                                candidateServices.Add($"{{ VendorName: '{item.Service.Vendor.BusinessName}', ServiceName: '{item.Service.Name}', VendorId: '{item.Service.VendorId}' }}");
                             }
                         }
                     }
@@ -149,19 +149,19 @@ Return ONLY a JSON object with this structure:
 
                 prompt = $@"
                     The user is planning a {currentEvent.EventType?.Name ?? "Event"}.
-                    They have already booked these services: {string.Join(", ", allBookedItems.Select(i => i.ServiceName).Distinct())}.
+                    They have already booked these services: {string.Join(", ", allBookedItems.Select(i => i.Service.Name).Distinct())}.
                     
                     Based on our collaborative filtering model, users who planned similar events also booked these candidate services: 
                     [{candidateStr}]
                     
                     Select the top 3 best matching services from the candidates that the user should book next. 
-                    If candidates list is 'None available', suggest 3 general essential services instead with empty ServiceId (Guid.Empty).
-                    For the chosen candidates, use their actual VendorId as the ServiceId for reference, and provide a convincing reasoning starting with 'People planning similar weddings also booked...'
+                    If candidates list is 'None available', suggest 3 general essential services instead with empty VendorId (Guid.Empty).
+                    For the chosen candidates, use their actual VendorId as the VendorId for reference, and provide a convincing reasoning starting with 'People planning similar events also booked...'
                     
                     Return ONLY a JSON object with this structure:
                     {{
                         ""Recommendations"": [
-                            {{ ""ServiceId"": ""<VendorId or 00000000-0000-0000-0000-000000000000>"", ""Reasoning"": ""<reasoning string>"" }}
+                            {{ ""VendorId"": ""<VendorId or 00000000-0000-0000-0000-000000000000>"", ""Reasoning"": ""<reasoning string>"" }}
                         ]
                     }}
                 ";

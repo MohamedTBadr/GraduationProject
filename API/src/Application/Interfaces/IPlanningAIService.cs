@@ -50,7 +50,7 @@ namespace Application.Interfaces
 
     public class RecommendationItem
     {
-        public Guid ServiceId { get; set; }
+        public Guid VendorId { get; set; }
         public string Reasoning { get; set; }
     }
 }

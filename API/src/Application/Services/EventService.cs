@@ -160,7 +160,7 @@ namespace Application.Services
             if (item == null || item.EventId != eventId)
                 return Result<EventItemResponseDto>.NotFound(404, "Item not found in this event.");
 
-            if (item.VendorId != vendorId)
+            if (item.Service.VendorId != vendorId)
                 return Result<EventItemResponseDto>.Unauthorized(401, "You do not own this item.");
 
             if (item.ItemStatus != "Pending")
@@ -189,11 +189,7 @@ namespace Application.Services
             var item = new EventItem
             {
                 EventId = eventId,
-                ServiceName = dto.ServiceName,
-                ServiceImage = dto.ServiceImage,
-                Price = dto.Price,
-                VendorId = dto.VendorId,
-                VendorName = dto.VendorName,
+                ServiceId = dto.ServiceId,
                 Quantity = dto.Quantity,
                 ItemStatus = "Pending"
             };
@@ -212,10 +208,7 @@ namespace Application.Services
             if (item.ItemStatus is "Approved" or "Rejected")
                 return Result<EventItemResponseDto>.InvalidOperation(400, $"Cannot edit an item that is already '{item.ItemStatus}'.");
 
-            item.ServiceName = dto.ServiceName;
-            item.ServiceImage = dto.ServiceImage;
-            item.Price = dto.Price;
-            item.VendorName = dto.VendorName;
+           
             item.Quantity = dto.Quantity;
             item.ItemStatus = "Pending"; // reset to pending after edit
 
@@ -413,11 +406,11 @@ namespace Application.Services
         {
             Id = i.Id,
             EventId = i.EventId,
-            ServiceImage = i.ServiceImage,
-            ServiceName = i.ServiceName,
+            ServiceImage = i.Service.ServiceImages.FirstOrDefault()?.ToString(),
+            ServiceName = i.Service.Name,
             Price = i.Price,
-            VendorId = i.VendorId,
-            VendorName = i.VendorName,
+            VendorId = i.Service.VendorId,
+            VendorName = i.Service.Vendor.BusinessName,
             Quantity = i.Quantity,
             ItemStatus = i.ItemStatus,
             RejectionReason = i.RejectionReason
