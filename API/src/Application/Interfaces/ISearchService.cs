@@ -18,5 +18,8 @@ namespace Application.Interfaces
 
         Task<IEnumerable<Guid>> SearchVendorsAsync(string query, string? category = null, string? location = null, bool includeUnverified = false);
         Task<IEnumerable<Guid>> SearchServicesAsync(string query, Guid? serviceTypeId = null, decimal? minPrice = null, decimal? maxPrice = null);
+
+        Task IndexUserProfilesBatchAsync(IEnumerable<(Guid UserId, string BookedVendorIds, string BookedCategories)> userProfiles);
+        Task<IEnumerable<Guid>> SearchSimilarUsersAsync(string vendorIds, string categories, int limit = 10);
     }
 }

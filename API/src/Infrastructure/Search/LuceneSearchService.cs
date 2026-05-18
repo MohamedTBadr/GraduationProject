@@ -222,6 +222,57 @@ namespace Infrastructure.Search
             return Task.FromResult(results);
         }
 
+        public Task IndexUserProfilesBatchAsync(IEnumerable<(Guid UserId, string BookedVendorIds, string BookedCategories)> userProfiles)
+        {
+            using var writer = CreateWriter();
+            foreach (var profile in userProfiles)
+            {
+                var doc = new Document
+                {
+                    new StringField("Id", profile.UserId.ToString(), Field.Store.YES),
+                    new StringField("Type", "UserProfile", Field.Store.YES),
+                    new TextField("BookedVendors", profile.BookedVendorIds ?? "", Field.Store.YES),
+                    new TextField("BookedCategories", profile.BookedCategories ?? "", Field.Store.YES)
+                };
+                writer.UpdateDocument(new Term("Id", profile.UserId.ToString()), doc);
+            }
+            writer.Commit();
+            return Task.CompletedTask;
+        }
+
+        public Task<IEnumerable<Guid>> SearchSimilarUsersAsync(string vendorIds, string categories, int limit = 10)
+        {
+            if (string.IsNullOrWhiteSpace(vendorIds) && string.IsNullOrWhiteSpace(categories))
+                return Task.FromResult(Enumerable.Empty<Guid>());
+
+            using var reader = DirectoryReader.Open(_directory);
+            var searcher = new IndexSearcher(reader);
+            var booleanQuery = new BooleanQuery();
+
+            if (!string.IsNullOrWhiteSpace(vendorIds))
+            {
+                var parser = new MultiFieldQueryParser(AppLuceneVersion, new[] { "BookedVendors" }, _analyzer);
+                // Allow matches on any overlapping vendor
+                var q = parser.Parse(QueryParserBase.Escape(vendorIds));
+                booleanQuery.Add(q, Occur.SHOULD);
+            }
+
+            if (!string.IsNullOrWhiteSpace(categories))
+            {
+                var parser = new MultiFieldQueryParser(AppLuceneVersion, new[] { "BookedCategories" }, _analyzer);
+                var q = parser.Parse(QueryParserBase.Escape(categories));
+                booleanQuery.Add(q, Occur.SHOULD);
+            }
+
+            // Must be a user profile
+            booleanQuery.Add(new TermQuery(new Term("Type", "UserProfile")), Occur.MUST);
+
+            var hits = searcher.Search(booleanQuery, limit).ScoreDocs;
+            var results = hits.Select(hit => Guid.Parse(searcher.Doc(hit.Doc).Get("Id")));
+
+            return Task.FromResult(results);
+        }
+
         private IndexWriter CreateWriter()
         {
             var config = new IndexWriterConfig(AppLuceneVersion, _analyzer);

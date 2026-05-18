@@ -68,6 +68,36 @@ namespace Infrastructure.Search
                 _logger.LogInformation($"Synced {serviceSkip} services to Lucene.");
             }
 
+            // 4. Sync User Profiles (Booking History)
+            int userSkip = 0;
+            while (true)
+            {
+                var usersBatch = await _dbContext.Users
+                    .Include(u => u.Orders)
+                        .ThenInclude(o => o.Event)
+                            .ThenInclude(e => e.EventItems)
+                    .AsNoTracking()
+                    .Skip(userSkip)
+                    .Take(batchSize)
+                    .ToListAsync();
+
+                if (!usersBatch.Any())
+                    break;
+
+                var userProfiles = usersBatch.Select(u => {
+                    var allItems = u.Orders.SelectMany(o => o.Event?.EventItems ?? Enumerable.Empty<EventItem>()).ToList();
+                    
+                    var bookedVendorIds = string.Join(" ", allItems.Select(ei => ei.VendorId.ToString()).Distinct());
+                    var bookedCategories = string.Join(" ", allItems.Select(ei => ei.ServiceName?.Replace(" ", "")).Distinct());
+
+                    return (u.Id, bookedVendorIds, bookedCategories);
+                }).ToList();
+
+                await _searchService.IndexUserProfilesBatchAsync(userProfiles);
+                userSkip += batchSize;
+                _logger.LogInformation($"Synced {userSkip} user profiles to Lucene.");
+            }
+
             _logger.LogInformation("Lucene index synchronization completed successfully.");
         }
     }

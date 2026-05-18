@@ -34,6 +34,16 @@ namespace Web.Api.Controllers
             var result = await aiService.GenerateEventTimelineAsync(eventId);
             return result.IsSuccess ? Ok(result) : result.ToActionResult();
         }
+
+        [HttpGet("clients-like-you/{eventId}")]
+        [HybridCache(3600, "ai-recommendations/{eventId}", CachePostRequest = false)]
+        public async Task<IActionResult> GetClientsLikeYouRecommendations(Guid eventId)
+        {
+            if (UserId == null) return Unauthorized();
+            
+            var result = await aiService.GetClientsLikeYouRecommendationsAsync(eventId, UserId.Value);
+            return result.IsSuccess ? Ok(result) : result.ToActionResult();
+        }
     }
 
     public class BudgetAllocationRequest

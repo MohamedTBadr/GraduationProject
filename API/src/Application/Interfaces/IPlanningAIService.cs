@@ -8,6 +8,7 @@ namespace Application.Interfaces
     {
         Task<Result<BudgetAllocationResponse>> GetBudgetAllocationAsync(decimal totalBudget, string eventTypeName);
         Task<Result<EventTimelineResponse>> GenerateEventTimelineAsync(Guid eventId);
+        Task<Result<RecommendationResponse>> GetClientsLikeYouRecommendationsAsync(Guid eventId, Guid userId);
     }
 
     public class BudgetAllocationResponse
@@ -40,5 +41,16 @@ namespace Application.Interfaces
         public string Activity { get; set; }
         public string Duration { get; set; }
         public string Importance { get; set; } // Low, Medium, High
+    }
+
+    public class RecommendationResponse
+    {
+        public List<RecommendationItem> Recommendations { get; set; }
+    }
+
+    public class RecommendationItem
+    {
+        public Guid ServiceId { get; set; }
+        public string Reasoning { get; set; }
     }
 }
