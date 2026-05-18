@@ -10,7 +10,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/payments")]
-    public class PaymentsController : BaseController
+    public class PaymentsController : APIController
     {
         private readonly PaymobService _paymob;
         private readonly IOrderService _orderService;

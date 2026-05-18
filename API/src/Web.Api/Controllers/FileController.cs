@@ -11,7 +11,7 @@ namespace Web.Api.Controllers
 
     [ApiController]
     [Route("api/files")]
-    public class FileController : BaseController
+    public class FileController : APIController
     {
         private readonly IAmazonS3 _s3;
         private readonly AwsSettings _settings;

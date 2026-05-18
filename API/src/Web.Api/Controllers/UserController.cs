@@ -15,7 +15,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(UserManager<ApplicationUser> userManager, IEmailSender emailSenderService): BaseController
+    public class UserController(UserManager<ApplicationUser> userManager, IEmailSender emailSenderService): APIController
     {
         [Authorize(Roles = "Admin")]
         [HttpGet]

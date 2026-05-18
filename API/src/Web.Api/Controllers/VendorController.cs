@@ -16,7 +16,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class VendorController(IServiceManager serviceManager) : BaseController
+    public class VendorController(IServiceManager serviceManager) : APIController
     {
         [HttpGet]
         [HybridCache(1800,"vendors")]

@@ -6,7 +6,7 @@ using Web.Api.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class ChatController : BaseController
+public class ChatController : APIController
 {
     private readonly IChatService _chatService;
     public ChatController(IChatService chatService) => _chatService = chatService;

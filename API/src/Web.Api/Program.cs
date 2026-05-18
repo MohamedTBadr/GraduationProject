@@ -109,6 +109,13 @@ namespace Web
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard();
+            
+            var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+            recurringJobManager.AddOrUpdate<Infrastructure.Search.LuceneSyncJob>(
+                "lucene-daily-sync",
+                job => job.SyncIndexAsync(),
+                Cron.Daily);
+
             app.MapControllers();
             app.MapHub<ChatHub>("/Hub/chatHub");
             //app.Run($"https://localhost:{builder.Configuration["PORT"]}");

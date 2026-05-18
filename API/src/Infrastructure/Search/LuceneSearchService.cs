@@ -96,6 +96,59 @@ namespace Infrastructure.Search
             return Task.CompletedTask;
         }
 
+        public Task ClearIndexAsync()
+        {
+            using var writer = CreateWriter();
+            writer.DeleteAll();
+            writer.Commit();
+            return Task.CompletedTask;
+        }
+
+        public Task IndexVendorsBatchAsync(IEnumerable<Vendor> vendors)
+        {
+            using var writer = CreateWriter();
+            foreach (var vendor in vendors)
+            {
+                var doc = new Document
+                {
+                    new StringField("Id", vendor.UserId.ToString(), Field.Store.YES),
+                    new StringField("Type", "Vendor", Field.Store.YES),
+                    new TextField("BusinessName", vendor.BusinessName ?? "", Field.Store.YES),
+                    new TextField("Description", vendor.Description ?? "", Field.Store.YES),
+                    new StringField("VendorType", vendor.VendorType?.Name ?? "", Field.Store.YES),
+                    new TextField("City", vendor.Address?.City ?? "", Field.Store.YES),
+                    new TextField("State", vendor.Address?.State ?? "", Field.Store.YES),
+                    new StringField("IsVerified", vendor.IsVerified ? "true" : "false", Field.Store.YES)
+                };
+                writer.UpdateDocument(new Term("Id", vendor.UserId.ToString()), doc);
+            }
+            writer.Commit();
+            return Task.CompletedTask;
+        }
+
+        public Task IndexServicesBatchAsync(IEnumerable<Service> services)
+        {
+            using var writer = CreateWriter();
+            foreach (var service in services)
+            {
+                var doc = new Document
+                {
+                    new StringField("Id", service.Id.ToString(), Field.Store.YES),
+                    new StringField("Type", "Service", Field.Store.YES),
+                    new TextField("Name", service.Name ?? "", Field.Store.YES),
+                    new TextField("Description", service.Description ?? "", Field.Store.YES),
+                    new StringField("ServiceType", service.ServiceType?.Name ?? "", Field.Store.YES),
+                    new StringField("ServiceTypeId", service.ServiceTypeId.ToString(), Field.Store.YES),
+                    new DoubleField("Price", (double)service.Price, Field.Store.YES),
+                    new StringField("VendorId", service.VendorId.ToString(), Field.Store.YES),
+                    new TextField("VendorName", service.Vendor?.BusinessName ?? "", Field.Store.YES)
+                };
+                writer.UpdateDocument(new Term("Id", service.Id.ToString()), doc);
+            }
+            writer.Commit();
+            return Task.CompletedTask;
+        }
+
         public Task<IEnumerable<Guid>> SearchVendorsAsync(string query, string? category = null, string? location = null, bool includeUnverified = false)
         {
             if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(category) && string.IsNullOrWhiteSpace(location))

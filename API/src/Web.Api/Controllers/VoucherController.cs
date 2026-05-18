@@ -9,7 +9,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("api/vouchers")]
 [Authorize]
-public class VoucherController(IServiceManager serviceManager) : BaseController
+public class VoucherController(IServiceManager serviceManager) : APIController
 {
     // GET api/vouchers/referral-link
     [HttpGet("referral-link")]

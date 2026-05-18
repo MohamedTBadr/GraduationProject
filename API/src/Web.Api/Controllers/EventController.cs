@@ -19,7 +19,7 @@ namespace Web.Api.Controllers
     [Route("api/[controller]")]
     public class EventController(
         IServiceManager serviceManager
-        ) : BaseController
+        ) : APIController
     {
         protected Guid UserId => GetUserIdFromToken();
 

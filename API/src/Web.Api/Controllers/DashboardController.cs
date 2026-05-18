@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Web.Api.Controllers
 {
     [Authorize(Policy = "DashboardAccess")]
-    public class DashboardController : BaseController
+    public class DashboardController : APIController
     {
         private readonly ApplicationDbContext _context;
 

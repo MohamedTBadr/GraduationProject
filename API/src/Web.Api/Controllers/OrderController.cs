@@ -10,7 +10,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class OrderController(IServiceManager serviceManager) : BaseController
+    public class OrderController(IServiceManager serviceManager) : APIController
     {
         // POST api/orders
         [HttpPost]

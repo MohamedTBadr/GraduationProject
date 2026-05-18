@@ -9,7 +9,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/admin/support/tickets")]
-    public class SupportTicketsController(IServiceManager serviceManager) : BaseController
+    public class SupportTicketsController(IServiceManager serviceManager) : APIController
     {
         // ─── GET STATS ───────────────────────────────────────────────────────────────
         [Authorize(Roles = "Admin")]

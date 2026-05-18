@@ -13,10 +13,12 @@ namespace Web.Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class AIController(IPlanningAIService aiService) : BaseController
+    public class AIController(IPlanningAIService aiService) : APIController
     {
+
+        Guid? UserId => TryGetUserId();
         [HttpPost("budget-allocation")]
-        [HybridCache(3600, "ai-budget")]
+        [HybridCache(3600, "ai-budget", CachePostRequest = true)]
         [Idempotent]
         public async Task<IActionResult> GetBudgetAllocation([FromBody] BudgetAllocationRequest request)
         {
@@ -25,7 +27,7 @@ namespace Web.Api.Controllers
         }
 
         [HttpPost("event-timeline/{eventId}")]
-        [HybridCache(3600, "ai-timeline")]
+        [HybridCache(3600, "ai-timeline/{eventId}", CachePostRequest = true)]
         [Idempotent]
         public async Task<IActionResult> GenerateTimeline(Guid eventId)
         {

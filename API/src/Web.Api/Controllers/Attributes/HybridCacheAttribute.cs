@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Hybrid;
 using System.Security.Claims;
@@ -11,6 +11,7 @@ namespace Web.Api.Attributes
     {
         public int DurationInSeconds { get; }
         public string[] Tags { get; }
+        public bool CachePostRequest { get; set; } = false;
 
         public HybridCacheAttribute(int durationInSeconds, params string[] tags)
         {
@@ -20,8 +21,13 @@ namespace Web.Api.Attributes
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            // 1. Only GET requests should be cached
-            if (!HttpMethods.IsGet(context.HttpContext.Request.Method))
+
+
+            // 1. Only GET and explicitly opted-in POST requests should be cached
+            bool isGet = HttpMethods.IsGet(context.HttpContext.Request.Method);
+            bool isPost = HttpMethods.IsPost(context.HttpContext.Request.Method);
+
+            if (!isGet && !(isPost && CachePostRequest))
             {
                 await next();
                 return;
@@ -71,6 +77,8 @@ namespace Web.Api.Attributes
             if (Tags == null || Tags.Length == 0) return Array.Empty<string>();
 
             var resolved = new List<string>();
+            var userId = context.HttpContext.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
             foreach (var tag in Tags)
             {
                 var processedTag = tag;
@@ -78,11 +86,18 @@ namespace Web.Api.Attributes
                 foreach (var routeValue in context.RouteData.Values)
                 {
                     var placeholder = $"{{{routeValue.Key}}}";
-                    if (processedTag.Contains(placeholder))
+                    if (processedTag.Contains(placeholder, StringComparison.OrdinalIgnoreCase))
                     {
-                        processedTag = processedTag.Replace(placeholder, routeValue.Value?.ToString());
+                        processedTag = processedTag.Replace(placeholder, routeValue.Value?.ToString(), StringComparison.OrdinalIgnoreCase);
                     }
                 }
+
+                // Replace {UserId} placeholder
+                if (userId != null && processedTag.Contains("{UserId}", StringComparison.OrdinalIgnoreCase))
+                {
+                    processedTag = processedTag.Replace("{UserId}", userId, StringComparison.OrdinalIgnoreCase);
+                }
+
                 resolved.Add(processedTag);
             }
             return resolved.ToArray();
@@ -101,7 +116,13 @@ namespace Web.Api.Attributes
                 .Select(x => $"{x.Key}={x.Value}")
                 .ToList();
 
-            return $"hcache:{userId}:{request.Path}:{string.Join("&", query)}";
+            var bodyString = string.Empty;
+            if (HttpMethods.IsPost(request.Method) && context.ActionArguments.Any())
+            {
+                bodyString = ":" + JsonSerializer.Serialize(context.ActionArguments);
+            }
+
+            return $"hcache:{userId}:{request.Path}:{string.Join("&", query)}{bodyString}";
         }
     }
 }

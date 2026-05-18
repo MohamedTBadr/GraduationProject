@@ -130,8 +130,11 @@ namespace Web.Api
 
             #region SignalR
 
-            Services.AddSignalR();
-
+            Services.AddSignalR()
+                .AddStackExchangeRedis(configuration.GetConnectionString("Redis"), options =>
+                {
+                    options.Configuration.ChannelPrefix = "SignalR_ScaleOut_";
+                });
 
             #endregion
 

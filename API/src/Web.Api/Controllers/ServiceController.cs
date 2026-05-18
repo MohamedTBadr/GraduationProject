@@ -15,7 +15,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ServiceController(IServiceManager serviceManager) : BaseController
+    public class ServiceController(IServiceManager serviceManager) : APIController
     {
         private Guid? UserId =>TryGetUserId();
         private bool IsAdminUser => IsAdmin();

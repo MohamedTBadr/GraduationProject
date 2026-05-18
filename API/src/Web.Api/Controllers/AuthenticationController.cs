@@ -15,7 +15,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthenticationController(IServiceManager ServiceManager) : BaseController
+    public class AuthenticationController(IServiceManager ServiceManager) : APIController
     {
         [HttpPost("Login")]
         [AllowAnonymous]
@@ -124,7 +124,7 @@ namespace Web.Api.Controllers
             }
             await ServiceManager.AuthenticationService.ForgetPassword(email, cancellationToken);
             var result = Result<string>.Success("Email Has Send Succussfully");
-            return Ok(result);
+            return Accepted(result);
 
 
         }

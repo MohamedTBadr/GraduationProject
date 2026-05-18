@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Web.Api.Controllers
 {
     [ApiController]
-    public class BaseController : ControllerBase
+    public class APIController : ControllerBase
     {
         // ─── Raw extractors (still throw — use in [Authorize] endpoints only) ───
 
