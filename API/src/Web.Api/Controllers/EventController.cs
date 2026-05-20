@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdempotentAPI.Filters;
 using Domain.Enums;
+using Web.Api.Attributes;
 
 namespace Web.Api.Controllers
 {
@@ -28,6 +29,7 @@ namespace Web.Api.Controllers
         // ─────────────────────────────────────────────────────────
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [HybridCache(1800, "events", PerUser = true)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var result = IsAdmin()
@@ -44,6 +46,7 @@ namespace Web.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HybridCache(1800, "events", "events/{id}", PerUser = true)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
             var result = await serviceManager.EventService.GetByIdAsync(id, cancellationToken);
@@ -61,6 +64,7 @@ namespace Web.Api.Controllers
         [HttpGet("user/{userId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        
         public async Task<IActionResult> GetByUser(Guid userId, CancellationToken cancellationToken)
         {
             if (!IsAdminOrOwner(userId))
@@ -76,6 +80,7 @@ namespace Web.Api.Controllers
         [HttpGet("status/{status}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HybridCache(1800, "events", "events/status/{status}", PerUser = true)]
         public async Task<IActionResult> GetByStatus(string status, CancellationToken cancellationToken)
         {
             if (IsAdmin())

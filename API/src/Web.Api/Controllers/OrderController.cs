@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Api.Controllers;
 using IdempotentAPI.Filters;
+using Web.Api.Attributes;
 
 namespace API.Controllers
 {
@@ -15,7 +16,8 @@ namespace API.Controllers
         // POST api/orders
         [HttpPost]
         [Idempotent]
-        [Authorize]
+        [Authorize(Roles = "Customer")]
+        
         public async Task<IActionResult> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
         {
             var userId = GetUserIdFromToken();
@@ -27,6 +29,7 @@ namespace API.Controllers
         // GET api/orders
         [HttpGet]
         [Authorize(Roles = "Admin")]
+        [HybridCache(300, "orders", PerUser = true)]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var orders = await serviceManager.OrderService.GetAllOrdersAsync(ct);
@@ -36,6 +39,7 @@ namespace API.Controllers
         // GET api/orders/{id}
         [HttpGet("{id:guid}")]
         [Authorize]
+        [HybridCache(300, "orders", "orders/{id}", PerUser = true)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
             try

@@ -19,7 +19,7 @@ namespace Web.Api.Controllers
     public class VendorController(IServiceManager serviceManager) : APIController
     {
         [HttpGet]
-        [HybridCache(1800,"vendors")]
+        [HybridCache(1800,"vendors",PerRole =true)]
         public async Task<IActionResult> GetVendorsAsync([FromQuery] PaginatedRequest paginatedRequest, CancellationToken cancellationToken)
         {
             var isAdmin = User.IsInRole("Admin");
@@ -29,7 +29,7 @@ namespace Web.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        [HybridCache(1800, "vendors", "vendors/{id}")]
+        [HybridCache(1800, "vendors", "vendors/{id}", PerRole = true)]
         public async Task<IActionResult> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken)
         {
            var result= await serviceManager.VendorService.GetVendorByIdAsync(id, cancellationToken);
@@ -44,6 +44,7 @@ namespace Web.Api.Controllers
         /// 
         [HttpGet("bookings")]
         [Authorize(Roles = "Vendor")]
+        [HybridCache(1800, "vendors", "vendors/{id}/bookings", PerUser = true)]
         public async Task<IActionResult> GetMyBookings(CancellationToken cancellationToken)
         {
             var vendorIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

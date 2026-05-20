@@ -11,7 +11,8 @@ namespace Web.Api.Controllers
     public class EventTypesController(IServiceManager serviceManager) : ControllerBase
     {
         [HttpGet]
-        [HybridCache(1800, "EventTypes")]
+        [HybridCache(1800, "EventTypes", PerRole = true)]
+        
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var result = await serviceManager.EventTypeService.GetAllAsync(ct);
@@ -20,7 +21,7 @@ namespace Web.Api.Controllers
 
         [HttpGet("{id:guid}")]
         // Ensure the tag here matches the invalidation pattern exactly
-        [HybridCache(1800, "EventType/{id}")]
+        [HybridCache(1800, "EventType/{id}", PerRole = true)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
             var result = await serviceManager.EventTypeService.GetByIdAsync(id, ct);

@@ -23,7 +23,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services
         [HttpGet]
-        [HybridCache(1800, "services")]
+        [HybridCache(1800, "services",PerRole =true)]
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var result = await serviceManager.ServiceService.GetAllAsync(request, IsAdminUser, IsVendorUser, UserId, cancellationToken);
@@ -32,7 +32,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services/{id}
         [HttpGet("{id:guid}")]
-        [HybridCache(1800, "services", "services/{id}")]
+        [HybridCache(1800, "services", "services/{id}", PerRole = true)]
         public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var result = await serviceManager.ServiceService.GetByIdAsync(id, cancellationToken);
@@ -41,7 +41,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services/by-event-type/{eventTypeId}
         [HttpGet("by-event-type/{eventTypeId:guid}")]
-        [HybridCache(1800, "services")]
+        [HybridCache(1800, "services", PerRole = true)]
         public async Task<IActionResult> GetByEventTypeAsync(Guid eventTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var result = await serviceManager.ServiceService.GetByEventTypeIdAsync(eventTypeId, request, IsAdminUser, IsVendorUser, UserId, cancellationToken);
@@ -50,7 +50,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services/by-vendor/{vendorId}
         [HttpGet("by-vendor/{vendorId:guid}")]
-        [HybridCache(1800)]
+        [HybridCache(1800, "services", PerRole = true)]
         public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var filteredRequest = request with { VendorId = vendorId };
@@ -60,7 +60,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services/by-service-type/{serviceTypeId}
         [HttpGet("by-service-type/{serviceTypeId:guid}")]
-        [HybridCache(1800)]
+        [HybridCache(1800, "services", PerRole = true)]
         public async Task<IActionResult> GetByServiceTypeAsync(Guid serviceTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var filteredRequest = request with { ServiceTypeId = serviceTypeId };
