@@ -23,7 +23,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services
         [HttpGet]
-        [HybridCache(1800, "services",PerRole =true)]
+        [HybridCache(1800, "services", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var result = await serviceManager.ServiceService.GetAllAsync(request, IsAdminUser, IsVendorUser, UserId, cancellationToken);
@@ -32,7 +32,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services/{id}
         [HttpGet("{id:guid}")]
-        [HybridCache(1800, "services", "services/{id}", PerRole = true)]
+        [HybridCache(1800, "services", "services/{id}")]
         public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var result = await serviceManager.ServiceService.GetByIdAsync(id, cancellationToken);
@@ -41,7 +41,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services/by-event-type/{eventTypeId}
         [HttpGet("by-event-type/{eventTypeId:guid}")]
-        [HybridCache(1800, "services", PerRole = true)]
+        [HybridCache(1800, "services", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetByEventTypeAsync(Guid eventTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var result = await serviceManager.ServiceService.GetByEventTypeIdAsync(eventTypeId, request, IsAdminUser, IsVendorUser, UserId, cancellationToken);
@@ -50,7 +50,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services/by-vendor/{vendorId}
         [HttpGet("by-vendor/{vendorId:guid}")]
-        [HybridCache(1800, "services", PerRole = true)]
+        [HybridCache(1800, "services", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetByVendorAsync(Guid vendorId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var filteredRequest = request with { VendorId = vendorId };
@@ -60,7 +60,7 @@ namespace Web.Api.Controllers
 
         // GET api/Services/by-service-type/{serviceTypeId}
         [HttpGet("by-service-type/{serviceTypeId:guid}")]
-        [HybridCache(1800, "services", PerRole = true)]
+        [HybridCache(1800, "services", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetByServiceTypeAsync(Guid serviceTypeId, [FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var filteredRequest = request with { ServiceTypeId = serviceTypeId };
@@ -71,7 +71,7 @@ namespace Web.Api.Controllers
         [Authorize(Roles = "Vendor")]
         [HttpPost]
         [Idempotent]
-        [InvalidateCache("services")]
+        [InvalidateCache("services", "dashboard-stats")]
         public async Task<IActionResult> CreateAsync([FromForm] CreateServiceRequest dto, CancellationToken cancellationToken)
         {
             dto.VendorId = UserId; // Ensure the Service is associated with the authenticated vendor
@@ -88,7 +88,7 @@ namespace Web.Api.Controllers
         [Authorize(Roles = "Admin,Vendor")]
         [HttpPut("{id:guid}")]
         [Idempotent]
-        [InvalidateCache("services/{id}")]
+        [InvalidateCache("services/{id}", "dashboard-stats")]
         public async Task<IActionResult> UpdateAsync(Guid id, [FromForm] UpdateServiceDTO dto, CancellationToken cancellationToken)
         {
             if (id != dto.Id)
@@ -113,7 +113,7 @@ namespace Web.Api.Controllers
         // DELETE api/Services/{id}
         [HttpDelete("{id:guid}")]
         [Idempotent]
-        [InvalidateCache("services/{id}", "services")]
+        [InvalidateCache("services/{id}", "services", "dashboard-stats")]
         public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
             if (UserId != null && !IsAdminUser) // if user is authenticated and not admin, ensure they own the service
@@ -132,7 +132,7 @@ namespace Web.Api.Controllers
         [HttpPatch("{id}/status")]
         [Idempotent]
         [Authorize(Roles = "Admin,Vendor")]
-        [InvalidateCache("services/{id}","services")]
+        [InvalidateCache("services/{id}", "services", "dashboard-stats")]
         public async Task<IActionResult> ToggleStatus(Guid id, CancellationToken ct)
         {
             if (!IsAdminUser) // if vendor is authenticated, ensure they own the service

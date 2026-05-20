@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Web.Api.Controllers;
 using IdempotentAPI.Filters;
 using Web.Api.Attributes;
+using Web.Api.Controllers.Attributes;
+
 
 namespace API.Controllers
 {
@@ -17,7 +19,7 @@ namespace API.Controllers
         [HttpPost]
         [Idempotent]
         [Authorize(Roles = "Customer")]
-        
+        [InvalidateCache("orders", "dashboard-stats")]
         public async Task<IActionResult> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
         {
             var userId = GetUserIdFromToken();
@@ -29,7 +31,7 @@ namespace API.Controllers
         // GET api/orders
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        [HybridCache(300, "orders", PerUser = true)]
+        [HybridCache(300, "orders")]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var orders = await serviceManager.OrderService.GetAllOrdersAsync(ct);
@@ -72,6 +74,7 @@ namespace API.Controllers
         [HttpPatch("{id:guid}/payment-status")]
         [Idempotent]
         [Authorize(Roles = "Admin")]
+        [InvalidateCache("orders", "orders/{id}", "dashboard-stats")]
         public async Task<IActionResult> UpdatePaymentStatus(
             Guid id,
             [FromBody] UpdateOrderStatusRequest request,
@@ -92,6 +95,7 @@ namespace API.Controllers
         [HttpPatch("{id:guid}/payment-intent")]
         [Idempotent]
         [Authorize]
+        [InvalidateCache("orders", "orders/{id}", "dashboard-stats")]
         public async Task<IActionResult> SetPaymentIntent(
             Guid id,
             [FromQuery] string paymentIntentId,
@@ -112,6 +116,7 @@ namespace API.Controllers
         [HttpPost("{id:guid}/cancel")]
         [Idempotent]
         [Authorize]
+        [InvalidateCache("orders", "orders/{id}", "dashboard-stats")]
         public async Task<IActionResult> Cancel(Guid id, CancellationToken ct)
         {
             try
@@ -137,6 +142,7 @@ namespace API.Controllers
         [HttpDelete("{id:guid}")]
         [Idempotent]
         [Authorize(Roles = "Admin")]
+        [InvalidateCache("orders", "orders/{id}", "dashboard-stats")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
             try

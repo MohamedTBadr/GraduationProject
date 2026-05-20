@@ -2,6 +2,8 @@ using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Web.Api.Attributes;
+using Web.Api.Controllers.Attributes;
 
 namespace Web.Api.Controllers
 {
@@ -16,6 +18,7 @@ namespace Web.Api.Controllers
         }
 
         [HttpGet("stats")]
+        [HybridCache(300, "dashboard-stats", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetDashboardStats()
         {
             var now = DateTime.UtcNow;

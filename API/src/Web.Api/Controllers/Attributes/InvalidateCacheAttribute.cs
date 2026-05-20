@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Hybrid;
+using System.Security.Claims;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class InvalidateCacheAttribute : ActionFilterAttribute
@@ -26,14 +27,37 @@ public class InvalidateCacheAttribute : ActionFilterAttribute
             _ => null
         };
 
-        if (statusCode is 201 or 204)
+        // Standardize: any successful response (200-299) should trigger cache invalidation
+        if (statusCode is >= 200 and < 300)
         {
             var cache = executedContext.HttpContext.RequestServices.GetRequiredService<HybridCache>();
 
+            var user = executedContext.HttpContext.User;
+            var userId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userRole = user?.FindFirstValue(ClaimTypes.Role) ?? user?.FindAll(ClaimTypes.Role).Select(c => c.Value).FirstOrDefault();
+
             var resolvedTags = Tags.Select(tag =>
-                executedContext.RouteData.Values.Aggregate(tag, (current, rv) =>
-                    current.Replace($"{{{rv.Key}}}", rv.Value?.ToString()))
-            ).ToList();
+            {
+                var processedTag = tag;
+
+                // 1. Resolve Route values
+                foreach (var rv in executedContext.RouteData.Values)
+                {
+                    processedTag = processedTag.Replace($"{{{rv.Key}}}", rv.Value?.ToString(), StringComparison.OrdinalIgnoreCase);
+                }
+
+                // 2. Resolve Claim-based placeholders
+                if (userId != null)
+                {
+                    processedTag = processedTag.Replace("{UserId}", userId, StringComparison.OrdinalIgnoreCase);
+                }
+                if (userRole != null)
+                {
+                    processedTag = processedTag.Replace("{UserRole}", userRole, StringComparison.OrdinalIgnoreCase);
+                }
+
+                return processedTag;
+            }).ToList();
 
             foreach (var tag in resolvedTags)
                 await cache.RemoveByTagAsync(tag);

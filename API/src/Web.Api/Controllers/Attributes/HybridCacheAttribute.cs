@@ -6,6 +6,14 @@ using System.Text.Json;
 
 namespace Web.Api.Attributes
 {
+    public enum CacheVariance
+    {
+        Shared,
+        PerUser,
+        PerRole,
+        Adaptive
+    }
+
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public class HybridCacheAttribute : ActionFilterAttribute
     {
@@ -30,6 +38,11 @@ namespace Web.Api.Attributes
         /// Default: false.
         /// </summary>
         public bool PerRole { get; set; } = false;
+
+        /// <summary>
+        /// Caching variance strategy. Default: CacheVariance.Shared (unless PerUser or PerRole is set).
+        /// </summary>
+        public CacheVariance Variance { get; set; } = CacheVariance.Shared;
 
         /// <summary>
         /// The claim type used to resolve the user's role(s).
@@ -98,26 +111,49 @@ namespace Web.Api.Attributes
         /// Resolves the cache key segment based on the caching mode:
         /// - PerUser  → unique user ID         (e.g. "abc-123")
         /// - PerRole  → sorted role(s)          (e.g. "admin" or "admin|manager")
-        /// - Neither  → shared across all users (e.g. "shared")
+        /// - Adaptive  → Admin role gets PerRole segment, Vendor & Customer get PerUser segment.
+        /// - Shared    → shared across all users (e.g. "shared")
         /// </summary>
         private string ResolveSegment(ClaimsPrincipal? user)
         {
-            if (PerUser)
-                return user?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anonymous";
+            var variance = Variance;
 
-            if (PerRole)
+            // Maintain legacy property backward compatibility
+            if (PerUser) variance = CacheVariance.PerUser;
+            else if (PerRole) variance = CacheVariance.PerRole;
+
+            switch (variance)
             {
-                // Collect ALL roles, sort for consistency so "admin|manager" == "manager|admin"
-                var roles = user?.FindAll(RoleClaim)
-                    .Select(c => c.Value.ToLowerInvariant())
-                    .OrderBy(r => r)
-                    .ToList() ?? [];
+                case CacheVariance.PerUser:
+                    return user?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anonymous";
 
-                return roles.Count > 0 ? string.Join("|", roles) : "anonymous";
+                case CacheVariance.PerRole:
+                    return GetRoleSegment(user);
+
+                case CacheVariance.Adaptive:
+                    if (user == null || user.Identity?.IsAuthenticated != true)
+                        return "anonymous";
+
+                    if (user.IsInRole("Admin"))
+                        return "role:admin";
+
+                    // Vendors and Customers get strict per-user segmentation
+                    return $"user:{user.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anonymous"}";
+
+                case CacheVariance.Shared:
+                default:
+                    return "shared";
             }
+        }
 
-            // Default: one shared cache entry for everyone
-            return "shared";
+        private string GetRoleSegment(ClaimsPrincipal? user)
+        {
+            var roles = user?.FindAll(RoleClaim)
+                .Select(c => c.Value.ToLowerInvariant())
+                .OrderBy(r => r)
+                .ToList() ?? [];
+
+            return roles.Count > 0 ? string.Join("|", roles) : "anonymous";
         }
 
         private string BuildCacheKey(ActionExecutingContext context)

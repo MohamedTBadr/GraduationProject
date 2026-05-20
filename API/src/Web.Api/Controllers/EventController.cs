@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using IdempotentAPI.Filters;
 using Domain.Enums;
 using Web.Api.Attributes;
+using Web.Api.Controllers.Attributes;
 
 namespace Web.Api.Controllers
 {
@@ -200,6 +201,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [InvalidateCache("events", "dashboard-stats")]
         public async Task<IActionResult> Create([FromBody] CreateEventDto dto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -226,6 +228,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [InvalidateCache("events", "events/{id}", "dashboard-stats")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateEventDto dto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -257,6 +260,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [InvalidateCache("events", "events/{eventId}", "dashboard-stats")]
         public async Task<IActionResult> AddItem(
             Guid eventId,
             [FromBody] CreateEventItemDto dto,
@@ -287,6 +291,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [InvalidateCache("events", "events/{eventId}", "dashboard-stats")]
         public async Task<IActionResult> UpdateItem(
             Guid eventId,
             Guid itemId,
@@ -318,6 +323,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [InvalidateCache("events", "events/{eventId}", "vendors/{UserId}/bookings", "dashboard-stats")]
         public async Task<IActionResult> ApproveItem(
             Guid eventId,
             Guid itemId,
@@ -345,6 +351,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [InvalidateCache("events", "dashboard-stats")]
         public async Task<IActionResult> CancelEvent(Guid id, [FromBody] CancelEventRequest cancelEventRequest, CancellationToken cancellationToken)
         {
             var existing = await serviceManager.EventService.GetByIdAsync(id, cancellationToken);
@@ -386,6 +393,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [InvalidateCache("events", "events/{id}", "dashboard-stats")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
         {
             if (IsVendor())
