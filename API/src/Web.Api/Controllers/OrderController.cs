@@ -31,7 +31,7 @@ namespace API.Controllers
         // GET api/orders
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        [HybridCache(300, "orders")]
+        [HybridCache(300, "orders", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var orders = await serviceManager.OrderService.GetAllOrdersAsync(ct);
@@ -41,7 +41,7 @@ namespace API.Controllers
         // GET api/orders/{id}
         [HttpGet("{id:guid}")]
         [Authorize]
-        [HybridCache(300, "orders", "orders/{id}", PerUser = true)]
+        [HybridCache(300, "orders", "orders/{id}", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
             try
@@ -61,6 +61,7 @@ namespace API.Controllers
         // GET api/orders/user/{userId}
         [HttpGet("user/{userId:guid}")]
         [Authorize]
+        [HybridCache(300, "orders", "orders/user/{userId}", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetByUser(Guid userId, CancellationToken ct)
         {
             if (!IsAdminOrOwner(userId))

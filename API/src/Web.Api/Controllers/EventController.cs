@@ -30,7 +30,7 @@ namespace Web.Api.Controllers
         // ─────────────────────────────────────────────────────────
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HybridCache(1800, "events", PerUser = true)]
+        [HybridCache(1800, "events", Variance =CacheVariance.Adaptive)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var result = IsAdmin()
@@ -47,7 +47,7 @@ namespace Web.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HybridCache(1800, "events", "events/{id}", PerUser = true)]
+        [HybridCache(1800, "events", "events/{id}",Variance =CacheVariance.Adaptive)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
             var result = await serviceManager.EventService.GetByIdAsync(id, cancellationToken);
@@ -65,7 +65,7 @@ namespace Web.Api.Controllers
         [HttpGet("user/{userId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        
+        [HybridCache(1800, "events", "events/user/{userId}", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetByUser(Guid userId, CancellationToken cancellationToken)
         {
             if (!IsAdminOrOwner(userId))
@@ -81,7 +81,7 @@ namespace Web.Api.Controllers
         [HttpGet("status/{status}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HybridCache(1800, "events", "events/status/{status}", PerUser = true)]
+        [HybridCache(1800, "events", "events/status/{status}", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetByStatus(string status, CancellationToken cancellationToken)
         {
             if (IsAdmin())

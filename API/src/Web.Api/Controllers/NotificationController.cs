@@ -3,6 +3,7 @@ using Domain.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Web.Api.Attributes;
 
 
 [Authorize]
@@ -15,6 +16,7 @@ public class NotificationsController(
 {
     // SSE endpoint — client connects here and keeps it open
     [HttpGet("stream")]
+
     public async Task Stream(CancellationToken ct)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -39,6 +41,7 @@ public class NotificationsController(
 
     // get all notifications
     [HttpGet]
+    [HybridCache(60, "notifications", Variance = CacheVariance.Adaptive)]
     public async Task<IActionResult> GetAll()
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);

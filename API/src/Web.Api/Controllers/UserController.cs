@@ -19,7 +19,7 @@ namespace Web.Api.Controllers
     {
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        [HybridCache(1800, "GetAllUsers")]
+        [HybridCache(1800, "GetAllUsers", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetAllUsers([FromQuery] PaginatedRequest request, CancellationToken cancellationToken)
         {
             var query = userManager.Users.AsQueryable();
@@ -77,6 +77,7 @@ namespace Web.Api.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
+        [HybridCache(1800, "GetUserById", Variance = CacheVariance.Adaptive)]
         public async Task<ActionResult<UserDTO>> GetUserById(Guid id)
         {
             if (!IsAdminOrOwner(id))
@@ -100,6 +101,7 @@ namespace Web.Api.Controllers
 
         [HttpPatch("suspend/{id}")]
         [Authorize(Roles = "Admin")]
+        [InvalidateCache("GetUserById", "GetAllUsers")]
         public async Task<IActionResult> SuspendUser(Guid id, [FromBody] string reason)
         {
             var user = await userManager.FindByIdAsync(id.ToString());
@@ -119,6 +121,7 @@ namespace Web.Api.Controllers
 
         [HttpPatch("unsuspend/{id}")]
         [Authorize(Roles = "Admin")]
+        [InvalidateCache("GetUserById", "GetAllUsers")]
         public async Task<IActionResult> UnsuspendUser(Guid id)
         {
             var user = await userManager.FindByIdAsync(id.ToString());
@@ -156,6 +159,7 @@ namespace Web.Api.Controllers
 
         [HttpPatch("{id}")]
         [Authorize]
+        [InvalidateCache("GetUserById", "GetAllUsers")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserDTO userDto)
         {
             if (!IsAdminOrOwner(id))
@@ -182,6 +186,7 @@ namespace Web.Api.Controllers
 
         [HttpPost]
         [SuccessStatusCode(201)]
+        [HybridCache(1800, "GetAllUsers", Variance = CacheVariance.Adaptive)]
         public async Task<Result<UserDTO>> CreateUser([FromBody] CreateUserRequest request)
         {
             var user = new ApplicationUser

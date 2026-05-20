@@ -2,6 +2,7 @@
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Web.Api.Attributes;
 using Web.Api.Controllers;
 
 namespace API.Controllers;
@@ -13,6 +14,7 @@ public class VoucherController(IServiceManager serviceManager) : APIController
 {
     // GET api/vouchers/referral-link
     [HttpGet("referral-link")]
+    [HybridCache(300, "vouchers", "vouchers/referral-link", Variance = CacheVariance.PerUser)]
     public async Task<IActionResult> GetReferralLink(CancellationToken ct)
     {
         var userId = GetUserIdFromToken();
@@ -22,6 +24,7 @@ public class VoucherController(IServiceManager serviceManager) : APIController
 
     // GET api/vouchers/my
     [HttpGet("my")]
+    [HybridCache(300, "vouchers", "vouchers/my", Variance = CacheVariance.Adaptive)]
     public async Task<IActionResult> GetMyVouchers(CancellationToken ct)
     {
         var userId = GetUserIdFromToken();
@@ -31,6 +34,7 @@ public class VoucherController(IServiceManager serviceManager) : APIController
 
     // GET api/vouchers/validate?code=REWARD-A3FK9ZBX
     [HttpGet("validate")]
+    [HybridCache(300, "vouchers", "vouchers/validate", Variance = CacheVariance.Adaptive)]
     public async Task<IActionResult> Validate([FromQuery] string code, CancellationToken ct)
     {
         var userId = GetUserIdFromToken();

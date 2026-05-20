@@ -44,7 +44,7 @@ namespace Web.Api.Controllers
         /// 
         [HttpGet("bookings")]
         [Authorize(Roles = "Vendor")]
-        [HybridCache(1800, "vendors", "vendors/{UserId}/bookings", PerUser = true)]
+        [HybridCache(1800, "vendors", "vendors/{UserId}/bookings", Variance = CacheVariance.PerUser)]
         public async Task<IActionResult> GetMyBookings(CancellationToken cancellationToken)
         {
             var vendorIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

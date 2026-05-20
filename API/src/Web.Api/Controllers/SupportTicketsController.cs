@@ -19,6 +19,7 @@ namespace API.Controllers
         [Authorize]
         [ProducesResponseType(typeof(TicketDetailsDTO), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
         public async Task<IActionResult> Create(
             [FromBody] CreateTicketRequestDTO request,
             CancellationToken cancellationToken)
