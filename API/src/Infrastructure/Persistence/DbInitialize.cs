@@ -13,18 +13,15 @@ namespace Infrastructure.Persistence
     {
         public async Task IntializeAsync()
         {
-            // Always migrate
             await context.Database.MigrateAsync();
 
-            // Optional retry logic for Docker startup timing
-            var retries = 5;
+            var strategy = context.Database.CreateExecutionStrategy(); // ← key fix
 
-            while (retries > 0)
+            await strategy.ExecuteAsync(async () =>
             {
+                using var transaction = await context.Database.BeginTransactionAsync();
                 try
                 {
-                    using var transaction = await context.Database.BeginTransactionAsync();
-
                     await SeedVendorTypeAsync();
                     await SeedRolesAsync();
                     await SeedAdminUserAsync();
@@ -37,27 +34,20 @@ namespace Infrastructure.Persistence
                     await SeedNotificationAsnyc();
                     await SeedEventAsync();
                     await SeedOrderAsync();
+
                     await transaction.CommitAsync();
-
                     Console.WriteLine("Database seeding completed successfully.");
-
-                    break;
                 }
                 catch (Exception ex)
                 {
-                    retries--;
-
+                    await transaction.RollbackAsync();
                     Console.WriteLine("========================================");
                     Console.WriteLine("DATABASE SEEDING ERROR");
                     Console.WriteLine(ex);
                     Console.WriteLine("========================================");
-
-                    if (retries == 0)
-                        throw;
-
-                    await Task.Delay(5000);
+                    throw; // let the strategy handle retries
                 }
-            }
+            });
         }
 
         private async Task SeedVendorTypeAsync()
