@@ -51,6 +51,7 @@ namespace Infrastructure
                        );
                    }));
             Services.AddScoped<IVoucherRepository, VoucherRepository>();
+            Services.AddScoped<IReportHistoryRepository, ReportHistoryRepository>();
             Services.AddSingleton<ISearchService, LuceneSearchService>();
             Services.AddTransient<LuceneSyncJob>();
 

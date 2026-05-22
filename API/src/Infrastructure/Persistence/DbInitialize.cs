@@ -36,6 +36,7 @@ namespace Infrastructure.Persistence
                     await SeedOrderAsync();
 
                     await transaction.CommitAsync();
+
                     Console.WriteLine("Database seeding completed successfully.");
                 }
                 catch (Exception ex)

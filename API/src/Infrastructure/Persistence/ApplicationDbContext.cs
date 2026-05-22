@@ -247,6 +247,26 @@ namespace Infrastructure.Persistence
 
                 entity.HasIndex(ec => new { ec.EventId, ec.UserId }).IsUnique();
             });
+
+            builder.Entity<ReportRecord>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+                entity.Property(r => r.PdfStoragePath).HasMaxLength(500).IsRequired();
+                entity.HasOne(r => r.Vendor)
+                      .WithMany()
+                      .HasForeignKey(r => r.VendorId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            builder.Entity<ScheduledReport>(entity =>
+            {
+                entity.HasKey(sr => sr.Id);
+                entity.Property(sr => sr.EmailRecipient).HasMaxLength(255).IsRequired();
+                entity.HasOne(sr => sr.Vendor)
+                      .WithMany()
+                      .HasForeignKey(sr => sr.VendorId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
 
@@ -282,6 +302,8 @@ namespace Infrastructure.Persistence
 
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<EventCollaborator> EventCollaborators { get; set; }
+        public DbSet<ReportRecord> ReportRecords { get; set; }
+        public DbSet<ScheduledReport> ScheduledReports { get; set; }
 
         }
 }

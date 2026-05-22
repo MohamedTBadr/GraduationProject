@@ -116,6 +116,16 @@ namespace Web
                 job => job.SyncIndexAsync(),
                 Cron.Daily);
 
+            recurringJobManager.AddOrUpdate<Infrastructure.Jobs.ScheduledReportJob>(
+                "monthly-vendor-reports",
+                job => job.SendMonthlyVendorReportsAsync(CancellationToken.None),
+                Cron.Monthly(1, 6));
+
+            recurringJobManager.AddOrUpdate<Infrastructure.Jobs.ScheduledReportJob>(
+                "monthly-admin-report",
+                job => job.SendAdminMonthlyReportAsync("admin@platform.com", CancellationToken.None),
+                Cron.Monthly(1, 7));
+
             app.MapControllers();
             app.MapHub<ChatHub>("/Hub/chatHub");
             //app.Run($"https://localhost:{builder.Configuration["PORT"]}");
