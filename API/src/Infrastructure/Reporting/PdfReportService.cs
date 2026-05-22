@@ -41,24 +41,40 @@ namespace Infrastructure.Reporting
                 page.Margin(2, Unit.Centimetre);
                 page.DefaultTextStyle(t => t.FontFamily("Helvetica"));
 
-                page.Content().Column(col =>
+                page.Content().PaddingVertical(20).Column(col =>
                 {
-                    col.Item().PaddingTop(80).Text("Executive Report")
-                        .FontSize(36).Bold().FontColor("#1A1A2E");
+                    col.Item().AlignCenter().PaddingTop(40).Width(120).Height(120)
+                        .Background("#1A1A2E")
+                        .Border(4)
+                        .BorderColor("#2D2D44")
+                        .AlignCenter()
+                        .AlignMiddle()
+                        .Text("GE")
+                        .FontSize(44)
+                        .Bold()
+                        .FontColor("#FFFFFF");
 
-                    col.Item().PaddingTop(12).Text(
+                    col.Item().AlignCenter().PaddingTop(28).Text("don't think, Go Epic")
+                        .FontSize(24)
+                        .Bold()
+                        .FontColor("#1A1A2E");
+
+                    col.Item().AlignCenter().PaddingTop(18).Text("Executive Report")
+                        .FontSize(34).Bold().FontColor("#22223B");
+
+                    col.Item().AlignCenter().PaddingTop(8).Text(
                         report.Scope == ReportScope.Admin
                             ? "Platform Overview — Admin"
-                            : $"Vendor Performance Report")
-                        .FontSize(18).FontColor("#4A4A6A");
+                            : "Vendor Performance Report")
+                        .FontSize(16).FontColor("#4A4A6A");
 
-                    col.Item().PaddingTop(8).Text(
+                    col.Item().AlignCenter().PaddingTop(8).Text(
                         $"Generated: {report.GeneratedAt:MMMM dd, yyyy HH:mm} UTC")
                         .FontSize(11).FontColor("#888888");
 
-                    col.Item().PaddingTop(60).LineHorizontal(1).LineColor("#DDDDDD");
+                    col.Item().PaddingTop(52).LineHorizontal(1).LineColor("#E2E4EA");
 
-                    col.Item().PaddingTop(40).Text("Confidential — For internal use only")
+                    col.Item().PaddingTop(18).AlignCenter().Text("Confidential — For internal use only")
                         .FontSize(10).Italic().FontColor("#AAAAAA");
                 });
             };
@@ -165,7 +181,7 @@ namespace Infrastructure.Reporting
                             .OrderByDescending(x => x.Year).ThenByDescending(x => x.Month)
                             .Select((x, i) => (x, i)))
                         {
-                            var bg = index % 2 == 0 ? "#F8F9FA" : "#FFFFFF";
+                            string bg = index % 2 == 0 ? "#F8F9FA" : "#FFFFFF";
                             var growthText = item.GrowthPercentage.HasValue
                                 ? $"{item.GrowthPercentage:+0.00;-0.00}%"
                                 : "—";
@@ -223,7 +239,7 @@ namespace Infrastructure.Reporting
 
                         foreach (var (svc, i) in report.TopServices.Select((x, i) => (x, i)))
                         {
-                            var bg = i % 2 == 0 ? "#F8F9FA" : "#FFFFFF";
+                            string bg = i % 2 == 0 ? "#F8F9FA" : "#FFFFFF";
                             t.Cell().Background(bg).Padding(8).Text(svc.ServiceName).FontSize(10);
                             t.Cell().Background(bg).Padding(8).Text(svc.Revenue.ToString("C")).FontSize(10).Bold();
                             t.Cell().Background(bg).Padding(8).Text($"{svc.RevenueShare}%").FontSize(10);
@@ -333,7 +349,6 @@ namespace Infrastructure.Reporting
                     col.Item().PaddingTop(4).Row(row =>
                     {
                         row.ConstantItem(16)
-                            .AlignMiddle()
                             .Text("●")
                             .FontColor(_bulletColor)
                             .FontSize(8);
