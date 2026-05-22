@@ -47,6 +47,9 @@ namespace Application
             Services.AddScoped<IVoucherService, VoucherService>();
             Services.AddScoped<IPlanningAIService, PlanningAIService>();
 
+            Services.AddScoped<Application.Contracts.IReportingService, Infrastructure.Reporting.ReportingService>();
+            Services.AddScoped<Application.Contracts.IPdfReportService, Infrastructure.Reporting.PdfReportService>();
+            Services.AddScoped<Application.Contracts.IEmailService, Infrastructure.Email.SmtpEmailService>();
 
             Services.AddSingleton(sp =>
             {
@@ -134,7 +137,7 @@ namespace Application
                 {
                     OnMessageReceived = context =>
                     {
-                        var accessToken = context.Request.Query["accessToken"];
+                        var accessToken = context.Request.Query["access_token"];
                         var path = context.HttpContext.Request.Path;
 
                         if (!string.IsNullOrEmpty(accessToken) &&
