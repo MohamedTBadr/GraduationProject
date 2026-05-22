@@ -18,18 +18,15 @@ namespace Web.Api.Controllers
     {
         private readonly IReportingService _reporting;
         private readonly IPdfReportService _pdf;
-        private readonly IEmailService _email;
         private readonly IBackgroundJobClient _jobs;
 
         public ReportsController(
             IReportingService reporting,
             IPdfReportService pdf,
-            IEmailService email,
             IBackgroundJobClient jobs)
         {
             _reporting = reporting;
             _pdf = pdf;
-            _email = email;
             _jobs = jobs;
         }
 

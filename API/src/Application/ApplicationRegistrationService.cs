@@ -47,9 +47,7 @@ namespace Application
             Services.AddScoped<IVoucherService, VoucherService>();
             Services.AddScoped<IPlanningAIService, PlanningAIService>();
 
-            Services.AddScoped<Application.Contracts.IReportingService, Infrastructure.Reporting.ReportingService>();
-            Services.AddScoped<Application.Contracts.IPdfReportService, Infrastructure.Reporting.PdfReportService>();
-            Services.AddScoped<Application.Contracts.IEmailService, Infrastructure.Email.SmtpEmailService>();
+            Services.AddScoped<Application.Contracts.IEmailService, HangfireEmailSender>();
 
             Services.AddSingleton(sp =>
             {

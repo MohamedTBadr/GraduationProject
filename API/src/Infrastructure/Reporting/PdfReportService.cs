@@ -165,7 +165,7 @@ namespace Infrastructure.Reporting
                             .OrderByDescending(x => x.Year).ThenByDescending(x => x.Month)
                             .Select((x, i) => (x, i)))
                         {
-                            var bg = index % 2 == 0 ? "#F8F9FA" : Colors.White;
+                            var bg = index % 2 == 0 ? "#F8F9FA" : "#FFFFFF";
                             var growthText = item.GrowthPercentage.HasValue
                                 ? $"{item.GrowthPercentage:+0.00;-0.00}%"
                                 : "—";
@@ -223,7 +223,7 @@ namespace Infrastructure.Reporting
 
                         foreach (var (svc, i) in report.TopServices.Select((x, i) => (x, i)))
                         {
-                            var bg = i % 2 == 0 ? "#F8F9FA" : Colors.White;
+                            var bg = i % 2 == 0 ? "#F8F9FA" : "#FFFFFF";
                             t.Cell().Background(bg).Padding(8).Text(svc.ServiceName).FontSize(10);
                             t.Cell().Background(bg).Padding(8).Text(svc.Revenue.ToString("C")).FontSize(10).Bold();
                             t.Cell().Background(bg).Padding(8).Text($"{svc.RevenueShare}%").FontSize(10);
@@ -332,9 +332,16 @@ namespace Infrastructure.Reporting
                 {
                     col.Item().PaddingTop(4).Row(row =>
                     {
-                        row.ConstantItem(16).Text("●").FontColor(_bulletColor).FontSize(8)
-                            .AlignMiddle();
-                        row.RelativeItem().PaddingLeft(6).Text(item).FontSize(11);
+                        row.ConstantItem(16)
+                            .AlignMiddle()
+                            .Text("●")
+                            .FontColor(_bulletColor)
+                            .FontSize(8);
+
+                        row.RelativeItem()
+                            .PaddingLeft(6)
+                            .Text(item)
+                            .FontSize(11);
                     });
                 }
             });
