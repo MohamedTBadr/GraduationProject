@@ -25,7 +25,7 @@
 
 <br/>
 
-<a href="https://4v3b1ot6fb.apidog.io/%EF%B8%8F-epichub-documentation-2172110m0" target=_blank>
+<a href="https://epichub.apidog.io/" target=_blank>
   <img src="https://img.shields.io/badge/📖_Explore_Live_API_Docs-00C2B8?style=for-the-badge&logoColor=white" alt="Apidog Documentation" width="280"/>
 </a>
 
