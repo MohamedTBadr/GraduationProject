@@ -1,6 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap, catchError, throwError, map } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpContext, HttpContextToken } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { Observable, tap, catchError, throwError, map, shareReplay, finalize } from 'rxjs';
 import {
   UserRole,
   UserSession,
@@ -16,6 +17,8 @@ import {
 } from '../../shared/types/api.interfaces';
 import { environment } from '../../../environments/environment';
 
+export const SKIP_AUTH = new HttpContextToken<boolean>(() => false);
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,10 +33,19 @@ export class AuthService {
   isLoggedIn = computed(() => !!this.currentUser());
   role = computed(() => this.currentUser()?.role ?? null);
 
-  constructor(private http: HttpClient) {
-    const savedSession = localStorage.getItem('eventora_session');
-    if (savedSession) {
-      this.currentUser.set(JSON.parse(savedSession));
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
+    try {
+      const savedSession = localStorage.getItem('eventora_session');
+      if (savedSession) {
+        this.currentUser.set(JSON.parse(savedSession));
+      }
+    } catch {
+      localStorage.removeItem('eventora_session');
+      localStorage.removeItem('eventora_token');
+      localStorage.removeItem('eventora_refresh_token');
     }
   }
 
@@ -54,7 +66,10 @@ export class AuthService {
     });
 
     return this.http
-      .post<AuthApiResponse>(`${this.apiUrl}/Authentication/Login`, body, { headers })
+      .post<AuthApiResponse>(`${this.apiUrl}/Authentication/Login`, body, {
+        headers,
+        context: new HttpContext().set(SKIP_AUTH, true)
+      })
       .pipe(
         tap((res) => {
           // Persist the raw RefreshToken before mapping
@@ -74,8 +89,7 @@ export class AuthService {
       );
   }
 
-  /** POST /Authentication/Register */
-  register(data: any): Observable<AuthResponse> {
+  register(data: RegisterRequest): Observable<AuthResponse> {
     const body: RegisterRequest = {
       name: (data.name || `${data.firstName || ''} ${data.lastName || ''}`).trim() || '',
       firstName: data.firstName || '',
@@ -89,7 +103,10 @@ export class AuthService {
     const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
 
     return this.http
-      .post<AuthApiResponse>(`${this.apiUrl}/Authentication/Register`, body, { headers })
+      .post<AuthApiResponse>(`${this.apiUrl}/Authentication/Register`, body, {
+        headers,
+        context: new HttpContext().set(SKIP_AUTH, true)
+      })
       .pipe(
         tap((res) => {
           // Persist the raw RefreshToken before mapping
@@ -151,13 +168,33 @@ export class AuthService {
     // Match the JSON key casing tested in Apidog
     const body = { refreshToken: refreshToken };
     return this.http
-      .post<AuthApiResponse>(`${this.apiUrl}/Authentication/RefreshToken`, body)
+      .post<AuthApiResponse>(`${this.apiUrl}/Authentication/RefreshToken`, body, {
+        context: new HttpContext().set(SKIP_AUTH, true)
+      })
       .pipe(
         tap((res) => {
           localStorage.setItem('eventora_token', res.accessToken);
           localStorage.setItem('eventora_refresh_token', res.refreshToken);
         })
       );
+  }
+
+  private refreshResult$: Observable<string> | null = null;
+
+  refreshTokenOnce(): Observable<string> {
+    if (this.refreshResult$) {
+      return this.refreshResult$;
+    }
+
+    this.refreshResult$ = this.refreshToken().pipe(
+      map((res) => res.accessToken),
+      shareReplay(1),
+      finalize(() => {
+        this.refreshResult$ = null;
+      })
+    );
+
+    return this.refreshResult$;
   }
 
   /** POST /Authentication/CheckIfEmailExists?email=... – email is [FromQuery] */
@@ -241,16 +278,31 @@ export class AuthService {
     localStorage.removeItem('eventora_session');
     localStorage.removeItem('eventora_token');
     localStorage.removeItem('eventora_refresh_token');
-    window.location.reload();
+    this.router.navigate(['/']);
   }
 
   getToken(): string | null {
     return localStorage.getItem('eventora_token');
   }
 
+  isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (!payload.exp) return true;
+      const exp = payload.exp * 1000;
+      // Use a 10 second skew window
+      return Date.now() >= (exp - 10000);
+    } catch {
+      return true;
+    }
+  }
+
   getRefreshToken(): string | null {
     return localStorage.getItem('eventora_refresh_token');
   }
+
 
   // ─────────────────────────────────────────────
   // Private helpers

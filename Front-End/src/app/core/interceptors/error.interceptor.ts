@@ -8,6 +8,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(req).pipe(
         catchError((error) => {
+            if (error && (error as any).handled) {
+                return throwError(() => error);
+            }
             let errorMessage = 'An unexpected error occurred';
 
             if (error.error instanceof ErrorEvent) {
