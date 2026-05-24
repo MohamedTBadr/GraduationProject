@@ -1,0 +1,250 @@
+.fav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 20px;
+
+  .fav-title {
+    font-family: var(--ff-d);
+    color: var(--navy);
+    font-size: 1.8rem;
+    margin: 0 0 6px 0;
+  }
+
+  .fav-subtitle {
+    color: var(--gray);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+.fav-loading {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--gray);
+
+  .loader-pulse {
+    width: 50px;
+    height: 50px;
+    background: var(--gold);
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    animation: ripple 1.5s infinite ease-in-out;
+  }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.fav-empty-card {
+  text-align: center;
+  background: var(--white);
+  padding: 60px 24px;
+  border-radius: var(--r2);
+  box-shadow: var(--sh1);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  max-width: 500px;
+  margin: 40px auto;
+
+  .empty-icon {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    display: inline-block;
+    animation: heartPulse 2.5s infinite ease-in-out;
+  }
+
+  h3 {
+    font-family: var(--ff-d);
+    color: var(--navy);
+    font-size: 1.4rem;
+    margin: 0 0 10px 0;
+  }
+
+  p {
+    color: var(--gray);
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+@keyframes heartPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.fav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.fav-card {
+  background: var(--white);
+  border-radius: var(--r2);
+  box-shadow: var(--sh1);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--sh2);
+    border-color: var(--gold);
+    
+    .fav-card-avatar-placeholder {
+      transform: scale(1.05);
+    }
+  }
+
+  .fav-card-photo-wrapper {
+    height: 140px;
+    background: linear-gradient(135deg, hsl(230, 40%, 18%) 0%, hsl(250, 45%, 28%) 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fav-card-avatar-placeholder {
+    font-size: 4rem;
+    font-weight: 700;
+    font-family: var(--ff-d);
+    color: rgba(201, 168, 76, 0.2);
+    text-transform: uppercase;
+    user-select: none;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .fav-top-actions {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .fav-badge {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    color: var(--white);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .fav-heart-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+
+    &:hover {
+      transform: scale(1.15);
+      background: white;
+    }
+  }
+
+  .fav-card-body {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fav-vendor-name {
+    font-family: var(--ff-d);
+    color: var(--navy);
+    font-size: 1.2rem;
+    margin: 0 0 6px 0;
+    font-weight: 600;
+  }
+
+  .fav-vendor-location {
+    font-size: 0.85rem;
+    color: var(--gray);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .fav-vendor-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 12px;
+
+    .stars-gold {
+      color: var(--gold);
+      font-size: 1.1rem;
+    }
+
+    .rating-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--navy);
+    }
+  }
+
+  .fav-vendor-about {
+    font-size: 0.85rem;
+    color: var(--gray);
+    line-height: 1.5;
+    margin: 0;
+    flex: 1;
+  }
+
+  .fav-card-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fafafa;
+  }
+
+  .price-notice {
+    font-size: 0.8rem;
+    color: var(--gray);
+    font-weight: 500;
+  }
+
+  .btn-view-profile {
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateX(4px);
+    }
+  }
+}

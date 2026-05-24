@@ -311,6 +311,55 @@ export interface AiEventPlanResponse {
   aiPlan: string; // JSON string representing AiEventPlanParsed
 }
 
+export interface BudgetCategory {
+  name: string;
+  amount: number;
+  percentage: number;
+  description: string;
+}
+
+export interface BudgetAllocationResponse {
+  totalBudget: number;
+  eventType: string;
+  categories: BudgetCategory[];
+  advice: string;
+}
+
+export interface TimelineItem {
+  time: string;
+  activity: string;
+  duration: string;
+  importance: string; // Low, Medium, High
+}
+
+export interface EventTimelineResponse {
+  eventId: string;
+  eventTitle: string;
+  timeline: TimelineItem[];
+  planningNotes: string;
+}
+
+export interface RecommendationItem {
+  ServiceId: string;
+  ServiceName: string;
+  VendorName: string;
+  Reasoning: string;
+}
+
+export interface RecommendationResponse {
+  recommendations: RecommendationItem[];
+}
+
+export interface ApiResult<T> {
+  isSuccess: boolean;
+  value: T;
+  error?: {
+    code: number;
+    type: string;
+    description: string;
+  };
+}
+
 // ─────────────────────────────────────────────
 // Event / Bookings
 // ─────────────────────────────────────────────

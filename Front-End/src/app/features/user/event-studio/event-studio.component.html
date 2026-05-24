@@ -7,73 +7,209 @@
       <button class="close-btn" (click)="close.emit()">×</button>
     </div>
 
-    <div class="ai-body">
-      <!-- Initial State -->
-      <div class="ai-initial" *ngIf="!isGenerating && !aiPlan && !error">
-        <h3>Let AI design your perfect event</h3>
-        <p>Our AI will analyze your budget of <strong>{{eventBudget | number}} EGP</strong> and instantly match you with the best available vendors in our database to build a complete package.</p>
-        <button class="btn btn-gold btn-lg mt-4" (click)="generatePlan()">
-          ✨ Generate Event Plan
-        </button>
-      </div>
-
-      <!-- Generating State -->
-      <div class="ai-generating" *ngIf="isGenerating">
-        <div class="loader-pulse"></div>
-        <h3>AI is thinking...</h3>
-        <p>Analyzing vendors, crunching numbers, and building your dream event.</p>
-      </div>
-
-      <!-- Error State -->
-      <div class="ai-error" *ngIf="error">
-        <div class="error-icon">⚠️</div>
-        <h3>Something went wrong</h3>
-        <p>{{error}}</p>
-        <button class="btn btn-outline mt-3" (click)="generatePlan()">Try Again</button>
-      </div>
-
-      <!-- Result State -->
-      <div class="ai-result" *ngIf="aiPlan">
-        <div class="plan-summary-card">
-          <h4>{{aiPlan.event_title}}</h4>
-          <p>{{aiPlan.plan_summary}}</p>
-          
-          <div class="budget-breakdown mt-3">
-            <div class="b-item">
-              <span>Total Cost</span>
-              <strong>{{aiPlan.total_cost | number}} EGP</strong>
-            </div>
-            <div class="b-item">
-              <span>Remaining Budget</span>
-              <strong class="text-[var(--gold)]">{{aiPlan.remaining_budget | number}} EGP</strong>
-            </div>
-          </div>
-        </div>
-
-        <h4 class="mt-4 mb-3">Recommended Vendors</h4>
-        <div class="ai-vendor-list">
-          <div class="ai-vendor-item" *ngFor="let item of aiPlan.selected_items">
-            <div class="avi-header">
-              <span class="avi-cat">{{item.category}}</span>
-              <span class="avi-price">{{item.price | number}} EGP</span>
-            </div>
-            <div class="avi-name">{{item.vendor}}</div>
-            <div class="avi-reason">"{{item.reason}}"</div>
-          </div>
-        </div>
-
-        <div class="ai-tips mt-4" *ngIf="aiPlan.tips?.length">
-          <h4>💡 AI Tips</h4>
-          <ul>
-            <li *ngFor="let tip of aiPlan.tips">{{tip}}</li>
-          </ul>
-        </div>
-      </div>
+    <!-- Navigation Tabs -->
+    <div class="ai-tabs">
+      <button class="ai-tab-btn" [class.active]="activeTab === 'package'" (click)="switchTab('package')">
+        📦 Package Planning
+      </button>
+      <button class="ai-tab-btn" [class.active]="activeTab === 'budget'" (click)="switchTab('budget')">
+        📊 Smart Budget Allocation
+      </button>
+      <button class="ai-tab-btn" [class.active]="activeTab === 'timeline'" (click)="switchTab('timeline')">
+        ⏱️ Day-of Timeline
+      </button>
     </div>
 
-    <div class="ai-footer" *ngIf="aiPlan">
-      <button class="btn btn-outline" (click)="generatePlan()">Regenerate</button>
-      <button class="btn btn-gold" (click)="acceptPlan()">Accept & Add Vendors</button>
+    <div class="ai-body">
+      
+      <!-- 1. PACKAGE PLANNING TAB -->
+      <div *ngIf="activeTab === 'package'">
+        <!-- Initial State -->
+        <div class="ai-initial" *ngIf="!isGenerating && !aiPlan && !error">
+          <h3>Let AI design your perfect event</h3>
+          <p>Our AI will analyze your budget of <strong>{{eventBudget | number}} EGP</strong> and instantly match you with the best available vendors in our database to build a complete package.</p>
+          <button class="btn btn-gold btn-lg mt-4" (click)="generatePlan()">
+            ✨ Generate Event Plan
+          </button>
+        </div>
+
+        <!-- Generating State -->
+        <div class="ai-generating" *ngIf="isGenerating">
+          <div class="loader-pulse"></div>
+          <h3>AI is thinking...</h3>
+          <p>Analyzing vendors, crunching numbers, and building your dream event.</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="ai-error" *ngIf="error">
+          <div class="error-icon">⚠️</div>
+          <h3>Something went wrong</h3>
+          <p>{{error}}</p>
+          <button class="btn btn-outline mt-3" (click)="generatePlan()">Try Again</button>
+        </div>
+
+        <!-- Result State -->
+        <div class="ai-result" *ngIf="aiPlan">
+          <div class="plan-summary-card">
+            <h4>{{aiPlan.event_title}}</h4>
+            <p>{{aiPlan.plan_summary}}</p>
+            
+            <div class="budget-breakdown mt-3">
+              <div class="b-item">
+                <span>Total Cost</span>
+                <strong>{{aiPlan.total_cost | number}} EGP</strong>
+              </div>
+              <div class="b-item">
+                <span>Remaining Budget</span>
+                <strong class="text-gold">{{aiPlan.remaining_budget | number}} EGP</strong>
+              </div>
+            </div>
+          </div>
+
+          <h4 class="mt-4 mb-3">Recommended Vendors</h4>
+          <div class="ai-vendor-list">
+            <div class="ai-vendor-item" *ngFor="let item of aiPlan.selected_items">
+              <div class="avi-header">
+                <span class="avi-cat">{{item.category}}</span>
+                <span class="avi-price">{{item.price | number}} EGP</span>
+              </div>
+              <div class="avi-name">{{item.vendor}}</div>
+              <div class="avi-reason">"{{item.reason}}"</div>
+            </div>
+          </div>
+
+          <div class="ai-tips mt-4" *ngIf="aiPlan.tips?.length">
+            <h4>💡 AI Tips</h4>
+            <ul>
+              <li *ngFor="let tip of aiPlan.tips">{{tip}}</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Recommendations Section (Clients Like You) -->
+        <div class="recommendations-section mt-5" *ngIf="!isGenerating && recommendations.length > 0">
+          <h4 class="section-title">✨ Recommended For You (Based on past hosts)</h4>
+          <p class="section-desc">Hosts organizing similar events also selected these services:</p>
+          <div class="rec-list">
+            <div class="rec-card" *ngFor="let rec of recommendations">
+              <div class="rec-header">
+                <span class="rec-service-name">{{ rec.ServiceName }}</span>
+                <span class="rec-vendor-name">by {{ rec.VendorName }}</span>
+              </div>
+              <div class="rec-reason">"{{ rec.Reasoning }}"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. SMART BUDGET ALLOCATION TAB -->
+      <div *ngIf="activeTab === 'budget'">
+        <!-- Loading State -->
+        <div class="ai-generating" *ngIf="loadingBudget">
+          <div class="loader-pulse"></div>
+          <h3>Calculating Optimal Budget Breakdown...</h3>
+          <p>Analyzing industry benchmarks for {{ eventTypeName }} events...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="ai-error" *ngIf="budgetError">
+          <div class="error-icon">⚠️</div>
+          <h3>Budget Analysis Failed</h3>
+          <p>{{budgetError}}</p>
+          <button class="btn btn-outline mt-3" (click)="loadBudgetAllocation()">Retry Analysis</button>
+        </div>
+
+        <!-- Budget Result State -->
+        <div class="budget-result" *ngIf="!loadingBudget && budgetAllocation">
+          <div class="plan-summary-card">
+            <h4>📊 Smart Budget Breakdown</h4>
+            <p>Here is the recommended allocation of your <strong>{{ budgetAllocation.totalBudget | number }} EGP</strong> budget for a premium <strong>{{ budgetAllocation.eventType }}</strong> experience.</p>
+          </div>
+
+          <div class="budget-alloc-list mt-4">
+            <div class="budget-alloc-item" *ngFor="let cat of budgetAllocation.categories">
+              <div class="bai-header">
+                <span class="bai-name">{{ cat.name }}</span>
+                <div class="bai-values">
+                  <span class="bai-pct">{{ cat.percentage | number:'1.0-1' }}%</span>
+                  <span class="bai-amt">{{ cat.amount | number }} EGP</span>
+                </div>
+              </div>
+              
+              <div class="budget-progress-bar">
+                <div class="budget-fill" [style.width]="cat.percentage + '%'"></div>
+              </div>
+              
+              <p class="bai-desc" *ngIf="cat.description">{{ cat.description }}</p>
+            </div>
+          </div>
+
+          <div class="ai-advice-box mt-4" *ngIf="budgetAllocation.advice">
+            <h4>💡 AI Budget Strategist Advice</h4>
+            <p>{{ budgetAllocation.advice }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. DAY-OF-EVENT TIMELINE TAB -->
+      <div *ngIf="activeTab === 'timeline'">
+        <!-- Loading State -->
+        <div class="ai-generating" *ngIf="loadingTimeline">
+          <div class="loader-pulse"></div>
+          <h3>Designing Minute-by-Minute Schedule...</h3>
+          <p>Sequencing activities for a flawless flow...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="ai-error" *ngIf="timelineError">
+          <div class="error-icon">⚠️</div>
+          <h3>Timeline Generation Failed</h3>
+          <p>{{timelineError}}</p>
+          <button class="btn btn-outline mt-3" (click)="loadTimeline()">Retry Generation</button>
+        </div>
+
+        <!-- Timeline Result State -->
+        <div class="timeline-result" *ngIf="!loadingTimeline && timelineData">
+          <div class="plan-summary-card">
+            <h4>⏱️ Day-Of Chronological Timeline</h4>
+            <p>Minute-by-minute scheduling proposed by AI planner for: <strong>{{ timelineData.eventTitle }}</strong></p>
+          </div>
+
+          <!-- Chronological Timeline Chain -->
+          <div class="timeline-chain mt-4">
+            <div class="timeline-node" *ngFor="let item of timelineData.timeline">
+              <div class="tn-time-bubble">
+                {{ item.time }}
+              </div>
+              <div class="tn-card">
+                <div class="tn-header">
+                  <span class="tn-activity">{{ item.activity }}</span>
+                  <span class="importance-tag tag-{{ item.importance.toLowerCase() }}">
+                    {{ item.importance }}
+                  </span>
+                </div>
+                <div class="tn-meta">
+                  <span>⏱️ Duration: {{ item.duration }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-notes-box mt-4" *ngIf="timelineData.planningNotes">
+            <h4>📝 AI Coordinator Planning Notes</h4>
+            <p>{{ timelineData.planningNotes }}</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="ai-footer">
+      <button class="btn btn-outline" (click)="close.emit()">Close Studio</button>
+      <button class="btn btn-gold" *ngIf="activeTab === 'package' && aiPlan" (click)="acceptPlan()">
+        Accept & Add Vendors
+      </button>
     </div>
   </div>
 </div>

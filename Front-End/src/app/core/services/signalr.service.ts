@@ -62,7 +62,7 @@ export class SignalRService {
   private startSseNotifications(token: string) {
     if (this.eventSource) return;
 
-    const sseUrl = `${environment.apiUrl}/notifications/stream?accessToken=${token}`;
+    const sseUrl = `${environment.apiUrl}/notifications/stream?access_token=${token}`;
     this.eventSource = new EventSource(sseUrl);
 
     this.eventSource.onmessage = (event) => {

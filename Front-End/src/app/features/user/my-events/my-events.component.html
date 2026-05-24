@@ -131,6 +131,7 @@
     *ngIf="showAiStudio && activeEvent" 
     [eventId]="activeEvent.id" 
     [eventBudget]="activeEvent.budget"
+    [eventTypeName]="activeEvent.type"
     (close)="showAiStudio = false"
     (planAccepted)="onAiPlanAccepted($event)">
 </app-event-studio>
