@@ -79,7 +79,7 @@ namespace Application.Services
         {
             var vendor = await _vendorRepository.GetVendorByIdAsync(dto.VendorId.Value, cancellationToken);
             if (vendor is null)
-                throw new Exception("Vendor not found");
+                return Result<ServiceDTO>.NotFound(404, "Vendor not found");
 
             var service = _mapper.Map<Service>(dto);
 
@@ -221,14 +221,25 @@ namespace Application.Services
             // Ideally ISearchService.RebuildIndexAsync should take a type filter or we just clear once.
             // For now, we assume this is a full rebuild.
             
-            var result = await _ServiceRepository.GetAllAsync(
-                new PaginatedRequest { PageSize = int.MaxValue }, 
-                s => true, 
-                CancellationToken.None);
-                
-            foreach (var service in result.Items)
+            const int pageSize = 200;
+            var pageIndex = 1;
+
+            while (true)
             {
-                await _searchService.IndexServiceAsync(service);
+                var result = await _ServiceRepository.GetAllAsync(
+                    new PaginatedRequest { PageIndex = pageIndex, PageSize = pageSize },
+                    s => true,
+                    CancellationToken.None);
+
+                foreach (var service in result.Items)
+                {
+                    await _searchService.IndexServiceAsync(service);
+                }
+
+                if (pageIndex * pageSize >= result.TotalCount || !result.Items.Any())
+                    break;
+
+                pageIndex++;
             }
         }
     }

@@ -35,6 +35,8 @@ namespace Web.Api.Middlewares
                 NotFoundException => (404, ErrorResponse(ErrorType.NotFound, 404, ex.Message)),
                 RateLimitExceededException => (429, ErrorResponse(ErrorType.LimitExceeded, 429, ex.Message)),
                 UnauthorizedException => (401, ErrorResponse(ErrorType.Unauthorized, 401, ex.Message)),
+                UnauthorizedAccessException => (403, ErrorResponse(ErrorType.Unauthorized, 403, ex.Message)),
+                KeyNotFoundException => (404, ErrorResponse(ErrorType.NotFound, 404, ex.Message)),
                 UnprocessableContentException => (422, ErrorResponse(ErrorType.BusinessRule, 422, ex.Message)),
                 IdempotencyKeyDuplicateException => (406, ErrorResponse(ErrorType.Conflict, 406, ex.Message)),
                 IdempotencyKeyMissingException => (422, ErrorResponse(ErrorType.Validation, 422, ex.Message)),

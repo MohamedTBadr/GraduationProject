@@ -32,10 +32,23 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Order>> GetByUserIdAsync(Guid userId, CancellationToken ct)
             => await db.Orders
-                .Include(o => o.Event).ThenInclude(e => e.EventItems)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Service).ThenInclude(s => s.Vendor)
                 .Where(o => o.UserId == userId)
                 .AsNoTracking()
                 .ToListAsync(ct);
+
+        public async Task<IEnumerable<Order>> GetByUserIdsAsync(IEnumerable<Guid> userIds, CancellationToken ct)
+        {
+            var ids = userIds.Distinct().ToList();
+            if (ids.Count == 0)
+                return [];
+
+            return await db.Orders
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Service).ThenInclude(s => s.Vendor)
+                .Where(o => ids.Contains(o.UserId))
+                .AsNoTracking()
+                .ToListAsync(ct);
+        }
         public async Task<Order?> GetByPaymentIntentIdAsync(string paymentIntentId, CancellationToken ct)
             => await db.Orders
                 .Include(o => o.Event).ThenInclude(e => e.EventItems)

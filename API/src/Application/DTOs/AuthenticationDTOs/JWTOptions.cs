@@ -11,7 +11,7 @@ namespace Application.DTOs.AuthenticationDTOs
         public string SecretKey {  get; set; }
         public string Issuer { get; set; }
         public string Audience { get; set; }
-        public double DurationDays { get; set; }
-        
+        public double AccessTokenDurationDays { get; set; }
+        public double RefreshTokenDurationDays { get; set; }
     }
 }

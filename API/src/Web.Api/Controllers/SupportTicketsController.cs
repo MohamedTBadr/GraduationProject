@@ -105,7 +105,8 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await serviceManager.SupportTicketService.ReplyAsync(ticketId, request, cancellationToken);
+            var username = User.Identity?.Name ?? User.FindFirst("name")?.Value ?? "Unknown User";
+            var result = await serviceManager.SupportTicketService.ReplyAsync(ticketId, request, cancellationToken, username);
             return result.ToActionResult();
         }
 
@@ -146,7 +147,8 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await serviceManager.SupportTicketService.ResolveAsync(ticketId, request, cancellationToken);
+            var username = User.Identity?.Name ?? User.FindFirst("name")?.Value ?? "Unknown User";
+            var result = await serviceManager.SupportTicketService.ResolveAsync(ticketId, request, cancellationToken, username);
             return result.ToActionResult();
         }
         // ─── OPEN TICKET ─────────────────────────────────────────────────────────────
@@ -193,7 +195,7 @@ namespace API.Controllers
             if (ticket.Value.From != username)
                 return Forbid();
 
-            var result = await serviceManager.SupportTicketService.EscalateAsync(ticketId, request, cancellationToken);
+            var result = await serviceManager.SupportTicketService.EscalateAsync(ticketId, request, cancellationToken, username);
             return result.ToActionResult();
         }
     }

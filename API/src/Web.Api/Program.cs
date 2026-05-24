@@ -1,23 +1,13 @@
-
-
 using Application;
-using Application.Services.Helpers;
 using Domain.Contracts;
 using Hangfire;
 using Infrastructure;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.Extensions.Caching.Hybrid;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using Serilog;
-using System.Reflection;
 using Web.Api;
-
 using Web.Api.Middlewares;
-
 
 namespace Web
 {
@@ -27,55 +17,40 @@ namespace Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add Services to the container.
-
             builder.Services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>
                 {
                     options.SuppressModelStateInvalidFilter = true;
                 });
 
-
-           await InfrastructureRegistrationService.AddInfrastructureServices(builder.Services, builder.Configuration);
+            await InfrastructureRegistrationService.AddInfrastructureServices(builder.Services, builder.Configuration);
             await WebRegistrationService.AddWebsRegistrationServices(builder.Services, builder.Configuration);
             await ApplicationRegistrationService.AddApplicationServices(builder.Services, builder.Configuration);
-     
 
-           
             builder.Host.UseSerilog((ctx, config) =>
             {
                 config.ReadFrom.Configuration(ctx.Configuration)
-                      .Enrich.FromLogContext()
-                      
-                      .WriteTo.File(new Serilog.Formatting.Json.JsonFormatter(), "logs/app-json-.log", rollingInterval: RollingInterval.Day)
-                      .WriteTo.File("logs/app-text-.log", rollingInterval: RollingInterval.Day);
-            });
-            //builder.Services.AddOpenApi();
-            builder.Services.AddResponseCompression(options =>
-            {
-                options.EnableForHttps = true;
-                options.Providers.Add<BrotliCompressionProvider>();
-                options.Providers.Add<GzipCompressionProvider>();
-            });
-
-            builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
-            {
-                options.Level = System.IO.Compression.CompressionLevel.Fastest;
+                    .Enrich.FromLogContext()
+                    .WriteTo.File(new Serilog.Formatting.Json.JsonFormatter(), "logs/app-json-.log", rollingInterval: RollingInterval.Day)
+                    .WriteTo.File("logs/app-text-.log", rollingInterval: RollingInterval.Day);
             });
 
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", policy =>
                 {
+                    var allowedOrigins = builder.Configuration
+                        .GetSection("Cors:AllowedOrigins")
+                        .Get<string[]>() ?? ["http://localhost:4200"];
+
                     policy
-                        .WithOrigins("http://localhost:4200") // your frontend
+                        .WithOrigins(allowedOrigins)
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .AllowCredentials(); // ← must for SignalR
+                        .AllowCredentials();
                 });
             });
 
-            // Program.cs — add one line to logging
             builder.Logging.AddOpenTelemetry(logging =>
             {
                 logging.SetResourceBuilder(
@@ -90,15 +65,10 @@ namespace Web
             });
 
             var app = builder.Build();
-              
 
             await SeedingScope(app);
 
-
-
-
-
-            app.UseCors("CorsPolicy");                          // ← First
+            app.UseCors("CorsPolicy");
             app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseResponseCompression();
@@ -107,9 +77,13 @@ namespace Web
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseMiddleware<IdempotencyCustomMiddleware>();
             app.UseAuthentication();
+            app.UseRateLimiter();
             app.UseAuthorization();
-            app.UseHangfireDashboard();
-            
+            app.UseHangfireDashboard("/hangfire", new Hangfire.DashboardOptions
+            {
+                Authorization = new[] { new HangfireAdminAuthorizationFilter() }
+            });
+
             var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
             recurringJobManager.AddOrUpdate<Infrastructure.Search.LuceneSyncJob>(
                 "lucene-daily-sync",
@@ -121,33 +95,38 @@ namespace Web
                 job => job.SendMonthlyVendorReportsAsync(CancellationToken.None),
                 Cron.Monthly(1, 6));
 
-            recurringJobManager.AddOrUpdate<Infrastructure.Jobs.ScheduledReportJob>(
-                "monthly-admin-report",
-                job => job.SendAdminMonthlyReportAsync("admin@platform.com", CancellationToken.None),
-                Cron.Monthly(1, 7));
+            var adminReportEmail = builder.Configuration["AdminReports:Email"];
+            if (!string.IsNullOrWhiteSpace(adminReportEmail))
+            {
+                recurringJobManager.AddOrUpdate<Infrastructure.Jobs.ScheduledReportJob>(
+                    "monthly-admin-report",
+                    job => job.SendAdminMonthlyReportAsync(adminReportEmail, CancellationToken.None),
+                    Cron.Monthly(1, 7));
+            }
+            else
+            {
+                app.Logger.LogWarning("Monthly admin report job was not registered because AdminReports:Email is not configured.");
+            }
 
             app.MapControllers();
             app.MapHub<ChatHub>("/Hub/chatHub");
-            //app.Run($"https://localhost:{builder.Configuration["PORT"]}");
             await app.RunAsync();
-          
         }
 
         private static async Task SeedingScope(WebApplication app)
         {
-            // ✅ Run DB seeders at startup
-            using (var scope = app.Services.CreateScope())
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+
+            try
             {
-                var Services = scope.ServiceProvider;
-                try
-                {
-                    var initializer = Services.GetRequiredService<IDbIntialize>();
-                    await initializer.IntializeAsync(); // seeds Vendors, Roles, Categories
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Seeding failed: {ex}");
-                }
+                var initializer = services.GetRequiredService<IDbIntialize>();
+                await initializer.IntializeAsync();
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogCritical(ex, "Database seeding failed.");
+                throw;
             }
         }
     }

@@ -107,7 +107,7 @@ namespace Application.Services
         {
             var user = new ApplicationUser
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 UserName = request.Name,
@@ -206,9 +206,35 @@ namespace Application.Services
             return Result<VendorDetailsDTO>.Success(vendorDTO);
         }
 
-        public Task<Result<VendorDetailsDTO>> RateVendorAsync(Guid id, RatingVendorRequest request, CancellationToken cancellationToken)
-        { 
-            return Task.FromResult(Result<VendorDetailsDTO>.Success(new VendorDetailsDTO()));
+        public async Task<Result<VendorDetailsDTO>> RateVendorAsync(Guid id, RatingVendorRequest request, CancellationToken cancellationToken)
+        {
+            if (request.RatingValue is < 1 or > 5)
+                return Result<VendorDetailsDTO>.Validation(400, "Rating must be between 1 and 5.");
+
+            var vendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken);
+            if (vendor is null)
+                return Result<VendorDetailsDTO>.NotFound(404, "Vendor not found");
+
+            var service = vendor.Services.FirstOrDefault();
+            if (service is null)
+                return Result<VendorDetailsDTO>.InvalidOperation(400, "Vendor has no services to rate.");
+
+            var rating = new ServiceRating
+            {
+                Id = Guid.NewGuid(),
+                ServiceId = service.Id,
+                UserId = request.UserId,
+                Rating = request.RatingValue,
+                Review = request.Comment ?? string.Empty
+            };
+
+            await vendorRepository.AddServiceRatingAsync(rating, cancellationToken);
+
+            vendor = await vendorRepository.GetVendorByIdAsync(id, cancellationToken) ?? vendor;
+            await searchService.IndexVendorAsync(vendor);
+
+            var vendorDTO = mapper.Map<VendorDetailsDTO>(vendor);
+            return Result<VendorDetailsDTO>.Success(vendorDTO);
         }
 
         public async Task<Result<VendorVibeDTO>> GetVendorVibeAsync(Guid vendorId, CancellationToken cancellationToken)
@@ -234,7 +260,7 @@ namespace Application.Services
             }
 
             var prompt = $@"
-                Analyze the following customer reviews for vendor '{vendor.BusinessName}' and provide a 'Vendor Vibe' summary.
+                Analyze the following customer reviews for vendor '{SanitizeForPrompt(vendor.BusinessName)}' and provide a 'Vendor Vibe' summary.
                 Return ONLY a JSON object with this structure:
                 {{
                     ""VibeSummary"": ""A concise 1-sentence summary of the vendor's vibe."",
@@ -243,7 +269,7 @@ namespace Application.Services
                 }}
 
                 REVIEWS:
-                {string.Join("\n- ", reviews)}
+                {string.Join("\n- ", reviews.Select(SanitizeForPrompt))}
                 ";
 
             var aiResult = await llamaService.SendMessageAsync(prompt, "You are a professional sentiment analyst. Return JSON only.");
@@ -264,15 +290,40 @@ namespace Application.Services
         public async Task RebuildSearchIndexAsync()
         {
             await searchService.RebuildIndexAsync();
-            var paginatedResult = await vendorRepository.GetVendorsAsync(
-                new PaginatedRequest { PageSize = int.MaxValue }, 
-                v => true, 
-                CancellationToken.None);
-            
-            foreach (var vendor in paginatedResult.Items)
+            const int pageSize = 200;
+            var pageIndex = 1;
+
+            while (true)
             {
-                await searchService.IndexVendorAsync(vendor);
+                var paginatedResult = await vendorRepository.GetVendorsAsync(
+                    new PaginatedRequest { PageIndex = pageIndex, PageSize = pageSize },
+                    v => true,
+                    CancellationToken.None);
+
+                foreach (var vendor in paginatedResult.Items)
+                {
+                    await searchService.IndexVendorAsync(vendor);
+                }
+
+                if (pageIndex * pageSize >= paginatedResult.TotalCount || !paginatedResult.Items.Any())
+                    break;
+
+                pageIndex++;
             }
+        }
+
+        private static string SanitizeForPrompt(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            return value
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\r", " ")
+                .Replace("\n", " ")
+                .Replace("```", string.Empty)
+                .Trim();
         }
     }
 }

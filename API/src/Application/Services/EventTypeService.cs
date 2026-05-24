@@ -12,42 +12,50 @@ namespace Application.Services
 {
     public class EventTypeService(IEventTypeRepository repository) : IEventTypeService
     {
-        public async Task<IEnumerable<EventTypeResponseDto>> GetAllAsync(CancellationToken ct)
+        public async Task<Result<IEnumerable<EventTypeResponseDto>>> GetAllAsync(CancellationToken ct)
         {
             var types = await repository.GetAllAsync(ct);
-            return types.Select(t => new EventTypeResponseDto(t.Id, t.Name));
+            var dtos = types.Select(t => new EventTypeResponseDto(t.Id, t.Name));
+            return Result<IEnumerable<EventTypeResponseDto>>.Success(dtos);
         }
+        
 
-        public async Task<EventTypeResponseDto?> GetByIdAsync(Guid id, CancellationToken ct)
+        public async Task<Result<EventTypeResponseDto?>> GetByIdAsync(Guid id, CancellationToken ct)
         {
             var type = await repository.GetByIdAsync(id, ct);
-            return type == null ? null : new EventTypeResponseDto(type.Id, type.Name);
+            if (type == null)
+            {
+                return Result<EventTypeResponseDto?>.NotFound(404, "Event type not found");
+            }
+            return Result<EventTypeResponseDto?>.Success(new EventTypeResponseDto(type.Id, type.Name));
         }
 
-        public async Task<EventTypeResponseDto> CreateAsync(EventTypeCreateDto dto, CancellationToken ct)
+        public async Task<Result<EventTypeResponseDto>> CreateAsync(EventTypeCreateDto dto, CancellationToken ct)
         {
             var entity = new EventType { Id = Guid.NewGuid(), Name = dto.Name };
             await repository.CreateAsync(entity, ct);
-            return new EventTypeResponseDto(entity.Id, entity.Name);
+            return Result<EventTypeResponseDto>.Success(new EventTypeResponseDto(entity.Id, entity.Name));
         }
 
-        public async Task UpdateAsync(EventTypeUpdateDto dto, CancellationToken ct)
+        public async Task<Result<string>> UpdateAsync(EventTypeUpdateDto dto, CancellationToken ct)
         {
             var existing = await repository.GetByIdAsync(dto.Id, ct);
             if (existing != null)
             {
                 existing.Name = dto.Name;
                 await repository.UpdateAsync(existing, ct);
+                return Result<string>.Success("Event type updated successfully");
             }
+            return Result<string>.NotFound(404, "Event type not found");
         }
 
-        public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
+        public async Task<Result<bool>> DeleteAsync(Guid id, CancellationToken ct)
         {
             var entity = await repository.GetByIdAsync(id, ct);
-            if (entity == null) return false;
+            if (entity == null) return Result<bool>.NotFound(404, "Event type not found");
 
             await repository.DeleteAsync(entity, ct);
-            return true;
+            return Result<bool>.Success(true);
         }
     }
 }

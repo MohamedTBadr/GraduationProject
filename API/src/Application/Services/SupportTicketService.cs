@@ -16,9 +16,7 @@ namespace Application.Services
 
         public async Task<Result<TicketDetailsDTO>> CreateAsync(CreateTicketRequestDTO request, string fromUser, CancellationToken ct)
         {
-            var ticketCount = await repository.CountByStatusAsync(TicketStatus.Open, ct); 
-            // In a real system, you might want to generate a better unique standard ticket number
-            var ticketNumber = $"TK-{DateTime.UtcNow.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}";
+            var ticketNumber = $"TK-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid():N}".Substring(0, 24);
 
             var ticket = new SupportTicket
             {
@@ -97,7 +95,8 @@ namespace Application.Services
         public async Task<Result<TicketReplyResponseDTO>> ReplyAsync(
             string ticketNumber,
             TicketReplyRequestDTO request,
-            CancellationToken ct)
+            CancellationToken ct,
+            string actor = "System")
         {
             var ticket = await repository.GetByTicketNumberAsync(ticketNumber, ct);
             if (ticket is null)
@@ -112,7 +111,7 @@ namespace Application.Services
                 Id           = Guid.NewGuid(),
                 ReplyNumber  = replyNumber,
                 Message      = request.Message,
-                RepliedBy    = "Super Admin",           // replace with current user from HttpContext
+                RepliedBy    = actor,
                 SentViaEmail = request.SendEmail,
                 SentViaSms   = request.SendSms,
                 RepliedAt    = DateTime.UtcNow,
@@ -174,7 +173,8 @@ namespace Application.Services
         public async Task<Result<TicketResolveResponseDTO>> ResolveAsync(
             string ticketNumber,
             TicketResolveRequestDTO request,
-            CancellationToken ct)
+            CancellationToken ct,
+            string actor = "System")
         {
             var ticket = await repository.GetByTicketNumberAsync(ticketNumber, ct);
             if (ticket is null)
@@ -187,7 +187,7 @@ namespace Application.Services
 
             ticket.Status         = TicketStatus.Resolved;
             ticket.ResolvedAt     = DateTime.UtcNow;
-            ticket.ResolvedBy     = "Super Admin";      // replace with current user from HttpContext
+            ticket.ResolvedBy     = actor;
             ticket.ResolutionNote = request.ResolutionNote;
 
             await repository.UpdateAsync(ticket, ct);
@@ -207,7 +207,8 @@ namespace Application.Services
         public async Task<Result<TicketEscalateResponseDTO>> EscalateAsync(
             string ticketNumber,
             TicketEscalateRequestDTO request,
-            CancellationToken ct)
+            CancellationToken ct,
+            string actor = "System")
         {
             var ticket = await repository.GetByTicketNumberAsync(ticketNumber, ct);
             if (ticket is null)
@@ -220,7 +221,7 @@ namespace Application.Services
             ticket.IsEscalated      = true;
             ticket.EscalatedTo      = request.EscalateTo;
             ticket.EscalationReason = request.Reason;
-            ticket.EscalatedBy      = "Super Admin";    // replace with current user from HttpContext
+            ticket.EscalatedBy      = actor;
             ticket.EscalatedAt      = DateTime.UtcNow;
             ticket.FinanceNotified  = request.NotifyFinance;
 

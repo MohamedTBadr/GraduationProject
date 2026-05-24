@@ -9,10 +9,10 @@ namespace Application.Interfaces
 {
     public interface IEventTypeService
     {
-        Task<IEnumerable<EventTypeResponseDto>> GetAllAsync(CancellationToken ct);
-        Task<EventTypeResponseDto?> GetByIdAsync(Guid id, CancellationToken ct);
-        Task<EventTypeResponseDto> CreateAsync(EventTypeCreateDto dto, CancellationToken ct);
-        Task UpdateAsync(EventTypeUpdateDto dto, CancellationToken ct);
-        Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+        Task<Result<IEnumerable<EventTypeResponseDto>>> GetAllAsync(CancellationToken ct);
+        Task<Result<EventTypeResponseDto?>> GetByIdAsync(Guid id, CancellationToken ct);
+        Task<Result<EventTypeResponseDto>> CreateAsync(EventTypeCreateDto dto, CancellationToken ct);
+        Task<Result<string>> UpdateAsync(EventTypeUpdateDto dto, CancellationToken ct);
+        Task<Result<bool>> DeleteAsync(Guid id, CancellationToken ct);
     }
 }

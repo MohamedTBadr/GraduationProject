@@ -210,11 +210,6 @@ namespace Web.Api.Controllers
 
                 return Result<UserDTO>.Failure(error);
             }
-            if (!result.Succeeded)
-            {
-                var (errorType, message) = ToError(result);
-                return Result<UserDTO>.Failure(new Error(errorType, 500 , message));
-            }
             return Result<UserDTO>.Success(new UserDTO
             {
                 Id = user.Id,

@@ -12,20 +12,20 @@ public class VoucherService(
     IConfiguration config) : IVoucherService
 {
     // Called by AuthService after registration
-    public async Task ApplyReferralAsync(string referralCode, Guid newUserId, CancellationToken ct)
+    public async Task<Result<bool>> ApplyReferralAsync(string referralCode, Guid newUserId, CancellationToken ct)
     {
         // 1. Find the referrer by their code
         var referrer = await userRepo.GetByReferralCodeAsync(referralCode, ct);
 
         // 2. Silently ignore if code invalid or self-referral
         if (referrer is null || referrer.Id == newUserId)
-            return;
+            return Result<bool>.BusinessRule(422, "Invalid referral code or self-referral.");
 
         // 3. Guard: don't reward twice for the same referral
         var alreadyRewarded = await voucherRepo
             .ExistsForReferrerAsync(referrer.Id, referralCode, ct);
 
-        if (alreadyRewarded) return;
+        if (alreadyRewarded) return Result<bool>.BusinessRule(422, "Referral already applied.");
 
         // 4. Create the 5% voucher for the referrer
         var voucher = new Voucher
@@ -38,67 +38,75 @@ public class VoucherService(
 
         await voucherRepo.AddAsync(voucher, ct);
         await voucherRepo.SaveChangesAsync(ct);
+        return Result<bool>.Success(true);
     }
 
     // Returns the shareable referral link for the user
-    public async Task<string> GetReferralLinkAsync(Guid userId, CancellationToken ct)
+    public async Task<Result<string>> GetReferralLinkAsync(Guid userId, CancellationToken ct)
     {
         var user = await userRepo.GetByIdAsync(userId, ct)
             ?? throw new KeyNotFoundException("User not found.");
 
         var baseUrl = config["App:BaseUrl"];
-        return $"{baseUrl}/register?ref={user.ReferralCode}";
+        return Result<string>.Success($"{baseUrl}/register?ref={user.ReferralCode}");
     }
 
     // Returns all vouchers for a user
-    public async Task<IEnumerable<VoucherDto>> GetMyVouchersAsync(Guid userId, CancellationToken ct)
+    public async Task<Result<IEnumerable<VoucherDto>>> GetMyVouchersAsync(Guid userId, CancellationToken ct)
     {
         var vouchers = await voucherRepo.GetByOwnerIdAsync(userId, ct);
-        return vouchers.Select(v => new VoucherDto(
-            v.Id,
-            v.Code,
-            v.DiscountPercent,
-            v.IsUsed,
-            v.ExpiresAt));
+        var dtos = vouchers.Select(v => new VoucherDto(
+                v.Id,
+                v.Code,
+                v.DiscountPercent,
+                v.IsUsed,
+                v.ExpiresAt
+        ));
+        return Result<IEnumerable<VoucherDto>>.Success(dtos);
     }
 
     // Validates voucher at checkout — returns result instead of throwing
-    public async Task<ApplyVoucherResult> ValidateVoucherAsync(string code, Guid userId, CancellationToken ct)
+    public async Task<Result<ApplyVoucherResult>> ValidateVoucherAsync(string code, Guid userId, CancellationToken ct)
     {
         var voucher = await voucherRepo.GetByCodeAsync(code, ct);
 
         if (voucher is null)
-            return new ApplyVoucherResult(false, 0, "Voucher not found.");
+            return Result<ApplyVoucherResult>.NotFound(404, "Voucher not found.");
 
         if (voucher.OwnerId != userId)
-            return new ApplyVoucherResult(false, 0, "Voucher does not belong to you.");
+            return Result<ApplyVoucherResult>.BusinessRule(422, "Voucher does not belong to you.");
 
         if (voucher.IsUsed)
-            return new ApplyVoucherResult(false, 0, "Voucher has already been used.");
+            return Result<ApplyVoucherResult>.BusinessRule(422, "Voucher has already been used.");
 
         if (voucher.ExpiresAt < DateTime.UtcNow)
-            return new ApplyVoucherResult(false, 0, "Voucher has expired.");
+            return Result<ApplyVoucherResult>.BusinessRule(422, "Voucher has expired.");
 
-        return new ApplyVoucherResult(true, voucher.DiscountPercent, null);
+        return Result<ApplyVoucherResult>.Success(new ApplyVoucherResult(true, voucher.DiscountPercent, null));
     }
 
     // Called by OrderService after order is confirmed
-    public async Task MarkVoucherUsedAsync(string code, CancellationToken ct)
+    public async Task<Result<bool>> MarkVoucherUsedAsync(string code, CancellationToken ct)
     {
-        var voucher = await voucherRepo.GetByCodeAsync(code, ct)
-            ?? throw new KeyNotFoundException("Voucher not found.");
+        var voucher = await voucherRepo.GetByCodeAsync(code, ct);
+        if (voucher is null)
+            return Result<bool>.NotFound(404, "Voucher not found.");
 
         voucher.IsUsed = true;
         await voucherRepo.SaveChangesAsync(ct);
+        return Result<bool>.Success(true);
     }
+    
 
-    public async Task MarkVoucherUnusedAsync(string code, CancellationToken ct)
+    public async Task<Result<bool>> MarkVoucherUnusedAsync(string code, CancellationToken ct)
     {
         var voucher = await voucherRepo.GetByCodeAsync(code, ct);
         if (voucher is not null)
         {
             voucher.IsUsed = false;
             await voucherRepo.SaveChangesAsync(ct);
+            return Result<bool>.Success(true);
         }
+        return Result<bool>.NotFound(404, "Voucher not found.");
     }
 }
