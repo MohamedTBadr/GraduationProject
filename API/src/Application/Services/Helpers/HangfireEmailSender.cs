@@ -15,6 +15,18 @@ namespace Application.Services.Helpers
             return Task.CompletedTask;
         }
 
+        public Task InviteCollaboratorAsync(string email, string eventTitle, string role)
+        {
+            backgroundJobClient.Enqueue<EmailSenderService>(x => x.InviteCollaboratorAsync(email, eventTitle, role));
+            return Task.CompletedTask;
+        }
+
+        public Task SendCongratulatoryEmailAsync(string userEmail, string userFirstName, string eventTitle)
+        {
+            backgroundJobClient.Enqueue<EmailSenderService>(x => x.SendCongratulatoryEmailAsync(userEmail, userFirstName, eventTitle));
+            return Task.CompletedTask;
+        }
+
         public Task SendReportEmailAsync(
             string toEmail,
             string recipientName,

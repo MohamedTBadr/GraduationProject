@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +8,8 @@ namespace Application.Interfaces
 {
     public interface IEmailSender
     {
-      public Task SendEmailAsync(string email, string subject, string htmlMessage);
+        Task SendEmailAsync(string email, string subject, string htmlMessage);
+        Task InviteCollaboratorAsync(string email, string eventTitle, string role);
+        Task SendCongratulatoryEmailAsync(string userEmail, string userFirstName, string eventTitle);
     }
 }

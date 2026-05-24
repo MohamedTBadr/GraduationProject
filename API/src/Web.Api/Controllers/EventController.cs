@@ -244,10 +244,7 @@ Only return JSON. No markdown. No explanation.
                 return Forbid();
 
             var updated = await serviceManager.EventService.UpdateAsync(id, dto, cancellationToken);
-            if (dto.EventStatus == "Completed")
-            {
-                await serviceManager.NotificationService.SendAsync(existing.Value.UserId, "EVENT_COMPLETED", "Event Completed", $"Your event '{existing.Value.Title}' has been marked as completed.");
-            }
+            
             return updated.IsSuccess ? Ok(updated) : updated.ToActionResult();
         }
 

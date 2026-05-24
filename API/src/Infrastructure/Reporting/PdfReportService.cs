@@ -13,6 +13,34 @@ using Application.DTOs.Ai;
 
 namespace Infrastructure.Reporting
 {
+    /// <summary>
+    /// Color tokens matching the design system's CSS custom properties.
+    /// </summary>
+    internal static class DS
+    {
+        // Backgrounds & surfaces
+        public const string Navy = "#1A2540"; // --navy
+        public const string Navy2 = "#243050"; // --navy2
+        public const string Dark = "#0E1627"; // --dark
+        public const string Cream = "#F9F6F0"; // --cream
+        public const string Cream2 = "#F0EBE0"; // --cream2
+        public const string White = "#FFFFFF"; // --white
+        public const string LGray = "#E8E4DC"; // --lgray
+
+        // Text
+        public const string Gray = "#6B7280"; // --gray
+
+        // Accents
+        public const string Gold = "#C9A84C"; // --gold
+        public const string Gold2 = "#E8C97A"; // --gold2
+        public const string Green = "#16A34A"; // --green
+        public const string Amber = "#CA8A04"; // --amber  (replaces red for warnings/risks)
+
+        // Typography — register these via FontManager before generating
+        public const string FontDisplay = "Cormorant Garamond"; // --ff-d (headings)
+        public const string FontBody = "Outfit";             // --ff-b (body / tables)
+    }
+
     public sealed class PdfReportService : IPdfReportService
     {
         public Task<byte[]> RenderAsync(ExecutiveReportDto report, CancellationToken ct = default)
@@ -34,88 +62,128 @@ namespace Infrastructure.Reporting
             return Task.FromResult(bytes);
         }
 
+        // ─────────────────────────────────────────────────────────────
+        //  Cover Page
+        // ─────────────────────────────────────────────────────────────
         private static Action<PageDescriptor> BuildCoverPage(ExecutiveReportDto report) =>
             page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(2, Unit.Centimetre);
-                page.DefaultTextStyle(t => t.FontFamily("Helvetica"));
+                page.Background(DS.Cream);
+                page.DefaultTextStyle(t => t.FontFamily(DS.FontBody));
 
                 page.Content().PaddingVertical(20).Column(col =>
                 {
+                    // Logo mark
                     col.Item().AlignCenter().PaddingTop(40).Width(120).Height(120)
-                        .Background("#1A1A2E")
-                        .Border(4)
-                        .BorderColor("#2D2D44")
+                        .Background(DS.Navy)
+                        .Border(3)
+                        .BorderColor(DS.Gold)
                         .AlignCenter()
                         .AlignMiddle()
-                        .Text("GE")
+                        .Text("Epic Hub")
                         .FontSize(44)
                         .Bold()
-                        .FontColor("#FFFFFF");
+                        .FontFamily(DS.FontDisplay)
+                        .FontColor(DS.Gold2);
 
-                    col.Item().AlignCenter().PaddingTop(28).Text("don't think, Go Epic")
-                        .FontSize(24)
+                    // Tagline
+                    col.Item().AlignCenter().PaddingTop(24)
+                        .Text("Don't Plan, Go Epic")
+                        .FontSize(14)
+                        .FontFamily(DS.FontBody)
+                        .FontColor(DS.Gray)
+                        .LetterSpacing(0.08f);
+
+                    // Main title
+                    col.Item().AlignCenter().PaddingTop(28)
+                        .Text("Executive Report")
+                        .FontSize(36)
                         .Bold()
-                        .FontColor("#1A1A2E");
+                        .FontFamily(DS.FontDisplay)
+                        .FontColor(DS.Navy);
 
-                    col.Item().AlignCenter().PaddingTop(18).Text("Executive Report")
-                        .FontSize(34).Bold().FontColor("#22223B");
-
-                    col.Item().AlignCenter().PaddingTop(8).Text(
-                        report.Scope == ReportScope.Admin
+                    // Subtitle
+                    col.Item().AlignCenter().PaddingTop(8)
+                        .Text(report.Scope == ReportScope.Admin
                             ? "Platform Overview — Admin"
                             : "Vendor Performance Report")
-                        .FontSize(16).FontColor("#4A4A6A");
+                        .FontSize(14)
+                        .FontFamily(DS.FontBody)
+                        .FontColor(DS.Navy2);
 
-                    col.Item().AlignCenter().PaddingTop(8).Text(
-                        $"Generated: {report.GeneratedAt:MMMM dd, yyyy HH:mm} UTC")
-                        .FontSize(11).FontColor("#888888");
+                    // Gold divider
+                    col.Item().PaddingTop(36).PaddingHorizontal(60)
+                        .LineHorizontal(1.5f)
+                        .LineColor(DS.Gold);
 
-                    col.Item().PaddingTop(52).LineHorizontal(1).LineColor("#E2E4EA");
+                    // Date stamp
+                    col.Item().AlignCenter().PaddingTop(16)
+                        .Text($"Generated: {report.GeneratedAt:MMMM dd, yyyy  HH:mm} UTC")
+                        .FontSize(10)
+                        .FontFamily(DS.FontBody)
+                        .FontColor(DS.Gray);
 
-                    col.Item().PaddingTop(18).AlignCenter().Text("Confidential — For internal use only")
-                        .FontSize(10).Italic().FontColor("#AAAAAA");
+                    // Bottom confidential note
+                    col.Item().PaddingTop(48).AlignCenter()
+                        .Text("Confidential — For internal use only")
+                        .FontSize(9)
+                        .Italic()
+                        .FontColor(DS.Gray);
                 });
             };
 
+        // ─────────────────────────────────────────────────────────────
+        //  KPI Page
+        // ─────────────────────────────────────────────────────────────
         private static Action<PageDescriptor> BuildKpiPage(ExecutiveReportDto report) =>
             page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(2, Unit.Centimetre);
+                page.Background(DS.Cream);
+                page.DefaultTextStyle(t => t.FontFamily(DS.FontBody));
 
                 page.Content().Column(col =>
                 {
-                    col.Item().Text("Key Performance Indicators")
-                        .FontSize(22).Bold().FontColor("#1A1A2E");
+                    col.Item().PaddingBottom(4)
+                        .Text("Key Performance Indicators")
+                        .FontSize(26).Bold()
+                        .FontFamily(DS.FontDisplay)
+                        .FontColor(DS.Navy);
 
-                    col.Item().PaddingTop(20).Row(row =>
+                    col.Item().LineHorizontal(1.5f).LineColor(DS.Gold);
+
+                    col.Item().PaddingTop(24).Row(row =>
                     {
                         row.RelativeItem().Component(new KpiCard(
                             "Lifetime Revenue",
                             report.KPIs.LifetimeRevenue.ToString("C"),
-                            "#2ECC71"));
+                            DS.Green));
 
                         row.ConstantItem(16);
 
                         row.RelativeItem().Component(new KpiCard(
                             "This Month",
                             report.KPIs.CurrentMonthRevenue.ToString("C"),
-                            "#3498DB"));
+                            DS.Gold));
 
                         row.ConstantItem(16);
 
                         row.RelativeItem().Component(new KpiCard(
                             "Growth",
                             $"{report.KPIs.GrowthPercentage:+0.00;-0.00}%",
-                            report.KPIs.IsGrowthPositive ? "#2ECC71" : "#E74C3C"));
+                            report.KPIs.IsGrowthPositive ? DS.Green : DS.Amber));
                     });
 
                     if (report.AdminMetrics is not null)
                     {
-                        col.Item().PaddingTop(24).Text("Platform Metrics")
-                            .FontSize(16).Bold();
+                        col.Item().PaddingTop(32)
+                            .Text("Platform Metrics")
+                            .FontSize(18).Bold()
+                            .FontFamily(DS.FontDisplay)
+                            .FontColor(DS.Navy);
 
                         col.Item().PaddingTop(12).Table(t =>
                         {
@@ -125,15 +193,19 @@ namespace Infrastructure.Reporting
                                 c.RelativeColumn();
                             });
 
+                            bool alt = false;
                             void AddRow(string label, string value)
                             {
-                                t.Cell().Padding(8).Text(label).FontSize(11);
-                                t.Cell().Padding(8).Text(value).FontSize(11).Bold();
+                                string bg = alt ? DS.Cream2 : DS.White;
+                                t.Cell().Background(bg).Padding(10)
+                                    .Text(label).FontSize(11).FontColor(DS.Gray);
+                                t.Cell().Background(bg).Padding(10)
+                                    .Text(value).FontSize(11).Bold().FontColor(DS.Navy);
+                                alt = !alt;
                             }
 
                             AddRow("Total Vendors", report.AdminMetrics.TotalVendors.ToString());
-                            AddRow("Verified Vendors",
-                                $"{report.AdminMetrics.VerifiedVendors} ({report.AdminMetrics.VendorVerificationRate}%)");
+                            AddRow("Verified Vendors", $"{report.AdminMetrics.VerifiedVendors} ({report.AdminMetrics.VendorVerificationRate}%)");
                             AddRow("Total Customers", report.AdminMetrics.TotalCustomers.ToString());
                             AddRow("Total Orders", report.AdminMetrics.TotalOrders.ToString());
                         });
@@ -141,18 +213,28 @@ namespace Infrastructure.Reporting
                 });
             };
 
+        // ─────────────────────────────────────────────────────────────
+        //  Revenue History Page
+        // ─────────────────────────────────────────────────────────────
         private static Action<PageDescriptor> BuildRevenueHistoryPage(ExecutiveReportDto report) =>
             page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(2, Unit.Centimetre);
+                page.Background(DS.Cream);
+                page.DefaultTextStyle(t => t.FontFamily(DS.FontBody));
 
                 page.Content().Column(col =>
                 {
-                    col.Item().Text("Revenue History (Last 12 Months)")
-                        .FontSize(22).Bold().FontColor("#1A1A2E");
+                    col.Item().PaddingBottom(4)
+                        .Text("Revenue History (Last 12 Months)")
+                        .FontSize(26).Bold()
+                        .FontFamily(DS.FontDisplay)
+                        .FontColor(DS.Navy);
 
-                    col.Item().PaddingTop(16).Table(t =>
+                    col.Item().LineHorizontal(1.5f).LineColor(DS.Gold);
+
+                    col.Item().PaddingTop(20).Table(t =>
                     {
                         t.ColumnsDefinition(c =>
                         {
@@ -162,57 +244,68 @@ namespace Infrastructure.Reporting
                             c.RelativeColumn(2);
                         });
 
-                        static IContainer HeaderCell(IContainer c) =>
-                            c.Background("#1A1A2E").Padding(8);
+                        // Header style
+                        IContainer HeaderCell(IContainer c) =>
+                            c.Background(DS.Navy).Padding(10);
 
                         t.Header(h =>
                         {
                             h.Cell().Element(HeaderCell).Text("Month")
-                                .FontColor(Colors.White).FontSize(10).Bold();
+                                .FontColor(DS.Gold2).FontSize(10).Bold();
                             h.Cell().Element(HeaderCell).Text("Revenue")
-                                .FontColor(Colors.White).FontSize(10).Bold();
+                                .FontColor(DS.Gold2).FontSize(10).Bold();
                             h.Cell().Element(HeaderCell).Text("Orders")
-                                .FontColor(Colors.White).FontSize(10).Bold();
+                                .FontColor(DS.Gold2).FontSize(10).Bold();
                             h.Cell().Element(HeaderCell).Text("Growth")
-                                .FontColor(Colors.White).FontSize(10).Bold();
+                                .FontColor(DS.Gold2).FontSize(10).Bold();
                         });
 
                         foreach (var (item, index) in report.RevenueHistory
                             .OrderByDescending(x => x.Year).ThenByDescending(x => x.Month)
                             .Select((x, i) => (x, i)))
                         {
-                            string bg = index % 2 == 0 ? "#F8F9FA" : "#FFFFFF";
-                            var growthText = item.GrowthPercentage.HasValue
+                            string bg = index % 2 == 0 ? DS.Cream : DS.White;
+                            string growthText = item.GrowthPercentage.HasValue
                                 ? $"{item.GrowthPercentage:+0.00;-0.00}%"
                                 : "—";
-                            var growthColor = item.GrowthPercentage >= 0 ? "#2ECC71" : "#E74C3C";
+                            string growthColor = item.GrowthPercentage >= 0 ? DS.Green : DS.Amber;
 
-                            t.Cell().Background(bg).Padding(8)
-                                .Text(item.Label).FontSize(10);
-                            t.Cell().Background(bg).Padding(8)
-                                .Text(item.Revenue.ToString("C")).FontSize(10).Bold();
-                            t.Cell().Background(bg).Padding(8)
-                                .Text(item.Orders.ToString()).FontSize(10);
-                            t.Cell().Background(bg).Padding(8)
+                            t.Cell().Background(bg).Padding(9)
+                                .Text(item.Label).FontSize(10).FontColor(DS.Navy2);
+                            t.Cell().Background(bg).Padding(9)
+                                .Text(item.Revenue.ToString("C")).FontSize(10).Bold().FontColor(DS.Navy);
+                            t.Cell().Background(bg).Padding(9)
+                                .Text(item.Orders.ToString()).FontSize(10).FontColor(DS.Gray);
+                            t.Cell().Background(bg).Padding(9)
                                 .Text(growthText).FontSize(10)
-                                .FontColor(item.GrowthPercentage.HasValue ? growthColor : "#888888");
+                                .FontColor(item.GrowthPercentage.HasValue ? growthColor : DS.Gray);
                         }
                     });
                 });
             };
 
+        // ─────────────────────────────────────────────────────────────
+        //  Top Services Page
+        // ─────────────────────────────────────────────────────────────
         private static Action<PageDescriptor> BuildTopServicesPage(ExecutiveReportDto report) =>
             page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(2, Unit.Centimetre);
+                page.Background(DS.Cream);
+                page.DefaultTextStyle(t => t.FontFamily(DS.FontBody));
 
                 page.Content().Column(col =>
                 {
-                    col.Item().Text("Top Services by Revenue")
-                        .FontSize(22).Bold().FontColor("#1A1A2E");
+                    col.Item().PaddingBottom(4)
+                        .Text("Top Services by Revenue")
+                        .FontSize(26).Bold()
+                        .FontFamily(DS.FontDisplay)
+                        .FontColor(DS.Navy);
 
-                    col.Item().PaddingTop(16).Table(t =>
+                    col.Item().LineHorizontal(1.5f).LineColor(DS.Gold);
+
+                    col.Item().PaddingTop(20).Table(t =>
                     {
                         t.ColumnsDefinition(c =>
                         {
@@ -222,60 +315,79 @@ namespace Infrastructure.Reporting
                             c.RelativeColumn(2);
                         });
 
-                        static IContainer HeaderCell(IContainer c) =>
-                            c.Background("#1A1A2E").Padding(8);
+                        IContainer HeaderCell(IContainer c) =>
+                            c.Background(DS.Navy).Padding(10);
 
                         t.Header(h =>
                         {
                             h.Cell().Element(HeaderCell).Text("Service")
-                                .FontColor(Colors.White).FontSize(10).Bold();
+                                .FontColor(DS.Gold2).FontSize(10).Bold();
                             h.Cell().Element(HeaderCell).Text("Revenue")
-                                .FontColor(Colors.White).FontSize(10).Bold();
+                                .FontColor(DS.Gold2).FontSize(10).Bold();
                             h.Cell().Element(HeaderCell).Text("Share")
-                                .FontColor(Colors.White).FontSize(10).Bold();
+                                .FontColor(DS.Gold2).FontSize(10).Bold();
                             h.Cell().Element(HeaderCell).Text("Orders")
-                                .FontColor(Colors.White).FontSize(10).Bold();
+                                .FontColor(DS.Gold2).FontSize(10).Bold();
                         });
 
                         foreach (var (svc, i) in report.TopServices.Select((x, i) => (x, i)))
                         {
-                            string bg = i % 2 == 0 ? "#F8F9FA" : "#FFFFFF";
-                            t.Cell().Background(bg).Padding(8).Text(svc.ServiceName).FontSize(10);
-                            t.Cell().Background(bg).Padding(8).Text(svc.Revenue.ToString("C")).FontSize(10).Bold();
-                            t.Cell().Background(bg).Padding(8).Text($"{svc.RevenueShare}%").FontSize(10);
-                            t.Cell().Background(bg).Padding(8).Text(svc.Orders.ToString()).FontSize(10);
+                            string bg = i % 2 == 0 ? DS.Cream : DS.White;
+                            t.Cell().Background(bg).Padding(9)
+                                .Text(svc.ServiceName).FontSize(10).FontColor(DS.Navy);
+                            t.Cell().Background(bg).Padding(9)
+                                .Text(svc.Revenue.ToString("C")).FontSize(10).Bold().FontColor(DS.Navy);
+                            t.Cell().Background(bg).Padding(9)
+                                .Text($"{svc.RevenueShare}%").FontSize(10).FontColor(DS.Gold);
+                            t.Cell().Background(bg).Padding(9)
+                                .Text(svc.Orders.ToString()).FontSize(10).FontColor(DS.Gray);
                         }
                     });
                 });
             };
 
+        // ─────────────────────────────────────────────────────────────
+        //  AI Insights Page
+        // ─────────────────────────────────────────────────────────────
         private static Action<PageDescriptor> BuildAiInsightsPage(AiInsightResponseDto insights) =>
             page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(2, Unit.Centimetre);
+                page.Background(DS.Cream);
+                page.DefaultTextStyle(t => t.FontFamily(DS.FontBody));
 
                 page.Content().Column(col =>
                 {
-                    col.Item().Text("AI Business Intelligence Analysis")
-                        .FontSize(22).Bold().FontColor("#1A1A2E");
+                    col.Item().PaddingBottom(4)
+                        .Text("AI Business Intelligence Analysis")
+                        .FontSize(26).Bold()
+                        .FontFamily(DS.FontDisplay)
+                        .FontColor(DS.Navy);
 
-                    col.Item().PaddingTop(4).Text($"Model: {insights.ModelUsed} · {insights.GeneratedAt:MMM dd, yyyy HH:mm} UTC")
-                        .FontSize(9).FontColor("#999999").Italic();
+                    col.Item().LineHorizontal(1.5f).LineColor(DS.Gold);
 
-                    col.Item().PaddingTop(16).Component(new InsightSection("Executive Summary", insights.Summary));
-                    col.Item().PaddingTop(12).Component(new BulletSection("Risks", insights.Risks, "#E74C3C"));
-                    col.Item().PaddingTop(12).Component(new BulletSection("Opportunities", insights.Opportunities, "#2ECC71"));
-                    col.Item().PaddingTop(12).Component(new BulletSection("Recommendations", insights.Recommendations, "#3498DB"));
-                    col.Item().PaddingTop(12).Component(new InsightSection("Conclusion", insights.Conclusion));
+                    col.Item().PaddingTop(6)
+                        .Text($"Model: {insights.ModelUsed}  ·  {insights.GeneratedAt:MMM dd, yyyy  HH:mm} UTC")
+                        .FontSize(9).FontColor(DS.Gray).Italic();
 
-                    col.Item().PaddingTop(24).LineHorizontal(1).LineColor("#EEEEEE");
+                    col.Item().PaddingTop(20).Component(new InsightSection("Executive Summary", insights.Summary));
+                    col.Item().PaddingTop(14).Component(new BulletSection("Risks", insights.Risks, DS.Amber));
+                    col.Item().PaddingTop(14).Component(new BulletSection("Opportunities", insights.Opportunities, DS.Green));
+                    col.Item().PaddingTop(14).Component(new BulletSection("Recommendations", insights.Recommendations, DS.Gold));
+                    col.Item().PaddingTop(14).Component(new InsightSection("Conclusion", insights.Conclusion));
+
+                    col.Item().PaddingTop(28).LineHorizontal(1).LineColor(DS.LGray);
                     col.Item().PaddingTop(8)
                         .Text("⚠ AI-generated analysis is for guidance only. All figures are system-calculated and not modified by AI.")
-                        .FontSize(8).FontColor("#AAAAAA").Italic();
+                        .FontSize(8).FontColor(DS.Gray).Italic();
                 });
             };
     }
+
+    // ─────────────────────────────────────────────────────────────────
+    //  Components
+    // ─────────────────────────────────────────────────────────────────
 
     public class KpiCard : IComponent
     {
@@ -293,13 +405,29 @@ namespace Infrastructure.Reporting
         public void Compose(IContainer container)
         {
             container
-                .Border(1).BorderColor("#EEEEEE")
-                .Background("#FAFAFA")
-                .Padding(16)
+                .Border(1)
+                .BorderColor(DS.LGray)
+                .Background(DS.White)
+                .Padding(18)
                 .Column(col =>
                 {
-                    col.Item().Text(_label).FontSize(10).FontColor("#888888");
-                    col.Item().PaddingTop(4).Text(_value).FontSize(22).Bold().FontColor(_accentColor);
+                    col.Item()
+                        .Text(_label)
+                        .FontSize(10)
+                        .FontFamily(DS.FontBody)
+                        .FontColor(DS.Gray);
+
+                    // Gold accent rule
+                    col.Item().PaddingTop(6).PaddingBottom(6)
+                        .LineHorizontal(2)
+                        .LineColor(_accentColor);
+
+                    col.Item()
+                        .Text(_value)
+                        .FontSize(24)
+                        .Bold()
+                        .FontFamily(DS.FontDisplay)
+                        .FontColor(_accentColor);
                 });
         }
     }
@@ -319,8 +447,19 @@ namespace Infrastructure.Reporting
         {
             container.Column(col =>
             {
-                col.Item().Text(_title).FontSize(14).Bold().FontColor("#1A1A2E");
-                col.Item().PaddingTop(4).Text(_body).FontSize(11).LineHeight(1.5f);
+                col.Item()
+                    .Text(_title)
+                    .FontSize(16)
+                    .Bold()
+                    .FontFamily(DS.FontDisplay)
+                    .FontColor(DS.Navy);
+
+                col.Item().PaddingTop(5)
+                    .Text(_body)
+                    .FontSize(11)
+                    .FontFamily(DS.FontBody)
+                    .FontColor(DS.Navy2)
+                    .LineHeight(1.6f);
             });
         }
     }
@@ -342,21 +481,30 @@ namespace Infrastructure.Reporting
         {
             container.Column(col =>
             {
-                col.Item().Text(_title).FontSize(14).Bold().FontColor("#1A1A2E");
+                col.Item()
+                    .Text(_title)
+                    .FontSize(16)
+                    .Bold()
+                    .FontFamily(DS.FontDisplay)
+                    .FontColor(DS.Navy);
 
                 foreach (var item in _items)
                 {
-                    col.Item().PaddingTop(4).Row(row =>
+                    col.Item().PaddingTop(5).Row(row =>
                     {
-                        row.ConstantItem(16)
-                            .Text("●")
+                        row.ConstantItem(18)
+                            .PaddingTop(2)
+                            .Text("◆")
                             .FontColor(_bulletColor)
-                            .FontSize(8);
+                            .FontSize(7);
 
                         row.RelativeItem()
-                            .PaddingLeft(6)
+                            .PaddingLeft(4)
                             .Text(item)
-                            .FontSize(11);
+                            .FontSize(11)
+                            .FontFamily(DS.FontBody)
+                            .FontColor(DS.Navy2)
+                            .LineHeight(1.5f);
                     });
                 }
             });

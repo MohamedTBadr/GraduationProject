@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
+using Application.Services.Helpers;
 using Domain.Contracts;
 using Domain.Entities;
 
@@ -16,6 +17,7 @@ namespace Application.Services
         private readonly IUserRepository _userRepo;
         private readonly IEmailSender _emailSender;
         private readonly NotificationService _notificationService;
+
 
         private static readonly HashSet<string> ValidStatuses =
             new() { "Planned", "Approved", "Completed", "Cancelled" };
@@ -91,10 +93,17 @@ namespace Application.Services
             dto.ApplyTo(entity);
 
             var updated = await _eventRepo.UpdateAsync(entity, cancellationToken);
-
+            if (dto.EventStatus == "Completed")
+            {
+                await _notificationService.SendAsync(updated.UserId, "EVENT_COMPLETED", "Event Completed", $"Your event '{updated.Title}' has been marked as completed.");
+            }
             if (transitionedToCompleted)
             {
-                await SendCongratulatoryEmailAsync(entity, cancellationToken);
+                var user = await _userRepo.GetByIdAsync(entity.UserId, cancellationToken);
+                if (user != null && !string.IsNullOrEmpty(user.Email))
+                {
+                    await _emailSender.SendCongratulatoryEmailAsync(user.Email, user.FirstName, entity.Title);
+                }
             }
 
             return Result<EventResponseDto>.Success(updated.ToResponseDto());
@@ -130,7 +139,11 @@ namespace Application.Services
 
             if (transitionedToCompleted)
             {
-                await SendCongratulatoryEmailAsync(entity, cancellationToken);
+                var user = await _userRepo.GetByIdAsync(entity.UserId, cancellationToken);
+                if (user != null && !string.IsNullOrEmpty(user.Email))
+                {
+                    await _emailSender.SendCongratulatoryEmailAsync(user.Email, user.FirstName, entity.Title);
+                }
             }
 
             return Result<bool>.Success(true);
@@ -229,10 +242,7 @@ namespace Application.Services
             {
                 if (IsEmail(userEmailOrName))
                 {
-                    await _emailSender.SendEmailAsync(
-                        userEmailOrName,
-                        "Invitation to Collaborate",
-                        $"<p>You've been invited to collaborate on the event <strong>{ev.Title}</strong> as a {role}.</p><p>Register now to start planning!</p>");
+                    await _emailSender.InviteCollaboratorAsync(userEmailOrName, ev.Title, role.ToString());
                     return Result<bool>.Success(true);
                 }
                 return Result<bool>.NotFound(404, "User not found.");
@@ -339,32 +349,7 @@ namespace Application.Services
             await _eventRepo.UpdateAsync(ev, cancellationToken);
         }
 
-        private async Task SendCongratulatoryEmailAsync(Event entity, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var user = await _userRepo.GetByIdAsync(entity.UserId, cancellationToken);
-                if (user != null && !string.IsNullOrEmpty(user.Email))
-                {
-                    string subject = $"Congratulations on Your Completed Event: {entity.Title}!";
-                    string htmlBody = $@"
-                        <div style='font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;'>
-                            <h2 style='color: #2E7D32; border-bottom: 2px solid #2E7D32; padding-bottom: 10px;'>Congratulations, {user.FirstName}! 🎉</h2>
-                            <p>We are thrilled to let you know that your event, <strong style='color: #1565C0;'>{entity.Title}</strong>, has been successfully completed!</p>
-                            <p>Thank you for choosing our platform to plan and manage your event. We hope it was a memorable and wonderful experience for you and all of your guests.</p>
-                            <p>We look forward to helping you plan your next amazing experience!</p>
-                            <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;' />
-                            <p style='font-size: 12px; color: #777;'>Best regards,<br/><strong>The Eventora Team</strong></p>
-                        </div>";
-
-                    await _emailSender.SendEmailAsync(user.Email, subject, htmlBody);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to send congratulatory email: {ex.Message}");
-            }
-        }
+        
     }
 
     // ── Mappers ───────────────────────────────────────────────────

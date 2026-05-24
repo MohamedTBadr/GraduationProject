@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -167,7 +167,7 @@ namespace Application.UnitTests.Services
             Assert.Equal("Updated", existingEvent.Title);
             Assert.Equal("Approved", existingEvent.EventStatus);
             _eventRepoMock.Verify(x => x.UpdateAsync(existingEvent, cancellationToken), Times.Once);
-            _emailSenderMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _emailSenderMock.Verify(x => x.SendCongratulatoryEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
@@ -200,7 +200,7 @@ namespace Application.UnitTests.Services
             Assert.True(result.IsSuccess);
             Assert.Equal("Completed", existingEvent.EventStatus);
             _eventRepoMock.Verify(x => x.UpdateAsync(existingEvent, cancellationToken), Times.Once);
-            _emailSenderMock.Verify(x => x.SendEmailAsync(user.Email, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _emailSenderMock.Verify(x => x.SendCongratulatoryEmailAsync(user.Email, user.FirstName, existingEvent.Title), Times.Once);
         }
 
         [Fact]
@@ -285,7 +285,7 @@ namespace Application.UnitTests.Services
             Assert.Equal(status, existingEvent.EventStatus);
             _eventRepoMock.Verify(x => x.UpdateAsync(existingEvent, cancellationToken), Times.Once);
             _notificationRepoMock.Verify(x => x.AddAsync(It.Is<Notification>(n => n.UserId == existingEvent.UserId && n.Title == "Event Status Updated"), It.IsAny<CancellationToken>()), Times.Once);
-            _emailSenderMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _emailSenderMock.Verify(x => x.SendCongratulatoryEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
@@ -309,7 +309,7 @@ namespace Application.UnitTests.Services
             Assert.Equal(status, existingEvent.EventStatus);
             _eventRepoMock.Verify(x => x.UpdateAsync(existingEvent, cancellationToken), Times.Once);
             _notificationRepoMock.Verify(x => x.AddAsync(It.Is<Notification>(n => n.UserId == existingEvent.UserId && n.Title == "Event Status Updated"), It.IsAny<CancellationToken>()), Times.Once);
-            _emailSenderMock.Verify(x => x.SendEmailAsync(user.Email, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _emailSenderMock.Verify(x => x.SendCongratulatoryEmailAsync(user.Email, user.FirstName, existingEvent.Title), Times.Once);
         }
     }
 }
