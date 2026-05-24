@@ -12,17 +12,19 @@ namespace Application.Services
     {
         // ─── Create ───────────────────────────────────────────────────────────────
 
-        public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request, CancellationToken ct )
+        public async Task<Result<OrderResponse>> CreateOrderAsync(CreateOrderRequest request, CancellationToken ct )
         {
             if (request.ShippingAddress is null)
-                throw new ArgumentException("Shipping address is required.", nameof(request));
+                return Result<OrderResponse>.Validation(400, "Shipping address is required.");
 
             // 1. Fetch event and validate ownership (IDOR Fix)
-            var eventWithItems = await orderRepo.GetEventWithItemsAsync(request.EventId, ct)
-                ?? throw new KeyNotFoundException($"Event {request.EventId} was not found.");
+            var eventWithItems = await orderRepo.GetEventWithItemsAsync(request.EventId, ct);
+                
+            if(eventWithItems is null)
+                return Result<OrderResponse>.NotFound(404, $"Event {request.EventId} was not found.");
 
             if (eventWithItems.UserId != request.UserId)
-                throw new UnauthorizedAccessException("You are not authorized to create an order for this event.");
+                return Result<OrderResponse>.Unauthorized(403, "You are not authorized to create an order for this event.");
 
             // 2. Calculate base amount in-memory (Performance Optimization)
             var amount = eventWithItems.EventItems?.Sum(ei => ei.Quantity * ei.Price) ?? 0;
@@ -33,10 +35,10 @@ namespace Application.Services
                 var voucherResult = await voucherService.ValidateVoucherAsync(
                     request.VoucherCode, request.UserId, ct);
 
-                if (!voucherResult.IsValid)
-                    throw new InvalidOperationException(voucherResult.ErrorMessage);
+                if (!voucherResult.Value.IsValid)
+                    return Result<OrderResponse>.InvalidOperation(400, "Invalid voucher code.");
 
-                var discount = amount * (voucherResult.DiscountPercent / 100);
+                var discount = amount * (voucherResult.Value.DiscountPercent / 100);
                 amount -= discount;
 
                 await voucherService.MarkVoucherUsedAsync(request.VoucherCode, ct);
@@ -85,40 +87,43 @@ namespace Application.Services
                 }
             }
 
-            return MapToResponse(order);
+           var result = MapToResponse(order);
+           return Result<OrderResponse>.Success(result);
         }
 
         // ─── Read ─────────────────────────────────────────────────────────────────
 
-        public async Task<OrderResponse> GetOrderByIdAsync(Guid id, CancellationToken ct )
+        public async Task<Result<OrderResponse>> GetOrderByIdAsync(Guid id, CancellationToken ct )
         {
-            var order = await orderRepo.GetByIdWithItemsAsync(id, ct)
-                ?? throw new KeyNotFoundException($"Order {id} not found.");
-            return MapToResponse(order);
+            var order = await orderRepo.GetByIdWithItemsAsync(id, ct);
+                if (order == null)
+            { return Result<OrderResponse>.NotFound(404, $"Order {id} not found."); }
+
+            return Result<OrderResponse>.Success(MapToResponse(order));
         }
 
-        public async Task<IEnumerable<OrderResponse>> GetAllOrdersAsync(CancellationToken ct )
+        public async Task<Result<IEnumerable<OrderResponse>>> GetAllOrdersAsync(CancellationToken ct )
         {
             var orders = await orderRepo.GetAllAsync(ct);
-            return orders.Select(MapToResponse);
+            return Result<IEnumerable<OrderResponse>>.Success(orders.Select(MapToResponse));
         }
 
-        public async Task<IEnumerable<OrderResponse>> GetOrdersByUserIdAsync(Guid userId, CancellationToken ct )
+        public async Task<Result<IEnumerable<OrderResponse>>> GetOrdersByUserIdAsync(Guid userId, CancellationToken ct )
         {
             var orders = await orderRepo.GetByUserIdAsync(userId, ct);
-            return orders.Select(MapToResponse);
+            return Result<IEnumerable<OrderResponse>>.Success(orders.Select(MapToResponse));
         }
 
         // ─── Update ───────────────────────────────────────────────────────────────
 
-        public async Task<OrderResponse> UpdatePaymentStatusAsync(Guid id, UpdateOrderStatusRequest request, CancellationToken ct )
+        public async Task<Result<OrderResponse>> UpdatePaymentStatusAsync(Guid id, UpdateOrderStatusRequest request, CancellationToken ct )
         {
             var order = await orderRepo.GetByIdWithItemsAsync(id, ct)
                 ?? throw new KeyNotFoundException($"Order {id} not found.");
 
             // Idempotency check: if status is already the same, skip processing
             if (order.PaymentStatus.Equals(request.PaymentStatus, StringComparison.OrdinalIgnoreCase))
-                return MapToResponse(order);
+                return Result<OrderResponse>.Success(MapToResponse(order));
 
             order.PaymentStatus = request.PaymentStatus;
             await orderRepo.UpdateAsync(order, ct);
@@ -144,28 +149,32 @@ namespace Application.Services
                     await notificationService.SendAsync(order.UserId, type.Value.ToString(), title!, msg!);
             }
 
-            return MapToResponse(order);
+            return Result<OrderResponse>.Success(MapToResponse(order));
         }
 
-        public async Task<OrderResponse> SetPaymentIntentAsync(Guid id, string paymentIntentId, CancellationToken ct )
+        public async Task<Result<OrderResponse>> SetPaymentIntentAsync(Guid id, string paymentIntentId, CancellationToken ct )
         {
-            var order = await orderRepo.GetByIdWithItemsAsync(id, ct)
-                ?? throw new KeyNotFoundException($"Order {id} not found.");
+            var order = await orderRepo.GetByIdWithItemsAsync(id, ct);
 
+
+
+                if (order == null) {
+                return Result<OrderResponse>.NotFound(404, $"Order {id} not found.");
+            }
             order.PaymentIntentId = paymentIntentId;
             await orderRepo.UpdateAsync(order, ct);
-            return MapToResponse(order);
+            return Result<OrderResponse>.Success(MapToResponse(order));
         }
 
         // ─── Cancel / Delete ──────────────────────────────────────────────────────
 
-        public async Task CancelOrderAsync(Guid id, CancellationToken ct)
+        public async Task<Result<bool>> CancelOrderAsync(Guid id, CancellationToken ct)
         {
             var order = await orderRepo.GetByIdAsync(id, ct)
                 ?? throw new KeyNotFoundException($"Order {id} not found.");
 
             if (order.PaymentStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
-                return;
+                return Result<bool>.Success(true);
 
             order.PaymentStatus = "Cancelled";
             await orderRepo.UpdateAsync(order, ct);
@@ -182,14 +191,17 @@ namespace Application.Services
                     nameof(NotificationType.ORDER_CANCELLED),
                     "Order Cancelled",
                     $"Your order #{order.Id} has been cancelled.");
+
+            return Result<bool>.Success(true);
         }
 
-        public async Task DeleteOrderAsync(Guid id, CancellationToken ct )
+        public async Task<Result<bool>> DeleteOrderAsync(Guid id, CancellationToken ct )
         {
             if (!await orderRepo.ExistsAsync(id, ct))
                 throw new KeyNotFoundException($"Order {id} not found.");
 
             await orderRepo.DeleteAsync(id, ct);
+            return Result<bool>.Success(true);
         }
 
         // ─── Mapping ──────────────────────────────────────────────────────────────

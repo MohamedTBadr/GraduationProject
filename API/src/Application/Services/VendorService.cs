@@ -107,7 +107,7 @@ namespace Application.Services
         {
             var user = new ApplicationUser
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 UserName = request.Name,

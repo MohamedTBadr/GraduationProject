@@ -328,7 +328,7 @@ namespace Application.Services
                 audience: jwt.Audience,
                 claims: claims,
                 // Access Token duration from configuration
-                expires: DateTime.UtcNow.AddMinutes(jwt.DurationDays * 8),
+                expires: DateTime.UtcNow.AddHours(jwt.AccessTokenDurationDays),
                 signingCredentials: creds
             );
 
@@ -354,8 +354,9 @@ namespace Application.Services
         /// </summary>
         private async Task SetRefreshTokenAsync(ApplicationUser user, string token, int durationDays, CancellationToken cancellationToken)
         {
+            var jwt = options.Value;
             user.RefreshToken = token;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(durationDays);
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(jwt.RefreshTokenDurationDays);
             await userRepository.UpdateAsync(user, cancellationToken);
         }
 

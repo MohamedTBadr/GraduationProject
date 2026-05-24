@@ -40,13 +40,13 @@ public class VoucherController(IServiceManager serviceManager) : APIController
         var userId = GetUserIdFromToken();
         var result = await serviceManager.VoucherService.ValidateVoucherAsync(code, userId, ct);
 
-        if (!result.IsValid)
-            return BadRequest(new { message = result.ErrorMessage });
+        if (!result.Value.IsValid)
+            return BadRequest(new { message = result.Value.ErrorMessage });
 
         return Ok(new
         {
-            result.DiscountPercent,
-            message = $"{result.DiscountPercent}% discount will be applied."
+            result.Value.DiscountPercent,
+            message = $"{result.Value.DiscountPercent}% discount will be applied."
         });
     }
 }

@@ -4,10 +4,10 @@ namespace Application.Interfaces.Services;
 
 public interface IVoucherService
 {
-    Task<string> GetReferralLinkAsync(Guid userId, CancellationToken ct);
-    Task ApplyReferralAsync(string referralCode, Guid newUserId, CancellationToken ct);
-    Task<IEnumerable<VoucherDto>> GetMyVouchersAsync(Guid userId, CancellationToken ct);
-    Task<ApplyVoucherResult> ValidateVoucherAsync(string code, Guid userId, CancellationToken ct);
-    Task MarkVoucherUsedAsync(string code, CancellationToken ct);
-    Task MarkVoucherUnusedAsync(string code, CancellationToken ct);
+    Task<Result<string>> GetReferralLinkAsync(Guid userId, CancellationToken ct);
+    Task<Result<bool>> ApplyReferralAsync(string referralCode, Guid newUserId, CancellationToken ct);
+    Task<Result<IEnumerable<VoucherDto>>> GetMyVouchersAsync(Guid userId, CancellationToken ct);
+    Task<Result<ApplyVoucherResult>> ValidateVoucherAsync(string code, Guid userId, CancellationToken ct);
+    Task<Result<bool>> MarkVoucherUsedAsync(string code, CancellationToken ct);
+    Task<Result<bool>> MarkVoucherUnusedAsync(string code, CancellationToken ct);
 }

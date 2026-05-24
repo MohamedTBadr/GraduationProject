@@ -25,7 +25,7 @@ namespace API.Controllers
             var userId = GetUserIdFromToken();
             request = request with { UserId = userId };
             var order = await serviceManager.OrderService.CreateOrderAsync(request, ct);
-            return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
+            return order.IsSuccess ? NoContent() : order.ToActionResult();
         }
 
         // GET api/orders
@@ -35,7 +35,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var orders = await serviceManager.OrderService.GetAllOrdersAsync(ct);
-            return Ok(orders);
+            return orders.IsSuccess ? Ok(orders.Value) : orders.ToActionResult();
         }
 
         // GET api/orders/{id}
@@ -44,18 +44,13 @@ namespace API.Controllers
         [HybridCache(300, "orders", "orders/{id}", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
-            try
-            {
+           
                 var order = await serviceManager.OrderService.GetOrderByIdAsync(id, ct);
-                if (!IsAdminOrOwner(order.UserId))
+                if (!IsAdminOrOwner(order.Value.UserId))
                     return Forbid();
 
-                return Ok(order);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+                return order.IsSuccess ? Ok(order.Value) : order.ToActionResult();
+            
         }
 
         // GET api/orders/user/{userId}
@@ -68,7 +63,7 @@ namespace API.Controllers
                 return Forbid();
 
             var orders = await serviceManager.OrderService.GetOrdersByUserIdAsync(userId, ct);
-            return Ok(orders);
+            return orders.IsSuccess ? Ok(orders.Value) : orders.ToActionResult();
         }
 
         // PATCH api/orders/{id}/payment-status
@@ -81,15 +76,10 @@ namespace API.Controllers
             [FromBody] UpdateOrderStatusRequest request,
             CancellationToken ct)
         {
-            try
-            {
+         
                 var updated = await serviceManager.OrderService.UpdatePaymentStatusAsync(id, request, ct);
-                return Ok(updated);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+                return updated.IsSuccess ? Ok(updated.Value) : updated.ToActionResult();
+           
         }
 
         // PATCH api/orders/{id}/payment-intent
@@ -102,15 +92,10 @@ namespace API.Controllers
             [FromQuery] string paymentIntentId,
             CancellationToken ct)
         {
-            try
-            {
+
                 var updated = await serviceManager.OrderService.SetPaymentIntentAsync(id, paymentIntentId, ct);
-                return Ok(updated);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+                return updated.IsSuccess ? Ok(updated.Value) : updated.ToActionResult();
+            
         }
 
         // POST api/orders/{id}/cancel
@@ -120,23 +105,18 @@ namespace API.Controllers
         [InvalidateCache("orders", "orders/{id}", "dashboard-stats")]
         public async Task<IActionResult> Cancel(Guid id, CancellationToken ct)
         {
-            try
-            {
+
                 var order = await serviceManager.OrderService.GetOrderByIdAsync(id, ct);
-                if (!IsAdminOrOwner(order.UserId))
+                if (!IsAdminOrOwner(order.Value.UserId))
                     return Forbid();
 
                 // Prevent clients from unilaterally cancelling Paid or Completed orders
-                if (!IsAdmin() && order.PaymentStatus is "Paid" or "Completed")
+                if (!IsAdmin() && order.Value.PaymentStatus is "Paid" or "Completed")
                     return BadRequest(new { message = "Cannot cancel an order that has already been paid or completed." });
 
-                await serviceManager.OrderService.CancelOrderAsync(id, ct);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+               var result = await serviceManager.OrderService.CancelOrderAsync(id, ct);
+                return result.IsSuccess ? NoContent() : result.ToActionResult();
+            
         }
 
         // DELETE api/orders/{id}
@@ -146,15 +126,10 @@ namespace API.Controllers
         [InvalidateCache("orders", "orders/{id}", "dashboard-stats")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
-            try
-            {
-                await serviceManager.OrderService.DeleteOrderAsync(id, ct);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+           
+                var result = await serviceManager.OrderService.DeleteOrderAsync(id, ct);
+                return result.IsSuccess ? NoContent() : result.ToActionResult();
+            
         }
     }
 }

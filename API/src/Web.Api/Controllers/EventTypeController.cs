@@ -59,7 +59,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
             var success = await serviceManager.EventTypeService.DeleteAsync(id, ct);
-            return success ? NoContent() : NotFound();
+            return success.IsSuccess ? NoContent() : success.ToActionResult();
         }
     }
 }

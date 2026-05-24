@@ -16,7 +16,7 @@ namespace Application.Services
             _repository = repository;
         }
 
-        public async Task AddAsync(CreateCompanyInquiryDto dto, CancellationToken ct)
+        public async Task<Result<string>> AddAsync(CreateCompanyInquiryDto dto, CancellationToken ct)
         {
             var entity = new CorporationInquiry
             {
@@ -34,9 +34,10 @@ namespace Application.Services
             };
 
             await _repository.AddCompanyInquiryAsync(entity, ct);
+            return Result<string>.Success("Company inquiry submitted successfully");
         }
 
-        public async Task UpdateAsync(UpdateCompanyInquiryDto dto, CancellationToken ct)
+        public async Task<Result<string>> UpdateAsync(UpdateCompanyInquiryDto dto, CancellationToken ct)
         {
             var entity = new CorporationInquiry
             {
@@ -54,18 +55,26 @@ namespace Application.Services
             };
 
             await _repository.UpdateCompanyInquiryAsync(entity, ct);
+            return Result<string>.Success("Company inquiry updated successfully");
         }
 
-        public async Task DeleteAsync(Guid id, CancellationToken ct)
+        public async Task<Result<string>> DeleteAsync(Guid id, CancellationToken ct)
         {
             await _repository.DeleteCompanyInquiryAsync(id, ct);
+
+            return Result<string>.Success("Company inquiry deleted successfully");
         }
 
         public async Task<CompanyInquiryDto> GetByIdAsync(Guid id, CancellationToken ct)
         {
             var entity = await _repository.GetCompanyInquiryByIdAsync(id, ct);
+            var dto = MapToDto(entity);
+            if(dto == null)
+            {
+                return Result<CompanyInquiryDto>.NotFound(404, "Company inquiry not found").Value;
+            }
+            return Result<CompanyInquiryDto>.Success(dto).Value;
 
-            return MapToDto(entity);
         }
 
         public async Task<PaginatedResponse<CompanyInquiryDto>> GetAllAsync(PaginatedRequest request, CancellationToken ct)
@@ -74,12 +83,15 @@ namespace Application.Services
 
             var dtoItems = result.Items.Select(MapToDto);
 
-            return new PaginatedResponse<CompanyInquiryDto>(
+            var response = new PaginatedResponse<CompanyInquiryDto>(
                 dtoItems,
                 result.TotalCount,
                 result.PageNumber,
                 result.PageSize
             );
+            var resultPattern= Result<PaginatedResponse<CompanyInquiryDto>>.Success(response);
+
+            return resultPattern.Value;
         }
 
         private static CompanyInquiryDto MapToDto(CorporationInquiry entity)
