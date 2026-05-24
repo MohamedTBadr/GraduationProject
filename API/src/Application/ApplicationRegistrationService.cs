@@ -104,16 +104,13 @@ namespace Application
             return Services;
         }
 
-        public static void ConfigureJWT(this IServiceCollection Services, IConfiguration configuration)
+        public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
         {
-            var jwt = configuration.GetSection("JWTOptions").Get<JWTOptions>();
-                       // ❌ Missing this is a very common cause of 401
-            Services.AddAuthentication(options =>
+            services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; // ✅ Add this
-
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -128,25 +125,42 @@ namespace Application
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(configuration["JWTOptions:SecretKey"]!))
                 };
-                // ✅ Add this block
+
+                // ONLY for local dev if needed
+                options.RequireHttpsMetadata = false;
+
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
                         var accessToken = context.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
+                        var path = context.HttpContext.Request.Path.Value ?? "";
 
+                        // safer + case-insensitive + broader match
                         if (!string.IsNullOrEmpty(accessToken) &&
-                            (path.StartsWithSegments("/Hub/chatHub") || path.StartsWithSegments("/api/notifications/stream")))
+                            (path.Contains("chathub", StringComparison.OrdinalIgnoreCase) ||
+                             path.Contains("notifications/stream", StringComparison.OrdinalIgnoreCase)))
                         {
                             context.Token = accessToken;
                         }
+
+                        return Task.CompletedTask;
+                    },
+
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"JWT FAILED: {context.Exception.Message} | PATH: {context.Request.Path}");
+                        return Task.CompletedTask;
+                    },
+
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine($"JWT OK: {context.Request.Path}");
                         return Task.CompletedTask;
                     }
                 };
             });
         }
 
-    
     }
 }
