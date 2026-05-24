@@ -202,6 +202,7 @@ namespace Application.Services
                             "">
                           <a href=""{callbackUrl}"" style=""color: #c07c3a; text-decoration: none; font-weight: 600"">
                             Reset Password
+                          </a>
                         </span>
                     </div>
                     <p
@@ -328,7 +329,7 @@ namespace Application.Services
                 audience: jwt.Audience,
                 claims: claims,
                 // Access Token duration from configuration
-                expires: DateTime.UtcNow.AddHours(jwt.AccessTokenDurationDays),
+                expires: DateTime.UtcNow.AddDays(jwt.AccessTokenDurationDays),
                 signingCredentials: creds
             );
 

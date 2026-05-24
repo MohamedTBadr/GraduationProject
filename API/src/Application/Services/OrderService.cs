@@ -118,8 +118,9 @@ namespace Application.Services
 
         public async Task<Result<OrderResponse>> UpdatePaymentStatusAsync(Guid id, UpdateOrderStatusRequest request, CancellationToken ct )
         {
-            var order = await orderRepo.GetByIdWithItemsAsync(id, ct)
-                ?? throw new KeyNotFoundException($"Order {id} not found.");
+            var order = await orderRepo.GetByIdWithItemsAsync(id, ct);
+            if (order is null)
+                return Result<OrderResponse>.NotFound(404, $"Order {id} not found.");
 
             // Idempotency check: if status is already the same, skip processing
             if (order.PaymentStatus.Equals(request.PaymentStatus, StringComparison.OrdinalIgnoreCase))
@@ -170,8 +171,9 @@ namespace Application.Services
 
         public async Task<Result<bool>> CancelOrderAsync(Guid id, CancellationToken ct)
         {
-            var order = await orderRepo.GetByIdAsync(id, ct)
-                ?? throw new KeyNotFoundException($"Order {id} not found.");
+            var order = await orderRepo.GetByIdAsync(id, ct);
+            if (order is null)
+                return Result<bool>.NotFound(404, $"Order {id} not found.");
 
             if (order.PaymentStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
                 return Result<bool>.Success(true);
@@ -198,7 +200,7 @@ namespace Application.Services
         public async Task<Result<bool>> DeleteOrderAsync(Guid id, CancellationToken ct )
         {
             if (!await orderRepo.ExistsAsync(id, ct))
-                throw new KeyNotFoundException($"Order {id} not found.");
+                return Result<bool>.NotFound(404, $"Order {id} not found.");
 
             await orderRepo.DeleteAsync(id, ct);
             return Result<bool>.Success(true);

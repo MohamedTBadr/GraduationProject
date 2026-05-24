@@ -10,6 +10,7 @@ namespace Domain.Contracts {
         Task<Vendor?> GetVendorByIdAsync(Guid id, CancellationToken cancellationToken);
         Task<PaginatedResponse<Vendor>> GetVendorsAsync(PaginatedRequest paginatedRequest, Expression<Func<Vendor, bool>> visibilityFilter, CancellationToken cancellationToken);
         Task UpdateVendorAsync(Vendor vendor, CancellationToken cancellationToken);
+        Task AddServiceRatingAsync(ServiceRating rating, CancellationToken cancellationToken);
         Task<List<ServiceType>> GetServiceTypesByIdsAsync(List<Guid> ids, CancellationToken cancellationToken);
         Task<List<Vendor>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken);
     }

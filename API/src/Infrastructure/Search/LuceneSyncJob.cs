@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Hangfire;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,7 @@ namespace Infrastructure.Search
             _logger = logger;
         }
 
+        [DisableConcurrentExecution(timeoutInSeconds: 3600)]
         public async Task SyncIndexAsync()
         {
             _logger.LogInformation("Starting Lucene index synchronization...");
@@ -76,6 +78,7 @@ namespace Infrastructure.Search
                     .Include(u => u.Orders)
                         .ThenInclude(o => o.Event)
                             .ThenInclude(e => e.EventItems)
+                                .ThenInclude(ei => ei.Service)
                     .AsNoTracking()
                     .Skip(userSkip)
                     .Take(batchSize)

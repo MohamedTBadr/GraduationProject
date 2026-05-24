@@ -41,8 +41,6 @@ namespace Web.Api
 
         public async static Task<IServiceCollection> AddWebsRegistrationServices(IServiceCollection Services, IConfiguration configuration)
         {
-            //Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
-
             Services.AddControllers(options =>
             {
                 options.Filters.Add<ResultFilter>(); // ← applies to all controllers
@@ -78,7 +76,7 @@ namespace Web.Api
                 // Your Redis connection string should be in appsettings.json
                 // e.g. "Redis": "localhost:6379"
                 options.Configuration = configuration.GetConnectionString("Redis");
-                options.InstanceName = "MyApp_"; // optional prefix for Redis keys
+                options.InstanceName = "EpicHub_";
             });
 
             // 2) Create Idempotency options and register the core with them
@@ -156,10 +154,10 @@ namespace Web.Api
                 options.User.RequireUniqueEmail = true;
 
                 // Optional: tweak password settings
-                options.Password.RequireDigit = false;
-                options.Password.RequireUppercase = false;
+                options.Password.RequireDigit = true;
+                options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredLength = 6;
+                options.Password.RequiredLength = 8;
                 
             });
 
@@ -211,11 +209,6 @@ namespace Web.Api
                 };
             });
 
-            Services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = configuration.GetConnectionString("Redis");
-                options.InstanceName = "HybridCache_";
-            });
             #endregion
 
 
@@ -226,13 +219,17 @@ namespace Web.Api
             {
                 options.EnableForHttps = true; // compress HTTPS responses
                 options.Providers.Add<GzipCompressionProvider>();
-                // options.Providers.Add<BrotliCompressionProvider>(); // optional, more efficient
+                options.Providers.Add<BrotliCompressionProvider>();
             });
 
             // Configure compression levels
             Services.Configure<GzipCompressionProviderOptions>(options =>
             {
                 options.Level = CompressionLevel.Fastest; // or Optimal
+            });
+            Services.Configure<BrotliCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Fastest;
             });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             Services.AddEndpointsApiExplorer();
@@ -268,7 +265,6 @@ namespace Web.Api
 
             #endregion
             Services.AddScoped<IChatNotificationService, ChatNotificationService>();
-            Services.AddScoped<IChatService, ChatService>();
             Services.AddSingleton<
     IAuthorizationMiddlewareResultHandler,
     CustomAuthorizationResultHandler>();

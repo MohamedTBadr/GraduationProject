@@ -8,6 +8,7 @@ namespace Domain.Contracts
         Task<Order?> GetByIdWithItemsAsync(Guid id, CancellationToken ct );
         Task<IEnumerable<Order>> GetAllAsync(CancellationToken ct );
         Task<IEnumerable<Order>> GetByUserIdAsync(Guid userId, CancellationToken ct );
+        Task<IEnumerable<Order>> GetByUserIdsAsync(IEnumerable<Guid> userIds, CancellationToken ct);
         Task<Order?> GetByPaymentIntentIdAsync(string paymentIntentId, CancellationToken ct );
         Task<decimal> GetOrderAmountAsync(Guid id, CancellationToken ct );
         Task AddAsync(Order order, CancellationToken ct );

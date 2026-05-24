@@ -62,7 +62,8 @@ namespace Web.Api.Controllers
             return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
         }
 
-        [HttpPost("CheckIfEmailExists")]
+        [HttpGet("CheckIfEmailExists")]
+        [AllowAnonymous]
         public async Task<IActionResult> CheckEmailExists([Required][FromQuery] string email,CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -79,7 +80,7 @@ namespace Web.Api.Controllers
                 throw new BadRequestException(errors);
             }
 
-            return Ok(await ServiceManager.AuthenticationService.CheckIfEmailExists(email, cancellationToken));
+            return Accepted(Result<string>.Success("If the email can be used, registration can continue."));
         }
 
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -123,7 +124,7 @@ namespace Web.Api.Controllers
                 throw new BadRequestException(errors);
             }
             await ServiceManager.AuthenticationService.ForgetPassword(email, cancellationToken);
-            var result = Result<string>.Success("Email Has Send Succussfully");
+            var result = Result<string>.Success("Password reset email has been sent successfully.");
             return Accepted(result);
 
 
@@ -142,7 +143,7 @@ namespace Web.Api.Controllers
             }
             await ServiceManager.AuthenticationService.ResetPassword(request, cancellationToken);
 
-            var result = Result<string>.Success("Email Has Send Succussfully");
+            var result = Result<string>.Success("Password has been reset successfully.");
 
             return Ok(result);
         }

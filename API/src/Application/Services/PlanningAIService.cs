@@ -16,13 +16,14 @@ namespace Application.Services
 
         public async Task<Result<BudgetAllocationResponse>> GetBudgetAllocationAsync(decimal totalBudget, string eventTypeName)
         {
-            var prompt = $@"As an expert event planner, provide a budget allocation for a {eventTypeName} with a total budget of {totalBudget}.
+            var safeEventTypeName = SanitizeForPrompt(eventTypeName);
+            var prompt = $@"As an expert event planner, provide a budget allocation for a {safeEventTypeName} with a total budget of {totalBudget}.
 Break it down into logical categories like Venue, Catering, Decor, Photography, Entertainment, and Miscellaneous.
 
 Return ONLY a JSON object with this structure:
 {{
     ""TotalBudget"": {totalBudget},
-    ""EventType"": ""{eventTypeName}"",
+    ""EventType"": ""{safeEventTypeName}"",
     ""Categories"": [
         {{ ""Name"": ""Category Name"", ""Amount"": 0, ""Percentage"": 0, ""Description"": ""Brief explanation"" }}
     ],
@@ -49,21 +50,24 @@ Return ONLY a JSON object with this structure:
             var ev = await eventRepository.GetByIdWithItemsAsync(eventId, default);
             if (ev == null) return Result<EventTimelineResponse>.NotFound(404, "Event not found.");
 
-            var bookedItems = string.Join(", ", ev.EventItems.Select(i => $"{i.Service.Name} ({i.ItemStatus})"));
-            var eventType = ev.EventType?.Name ?? "General Event";
+            var bookedItems = string.Join(", ", ev.EventItems.Select(i => $"{SanitizeForPrompt(i.Service.Name)} ({SanitizeForPrompt(i.ItemStatus)})"));
+            var eventType = SanitizeForPrompt(ev.EventType?.Name ?? "General Event");
+            var eventTitle = SanitizeForPrompt(ev.Title);
+            var locationCity = SanitizeForPrompt(ev.Location?.City ?? string.Empty);
+            var locationState = SanitizeForPrompt(ev.Location?.State ?? string.Empty);
 
             var prompt = $@"
-                Create a minute-by-minute timeline for a {eventType} titled '{ev.Title}'.
+                Create a minute-by-minute timeline for a {eventType} titled '{eventTitle}'.
                 The event date is {ev.EventDate:MMMM dd, yyyy}.
                 Booked services/items: {bookedItems}.
-                Location: {ev.Location?.City}, {ev.Location?.State}.
+                Location: {locationCity}, {locationState}.
                 
                 Provide a structured schedule starting from setup to wrap-up.
                 
                 Return ONLY a JSON object with this structure:
                 {{
                     ""EventId"": ""{eventId}"",
-                    ""EventTitle"": ""{ev.Title}"",
+                    ""EventTitle"": ""{eventTitle}"",
                     ""Timeline"": [
                         {{ ""Time"": ""HH:MM AM/PM"", ""Activity"": ""Description"", ""Duration"": ""X mins/hours"", ""Importance"": ""High/Medium/Low"" }}
                     ],
@@ -111,7 +115,7 @@ Return ONLY a JSON object with this structure:
             {
                 // ── Cold Start: No booking history ────────────────────────────────────
                 prompt = $@"
-            The user is planning a {currentEvent.EventType?.Name ?? "Event"} with a total budget of {currentEvent.TotalBudget}.
+            The user is planning a {SanitizeForPrompt(currentEvent.EventType?.Name ?? "Event")} with a total budget of {currentEvent.TotalBudget}.
             They have no prior booking history on our platform.
             Based on standard industry practices for this type of event, recommend 3 essential service categories they should consider booking.
 
@@ -131,38 +135,35 @@ Return ONLY a JSON object with this structure:
             else
             {
                 // ── Collaborative Filtering ───────────────────────────────────────────
-                var similarUserIds = await searchService.SearchSimilarUsersAsync(bookedVendorIdsStr, bookedCategoriesStr, 10);
+                var similarUserIds = (await searchService.SearchSimilarUsersAsync(bookedVendorIdsStr, bookedCategoriesStr, 10))
+                    .Where(sUserId => sUserId != userId)
+                    .Distinct()
+                    .ToList();
 
                 var candidateServices = new List<string>();
 
                 if (similarUserIds.Any())
                 {
-                    foreach (var sUserId in similarUserIds)
+                    var similarUserOrders = await orderRepository.GetByUserIdsAsync(similarUserIds, default);
+                    var similarItems = similarUserOrders
+                        .SelectMany(o => o.Event?.EventItems ?? new List<EventItem>())
+                        .ToList();
+
+                    foreach (var item in similarItems)
                     {
-                        if (sUserId == userId) continue;
+                        var alreadyBooked = allBookedItems.Any(b =>
+                            b.Service.Id == item.Service.Id);
 
-                        var sUserOrders = await orderRepository.GetByUserIdAsync(sUserId, default);
-                        var sItems = sUserOrders
-                            .SelectMany(o => o.Event?.EventItems ?? new List<EventItem>())
-                            .ToList();
-
-                        foreach (var item in sItems)
+                        if (!alreadyBooked)
                         {
-                            // Filter out services the current user already booked
-                            var alreadyBooked = allBookedItems.Any(b =>
-                                b.Service.Id == item.Service.Id);
-
-                            if (!alreadyBooked)
-                            {
-                                candidateServices.Add(
-                                    $"{{ " +
-                                    $"\"ServiceId\": \"{item.Service.Id}\", " +
-                                    $"\"ServiceName\": \"{item.Service.Name}\", " +
-                                    $"\"VendorName\": \"{item.Service.Vendor.BusinessName}\", " +
-                                    $"\"Price\": {item.Service.Price} " +
-                                    $"}}"
-                                );
-                            }
+                            candidateServices.Add(
+                                $"{{ " +
+                                $"\"ServiceId\": \"{item.Service.Id}\", " +
+                                $"\"ServiceName\": \"{SanitizeForPrompt(item.Service.Name)}\", " +
+                                $"\"VendorName\": \"{SanitizeForPrompt(item.Service.Vendor.BusinessName)}\", " +
+                                $"\"Price\": {item.Service.Price} " +
+                                $"}}"
+                            );
                         }
                     }
                 }
@@ -173,8 +174,8 @@ Return ONLY a JSON object with this structure:
                     : "None available";
 
                 prompt = $@"
-            The user is planning a {currentEvent.EventType?.Name ?? "Event"} with a budget of {currentEvent.TotalBudget}.
-            They have already booked these services: {string.Join(", ", allBookedItems.Select(i => i.Service.Name).Distinct())}.
+            The user is planning a {SanitizeForPrompt(currentEvent.EventType?.Name ?? "Event")} with a budget of {currentEvent.TotalBudget}.
+            They have already booked these services: {string.Join(", ", allBookedItems.Select(i => SanitizeForPrompt(i.Service.Name)).Distinct())}.
 
             Based on collaborative filtering, users who planned similar events also booked these candidate services:
             [{candidateStr}]
@@ -220,6 +221,20 @@ Return ONLY a JSON object with this structure:
             {
                 return Result<RecommendationResponse>.Unexpected(5002, $"Failed to parse AI response: {ex.Message}");
             }
+        }
+
+        private static string SanitizeForPrompt(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            return value
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\r", " ")
+                .Replace("\n", " ")
+                .Replace("```", string.Empty)
+                .Trim();
         }
     }
 }

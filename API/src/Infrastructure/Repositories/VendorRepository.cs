@@ -180,6 +180,12 @@ namespace Infrastructure.Repositories
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task AddServiceRatingAsync(ServiceRating rating, CancellationToken cancellationToken)
+        {
+            await dbContext.ServiceRatings.AddAsync(rating, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         public async Task DeleteVendorAsync(Vendor vendor, CancellationToken cancellationToken)
         {
             dbContext.Vendors.Remove(vendor);

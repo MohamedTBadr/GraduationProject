@@ -7,7 +7,7 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Infrastructure.Payments;
+namespace Application.Services;
 
 public class PaymobService(
     IHttpClientFactory httpClientFactory,
