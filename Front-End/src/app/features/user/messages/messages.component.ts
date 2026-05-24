@@ -22,7 +22,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
   messages: ChatMessage[] = [];
   newMessageText = '';
   currentUserId = '';
-  
+  searchTerm = '';
+  loadingConversations = false;
+  loadingMessages = false;
+
   private messageSub?: Subscription;
 
   constructor(
@@ -31,47 +34,57 @@ export class MessagesComponent implements OnInit, OnDestroy {
     private toastService: ToastService
   ) {}
 
+  get filteredConversations(): Conversation[] {
+    if (!this.searchTerm.trim()) return this.conversations;
+    const term = this.searchTerm.toLowerCase();
+    return this.conversations.filter(c =>
+      c.userName?.toLowerCase().includes(term) ||
+      c.lastMessage?.toLowerCase().includes(term)
+    );
+  }
+
   ngOnInit(): void {
     this.currentUserId = this.authService.user()?.id || '';
-    
-    // Start SignalR connection
+
+    // Start SignalR connection for real-time messages
     this.chatService.startConnection();
 
     this.loadConversations();
 
-    // Listen for real-time messages
+    // Subscribe to real-time incoming messages
     this.messageSub = this.chatService.onMessageReceived$.subscribe((msg) => {
-      // If the message belongs to the currently open chat, append it
-      if (this.selectedConversation && 
-         (msg.senderId === this.selectedConversation.userId || msg.receiverId === this.selectedConversation.userId)) {
-        // Prevent duplicates
+      if (
+        this.selectedConversation &&
+        (msg.senderId === this.selectedConversation.userId ||
+          msg.receiverId === this.selectedConversation.userId)
+      ) {
         if (!this.messages.some(m => m.id === msg.id)) {
           this.messages.push(msg);
           this.scrollToBottom();
         }
       }
-      
-      // Update conversations list with the new message
-      this.loadConversations();
+      // Refresh sidebar to update last message preview
+      this.loadConversations(false);
     });
   }
 
   ngOnDestroy(): void {
-    if (this.messageSub) {
-      this.messageSub.unsubscribe();
-    }
+    this.messageSub?.unsubscribe();
   }
 
-  loadConversations(): void {
+  loadConversations(showLoader = true): void {
+    if (showLoader) this.loadingConversations = true;
     this.chatService.getConversations().subscribe({
       next: (data) => {
         this.conversations = data || [];
-        // Optional: auto-select first conversation
+        this.loadingConversations = false;
+        // Auto-select first conversation if none selected
         if (!this.selectedConversation && this.conversations.length > 0) {
           this.selectChat(this.conversations[0]);
         }
       },
       error: (err) => {
+        this.loadingConversations = false;
         console.error('Failed to load conversations', err);
         this.toastService.show('Failed to load conversations', 'error');
       }
@@ -80,13 +93,17 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   selectChat(chat: Conversation) {
     this.selectedConversation = chat;
+    this.loadingMessages = true;
+    this.messages = [];
     this.chatService.getMessages(chat.userId).subscribe({
       next: (msgs) => {
         this.messages = msgs || [];
-        chat.unreadCount = 0; // optimistic clear
+        chat.unreadCount = 0;
+        this.loadingMessages = false;
         this.scrollToBottom();
       },
       error: (err) => {
+        this.loadingMessages = false;
         console.error('Failed to load messages', err);
         this.toastService.show('Failed to load messages', 'error');
       }
@@ -99,8 +116,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
     this.chatService.sendMessage(this.selectedConversation.userId, text)
       .then(() => {
-        // The server echoes the message back via SignalR ('ReceiveMessage'),
-        // which will trigger onMessageReceived$ and add the message to the list.
+        // Server echoes message back via 'ReceiveMessage' on hub
         this.newMessageText = '';
         this.scrollToBottom();
       })
@@ -113,8 +129,9 @@ export class MessagesComponent implements OnInit, OnDestroy {
   private scrollToBottom(): void {
     setTimeout(() => {
       if (this.scrollContainer) {
-        this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
+        this.scrollContainer.nativeElement.scrollTop =
+          this.scrollContainer.nativeElement.scrollHeight;
       }
-    }, 100);
+    }, 80);
   }
 }

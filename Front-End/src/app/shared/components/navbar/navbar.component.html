@@ -1,5 +1,5 @@
 <!-- NAV -->
-<nav class="nav" [class.scrolled]="isScrolled">
+<nav class="nav" [class.scrolled]="isScrolled" (click)="closeNotificationPanel($event)">
   <div class="nav-inner">
     <div class="nav-logo" routerLink="/">Epic<span>Hub</span></div>
 
@@ -24,17 +24,40 @@
       </button>
 
       <!-- Notifications -->
-      <button 
-        *ngIf="authService.isLoggedIn()" 
-        class="nav-icon-btn relative" 
-        title="Notifications"
-        (click)="goToNotifications()"
-      >
-        🔔
-        <div class="fav-count" *ngIf="signalRService.unreadCount() > 0">
-          {{signalRService.unreadCount()}}
+      <div class="nav-notif-wrapper" *ngIf="authService.isLoggedIn()">
+        <button 
+          class="nav-icon-btn" 
+          title="Notifications"
+          (click)="toggleNotificationPanel($event)"
+        >
+          🔔
+          <div class="notif-badge" [class.visible]="signalRService.unreadCount() > 0">
+            {{ signalRService.unreadCount() > 9 ? '9+' : signalRService.unreadCount() }}
+          </div>
+        </button>
+
+        <!-- Notification Dropdown Panel -->
+        <div class="notif-panel" *ngIf="showNotifPanel" (click)="$event.stopPropagation()">
+          <div class="notif-panel-header">
+            <span class="notif-panel-title">Notifications</span>
+            <button class="notif-clear-btn" *ngIf="signalRService.notifications().length > 0" (click)="clearNotifications()">Clear all</button>
+          </div>
+          <div class="notif-list" *ngIf="signalRService.notifications().length > 0">
+            <div class="notif-item" *ngFor="let n of signalRService.notifications().slice(0, 8)">
+              <div class="notif-dot"></div>
+              <div class="notif-content">
+                <strong class="notif-title">{{ n.title }}</strong>
+                <p class="notif-message">{{ n.message }}</p>
+                <span class="notif-time">{{ n.createdAt | date:'shortTime' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="notif-empty" *ngIf="signalRService.notifications().length === 0">
+            <span>🔔</span>
+            <p>You're all caught up!</p>
+          </div>
         </div>
-      </button>
+      </div>
 
       <!-- Favorites -->
       <button
@@ -42,7 +65,10 @@
         (click)="goToFavorites()"
         title="My Favorites"
       >
-        <div class="fav-count" id="favCount">0</div>
+        🤍
+        <div class="notif-badge" [class.visible]="favoriteService.favoritesCount() > 0">
+          {{ favoriteService.favoritesCount() }}
+        </div>
       </button>
 
       <button (click)="theme.toggle()">
