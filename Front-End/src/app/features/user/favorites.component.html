@@ -1,1 +1,58 @@
-<p>favorites works!</p>
+<div class="fav-header">
+  <div>
+    <h2 class="fav-title">My Saved Vendors</h2>
+    <p class="fav-subtitle">Your curated selection of outstanding professionals saved for your upcoming events.</p>
+  </div>
+  <button class="btn btn-outline" *ngIf="favorites.length > 0" (click)="clearFavorites()">
+    🧹 Clear All
+  </button>
+</div>
+
+<div class="fav-loading" *ngIf="loading">
+  <div class="loader-pulse"></div>
+  <p>Gathering your saved vendors...</p>
+</div>
+
+<div class="fav-empty-card" *ngIf="!loading && favorites.length === 0">
+  <div class="empty-icon">💖</div>
+  <h3>Your Favorites List is Empty</h3>
+  <p>Explore our premium vendor network, find services that inspire you, and tap the heart icon to compile your dream team here.</p>
+  <button class="btn btn-gold mt-4" routerLink="/explore">
+    Explore Premium Vendors
+  </button>
+</div>
+
+<div class="fav-grid" *ngIf="!loading && favorites.length > 0">
+  <div class="fav-card" *ngFor="let vendor of favorites" [routerLink]="['/vendor', vendor.id]">
+    <div class="fav-card-photo-wrapper">
+      <div class="fav-card-avatar-placeholder">
+        {{ vendor.name.charAt(0) }}
+      </div>
+      <div class="fav-top-actions">
+        <span class="fav-badge">{{ vendor.vendorTypeName || 'Premium Vendor' }}</span>
+        <button class="fav-heart-btn" (click)="removeFromFavorites(vendor.id, $event)" title="Remove from favorites">
+          ❤️
+        </button>
+      </div>
+    </div>
+    
+    <div class="fav-card-body">
+      <h3 class="fav-vendor-name">{{ vendor.name }}</h3>
+      <div class="fav-vendor-location" *ngIf="vendor.location">
+        <span>📍</span> {{ vendor.location }}
+      </div>
+      <div class="fav-vendor-rating">
+        <span class="stars-gold">★</span>
+        <span class="rating-value">{{ vendor.rating ? (vendor.rating | number:'1.1-1') : 'New' }}</span>
+      </div>
+      <p class="fav-vendor-about" *ngIf="vendor.about">
+        {{ vendor.about | slice:0:90 }}{{ vendor.about.length > 90 ? '...' : '' }}
+      </p>
+    </div>
+    
+    <div class="fav-card-footer">
+      <span class="price-notice">Custom pricing</span>
+      <button class="btn-view-profile">View Profile →</button>
+    </div>
+  </div>
+</div>
