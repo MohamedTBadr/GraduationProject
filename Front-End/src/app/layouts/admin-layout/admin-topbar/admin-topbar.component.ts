@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ThemeService } from '../../../services/theme.service';
+
 
 @Component({
   selector: 'app-admin-topbar',
@@ -10,5 +12,6 @@ import { RouterLink } from '@angular/router';
   styleUrl: './admin-topbar.component.scss'
 })
 export class AdminTopbarComponent {
+  constructor(public theme: ThemeService) {}
 
 }
