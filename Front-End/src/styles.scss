@@ -4,6 +4,7 @@
 
 /* ═══ TOKENS ═══════════════════════════ */
 :root {
+  --grayHover: rgba(255, 255, 255, 0.8);
   --navy: #1a2540;
   --navy2: #243050;
   --gold: #c9a84c;
@@ -24,16 +25,21 @@
   --r: 12px;
   --r2: 20px;
   --nav-h: 68px;
+  --success: #22c55e;
+  --danger: #ef4444;
 }
 .dark {
+  --grayHover: rgba(20, 17, 17, 0.8);
   --navy: #e8e4dc;
   --navy2: #f0ebe0;
   --cream: #0f1117;
   --cream2: #161b27;
   --white: #1a2035;
   --lgray: #2a3050;
-  --gray: #8892a4;
-  --dark: #070b12;
+  --gray: #22252b;
+  --dark: #e8e4dc;
+  --success: #4ade80;
+  --danger: #f87171;
 }
 *,
 *::before,
@@ -191,8 +197,8 @@ img {
   display: inline-block;
   // background: rgba(201, 168, 76, 0.12);
   // color: var(--gold);
-  background:rgba(132,26,79,.1)!important;
-  color:#841A4F;
+  background: rgba(132, 26, 79, 0.1) !important;
+  color: #841a4f;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -315,7 +321,7 @@ img {
 .ad-sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: #080f1e;
+  background: var(--dark);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -401,14 +407,15 @@ img {
   padding: 8px 11px;
   border-radius: 8px;
   font-size: 0.81rem;
-  color: rgba(255, 255, 255, 0.44);
+  color: var(--gray);
   cursor: pointer;
   transition: all 0.16s;
   margin-bottom: 1px;
 }
 .ad-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.8);
+
+  color: var(--grayHover);
 }
 .ad-item.active {
   background: rgba(201, 168, 76, 0.12);
@@ -3006,13 +3013,25 @@ table.ad-tbl {
   display: flex;
   align-items: center;
   // background: var(--dark);
-  background:linear-gradient(135deg,#1A0F20 0%,#2A1535 35%,#841A4F 70%,#FFC554 100%)
+  background: linear-gradient(
+    135deg,
+    #1a0f20 0%,
+    #2a1535 35%,
+    #841a4f 70%,
+    #ffc554 100%
+  );
 }
 .hero-bg {
   position: absolute;
   inset: 0;
   // background: linear-gradient(135deg, #161022 0%, #7a114c 100%);
-  background:linear-gradient(135deg,rgba(26,15,32,.97) 0%,rgba(42,21,53,.92) 35%,rgba(132,26,79,.85) 70%,rgba(255,197,84,.6) 100%)
+  background: linear-gradient(
+    135deg,
+    rgba(26, 15, 32, 0.97) 0%,
+    rgba(42, 21, 53, 0.92) 35%,
+    rgba(132, 26, 79, 0.85) 70%,
+    rgba(255, 197, 84, 0.6) 100%
+  );
 }
 .hero-orb {
   position: absolute;
@@ -3078,11 +3097,10 @@ table.ad-tbl {
   color: var(--white);
   margin-bottom: 22px;
   max-width: 720px;
-  
 }
 .hero h1 em {
   font-style: italic;
-  color:#841A4F;
+  color: #841a4f;
   // -webkit-background-clip: text;
   // -webkit-text-fill-color: transparent;
 }
@@ -5361,7 +5379,7 @@ table.ad-tbl {
   inset: 0;
   z-index: 2000;
   background: rgba(14, 22, 39, 0.6);
-  backdrop-filter: blur(5px);
+  // backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;

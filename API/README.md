@@ -25,7 +25,7 @@
 
 <br/>
 
-<a href="https://app.apidog.com/invite/project?token=zG2ZhohbOdBh5J8CGYRgp">
+<a href="https://epichub.apidog.io/" target=_blank>
   <img src="https://img.shields.io/badge/📖_Explore_Live_API_Docs-00C2B8?style=for-the-badge&logoColor=white" alt="Apidog Documentation" width="280"/>
 </a>
 
