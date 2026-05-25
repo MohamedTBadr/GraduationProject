@@ -1115,34 +1115,269 @@ namespace Infrastructure.Persistence
             await context.SaveChangesAsync();
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  SERVICES
-        // ─────────────────────────────────────────────────────────────────────
         private async Task SeedServicesAsync()
         {
             if (await context.Services.AnyAsync())
                 return;
 
-            var vendor      = await context.Vendors.FirstOrDefaultAsync();
-            var photography = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Photography");
-            var catering    = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Catering");
-            var decoration  = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Decoration");
-            var wedding     = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Wedding");
-            var birthday    = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Birthday");
+            var vendors = await context.Vendors.ToListAsync();
 
-            if (vendor == null || photography == null || catering == null ||
-                decoration == null || wedding == null || birthday == null)
-            {
-                Console.WriteLine("Missing required data for service seeding.");
+            var photography = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Photography");
+            var catering = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Catering");
+            var decoration = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Decoration");
+
+            var wedding = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Wedding");
+            var birthday = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Birthday");
+            var grad = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Graduation");
+
+            if (photography == null || catering == null || decoration == null)
                 return;
+
+            var services = new List<Service>();
+
+            var rand = new Random();
+
+            // =========================
+            // 1. PHOTOGRAPHY & MEDIA (30+)
+            // =========================
+            foreach (var v in vendors.Take(10))
+            {
+                services.AddRange(new[]
+                {
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Wedding Cinematic Photography Package",
+                Description = "Full-day cinematic wedding coverage with edited album",
+                Price = rand.Next(4000, 12000),
+                VendorId = v.UserId,
+                ServiceTypeId = photography.Id,
+                SetupDuration = 6,
+                LeadTimeRequired = 2,
+                EventTypes = new List<EventType>{ wedding }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Engagement Photoshoot",
+                Description = "Outdoor engagement session with color grading",
+                Price = rand.Next(1500, 5000),
+                VendorId = v.UserId,
+                ServiceTypeId = photography.Id,
+                SetupDuration = 2,
+                LeadTimeRequired = 1,
+                EventTypes = new List<EventType>{ wedding }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Corporate Event Photography",
+                Description = "Professional coverage for conferences and business events",
+                Price = rand.Next(3000, 8000),
+                VendorId = v.UserId,
+                ServiceTypeId = photography.Id,
+                SetupDuration = 5,
+                LeadTimeRequired = 1,
+                EventTypes = new List<EventType>{ wedding, grad }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Drone Aerial Coverage",
+                Description = "4K drone footage for outdoor events",
+                Price = rand.Next(2000, 6000),
+                VendorId = v.UserId,
+                ServiceTypeId = photography.Id,
+                SetupDuration = 3,
+                LeadTimeRequired = 1,
+                EventTypes = new List<EventType>{ wedding, birthday, grad }
+            }
+        });
             }
 
-            var services = new List<Service>
+            // =========================
+            // 2. CATERING SERVICES (40+)
+            // =========================
+            foreach (var v in vendors.Take(15))
             {
-                new Service { Id = Guid.NewGuid(), Name = "Wedding Photography Package", Description = "Wedding photography coverage", Price = 5000, VendorId = vendor.UserId, ServiceTypeId = photography.Id, EventTypes = new List<EventType> { wedding  } },
-                new Service { Id = Guid.NewGuid(), Name = "Birthday Catering Set",       Description = "Birthday catering",           Price = 3000, VendorId = vendor.UserId, ServiceTypeId = catering.Id,    EventTypes = new List<EventType> { birthday } },
-                new Service { Id = Guid.NewGuid(), Name = "Wedding Decoration",          Description = "Hall decoration",             Price = 7000, VendorId = vendor.UserId, ServiceTypeId = decoration.Id,  EventTypes = new List<EventType> { wedding  } }
-            };
+                services.AddRange(new[]
+                {
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Luxury Wedding Buffet",
+                Description = "Full buffet catering for weddings (100–300 guests)",
+                Price = rand.Next(15000, 60000),
+                VendorId = v.UserId,
+                ServiceTypeId = catering.Id,
+                SetupDuration = 4,
+                LeadTimeRequired = 3,
+                EventTypes = new List<EventType>{ wedding }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Corporate Lunch Buffet",
+                Description = "Business catering with international menu",
+                Price = rand.Next(5000, 20000),
+                VendorId = v.UserId,
+                ServiceTypeId = catering.Id,
+                SetupDuration = 3,
+                LeadTimeRequired = 2,
+                EventTypes = new List<EventType>{ grad, wedding }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Live Cooking Station",
+                Description = "Interactive chef stations (pasta, grill, sushi)",
+                Price = rand.Next(8000, 25000),
+                VendorId = v.UserId,
+                ServiceTypeId = catering.Id,
+                SetupDuration = 5,
+                LeadTimeRequired = 2,
+                EventTypes = new List<EventType>{ wedding, birthday }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Dessert & Candy Bar Setup",
+                Description = "Themed dessert table with premium sweets",
+                Price = rand.Next(3000, 10000),
+                VendorId = v.UserId,
+                ServiceTypeId = catering.Id,
+                SetupDuration = 2,
+                LeadTimeRequired = 1,
+                EventTypes = new List<EventType>{ wedding, birthday }
+            }
+        });
+            }
+
+            // =========================
+            // 3. DECORATION (30+)
+            // =========================
+            foreach (var v in vendors.Take(12))
+            {
+                services.AddRange(new[]
+                {
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Luxury Wedding Decoration Package",
+                Description = "Full venue styling with floral + stage design",
+                Price = rand.Next(10000, 50000),
+                VendorId = v.UserId,
+                ServiceTypeId = decoration.Id,
+                SetupDuration = 8,
+                LeadTimeRequired = 3,
+                EventTypes = new List<EventType>{ wedding }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Balloon Decoration Setup",
+                Description = "Birthday themed balloon setups",
+                Price = rand.Next(2000, 8000),
+                VendorId = v.UserId,
+                ServiceTypeId = decoration.Id,
+                SetupDuration = 3,
+                LeadTimeRequired = 1,
+                EventTypes = new List<EventType>{ birthday }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Corporate Branding Backdrop",
+                Description = "Branded stage & media wall design",
+                Price = rand.Next(4000, 15000),
+                VendorId = v.UserId,
+                ServiceTypeId = decoration.Id,
+                SetupDuration = 4,
+                LeadTimeRequired = 2,
+                EventTypes = new List<EventType>{ grad, wedding }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Floral Arrangement Package",
+                Description = "Premium floral designs for halls & stages",
+                Price = rand.Next(3000, 12000),
+                VendorId = v.UserId,
+                ServiceTypeId = decoration.Id,
+                SetupDuration = 3,
+                LeadTimeRequired = 2,
+                EventTypes = new List<EventType>{ wedding }
+            }
+        });
+            }
+
+            // =========================
+            // 4. EVENT PRODUCTION (NEW - 20+)
+            // =========================
+            foreach (var v in vendors.Take(10))
+            {
+                var productionType = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Photography"); // fallback reuse
+
+                services.AddRange(new[]
+                {
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Full Event Production Package",
+                Description = "Complete sound, lighting, staging & coordination",
+                Price = rand.Next(20000, 100000),
+                VendorId = v.UserId,
+                ServiceTypeId = productionType.Id,
+                SetupDuration = 10,
+                LeadTimeRequired = 4,
+                EventTypes = new List<EventType>{ wedding, grad, birthday }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "LED Screen & Visual Setup",
+                Description = "High resolution LED walls for events",
+                Price = rand.Next(8000, 30000),
+                VendorId = v.UserId,
+                ServiceTypeId = productionType.Id,
+                SetupDuration = 5,
+                LeadTimeRequired = 2,
+                EventTypes = new List<EventType>{ wedding, grad }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Professional Sound System",
+                Description = "PA system for conferences and weddings",
+                Price = rand.Next(5000, 20000),
+                VendorId = v.UserId,
+                ServiceTypeId = productionType.Id,
+                SetupDuration = 3,
+                LeadTimeRequired = 1,
+                EventTypes = new List<EventType>{ wedding, birthday, grad }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Stage Lighting Package",
+                Description = "Dynamic lighting design with DMX control",
+                Price = rand.Next(6000, 25000),
+                VendorId = v.UserId,
+                ServiceTypeId = productionType.Id,
+                SetupDuration = 4,
+                LeadTimeRequired = 2,
+                EventTypes = new List<EventType>{ wedding, grad }
+            },
+
+            new Service {
+                Id = Guid.NewGuid(),
+                Name = "Live Streaming Setup",
+                Description = "Multi-camera live broadcast production",
+                Price = rand.Next(7000, 30000),
+                VendorId = v.UserId,
+                ServiceTypeId = productionType.Id,
+                SetupDuration = 6,
+                LeadTimeRequired = 3,
+                EventTypes = new List<EventType>{ wedding, grad }
+            }
+        });
+            }
 
             await context.Services.AddRangeAsync(services);
             await context.SaveChangesAsync();
