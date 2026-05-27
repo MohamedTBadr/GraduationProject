@@ -99,12 +99,15 @@ public class ServiceServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_WhenVendorMissing_ThrowsException()
+    public async Task CreateAsync_WhenVendorMissing_ReturnsNotFoundResult()
     {
         var request = CreateRequest();
         _vendorRepositoryMock.Setup(x => x.GetVendorByIdAsync(request.VendorId!.Value, It.IsAny<CancellationToken>())).ReturnsAsync((Vendor?)null);
 
-        await Assert.ThrowsAsync<Exception>(() => _sut.CreateAsync(request, CancellationToken.None));
+        var result = await _sut.CreateAsync(request, CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(404, result.Error!.Code);
     }
 
     [Fact]

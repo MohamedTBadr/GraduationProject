@@ -44,13 +44,14 @@ namespace API.Controllers
         [HybridCache(300, "orders", "orders/{id}", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
-           
-                var order = await serviceManager.OrderService.GetOrderByIdAsync(id, ct);
-                if (!IsAdminOrOwner(order.Value.UserId))
-                    return Forbid();
+            var order = await serviceManager.OrderService.GetOrderByIdAsync(id, ct);
+            if (!order.IsSuccess)
+                return order.ToActionResult();
 
-                return order.IsSuccess ? Ok(order.Value) : order.ToActionResult();
-            
+            if (!IsAdminOrOwner(order.Value.UserId))
+                return Forbid();
+
+            return Ok(order.Value);
         }
 
         // GET api/orders/user/{userId}
@@ -76,10 +77,15 @@ namespace API.Controllers
             [FromBody] UpdateOrderStatusRequest request,
             CancellationToken ct)
         {
-         
+            try
+            {
                 var updated = await serviceManager.OrderService.UpdatePaymentStatusAsync(id, request, ct);
                 return updated.IsSuccess ? Ok(updated.Value) : updated.ToActionResult();
-           
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         // PATCH api/orders/{id}/payment-intent
