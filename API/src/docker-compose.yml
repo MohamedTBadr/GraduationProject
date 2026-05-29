@@ -1,11 +1,29 @@
 services:
-  web:
+  gateway.api:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: GraduationProject-Web
+      dockerfile: Gateway.API/Dockerfile
+    container_name: GraduationProject-Gateway
     ports:
       - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ReverseProxy__Clusters__webapi-cluster__Destinations__webapi-destination__Address=http://web.api:8080
+    depends_on:
+      - web.api
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.50
+
+  web.api:
+    build:
+      context: .
+      dockerfile: Web.Api/Dockerfile
+    container_name: GraduationProject-WebApi
+    ports:
+      - "5030:8081"
+      - "5031:8080"
     depends_on:
       db:
         condition: service_healthy

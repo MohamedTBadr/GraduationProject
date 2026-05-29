@@ -27,30 +27,6 @@ namespace Web
             await WebRegistrationService.AddWebsRegistrationServices(builder.Services, builder.Configuration);
             await ApplicationRegistrationService.AddApplicationServices(builder.Services, builder.Configuration);
 
-            builder.Host.UseSerilog((ctx, config) =>
-            {
-                config.ReadFrom.Configuration(ctx.Configuration)
-                    .Enrich.FromLogContext()
-                    .WriteTo.File(new Serilog.Formatting.Json.JsonFormatter(), "logs/app-json-.log", rollingInterval: RollingInterval.Day)
-                    .WriteTo.File("logs/app-text-.log", rollingInterval: RollingInterval.Day);
-            });
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("CorsPolicy", policy =>
-                {
-                    var allowedOrigins = builder.Configuration
-                        .GetSection("Cors:AllowedOrigins")
-                        .Get<string[]>() ?? ["http://localhost:4200"];
-
-                    policy
-                        .WithOrigins(allowedOrigins)
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-                });
-            });
-
             builder.Logging.AddOpenTelemetry(logging =>
             {
                 logging.SetResourceBuilder(
@@ -68,16 +44,13 @@ namespace Web
 
             await SeedingScope(app);
 
-            app.UseCors("CorsPolicy");
             app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseResponseCompression();
             app.UseTelemetry();
-            app.UseSerilogRequestLogging();
             app.UseMiddleware<CustomExceptionHandlerMiddleware>();
             app.UseMiddleware<IdempotencyCustomMiddleware>();
             app.UseAuthentication();
-            app.UseRateLimiter();
             app.UseAuthorization();
             app.UseHangfireDashboard("/hangfire", new Hangfire.DashboardOptions
             {
