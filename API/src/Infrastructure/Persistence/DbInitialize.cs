@@ -31,6 +31,16 @@ namespace Infrastructure.Persistence
                     await SeedCoworkingSpaceVendorsAsync();
                     await SeedProductionVendorsAsync();
                     await SeedCateringVendorsAsync();
+                    await SeedDecorationVendorsAsync();
+                    await SeedMediaVendorsAsync();
+                    await SeedFurnitureVendorsAsync();
+                    await SeedTransportationVendorsAsync();
+                    await SeedPrintingVendorsAsync();
+                    await SeedEntertainmentVendorsAsync();
+                    await SeedSecurityVendorsAsync();
+                    await SeedMakeupVendorsAsync();
+                    await SeedKidsVendorsAsync();
+                    await SeedCorporateVendorsAsync();
                     await SeedCustomerAsync();
                     await SeedServiceTypesAsync();
                     await SeedEventTypeAsync();
@@ -64,17 +74,24 @@ namespace Infrastructure.Persistence
             if (await context.VendorTypes.AnyAsync())
                 return;
 
-           var vendorTypes= new List<VendorType>
+            var vendorTypes = new List<VendorType>
     {
-        new VendorType { Name = "Furniture Vendor" },
-        new VendorType { Name = "Media Vendor" },
-        new VendorType { Name = "Catering Vendor" },
-        new VendorType { Name = "Venue Vendor" },
-        new VendorType { Name = "Entertainment Vendor" },
-        new VendorType { Name = "Printing Vendor" },
-        new VendorType { Name = "Transportation Vendor" },
+        new VendorType { Name = "Furniture & Setup" },
+        new VendorType { Name = "Media" },
+        new VendorType { Name = "Catering" },
+        new VendorType { Name = "Venue" },
+        new VendorType { Name = "Entertainment" },
+        new VendorType { Name = "Printing" },
+        new VendorType { Name = "Transportation" },
         new VendorType { Name = "Coworking Space" },
-        new VendorType { Name = "Production Vendor" }
+        new VendorType { Name = "Production" },
+        // ── new ──
+        new VendorType { Name = "Decoration & Floral" },
+        new VendorType { Name = "Security & Staffing" },
+        new VendorType { Name = "Makeup & Bridal" },
+        
+        new VendorType { Name = "Kids Activities" },
+        new VendorType { Name = "Corporate Services" },
     };
 
             await context.VendorTypes.AddRangeAsync(vendorTypes);
@@ -105,11 +122,11 @@ namespace Infrastructure.Persistence
                 return;
 
             var venueType = await context.VendorTypes
-                .FirstOrDefaultAsync(v => v.Name == "Venue Vendor");
+                .FirstOrDefaultAsync(v => v.Name == "Venue");
 
             if (venueType == null)
             {
-                Console.WriteLine("[VenueSeeding] VendorType 'Venue Vendor' not found.");
+                Console.WriteLine("[VenueSeeding] VendorType 'Venue' not found.");
                 return;
             }
 
@@ -490,11 +507,11 @@ namespace Infrastructure.Persistence
                 return;
 
             var productionType = await context.VendorTypes
-                .FirstOrDefaultAsync(v => v.Name == "Production Vendor");
+                .FirstOrDefaultAsync(v => v.Name == "Production");
 
             if (productionType == null)
             {
-                Console.WriteLine("[ProductionSeeding] VendorType 'Production Vendor' not found.");
+                Console.WriteLine("[ProductionSeeding] VendorType 'Production' not found.");
                 return;
             }
 
@@ -674,23 +691,34 @@ namespace Infrastructure.Persistence
         "catering.kazouza@placeholder.com",
         "catering.cookdoor@placeholder.com",
         "catering.didos@placeholder.com",
-        "catering.willyskitchen@placeholder.com"
+        "catering.willyskitchen@placeholder.com",
+
+        // Cake Designers
+        "happiness@ninosbakeryeg.com",
+        "cake.cairocakes@placeholder.com",
+        "cake.pharaonic@placeholder.com",
+        "cake.sweetgarden@placeholder.com",
+        "cake.royal@placeholder.com"
     };
 
             if (await context.ApplicationUsers.AnyAsync(u => cateringEmails.Contains(u.Email)))
                 return;
 
             var catererType = await context.VendorTypes
-                .FirstOrDefaultAsync(v => v.Name == "Catering Vendor");
+                .FirstOrDefaultAsync(v => v.Name == "Catering");
 
             if (catererType == null)
             {
-                Console.WriteLine("[CateringSeeding] VendorType 'Catering Vendor' not found.");
+                Console.WriteLine("[CateringSeeding] VendorType 'Catering' not found.");
                 return;
             }
 
             var cateringData = new[]
             {
+        // ─────────────────────────────
+        // Catering Vendors
+        // ─────────────────────────────
+
         new
         {
             BusinessName = "Abou El Sid Catering",
@@ -829,6 +857,80 @@ namespace Infrastructure.Persistence
             {
                 ("Cairo", "Heliopolis", 30.0876m, 31.3220m)
             }
+        },
+
+        // ─────────────────────────────
+        // Cake Designers
+        // ─────────────────────────────
+
+        new
+        {
+            BusinessName = "Nino's Bakery",
+            Phone = "+201023147888",
+            Email = "happiness@ninosbakeryeg.com",
+            Street = "11 El Sheikh El Ni'ma St., Nasr City",
+            City = "Cairo",
+            State = "Cairo Governorate",
+            Regions = new[]
+            {
+                ("Cairo", "Nasr City", 30.0490m, 31.3303m)
+            }
+        },
+
+        new
+        {
+            BusinessName = "Cairo Cakes Co",
+            Phone = "",
+            Email = "cake.cairocakes@placeholder.com",
+            Street = "Heliopolis",
+            City = "Cairo",
+            State = "Cairo Governorate",
+            Regions = new[]
+            {
+                ("Cairo", "Heliopolis", 30.0876m, 31.3220m)
+            }
+        },
+
+        new
+        {
+            BusinessName = "Pharaonic Pastries",
+            Phone = "01000000110",
+            Email = "cake.pharaonic@placeholder.com",
+            Street = "Zamalek",
+            City = "Cairo",
+            State = "Cairo Governorate",
+            Regions = new[]
+            {
+                ("Cairo", "Zamalek", 30.0626m, 31.2197m)
+            }
+        },
+
+        new
+        {
+            BusinessName = "Sweet Garden Cairo",
+            Phone = "",
+            Email = "cake.sweetgarden@placeholder.com",
+            Street = "Downtown Cairo",
+            City = "Cairo",
+            State = "Cairo Governorate",
+            Regions = new[]
+            {
+                ("Cairo", "Downtown", 30.0444m, 31.2357m)
+            }
+        },
+
+        new
+        {
+            BusinessName = "Royal Bakeries Cairo",
+            Phone = "01000000111",
+            Email = "cake.royal@placeholder.com",
+            Street = "New Cairo",
+            City = "Cairo",
+            State = "Cairo Governorate",
+            Regions = new[]
+            {
+                ("Cairo", "New Cairo", 30.0120m, 31.4354m)
+            }
         }
     };
 
@@ -849,6 +951,1117 @@ namespace Infrastructure.Persistence
             Console.WriteLine("[CateringSeeding] Completed.");
         }
 
+        // ─────────────────────────────────────────────────────────────────────
+        //  DECORATION & FLORAL VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedDecorationVendorsAsync()
+        {
+            var decorEmails = new[]
+            {
+        "info@flowerpowerdesign.com",
+        "info@tailordevents.com",
+        "events@daliaelhaggar.com",
+        "decor.dreamy@placeholder.com",
+        "decor.gardenia@placeholder.com",
+        "decor.elegant@placeholder.com",
+        "decor.blossom@placeholder.com",
+        "decor.lux@placeholder.com",
+        "decor.elite@placeholder.com",
+        "decor.magenta@placeholder.com",
+        "decor.gold@placeholder.com",
+        "decor.vintage@placeholder.com",
+        "decor.cairocreative@placeholder.com",
+        "decor.nileoasis@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => decorEmails.Contains(u.Email)))
+                return;
+
+            var decorType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Decoration & Floral");
+
+            if (decorType == null)
+            {
+                Console.WriteLine("[DecorationSeeding] VendorType 'Decoration & Floral' not found.");
+                return;
+            }
+
+            var decorationData = new[]
+            {
+        new {
+            BusinessName = "Flower Power Design",
+            Phone        = "01223904907",
+            Email        = "info@flowerpowerdesign.com",
+            Street       = "14 Wadi El Nile St.",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Mohandessin", 30.0444m, 31.2357m) }
+        },
+        new {
+            BusinessName = "Tailor'd Events LLC",
+            Phone        = "+20 1272377238",
+            Email        = "info@tailordevents.com",
+            Street       = "Mohandessin",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Downtown", 30.0444m, 31.2357m) }
+        },
+        new {
+            BusinessName = "Dalia El Haggar Florist",
+            Phone        = "01222167048",
+            Email        = "events@daliaelhaggar.com",
+            Street       = "Unknown Street",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Downtown", 30.0444m, 31.2357m) }
+        },
+        new {
+            BusinessName = "Dreamy Decor Cairo",
+            Phone        = "",
+            Email        = "decor.dreamy@placeholder.com",
+            Street       = "Al Maadi",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Maadi", 29.9602m, 31.2569m) }
+        },
+        new {
+            BusinessName = "Gardenia Floral Design",
+            Phone        = "01000000001",
+            Email        = "decor.gardenia@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        },
+        new {
+            BusinessName = "Elegant Events Decor",
+            Phone        = "",
+            Email        = "decor.elegant@placeholder.com",
+            Street       = "Sheikh Zayed",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Sheikh Zayed", 30.0131m, 30.9744m) }
+        },
+        new {
+            BusinessName = "Blossom Creations",
+            Phone        = "01000000002",
+            Email        = "decor.blossom@placeholder.com",
+            Street       = "New Cairo",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "New Cairo", 30.0120m, 31.4354m) }
+        },
+        new {
+            BusinessName = "Lux Floral Egypt",
+            Phone        = "",
+            Email        = "decor.lux@placeholder.com",
+            Street       = "Dokki",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Dokki", 30.0419m, 31.2047m) }
+        },
+        new {
+            BusinessName = "Elite Event Stylists",
+            Phone        = "01000000003",
+            Email        = "decor.elite@placeholder.com",
+            Street       = "Downtown Cairo",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Downtown", 30.0444m, 31.2357m) }
+        },
+        new {
+            BusinessName = "Magenta Floral",
+            Phone        = "",
+            Email        = "decor.magenta@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0561m, 31.3300m) }
+        },
+        new {
+            BusinessName = "Golden Petals",
+            Phone        = "01000000004",
+            Email        = "decor.gold@placeholder.com",
+            Street       = "Heliopolis",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Heliopolis", 30.0868m, 31.3235m) }
+        },
+        new {
+            BusinessName = "Vintage Blooms",
+            Phone        = "",
+            Email        = "decor.vintage@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        },
+        new {
+            BusinessName = "Cairo Creative Decor",
+            Phone        = "01000000005",
+            Email        = "decor.cairocreative@placeholder.com",
+            Street       = "Mohandessin",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Mohandessin", 30.0466m, 31.1956m) }
+        },
+        new {
+            BusinessName = "Nile Oasis Events",
+            Phone        = "",
+            Email        = "decor.nileoasis@placeholder.com",
+            Street       = "Imbaba",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Imbaba", 30.0691m, 31.2140m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                decorationData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                decorType,
+                "DecorationSeeding");
+
+            Console.WriteLine("[DecorationSeeding] Completed.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  MEDIA / PHOTOGRAPHY VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedMediaVendorsAsync()
+        {
+            var mediaEmails = new[]
+            {
+        "info@splashwedding.com",
+        "media.fairytale@placeholder.com",
+        "media.nation@placeholder.com",
+        "media.goldenframe@placeholder.com",
+        "media.artistic@placeholder.com",
+        "media.magic@placeholder.com",
+        "media.sunrise@placeholder.com",
+        "media.visionary@placeholder.com",
+        "media.capture@placeholder.com",
+        "media.focus@placeholder.com",
+        "media.cinema@placeholder.com",
+        "media.flash@placeholder.com",
+        "media.moments@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => mediaEmails.Contains(u.Email)))
+                return;
+
+            var mediaType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Media");
+
+            if (mediaType == null)
+            {
+                Console.WriteLine("[MediaSeeding] VendorType 'Media' not found.");
+                return;
+            }
+
+            var mediaData = new[]
+            {
+        new {
+            BusinessName = "Splash Wedding Studios",
+            Phone        = "+201111091999",
+            Email        = "info@splashwedding.com",
+            Street       = "New Cairo Housing",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "New Cairo", 30.0120m, 31.4354m) }
+        },
+        new {
+            BusinessName = "Fairytale Photography Egypt",
+            Phone        = "01000000010",
+            Email        = "media.fairytale@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        },
+        new {
+            BusinessName = "MediaNation Cairo",
+            Phone        = "",
+            Email        = "media.nation@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        },
+        new {
+            BusinessName = "Golden Frame Photographers",
+            Phone        = "01000000011",
+            Email        = "media.goldenframe@placeholder.com",
+            Street       = "Heliopolis",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Heliopolis", 30.0876m, 31.3220m) }
+        },
+        new {
+            BusinessName = "Artistic Lens Cairo",
+            Phone        = "",
+            Email        = "media.artistic@placeholder.com",
+            Street       = "Mohandessin",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Mohandessin", 30.0466m, 31.1956m) }
+        },
+        new {
+            BusinessName = "Magic Moments Studio",
+            Phone        = "01000000012",
+            Email        = "media.magic@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0561m, 31.3300m) }
+        },
+        new {
+            BusinessName = "Sunrise Media",
+            Phone        = "",
+            Email        = "media.sunrise@placeholder.com",
+            Street       = "New Maadi",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Maadi", 29.9598m, 31.2556m) }
+        },
+        new {
+            BusinessName = "Visionary Studios",
+            Phone        = "01000000013",
+            Email        = "media.visionary@placeholder.com",
+            Street       = "Zahraa Maadi",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Maadi", 29.9602m, 31.2569m) }
+        },
+        new {
+            BusinessName = "Capture Cairo",
+            Phone        = "",
+            Email        = "media.capture@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        },
+        new {
+            BusinessName = "Focus Event Photography",
+            Phone        = "01000000014",
+            Email        = "media.focus@placeholder.com",
+            Street       = "Sheikh Zayed",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Sheikh Zayed", 30.0131m, 30.9744m) }
+        },
+        new {
+            BusinessName = "Cinema Frames",
+            Phone        = "",
+            Email        = "media.cinema@placeholder.com",
+            Street       = "Heliopolis",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Heliopolis", 30.0876m, 31.3220m) }
+        },
+        new {
+            BusinessName = "Flash Photography",
+            Phone        = "01000000015",
+            Email        = "media.flash@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0561m, 31.3300m) }
+        },
+        new {
+            BusinessName = "Moments Photography",
+            Phone        = "",
+            Email        = "media.moments@placeholder.com",
+            Street       = "Mohandessin",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Mohandessin", 30.0466m, 31.1956m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                mediaData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                mediaType,
+                "MediaSeeding");
+
+            Console.WriteLine("[MediaSeeding] Completed.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  FURNITURE & RENTALS VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedFurnitureVendorsAsync()
+        {
+            var furnitureEmails = new[]
+            {
+        "info@vendegypt.com",
+        "rental.eventessentials@placeholder.com",
+        "rental.tablechair@placeholder.com",
+        "rental.tentscity@placeholder.com",
+        "rental.cairoparty@placeholder.com",
+        "rental.luxtent@placeholder.com",
+        "rental.basmenatents@placeholder.com",
+        "rental.bluelile@placeholder.com",
+        "rental.nile@placeholder.com",
+        "rental.eventdecor@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => furnitureEmails.Contains(u.Email)))
+                return;
+
+            var furnitureType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Furniture & Setup");
+
+            if (furnitureType == null)
+            {
+                Console.WriteLine("[FurnitureSeeding] VendorType 'Furniture & Setup' not found.");
+                return;
+            }
+
+            var furnitureData = new[]
+            {
+        new {
+            BusinessName = "Vend Egypt Rentals",
+            Phone        = "+201124334178",
+            Email        = "info@vendegypt.com",
+            Street       = "Place Tower, New Cairo",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "New Cairo", 30.0230m, 31.5006m) }
+        },
+        new {
+            BusinessName = "Event Essentials Rental",
+            Phone        = "",
+            Email        = "rental.eventessentials@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        },
+        new {
+            BusinessName = "Table & Chair Egypt",
+            Phone        = "01000000050",
+            Email        = "rental.tablechair@placeholder.com",
+            Street       = "6th October",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "6th of October", 29.9285m, 30.9188m) }
+        },
+        new {
+            BusinessName = "Tent City Cairo",
+            Phone        = "",
+            Email        = "rental.tentscity@placeholder.com",
+            Street       = "New Cairo",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "New Cairo", 30.0120m, 31.4354m) }
+        },
+        new {
+            BusinessName = "Cairo Party Rentals",
+            Phone        = "01000000051",
+            Email        = "rental.cairoparty@placeholder.com",
+            Street       = "Maadi",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Maadi", 29.9602m, 31.2569m) }
+        },
+        new {
+            BusinessName = "Lux Tent & Chair",
+            Phone        = "",
+            Email        = "rental.luxtent@placeholder.com",
+            Street       = "Dokki",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Dokki", 30.0419m, 31.2047m) }
+        },
+        new {
+            BusinessName = "Basmena Tents",
+            Phone        = "01000000052",
+            Email        = "rental.basmenatents@placeholder.com",
+            Street       = "Zahraa Maadi",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Maadi", 29.9602m, 31.2569m) }
+        },
+        new {
+            BusinessName = "Blue Nile Events Rentals",
+            Phone        = "",
+            Email        = "rental.bluelile@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        },
+        new {
+            BusinessName = "Nile Rental Co.",
+            Phone        = "01000000053",
+            Email        = "rental.nile@placeholder.com",
+            Street       = "Sheikh Zayed",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Sheikh Zayed", 30.0131m, 30.9744m) }
+        },
+        new {
+            BusinessName = "Event Decor Rentals",
+            Phone        = "",
+            Email        = "rental.eventdecor@placeholder.com",
+            Street       = "Tahrir Square",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Downtown", 30.0444m, 31.2357m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                furnitureData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                furnitureType,
+                "FurnitureSeeding");
+
+            Console.WriteLine("[FurnitureSeeding] Completed.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  TRANSPORTATION VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedTransportationVendorsAsync()
+        {
+            var transportEmails = new[]
+            {
+        "info@premiumlimousine-eg.com",
+        "transport.lux@placeholder.com",
+        "transport.valley@placeholder.com",
+        "transport.sphinxshuttle@placeholder.com",
+        "transport.cairoexecutive@placeholder.com",
+        "transport.goldentulip@placeholder.com",
+        "transport.aircairo@placeholder.com",
+        "transport.deluxebus@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => transportEmails.Contains(u.Email)))
+                return;
+
+            var transportationType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Transportation");
+
+            if (transportationType == null)
+            {
+                Console.WriteLine("[TransportationSeeding] VendorType 'Transportation' not found.");
+                return;
+            }
+
+            var transportData = new[]
+            {
+        new {
+            BusinessName = "Egypt Premium Limousine",
+            Phone        = "+201129119919",
+            Email        = "info@premiumlimousine-eg.com",
+            Street       = "350 Gardinia City, Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0490m, 31.3303m) }
+        },
+        new {
+            BusinessName = "Lux Transport Cairo",
+            Phone        = "01000000060",
+            Email        = "transport.lux@placeholder.com",
+            Street       = "Dokki",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Dokki", 30.0419m, 31.2047m) }
+        },
+        new {
+            BusinessName = "Valley Nile Shuttle",
+            Phone        = "",
+            Email        = "transport.valley@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        },
+        new {
+            BusinessName = "Sphinx Shuttle Services",
+            Phone        = "01000000061",
+            Email        = "transport.sphinxshuttle@placeholder.com",
+            Street       = "Sheikh Zayed",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Sheikh Zayed", 30.0131m, 30.9744m) }
+        },
+        new {
+            BusinessName = "Cairo Executive Chauffeurs",
+            Phone        = "",
+            Email        = "transport.cairoexecutive@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0490m, 31.3303m) }
+        },
+        new {
+            BusinessName = "Golden Tulip Transfers",
+            Phone        = "01000000062",
+            Email        = "transport.goldentulip@placeholder.com",
+            Street       = "Mohandessin",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Mohandessin", 30.0466m, 31.1956m) }
+        },
+        new {
+            BusinessName = "Air Cairo Chauffeurs",
+            Phone        = "",
+            Email        = "transport.aircairo@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0490m, 31.3303m) }
+        },
+        new {
+            BusinessName = "Deluxe Bus Lines",
+            Phone        = "01000000063",
+            Email        = "transport.deluxebus@placeholder.com",
+            Street       = "New Cairo",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "New Cairo", 30.0120m, 31.4354m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                transportData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                transportationType,
+                "TransportationSeeding");
+
+            Console.WriteLine("[TransportationSeeding] Completed.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  PRINTING & INVITATIONS VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedPrintingVendorsAsync()
+        {
+            var printingEmails = new[]
+            {
+        "print.goldenpress@placeholder.com",
+        "print.eliteinvites@placeholder.com",
+        "print.cairoprint@placeholder.com",
+        "print.royalsol@placeholder.com",
+        "print.lotus@placeholder.com",
+        "print.bluenile@placeholder.com",
+        "print.invitedesign@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => printingEmails.Contains(u.Email)))
+                return;
+
+            var printingType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Printing");
+
+            if (printingType == null)
+            {
+                Console.WriteLine("[PrintingSeeding] VendorType 'Printing' not found.");
+                return;
+            }
+
+            var printingData = new[]
+            {
+        new {
+            BusinessName = "Golden Press Cairo",
+            Phone        = "",
+            Email        = "print.goldenpress@placeholder.com",
+            Street       = "10 Ramses St.",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Downtown", 30.0444m, 31.2357m) }
+        },
+        new {
+            BusinessName = "Elite Invitations",
+            Phone        = "01000000070",
+            Email        = "print.eliteinvites@placeholder.com",
+            Street       = "Mohandessin",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Mohandessin", 30.0466m, 31.1956m) }
+        },
+        new {
+            BusinessName = "Cairo Print Design",
+            Phone        = "",
+            Email        = "print.cairoprint@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        },
+        new {
+            BusinessName = "Royal Print Solutions",
+            Phone        = "01000000071",
+            Email        = "print.royalsol@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        },
+        new {
+            BusinessName = "Lotus Printing House",
+            Phone        = "",
+            Email        = "print.lotus@placeholder.com",
+            Street       = "Maadi",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Maadi", 29.9602m, 31.2569m) }
+        },
+        new {
+            BusinessName = "Blue Nile Press",
+            Phone        = "01000000072",
+            Email        = "print.bluenile@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0490m, 31.3303m) }
+        },
+        new {
+            BusinessName = "Egypt Invitation Design",
+            Phone        = "",
+            Email        = "print.invitedesign@placeholder.com",
+            Street       = "Heliopolis",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Heliopolis", 30.0876m, 31.3220m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                printingData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                printingType,
+                "PrintingSeeding");
+
+            Console.WriteLine("[PrintingSeeding] Completed.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  ENTERTAINMENT VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedEntertainmentVendorsAsync()
+        {
+            var entertainmentEmails = new[]
+            {
+        "ent.nilebeats@placeholder.com",
+        "ent.pyramid@placeholder.com",
+        "ent.orientalbeats@placeholder.com",
+        "ent.desertrose@placeholder.com",
+        "ent.urbangrooves@placeholder.com",
+        "ent.midnight@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => entertainmentEmails.Contains(u.Email)))
+                return;
+
+            var entertainmentType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Entertainment");
+
+            if (entertainmentType == null)
+            {
+                Console.WriteLine("[EntertainmentSeeding] VendorType 'Entertainment' not found.");
+                return;
+            }
+
+            var entertainmentData = new[]
+            {
+        new {
+            BusinessName = "Nile Beats Live Band",
+            Phone        = "01000000080",
+            Email        = "ent.nilebeats@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        },
+        new {
+            BusinessName = "Pyramid DJ Services",
+            Phone        = "",
+            Email        = "ent.pyramid@placeholder.com",
+            Street       = "Mohandessin",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Mohandessin", 30.0466m, 31.1956m) }
+        },
+        new {
+            BusinessName = "Oriental Beats Entertainment",
+            Phone        = "01000000081",
+            Email        = "ent.orientalbeats@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0490m, 31.3303m) }
+        },
+        new {
+            BusinessName = "Desert Rose Band",
+            Phone        = "",
+            Email        = "ent.desertrose@placeholder.com",
+            Street       = "New Cairo",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "New Cairo", 30.0120m, 31.4354m) }
+        },
+        new {
+            BusinessName = "Urban Grooves Entertainment",
+            Phone        = "01000000082",
+            Email        = "ent.urbangrooves@placeholder.com",
+            Street       = "Sheikh Zayed",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Sheikh Zayed", 30.0131m, 30.9744m) }
+        },
+        new {
+            BusinessName = "Midnight DJs Cairo",
+            Phone        = "",
+            Email        = "ent.midnight@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                entertainmentData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                entertainmentType,
+                "EntertainmentSeeding");
+
+            Console.WriteLine("[EntertainmentSeeding] Completed.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  SECURITY & STAFFING VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedSecurityVendorsAsync()
+        {
+            var securityEmails = new[]
+            {
+        "security.nileevent@placeholder.com",
+        "security.safeguard@placeholder.com",
+        "security.egyptguards@placeholder.com",
+        "security.pharaoh@placeholder.com",
+        "security.vipse@placeholder.com",
+        "security.shadow@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => securityEmails.Contains(u.Email)))
+                return;
+
+            var securityType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Security & Staffing");
+
+            if (securityType == null)
+            {
+                Console.WriteLine("[SecuritySeeding] VendorType 'Security & Staffing' not found.");
+                return;
+            }
+
+            var securityData = new[]
+            {
+        new {
+            BusinessName = "Nile Event Security",
+            Phone        = "01000000090",
+            Email        = "security.nileevent@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0490m, 31.3303m) }
+        },
+        new {
+            BusinessName = "Safeguard Egypt",
+            Phone        = "",
+            Email        = "security.safeguard@placeholder.com",
+            Street       = "Downtown Cairo",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Downtown", 30.0444m, 31.2357m) }
+        },
+        new {
+            BusinessName = "Egyptian Guards Co",
+            Phone        = "01000000091",
+            Email        = "security.egyptguards@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        },
+        new {
+            BusinessName = "Pharaoh Security",
+            Phone        = "",
+            Email        = "security.pharaoh@placeholder.com",
+            Street       = "Giza",
+            City         = "Giza",
+            State        = "Giza Governorate",
+            Regions      = new[] { ("Giza", "Dokki", 30.0419m, 31.2047m) }
+        },
+        new {
+            BusinessName = "VIP Secure Egypt",
+            Phone        = "01000000092",
+            Email        = "security.vipse@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        },
+        new {
+            BusinessName = "Shadow Security",
+            Phone        = "",
+            Email        = "security.shadow@placeholder.com",
+            Street       = "Mohandessin",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Mohandessin", 30.0466m, 31.1956m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                securityData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                securityType,
+                "SecuritySeeding");
+
+            Console.WriteLine("[SecuritySeeding] Completed.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  MAKEUP & BRIDAL VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedMakeupVendorsAsync()
+        {
+            var makeupEmails = new[]
+            {
+        "beauty.golden@placeholder.com",
+        "beauty.bridal@placeholder.com",
+        "beauty.divine@placeholder.com",
+        "beauty.nilewedding@placeholder.com",
+        "beauty.oriental@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => makeupEmails.Contains(u.Email)))
+                return;
+
+            var makeupType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Makeup & Bridal");
+
+            if (makeupType == null)
+            {
+                Console.WriteLine("[MakeupSeeding] VendorType 'Makeup & Bridal' not found.");
+                return;
+            }
+
+            var makeupData = new[]
+            {
+        new {
+            BusinessName = "Golden Glamour Makeup",
+            Phone        = "01000000100",
+            Email        = "beauty.golden@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        },
+        new {
+            BusinessName = "Cairo Bridal Beauty",
+            Phone        = "",
+            Email        = "beauty.bridal@placeholder.com",
+            Street       = "Heliopolis",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Heliopolis", 30.0876m, 31.3220m) }
+        },
+        new {
+            BusinessName = "Divine Makeup Artistry",
+            Phone        = "01000000101",
+            Email        = "beauty.divine@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0490m, 31.3303m) }
+        },
+        new {
+            BusinessName = "Nile Wedding Hair & Makeup",
+            Phone        = "",
+            Email        = "beauty.nilewedding@placeholder.com",
+            Street       = "Maadi",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Maadi", 29.9602m, 31.2569m) }
+        },
+        new {
+            BusinessName = "Oriental Makeup Studio",
+            Phone        = "01000000102",
+            Email        = "beauty.oriental@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                makeupData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                makeupType,
+                "MakeupSeeding");
+
+            Console.WriteLine("[MakeupSeeding] Completed.");
+        }
+
+    
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  KIDS ACTIVITIES VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedKidsVendorsAsync()
+        {
+            var kidsEmails = new[]
+            {
+        "kids.kingdom@placeholder.com",
+        "kids.happycastle@placeholder.com",
+        "kids.partyjungle@placeholder.com",
+        "kids.funtime@placeholder.com",
+        "kids.littlerascals@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => kidsEmails.Contains(u.Email)))
+                return;
+
+            var kidsType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Kids Activities");
+
+            if (kidsType == null)
+            {
+                Console.WriteLine("[KidsSeeding] VendorType 'Kids Activities' not found.");
+                return;
+            }
+
+            var kidsData = new[]
+            {
+        new {
+            BusinessName = "Kids Kingdom Cairo",
+            Phone        = "01000000120",
+            Email        = "kids.kingdom@placeholder.com",
+            Street       = "Maadi",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Maadi", 29.9602m, 31.2569m) }
+        },
+        new {
+            BusinessName = "Happy Castle Play",
+            Phone        = "",
+            Email        = "kids.happycastle@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        },
+        new {
+            BusinessName = "Party Jungle Egypt",
+            Phone        = "01000000121",
+            Email        = "kids.partyjungle@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        },
+        new {
+            BusinessName = "Fun Time Zone",
+            Phone        = "",
+            Email        = "kids.funtime@placeholder.com",
+            Street       = "Nasr City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Nasr City", 30.0490m, 31.3303m) }
+        },
+        new {
+            BusinessName = "Little Rascals Party",
+            Phone        = "01000000122",
+            Email        = "kids.littlerascals@placeholder.com",
+            Street       = "Downtown Cairo",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Downtown", 30.0444m, 31.2357m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                kidsData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                kidsType,
+                "KidsSeeding");
+
+            Console.WriteLine("[KidsSeeding] Completed.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  CORPORATE SERVICES VENDORS
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedCorporateVendorsAsync()
+        {
+            var corporateEmails = new[]
+            {
+        "corp.nilespeakers@placeholder.com",
+        "corp.summit@placeholder.com",
+        "corp.emcpros@placeholder.com",
+        "corp.interwork@placeholder.com"
+    };
+
+            if (await context.ApplicationUsers.AnyAsync(u => corporateEmails.Contains(u.Email)))
+                return;
+
+            var corporateType = await context.VendorTypes
+                .FirstOrDefaultAsync(v => v.Name == "Corporate Services");
+
+            if (corporateType == null)
+            {
+                Console.WriteLine("[CorporateSeeding] VendorType 'Corporate Services' not found.");
+                return;
+            }
+
+            var corporateData = new[]
+            {
+        new {
+            BusinessName = "Nile Speakers Bureau",
+            Phone        = "01000000130",
+            Email        = "corp.nilespeakers@placeholder.com",
+            Street       = "Zamalek",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Zamalek", 30.0626m, 31.2197m) }
+        },
+        new {
+            BusinessName = "Summit Translators Egypt",
+            Phone        = "",
+            Email        = "corp.summit@placeholder.com",
+            Street       = "Garden City",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Garden City", 30.0393m, 31.2280m) }
+        },
+        new {
+            BusinessName = "Event MC Pros",
+            Phone        = "01000000131",
+            Email        = "corp.emcpros@placeholder.com",
+            Street       = "Mohandessin",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "Mohandessin", 30.0466m, 31.1956m) }
+        },
+        new {
+            BusinessName = "InterWork Translating",
+            Phone        = "",
+            Email        = "corp.interwork@placeholder.com",
+            Street       = "New Cairo",
+            City         = "Cairo",
+            State        = "Cairo Governorate",
+            Regions      = new[] { ("Cairo", "New Cairo", 30.0120m, 31.4354m) }
+        }
+    };
+
+            await SeedVendorListAsync(
+                corporateData.Select(v => (v.BusinessName, v.Phone, v.Email, v.Street, v.City, v.State, v.Regions)),
+                corporateType,
+                "CorporateSeeding");
+
+            Console.WriteLine("[CorporateSeeding] Completed.");
+        }
         // ─────────────────────────────────────────────────────────────────────
         //  SHARED HELPER — creates ApplicationUser + Vendor + ServiceAreas
         // ─────────────────────────────────────────────────────────────────────
@@ -1132,6 +2345,7 @@ namespace Infrastructure.Persistence
         new ServiceType { Name = "Set Menu", VendorTypeId = catering.Id },
         new ServiceType { Name = "Live Cooking", VendorTypeId = catering.Id },
         new ServiceType { Name = "Drinks Corner", VendorTypeId = catering.Id },
+        new ServiceType { Name = "Cake Design", VendorTypeId = catering.Id },
 
         // Venue
         new ServiceType { Name = "Indoor Venue", VendorTypeId = venue.Id },
