@@ -2314,332 +2314,750 @@ namespace Infrastructure.Persistence
             var furniture = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Furniture & Setup");
             var media = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Media");
             var catering = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Catering");
+            var cakeDesign = catering;
             var entertainment = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Entertainment");
-            var Printing = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Printing & Invitations");
+            var printing = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Printing");
             var transportation = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Transportation");
             var venue = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Venue");
-            if (furniture == null || media == null || catering == null || entertainment == null || Printing == null || transportation == null || venue == null)
+
+            if (furniture == null || media == null || catering == null || cakeDesign == null ||
+                entertainment == null || printing == null || transportation == null || venue == null)
             {
-                Console.WriteLine("VendorTypes missing.");
+                Console.WriteLine("[ServiceTypeSeeding] One or more VendorTypes missing.");
                 return;
             }
 
             var serviceTypes = new List<ServiceType>
     {
         // Furniture & Setup
-        new ServiceType { Name = "Chairs Rental", VendorTypeId = furniture.Id },
-        new ServiceType { Name = "Tables Rental", VendorTypeId = furniture.Id },
-        new ServiceType { Name = "Stage Setup", VendorTypeId = furniture.Id },
-        new ServiceType { Name = "Lighting System Setup", VendorTypeId = furniture.Id },
-        new ServiceType { Name = "Sound System Setup", VendorTypeId = furniture.Id },
-        new ServiceType { Name = "LED Screens", VendorTypeId = furniture.Id },
+        new ServiceType { Name = "Chairs Rental",        VendorTypeId = furniture.Id },
+        new ServiceType { Name = "Tables Rental",        VendorTypeId = furniture.Id },
+        new ServiceType { Name = "Stage Setup",          VendorTypeId = furniture.Id },
+        new ServiceType { Name = "Lighting System Setup",VendorTypeId = furniture.Id },
+        new ServiceType { Name = "Sound System Setup",   VendorTypeId = furniture.Id },
+        new ServiceType { Name = "LED Screens",          VendorTypeId = furniture.Id },
 
         // Media
-        new ServiceType { Name = "Photographer", VendorTypeId = media.Id },
-        new ServiceType { Name = "Videographer", VendorTypeId = media.Id },
-        new ServiceType { Name = "Drone Videography", VendorTypeId = media.Id },
-        new ServiceType { Name = "Photobooth", VendorTypeId = media.Id },
+        new ServiceType { Name = "Photographer",         VendorTypeId = media.Id },
+        new ServiceType { Name = "Videographer",         VendorTypeId = media.Id },
+        new ServiceType { Name = "Drone Videography",    VendorTypeId = media.Id },
+        new ServiceType { Name = "Photobooth",           VendorTypeId = media.Id },
 
         // Catering
-        new ServiceType { Name = "Open Buffet", VendorTypeId = catering.Id },
-        new ServiceType { Name = "Set Menu", VendorTypeId = catering.Id },
-        new ServiceType { Name = "Live Cooking", VendorTypeId = catering.Id },
-        new ServiceType { Name = "Drinks Corner", VendorTypeId = catering.Id },
-        new ServiceType { Name = "Cake Design", VendorTypeId = catering.Id },
+        new ServiceType { Name = "Open Buffet",          VendorTypeId = catering.Id },
+        new ServiceType { Name = "Set Menu",             VendorTypeId = catering.Id },
+        new ServiceType { Name = "Live Cooking",         VendorTypeId = catering.Id },
+        new ServiceType { Name = "Drinks Corner",        VendorTypeId = catering.Id },
+        new ServiceType { Name = "Dessert & Candy Bar",  VendorTypeId = catering.Id },
+
+        // Cake Design (maps to both Catering and Cake Design vendor type)
+        new ServiceType { Name = "Cake Design",          VendorTypeId = catering.Id },
+        new ServiceType { Name = "Cake Design",          VendorTypeId = cakeDesign.Id },
 
         // Venue
-        new ServiceType { Name = "Indoor Venue", VendorTypeId = venue.Id },
-        new ServiceType { Name = "Outdoor Venue", VendorTypeId = venue.Id },
+        new ServiceType { Name = "Indoor Venue",         VendorTypeId = venue.Id },
+        new ServiceType { Name = "Outdoor Venue",        VendorTypeId = venue.Id },
 
         // Entertainment
-        new ServiceType { Name = "DJ", VendorTypeId = entertainment.Id },
+        new ServiceType { Name = "DJ",                   VendorTypeId = entertainment.Id },
 
         // Printing
-        new ServiceType { Name = "Printed Invitations", VendorTypeId = Printing.Id },
-        new ServiceType { Name = "Digital Invitations", VendorTypeId = Printing.Id },
-        new ServiceType { Name = "Banners", VendorTypeId = Printing.Id },
-        new ServiceType { Name = "Customized Cards", VendorTypeId = Printing.Id },
+        new ServiceType { Name = "Printed Invitations",  VendorTypeId = printing.Id },
+        new ServiceType { Name = "Digital Invitations",  VendorTypeId = printing.Id },
+        new ServiceType { Name = "Banners",              VendorTypeId = printing.Id },
+        new ServiceType { Name = "Customized Cards",     VendorTypeId = printing.Id },
 
         // Transportation
-        new ServiceType { Name = "Luxury Transport", VendorTypeId = transportation.Id },
-        new ServiceType { Name = "Limousine", VendorTypeId = transportation.Id },
-        new ServiceType { Name = "Shuttle Transport", VendorTypeId = transportation.Id }
+        new ServiceType { Name = "Luxury Transport",     VendorTypeId = transportation.Id },
+        new ServiceType { Name = "Limousine",            VendorTypeId = transportation.Id },
+        new ServiceType { Name = "Shuttle Transport",    VendorTypeId = transportation.Id },
     };
 
             await context.ServiceTypes.AddRangeAsync(serviceTypes);
             await context.SaveChangesAsync();
+
+            Console.WriteLine("[ServiceTypeSeeding] Completed.");
         }
 
+        // ─────────────────────────────────────────────────────────────────────
+        //  SERVICES
+        // ─────────────────────────────────────────────────────────────────────
         private async Task SeedServicesAsync()
         {
             if (await context.Services.AnyAsync())
                 return;
 
-            var vendors = await context.Vendors.ToListAsync();
-
-            var photography = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Photography");
-            var catering = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Catering");
-            var decoration = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Decoration");
-
+            // ── event types ──
             var wedding = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Wedding");
             var birthday = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Birthday");
-            var grad = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Graduation");
+            var graduation = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Graduation");
 
-            if (photography == null || catering == null || decoration == null)
+            if (wedding == null || birthday == null || graduation == null)
+            {
+                Console.WriteLine("[ServicesSeeding] EventTypes missing.");
                 return;
+            }
+
+            // ── service types ──
+            var stOpenBuffet = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Open Buffet");
+            var stSetMenu = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Set Menu");
+            var stLiveCooking = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Live Cooking");
+            var stDrinksCorner = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Drinks Corner");
+            var stDessertCandyBar = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Dessert & Candy Bar");
+            var stCakeDesign = await context.ServiceTypes
+                                        .FirstOrDefaultAsync(s => s.Name == "Cake Design" &&
+                                                                  s.VendorType.Name == "Catering");
+
+            if (stOpenBuffet == null || stSetMenu == null || stLiveCooking == null ||
+                stDrinksCorner == null || stDessertCandyBar == null || stCakeDesign == null)
+            {
+                Console.WriteLine("[ServicesSeeding] One or more ServiceTypes missing.");
+                return;
+            }
+
+            // ── vendor lookup helper ──
+            async Task<Guid?> VendorId(string email)
+            {
+                var user = await context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == email);
+                return user?.Id;
+            }
 
             var services = new List<Service>();
 
-            var rand = new Random();
-
-            // =========================
-            // 1. PHOTOGRAPHY & MEDIA (30+)
-            // =========================
-            foreach (var v in vendors.Take(10))
+            // helper to skip a vendor if not found
+            void Add(Guid? vendorId, IEnumerable<Service> vendorServices)
             {
-                services.AddRange(new[]
-                {
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Wedding Cinematic Photography Package",
-                Description = "Full-day cinematic wedding coverage with edited album",
-                Price = rand.Next(4000, 12000),
-                VendorId = v.UserId,
-                ServiceTypeId = photography.Id,
-                SetupDuration = 6,
-                LeadTimeRequired = 2,
-                EventTypes = new List<EventType>{ wedding }
-            },
-
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Engagement Photoshoot",
-                Description = "Outdoor engagement session with color grading",
-                Price = rand.Next(1500, 5000),
-                VendorId = v.UserId,
-                ServiceTypeId = photography.Id,
-                SetupDuration = 2,
-                LeadTimeRequired = 1,
-                EventTypes = new List<EventType>{ wedding }
-            },
-
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Corporate Event Photography",
-                Description = "Professional coverage for conferences and business events",
-                Price = rand.Next(3000, 8000),
-                VendorId = v.UserId,
-                ServiceTypeId = photography.Id,
-                SetupDuration = 5,
-                LeadTimeRequired = 1,
-                EventTypes = new List<EventType>{ wedding, grad }
-            },
-
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Drone Aerial Coverage",
-                Description = "4K drone footage for outdoor events",
-                Price = rand.Next(2000, 6000),
-                VendorId = v.UserId,
-                ServiceTypeId = photography.Id,
-                SetupDuration = 3,
-                LeadTimeRequired = 1,
-                EventTypes = new List<EventType>{ wedding, birthday, grad }
-            }
-        });
+                if (vendorId.HasValue)
+                    services.AddRange(vendorServices);
             }
 
-            // =========================
-            // 2. CATERING SERVICES (40+)
-            // =========================
-            foreach (var v in vendors.Take(15))
+            // ── Abou El Sid ──
+            var abouElSidId = await VendorId("catering.abouelsid@placeholder.com");
+            Add(abouElSidId, new[]
             {
-                services.AddRange(new[]
-                {
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Luxury Wedding Buffet",
-                Description = "Full buffet catering for weddings (100–300 guests)",
-                Price = rand.Next(15000, 60000),
-                VendorId = v.UserId,
-                ServiceTypeId = catering.Id,
-                SetupDuration = 4,
-                LeadTimeRequired = 3,
-                EventTypes = new List<EventType>{ wedding }
-            },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Abou El Sid Full Egyptian Buffet",
+            Description = "Buffet of authentic Egyptian classics (kebabs, kofta, mezze, etc.), with dessert station.",
+            Price = 30000, VendorId = abouElSidId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 5, LeadTimeRequired = 3,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Abou El Sid Set Menu Dinner",
+            Description = "Three-course set menu featuring gourmet Egyptian & Mediterranean dishes.",
+            Price = 15000, VendorId = abouElSidId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 3, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Live Grill Station",
+            Description = "On-site charcoal grill station for fresh kebab, kofta and shish tawook.",
+            Price = 18000, VendorId = abouElSidId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 4, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Dessert & Candy Bar",
+            Description = "Selection of Egyptian desserts and candy (basbousa, konafa, etc.) with candies.",
+            Price = 7000, VendorId = abouElSidId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Drinks Corner – Fresh Juices",
+            Description = "Cold-pressed juices, mint lemonade and soft drinks station.",
+            Price = 4000, VendorId = abouElSidId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday, graduation }
+        }
+    });
 
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Corporate Lunch Buffet",
-                Description = "Business catering with international menu",
-                Price = rand.Next(5000, 20000),
-                VendorId = v.UserId,
-                ServiceTypeId = catering.Id,
-                SetupDuration = 3,
-                LeadTimeRequired = 2,
-                EventTypes = new List<EventType>{ grad, wedding }
-            },
-
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Live Cooking Station",
-                Description = "Interactive chef stations (pasta, grill, sushi)",
-                Price = rand.Next(8000, 25000),
-                VendorId = v.UserId,
-                ServiceTypeId = catering.Id,
-                SetupDuration = 5,
-                LeadTimeRequired = 2,
-                EventTypes = new List<EventType>{ wedding, birthday }
-            },
-
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Dessert & Candy Bar Setup",
-                Description = "Themed dessert table with premium sweets",
-                Price = rand.Next(3000, 10000),
-                VendorId = v.UserId,
-                ServiceTypeId = catering.Id,
-                SetupDuration = 2,
-                LeadTimeRequired = 1,
-                EventTypes = new List<EventType>{ wedding, birthday }
-            }
-        });
-            }
-
-            // =========================
-            // 3. DECORATION (30+)
-            // =========================
-            foreach (var v in vendors.Take(12))
+            // ── Zooba ──
+            var zoobaId = await VendorId("catering.zooba@placeholder.com");
+            Add(zoobaId, new[]
             {
-                services.AddRange(new[]
-                {
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Luxury Wedding Decoration Package",
-                Description = "Full venue styling with floral + stage design",
-                Price = rand.Next(10000, 50000),
-                VendorId = v.UserId,
-                ServiceTypeId = decoration.Id,
-                SetupDuration = 8,
-                LeadTimeRequired = 3,
-                EventTypes = new List<EventType>{ wedding }
-            },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Egyptian Street Food Buffet",
+            Description = "Buffet of popular street-food dishes (koshary, falafel, hawawshi, etc.).",
+            Price = 20000, VendorId = zoobaId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 5, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Zooba Set Menu",
+            Description = "Curated set menu highlighting Egyptian favourites in plated courses.",
+            Price = 10000, VendorId = zoobaId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 3, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Live Koshary Station",
+            Description = "On-site koshary preparation station: rice, lentils, pasta and all toppings served fresh.",
+            Price = 12000, VendorId = zoobaId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 4, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Drinks Corner – Fresh Juice Bar",
+            Description = "Assorted fresh juices, smoothies and mint lemonade drinks station.",
+            Price = 3000, VendorId = zoobaId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Dessert & Candy Bar",
+            Description = "Traditional desserts and candy bar (basbousa, kahk, assorted candies).",
+            Price = 4000, VendorId = zoobaId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        }
+    });
 
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Balloon Decoration Setup",
-                Description = "Birthday themed balloon setups",
-                Price = rand.Next(2000, 8000),
-                VendorId = v.UserId,
-                ServiceTypeId = decoration.Id,
-                SetupDuration = 3,
-                LeadTimeRequired = 1,
-                EventTypes = new List<EventType>{ birthday }
-            },
-
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Corporate Branding Backdrop",
-                Description = "Branded stage & media wall design",
-                Price = rand.Next(4000, 15000),
-                VendorId = v.UserId,
-                ServiceTypeId = decoration.Id,
-                SetupDuration = 4,
-                LeadTimeRequired = 2,
-                EventTypes = new List<EventType>{ grad, wedding }
-            },
-
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Floral Arrangement Package",
-                Description = "Premium floral designs for halls & stages",
-                Price = rand.Next(3000, 12000),
-                VendorId = v.UserId,
-                ServiceTypeId = decoration.Id,
-                SetupDuration = 3,
-                LeadTimeRequired = 2,
-                EventTypes = new List<EventType>{ wedding }
-            }
-        });
-            }
-
-            // =========================
-            // 4. EVENT PRODUCTION (NEW - 20+)
-            // =========================
-            foreach (var v in vendors.Take(10))
+            // ── Tabali ──
+            var tabaliId = await VendorId("catering.tabali@placeholder.com");
+            Add(tabaliId, new[]
             {
-                var productionType = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Photography"); // fallback reuse
+        new Service {
+            Id = Guid.NewGuid(), Name = "Mediterranean Buffet",
+            Description = "Buffet of Mediterranean favourites (hummus, kebabs, mezze, seafood, etc.).",
+            Price = 25000, VendorId = tabaliId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 5, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Premium Set Menu",
+            Description = "Plated multi-course meal with gourmet Middle Eastern and international dishes.",
+            Price = 15000, VendorId = tabaliId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 3, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Live Grill Station",
+            Description = "Open grill station with mixed kebabs and shawarma carved to order.",
+            Price = 18000, VendorId = tabaliId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 4, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Dessert Table",
+            Description = "Assortment of pastries and sweets (baklava, kunafa, maamoul) with candy bar.",
+            Price = 6000, VendorId = tabaliId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Beverage Station – Coffee & Tea",
+            Description = "Hot beverage station with premium Arabic coffee, tea and mint lemonade.",
+            Price = 3000, VendorId = tabaliId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
 
-                services.AddRange(new[]
-                {
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Full Event Production Package",
-                Description = "Complete sound, lighting, staging & coordination",
-                Price = rand.Next(20000, 100000),
-                VendorId = v.UserId,
-                ServiceTypeId = productionType.Id,
-                SetupDuration = 10,
-                LeadTimeRequired = 4,
-                EventTypes = new List<EventType>{ wedding, grad, birthday }
-            },
+            // ── Etoile ──
+            var etoileId = await VendorId("catering.etoile@placeholder.com");
+            Add(etoileId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Classic Buffet Dinner",
+            Description = "Elegant buffet with international dishes (meats, salads, sushi, etc.).",
+            Price = 30000, VendorId = etoileId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 6, LeadTimeRequired = 3,
+            EventTypes = new List<EventType> { wedding, birthday, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Gourmet Set Menu",
+            Description = "Five-star plated menu with upscale international and oriental cuisine.",
+            Price = 20000, VendorId = etoileId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 4, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Live Molecular Station",
+            Description = "Interactive live cooking with modern gastronomic techniques.",
+            Price = 25000, VendorId = etoileId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 5, LeadTimeRequired = 3,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Chocolate Fountain Dessert",
+            Description = "Grand dessert station featuring a flowing chocolate fountain and fruit skewers.",
+            Price = 10000, VendorId = etoileId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 3, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Premium Beverage Cart",
+            Description = "Champagne, mocktails, and premium juices served by a mobile bar cart.",
+            Price = 5000, VendorId = etoileId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
 
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "LED Screen & Visual Setup",
-                Description = "High resolution LED walls for events",
-                Price = rand.Next(8000, 30000),
-                VendorId = v.UserId,
-                ServiceTypeId = productionType.Id,
-                SetupDuration = 5,
-                LeadTimeRequired = 2,
-                EventTypes = new List<EventType>{ wedding, grad }
-            },
+            // ── Cilantro ──
+            var cilantroId = await VendorId("catering.cilantro@placeholder.com");
+            Add(cilantroId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "International Buffet",
+            Description = "Buffet featuring global cuisine (salads, pastas, seafood, etc.) and vegetarian options.",
+            Price = 20000, VendorId = cilantroId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 5, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Executive Set Menu",
+            Description = "Business-style plated menu with premium dishes (steaks, seafood, etc.).",
+            Price = 15000, VendorId = cilantroId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 3, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Dessert Buffet (Pastries & Cakes)",
+            Description = "Extended dessert buffet with cakes, tarts, macarons and signature Cilantro pastries.",
+            Price = 8000, VendorId = cilantroId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Signature Cake Design",
+            Description = "Custom-designed wedding cake (flavours by choice, artistically decorated).",
+            Price = 7000, VendorId = cilantroId!.Value, ServiceTypeId = stCakeDesign.Id,
+            SetupDuration = 2, LeadTimeRequired = 3,
+            EventTypes = new List<EventType> { wedding }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Specialty Coffee Station",
+            Description = "Barista service with gourmet coffee, teas and infused coffees.",
+            Price = 3000, VendorId = cilantroId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
 
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Professional Sound System",
-                Description = "PA system for conferences and weddings",
-                Price = rand.Next(5000, 20000),
-                VendorId = v.UserId,
-                ServiceTypeId = productionType.Id,
-                SetupDuration = 3,
-                LeadTimeRequired = 1,
-                EventTypes = new List<EventType>{ wedding, birthday, grad }
-            },
+            // ── Sequoia ──
+            var sequoiaId = await VendorId("catering.sequoia@placeholder.com");
+            Add(sequoiaId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Sequoia Luxury Buffet",
+            Description = "High-end buffet with gourmet international and seafood dishes.",
+            Price = 35000, VendorId = sequoiaId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 6, LeadTimeRequired = 3,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Sequoia Set Menu",
+            Description = "Refined multi-course menu with premium ingredients (foie gras, lobster, etc.).",
+            Price = 20000, VendorId = sequoiaId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 4, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Seafood Grill Station",
+            Description = "Live grilling station featuring prawns, calamari, and grilled fish fillets.",
+            Price = 30000, VendorId = sequoiaId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 5, LeadTimeRequired = 3,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Signature Dessert Bar",
+            Description = "Premium dessert bar with chocolate fountain, crepes, and specialty cakes.",
+            Price = 10000, VendorId = sequoiaId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 3, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Mocktail Bar",
+            Description = "Non-alcoholic cocktail bar with fresh fruit drinks and mocktails.",
+            Price = 5000, VendorId = sequoiaId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
 
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Stage Lighting Package",
-                Description = "Dynamic lighting design with DMX control",
-                Price = rand.Next(6000, 25000),
-                VendorId = v.UserId,
-                ServiceTypeId = productionType.Id,
-                SetupDuration = 4,
-                LeadTimeRequired = 2,
-                EventTypes = new List<EventType>{ wedding, grad }
-            },
+            // ── Kazouza ──
+            var kazouzaId = await VendorId("catering.kazouza@placeholder.com");
+            Add(kazouzaId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Kazouza International Buffet",
+            Description = "Buffet with international cuisine (Mediterranean salads, pasta, etc.) and grill station.",
+            Price = 22000, VendorId = kazouzaId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 5, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Kazouza Set Menu",
+            Description = "Plated menu with premium dishes (steak, fish, vegetarian options).",
+            Price = 12000, VendorId = kazouzaId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 3, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "BBQ Grill Station",
+            Description = "Open barbecue station with kebabs, grilled chicken wings and sausages.",
+            Price = 16000, VendorId = kazouzaId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 4, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Dessert Table",
+            Description = "International dessert selection (cakes, pastries, and mini sweets).",
+            Price = 6000, VendorId = kazouzaId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Refreshment Corner",
+            Description = "Soft drinks, juices and water station with an attendant.",
+            Price = 3000, VendorId = kazouzaId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
 
-            new Service {
-                Id = Guid.NewGuid(),
-                Name = "Live Streaming Setup",
-                Description = "Multi-camera live broadcast production",
-                Price = rand.Next(7000, 30000),
-                VendorId = v.UserId,
-                ServiceTypeId = productionType.Id,
-                SetupDuration = 6,
-                LeadTimeRequired = 3,
-                EventTypes = new List<EventType>{ wedding, grad }
-            }
-        });
-            }
+            // ── Cook Door ──
+            var cookDoorId = await VendorId("catering.cookdoor@placeholder.com");
+            Add(cookDoorId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Family Chicken & Pizza Buffet",
+            Description = "Buffet featuring Cook Door specials (grilled chicken, shawarma, pizza, fries).",
+            Price = 15000, VendorId = cookDoorId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 4, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { birthday, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Shawarma & Pizza Set Menu",
+            Description = "Meal package with platters of shawarma, pizza and sides for large groups.",
+            Price = 10000, VendorId = cookDoorId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 3, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Live Shawarma Station",
+            Description = "On-site shawarma carving station with freshly made sauces and salads.",
+            Price = 12000, VendorId = cookDoorId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 4, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Kids Party Menu",
+            Description = "Special menu for children (mini pizzas, chicken fingers, fries, popcorn).",
+            Price = 10000, VendorId = cookDoorId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Soft Drinks Corner",
+            Description = "Unlimited soft drinks, juices and water station for the event.",
+            Price = 3000, VendorId = cookDoorId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Dessert & Candy Bar",
+            Description = "Assorted candies and baked treats table (galawati, brownies, jelly).",
+            Price = 5000, VendorId = cookDoorId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        }
+    });
+
+            // ── Dido's ──
+            var didosId = await VendorId("catering.didos@placeholder.com");
+            Add(didosId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Deluxe Dessert Buffet",
+            Description = "Lavish dessert spread with cakes, tarts, brownies, and chocolate specialties.",
+            Price = 8000, VendorId = didosId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 3, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Chocolate Fountain Station",
+            Description = "Tiered chocolate fountain with fruit skewers and marshmallows for dipping.",
+            Price = 6000, VendorId = didosId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Gourmet Pastries Selection",
+            Description = "Assorted premium pastries and confectioneries by Dido's chefs.",
+            Price = 7000, VendorId = didosId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Customized Celebration Cake",
+            Description = "Artisanal cake for weddings/events (design per theme, high-quality ingredients).",
+            Price = 5000, VendorId = didosId!.Value, ServiceTypeId = stCakeDesign.Id,
+            SetupDuration = 2, LeadTimeRequired = 3,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Coffee & Tea Bar",
+            Description = "Self-service bar with espresso, cappuccino, tea and specialty coffees.",
+            Price = 3000, VendorId = didosId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
+
+            // ── Willy's Kitchen ──
+            var willysId = await VendorId("catering.willyskitchen@placeholder.com");
+            Add(willysId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Home-style Buffet",
+            Description = "Comfort-food buffet with traditional Egyptian dishes and family favorites.",
+            Price = 18000, VendorId = willysId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 4, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Set Menu – Family Feast",
+            Description = "Hearty plated menu with classic mains (lamb, chicken, rice, etc.).",
+            Price = 10000, VendorId = willysId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 3, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Live Egyptian Grill",
+            Description = "On-site open-flame grill serving kebabs, kofta and shawarma.",
+            Price = 14000, VendorId = willysId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 4, LeadTimeRequired = 2,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Dessert Table",
+            Description = "Traditional sweets buffet (atayef, basbousa, rice pudding, etc.).",
+            Price = 5000, VendorId = willysId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Beverage Corner",
+            Description = "Soft drinks and juices served in dispensers with self-serve glasses.",
+            Price = 3000, VendorId = willysId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
+
+            // ── Nino's Bakery ──
+            var ninosId = await VendorId("happiness@ninosbakeryeg.com");
+            Add(ninosId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Signature Wedding Cake",
+            Description = "Custom-designed multi-tier wedding cake with premium fillings and decor.",
+            Price = 7000, VendorId = ninosId!.Value, ServiceTypeId = stCakeDesign.Id,
+            SetupDuration = 2, LeadTimeRequired = 7,
+            EventTypes = new List<EventType> { wedding }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Custom Celebration Cake",
+            Description = "Personalized cake for birthdays or events, hand-crafted designs.",
+            Price = 5000, VendorId = ninosId!.Value, ServiceTypeId = stCakeDesign.Id,
+            SetupDuration = 2, LeadTimeRequired = 5,
+            EventTypes = new List<EventType> { birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Dessert Platter",
+            Description = "Assorted pastries and bites (brownies, cookies, minis) on platters.",
+            Price = 4000, VendorId = ninosId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Cupcake & Cookie Tower",
+            Description = "Tiered display of decorated cupcakes and gourmet cookies.",
+            Price = 3000, VendorId = ninosId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Espresso & Tea Station",
+            Description = "Barista service with espresso, cappuccino and selection of teas.",
+            Price = 1000, VendorId = ninosId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
+
+            // ── Cairo Cakes Co ──
+            var cairoCakesId = await VendorId("cake.cairocakes@placeholder.com");
+            Add(cairoCakesId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Luxury Wedding Cake",
+            Description = "Hand-crafted tiered wedding cake with bespoke decoration and flavors.",
+            Price = 8000, VendorId = cairoCakesId!.Value, ServiceTypeId = stCakeDesign.Id,
+            SetupDuration = 2, LeadTimeRequired = 7,
+            EventTypes = new List<EventType> { wedding }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Cupcake Tower",
+            Description = "Elegant tiered display of gourmet cupcakes and mini pastries.",
+            Price = 3000, VendorId = cairoCakesId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Mini Dessert Buffet",
+            Description = "Selection of petit fours, cake pops and macarons.",
+            Price = 5000, VendorId = cairoCakesId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { birthday, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Chocolate Fountain",
+            Description = "Fountain of dark or white chocolate with fruit and marshmallows.",
+            Price = 7000, VendorId = cairoCakesId!.Value, ServiceTypeId = stLiveCooking.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Beverage Station (Juices & Tea)",
+            Description = "Self-serve station with fresh juices, water and herbal teas.",
+            Price = 2000, VendorId = cairoCakesId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
+
+            // ── Pharaonic Pastries ──
+            var pharaonicId = await VendorId("cake.pharaonic@placeholder.com");
+            Add(pharaonicId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Oriental Dessert Buffet",
+            Description = "Buffet of Egyptian and Middle Eastern sweets (baklava, basbousa, kahk).",
+            Price = 6000, VendorId = pharaonicId!.Value, ServiceTypeId = stOpenBuffet.Id,
+            SetupDuration = 3, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Traditional Sweets Platter",
+            Description = "Assortment platter of kebab, halawa, marzipan and other candies.",
+            Price = 5000, VendorId = pharaonicId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Custom Themed Cake",
+            Description = "Designer cake with Egyptian motifs (pharaonic, lotus) for special events.",
+            Price = 4000, VendorId = pharaonicId!.Value, ServiceTypeId = stCakeDesign.Id,
+            SetupDuration = 2, LeadTimeRequired = 5,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Baklava Bar",
+            Description = "Unlimited baklava station with traditional and modern fillings.",
+            Price = 3000, VendorId = pharaonicId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Mint Tea Corner",
+            Description = "Serving traditional mint tea and coffee in oriental style cups.",
+            Price = 1000, VendorId = pharaonicId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
+
+            // ── Sweet Garden Cairo ──
+            var sweetGardenId = await VendorId("cake.sweetgarden@placeholder.com");
+            Add(sweetGardenId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Premium Wedding Cake",
+            Description = "Bespoke multi-tier cake with floral/garden-themed design.",
+            Price = 8000, VendorId = sweetGardenId!.Value, ServiceTypeId = stCakeDesign.Id,
+            SetupDuration = 2, LeadTimeRequired = 7,
+            EventTypes = new List<EventType> { wedding }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Dessert Sampler Table",
+            Description = "Variety of mini cakes, macarons and fruit tarts in buffet style.",
+            Price = 6000, VendorId = sweetGardenId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Gourmet Cupcake Tower",
+            Description = "Tower display of decorated cupcakes in assorted flavours.",
+            Price = 4000, VendorId = sweetGardenId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Coffee & Tea Cart",
+            Description = "Mobile cart serving espresso, cappuccino and tea alongside pastries.",
+            Price = 1000, VendorId = sweetGardenId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Candy Buffet",
+            Description = "Table of assorted candies and chocolates, jars for self-serving.",
+            Price = 5000, VendorId = sweetGardenId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        }
+    });
+
+            // ── Royal Bakeries Cairo ──
+            var royalId = await VendorId("cake.royal@placeholder.com");
+            Add(royalId, new[]
+            {
+        new Service {
+            Id = Guid.NewGuid(), Name = "Royal Wedding Cake",
+            Description = "Exquisite tiered cake with elaborate royal decorations.",
+            Price = 10000, VendorId = royalId!.Value, ServiceTypeId = stCakeDesign.Id,
+            SetupDuration = 2, LeadTimeRequired = 7,
+            EventTypes = new List<EventType> { wedding }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Luxury Pastry Table",
+            Description = "Grand pastry buffet (tarts, éclairs, macarons, and premium chocolates).",
+            Price = 7000, VendorId = royalId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 3, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Cupcake Assortment",
+            Description = "Variety of decorated cupcakes and mini cakes on trays.",
+            Price = 4000, VendorId = royalId!.Value, ServiceTypeId = stDessertCandyBar.Id,
+            SetupDuration = 1, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Savory Appetizer Platter",
+            Description = "Finger foods and appetizers (mini quiches, samosas, bruschetta).",
+            Price = 5000, VendorId = royalId!.Value, ServiceTypeId = stSetMenu.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, birthday }
+        },
+        new Service {
+            Id = Guid.NewGuid(), Name = "Mocktail Bar",
+            Description = "Selection of non-alcoholic cocktails and fresh juice mocktails.",
+            Price = 3000, VendorId = royalId!.Value, ServiceTypeId = stDrinksCorner.Id,
+            SetupDuration = 2, LeadTimeRequired = 1,
+            EventTypes = new List<EventType> { wedding, graduation }
+        }
+    });
 
             await context.Services.AddRangeAsync(services);
             await context.SaveChangesAsync();
 
-
+            Console.WriteLine($"[ServicesSeeding] Completed. {services.Count} services seeded.");
         }
-
         // ─────────────────────────────────────────────────────────────────────
         //  EVENT
         // ─────────────────────────────────────────────────────────────────────
