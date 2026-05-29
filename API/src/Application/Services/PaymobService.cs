@@ -12,7 +12,7 @@ namespace Application.Services;
 public class PaymobService(
     IHttpClientFactory httpClientFactory,
     IOptions<PaymobOptions> options,
-    IOrderService orderService)
+    IOrderService orderService) : IPaymobService
 {
     private readonly PaymobOptions _options = options.Value;
 

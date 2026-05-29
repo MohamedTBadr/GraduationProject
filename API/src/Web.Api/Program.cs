@@ -93,6 +93,7 @@ namespace Web
 
             try
             {
+                Console.WriteLine("Seeding database...");
                 var initializer = services.GetRequiredService<IDbIntialize>();
                 await initializer.IntializeAsync();
             }

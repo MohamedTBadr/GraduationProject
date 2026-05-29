@@ -44,6 +44,7 @@ namespace Application
             Services.AddScoped<ISupportTicketService, SupportTicketService>();
             Services.AddScoped<IVoucherService, VoucherService>();
             Services.AddScoped<IPlanningAIService, PlanningAIService>();
+            Services.AddScoped<IPaymobService, PaymobService>();
 
             Services.AddScoped<Application.Contracts.IEmailService, HangfireEmailSender>();
 
@@ -97,7 +98,7 @@ namespace Application
             Services.Configure<PaymobOptions>(
     configuration.GetSection("Paymob"));
 
-            Services.AddHttpClient<PaymobService>();
+            Services.AddHttpClient<IPaymobService>();
 
 
 

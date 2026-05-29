@@ -65,7 +65,7 @@ public static class ResultExtensions
             // Validation & Input
             ErrorType.Validation => StatusCodes.Status400BadRequest,
             ErrorType.InvalidOperation => StatusCodes.Status400BadRequest,
-
+            
             // Resource Errors
             ErrorType.NotFound => StatusCodes.Status404NotFound,
             ErrorType.AlreadyExists => StatusCodes.Status409Conflict,

@@ -22,6 +22,7 @@ namespace Infrastructure.Persistence
                 using var transaction = await context.Database.BeginTransactionAsync();
                 try
                 {
+                    Console.WriteLine("Database seeding started...");
                     await SeedVendorTypeAsync();
                     await SeedRolesAsync();
                     await SeedAdminUserAsync();
@@ -63,15 +64,18 @@ namespace Infrastructure.Persistence
             if (await context.VendorTypes.AnyAsync())
                 return;
 
-            var vendorTypes = new List<VendorType>
-            {
-                new VendorType { Id = Guid.NewGuid(), Name = "Photographer"     },
-                new VendorType { Id = Guid.NewGuid(), Name = "Caterer"          },
-                new VendorType { Id = Guid.NewGuid(), Name = "Decorator"        },
-                new VendorType { Id = Guid.NewGuid(), Name = "Venue"            },
-                new VendorType { Id = Guid.NewGuid(), Name = "Coworking Space"  },
-                new VendorType { Id = Guid.NewGuid(), Name = "Production"       }
-            };
+           var vendorTypes= new List<VendorType>
+    {
+        new VendorType { Name = "Furniture Vendor" },
+        new VendorType { Name = "Media Vendor" },
+        new VendorType { Name = "Catering Vendor" },
+        new VendorType { Name = "Venue Vendor" },
+        new VendorType { Name = "Entertainment Vendor" },
+        new VendorType { Name = "Printing Vendor" },
+        new VendorType { Name = "Transportation Vendor" },
+        new VendorType { Name = "Coworking Space" },
+        new VendorType { Name = "Production Vendor" }
+    };
 
             await context.VendorTypes.AddRangeAsync(vendorTypes);
             await context.SaveChangesAsync();
@@ -101,11 +105,11 @@ namespace Infrastructure.Persistence
                 return;
 
             var venueType = await context.VendorTypes
-                .FirstOrDefaultAsync(v => v.Name == "Venue");
+                .FirstOrDefaultAsync(v => v.Name == "Venue Vendor");
 
             if (venueType == null)
             {
-                Console.WriteLine("[VenueSeeding] VendorType 'Venue' not found.");
+                Console.WriteLine("[VenueSeeding] VendorType 'Venue Vendor' not found.");
                 return;
             }
 
@@ -486,11 +490,11 @@ namespace Infrastructure.Persistence
                 return;
 
             var productionType = await context.VendorTypes
-                .FirstOrDefaultAsync(v => v.Name == "Production");
+                .FirstOrDefaultAsync(v => v.Name == "Production Vendor");
 
             if (productionType == null)
             {
-                Console.WriteLine("[ProductionSeeding] VendorType 'Production' not found.");
+                Console.WriteLine("[ProductionSeeding] VendorType 'Production Vendor' not found.");
                 return;
             }
 
@@ -677,11 +681,11 @@ namespace Infrastructure.Persistence
                 return;
 
             var catererType = await context.VendorTypes
-                .FirstOrDefaultAsync(v => v.Name == "Caterer");
+                .FirstOrDefaultAsync(v => v.Name == "Catering Vendor");
 
             if (catererType == null)
             {
-                Console.WriteLine("[CateringSeeding] VendorType 'Caterer' not found.");
+                Console.WriteLine("[CateringSeeding] VendorType 'Catering Vendor' not found.");
                 return;
             }
 
@@ -1094,22 +1098,59 @@ namespace Infrastructure.Persistence
             if (await context.ServiceTypes.AnyAsync())
                 return;
 
-            var photographer = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Photographer");
-            var caterer      = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Caterer");
-            var decorator    = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Decorator");
-
-            if (photographer == null || caterer == null || decorator == null)
+            var furniture = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Furniture & Setup");
+            var media = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Media");
+            var catering = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Catering");
+            var entertainment = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Entertainment");
+            var Printing = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Printing & Invitations");
+            var transportation = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Transportation");
+            var venue = await context.VendorTypes.FirstOrDefaultAsync(v => v.Name == "Venue");
+            if (furniture == null || media == null || catering == null || entertainment == null || Printing == null || transportation == null || venue == null)
             {
                 Console.WriteLine("VendorTypes missing.");
                 return;
             }
 
             var serviceTypes = new List<ServiceType>
-            {
-                new ServiceType { Id = Guid.NewGuid(), Name = "Photography", VendorTypeId = photographer.Id },
-                new ServiceType { Id = Guid.NewGuid(), Name = "Catering",    VendorTypeId = caterer.Id      },
-                new ServiceType { Id = Guid.NewGuid(), Name = "Decoration",  VendorTypeId = decorator.Id   }
-            };
+    {
+        // Furniture & Setup
+        new ServiceType { Name = "Chairs Rental", VendorTypeId = furniture.Id },
+        new ServiceType { Name = "Tables Rental", VendorTypeId = furniture.Id },
+        new ServiceType { Name = "Stage Setup", VendorTypeId = furniture.Id },
+        new ServiceType { Name = "Lighting System Setup", VendorTypeId = furniture.Id },
+        new ServiceType { Name = "Sound System Setup", VendorTypeId = furniture.Id },
+        new ServiceType { Name = "LED Screens", VendorTypeId = furniture.Id },
+
+        // Media
+        new ServiceType { Name = "Photographer", VendorTypeId = media.Id },
+        new ServiceType { Name = "Videographer", VendorTypeId = media.Id },
+        new ServiceType { Name = "Drone Videography", VendorTypeId = media.Id },
+        new ServiceType { Name = "Photobooth", VendorTypeId = media.Id },
+
+        // Catering
+        new ServiceType { Name = "Open Buffet", VendorTypeId = catering.Id },
+        new ServiceType { Name = "Set Menu", VendorTypeId = catering.Id },
+        new ServiceType { Name = "Live Cooking", VendorTypeId = catering.Id },
+        new ServiceType { Name = "Drinks Corner", VendorTypeId = catering.Id },
+
+        // Venue
+        new ServiceType { Name = "Indoor Venue", VendorTypeId = venue.Id },
+        new ServiceType { Name = "Outdoor Venue", VendorTypeId = venue.Id },
+
+        // Entertainment
+        new ServiceType { Name = "DJ", VendorTypeId = entertainment.Id },
+
+        // Printing
+        new ServiceType { Name = "Printed Invitations", VendorTypeId = Printing.Id },
+        new ServiceType { Name = "Digital Invitations", VendorTypeId = Printing.Id },
+        new ServiceType { Name = "Banners", VendorTypeId = Printing.Id },
+        new ServiceType { Name = "Customized Cards", VendorTypeId = Printing.Id },
+
+        // Transportation
+        new ServiceType { Name = "Luxury Transport", VendorTypeId = transportation.Id },
+        new ServiceType { Name = "Limousine", VendorTypeId = transportation.Id },
+        new ServiceType { Name = "Shuttle Transport", VendorTypeId = transportation.Id }
+    };
 
             await context.ServiceTypes.AddRangeAsync(serviceTypes);
             await context.SaveChangesAsync();
