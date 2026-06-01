@@ -48,7 +48,10 @@ namespace Application.Services
             var isValid = await userRepository.CheckPasswordAsync(user, loginRequest.password, cancellationToken);
 
             if (!isValid)
-                throw new UnauthorizedException("Invalid credentials.");
+            {
+                Result<UserResponse> failureResult = Result<UserResponse>.Failure(Error.Unauthorized(401, "Invalid credentials."));
+                return failureResult;
+            }
 
             // 3. Check roles and vendor verification
             var roles = await userRepository.GetUserRolesAsync(user, cancellationToken);
@@ -58,7 +61,10 @@ namespace Application.Services
             {
                 var isVerified = await userRepository.IsVendorVerifiedAsync(user.Id, cancellationToken);
                 if (!isVerified)
-                    throw new BadRequestException(new List<string> { "Your vendor account is not verified yet. Please wait for approval." });
+                {
+                    Result<UserResponse> failureResult = Result<UserResponse>.Failure(Error.BusinessRule(400, "Your vendor account is not verified yet. Please wait for approval."));
+                    return failureResult;
+                }
             }
 
             // 4. Generate Tokens

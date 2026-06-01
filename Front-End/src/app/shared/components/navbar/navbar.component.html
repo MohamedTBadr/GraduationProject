@@ -71,8 +71,8 @@
         </div>
       </button>
 
-      <button (click)="theme.toggle()">
-        {{ theme.isDark ? "☀️" : "🌙" }}
+      <button (click)="theme.toggleTheme()">
+        {{ theme.isDark() ? "☀️" : "🌙" }}
       </button>
 
       <!-- Not Logged In -->

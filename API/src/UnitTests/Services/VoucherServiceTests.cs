@@ -100,7 +100,7 @@ public class VoucherServiceTests
 
         var result = await _sut.GetReferralLinkAsync(userId, CancellationToken.None);
 
-        Assert.Equal("https://epichub.test/register?ref=REF42", result);
+        Assert.Equal("https://epichub.test/register?ref=REF42", result.Value);
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class VoucherServiceTests
             .Setup(x => x.GetByOwnerIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(vouchers);
 
-        var result = (await _sut.GetMyVouchersAsync(userId, CancellationToken.None)).ToList();
+        var result = (await _sut.GetMyVouchersAsync(userId, CancellationToken.None)).Value.ToList();
 
         Assert.Equal(2, result.Count);
         Assert.Equal(vouchers.Select(v => v.Code), result.Select(v => v.Code));
@@ -156,9 +156,9 @@ public class VoucherServiceTests
 
         var result = await _sut.ValidateVoucherAsync("SAVE", userId, CancellationToken.None);
 
-        Assert.False(result.IsValid);
-        Assert.Equal(0, result.DiscountPercent);
-        Assert.Equal(expectedError, result.ErrorMessage);
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+        Assert.Equal(expectedError, result.Error.Description);
     }
 
     [Fact]
@@ -177,20 +177,23 @@ public class VoucherServiceTests
 
         var result = await _sut.ValidateVoucherAsync("SAVE", userId, CancellationToken.None);
 
-        Assert.True(result.IsValid);
-        Assert.Equal(15, result.DiscountPercent);
-        Assert.Null(result.ErrorMessage);
+        Assert.True(result.IsSuccess);
+        Assert.Equal(15, result.Value.DiscountPercent);
+        Assert.Null(result.Value.ErrorMessage);
     }
 
     [Fact]
-    public async Task MarkVoucherUsedAsync_WhenVoucherMissing_ThrowsKeyNotFoundException()
+    public async Task MarkVoucherUsedAsync_WhenVoucherMissing_ReturnsNotFound()
     {
         _voucherRepoMock
             .Setup(x => x.GetByCodeAsync("MISSING", It.IsAny<CancellationToken>()))
             .ReturnsAsync((Voucher?)null);
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            () => _sut.MarkVoucherUsedAsync("MISSING", CancellationToken.None));
+        var result = await _sut.MarkVoucherUsedAsync("MISSING", CancellationToken.None);
+        
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+        Assert.Equal(404, result.Error?.Code);
     }
 
     [Fact]
@@ -219,5 +222,17 @@ public class VoucherServiceTests
 
         Assert.False(voucher.IsUsed);
         _voucherRepoMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ApplyVoucherAsync_VoucherNotFound_ReturnsFailure()
+    {
+        _voucherRepoMock.Setup(repo => repo.GetByCodeAsync("NOT_FOUND", default))
+                        .ReturnsAsync((Voucher)null);
+
+        var result = await _sut.ValidateVoucherAsync("NOT_FOUND", Guid.NewGuid(), CancellationToken.None);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(404, result.Error?.Code);
     }
 }

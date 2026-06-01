@@ -41,7 +41,7 @@
         NotFound,            // Requested resource does not exist
         AlreadyExists,       // Resource already exists (duplicate creation attempt)
         Conflict,            // State conflict (e.g., concurrent update, version mismatch)
-
+        
         // Authorization & Authentication
         Unauthorized,        // User is not authenticated
         Forbidden,           // User is authenticated but lacks permission

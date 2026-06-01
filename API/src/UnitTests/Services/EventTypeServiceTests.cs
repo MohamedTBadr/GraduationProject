@@ -24,14 +24,14 @@ public class EventTypeServiceTests
             .Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([new EventType { Id = Guid.NewGuid(), Name = "Wedding" }]);
 
-        var result = (await _sut.GetAllAsync(CancellationToken.None)).ToList();
+        var result = (await _sut.GetAllAsync(CancellationToken.None)).Value.ToList();
 
         Assert.Single(result);
         Assert.Equal("Wedding", result[0].Name);
     }
 
     [Fact]
-    public async Task GetByIdAsync_WhenMissing_ReturnsNull()
+    public async Task GetByIdAsync_WhenMissing_ReturnsFailure()
     {
         _repositoryMock
             .Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
@@ -39,7 +39,8 @@ public class EventTypeServiceTests
 
         var result = await _sut.GetByIdAsync(Guid.NewGuid(), CancellationToken.None);
 
-        Assert.Null(result);
+        Assert.True(result.IsFailure);
+        Assert.Equal(404, result.Error!.Code);
     }
 
     [Fact]
@@ -47,10 +48,10 @@ public class EventTypeServiceTests
     {
         var result = await _sut.CreateAsync(new EventTypeCreateDto("Conference"), CancellationToken.None);
 
-        Assert.NotEqual(Guid.Empty, result.Id);
-        Assert.Equal("Conference", result.Name);
+        Assert.NotEqual(Guid.Empty, result.Value.Id);
+        Assert.Equal("Conference", result.Value.Name);
         _repositoryMock.Verify(
-            x => x.CreateAsync(It.Is<EventType>(e => e.Id == result.Id && e.Name == "Conference"), It.IsAny<CancellationToken>()),
+            x => x.CreateAsync(It.Is<EventType>(e => e.Id == result.Value.Id && e.Name == "Conference"), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -77,7 +78,7 @@ public class EventTypeServiceTests
 
         var result = await _sut.DeleteAsync(Guid.NewGuid(), CancellationToken.None);
 
-        Assert.False(result);
+        Assert.False(result.IsSuccess);
         _repositoryMock.Verify(x => x.DeleteAsync(It.IsAny<EventType>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -91,7 +92,7 @@ public class EventTypeServiceTests
 
         var result = await _sut.DeleteAsync(existing.Id, CancellationToken.None);
 
-        Assert.True(result);
+        Assert.True(result.IsSuccess);
         _repositoryMock.Verify(x => x.DeleteAsync(existing, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -16,7 +16,7 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var result = await serviceManager.EventTypeService.GetAllAsync(ct);
-            return Ok(result);
+            return result.IsSuccess ? Ok(result.Value) : result.ToActionResult();
         }
 
         [HttpGet("{id:guid}")]
@@ -25,7 +25,8 @@ namespace Web.Api.Controllers
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
             var result = await serviceManager.EventTypeService.GetByIdAsync(id, ct);
-            return result is null ? NotFound() : Ok(result);
+            if (!result.IsSuccess) return result.ToActionResult();
+            return result.Value is null ? NotFound() : Ok(result.Value);
         }
 
         [HttpPost]

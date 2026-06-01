@@ -45,26 +45,6 @@ namespace Web.Api
             {
                 options.Filters.Add<ResultFilter>(); // ← applies to all controllers
             });
-            #region RateLimiter
-            Services.AddRateLimiter(options =>
-            {
-                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-                    RateLimitPartition.GetFixedWindowLimiter(
-                        partitionKey: httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "Unkown",
-                        factory: partition => new FixedWindowRateLimiterOptions
-                        {
-                            AutoReplenishment = true,
-                            PermitLimit = 20,
-                            QueueLimit = 0,
-                            Window = TimeSpan.FromMinutes(1)
-                        }));
-
-                options.OnRejected = async (_, _) =>
-                {
-                    throw new RateLimitExceededException();
-                };
-            });
-            #endregion
 
 
             #region Idompotent API
