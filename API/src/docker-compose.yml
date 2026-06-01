@@ -1,130 +1,237 @@
+version: '3.9'
+
 services:
+
+  # =========================================
+  # API GATEWAY
+  # =========================================
   gateway.api:
     build:
       context: .
       dockerfile: Gateway.API/Dockerfile
+
     container_name: GraduationProject-Gateway
+
     ports:
       - "5000:8080"
       - "5001:8081"
+
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ReverseProxy__Clusters__webapi-cluster__Destinations__webapi-destination__Address=http://web.api:8080
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8081
+
+      # YARP → Web API
+      ReverseProxy__Clusters__webapi-cluster__Destinations__webapi-destination__Address: http://web.api:8080
+
     depends_on:
       - web.api
+
     restart: unless-stopped
+
     mem_limit: 512m
     cpus: 0.50
 
+    networks:
+      - graduation-network
+
+
+  # =========================================
+  # WEB API
+  # =========================================
   web.api:
     build:
       context: .
       dockerfile: Web.Api/Dockerfile
+
     container_name: GraduationProject-WebApi
+
     ports:
       - "5030:8081"
       - "5031:8080"
+
+    expose:
+      - "8080"
+
     depends_on:
       db:
         condition: service_healthy
+
       redis:
         condition: service_started
-      aspire-dashboard:              # ← wait for dashboard
+
+      aspire-dashboard:
         condition: service_started
+
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=GraduationProject;User Id=sa;Password=MyPass@word;TrustServerCertificate=True;Connect Timeout=60;
-      - ConnectionStrings__Redis=redis:6379
-      - Ollama__Url=http://ollama:11434
-      - Ollama__Model=llama3.2
-      - Telemetry__Endpoint=http://aspire-dashboard:18889  # ← OTLP endpoint
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+
+      ConnectionStrings__DefaultConnection: Server=db,1433;Database=GraduationProject;User Id=sa;Password=MyPass@word;TrustServerCertificate=True;Connect Timeout=60;
+
+      ConnectionStrings__Redis: redis:6379
+
+      Ollama__Url: http://ollama:11434
+      Ollama__Model: llama3.2
+
+      Telemetry__Endpoint: http://aspire-dashboard:18889
+
     restart: unless-stopped
+
     mem_limit: 1g
     cpus: 0.75
 
+    networks:
+      - graduation-network
+
+
+  # =========================================
+  # NGROK
+  # =========================================
+  ngrok:
+    image: ngrok/ngrok:latest
+
+    container_name: GraduationProject-Ngrok
+
+    command:
+      - "http"
+      - "gateway.api:8081"
+      - "--url=pierre-sacred-sparkishly.ngrok-free.dev"
+
+    environment:
+      NGROK_AUTHTOKEN: 3EXzLM2Ial0tURTtHVJZdmcqSCv_2GAKBiCkHi4GQuUTJeEGS
+
+    depends_on:
+      - gateway.api
+
+    ports:
+      - "4040:4040"
+
+    restart: unless-stopped
+
+    networks:
+      - graduation-network
+
+
+  # =========================================
+  # ASPIRE DASHBOARD
+  # =========================================
   aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
-    container_name: Graduation-Project-Telemetry
+
+    container_name: GraduationProject-Telemetry
+
     ports:
-      - "18888:18888"   # web UI  → open http://localhost:18888
-      - "18889:18889"   # OTLP endpoint (your API sends data here)
+      - "18888:18888"
+      - "18889:18889"
+
     environment:
-      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true   # no login needed locally
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+
     restart: unless-stopped
+
     mem_limit: 256m
     cpus: 0.25
 
+    networks:
+      - graduation-network
+
+
+  # =========================================
+  # SQL SERVER
+  # =========================================
   db:
-     image: mcr.microsoft.com/mssql/server:2022-latest
-     container_name: Graduation-Project-Db
-     environment:
-     - ACCEPT_EULA=Y
-     - SA_PASSWORD=MyPass@word
-     - MSSQL_PID=Developer
+    image: mcr.microsoft.com/mssql/server:2022-latest
 
-     # ── Memory: tell SQL Server its own cap so it doesn't over-allocate ──
-     - MSSQL_MEMORY_LIMIT_MB=1700        # ~85 % of the 2 GB hard cap; leaves room for the OS inside the container
+    container_name: GraduationProject-Db
 
-     # ── TempDB: pre-size to avoid auto-growth stalls ──
-     - MSSQL_TEMPDB_DATA_SIZE_MB=256
-     - MSSQL_TEMPDB_LOG_SIZE_MB=64
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: MyPass@word
+      MSSQL_PID: Developer
 
-      # ── Disable features you almost certainly don't need ──
-     - MSSQL_AGENT_ENABLED=false         # SQL Agent daemon → saves ~100 MB RSS
-     - MSSQL_ENABLE_HADR=0               # Always-On / HADR stack → not needed for dev
+      MSSQL_MEMORY_LIMIT_MB: 1700
 
-     # ── Collation: set once; changing it later requires a rebuild ──
-     - MSSQL_COLLATION=SQL_Latin1_General_CP1_CI_AS   # default, explicit is safer
+      MSSQL_TEMPDB_DATA_SIZE_MB: 256
+      MSSQL_TEMPDB_LOG_SIZE_MB: 64
 
-     # ── Explicit TCP port (avoids dynamic-port surprises) ──
-     - MSSQL_TCP_PORT=1433
+      MSSQL_AGENT_ENABLED: "false"
+      MSSQL_ENABLE_HADR: "0"
 
-     ports:
-     - "127.0.0.1:1433:1433"   # bind to loopback only — don't expose to LAN
+      MSSQL_COLLATION: SQL_Latin1_General_CP1_CI_AS
 
-     volumes:
-     - sql_data:/var/opt/mssql
+      MSSQL_TCP_PORT: 1433
 
-  # ── Resource limits ──
-     mem_limit: 2g
-     mem_reservation: 512m        # guaranteed floor; lets Docker schedule smarter
-     cpus: 1.0
-     cpu_shares: 512              # relative weight when host is under pressure
+    ports:
+      - "127.0.0.1:1433:1433"
 
-  # ── Shared memory: SQL Server uses /dev/shm for inter-process comms ──
-     shm_size: 256m
+    volumes:
+      - sql_data:/var/opt/mssql
 
-  # ── ulimits: prevent "too many open files" under load ──
-     ulimits:
-       nofile:
+    mem_limit: 2g
+    mem_reservation: 512m
+
+    cpus: 1.0
+    cpu_shares: 512
+
+    shm_size: 256m
+
+    ulimits:
+      nofile:
         soft: 65536
         hard: 65536
 
-  # ── Healthcheck: tuned intervals ──
-     healthcheck:
+    healthcheck:
       test:
         [
-         "CMD-SHELL",
-        "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P MyPass@word -No -Q 'SELECT 1' || exit 1",
-      ]
-      interval: 30s          # was 60s — catch failures faster once it's up
-      timeout: 5s            # was 10s — sqlcmd to localhost should be near-instant
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P MyPass@word -No -Q 'SELECT 1' || exit 1"
+        ]
+
+      interval: 30s
+      timeout: 5s
       retries: 5
-      start_period: 90s      # give SQL Server time to initialise before checks begin
+      start_period: 90s
 
-     restart: unless-stopped
+    restart: unless-stopped
 
+    networks:
+      - graduation-network
+
+
+  # =========================================
+  # REDIS
+  # =========================================
   redis:
     image: redis:7.2-alpine
-    container_name: Graduation-Project-Redis
+
+    container_name: GraduationProject-Redis
+
     ports:
       - "6379:6379"
+
     volumes:
       - redis_data:/data
+
     restart: unless-stopped
+
     mem_limit: 256m
     cpus: 0.25
 
+    networks:
+      - graduation-network
+
+
+# =========================================
+# NETWORKS
+# =========================================
+networks:
+  graduation-network:
+    driver: bridge
+
+
+# =========================================
+# VOLUMES
+# =========================================
 volumes:
   sql_data:
   redis_data:
