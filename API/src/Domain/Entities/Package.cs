@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Domain.Entities
@@ -15,7 +16,9 @@ namespace Domain.Entities
         public decimal Price { get; set; }
         public decimal Discount { get; set; }
 
-        public ICollection<string> Items { get; set; }
+        public ICollection<Guid> ServiceIds { get; set; }
+        [NotMapped]
+        public ICollection<Service> Services { get; set; } = new List<Service>();
         public Vendor Vendor { get; set; }
         public Guid VendorId { get; set; }
 

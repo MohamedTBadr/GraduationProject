@@ -12,7 +12,7 @@ namespace Application.DTOs.PackageDTOs
         public decimal Price { get; set; }
         public decimal Discount { get; set; }
 
-        public ICollection<string> Items { get; set; }
-        public Guid VendorId { get; set; }
+        public ICollection<Guid> ServiceIds { get; set; }
+        public Guid? VendorId { get; set; }
     }
 }

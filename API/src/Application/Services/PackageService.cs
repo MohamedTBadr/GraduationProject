@@ -57,7 +57,7 @@ namespace Application.Services
                 Description = dto.Description,
                 Price = dto.Price,
                 Discount = dto.Discount,
-                Items = dto.Items,
+                ServiceIds = dto.ServiceIds,
                 VendorId = dto.VendorId
             };
 
@@ -78,7 +78,7 @@ namespace Application.Services
             package.Description = dto.Description;
             package.Price = dto.Price;
             package.Discount = dto.Discount;
-            package.Items = dto.Items;
+            package.ServiceIds = dto.ServiceIds;
             package.VendorId = dto.VendorId;
 
             var updatedPackage = await packageRepository.UpdateAsync(package, cancellationToken);

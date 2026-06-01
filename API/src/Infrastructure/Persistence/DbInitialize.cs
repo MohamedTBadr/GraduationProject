@@ -3114,8 +3114,8 @@ namespace Infrastructure.Persistence
 
             var packages = new List<Package>
             {
-                new Package { Id = Guid.NewGuid(), Name = "Basic Wedding Package",   Description = "Basic wedding package",   Price = 10000, Discount = 10, VendorId = vendor.UserId, Items = new List<string> { "Photography", "Decoration", "Catering" } },
-                new Package { Id = Guid.NewGuid(), Name = "Premium Wedding Package", Description = "Premium wedding package", Price = 25000, Discount = 15, VendorId = vendor.UserId, Items = new List<string> { "Luxury Photography", "Luxury Decoration", "Luxury Catering" } }
+                new Package { Id = Guid.NewGuid(), Name = "Basic Wedding Package",   Description = "Basic wedding package",   Price = 10000, Discount = 10, VendorId = vendor.UserId, ServiceIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() } },
+                new Package { Id = Guid.NewGuid(), Name = "Premium Wedding Package", Description = "Premium wedding package", Price = 25000, Discount = 15, VendorId = vendor.UserId, ServiceIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() } }
             };
 
             await context.Packages.AddRangeAsync(packages);

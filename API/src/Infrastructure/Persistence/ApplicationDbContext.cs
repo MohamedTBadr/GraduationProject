@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
+using System.Text.Json;
 namespace Infrastructure.Persistence
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
@@ -221,7 +222,8 @@ namespace Infrastructure.Persistence
                       .WithOne(o => o.Event)
                       .HasForeignKey<Order>(o => o.EventId)
                       .OnDelete(DeleteBehavior.Restrict);
-            }); builder.Entity<EventItem>()
+            });
+            builder.Entity<EventItem>()
                 .HasOne(i => i.Event)
                 .WithMany(e => e.EventItems)
                 .HasForeignKey(i => i.EventId)
@@ -267,6 +269,13 @@ namespace Infrastructure.Persistence
                       .HasForeignKey(sr => sr.VendorId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+
+            builder.Entity<Package>()
+       .Property(p => p.ServiceIds)
+       .HasConversion(
+           v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+           v => JsonSerializer.Deserialize<ICollection<Guid>>(v, (JsonSerializerOptions)null)
+                ?? new List<Guid>());
         }
 
 

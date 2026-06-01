@@ -15,22 +15,35 @@ namespace Infrastructure.Repositories
     {
         public async Task<Package> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            return await _context.Packages
+            var package = await _context.Packages
                 .Include(p => p.Vendor)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+            if (package == null)
+                return null;
+
+            package.Services = await _context.Services
+                .Where(s => package.ServiceIds.Contains(s.Id))
+                .ToListAsync(cancellationToken);
+
+            return package;
         }
 
         public async Task<PaginatedResponse<Package>> GetAllAsync(
-            PaginatedRequest request,
-            Expression<Func<Package, bool>> visibilityFilter,
-            CancellationToken ct)
+     PaginatedRequest request,
+     Expression<Func<Package, bool>> visibilityFilter,
+     CancellationToken ct)
         {
-            var query = _context.Packages.AsNoTracking().Where(visibilityFilter);
+            var query = _context.Packages
+                .AsNoTracking()
+                .Include(p => p.Vendor)
+                .Where(visibilityFilter);
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var search = request.SearchTerm.Trim();
+
                 query = query.Where(p =>
                     p.Name.Contains(search) ||
                     p.Description.Contains(search) ||
@@ -48,21 +61,51 @@ namespace Infrastructure.Repositories
 
             query = request.SortBy?.ToLower() switch
             {
-                "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
-                "vendor" => request.IsDescending ? query.OrderByDescending(p => p.Vendor.BusinessName) : query.OrderBy(p => p.Vendor.BusinessName),
-                "price" => request.IsDescending ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price),
+                "name" => request.IsDescending
+                    ? query.OrderByDescending(p => p.Name)
+                    : query.OrderBy(p => p.Name),
+
+                "vendor" => request.IsDescending
+                    ? query.OrderByDescending(p => p.Vendor.BusinessName)
+                    : query.OrderBy(p => p.Vendor.BusinessName),
+
+                "price" => request.IsDescending
+                    ? query.OrderByDescending(p => p.Price)
+                    : query.OrderBy(p => p.Price),
+
                 _ => query.OrderBy(p => p.Name)
             };
 
             var totalCount = await query.CountAsync(ct);
 
             var items = await query
-                .Include(p => p.Vendor)
                 .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync(ct);
 
-            return new PaginatedResponse<Package>(items, totalCount, request.PageIndex, request.PageSize);
+            // collect all ids once
+            var allServiceIds = items
+                .SelectMany(p => p.ServiceIds)
+                .Distinct()
+                .ToList();
+
+            var services = await _context.Services
+                .Where(s => allServiceIds.Contains(s.Id))
+                .ToListAsync(ct);
+
+            // map services to packages
+            foreach (var package in items)
+            {
+                package.Services = services
+                    .Where(s => package.ServiceIds.Contains(s.Id))
+                    .ToList();
+            }
+
+            return new PaginatedResponse<Package>(
+                items,
+                totalCount,
+                request.PageIndex,
+                request.PageSize);
         }
 
         public async Task<Package> CreateAsync(Package package, CancellationToken cancellationToken)
