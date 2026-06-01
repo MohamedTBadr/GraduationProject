@@ -25,7 +25,7 @@ namespace API.Controllers
             var userId = GetUserIdFromToken();
             request = request with { UserId = userId };
             var order = await serviceManager.OrderService.CreateOrderAsync(request, ct);
-            return order.IsSuccess ? NoContent() : order.ToActionResult();
+            return order.IsSuccess ? Ok(order) : order.ToActionResult();
         }
 
         // GET api/orders
