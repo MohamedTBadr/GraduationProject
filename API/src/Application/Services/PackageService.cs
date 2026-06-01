@@ -50,6 +50,7 @@ namespace Application.Services
 
         public async Task<Result<PackageDTO>> CreateAsync(CreatePackageDTO dto, CancellationToken cancellationToken)
         {
+           
             var package = new Package
             {
                 Id = Guid.NewGuid(),
@@ -58,7 +59,7 @@ namespace Application.Services
                 Price = dto.Price,
                 Discount = dto.Discount,
                 ServiceIds = dto.ServiceIds,
-                VendorId = dto.VendorId
+                VendorId = (Guid)dto.VendorId!
             };
 
             var createdPackage = await packageRepository.CreateAsync(package, cancellationToken);

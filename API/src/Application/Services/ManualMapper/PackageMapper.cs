@@ -51,7 +51,6 @@ namespace Application.Services.ManualMapper
                 Price = entity.Price,
                 Discount = entity.Discount,
 
-                ServiceIds = entity.ServiceIds,
 
                 Services = serviceDTOs ?? new List<ServiceDTO>(),
 

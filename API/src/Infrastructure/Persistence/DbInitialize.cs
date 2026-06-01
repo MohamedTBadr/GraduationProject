@@ -3111,11 +3111,10 @@ namespace Infrastructure.Persistence
 
             var vendor = await context.Vendors.FirstOrDefaultAsync();
             if (vendor == null) { Console.WriteLine("Vendor missing for package seeding."); return; }
-
+            var serviceIds = context.Services.Where(s => s.VendorId == vendor.UserId).Select(s => s.Id).Take(3).ToList();
             var packages = new List<Package>
             {
-                new Package { Id = Guid.NewGuid(), Name = "Basic Wedding Package",   Description = "Basic wedding package",   Price = 10000, Discount = 10, VendorId = vendor.UserId, ServiceIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() } },
-                new Package { Id = Guid.NewGuid(), Name = "Premium Wedding Package", Description = "Premium wedding package", Price = 25000, Discount = 15, VendorId = vendor.UserId, ServiceIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() } }
+                new Package { Id = Guid.NewGuid(), Name = "Basic Wedding Package",   Description = "Basic wedding package",   Price = 10000, Discount = 10, VendorId = vendor.UserId, ServiceIds = serviceIds }
             };
 
             await context.Packages.AddRangeAsync(packages);

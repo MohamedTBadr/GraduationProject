@@ -14,8 +14,6 @@ namespace Application.DTOs.PackageDTOs
         public decimal Price { get; set; }
         public decimal Discount { get; set; }
 
-        public ICollection<Guid> ServiceIds { get; set; } = new List<Guid>();
-
         public ICollection<ServiceDTO> Services { get; set; } = new List<ServiceDTO>();
         public Guid VendorId { get; set; }
     }

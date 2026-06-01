@@ -17,8 +17,8 @@ namespace Infrastructure
 {
     public static class InfrastructureRegistrationService
     {
-            public static async Task<IServiceCollection> AddInfrastructureServices(this IServiceCollection Services, IConfiguration configuration)
-            {
+        public static async Task<IServiceCollection> AddInfrastructureServices(this IServiceCollection Services, IConfiguration configuration)
+        {
             //Services.AddScoped<IDbIntialize, DbIntialize>();
             Services.AddScoped<IServiceTypeRepository, ServiceTypeRepository>();
             Services.AddScoped<IVendorRepository, VendorRepository>();
@@ -37,7 +37,6 @@ namespace Infrastructure
             Services.AddScoped<IUserRepository, UserRepository>();
             Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
             Services.AddScoped<IPackageRepository, PackageRepository>();
-
             Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             Services.AddScoped<ICompanyInquiryRepository, CompanyInquiryRepository>();
             // 1. Configure DbContext with SQL Server
