@@ -1,4 +1,4 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Entities;
 using Google.GenAI.Types;
 using Infrastructure.Persistence;
@@ -10,29 +10,32 @@ namespace Infrastructure.Repositories
 {
     public class OrderRepository(ApplicationDbContext db) : IOrderRepository
     {
-
-
         public async Task<Event?> GetEventWithItemsAsync(Guid eventId, CancellationToken ct)
-    => await db.Events
-        .Include(e => e.EventItems)
-        .FirstOrDefaultAsync(e => e.Id == eventId, ct);
+            => await db.Events
+                .Include(e => e.EventItems).ThenInclude(ei => ei.Service)
+                .Include(e => e.EventItems).ThenInclude(ei => ei.Package)
+                .FirstOrDefaultAsync(e => e.Id == eventId, ct);
+
         public async Task<Order?> GetByIdAsync(Guid id, CancellationToken ct)
             => await db.Orders.FindAsync([id], ct);
 
         public async Task<Order?> GetByIdWithItemsAsync(Guid id, CancellationToken ct )
             => await db.Orders
-                .Include(o => o.Event).ThenInclude(e => e.EventItems)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Service)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Package)
                 .FirstOrDefaultAsync(o => o.Id == id, ct);
 
         public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken ct)
             => await db.Orders
-                .Include(o => o.Event).ThenInclude(e => e.EventItems)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Service)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Package)
                 .AsNoTracking()
                 .ToListAsync(ct);
 
         public async Task<IEnumerable<Order>> GetByUserIdAsync(Guid userId, CancellationToken ct)
             => await db.Orders
                 .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Service).ThenInclude(s => s.Vendor)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Package).ThenInclude(p => p.Vendor)
                 .Where(o => o.UserId == userId)
                 .AsNoTracking()
                 .ToListAsync(ct);
@@ -45,14 +48,18 @@ namespace Infrastructure.Repositories
 
             return await db.Orders
                 .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Service).ThenInclude(s => s.Vendor)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Package).ThenInclude(p => p.Vendor)
                 .Where(o => ids.Contains(o.UserId))
                 .AsNoTracking()
                 .ToListAsync(ct);
         }
+
         public async Task<Order?> GetByPaymentIntentIdAsync(string paymentIntentId, CancellationToken ct)
             => await db.Orders
-                .Include(o => o.Event).ThenInclude(e => e.EventItems)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Service)
+                .Include(o => o.Event).ThenInclude(e => e.EventItems).ThenInclude(ei => ei.Package)
                 .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId, ct);
+
         public async Task AddAsync(Order order, CancellationToken ct)
         {
             order.Id = order.Id == Guid.Empty ? Guid.NewGuid() : order.Id;

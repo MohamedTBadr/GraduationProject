@@ -31,7 +31,7 @@ namespace Infrastructure.Repositories
           CancellationToken cancellationToken)
         {
             return await _context.EventItems
-                .Where(ei => ei.Service.VendorId == vendorId && ei.Event.Order != null) // ✅ one combined filter
+                .Where(ei => (ei.Service != null ? ei.Service.VendorId : ei.Package != null ? ei.Package.VendorId : Guid.Empty) == vendorId && ei.Event.Order != null) // ✅ one combined filter
                 .Include(ei => ei.Event)
                     .ThenInclude(e => e.EventType)
                 .Include(ei => ei.Event)
@@ -64,7 +64,7 @@ namespace Infrastructure.Repositories
         public async Task<EventItem> CreateAsync(EventItem entity, CancellationToken cancellationToken)
         {
             entity.Id = Guid.NewGuid();
-            entity.Price = entity.Service.Price;   // ← snapshot at booking time
+            entity.Price = entity.Service?.Price ?? entity.Package?.Price ?? 0;   // ← snapshot at booking time
 
             await _context.EventItems.AddAsync(entity, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
@@ -78,7 +78,7 @@ namespace Infrastructure.Repositories
             foreach (var item in entities)
             {
                 item.Id = Guid.NewGuid();
-                item.Price = item.Service.Price;   // ← snapshot per item
+                item.Price = item.Service?.Price ?? item.Package?.Price ?? 0;   // ← snapshot per item
                 list.Add(item);
             }
 

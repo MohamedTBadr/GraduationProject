@@ -45,6 +45,7 @@ namespace Application
             Services.AddScoped<IVoucherService, VoucherService>();
             Services.AddScoped<IPlanningAIService, PlanningAIService>();
             Services.AddScoped<IPaymobService, PaymobService>();
+            Services.AddScoped<IPackageService, PackageService>();
 
             Services.AddScoped<Application.Contracts.IEmailService, HangfireEmailSender>();
 

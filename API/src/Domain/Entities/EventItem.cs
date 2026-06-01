@@ -12,8 +12,11 @@ public class
 
     // ── Add these ──────────────────────────────
     // public Guid VendorId { get; set; }                          // links item to vendor
-    public Guid ServiceId { get; set; }                                        // links item to the booked service
-    public Service Service { get; set; }
+    public Guid? ServiceId { get; set; }                                        // links item to the booked service
+    public Service? Service { get; set; }
+
+    public Guid? PackageId { get; set; }
+    public Package? Package { get; set; }
     public string ItemStatus { get; set; } = "Pending";         // Pending, Approved, Rejected
     public string? RejectionReason { get; set; }
 }

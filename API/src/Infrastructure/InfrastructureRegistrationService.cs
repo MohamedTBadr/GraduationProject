@@ -36,6 +36,7 @@ namespace Infrastructure
             Services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
             Services.AddScoped<IUserRepository, UserRepository>();
             Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
+            Services.AddScoped<IPackageRepository, PackageRepository>();
 
             Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             Services.AddScoped<ICompanyInquiryRepository, CompanyInquiryRepository>();

@@ -26,5 +26,6 @@ namespace Application.Interfaces
         LlamaService LlamaService { get; }
         ISearchService SearchService { get; }
         IPlanningAIService PlanningAIService { get; }
+        IPackageService PackageService { get; }
     }
 }
