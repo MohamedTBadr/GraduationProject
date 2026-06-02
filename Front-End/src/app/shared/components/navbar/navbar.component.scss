@@ -11,8 +11,8 @@
 }
 
 .nav.scrolled {
-    background: rgba(255, 255, 255, .96);
-    backdrop-filter: blur(14px);
+    background: var(--footerBg);
+    // backdrop-filter: blur(14px);
     box-shadow: 0 1px 20px rgba(26, 37, 64, .09);
 }
 
@@ -63,7 +63,7 @@
 }
 
 .nav.scrolled .nav-links a {
-    color: var(--gray);
+    color: var(--navScrolled);
 }
 
 .nav-links a:hover {
@@ -138,7 +138,7 @@
 .btn-nav-cta {
     font-size: .83rem;
     font-weight: 700;
-    color: var(--navy);
+    color: #1A2540;
     padding: 9px 18px;
     border-radius: 50px;
     background: var(--gold);

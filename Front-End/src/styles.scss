@@ -1,9 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "bootstrap-icons/font/bootstrap-icons.css";
 
 /* ═══ TOKENS ═══════════════════════════ */
 :root {
+  --footerBg: #f9f6f0;
+  --footerText: #161022;
+  --footerTitle: #000;
+  --navScrolled: #6b7280;
   --grayHover: rgba(255, 255, 255, 0.8);
   --navy: #1a2540;
   --navy2: #243050;
@@ -11,7 +16,6 @@
   --gold2: #e8c97a;
   --cream: #f9f6f0;
   --cream2: #f0ebe0;
-  --white: #fff;
   --gray: #6b7280;
   --lgray: #e8e4dc;
   --dark: #0e1627;
@@ -27,14 +31,19 @@
   --nav-h: 68px;
   --success: #22c55e;
   --danger: #ef4444;
+  --white: #1a2035;
 }
 .dark {
+  --footerBg: #161022;
+  --footerText: rgba(255, 255, 255, 0.52);
+  --footerTitle: #ffff;
+  --navScrolled: #ccc;
   --grayHover: rgba(20, 17, 17, 0.8);
   --navy: #e8e4dc;
   --navy2: #f0ebe0;
   --cream: #0f1117;
   --cream2: #161b27;
-  --white: #1a2035;
+  --white: #fff;
   --lgray: #2a3050;
   --gray: #22252b;
   --dark: #e8e4dc;
@@ -4380,87 +4389,6 @@ table.ad-tbl {
   font-size: 0.8rem;
   color: var(--gray);
   line-height: 1.5;
-}
-
-/* ═══ TESTIMONIALS ══════════════════════ */
-.testimonials {
-  background: var(--cream2);
-}
-.testi-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-}
-.testi-card {
-  background: var(--white);
-  border-radius: var(--r2);
-  padding: 26px;
-  box-shadow: var(--sh);
-  position: relative;
-}
-.testi-card::before {
-  content: '"';
-  font-family: var(--ff-d);
-  font-size: 4.5rem;
-  color: var(--gold);
-  opacity: 0.13;
-  position: absolute;
-  top: 8px;
-  left: 18px;
-  line-height: 1;
-}
-.testi-text {
-  font-size: 0.92rem;
-  color: var(--gray);
-  line-height: 1.7;
-  margin-bottom: 18px;
-}
-.testi-author {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-.testi-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--navy) 0%, var(--gold) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
-.testi-name {
-  font-weight: 700;
-  font-size: 0.88rem;
-  color: var(--navy);
-}
-.testi-event {
-  font-size: 0.76rem;
-  color: var(--gray);
-}
-
-/* ═══ CTA ════════════════════════════════ */
-.cta-section {
-  background: linear-gradient(135deg, #161022 0%, #7a114c 100%);
-  text-align: center;
-  padding: 90px 24px;
-}
-.cta-section .section-title {
-  color: var(--white);
-  margin-bottom: 14px;
-}
-.cta-section p {
-  color: rgba(255, 255, 255, 0.52);
-  font-size: 1rem;
-  margin-bottom: 36px;
-}
-.cta-btns {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
 }
 
 /* ═══ DASHBOARD ══════════════════════════ */

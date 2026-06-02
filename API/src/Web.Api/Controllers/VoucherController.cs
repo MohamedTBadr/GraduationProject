@@ -19,7 +19,7 @@ public class VoucherController(IServiceManager serviceManager) : APIController
     {
         var userId = GetUserIdFromToken();
         var link = await serviceManager.VoucherService.GetReferralLinkAsync(userId, ct);
-        return Ok(new { link });
+        return Ok(link);
     }
 
     // GET api/vouchers/my

@@ -2,7 +2,10 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Reflection.Emit;
+using System.Text.Json;
 namespace Infrastructure.Persistence
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
@@ -63,7 +66,7 @@ namespace Infrastructure.Persistence
                       .HasForeignKey(p => p.VendorId)
                       .OnDelete(DeleteBehavior.Cascade);
 
-            
+
             });
 
             builder.Entity<OrderInsight>()
@@ -163,8 +166,8 @@ namespace Infrastructure.Persistence
                            .HasForeignKey(v => v.OwnerId)
                            .OnDelete(DeleteBehavior.Cascade);
                 }
-                
-                
+
+
                 );
 
             builder.Entity<Event>(entity =>
@@ -221,14 +224,15 @@ namespace Infrastructure.Persistence
                       .WithOne(o => o.Event)
                       .HasForeignKey<Order>(o => o.EventId)
                       .OnDelete(DeleteBehavior.Restrict);
-            }); builder.Entity<EventItem>()
+            });
+            builder.Entity<EventItem>()
                 .HasOne(i => i.Event)
                 .WithMany(e => e.EventItems)
                 .HasForeignKey(i => i.EventId)
                 .OnDelete(DeleteBehavior.NoAction); // ← fixes the cycle error
 
 
-            builder.Entity<Service>().HasMany(s=>s.EventTypes).WithMany(e=>e.Services)
+            builder.Entity<Service>().HasMany(s => s.EventTypes).WithMany(e => e.Services)
                 .UsingEntity(j => j.ToTable("ServiceEventTypes"));
 
             builder.Entity<EventCollaborator>(entity =>
@@ -267,7 +271,23 @@ namespace Infrastructure.Persistence
                       .HasForeignKey(sr => sr.VendorId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
-        }
+
+            var converter = new ValueConverter<ICollection<Guid>, string>(
+           v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+           v => JsonSerializer.Deserialize<List<Guid>>(v, (JsonSerializerOptions?)null)
+                ?? new List<Guid>()
+       );
+
+            var comparer = new ValueComparer<ICollection<Guid>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            );
+
+            builder.Entity<Package>()
+                .Property(p => p.ServiceIds)
+                .HasConversion(converter, comparer);
+                }
 
 
         public DbSet<OrderInsight> OrderInsights { get; set; }

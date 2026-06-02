@@ -299,7 +299,7 @@ namespace Infrastructure.Repositories
            
                 var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == serviceId, cancellationToken);
                 return await _context.Orders
-                    .AnyAsync(o => o.UserId == userId && o.Event.EventItems.Any(oi => oi.Service.Name == service.Name),cancellationToken);
+                    .AnyAsync(o => o.UserId == userId && o.Event.EventItems.Any(oi => oi.Service != null && oi.Service.Name == service.Name),cancellationToken);
         }
 
         public async Task<List<Service>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken)

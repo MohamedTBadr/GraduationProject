@@ -47,7 +47,7 @@ namespace Application
             Services.AddScoped<IPaymobService, PaymobService>();
 
             Services.AddScoped<Application.Contracts.IEmailService, HangfireEmailSender>();
-
+            Services.AddScoped<IPackageService, PackageService>();
             Services.AddSingleton(sp =>
             {
                 var apiKey = configuration["Groq:ApiKey"]

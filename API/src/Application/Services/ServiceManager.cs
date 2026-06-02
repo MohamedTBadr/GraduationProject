@@ -27,6 +27,7 @@ namespace Application.Services
         private readonly Lazy<LlamaService> _llamaService;
         private readonly Lazy<ISearchService> _searchService;
         private readonly Lazy<IPlanningAIService> _planningAIService;
+        private readonly Lazy<IPackageService> _packageService;
 
         public ServiceManager(IServiceProvider serviceProvider)
         {
@@ -50,6 +51,7 @@ namespace Application.Services
             _llamaService = new Lazy<LlamaService>(() => serviceProvider.GetRequiredService<LlamaService>());
             _searchService = new Lazy<ISearchService>(() => serviceProvider.GetRequiredService<ISearchService>());
             _planningAIService = new Lazy<IPlanningAIService>(() => serviceProvider.GetRequiredService<IPlanningAIService>());
+            _packageService = new Lazy<IPackageService>(() => serviceProvider.GetRequiredService<IPackageService>());
         }
 
         public IEmailSender EmailSender => _emailSender.Value;
@@ -72,5 +74,6 @@ namespace Application.Services
         public LlamaService LlamaService => _llamaService.Value;
         public ISearchService SearchService => _searchService.Value;
         public IPlanningAIService PlanningAIService => _planningAIService.Value;
+        public IPackageService PackageService => _packageService.Value;
     }
 }

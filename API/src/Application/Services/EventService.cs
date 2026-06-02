@@ -198,14 +198,23 @@ namespace Application.Services
 
             if (ev.EventStatus is "Cancelled" or "Completed")
                 return Result<EventItemResponseDto>.InvalidOperation(400, $"Cannot add items to a '{ev.EventStatus}' event.");
+            if (dto.ServiceId == null && dto.PackageId == null)
+                return Result<EventItemResponseDto>.InvalidOperation(400, "Either ServiceId or PackageId must be provided.");
+
+
+            if(dto.ServiceId != null && dto.PackageId != null)
+                return Result<EventItemResponseDto>.InvalidOperation(400, "Only one of ServiceId or PackageId can be provided.");
 
             var item = new EventItem
             {
                 EventId = eventId,
-                ServiceId = dto.ServiceId,
                 Quantity = dto.Quantity,
                 ItemStatus = "Pending"
             };
+
+            if (dto.ServiceId != null) item.ServiceId = dto.ServiceId;
+            if (dto.PackageId != null) item.PackageId = dto.PackageId;
+            
 
             var created = await _eventRepo.AddItemAsync(item, cancellationToken);
             return Result<EventItemResponseDto>.Success(created.ToResponseDto());

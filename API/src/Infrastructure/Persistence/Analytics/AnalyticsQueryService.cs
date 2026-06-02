@@ -230,7 +230,7 @@ namespace Infrastructure.Persistence.Analytics
         {
             var query = _db.EventItems
                 .AsNoTracking()
-                .Where(ei => PaidStatuses.Contains(ei.Event.Order.PaymentStatus));
+                .Where(ei => ei.ServiceId != null && PaidStatuses.Contains(ei.Event.Order.PaymentStatus));
 
             if (vendorId.HasValue)
                 query = query.Where(ei => ei.Service.VendorId == vendorId);
@@ -239,7 +239,7 @@ namespace Infrastructure.Persistence.Analytics
                 .GroupBy(ei => new { ei.ServiceId, ei.Service.Name })
                 .Select(g => new
                 {
-                    ServiceId = g.Key.ServiceId,
+                    ServiceId = g.Key.ServiceId!.Value,
                     ServiceName = g.Key.Name,
                     Revenue = g.Sum(x => x.Price * x.Quantity),
                     Orders = g.Select(x => x.Event.Order.Id).Distinct().Count(),

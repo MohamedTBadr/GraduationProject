@@ -7,7 +7,8 @@ namespace Application.DTOs
     public class CreateEventItemDto
     {
         public Guid EventId { get; set; }
-        public Guid ServiceId { get; set; }
+        public Guid? ServiceId { get; set; }
+        public Guid? PackageId { get; set; }
         public int Quantity { get; set; }
     }
 

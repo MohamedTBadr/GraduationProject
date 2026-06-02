@@ -75,12 +75,13 @@ namespace Application.Services
                 if (eventWithItems.EventItems is { Count: > 0 })
                 {
                     var vendorNotifications = eventWithItems.EventItems
-                        .GroupBy(i => i.Service.VendorId)
+                        .GroupBy(i => i.Service?.VendorId ?? i.Package?.VendorId ?? Guid.Empty)
+                        .Where(g => g.Key != Guid.Empty)
                         .Select(g => (
                             UserId: g.Key,
                             Type: nameof(NotificationType.ORDER_PLACED),
                             Title: "Order Details",
-                            Message: $"Order #{order.Id} details: {string.Join(", ", g.Select(i => $"{i.Quantity}x {i.Service.Name}"))}."))
+                            Message: $"Order #{order.Id} details: {string.Join(", ", g.Select(i => $"{i.Quantity}x {(i.Service?.Name ?? i.Package?.Name)}"))}."))
                         .ToList();
 
                     await notificationService.SendBulkAsync(vendorNotifications);
