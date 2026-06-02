@@ -270,38 +270,38 @@ export class CategoriesComponent implements OnInit {
 
   getIconForVendorType(name: string): string {
     const n = name.toLowerCase();
-    if (n.includes('venue') || n.includes('hall')) return '🏛️';
-    if (n.includes('cater') || n.includes('food')) return '🍽️';
-    if (n.includes('photo') || n.includes('camera') || n.includes('video')) return '📷';
-    if (n.includes('decor')) return '🌸';
-    if (n.includes('entertain') || n.includes('music') || n.includes('dj')) return '🎤';
-    if (n.includes('light')) return '💡';
-    if (n.includes('cake') || n.includes('dessert')) return '🎂';
-    return '🗂️';
+    if (n.includes('venue') || n.includes('hall')) return 'bi bi-building';
+    if (n.includes('cater') || n.includes('food')) return 'bi bi-cup-hot';
+    if (n.includes('photo') || n.includes('camera') || n.includes('video')) return 'bi bi-camera';
+    if (n.includes('decor')) return 'bi bi-flower1';
+    if (n.includes('entertain') || n.includes('music') || n.includes('dj')) return 'bi bi-music-note-beamed';
+    if (n.includes('light')) return 'bi bi-lightbulb';
+    if (n.includes('cake') || n.includes('dessert')) return 'bi bi-gift';
+    return 'bi bi-grid-3x3-gap';
   }
 
   getIconForServiceType(name: string): string {
     const n = name.toLowerCase();
-    if (n.includes('wed') || n.includes('bride')) return '💍';
-    if (n.includes('corp')) return '💼';
-    if (n.includes('video') || n.includes('reel') || n.includes('film')) return '🎞️';
-    if (n.includes('drone') || n.includes('aerial')) return '🚁';
-    if (n.includes('buffet')) return '🥘';
-    if (n.includes('plated') || n.includes('dining')) return '🍽️';
-    if (n.includes('coffee')) return '☕';
-    if (n.includes('ballroom') || n.includes('hall')) return '🏰';
-    if (n.includes('garden') || n.includes('outdoor')) return '🌳';
-    if (n.includes('conference')) return '🏢';
-    return '✨';
+    if (n.includes('wed') || n.includes('bride')) return 'bi bi-heart';
+    if (n.includes('corp')) return 'bi bi-briefcase';
+    if (n.includes('video') || n.includes('reel') || n.includes('film')) return 'bi bi-film';
+    if (n.includes('drone') || n.includes('aerial')) return 'bi bi-camera-video';
+    if (n.includes('buffet')) return 'bi bi-basket';
+    if (n.includes('plated') || n.includes('dining')) return 'bi bi-cup-hot';
+    if (n.includes('coffee')) return 'bi bi-cup';
+    if (n.includes('ballroom') || n.includes('hall')) return 'bi bi-building-fill';
+    if (n.includes('garden') || n.includes('outdoor')) return 'bi bi-tree';
+    if (n.includes('conference')) return 'bi bi-buildings';
+    return 'bi bi-stars';
   }
 
   getIconForEventType(name: string): string {
     const n = name.toLowerCase();
-    if (n.includes('wed')) return '💍';
-    if (n.includes('engag')) return '💐';
-    if (n.includes('birth')) return '🎂';
-    if (n.includes('grad')) return '🎓';
-    if (n.includes('corp') || n.includes('bus')) return '🏢';
-    return '🎉';
+    if (n.includes('wed')) return 'bi bi-heart';
+    if (n.includes('engag')) return 'bi bi-heart-fill';
+    if (n.includes('birth')) return 'bi bi-gift';
+    if (n.includes('grad')) return 'bi bi-mortarboard';
+    if (n.includes('corp') || n.includes('bus')) return 'bi bi-briefcase';
+    return 'bi bi-calendar-event';
   }
 }

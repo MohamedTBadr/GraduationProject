@@ -42,7 +42,7 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
   maxPrice = 100000;
   minRating = 0;
   
-  // 📍 Advanced Location Filters
+  // Advanced Location Filters
   selectedCity: string = '';
   selectedRegion: string = '';
   latitude?: number;
@@ -59,11 +59,23 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
   wishlist: string[] = []; // IDs
   showCompareBar = false;
   showCompareModal = false;
-  
+
+  // AI Studio
+  showAiStudio = false;
+
+  // Filter panel (pill dropdowns — mirrors explore-vendors UX)
+  activePanel: string | null = null;
+
   // Preview
   selectedPreviewService: ApiProduct | null = null;
   showPreview = false;
   previewSlideIndex = 0;
+
+  // Aliases for template
+  get selectedService() { return this.selectedPreviewService; }
+  get activeImageIndex() { return this.previewSlideIndex; }
+  set activeImageIndex(v: number) { this.previewSlideIndex = v; }
+  get previewImages(): string[] { return this.selectedPreviewService ? this.getPreviewImages(this.selectedPreviewService) : []; }
 
   constructor(
     private productService: ProductService,
@@ -245,12 +257,14 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
         }
 
         const formattedPrice = (svc.price || 0).toLocaleString() + ' EGP';
-        const iconText = svc.imageUrl ? '🖼️' : '🎨';
+        const markerIcon = svc.imageUrl
+          ? '<i class="bi bi-image" style="font-size:1rem;color:#c9a84c"></i>'
+          : '<i class="bi bi-palette" style="font-size:1rem;color:#c9a84c"></i>';
 
         const customIcon = L.divIcon({
           className: 'custom-map-marker',
           html: `<div style="background: white; border-radius: 50px; padding: 6px 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; border: 1.5px solid #e8e4dc; white-space: nowrap; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'; this.style.borderColor='#c9a84c'" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#e8e4dc'">
-                   <span style="font-size: 1rem;">${iconText}</span>
+                   ${markerIcon}
                    <span style="color: #1a2540;">${svc.name}</span>
                    <span style="color: #c9a84c;">${formattedPrice}</span>
                  </div>`,
@@ -414,6 +428,15 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
     } else {
       this.wishlist.push(id);
     }
+  }
+
+  togglePanel(panel: string) {
+    this.activePanel = this.activePanel === panel ? null : panel;
+  }
+
+  bookService(svc: ApiProduct) {
+    this.closePreview();
+    this.modalService.open('service-detail', svc);
   }
 
   openServiceModal(product: ApiProduct) {

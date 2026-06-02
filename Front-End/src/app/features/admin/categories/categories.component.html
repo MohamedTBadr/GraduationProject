@@ -1,4 +1,4 @@
-<div class="ad-section active block">
+﻿<div class="ad-section active block">
   <div class="ad-page-hd">
     <div>
       <div class="ad-page-title">Taxonomy Management</div>
@@ -9,30 +9,30 @@
 
   <div class="ad-g3">
     <!-- DIMENSION 1 -->
-    <div class="ad-card" style="border-color: rgba(255, 215, 0, 0.3)">
+    <div class="ad-card card-dim-1">
       <div class="text-[0.7rem] uppercase tracking-wider text-[var(--gold)] mb-[10px] font-bold">DIMENSION 1</div>
       <div class="flex items-center gap-[10px] mb-[10px]">
-        <span class="text-[1.2rem]">🗂️</span>
+        <i class="bi bi-grid-3x3-gap text-[1.2rem]"></i>
         <h3 class="text-[1.1rem] font-bold m-0 text-white">Vendor Type</h3>
       </div>
       <p class="text-[0.85rem] text-[gray] m-0">"What are you?" — Each vendor has exactly ONE. Drives the Vendor Explore page browsing.</p>
     </div>
 
     <!-- DIMENSION 2 -->
-    <div class="ad-card" style="border-color: rgba(65, 105, 225, 0.3)">
+    <div class="ad-card card-dim-2">
       <div class="text-[0.7rem] uppercase tracking-wider text-[#6495ED] mb-[10px] font-bold">DIMENSION 2</div>
       <div class="flex items-center gap-[10px] mb-[10px]">
-        <span class="text-[1.2rem]">🛠️</span>
+        <i class="bi bi-tools text-[1.2rem]"></i>
         <h3 class="text-[1.1rem] font-bold m-0 text-white">Service Type</h3>
       </div>
       <p class="text-[0.85rem] text-[gray] m-0">"What do you offer?" — Multiple per vendor, but <span class="italic text-[#6495ED]">must belong to their Vendor Type</span>. Drives Service Explore page.</p>
     </div>
 
     <!-- DIMENSION 3 -->
-    <div class="ad-card" style="border-color: rgba(46, 139, 87, 0.3)">
+    <div class="ad-card card-dim-3">
       <div class="text-[0.7rem] uppercase tracking-wider text-[#2E8B57] mb-[10px] font-bold">DIMENSION 3</div>
       <div class="flex items-center gap-[10px] mb-[10px]">
-        <span class="text-[1.2rem]">🎉</span>
+        <i class="bi bi-calendar-event text-[1.2rem]"></i>
         <h3 class="text-[1.1rem] font-bold m-0 text-white">Event Types Served</h3>
       </div>
       <p class="text-[0.85rem] text-[gray] m-0">"Who do you serve?" — Multiple per vendor. Powers the recommendation engine matching score.</p>
@@ -43,22 +43,22 @@
     <button class="pb-[10px] text-[0.95rem] font-bold transition-all bg-transparent border-0 cursor-pointer"
             [class.text-[var(--gold)]]="activeTab === 'vendorTypes'" [class.border-b-2]="activeTab === 'vendorTypes'" [class.border-[var(--gold)]]="activeTab === 'vendorTypes'" [class.text-[gray]]="activeTab !== 'vendorTypes'"
             (click)="activeTab = 'vendorTypes'">
-      🗂️ Vendor Types
+      <i class="bi bi-grid-3x3-gap"></i> Vendor Types
     </button>
     <button class="pb-[10px] text-[0.95rem] font-bold transition-all bg-transparent border-0 cursor-pointer"
             [class.text-[var(--gold)]]="activeTab === 'serviceTypes'" [class.border-b-2]="activeTab === 'serviceTypes'" [class.border-[var(--gold)]]="activeTab === 'serviceTypes'" [class.text-[gray]]="activeTab !== 'serviceTypes'"
             (click)="activeTab = 'serviceTypes'">
-      🛠️ Service Types
+      <i class="bi bi-tools"></i> Service Types
     </button>
     <button class="pb-[10px] text-[0.95rem] font-bold transition-all bg-transparent border-0 cursor-pointer"
             [class.text-[var(--gold)]]="activeTab === 'eventTypes'" [class.border-b-2]="activeTab === 'eventTypes'" [class.border-[var(--gold)]]="activeTab === 'eventTypes'" [class.text-[gray]]="activeTab !== 'eventTypes'"
             (click)="activeTab = 'eventTypes'">
-      🎉 Event Types
+      <i class="bi bi-calendar-event"></i> Event Types
     </button>
     <button class="pb-[10px] text-[0.95rem] font-bold transition-all bg-transparent border-0 cursor-pointer"
             [class.text-[var(--gold)]]="activeTab === 'dependencyMap'" [class.border-b-2]="activeTab === 'dependencyMap'" [class.border-[var(--gold)]]="activeTab === 'dependencyMap'" [class.text-[gray]]="activeTab !== 'dependencyMap'"
             (click)="activeTab = 'dependencyMap'">
-      🔗 Dependency Map
+      <i class="bi bi-diagram-2"></i> Dependency Map
     </button>
   </div>
 
@@ -73,7 +73,7 @@
       <div class="p-[20px] text-center text-[gray]" *ngIf="loadingVendorTypes">Loading vendor types...</div>
       <div *ngFor="let vt of vendorTypes; let i = index" class="ad-vendor-row justify-between">
         <div class="flex items-center gap-[12px]">
-          <div class="text-[1.4rem]">{{ getIconForVendorType(vt.name) }}</div>
+          <div class="text-[1.4rem]"><i [class]="getIconForVendorType(vt.name)"></i></div>
           <div>
             <div class="ad-vendor-name">{{ vt.name }}</div>
           </div>
@@ -95,7 +95,7 @@
       <div class="p-[20px] text-center text-[gray]" *ngIf="loadingServiceTypes">Loading service types...</div>
       <div *ngFor="let st of serviceTypes; let i = index" class="ad-vendor-row justify-between">
         <div class="flex items-center gap-[12px]">
-          <div class="text-[1.4rem]">{{ getIconForServiceType(st.name) }}</div>
+          <div class="text-[1.4rem]"><i [class]="getIconForServiceType(st.name)"></i></div>
           <div>
             <div class="ad-vendor-name">{{ st.name }}</div>
             <div class="text-[0.8rem] text-[gray]" *ngIf="getVendorTypeNameForService(st.id)">Belongs to: {{ getVendorTypeNameForService(st.id) }}</div>
@@ -118,7 +118,7 @@
       <div class="p-[20px] text-center text-[gray]" *ngIf="loadingEventTypes">Loading event types...</div>
       <div *ngFor="let ev of eventTypes; let i = index" class="ad-vendor-row justify-between">
         <div class="flex items-center gap-[12px]">
-          <div class="text-[1.4rem]">{{ getIconForEventType(ev.name) }}</div>
+          <div class="text-[1.4rem]"><i [class]="getIconForEventType(ev.name)"></i></div>
           <div>
             <div class="ad-vendor-name">{{ ev.name }}</div>
           </div>
@@ -204,3 +204,4 @@
     </form>
   </div>
 </div>
+

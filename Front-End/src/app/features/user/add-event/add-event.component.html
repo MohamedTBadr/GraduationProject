@@ -1,4 +1,4 @@
-<div class="page active" id="page-add-event">
+﻿<div class="page active" id="page-add-event">
   <div class="ae-hero">
     <h1>Create New Event</h1>
     <p>Start with a quickstart template or build your event from scratch</p>
@@ -26,7 +26,7 @@
     <!-- Step 1: Quickstart type select -->
     <div id="ae-panel-1" *ngIf="step === 1">
       <div class="text-center mb-[24px]">
-        <div class="tag">⚡ Quickstart</div>
+        <div class="tag">Quickstart</div>
         <h2 class="section-title text-[1.8rem]">What type of event are you planning?</h2>
         <p class="text-[var(--gray)] text-[.9rem] mt-[8px]">We'll pre-fill suggested vendors, checklist items, and budget splits for you.</p>
       </div>
@@ -58,15 +58,15 @@
             <label>Event Name *</label>
             <input type="text" formControlName="name" placeholder="e.g. Sara & Omar's Wedding"/>
             <div *ngIf="eventForm.get('name')?.touched && eventForm.get('name')?.invalid" class="text-red-500 text-xs mt-1 font-semibold">
-              <span *ngIf="eventForm.get('name')?.errors?.['required']">⚠️ Event Name is required.</span>
-              <span *ngIf="eventForm.get('name')?.errors?.['minlength']">⚠️ Event Name must be at least 3 characters.</span>
+              <span *ngIf="eventForm.get('name')?.errors?.['required']"><i class="bi bi-exclamation-triangle"></i> Event Name is required.</span>
+              <span *ngIf="eventForm.get('name')?.errors?.['minlength']"><i class="bi bi-exclamation-triangle"></i> Event Name must be at least 3 characters.</span>
             </div>
           </div>
           <div class="form-group">
             <label>Event Date *</label>
             <input type="date" formControlName="date"/>
             <div *ngIf="eventForm.get('date')?.touched && eventForm.get('date')?.errors?.['required']" class="text-red-500 text-xs mt-1 font-semibold">
-              ⚠️ Event Date is required.
+              <i class="bi bi-exclamation-triangle"></i> Event Date is required.
             </div>
           </div>
         </div>
@@ -76,7 +76,7 @@
             <label>Number of Guests</label>
             <input type="number" formControlName="guests" placeholder="e.g. 150"/>
             <div *ngIf="eventForm.get('guests')?.touched && eventForm.get('guests')?.errors?.['min']" class="text-red-500 text-xs mt-1 font-semibold">
-              ⚠️ Guests must be at least 1.
+              <i class="bi bi-exclamation-triangle"></i> Guests must be at least 1.
             </div>
           </div>
           <div class="form-group">
@@ -90,14 +90,14 @@
             <label>City *</label>
             <input type="text" formControlName="city" placeholder="e.g. New Cairo"/>
             <div *ngIf="eventForm.get('city')?.touched && eventForm.get('city')?.errors?.['required']" class="text-red-500 text-xs mt-1 font-semibold">
-              ⚠️ City is required.
+              <i class="bi bi-exclamation-triangle"></i> City is required.
             </div>
           </div>
           <div class="form-group">
             <label>State / Governorate *</label>
             <input type="text" formControlName="state" placeholder="e.g. Cairo"/>
             <div *ngIf="eventForm.get('state')?.touched && eventForm.get('state')?.errors?.['required']" class="text-red-500 text-xs mt-1 font-semibold">
-              ⚠️ State/Governorate is required.
+              <i class="bi bi-exclamation-triangle"></i> State/Governorate is required.
             </div>
           </div>
         </div>
@@ -106,14 +106,14 @@
           <label>Total Budget (EGP) *</label>
           <input type="number" formControlName="budget" placeholder="e.g. 50000" />
           <div *ngIf="eventForm.get('budget')?.touched && eventForm.get('budget')?.invalid" class="text-red-500 text-xs mt-1 font-semibold">
-            <span *ngIf="eventForm.get('budget')?.errors?.['required']">⚠️ Budget is required.</span>
-            <span *ngIf="eventForm.get('budget')?.errors?.['min']">⚠️ Budget must be at least 1,000 EGP.</span>
+            <span *ngIf="eventForm.get('budget')?.errors?.['required']"><i class="bi bi-exclamation-triangle"></i> Budget is required.</span>
+            <span *ngIf="eventForm.get('budget')?.errors?.['min']"><i class="bi bi-exclamation-triangle"></i> Budget must be at least 1,000 EGP.</span>
           </div>
         </div>
 
         <!-- Budget breakdown -->
         <div class="mb-[18px]">
-          <div class="text-[.84rem] font-semibold text-[var(--navy)] mb-[6px]">💰 Suggested Budget Breakdown</div>
+          <div class="text-[.84rem] font-semibold text-[var(--navy)] mb-[6px]"><i class="bi bi-currency-dollar"></i> Suggested Budget Breakdown</div>
           <div class="ae-budget-breakdown">
              <div class="ae-budget-row"><span>Venue</span> <span><strong>{{ getBudgetPart(0.4) | number }} EGP</strong> (40%)</span></div>
              <div class="ae-budget-row"><span>Catering</span> <span><strong>{{ getBudgetPart(0.3) | number }} EGP</strong> (30%)</span></div>
@@ -142,10 +142,12 @@
         <div class="ae-nav-btns">
           <button class="btn btn-ghost" (click)="goToStep1()">← Back</button>
           <button class="btn btn-gold py-[11px] px-[32px]" (click)="createEvent()" [disabled]="isSubmitting">
-            {{ isSubmitting ? 'Creating...' : 'Create Event 🎉' }}
+            {{ isSubmitting ? 'Creating...' : 'Create Event' }}
           </button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+

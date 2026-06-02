@@ -1,4 +1,4 @@
-<div class="page active" id="page-vendor-join">
+﻿<div class="page active" id="page-vendor-join">
   <!-- HERO SECTION -->
   <div class="vendor-join-hero">
     <div class="tag">Join Our Elite Network</div>
@@ -11,17 +11,17 @@
     <!-- BENEFITS GRID -->
     <div class="vendor-benefits" *ngIf="currentStep === 1">
       <div class="benefit-card">
-        <div class="benefit-icon">👥</div>
+        <div class="benefit-icon"><i class="bi bi-people"></i></div>
         <div class="benefit-title">Reach More Clients</div>
         <div class="benefit-desc">Get discovered by thousands of event planners, couples, and corporate managers across Egypt.</div>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon">📅</div>
+        <div class="benefit-icon"><i class="bi bi-calendar3"></i></div>
         <div class="benefit-title">Manage Bookings Easily</div>
         <div class="benefit-desc">Your personal dashboard to manage requests, bookings, and your availability calendar in real-time.</div>
       </div>
       <div class="benefit-card">
-        <div class="benefit-icon">💰</div>
+        <div class="benefit-icon"><i class="bi bi-currency-dollar"></i></div>
         <div class="benefit-title">Grow Your Revenue</div>
         <div class="benefit-desc">Our platform drives high-intent leads directly to you. Pay only when you get a confirmed booking.</div>
       </div>
@@ -125,7 +125,7 @@
               <div class="uploader-controls">
                 <div class="avatar-preview">
                   <img *ngIf="profilePreviewUrl" [src]="profilePreviewUrl" alt="Profile Preview" />
-                  <span *ngIf="!profilePreviewUrl" class="placeholder-icon">👤</span>
+                  <span *ngIf="!profilePreviewUrl" class="placeholder-icon"><i class="bi bi-person"></i></span>
                 </div>
                 <div class="uploader-actions">
                   <input type="file" (change)="onProfilePictureSelected($event)" accept="image/*" class="hidden" #profileInput />
@@ -167,7 +167,7 @@
               <label>Upload Portfolio / Documents (Optional)</label>
               <div class="file-drop-zone" (click)="docInput.click()">
                 <input type="file" (change)="onDocumentSelected($event)" accept=".pdf,.doc,.docx,.jpg,.png" class="hidden" #docInput />
-                <span class="drop-icon">📂</span>
+                <span class="drop-icon"><i class="bi bi-folder2-open"></i></span>
                 <span class="drop-text">{{ selectedDocument ? 'Change Documents' : 'Drop files here or click to upload' }}</span>
                 <span class="drop-subtext">PDF, JPG, PNG up to 10MB each. Portfolio photos, commercial register, etc.</span>
                 <div class="file-selected-name" *ngIf="selectedDocument">
@@ -229,7 +229,7 @@
 
     <!-- SUCCESS STATE -->
     <div class="vendor-success" *ngIf="isSuccess">
-      <span class="success-emoji">🎉</span>
+      <span class="success-emoji"><i class="bi bi-check-circle-fill" style="color:var(--success)"></i></span>
       <h2>Application Submitted!</h2>
       <p>
         Thank you for choosing Epic Hub! Our onboarding team will review your business profile and reach out within <strong>24 hours</strong> to complete verification. 

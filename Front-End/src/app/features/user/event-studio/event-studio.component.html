@@ -1,8 +1,8 @@
-<div class="ai-studio-overlay">
+﻿<div class="ai-studio-overlay">
   <div class="ai-studio-modal">
     <div class="ai-header">
       <div class="ai-title">
-        <span class="sparkle-icon">✨</span> AI Event Studio
+        <i class="bi bi-stars sparkle-icon"></i> AI Event Studio
       </div>
       <button class="close-btn" (click)="close.emit()">×</button>
     </div>
@@ -10,13 +10,13 @@
     <!-- Navigation Tabs -->
     <div class="ai-tabs">
       <button class="ai-tab-btn" [class.active]="activeTab === 'package'" (click)="switchTab('package')">
-        📦 Package Planning
+        <i class="bi bi-box"></i> Package Planning
       </button>
       <button class="ai-tab-btn" [class.active]="activeTab === 'budget'" (click)="switchTab('budget')">
-        📊 Smart Budget Allocation
+        <i class="bi bi-pie-chart"></i> Smart Budget Allocation
       </button>
       <button class="ai-tab-btn" [class.active]="activeTab === 'timeline'" (click)="switchTab('timeline')">
-        ⏱️ Day-of Timeline
+        <i class="bi bi-clock"></i> Day-of Timeline
       </button>
     </div>
 
@@ -29,7 +29,7 @@
           <h3>Let AI design your perfect event</h3>
           <p>Our AI will analyze your budget of <strong>{{eventBudget | number}} EGP</strong> and instantly match you with the best available vendors in our database to build a complete package.</p>
           <button class="btn btn-gold btn-lg mt-4" (click)="generatePlan()">
-            ✨ Generate Event Plan
+            <i class="bi bi-stars"></i> Generate Event Plan
           </button>
         </div>
 
@@ -42,7 +42,7 @@
 
         <!-- Error State -->
         <div class="ai-error" *ngIf="error">
-          <div class="error-icon">⚠️</div>
+          <div class="error-icon"><i class="bi bi-exclamation-triangle"></i></div>
           <h3>Something went wrong</h3>
           <p>{{error}}</p>
           <button class="btn btn-outline mt-3" (click)="generatePlan()">Try Again</button>
@@ -66,7 +66,7 @@
             </div>
           </div>
 
-          <h4 class="mt-4 mb-3">Recommended Vendors <small class="text-muted" style="font-size: 0.8rem; font-weight: normal; margin-left: 8px;">(Click to select/deselect)</small></h4>
+          <h4 class="mt-4 mb-3">Recommended Vendors <small class="text-muted text-studio-instruction">(Click to select/deselect)</small></h4>
           <div class="ai-vendor-list">
             <div class="ai-vendor-item" *ngFor="let item of aiPlan.selected_items"
                  [class.selected]="item.selected"
@@ -84,7 +84,7 @@
           </div>
 
           <div class="ai-tips mt-4" *ngIf="aiPlan.tips?.length">
-            <h4>💡 AI Tips</h4>
+            <h4><i class="bi bi-lightbulb"></i> AI Tips</h4>
             <ul>
               <li *ngFor="let tip of aiPlan.tips">{{tip}}</li>
             </ul>
@@ -93,7 +93,7 @@
 
         <!-- Recommendations Section (Clients Like You) -->
         <div class="recommendations-section mt-5" *ngIf="!isGenerating && recommendations.length > 0">
-          <h4 class="section-title">✨ Recommended For You (Based on past hosts)</h4>
+          <h4 class="section-title">Recommended For You (Based on past hosts)</h4>
           <p class="section-desc">Hosts organizing similar events also selected these services:</p>
           <div class="rec-list">
             <div class="rec-card" *ngFor="let rec of recommendations">
@@ -118,7 +118,7 @@
 
         <!-- Error State -->
         <div class="ai-error" *ngIf="budgetError">
-          <div class="error-icon">⚠️</div>
+          <div class="error-icon"><i class="bi bi-exclamation-triangle"></i></div>
           <h3>Budget Analysis Failed</h3>
           <p>{{budgetError}}</p>
           <button class="btn btn-outline mt-3" (click)="loadBudgetAllocation()">Retry Analysis</button>
@@ -127,7 +127,7 @@
         <!-- Budget Result State -->
         <div class="budget-result" *ngIf="!loadingBudget && budgetAllocation">
           <div class="plan-summary-card">
-            <h4>📊 Smart Budget Breakdown</h4>
+            <h4><i class="bi bi-pie-chart"></i> Smart Budget Breakdown</h4>
             <p>Here is the recommended allocation of your <strong>{{ budgetAllocation.totalBudget | number }} EGP</strong> budget for a premium <strong>{{ budgetAllocation.eventType }}</strong> experience.</p>
           </div>
 
@@ -150,7 +150,7 @@
           </div>
 
           <div class="ai-advice-box mt-4" *ngIf="budgetAllocation.advice">
-            <h4>💡 AI Budget Strategist Advice</h4>
+            <h4><i class="bi bi-lightbulb"></i> AI Budget Strategist Advice</h4>
             <p>{{ budgetAllocation.advice }}</p>
           </div>
         </div>
@@ -167,7 +167,7 @@
 
         <!-- Error State -->
         <div class="ai-error" *ngIf="timelineError">
-          <div class="error-icon">⚠️</div>
+          <div class="error-icon"><i class="bi bi-exclamation-triangle"></i></div>
           <h3>Timeline Generation Failed</h3>
           <p>{{timelineError}}</p>
           <button class="btn btn-outline mt-3" (click)="loadTimeline()">Retry Generation</button>
@@ -176,7 +176,7 @@
         <!-- Timeline Result State -->
         <div class="timeline-result" *ngIf="!loadingTimeline && timelineData">
           <div class="plan-summary-card">
-            <h4>⏱️ Day-Of Chronological Timeline</h4>
+            <h4><i class="bi bi-clock"></i> Day-Of Chronological Timeline</h4>
             <p>Minute-by-minute scheduling proposed by AI planner for: <strong>{{ timelineData.eventTitle }}</strong></p>
           </div>
 
@@ -194,14 +194,14 @@
                   </span>
                 </div>
                 <div class="tn-meta">
-                  <span>⏱️ Duration: {{ item.duration }}</span>
+                  <span><i class="bi bi-clock"></i> Duration: {{ item.duration }}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="timeline-notes-box mt-4" *ngIf="timelineData.planningNotes">
-            <h4>📝 AI Coordinator Planning Notes</h4>
+            <h4><i class="bi bi-journal-text"></i> AI Coordinator Planning Notes</h4>
             <p>{{ timelineData.planningNotes }}</p>
           </div>
         </div>
@@ -218,3 +218,5 @@
     </div>
   </div>
 </div>
+
+

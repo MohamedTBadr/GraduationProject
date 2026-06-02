@@ -1,6 +1,6 @@
-.event-tab-btn {
+﻿.event-tab-btn {
     padding: 10px 20px;
-    background: var(--white);
+    background: var(--surface);
     border: 1px solid var(--lgray);
     color: var(--gray);
     border-radius: 50px;
@@ -60,7 +60,7 @@
     padding: 8px 14px;
     border-radius: 50px;
     border: 1px solid var(--lgray);
-    background: var(--white);
+    background: var(--surface);
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--gray);
@@ -199,10 +199,10 @@
 }
 
 .dash-card {
-    background: var(--white);
+    background: var(--surface);
     border-radius: var(--r2);
     padding: 24px;
-    box-shadow: var(--sh1);
+    box-shadow: var(--sh);
 
     .dash-card-header {
         display: flex;
@@ -379,7 +379,7 @@
     border-radius: 6px;
     font-size: 0.85rem;
     outline: none;
-    background: var(--white);
+    background: var(--surface);
     color: var(--navy);
     transition: border-color 0.2s;
 
@@ -429,3 +429,13 @@
         color: #b91c1c;
     }
 }
+
+/* ═══ DARK MODE ═══════════════════════════════════════════════ */
+:host-context(.dark) {
+  .events-tab { border-color: var(--lgray); color: var(--gray); }
+  .events-tab.active { background: rgba(201,168,76,0.15); color: var(--gold); border-color: transparent; }
+  .event-card { background: var(--surface); border-color: rgba(100,145,210,0.1); }
+  .event-services-tab { border-color: var(--lgray); color: var(--gray); }
+  .event-services-tab.active { background: rgba(201,168,76,0.15); color: var(--gold); border-color: transparent; }
+}
+

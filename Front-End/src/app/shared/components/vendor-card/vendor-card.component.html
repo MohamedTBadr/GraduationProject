@@ -1,4 +1,4 @@
-<div class="vendor-card" [routerLink]="['/vendor', vendor.id]">
+﻿<div class="vendor-card" [routerLink]="['/vendor', vendor.id]">
     <div class="vc-photo">
         <div class="vc-photo-inner" [style.background]="getGradient(vendor.id)">{{vendor.name.charAt(0)}}</div>
         <div class="vc-top-row">
@@ -13,7 +13,7 @@
     </div>
     <div class="vc-body">
         <div class="vc-name">{{vendor.name}}</div>
-        <div class="vc-loc" *ngIf="vendor.location">📍 {{vendor.location}}</div>
+        <div class="vc-loc" *ngIf="vendor.location"><i class="bi bi-geo-alt-fill"></i> {{vendor.location}}</div>
         <div class="vc-rating-row">
             <span class="stars text-[var(--gold)] text-[.8rem]"></span>
             <span class="font-bold text-[.85rem] text-[var(--navy)] ml-[4px]">{{vendor.rating || 'New'}}</span>

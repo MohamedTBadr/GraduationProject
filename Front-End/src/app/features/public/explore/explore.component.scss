@@ -1,0 +1,38 @@
+﻿.view-toggle {
+  display: flex;
+  background: var(--cream2);
+  border-radius: 50px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.vt-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  background: transparent;
+  color: var(--gray);
+  transition: all 0.18s;
+
+  &.active {
+    background: var(--surface);
+    color: var(--navy);
+    box-shadow: 0 1px 4px rgba(26, 37, 64, 0.12);
+  }
+}
+/* ═══ DARK MODE ═══════════════════════════════════════════════ */
+:host-context(.dark) {
+  .view-toggle { background: var(--surface); border-color: var(--lgray); }
+  .vt-btn { color: var(--gray); }
+  .vt-btn.active { background: var(--cream2); color: var(--navy); }
+  .filter-bar-wrap { background: var(--surface); border-color: var(--lgray); }
+  .filter-pill { background: var(--surface); border-color: var(--lgray); color: var(--navy); }
+  .filter-pill.active { background: rgba(201,168,76,0.15); border-color: var(--gold); color: var(--gold); }
+}
+

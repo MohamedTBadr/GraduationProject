@@ -1,4 +1,4 @@
-.mb-header {
+﻿.mb-header {
   margin-bottom: 24px;
 }
 .mb-title {
@@ -98,7 +98,7 @@
   gap: 16px;
 }
 .mb-booking-card {
-  background: var(--white);
+  background: var(--surface);
   border-radius: var(--r2);
   padding: 24px;
   box-shadow: var(--sh);
@@ -184,7 +184,7 @@
   gap: 12px;
 }
 .bk-actions .btn {
-  background: var(--white);
+  background: var(--surface);
   border: 1px solid var(--lgray);
   color: var(--navy);
   font-weight: 700;
@@ -332,7 +332,7 @@
 
 .voucher-ticket {
   display: flex;
-  background: var(--white);
+  background: var(--surface);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: var(--sh);
@@ -458,3 +458,73 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
+
+.card-loyalty {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  color: white !important;
+  border-color: #d97706 !important;
+}
+
+.card-loyalty .val {
+  color: white !important;
+}
+
+.card-loyalty .lbl {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.bk-actions .btn.btn-confirm-completion {
+  background-color: #10b981 !important;
+  color: white !important;
+  border-color: #10b981 !important;
+
+  &:hover {
+    background-color: #0d9668 !important;
+    border-color: #0d9668 !important;
+  }
+}
+
+.bk-actions .btn.btn-leave-review {
+  background-color: #eba834 !important;
+  color: white !important;
+  border-color: #eba834 !important;
+
+  &:hover {
+    background-color: #d69427 !important;
+    border-color: #d69427 !important;
+  }
+}
+
+.bk-order-items {
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--gray);
+
+  .empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.empty-state.rewards-empty {
+  background: var(--surface);
+  border-radius: var(--r2);
+  box-shadow: var(--sh);
+}
+
+
+/* ═══ DARK MODE ═══════════════════════════════════════════════ */
+:host-context(.dark) {
+  .mb-stat-card { background: var(--surface); border-color: rgba(100,145,210,0.1); }
+  .mb-booking-card { background: var(--surface); border-color: rgba(100,145,210,0.1); }
+  .bk-icon { background: var(--cream2); }
+  .mb-tab { border-color: var(--lgray); color: var(--gray); }
+  .mb-tab.active { background: var(--surface); color: var(--navy); border-color: var(--lgray); }
+  .bk-note { background: var(--cream2); border-left-color: var(--gold); }
+}
+

@@ -1,4 +1,4 @@
-<div class="vd-section active block">
+﻿<div class="vd-section active block">
   <div class="vd-page-header">
     <div>
       <div class="vd-page-title">Messages</div>
@@ -25,7 +25,7 @@
       </div>
 
       <div class="vd-conv-empty" *ngIf="!loadingConversations && filteredConversations.length === 0">
-        <span>💬</span>
+        <i class="bi bi-chat"></i>
         <p>No conversations yet</p>
       </div>
 
@@ -56,7 +56,7 @@
 
       <!-- Empty State -->
       <div class="vd-chat-empty" *ngIf="!selectedConversation">
-        <div class="vd-empty-icon">💬</div>
+        <div class="vd-empty-icon"><i class="bi bi-chat" style="font-size:2.5rem;color:var(--gray)"></i></div>
         <h3>Client Messages</h3>
         <p>Select a conversation to start chatting with your clients.</p>
       </div>
@@ -86,7 +86,7 @@
             <div class="vd-mini-pulse"></div>
           </div>
           <div class="vd-msgs-empty" *ngIf="!loadingMessages && messages.length === 0">
-            <p>No messages yet. Start the conversation! 👋</p>
+            <p>No messages yet. Start the conversation! </p>
           </div>
           <div
             class="vd-bubble-wrap"

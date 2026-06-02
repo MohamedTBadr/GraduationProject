@@ -1,4 +1,4 @@
-<div class="stats-row">
+﻿<div class="stats-row">
     <div class="stat-card" *ngFor="let s of stats">
         <div class="stat-icon">{{s.icon}}</div>
         <div class="stat-val">
@@ -20,8 +20,8 @@
         </div>
         
         <div class="event-meta">
-            <span>📅 {{ev.date | date:'longDate'}}</span>
-            <span>✨ {{ev.type}}</span>
+            <span><i class="bi bi-calendar3"></i> {{ev.date | date:'longDate'}}</span>
+            <span><i class="bi bi-stars"></i> {{ev.type}}</span>
             <span> {{ev.guests}} Guests</span>
         </div>
 
@@ -61,3 +61,4 @@
         </div>
     </div>
 </div>
+

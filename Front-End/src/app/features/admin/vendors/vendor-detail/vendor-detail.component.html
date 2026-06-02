@@ -1,4 +1,4 @@
-<div class="ad-section active block" *ngIf="vendor">
+﻿<div class="ad-section active block" *ngIf="vendor">
     <div class="ad-page-hd">
         <div class="flex items-center gap-[15px]">
             <div class="ad-back-btn" routerLink="/admin/vendors">←</div>
@@ -48,13 +48,13 @@
 
         <!-- Services Tab -->
         <div *ngIf="activeTab === 'services'" class="ad-card text-center p-[4rem]">
-            <div class="text-[3rem] mb-[1rem]">📦</div>
+            <div class="text-[3rem] mb-[1rem]"><i class="bi bi-box"></i></div>
             <h3 class="text-[1.1rem] text-[#8c8fa7]">Service listing integration coming soon...</h3>
         </div>
 
         <!-- History Tab -->
         <div *ngIf="activeTab === 'history'" class="ad-card text-center p-[4rem]">
-            <div class="text-[3rem] mb-[1rem]">🕒</div>
+            <div class="text-[3rem] mb-[1rem]"><i class="bi bi-clock"></i></div>
             <h3 class="text-[1.1rem] text-[#8c8fa7]">Booking history integration coming soon...</h3>
         </div>
     </div>
@@ -63,3 +63,4 @@
 <div *ngIf="loading" class="p-[5rem] text-center text-[var(--gold)]">
     Loading vendor profile...
 </div>
+

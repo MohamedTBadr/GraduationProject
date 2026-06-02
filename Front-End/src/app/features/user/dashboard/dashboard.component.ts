@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
@@ -16,10 +16,10 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class DashboardComponent implements OnInit {
   stats = [
-    { label: 'Active Events', value: '0', icon: '📅' },
-    { label: 'Booked Vendors', value: '0', icon: '🏪' },
+    { label: 'Active Events', value: '0', icon: 'calendar3' },
+    { label: 'Booked Vendors', value: '0', icon: 'shop' },
     { label: 'Pending Requests', value: '0', icon: '⏳' },
-    { label: 'Avg Budget Used', value: '0%', icon: '💰' }
+    { label: 'Avg Budget Used', value: '0%', icon: 'currency-dollar' }
   ];
 
   events: any[] = [];
@@ -108,3 +108,4 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/user/my-events'], { queryParams: { id }});
   }
 }
+

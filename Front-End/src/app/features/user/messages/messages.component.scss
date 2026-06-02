@@ -1,4 +1,4 @@
-:host {
+﻿:host {
   display: block;
 }
 
@@ -8,12 +8,12 @@
   height: 680px;
   background: var(--white);
   border-radius: var(--r2);
-  box-shadow: var(--sh1);
+  box-shadow: var(--sh);
   border: 1px solid var(--border);
   overflow: hidden;
 }
 
-// ─── Sidebar ──────────────────────────────────
+// â”€â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .msg-sidebar {
   display: flex;
   flex-direction: column;
@@ -154,7 +154,7 @@
   }
 }
 
-// ─── Main Chat Area ────────────────────────────
+// â”€â”€â”€ Main Chat Area â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .msg-main {
   display: flex;
   flex-direction: column;
@@ -432,3 +432,4 @@
     display: none;
   }
 }
+

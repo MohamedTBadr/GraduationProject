@@ -1,48 +1,171 @@
 <div class="explore-container">
-  <!-- ═══ EXPLORE HERO ═══════════════════════════════════════ -->
-  <section class="explore-hero">
-    <div class="eh-bg-mesh"></div>
-    <div class="eh-orb eh-orb-1"></div>
-    <div class="eh-orb eh-orb-2"></div>
-    <div class="eh-inner">
-      <div class="eh-eyebrow">✦ Discovery Engine</div>
-      <h1 class="eh-title">Explore Services<br />Like You <em>Scroll Instagram</em></h1>
-      <p class="eh-sub">Discover, compare, and instantly book what fits your event vibe. 340+ verified vendors across Egypt.</p>
-      <div class="eh-search-wrap">
-        <div class="eh-search-inner">
-          <div class="eh-search-icon">🔍</div>
-          <input type="text" class="eh-search-input" placeholder="Search catering, decor, photography…" [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()" />
-          <div class="eh-search-divider"></div>
-          <input type="date" class="eh-search-date" title="Filter by availability" />
-        </div>
-        <button class="eh-search-btn" (click)="applyFilters()">Search →</button>
-      </div>
-      <div class="eh-quick-tags">
-        <div class="eh-quick-tag" [class.active]="selectedCategories.length === 0" (click)="clearAllFilters()">✨ All Services</div>
-        <div class="eh-quick-tag" *ngFor="let cat of (categories || []).slice(0, 5)" [class.active]="selectedCategories.includes(cat.id)" (click)="toggleCategory(cat.id)">
-          {{cat.name}}
-        </div>
-      </div>
-    </div>
-    <div class="eh-stats">
-      <div class="eh-stat"><div class="eh-stat-num">340+</div><div class="eh-stat-lbl">Verified Vendors</div></div>
-      <div class="eh-stat"><div class="eh-stat-num">1,200+</div><div class="eh-stat-lbl">Events Planned</div></div>
-      <div class="eh-stat"><div class="eh-stat-num">4.9★</div><div class="eh-stat-lbl">Avg. Rating</div></div>
-    </div>
-  </section>
 
-  <!-- ═══ CONTROLS BAR ════════════════════════════════════════ -->
-  <div class="controls-bar">
-    <div class="controls-inner">
-      <div class="view-toggle">
-        <button class="vt-btn" [class.active]="viewMode === 'grid'" (click)="setView('grid')" title="Grid View">⊞</button>
-        <button class="vt-btn" [class.active]="viewMode === 'list'" (click)="setView('list')" title="List View">☰</button>
-        <button class="vt-btn" [class.active]="viewMode === 'map'" (click)="setView('map')" title="Map View">📍</button>
+  <!-- ═══ HERO ═══════════════════════════════════════════════ -->
+  <div class="explore-hero">
+    <h1>Explore Services</h1>
+    <p>340+ verified services across Egypt — filter to match your event</p>
+  </div>
+
+  <!-- ═══ STICKY FILTER BAR ══════════════════════════════════ -->
+  <div class="filter-bar-wrap" id="filterBarWrap">
+    <div class="container relative">
+      <div class="filter-bar-scroll">
+        <div class="filter-bar">
+
+          <div class="filter-pill" [class.active]="activePanel === 'type'" (click)="togglePanel('type')">
+            <span>Service Type</span>
+            <span class="pill-arrow" *ngIf="selectedCategories.length">
+              ({{selectedCategories.length}})
+            </span>
+            <span class="pill-arrow">▾</span>
+          </div>
+          <div class="filter-divider"></div>
+
+          <div class="filter-pill" [class.active]="activePanel === 'event'" (click)="togglePanel('event')">
+            <span>Event Type</span>
+            <span class="pill-arrow" *ngIf="selectedEventTypes.length">
+              ({{selectedEventTypes.length}})
+            </span>
+            <span class="pill-arrow">▾</span>
+          </div>
+          <div class="filter-divider"></div>
+
+          <div class="filter-pill" [class.active]="activePanel === 'price'" (click)="togglePanel('price')">
+            <span>Price</span>
+            <span class="pill-arrow" *ngIf="maxPrice < 100000">(up to {{maxPrice | number}})</span>
+            <span class="pill-arrow">▾</span>
+          </div>
+          <div class="filter-divider"></div>
+
+          <div class="filter-pill" [class.active]="activePanel === 'rating'" (click)="togglePanel('rating')">
+            <span>Rating</span>
+            <span class="pill-arrow" *ngIf="minRating > 0">({{minRating}}+)</span>
+            <span class="pill-arrow">▾</span>
+          </div>
+          <div class="filter-divider"></div>
+
+          <div class="filter-pill" [class.active]="activePanel === 'loc'" (click)="togglePanel('loc')">
+            <span>Location</span>
+            <span class="pill-arrow" *ngIf="selectedCity">({{selectedCity}})</span>
+            <span class="pill-arrow">▾</span>
+          </div>
+          <div class="filter-divider"></div>
+
+          <button class="filter-pill text-[#dc2626] border-[#fecaca]" (click)="clearAllFilters()">
+            Clear All
+          </button>
+
+        </div>
       </div>
-      <div class="results-info"><strong>{{filteredServices.length}}</strong> services found — <span>{{selectedCategories.length === 0 ? 'All categories' : selectedCategories.length + ' Categories selected'}}</span></div>
-      <div class="sort-wrap">
-        Sort by:
-        <select class="sort-sel" [(ngModel)]="sortOption" (change)="applyFilters()">
+
+      <!-- Dropdown Panels -->
+      <div class="filter-panels-layer" *ngIf="activePanel">
+
+        <!-- Service Type -->
+        <div class="filter-panel open left-[0]" *ngIf="activePanel === 'type'">
+          <div class="fp-title">Service Type</div>
+          <div class="fp-chips">
+            <div class="fp-chip"
+              *ngFor="let cat of categories"
+              [class.selected]="selectedCategories.includes(cat.id)"
+              (click)="toggleCategory(cat.id)">
+              {{cat.name}}
+            </div>
+          </div>
+          <div class="fp-footer">
+            <button class="fp-clear" (click)="selectedCategories = []; applyFilters()">Clear</button>
+            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null; applyFilters()">Apply</button>
+          </div>
+        </div>
+
+        <!-- Event Type -->
+        <div class="filter-panel open left-[140px]" *ngIf="activePanel === 'event'">
+          <div class="fp-title">Event Type</div>
+          <div class="fp-chips">
+            <div class="fp-chip"
+              *ngFor="let ev of ['Wedding','Birthday','Corporate','Graduation','Engagement']"
+              [class.selected]="selectedEventTypes.includes(ev.toLowerCase())"
+              (click)="toggleEventType(ev.toLowerCase())">
+              {{ev}}
+            </div>
+          </div>
+          <div class="fp-footer">
+            <button class="fp-clear" (click)="selectedEventTypes = []; applyFilters()">Clear</button>
+            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null; applyFilters()">Apply</button>
+          </div>
+        </div>
+
+        <!-- Price -->
+        <div class="filter-panel open left-[290px]" *ngIf="activePanel === 'price'">
+          <div class="fp-title">Max Price (EGP)</div>
+          <div class="fp-chips">
+            <div class="fp-chip"
+              *ngFor="let p of [5000, 15000, 30000, 50000, 100000]"
+              [class.selected]="maxPrice === p"
+              (click)="maxPrice = p; applyFilters()">
+              {{p >= 100000 ? 'Any' : (p | number)}}
+            </div>
+          </div>
+          <div class="fp-footer">
+            <button class="fp-clear" (click)="maxPrice = 100000; applyFilters()">Clear</button>
+            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null">Apply</button>
+          </div>
+        </div>
+
+        <!-- Rating -->
+        <div class="filter-panel open left-[420px]" *ngIf="activePanel === 'rating'">
+          <div class="fp-title">Minimum Rating</div>
+          <div class="fp-chips">
+            <div class="fp-chip" *ngFor="let r of [3, 4, 4.5, 4.8]"
+              [class.selected]="minRating === r"
+              (click)="minRating = r; applyFilters()">{{r}}+</div>
+          </div>
+          <div class="fp-footer">
+            <button class="fp-clear" (click)="minRating = 0; applyFilters()">Clear</button>
+            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null">Apply</button>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="filter-panel open left-[540px]" *ngIf="activePanel === 'loc'">
+          <div class="fp-title">City</div>
+          <div class="fp-chips">
+            <div class="fp-chip"
+              *ngFor="let city of ['Cairo','New Cairo','Giza','Alexandria','Mansoura']"
+              [class.selected]="selectedCity === city"
+              (click)="selectedCity = city; loadData()">
+              {{city}}
+            </div>
+          </div>
+          <div class="fp-footer">
+            <button class="fp-clear" (click)="selectedCity = ''; loadData()">Clear</button>
+            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null">Apply</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="filter-panel-overlay" *ngIf="activePanel" (click)="activePanel = null"></div>
+    </div>
+  </div>
+
+  <!-- ═══ RESULTS ══════════════════════════════════════════════ -->
+  <div class="container">
+
+    <div class="results-header">
+      <div class="results-count">
+        Showing <strong>{{filteredServices.length}}</strong> services
+        <span *ngIf="selectedCategories.length || selectedEventTypes.length || selectedCity">
+          — {{selectedCategories.length === 0 ? 'All categories' : selectedCategories.length + ' categories'}}
+        </span>
+      </div>
+      <div class="flex gap-[16px] items-center">
+        <div class="view-toggle">
+          <button class="vt-btn" [class.active]="viewMode === 'grid'" (click)="setView('grid')" title="Grid"><i class="bi bi-grid"></i></button>
+          <button class="vt-btn" [class.active]="viewMode === 'list'" (click)="setView('list')" title="List"><i class="bi bi-list-ul"></i></button>
+          <button class="vt-btn" [class.active]="viewMode === 'map'" (click)="setView('map')" title="Map"><i class="bi bi-map"></i></button>
+        </div>
+        <select class="sort-select" [(ngModel)]="sortOption" (change)="applyFilters()">
           <option value="recommended">Recommended</option>
           <option value="rating">Top Rated</option>
           <option value="price-asc">Price: Low to High</option>
@@ -50,173 +173,55 @@
         </select>
       </div>
     </div>
-  </div>
 
-  <!-- ═══ MAIN LAYOUT ════════════════════════════════════════ -->
-  <div class="explore-layout">
-    <!-- FILTER SIDEBAR -->
-    <aside class="fs-sidebar">
-      <div class="fs-sticky">
-        <div class="fs-header">
-          <div class="fs-title">🎛️ Filters</div>
-          <button class="fs-clear" (click)="clearAllFilters()">Clear All</button>
-        </div>
+    <!-- Loading -->
+    <div class="p-[40px] text-center text-[var(--gray)]" *ngIf="loading">
+      Loading services...
+    </div>
 
-        <!-- Event Type Filter -->
-        <div class="filter-block">
-          <div class="fb-title">Event Type <span class="fb-toggle open">▾</span></div>
-          <div class="fb-chip-row">
-            <div class="fb-chip" [class.sel]="selectedEventTypes.length === 0" (click)="clearAllFilters()">All</div>
-            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('wedding')" (click)="toggleEventType('wedding')">Wedding</div>
-            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('birthday')" (click)="toggleEventType('birthday')">Birthday</div>
-            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('corporate')" (click)="toggleEventType('corporate')">Corporate</div>
-            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('graduation')" (click)="toggleEventType('graduation')">Graduation</div>
-            <div class="fb-chip" [class.sel]="selectedEventTypes.includes('engagement')" (click)="toggleEventType('engagement')">Engagement</div>
-          </div>
-        </div>
+    <!-- Map View -->
+    <div class="vendor-map-container" [class.hidden]="viewMode !== 'map'">
+      <div id="service-map" class="w-full h-[600px] rounded-[20px] border border-[rgba(0,0,0,0.1)] shadow-[0_8px_40px_rgba(26,37,64,0.18)] relative z-0 mb-8"></div>
+    </div>
 
-        <!-- Classification Filter -->
-        <div class="filter-block">
-          <div class="fb-title">Classification <span class="fb-toggle open">▾</span></div>
-          <div class="rating-options">
-            <label class="rating-row" (click)="setClassification('all')"><input type="radio" name="class" [checked]="selectedClassification==='all'" /> Any</label>
-            <label class="rating-row" (click)="setClassification('Personal')"><input type="radio" name="class" [checked]="selectedClassification==='Personal'" /> Personal</label>
-            <label class="rating-row" (click)="setClassification('Corporate')"><input type="radio" name="class" [checked]="selectedClassification==='Corporate'" /> Corporate</label>
-          </div>
-        </div>
-
-        <!-- Service Type Filter -->
-        <div class="filter-block">
-          <div class="fb-title">Service Type <span class="fb-toggle open">▾</span></div>
-          <div class="fb-chip-row">
-            <div class="fb-chip" [class.sel]="selectedCategories.length === 0" (click)="clearAllFilters()">All</div>
-            <div class="fb-chip" *ngFor="let cat of categories" [class.sel]="selectedCategories.includes(cat.id)" (click)="toggleCategory(cat.id)">
-              {{cat.name}}
+    <!-- Service Grid -->
+    <div class="svc-explore-grid" [class.list-view]="viewMode === 'list'" *ngIf="!loading && viewMode !== 'map'">
+      <div class="svc-card" *ngFor="let svc of filteredServices" (click)="openPreview(svc)">
+        <div class="svc-card-img">
+          <img *ngIf="svc.imageUrl" [src]="svc.imageUrl" />
+          <span *ngIf="!svc.imageUrl" class="svc-img-placeholder"><i class="bi bi-image"></i></span>
+          <div class="svc-card-top">
+            <span class="svc-cat-badge">{{svc.vendorTypeName || svc.serviceTypeName}}</span>
+            <div class="svc-card-actions">
+              <button class="svc-action-btn" [class.active]="isInWishlist(svc.id)" (click)="toggleWishlist(svc, $event)" title="Save"><i class="bi bi-heart"></i></button>
+              <button class="svc-action-btn" [class.compare-active]="isInCompare(svc.id)" (click)="addToCompare(svc, $event)" title="Compare"><i class="bi bi-arrow-left-right"></i></button>
             </div>
           </div>
         </div>
-
-        <!-- 📍 Location Filter -->
-        <div class="filter-block">
-          <div class="fb-title">Location & Distance <span class="fb-toggle open">▾</span></div>
-          
-          <!-- City & Region -->
-          <div class="location-inputs mb-3">
-            <select class="fb-input mb-2" [(ngModel)]="selectedCity" (change)="loadData()">
-              <option value="">Select City</option>
-              <option value="Cairo">Cairo</option>
-              <option value="Giza">Giza</option>
-              <option value="Alexandria">Alexandria</option>
-              <option value="Mansoura">Mansoura</option>
-              <option value="Tanta">Tanta</option>
-            </select>
-            <input type="text" class="fb-input" placeholder="Region (e.g. Maadi)" [(ngModel)]="selectedRegion" (keyup.enter)="loadData()" />
-          </div>
-
-          <!-- GPS Location -->
-          <button class="btn btn-ghost w-full mb-3 text-[0.8rem] flex items-center justify-center gap-2 border-[rgba(0,0,0,0.1)]" 
-                  (click)="getCurrentLocation()" [disabled]="isLocating">
-            <span *ngIf="!isLocating">📍 Use My Current Location</span>
-            <span *ngIf="isLocating">⌛ Locating...</span>
-          </button>
-
-          <div *ngIf="latitude" class="text-[0.7rem] text-[#059669] mb-2 flex justify-between items-center">
-            <span>✓ Using GPS Coordinates</span>
-            <button class="text-[#ef4444]" (click)="clearLocation()">Clear</button>
-          </div>
-
-          <!-- Radius Slider (only show if location or city is picked) -->
-          <div class="radius-slider mt-2" *ngIf="latitude || selectedCity">
-            <div class="flex justify-between text-[0.7rem] mb-1">
-              <span>Radius</span>
-              <strong>{{radiusKm}} km</strong>
-            </div>
-            <input type="range" min="5" max="200" step="5" [(ngModel)]="radiusKm" (change)="loadData()" class="w-full" />
-          </div>
-        </div>
-
-        <!-- Price Range -->
-        <div class="filter-block">
-          <div class="fb-title">Price Range (EGP) <span class="fb-toggle open">▾</span></div>
-          <div class="price-range-display">
-            <span>0</span><span>{{maxPrice | number}} EGP</span>
-          </div>
-          <input type="range" min="0" max="100000" step="1000" [(ngModel)]="maxPrice" (input)="updatePrice($event)" />
-        </div>
-
-        <!-- Rating -->
-        <div class="filter-block">
-          <div class="fb-title">Minimum Rating <span class="fb-toggle open">▾</span></div>
-          <div class="rating-options">
-            <label class="rating-row" (click)="minRating=4.5; applyFilters()"><input type="radio" name="rating" [checked]="minRating===4.5" /> 4.5+</label>
-            <label class="rating-row" (click)="minRating=4.0; applyFilters()"><input type="radio" name="rating" [checked]="minRating===4.0" /> 4.0+</label>
-            <label class="rating-row" (click)="minRating=0; applyFilters()"><input type="radio" name="rating" [checked]="minRating===0" /> Any</label>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <main>
-      <!-- AI BANNER -->
-      <div class="ai-banner">
-        <div class="ai-title">🧠 AI Picks For You</div>
-        <div class="ai-sub">Based on popular events in Egypt this season</div>
-        <div class="ai-chips">
-          <div class="ai-chip">Recommended for you</div>
-          <div class="ai-chip">🔥 Trending this week</div>
-          <div class="ai-chip">Editor's Picks ✦</div>
-        </div>
-      </div>
-
-      <!-- SERVICE MAP VIEW -->
-      <div class="svc-map-container" [class.hidden]="viewMode !== 'map'">
-        <div id="service-map" class="w-full h-[600px] rounded-[20px] border border-[rgba(0,0,0,0.1)] shadow-[0_8px_40px_rgba(26,37,64,0.18)] relative z-0"></div>
-      </div>
-
-      <!-- SERVICE GRID -->
-      <div class="svc-grid" [class.list-view]="viewMode === 'list'" *ngIf="viewMode !== 'map'">
-        <div class="svc-card" *ngFor="let svc of filteredServices" (click)="openPreview(svc)">
-          <div class="svc-card-img">
-            <img *ngIf="svc.imageUrl" [src]="svc.imageUrl" />
-            <span *ngIf="!svc.imageUrl">🎨</span>
-            <div class="svc-card-top">
-              <span class="svc-cat-badge">{{svc.vendorTypeName || svc.serviceTypeName}}</span>
-              <div class="svc-card-actions">
-                <button class="svc-action-btn" [class.active]="isInWishlist(svc.id)" (click)="toggleWishlist(svc, $event)">♡</button>
-                <button class="svc-action-btn" [class.compare-active]="isInCompare(svc.id)" (click)="addToCompare(svc, $event)">⚖️</button>
-              </div>
-            </div>
-          </div>
-          <div class="svc-card-body">
-            <div class="svc-name">{{svc.name}}</div>
-            <div class="svc-price">{{svc.price | currency:'EGP':'symbol':'1.0-0'}}</div>
-            <p class="svc-desc text-[0.8rem] text-[#6b7280] mt-[8px]">{{ (svc.description || '') | slice:0:80 }}<ng-container *ngIf="(svc.description || '').length > 80">…</ng-container></p>
-          </div>
+        <div class="svc-card-body">
+          <div class="svc-vendor" *ngIf="svc.vendorName">{{svc.vendorName}}</div>
+          <div class="svc-name">{{svc.name}}</div>
+          <div class="svc-price">{{svc.price | currency:'EGP':'symbol':'1.0-0'}}</div>
+          <p class="svc-desc">{{ (svc.description || '') | slice:0:80 }}<ng-container *ngIf="(svc.description || '').length > 80">…</ng-container></p>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div class="text-center p-[60px]" *ngIf="filteredServices.length === 0 && !loading">
-        <div class="text-[3rem]">🔍</div>
+      <div class="no-results" *ngIf="filteredServices.length === 0 && !loading">
+        <div class="text-[3rem] mb-[12px]"><i class="bi bi-search" style="color:var(--gray)"></i></div>
         <h3>No services found</h3>
         <p>Try adjusting your filters or search terms.</p>
+        <button class="btn btn-gold btn-sm mt-[16px]" (click)="clearAllFilters()">Clear All Filters</button>
       </div>
+    </div>
 
-      <!-- Loading State -->
-      <div class="text-center p-[60px]" *ngIf="loading">
-        <p>Searching for the best services...</p>
-      </div>
-    </main>
   </div>
 
   <!-- ═══ COMPARE BAR ════════════════════════════════════════ -->
   <div class="compare-bar" [class.show]="showCompareBar">
-    <div class="cb-title">⚖️ Compare ({{compareList.length}}/3)</div>
+    <div class="cb-title"><i class="bi bi-arrow-left-right"></i> Compare ({{compareList.length}}/3)</div>
     <div class="cb-slots">
-      <div class="cb-slot" *ngFor="let s of compareList" class="cb-slot filled">
-        {{s.name}}
-      </div>
+      <div class="cb-slot" *ngFor="let s of compareList" class="cb-slot filled">{{s.name}}</div>
       <div class="cb-slot" *ngIf="compareList.length < 3">+ Add service</div>
     </div>
     <div class="cb-actions">
@@ -225,121 +230,36 @@
     </div>
   </div>
 
-  <!-- ═══ SERVICE PREVIEW MODAL ════════════════════════════════════════ -->
+  <!-- ═══ SERVICE PREVIEW MODAL ═══════════════════════════════ -->
   <div class="es-preview-backdrop" *ngIf="showPreview" (click)="closePreview()">
     <div class="es-preview-card" (click)="$event.stopPropagation()">
-
-      <!-- Close Button -->
       <button class="es-preview-close" (click)="closePreview()">
         <i class="fa-solid fa-x fa-xs"></i>
       </button>
-
-      <ng-container *ngIf="selectedPreviewService as svc">
-
-        <!-- ── Image Slider ── -->
-        <div class="es-preview-media">
-          <!-- Heart Wishlist Button -->
-          <button class="es-preview-wishlist" [class.active]="isInWishlist(svc.id)" (click)="togglePreviewWishlist(svc.id, $event)">
-            <i class="fa-heart" [class.fa-solid]="isInWishlist(svc.id)" [class.fa-regular]="!isInWishlist(svc.id)"></i>
-          </button>
-
-          <!-- Slider when images exist -->
-          <ng-container *ngIf="getPreviewImages(svc).length > 0; else noPreviewImages">
-            <div class="es-preview-slider">
-              <div class="es-preview-slide" *ngFor="let img of getPreviewImages(svc); let idx = index" [class.active]="previewSlideIndex === idx">
-                <img [src]="img" [alt]="svc.name" />
-              </div>
-
-              <button class="es-preview-arrow left" *ngIf="getPreviewImages(svc).length > 1" (click)="prevPreviewSlide(getPreviewImages(svc))">
-                <i class="fa-solid fa-chevron-left"></i>
-              </button>
-              <button class="es-preview-arrow right" *ngIf="getPreviewImages(svc).length > 1" (click)="nextPreviewSlide(getPreviewImages(svc))">
-                <i class="fa-solid fa-chevron-right"></i>
-              </button>
-
-              <div class="es-preview-dots" *ngIf="getPreviewImages(svc).length > 1">
-                <span *ngFor="let img of getPreviewImages(svc); let idx = index"
-                      [class.active]="previewSlideIndex === idx"
-                      (click)="goToPreviewSlide(idx)"></span>
-              </div>
-            </div>
-          </ng-container>
-          <ng-template #noPreviewImages>
-            <div class="es-preview-no-img">
-              <i class="fa-solid fa-image"></i>
-              <span>Premium Event Service</span>
-            </div>
-          </ng-template>
+      <div class="es-preview-images" *ngIf="previewImages.length > 0">
+        <img [src]="previewImages[activeImageIndex]" class="es-preview-main-img" />
+        <div class="es-preview-thumbs" *ngIf="previewImages.length > 1">
+          <img *ngFor="let img of previewImages; let i = index" [src]="img"
+            [class.active]="i === activeImageIndex" (click)="activeImageIndex = i; $event.stopPropagation()" />
         </div>
-
-        <!-- ── Body Info ── -->
-        <div class="es-preview-body">
-
-          <!-- Badges -->
-          <div class="es-preview-badges">
-            <span class="es-badge-type" *ngIf="svc.serviceTypeName">{{ svc.serviceTypeName }}</span>
-            <span class="es-badge-class" *ngIf="svc.classification">{{ svc.classification }}</span>
-          </div>
-
-          <!-- Name -->
-          <h2 class="es-preview-title">{{ svc.name }}</h2>
-
-          <!-- Vendor (clickable) -->
-          <div class="es-preview-vendor" *ngIf="svc.vendorName">
-            <span>by</span>
-            <a [routerLink]="['/vendor', svc.vendorId]" class="es-preview-vendor-link" (click)="closePreview()">
-              {{ svc.vendorName }} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.6rem;"></i>
-            </a>
-          </div>
-
-          <!-- Price -->
-          <div class="es-preview-price-box">
-            <span class="es-price-label">Starting Price</span>
-            <span class="es-price-val">{{ svc.price | currency:'EGP ':'symbol':'1.0-0' }}</span>
-          </div>
-
-          <!-- Description -->
-          <div class="es-preview-desc" *ngIf="svc.description">
-            <p>{{ svc.description }}</p>
-          </div>
-
-          <!-- Specs: Duration & Lead Time -->
-          <div class="es-preview-specs" *ngIf="svc.duration || svc.leadTime">
-            <div class="es-spec-card" *ngIf="svc.duration">
-              <span class="es-spec-icon"><i class="fa-solid fa-clock"></i></span>
-              <div>
-                <span class="es-spec-label">Setup Duration</span>
-                <span class="es-spec-val">{{ svc.duration }} Hours</span>
-              </div>
-            </div>
-            <div class="es-spec-card" *ngIf="svc.leadTime">
-              <span class="es-spec-icon"><i class="fa-solid fa-calendar-check"></i></span>
-              <div>
-                <span class="es-spec-label">Lead Time</span>
-                <span class="es-spec-val">{{ svc.leadTime }} Weeks</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Service Areas -->
-          <div class="es-preview-areas" *ngIf="svc.serviceAreas && svc.serviceAreas.length > 0">
-            <p class="es-areas-title"><i class="fa-solid fa-map-location-dot"></i> Service Areas</p>
-            <div class="es-areas-pills">
-              <span class="es-area-pill" *ngFor="let area of svc.serviceAreas">
-                <i class="fa-solid fa-location-dot"></i> {{ area.city }}<span *ngIf="area.region">, {{ area.region }}</span>
-              </span>
-            </div>
-          </div>
+      </div>
+      <div class="es-preview-info">
+        <div class="es-preview-badge" *ngIf="selectedService?.vendorTypeName">{{selectedService?.vendorTypeName}}</div>
+        <h2 class="es-preview-title">{{selectedService?.name}}</h2>
+        <div class="es-preview-vendor" *ngIf="selectedService?.vendorName">
+          <i class="bi bi-shop"></i> {{selectedService?.vendorName}}
         </div>
-
-        <!-- ── Footer ── -->
-        <div class="es-preview-footer">
-          <button class="es-btn-book" (click)="openServiceModal(svc)">
-            Book Now <i class="fa-solid fa-arrow-right"></i>
+        <div class="es-preview-price">{{selectedService?.price | currency:'EGP':'symbol':'1.0-0'}}</div>
+        <p class="es-preview-desc">{{selectedService?.description}}</p>
+        <div class="es-preview-actions">
+          <button class="btn btn-gold" (click)="bookService(selectedService!)">Book Now</button>
+          <button class="btn btn-ghost btn-sm" [routerLink]="['/vendor', selectedService?.vendorId]" (click)="closePreview()">
+            View Vendor
           </button>
         </div>
-
-      </ng-container>
+      </div>
     </div>
   </div>
+
+
 </div>

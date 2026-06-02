@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
@@ -101,7 +101,7 @@ export class MyEventsComponent implements OnInit {
 
   mapEvent(ev: EventResponseDto): any {
     const mappedVendors = (ev.eventItems || []).map(item => ({
-      emoji: '🏪', 
+      emoji: '', 
       name: item.vendorName || 'Vendor',
       type: item.serviceName || 'Service',
       price: item.price || 0,
@@ -267,7 +267,7 @@ export class MyEventsComponent implements OnInit {
         if (res.isValid && res.discountPercent) {
           this.appliedVoucherCode = this.voucherCode.trim();
           this.appliedDiscountPercent = res.discountPercent;
-          this.toastService.show(`🎉 ${res.discountPercent}% discount applied!`, 'success');
+          this.toastService.show(`${res.discountPercent}% discount applied!`, 'success');
         } else {
           this.appliedVoucherCode = '';
           this.appliedDiscountPercent = 0;
@@ -353,3 +353,5 @@ export class MyEventsComponent implements OnInit {
     });
   }
 }
+
+

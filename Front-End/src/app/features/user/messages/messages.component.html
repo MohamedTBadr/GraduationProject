@@ -1,4 +1,4 @@
-<div class="msg-layout">
+﻿<div class="msg-layout">
 
   <!-- Sidebar: Conversation List -->
   <aside class="msg-sidebar">
@@ -18,7 +18,7 @@
     </div>
 
     <div class="conv-empty" *ngIf="!loadingConversations && filteredConversations.length === 0">
-      <span>💬</span>
+      <i class="bi bi-chat"></i>
       <p>No conversations yet</p>
     </div>
 
@@ -49,7 +49,7 @@
 
     <!-- No conversation selected -->
     <div class="chat-empty-state" *ngIf="!selectedConversation">
-      <div class="empty-icon">💬</div>
+      <div class="empty-icon"><i class="bi bi-chat" style="font-size:2.5rem;color:var(--gray)"></i></div>
       <h3>Your Messages</h3>
       <p>Select a conversation from the left to start chatting with your vendors and clients.</p>
     </div>
@@ -81,7 +81,7 @@
         </div>
 
         <div class="messages-empty" *ngIf="!loadingMessages && messages.length === 0">
-          <p>No messages yet. Say hello! 👋</p>
+          <p>No messages yet. Say hello! </p>
         </div>
 
         <div

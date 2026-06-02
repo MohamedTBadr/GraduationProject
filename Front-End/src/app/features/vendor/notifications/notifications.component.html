@@ -1,4 +1,4 @@
-<div class="vd-section active block">
+﻿<div class="vd-section active block">
   <div class="vd-page-header">
     <div><div class="vd-page-title">Notifications</div><div class="vd-page-sub">Stay up to date on bookings, messages, reviews, and payouts.</div></div>
     <div class="flex gap-[7px]"><button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="markAllAsRead()">Mark All Read</button><button class="vd-btn vd-btn-ghost vd-btn-sm"> Preferences</button></div>
@@ -16,11 +16,11 @@
       <div id="vd-notifs-all" *ngIf="filteredNotifications.length > 0; else noNotifs">
         <div class="flex gap-[12px] py-[12px] px-[16px] [border-bottom:1px_solid_rgba(255,255,255,.05)] cursor-pointer rounded-[8px]" *ngFor="let notif of filteredNotifications" (click)="markAsRead(notif)" [ngClass]="!notif.isRead ? 'bg-[var(--cream)]' : 'bg-transparent'">
             <div class="text-[1.4rem]">
-              <span *ngIf="notif.type === 'booking'">📅</span>
-              <span *ngIf="notif.type === 'message'">💬</span>
-              <span *ngIf="notif.type === 'review'">⭐</span>
-              <span *ngIf="notif.type === 'finance'">💰</span>
-              <span *ngIf="!['booking', 'message', 'review', 'finance'].includes(notif.type || '')">🔔</span>
+              <i class="bi bi-calendar3" *ngIf="notif.type === 'booking'"></i>
+              <i class="bi bi-chat" *ngIf="notif.type === 'message'"></i>
+              <i class="bi bi-star-fill" *ngIf="notif.type === 'review'" style="color:var(--gold)"></i>
+              <i class="bi bi-currency-dollar" *ngIf="notif.type === 'finance'"></i>
+              <span *ngIf="!['booking', 'message', 'review', 'finance'].includes(notif.type || '')"><i class="bi bi-bell"></i></span>
             </div>
             <div class="flex-1">
                 <div class="font-semibold text-[.9rem] mb-[4px]" [ngClass]="!notif.isRead ? 'text-[var(--navy)]' : 'text-inherit'">{{notif.title}}</div>
@@ -38,3 +38,5 @@
     </div>
   </div>
 </div>
+
+

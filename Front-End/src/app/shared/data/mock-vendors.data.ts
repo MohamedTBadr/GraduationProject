@@ -1,4 +1,4 @@
-import { Vendor } from '../types/vendor.interface';
+﻿import { Vendor } from '../types/vendor.interface';
 
 const DEFAULT_SERVICES = [
     { icon: '', name: 'Main Package', price: '15,000 EGP', desc: 'Full-service offering for your event — setup, coordination, and teardown included.', delivery: '2-4 weeks planning', duration: 'Full event day' },
@@ -22,7 +22,7 @@ export const MOCK_VENDORS: Vendor[] = [
         amenities: ['Floral Design', 'Custom Table Settings', 'Stage Setup', 'Lighting Control']
     },
     {
-        id: 2, name: 'Royal Hall Cairo', vendorTypeName: 'Venue', location: 'Heliopolis', rating: 4.8, reviews: 89, startPrice: 20000, emoji: '️',
+        id: 2, name: 'Royal Hall Cairo', vendorTypeName: 'Venue', location: 'Heliopolis', rating: 4.8, reviews: 89, startPrice: 20000, emoji: '',
         events: ['Wedding', 'Corporate', 'Graduation'],
         services: DEFAULT_SERVICES,
         packages: DEFAULT_PACKAGES,
@@ -38,7 +38,7 @@ export const MOCK_VENDORS: Vendor[] = [
         status: 'active', joined: 'Mar 2024', bookings: 88, revenue: '264,000'
     },
     {
-        id: 4, name: 'Elite Catering', vendorTypeName: 'Catering', location: 'Cairo', rating: 4.7, reviews: 92, startPrice: 8000, emoji: '️',
+        id: 4, name: 'Elite Catering', vendorTypeName: 'Catering', location: 'Cairo', rating: 4.7, reviews: 92, startPrice: 8000, emoji: '',
         events: ['Wedding', 'Birthday', 'Corporate'],
         services: DEFAULT_SERVICES,
         packages: DEFAULT_PACKAGES,
@@ -60,15 +60,16 @@ export const MOCK_VENDORS: Vendor[] = [
         status: 'active'
     },
     {
-        id: 8, name: 'Elite Events', vendorTypeName: 'Decoration', location: 'New Cairo', rating: 4.8, reviews: 156, startPrice: 12000, emoji: '✨',
+        id: 8, name: 'Elite Events', vendorTypeName: 'Decoration', location: 'New Cairo', rating: 4.8, reviews: 156, startPrice: 12000, emoji: '',
         status: 'active'
     },
     {
-        id: 9, name: 'Lumiere Studios', vendorTypeName: 'Photography', location: 'Maadi', rating: 4.7, reviews: 67, startPrice: 4500, emoji: '✨',
+        id: 9, name: 'Lumiere Studios', vendorTypeName: 'Photography', location: 'Maadi', rating: 4.7, reviews: 67, startPrice: 4500, emoji: '',
         status: 'active'
     },
     {
-        id: 10, name: 'The Golden Plate', vendorTypeName: 'Catering', location: 'Giza', rating: 4.9, reviews: 189, startPrice: 15000, emoji: '️',
+        id: 10, name: 'The Golden Plate', vendorTypeName: 'Catering', location: 'Giza', rating: 4.9, reviews: 189, startPrice: 15000, emoji: '',
         status: 'active'
     }
 ];
+

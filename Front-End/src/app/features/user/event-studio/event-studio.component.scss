@@ -1,4 +1,4 @@
-.ai-studio-overlay {
+﻿.ai-studio-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(15, 23, 42, 0.7);
@@ -88,7 +88,7 @@
     }
 
     &.active {
-      background: var(--white);
+      background: var(--surface);
       color: var(--navy);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
@@ -289,7 +289,7 @@
 }
 
 .budget-alloc-item {
-  background: var(--white);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px;
@@ -424,7 +424,7 @@
   }
 
   .tn-card {
-    background: var(--white);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 14px 16px;
@@ -501,3 +501,22 @@
 .mt-4 { margin-top: 24px; }
 .mt-5 { margin-top: 30px; }
 .mb-3 { margin-bottom: 12px; }
+
+.text-studio-instruction {
+  font-size: 0.8rem !important;
+  font-weight: normal !important;
+  margin-left: 8px !important;
+}
+
+/* ═══ DARK MODE ═══════════════════════════════════════════════ */
+:host-context(.dark) {
+  .ai-studio-modal { background: var(--surface); border: 1px solid rgba(100,145,210,0.12); }
+  .ai-tabs { background: rgba(255,255,255,0.05); }
+  .ai-tab-btn { color: var(--gray); }
+  .ai-tab-btn.active { background: var(--surface); color: var(--navy); }
+  .ai-initial h3, .ai-initial p { color: var(--navy); }
+  .plan-summary-card { background: var(--cream2); border-color: var(--lgray); }
+  .ai-vendor-item { background: var(--cream2); border-color: var(--lgray); }
+  .ai-vendor-item.selected { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+}
+

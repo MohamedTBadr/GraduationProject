@@ -20,17 +20,17 @@
         (click)="goToMessages()"
         title="Messages"
       >
-        💬
+        <i class="bi bi-chat"></i>
       </button>
 
       <!-- Notifications -->
       <div class="nav-notif-wrapper" *ngIf="authService.isLoggedIn()">
-        <button 
-          class="nav-icon-btn" 
+        <button
+          class="nav-icon-btn"
           title="Notifications"
           (click)="toggleNotificationPanel($event)"
         >
-          🔔
+          <i class="bi bi-bell"></i>
           <div class="notif-badge" [class.visible]="signalRService.unreadCount() > 0">
             {{ signalRService.unreadCount() > 9 ? '9+' : signalRService.unreadCount() }}
           </div>
@@ -53,7 +53,7 @@
             </div>
           </div>
           <div class="notif-empty" *ngIf="signalRService.notifications().length === 0">
-            <span>🔔</span>
+            <i class="bi bi-bell-slash"></i>
             <p>You're all caught up!</p>
           </div>
         </div>
@@ -71,8 +71,9 @@
         </div>
       </button>
 
-      <button (click)="theme.toggleTheme()">
-        {{ theme.isDark() ? "☀️" : "🌙" }}
+      <!-- Theme toggle -->
+      <button class="nav-icon-btn" (click)="theme.toggleTheme()" title="Toggle theme">
+        <i [class]="theme.isDark() ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
       </button>
 
       <!-- Not Logged In -->
@@ -115,9 +116,7 @@
           My Portal
         </button>
 
-        <button class="btn btn-navy btn-sm text-[#dc2626] bg-[transparent] ml-[12px] border-[#dc2626]" (click)="logout()">
-          Logout
-        </button>
+        <button class="btn-nav-logout" (click)="logout()">Logout</button>
       </ng-container>
     </div>
   </div>

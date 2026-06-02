@@ -40,7 +40,7 @@
   font-family: var(--ff-d);
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--white);
+  color: #ffffff;
   line-height: 1;
   span { color: var(--gold); }
 }
@@ -88,7 +88,7 @@
 .uss-user-name {
   font-weight: 700;
   font-size: 0.87rem;
-  color: var(--white);
+  color: #ffffff;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
@@ -157,7 +157,7 @@
 
   &.active {
     background: rgba(201, 168, 76, 0.13);
-    color: var(--white);
+    color: #ffffff;
     font-weight: 600;
 
     .uss-nav-icon { color: var(--gold); }

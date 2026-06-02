@@ -584,3 +584,107 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ═══ DARK MODE ════════════════════════════════════════════════
+   :host defines its own variables — override them here.
+   :host-context(.dark) has higher specificity than :host.     */
+:host-context(.dark) {
+  --navy: #d4e0f0;
+  --white: rgba(255, 255, 255, 0.88);
+  --surface: #111c30;
+  --gray: #6e88a0;
+  --lgray: #1c2d46;
+  --cream: #06091a;
+  --cream2: #0c1526;
+  --maroon: #e05590;
+  --sh: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+
+  .page { background: var(--cream); color: var(--navy); }
+
+  /* Benefit cards */
+  .benefit-card {
+    background: var(--surface);
+    border-color: rgba(100, 145, 210, 0.15);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    .benefit-title { color: var(--navy); }
+    .benefit-desc { color: var(--gray); }
+  }
+
+  /* Registration form */
+  .vendor-reg-form {
+    background: var(--surface);
+    border-color: rgba(100, 145, 210, 0.15);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .vrf-title { color: var(--navy); }
+  .vrf-sub { color: var(--gray); }
+
+  /* Step indicator */
+  .ae-step-num {
+    background: var(--surface);
+    border-color: var(--lgray);
+    color: var(--gray);
+  }
+  .ae-step-connector { background: var(--lgray); }
+  .ae-step.active {
+    .ae-step-num { background: var(--maroon); border-color: var(--maroon); color: #fff; }
+    .ae-step-label { color: var(--maroon); }
+  }
+  .ae-step.done {
+    .ae-step-num { background: #c9a84c; border-color: #c9a84c; color: #000; }
+    .ae-step-label { color: var(--navy); }
+    & + .ae-step-connector { background: rgba(201,168,76,0.4); }
+  }
+
+  /* Form sections */
+  .form-section { border-color: var(--lgray); }
+  .form-section .section-label { color: var(--maroon); }
+  .form-group {
+    label { color: var(--navy); }
+    input, select, textarea {
+      background: var(--surface);
+      border-color: var(--lgray);
+      color: var(--navy);
+      &::placeholder { color: rgba(255,255,255,0.25); }
+      &:focus { border-color: var(--maroon); background: var(--surface); }
+    }
+  }
+
+  /* Navigation buttons */
+  .btn-back {
+    background: var(--cream2);
+    border-color: var(--lgray);
+    color: var(--navy);
+    &:hover { background: var(--lgray); }
+  }
+  .btn-next {
+    background: #1e3050;
+    color: rgba(255,255,255,0.9);
+  }
+
+  /* File drop zone */
+  .file-drop-zone {
+    background: var(--cream2);
+    border-color: var(--lgray);
+    .drop-text { color: var(--navy); }
+    .drop-subtext { color: var(--gray); }
+    &:hover { background: var(--surface); border-color: var(--maroon); }
+  }
+
+  /* Profile uploader */
+  .avatar-preview { background: var(--lgray); border-color: var(--lgray); }
+  .btn-upload-compact {
+    background: var(--surface);
+    border-color: var(--lgray);
+    color: var(--navy);
+    &:hover { background: var(--cream2); border-color: var(--navy); }
+  }
+
+  /* Success state */
+  .vendor-success {
+    background: var(--surface);
+    border: 1px solid rgba(100,145,210,0.15);
+    h2 { color: var(--navy); }
+    p { color: var(--gray); }
+  }
+}

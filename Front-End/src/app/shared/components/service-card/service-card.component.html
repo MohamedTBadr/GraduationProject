@@ -2,7 +2,9 @@
   <!-- Image or Fallback Icon -->
   <img class="svc-media w-[70px] h-[70px] rounded-[12px] object-cover shrink-0 [box-shadow:0_2px_8px_rgba(0,0,0,0.05)]" *ngIf="coverImage; else fallbackIcon" [src]="coverImage">
   <ng-template #fallbackIcon>
-    <div class="vd-svc-icon bg-[#f8fafc] rounded-[12px] flex items-center justify-center w-[70px] h-[70px] text-[2rem] shrink-0 [box-shadow:0_2px_8px_rgba(0,0,0,0.05)]">🛠️</div>
+    <div class="vd-svc-icon bg-[#f8fafc] rounded-[12px] flex items-center justify-center w-[70px] h-[70px] shrink-0 [box-shadow:0_2px_8px_rgba(0,0,0,0.05)]">
+      <i class="bi bi-tools" style="font-size:1.6rem;color:var(--gray)"></i>
+    </div>
   </ng-template>
 
   <!-- Content -->

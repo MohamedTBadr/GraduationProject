@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -31,7 +31,7 @@ export class PackagesComponent implements OnInit {
   packages: PackageItem[] = [
     {
       id: 1,
-      icon: '💍',
+      icon: 'heart',
       name: 'Full Wedding Package',
       status: 'Active',
       pricePrefix: 'From',
@@ -43,7 +43,7 @@ export class PackagesComponent implements OnInit {
     },
     {
       id: 2,
-      icon: '💐',
+      icon: 'heart-fill',
       name: 'Engagement Bundle',
       status: 'Active',
       pricePrefix: 'From',
@@ -55,7 +55,7 @@ export class PackagesComponent implements OnInit {
     },
     {
       id: 3,
-      icon: '🎂',
+      icon: 'gift',
       name: 'Birthday Bloom',
       status: 'Paused',
       pricePrefix: 'From',
@@ -185,7 +185,7 @@ export class PackagesComponent implements OnInit {
         // Create new item
         const newPackage: PackageItem = {
           id: Date.now(),
-          icon: '✨', 
+          icon: 'stars', 
           name: formVal.name,
           status: 'Active',
           pricePrefix: formVal.priceType === 'Starting From' ? 'From' : '',
@@ -222,3 +222,5 @@ export class PackagesComponent implements OnInit {
     }
   }
 }
+
+

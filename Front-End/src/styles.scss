@@ -1,54 +1,260 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
-/* ═══ TOKENS ═══════════════════════════ */
+/* ═══ TOKENS — SUNSET THEME ══════════════════════════════════
+   Gold accent stays (#c9a84c). Navy blue replaced with deep
+   purple from the hero gradient (#1a1028, #2a1535).           */
 :root {
+  --navy-dk: #1e0e2c;
+  --navy2-dk: #2e1545;
+  --surface: #ffffff;
   --footerBg: #f9f6f0;
-  --footerText: #161022;
-  --footerTitle: #000;
-  --navScrolled: #6b7280;
+  --footerText: #1e0e2c;
+  --footerTitle: #1e0e2c;
+  --navScrolled: #6b6478;
   --grayHover: rgba(255, 255, 255, 0.8);
-  --navy: #1a2540;
-  --navy2: #243050;
-  --gold: #c9a84c;
-  --gold2: #e8c97a;
-  --cream: #f9f6f0;
-  --cream2: #f0ebe0;
-  --gray: #6b7280;
-  --lgray: #e8e4dc;
-  --dark: #0e1627;
+  --navy: #1e0e2c;          /* deep aubergine (replaces blue-navy) */
+  --navy2: #2e1545;         /* slightly lighter aubergine */
+  --gold: #c9a84c;          /* gold — unchanged */
+  --gold2: #e8c97a;         /* gold light — unchanged */
+  --cream: #fdf8f2;         /* warm ivory */
+  --cream2: #f5ede2;        /* warm off-white */
+  --gray: #6b6478;          /* warm purple-tinted gray */
+  --lgray: #e8e0ec;         /* warm lavender-light border */
+  --dark: #120818;          /* near-black purple */
   --green: #16a34a;
   --amber: #ca8a04;
+  --burgundy: #841a4f;
+  --burgundy2: #a02060;
   --ff-d: "Cormorant Garamond", Georgia, serif;
   --ff-b: "Outfit", sans-serif;
-  --sh: 0 4px 24px rgba(26, 37, 64, 0.1);
-  --sh1: 0 4px 24px rgba(26, 37, 64, 0.1);
-  --sh2: 0 8px 40px rgba(26, 37, 64, 0.18);
+  --sh-subtle: 0 2px 8px rgba(30, 14, 44, 0.05);
+  --sh: 0 4px 20px rgba(30, 14, 44, 0.09);
+  --sh2: 0 8px 32px rgba(30, 14, 44, 0.15);
   --r: 12px;
   --r2: 20px;
+  --r3: 8px;
   --nav-h: 68px;
   --success: #22c55e;
   --danger: #ef4444;
-  --white: #1a2035;
+  --white: #ffffff;
+  --primary: #c9a84c;
+  --trans: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .dark {
-  --footerBg: #161022;
-  --footerText: rgba(255, 255, 255, 0.52);
-  --footerTitle: #ffff;
-  --navScrolled: #ccc;
-  --grayHover: rgba(20, 17, 17, 0.8);
-  --navy: #e8e4dc;
-  --navy2: #f0ebe0;
-  --cream: #0f1117;
-  --cream2: #161b27;
-  --white: #fff;
-  --lgray: #2a3050;
-  --gray: #22252b;
-  --dark: #e8e4dc;
+  /* Dark mode — deep aubergine-black atmosphere, gold stays gold */
+  --footerBg: #0f0818;
+  --footerText: rgba(230, 215, 248, 0.65);
+  --footerTitle: #e4d0f8;
+  --navScrolled: #c4a8e4;
+  --grayHover: rgba(255, 255, 255, 0.14);
+  --navy: #e4d0f8;          /* light lavender-cream text */
+  --navy2: #c4a8e4;         /* secondary lavender */
+  --cream: #0f0818;         /* deep purple-black bg */
+  --cream2: #1a1028;        /* secondary bg */
+  --white: rgba(255, 255, 255, 0.88);
+  --surface: #221035;       /* card surface */
+  --lgray: #381850;         /* borders — purple-tinted */
+  --gray: #9078a8;          /* muted lavender text */
+  --dark: #0f0818;
+  --gold: #c9a84c;          /* gold stays gold */
+  --gold2: #e8c97a;
   --success: #4ade80;
   --danger: #f87171;
+  --amber: #fbbf24;
+  --primary: #c9a84c;
+  --burgundy: #c04080;      /* slightly brighter burgundy for dark contrast */
+  --burgundy2: #e060a0;
+}
+/* ══ Dark mode: color: var(--white) used as TEXT on always-dark backgrounds ═══
+   In dark mode --white = #111c30 (card surface). Anywhere it was used as
+   WHITE TEXT on a dark background, it becomes invisible. Fix explicitly.      */
+.dark .ad-logo,
+.dark .ad-logo-badge,
+.dark .ad-admin-name,
+.dark .ad-item.active,
+.dark .ad-tbl-head-title,
+.dark .ad-act-bold,
+.dark .ad-modal-title,
+.dark .ad-toggle-lbl,
+.dark .ad-settings-title,
+.dark .ad-ticket-title,
+.dark .ad-rev-val,
+.dark .ad-ring,
+.dark .ad-tl-title,
+.dark .ad-metric-val,
+.dark .ad-bc-val {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+/* Package cards on dark section */
+.dark .pkg-name { color: rgba(255, 255, 255, 0.9) !important; }
+.dark .pkg-includes li { color: rgba(255, 255, 255, 0.7) !important; }
+/* Earn banner text */
+.dark .vd-earn-val { color: var(--gold) !important; }
+.dark .vd-earn-lbl { color: rgba(255,255,255,0.45) !important; }
+.dark .vd-earn-stat-val { color: rgba(255,255,255,0.85) !important; }
+.dark .vd-earn-stat-lbl { color: rgba(255,255,255,0.38) !important; }
+/* Vendor page header cover text */
+.dark .vd-cover-avatar { border-color: var(--cream2) !important; }
+
+/* Dark mode: --navy-dk stays as the deep aubergine for backgrounds */
+.dark {
+  --navy-dk: #1e0e2c;
+  --navy2-dk: #2e1545;
+}
+/* ══ Dark mode: fix all elements using var(--navy) as BACKGROUND ═══════
+   In dark mode --navy = #d4e0f0 (light text). Every element that had
+   background: var(--navy) now gets a hardcoded dark navy instead.       */
+.dark .btn-navy { background: var(--navy-dk) !important; color: rgba(255,255,255,0.9) !important; }
+.dark .btn-navy:hover { background: var(--navy2-dk) !important; }
+.dark .vd-btn-navy { background: var(--navy-dk) !important; color: rgba(255,255,255,0.9) !important; }
+.dark .vd-btn-navy:hover { background: var(--navy2-dk) !important; }
+
+/* Package section */
+.dark .packages-section { background: #0f0818 !important; }
+.dark .packages-section .section-title { color: rgba(255,255,255,0.9) !important; }
+.dark .packages-section .section-sub { color: rgba(255,255,255,0.5) !important; }
+
+/* Filter / chip active states → gold instead of navy */
+.dark .filter-pill.active,
+.dark .fp-chip.selected,
+.dark .vd-chip.on {
+  background: rgba(201, 168, 76, 0.18) !important;
+  color: var(--gold) !important;
+  border-color: rgba(201, 168, 76, 0.4) !important;
+}
+
+/* Compare table headers */
+.dark .compare-table th,
+.dark .compare-header {
+  background: var(--cream2) !important;
+  color: var(--navy) !important;
+  border-color: var(--lgray) !important;
+}
+
+/* Message bubbles */
+.dark .msg-bubble.me .msg-text { background: rgba(60, 20, 80, 0.85) !important; color: rgba(255,255,255,0.9) !important; }
+.dark .vd-msg-bubble.me .vd-msg-text { background: rgba(60, 20, 80, 0.85) !important; color: rgba(255,255,255,0.9) !important; }
+
+/* Send button */
+.dark .vp-send-btn { background: var(--gold) !important; color: var(--dark) !important; }
+
+/* Dashboard sidebar */
+.dark .dash-sidebar { background: #1a1028 !important; }
+
+/* Vendor card photo placeholder */
+.dark .vc-photo-inner { background: linear-gradient(135deg, #1a1028 0%, var(--navy-dk) 100%) !important; }
+
+/* Earn banner */
+.dark .vd-earn-banner {
+  background: linear-gradient(135deg, #1a1028 0%, var(--navy-dk) 100%) !important;
+}
+
+/* Profile cover */
+.dark .vd-cover { background: linear-gradient(135deg, #1a1028 0%, var(--navy-dk) 100%) !important; }
+
+/* Bar chart navy bars */
+.dark .vd-bar-navy { background: linear-gradient(to top, var(--navy-dk), var(--navy2-dk)) !important; }
+
+/* Hero sections using navy gradient */
+.dark .ae-hero { background: linear-gradient(135deg, #070a18 0%, #1a1028 100%) !important; }
+.dark .vendor-join-hero { background: linear-gradient(135deg, #070a18 0%, #1a1028 100%) !important; }
+
+/* Add-event step indicators */
+.dark .ae-step.active { background: var(--gold) !important; border-color: var(--gold) !important; }
+.dark .ae-step.done { background: var(--gold) !important; border-color: var(--gold) !important; }
+.dark .ae-step.done .ae-step-connector { background: rgba(201, 168, 76, 0.3) !important; }
+
+/* Toast notification */
+.dark .toast { background: #1a1028 !important; color: rgba(255,255,255,0.9) !important; }
+
+/* Dark mode atmosphere — sunset aurora: crimson-rose glow at top */
+.dark body {
+  background-image: radial-gradient(
+    ellipse 80% 50% at 50% -5%,
+    rgba(132, 26, 79, 0.3) 0%,
+    rgba(255, 197, 84, 0.06) 50%,
+    transparent 72%
+  );
+}
+/* ══ Dark mode: comprehensive surface backgrounds ══════════════
+   --white is near-white (for text), --surface is the dark card color.
+   All card/panel elements that use background: var(--surface) need
+   background: var(--surface) instead.                              */
+.dark .vd-card,
+.dark .vd-stat,
+.dark .vd-table-wrap,
+.dark .vd-pkg-card,
+.dark .vd-svc-card,
+.dark .vd-bk-card,
+.dark .vd-cal-wrap,
+.dark .vd-msg-layout,
+.dark .vd-topbar,
+.dark .vd-modal,
+.dark .ad-kpi,
+.dark .ad-card,
+.dark .ad-ticket,
+.dark .ad-settings-section,
+.dark .ad-topbar,
+.dark .cat-card,
+.dark .vendor-card,
+.dark .testi-card,
+.dark .corp-service-card,
+.dark .corp-form,
+.dark .contact-form-wrap,
+.dark .contact-card,
+.dark .pkg-card:not(.featured),
+.dark .notif-panel,
+.dark .faq-item,
+.dark .compare-card,
+.dark .similar-card,
+.dark .msg-window,
+.dark .modal-box,
+.dark .modal-card {
+  background: var(--surface);
+  border-color: rgba(132, 26, 79, 0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.38);
+}
+.dark .vd-card:hover,
+.dark .vd-stat:hover,
+.dark .vd-svc-card:hover,
+.dark .vd-bk-card:hover,
+.dark .vd-pkg-card:hover,
+.dark .ad-kpi:hover,
+.dark .cat-card:hover,
+.dark .vendor-card:hover,
+.dark .corp-service-card:hover {
+  border-color: rgba(224, 72, 128, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(201, 168, 76, 0.1);
+}
+/* Dark mode inputs */
+.dark input,
+.dark textarea,
+.dark select {
+  background: var(--surface);
+  border-color: rgba(132, 26, 79, 0.22);
+  color: var(--navy);
+}
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: rgba(201, 168, 76, 0.55);
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+  background: var(--surface);
+}
+/* Dark mode buttons using var(--white) as background */
+.dark .btn-ghost { background: var(--surface); border-color: var(--lgray); }
+.dark .btn-white { background: var(--surface); color: var(--navy); }
+/* Dark mode topbar search */
+.dark .ad-topbar-search input,
+.dark .vd-topbar-search input { background: var(--surface); }
+/* Dark mode navbar */
+.dark .nav.scrolled {
+  background: rgba(6, 9, 26, 0.92) !important;
+  border-bottom: 1px solid rgba(132, 26, 79, 0.12);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
 }
 *,
 *::before,
@@ -138,14 +344,14 @@ img {
   letter-spacing: 0.2px;
 }
 .btn-gold {
-  background: linear-gradient(135deg, #e11d48, #eab308);
-  color: var(--white);
+  background: linear-gradient(135deg, #c9a84c 0%, #e8c97a 100%);
+  color: #1e0e2c;
   border: none;
 }
 .btn-gold:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.06);
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.32);
+  box-shadow: 0 8px 24px rgba(201, 168, 76, 0.45);
 }
 .btn-navy {
   background: var(--navy);
@@ -154,6 +360,7 @@ img {
 .btn-navy:hover {
   background: var(--navy2);
   transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(57, 82, 132, 0.3);
 }
 .btn-burgundy {
   background: var(--burgundy);
@@ -161,6 +368,14 @@ img {
 }
 .btn-burgundy:hover {
   background: var(--burgundy2);
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
 }
 .btn-outline {
   border: 2px solid var(--gold);
@@ -189,7 +404,7 @@ img {
 }
 .btn-green {
   background: #22c55e;
-  color: var(--white);
+  color: #fff;
 }
 .btn-green:hover {
   filter: brightness(1.08);
@@ -204,10 +419,8 @@ img {
 }
 .tag {
   display: inline-block;
-  // background: rgba(201, 168, 76, 0.12);
-  // color: var(--gold);
-  background: rgba(132, 26, 79, 0.1) !important;
-  color: #841a4f;
+  background: rgba(132, 26, 79, 0.1);
+  color: var(--burgundy);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -448,7 +661,7 @@ img {
   margin-left: auto;
 }
 .ad-badge.gold {
-  background: rgba(201, 168, 76, 0.22);
+  background: rgba(224, 72, 128, 0.35);
   color: var(--gold);
 }
 .ad-badge.red {
@@ -499,12 +712,12 @@ img {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #0d1424;
+  background: var(--cream);
 }
 .ad-topbar {
   height: 56px;
-  background: #0d1424;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--cream2);
+  border-bottom: 1px solid var(--lgray);
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -515,7 +728,7 @@ img {
   font-family: var(--ff-d);
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--white);
+  color: var(--navy);
   flex: 1;
 }
 .ad-topbar-search {
@@ -526,21 +739,20 @@ img {
   padding: 7px 12px 7px 30px;
   font-size: 0.79rem;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--lgray);
   width: 100%;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--white);
+  background: var(--white);
+  color: var(--navy);
 }
 .ad-topbar-search input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--gray);
 }
 .ad-topbar-search input:focus {
-  border-color: rgba(201, 168, 76, 0.4);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--gold);
+  background: var(--white);
   box-shadow: none;
 }
-.ad-topbar-search::before {
-  content: "🔍";
+.ad-topbar-search .ad-search-icon {
   position: absolute;
   left: 9px;
   top: 50%;
@@ -548,6 +760,7 @@ img {
   font-size: 0.75rem;
   pointer-events: none;
   opacity: 0.5;
+  color: var(--gray);
 }
 .ad-topbar-actions {
   display: flex;
@@ -558,8 +771,8 @@ img {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--white);
+  border: 1px solid var(--lgray);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -567,11 +780,11 @@ img {
   cursor: pointer;
   transition: all 0.18s;
   position: relative;
-  color: var(--white);
+  color: var(--navy);
 }
 .ad-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(201, 168, 76, 0.3);
+  background: var(--cream2);
+  border-color: var(--gold);
 }
 .ad-notif-pip {
   position: absolute;
@@ -581,7 +794,7 @@ img {
   height: 7px;
   border-radius: 50%;
   background: #ef4444;
-  border: 1.5px solid #0d1424;
+  border: 1.5px solid var(--cream2);
 }
 .ad-content {
   flex: 1;
@@ -599,7 +812,7 @@ img {
   width: 4px;
 }
 .ad-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--lgray);
   border-radius: 10px;
 }
 /* Page header */
@@ -615,13 +828,13 @@ img {
   font-family: var(--ff-d);
   font-size: 1.85rem;
   font-weight: 600;
-  color: var(--white);
+  color: var(--navy);
   line-height: 1.1;
   margin-bottom: 3px;
 }
 .ad-page-sub {
   font-size: 0.79rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--gray);
 }
 /* Stats */
 .ad-kpi-grid {
@@ -631,8 +844,8 @@ img {
   margin-bottom: 20px;
 }
 .ad-kpi {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--white);
+  border: 1px solid var(--lgray);
   border-radius: 14px;
   padding: 16px 18px;
   position: relative;
@@ -640,8 +853,8 @@ img {
   transition: all 0.2s;
 }
 .ad-kpi:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: var(--white);
+  border-color: var(--gold);
 }
 .ad-kpi::after {
   content: "";
@@ -680,13 +893,13 @@ img {
   font-family: var(--ff-d);
   font-size: 2rem;
   font-weight: 700;
-  color: var(--white);
+  color: var(--navy);
   line-height: 1;
   margin-bottom: 3px;
 }
 .ad-kpi-lbl {
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--gray);
 }
 .ad-kpi-trend {
   font-size: 0.69rem;
@@ -706,15 +919,15 @@ img {
 }
 /* Cards */
 .ad-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--white);
+  border: 1px solid var(--lgray);
   border-radius: 14px;
   padding: 18px 20px;
 }
 .ad-card-title {
   font-weight: 700;
   font-size: 0.87rem;
-  color: var(--white);
+  color: var(--navy);
   margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
@@ -1675,14 +1888,14 @@ table.ad-tbl {
   border: 1.5px solid var(--lgray);
   width: 100%;
 }
-.vd-topbar-search::before {
-  content: "🔍";
+.vd-topbar-search .vd-search-icon {
   position: absolute;
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 0.78rem;
   pointer-events: none;
+  color: var(--gray);
 }
 .vd-topbar-actions {
   display: flex;
@@ -1872,14 +2085,14 @@ table.ad-tbl {
   font-family: var(--ff-b);
 }
 .vd-btn-gold {
-  background: linear-gradient(135deg, #e11d48, #eab308);
+  background: linear-gradient(135deg, #c9a84c 0%, #e8c97a 100%);
   border: none;
-  color: var(--white);
+  color: #1e0e2c;
 }
 .vd-btn-gold:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);
+  box-shadow: 0 4px 14px rgba(201, 168, 76, 0.45);
 }
 .vd-btn-navy {
   background: var(--navy);
@@ -2313,13 +2526,15 @@ table.ad-tbl {
   position: relative;
   cursor: pointer;
 }
-.vd-pf-emoji {
+.vd-pf-placeholder {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
+  font-size: 1.8rem;
+  color: var(--gray);
+  opacity: 0.5;
 }
 .vd-pf-overlay {
   position: absolute;
@@ -2972,6 +3187,22 @@ table.ad-tbl {
 .btn-nav-cta:hover {
   background: var(--gold2);
 }
+.btn-nav-logout {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--danger);
+  padding: 7px 16px;
+  border-radius: 50px;
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  background: transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+  margin-left: 6px;
+}
+.btn-nav-logout:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: var(--danger);
+}
 .nav-fav-btn {
   position: relative;
   width: 36px;
@@ -3024,7 +3255,7 @@ table.ad-tbl {
   // background: var(--dark);
   background: linear-gradient(
     135deg,
-    #1a0f20 0%,
+    #1a1028 0%,
     #2a1535 35%,
     #841a4f 70%,
     #ffc554 100%
@@ -5667,3 +5898,202 @@ footer {
     display: none;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   DARK MODE — PUBLIC PAGE COMPREHENSIVE FIX
+   Core issue: sections and cards both use --white (#111c30) → no contrast.
+   Fix: sections use --cream2, cards use --white, everything gets visible borders.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Surface hierarchy ─────────────────────────────── */
+/*
+  Dark mode visual stack (bottom to top):
+  body bg:    var(--cream)  = #06091a   (deepest)
+  sections:   var(--cream2) = #0c1526   (secondary surfaces)
+  cards:      var(--white)  = #111c30   (elevated surfaces)
+  hover/focus: slightly lighter than --white
+*/
+
+/* Sections that use --white as a "lighter band" should use --cream2 in dark mode */
+.dark .cats-strip,
+.dark .filter-bar-wrap {
+  background: var(--cream2);
+  border-color: var(--lgray);
+}
+
+/* ── Category cards ────────────────────────────────── */
+.dark .cat-card {
+  background: var(--surface);
+  border-color: rgba(132, 26, 79, 0.22);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+.dark .cat-card:hover {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: rgba(201, 168, 76, 0.4);
+  box-shadow: 0 6px 20px rgba(201, 168, 76, 0.12);
+}
+.dark .cat-icon {
+  background: rgba(201, 168, 76, 0.1);
+  color: var(--gold);
+}
+.dark .cat-card:hover .cat-icon {
+  background: rgba(201, 168, 76, 0.18);
+}
+
+/* ── Vendor cards ──────────────────────────────────── */
+.dark .vendor-card {
+  background: var(--surface);
+  border: 1px solid rgba(132, 26, 79, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+.dark .vendor-card:hover {
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+  border-color: rgba(201, 168, 76, 0.3);
+}
+.dark .vc-view-btn {
+  background: var(--cream2);
+  color: var(--navy2);
+}
+.dark .vc-view-btn:hover {
+  background: var(--gold);
+  color: var(--dark);
+}
+
+/* ── Package cards ─────────────────────────────────── */
+.dark .pkg-card {
+  background: var(--surface);
+  border: 1px solid rgba(132, 26, 79, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+.dark .pkg-card.featured {
+  /* Keep the featured card's own gradient — it already looks distinct */
+  border: 1px solid rgba(201, 168, 76, 0.3);
+}
+
+/* ── Testimonial cards ─────────────────────────────── */
+.dark .testi-card {
+  background: var(--surface);
+  border: 1px solid rgba(132, 26, 79, 0.2);
+}
+
+/* ── Corporate service cards ───────────────────────── */
+.dark .corp-service-card {
+  background: var(--surface);
+  border: 1px solid rgba(132, 26, 79, 0.2);
+  border-bottom-color: transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.dark .corp-service-card:hover {
+  border-bottom-color: var(--gold);
+}
+.dark .industry-tag {
+  background: var(--surface);
+  border-color: var(--lgray);
+}
+.dark .industry-tag:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.dark .corp-form {
+  background: var(--surface);
+  border: 1px solid rgba(132, 26, 79, 0.2);
+}
+
+/* ── Hero search bar ───────────────────────────────── */
+.dark .hero-search {
+  background: var(--surface);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+.dark .hero-search input {
+  color: var(--navy);
+  background: transparent;
+}
+.dark .hero-search input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Filter bar pills (explore page) ──────────────── */
+.dark .filter-pill {
+  background: var(--surface);
+  border-color: var(--lgray);
+  color: var(--navy);
+}
+.dark .filter-pill.active {
+  background: rgba(201, 168, 76, 0.15);
+  border-color: rgba(201, 168, 76, 0.4);
+  color: var(--gold);
+}
+
+/* ── Vendor profile ────────────────────────────────── */
+.dark .vp-info-card,
+.dark .vp-services-card {
+  background: var(--surface);
+  border: 1px solid rgba(132, 26, 79, 0.2);
+}
+
+/* ── Contact page ──────────────────────────────────── */
+.dark .contact-card {
+  background: var(--surface);
+  border: 1px solid rgba(132, 26, 79, 0.2);
+}
+
+/* ── Why Us feature cards (already dark — just ensure borders) */
+.dark .wp-card {
+  border-color: rgba(201, 168, 76, 0.3);
+}
+.dark .wp-icon {
+  color: var(--gold);
+}
+
+/* ── FAQ / Compare / misc white cards ─────────────── */
+.dark .faq-item,
+.dark .compare-card,
+.dark .similar-card,
+.dark .notif-panel {
+  background: var(--surface);
+  border: 1px solid rgba(132, 26, 79, 0.2);
+}
+
+/* ── Sticky filter bar on explore pages ────────────── */
+.dark .sticky-filter-bar,
+.dark .fs-sticky {
+  background: var(--surface);
+  border-color: var(--lgray);
+}
+
+/* ── Navigation ────────────────────────────────────────── */
+/* nav-logo uses color: var(--white) which becomes dark in dark mode */
+.dark .nav-logo { color: rgba(255, 255, 255, 0.92) !important; }
+.dark .nav.scrolled .nav-logo { color: var(--navy) !important; }
+.dark .nav:not(.scrolled) {
+  background: linear-gradient(to bottom, rgba(6, 9, 26, 0.55) 0%, transparent 100%);
+}
+.dark .nav-icon-btn { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.08); }
+.dark .nav.scrolled .nav-icon-btn { color: var(--navy); background: var(--cream2); }
+.dark .nav-fav-btn { color: rgba(255,255,255,0.8); }
+.dark .nav.scrolled .nav-fav-btn { color: var(--navy); }
+
+/* ── Section heading colors in dark mode ───────────── */
+.dark .section-title { color: var(--navy); }
+.dark .section-sub { color: var(--gray); }
+.dark .gold-line { background: var(--gold); }
+
+/* ── Tailwind bg-[var(--white)] override ────────────────
+   --white is rgba(255,255,255,0.88) in dark mode (for text).
+   Any element using bg-[var(--white)] as Tailwind utility
+   needs to be re-mapped to --surface for backgrounds.      */
+.dark .bg-\[var\(--white\)\] {
+  background-color: var(--surface) !important;
+}
+.dark .bg-\[var\(--cream\)\] {
+  background-color: var(--cream) !important;
+}
+.dark .bg-\[var\(--cream2\)\] {
+  background-color: var(--cream2) !important;
+}
+
+/* Inline Tailwind box-shadow with var(--sh) — already fine.
+   But border using var(--lgray) in dark mode — fine.         */
+
+
+

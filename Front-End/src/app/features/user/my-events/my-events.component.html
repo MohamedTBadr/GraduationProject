@@ -1,4 +1,4 @@
-<!-- Event Tabs -->
+﻿<!-- Event Tabs -->
 <div class="event-tabs-bar">
     <div *ngFor="let ev of events" 
         class="event-tab-item"
@@ -20,10 +20,10 @@
             <div class="event-hero-label">Event Details</div>
             <div class="event-hero-title">{{activeEvent.name}}</div>
             <div class="event-hero-meta">
-                📅 {{activeEvent.date}} · {{activeEvent.type}} · {{activeEvent.guests}} guests
+                <i class="bi bi-calendar3"></i> {{activeEvent.date}} · {{activeEvent.type}} · {{activeEvent.guests}} guests
             </div>
             <button class="btn btn-gold btn-sm mt-3 inline-flex items-center gap-[6px]" (click)="openAiStudio()">
-                <span>✨</span> Gemini Event Studio
+                <i class="bi bi-stars"></i> Gemini Event Studio
             </button>
         </div>
         <div class="event-hero-stats">
@@ -92,7 +92,7 @@
                     </div>
                     <div class="applied-voucher-row" *ngIf="appliedVoucherCode">
                         <span class="applied-voucher-badge">
-                            🎉 <strong>{{appliedVoucherCode}}</strong> (-{{appliedDiscountPercent}}%) applied
+                            <i class="bi bi-ticket-perforated"></i> <strong>{{appliedVoucherCode}}</strong> (-{{appliedDiscountPercent}}%) applied
                         </span>
                         <button class="remove-voucher-btn" (click)="removeVoucher()" title="Remove Voucher">✕</button>
                     </div>
@@ -103,7 +103,7 @@
                 </p>
                 <button class="btn btn-gold w-100 flex justify-center items-center gap-[8px]" [disabled]="isPaying || spent === 0 || !hasApprovedServices" (click)="payDeposit()">
                     <span *ngIf="!isPaying">
-                        💳 Pay Deposit (
+                        <i class="bi bi-credit-card"></i> Pay Deposit (
                         <span *ngIf="appliedDiscountPercent > 0" class="line-through opacity-70 mr-1">{{(spent * 0.25) | number}}</span>
                         {{discountedAmount | number}} EGP)
                     </span>
@@ -131,7 +131,7 @@
         </div>
         <div class="vendors-list" *ngIf="displayedEventItems.length > 0">
             <div *ngFor="let item of displayedEventItems" class="vendor-row">
-                <div class="vendor-emoji">🏪</div>
+                <div class="vendor-emoji"><i class="bi bi-shop"></i></div>
                 <div class="vendor-info">
                     <div class="vi-name">{{ item.vendorName }}</div>
                     <div class="vi-type">{{ item.serviceName }} {{ item.price > 0 ? '· ' + (item.price | number) + ' EGP' : '' }}</div>
@@ -156,3 +156,4 @@
     (close)="showAiStudio = false"
     (planAccepted)="onAiPlanAccepted($event)">
 </app-event-studio>
+

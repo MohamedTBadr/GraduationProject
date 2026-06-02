@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -21,12 +21,12 @@ export class AddEventComponent implements OnInit {
   isSubmitting = false;
   
   eventTypes = [
-    { id: 'wedding', title: 'Wedding', icon: '💍', desc: 'Romantic ceremony & reception for your big day', services: 'Venue · Catering · Decor · Photography · DJ' },
-    { id: 'engagement', title: 'Engagement', icon: '💐', desc: 'Intimate celebration for your forever commitment', services: 'Venue · Decor · Desserts · Photography' },
-    { id: 'birthday', title: 'Birthday', icon: '🎂', desc: 'A memorable party for any age milestone', services: 'Venue · Decor · Cake · Entertainment' },
-    { id: 'graduation', title: 'Graduation', icon: '🎓', desc: 'Celebrate the achievement with family and friends', services: 'Venue · Decor · Photography · Catering' },
-    { id: 'corporate', title: 'Corporate', icon: '🏢', desc: 'Professional events, conferences & product launches', services: 'Venue · AV · Catering · Branding' },
-    { id: 'custom', title: 'Custom Event', icon: '✨', desc: 'Build your own event from scratch, your way', services: 'Choose any services' }
+    { id: 'wedding', title: 'Wedding', icon: 'heart', desc: 'Romantic ceremony & reception for your big day', services: 'Venue · Catering · Decor · Photography · DJ' },
+    { id: 'engagement', title: 'Engagement', icon: 'heart-fill', desc: 'Intimate celebration for your forever commitment', services: 'Venue · Decor · Desserts · Photography' },
+    { id: 'birthday', title: 'Birthday', icon: 'gift', desc: 'A memorable party for any age milestone', services: 'Venue · Decor · Cake · Entertainment' },
+    { id: 'graduation', title: 'Graduation', icon: 'mortarboard', desc: 'Celebrate the achievement with family and friends', services: 'Venue · Decor · Photography · Catering' },
+    { id: 'corporate', title: 'Corporate', icon: 'buildings', desc: 'Professional events, conferences & product launches', services: 'Venue · AV · Catering · Branding' },
+    { id: 'custom', title: 'Custom Event', icon: 'stars', desc: 'Build your own event from scratch, your way', services: 'Choose any services' }
   ];
 
   selectedEventType: any = null;
@@ -72,7 +72,7 @@ export class AddEventComponent implements OnInit {
         if (backendTypes && backendTypes.length > 0) {
           this.eventTypes = backendTypes.map(bt => {
             const hardcoded = this.eventTypes.find(h => h.title.toLowerCase() === bt.name.toLowerCase()) 
-              || { id: bt.id, title: bt.name, icon: '✨', desc: 'Custom Event', services: 'Choose any services' };
+              || { id: bt.id, title: bt.name, icon: 'stars', desc: 'Custom Event', services: 'Choose any services' };
             return {
               ...hardcoded,
               id: bt.id
@@ -162,3 +162,5 @@ export class AddEventComponent implements OnInit {
     this.router.navigate(['/user/dashboard']);
   }
 }
+
+

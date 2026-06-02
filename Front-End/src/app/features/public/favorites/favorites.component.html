@@ -1,4 +1,4 @@
-<div class="page active" id="page-favorites">
+﻿<div class="page active" id="page-favorites">
     <div class="container py-[60px] px-[0] min-h-[70vh]">
         <div class="flex justify-between items-end mb-[40px]">
             <div>
@@ -28,12 +28,12 @@
                     <div class="vc-photo-inner bg-[linear-gradient(135deg,_hsl(230,_40%,_25%)_0%,_hsl(250,_45%,_30%)_100%)]">{{v.name.charAt(0)}}</div>
                     <div class="vc-top-row">
                         <div class="vc-cat-badge">{{v.vendorTypeName || 'Vendor'}}</div>
-                        <button class="vc-fav-btn text-[var(--gold)]" (click)="removeFromFavorites(v.id, $event)">❤️</button>
+                        <button class="vc-fav-btn text-[var(--gold)]" (click)="removeFromFavorites(v.id, $event)"><i class="bi bi-heart-fill" style="color:#e11d48"></i>️</button>
                     </div>
                 </div>
                 <div class="vc-body">
                     <div class="vc-name">{{v.name}}</div>
-                    <div class="vc-loc" *ngIf="v.location">📍 {{v.location}}</div>
+                    <div class="vc-loc" *ngIf="v.location"><i class="bi bi-geo-alt-fill"></i> {{v.location}}</div>
                     <div class="vc-rating-row">
                         <span class="stars"></span>
                         <span class="vc-review-count">{{v.rating || 'New'}}</span>

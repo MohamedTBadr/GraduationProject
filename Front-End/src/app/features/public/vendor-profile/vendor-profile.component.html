@@ -1,4 +1,4 @@
-<div class="page-vendor-profile">
+﻿<div class="page-vendor-profile">
     <!-- Loading State -->
     <div class="container loading-screen" *ngIf="loading">
         <div class="loader"></div>
@@ -22,18 +22,18 @@
                         <h1 class="vp-title">{{vendor.name}}</h1>
                         <div class="vp-meta">
                             <div class="badge-item rating-badge">
-                                <span>⭐</span> {{vendor.rating || 'New'}}
+                                <i class="bi bi-star-fill" style="color:var(--gold)"></i> {{vendor.rating || 'New'}}
                             </div>
                             <div class="badge-item" *ngIf="vendor.location">
-                                <span>📍</span> {{vendor.location}}
+                                <i class="bi bi-geo-alt-fill"></i> {{vendor.location}}
                             </div>
                             <div class="badge-item">
-                                <span>🏷️</span> {{vendor.vendorTypeName || 'Vendor'}}
+                                <i class="bi bi-tag"></i> {{vendor.vendorTypeName || 'Vendor'}}
                             </div>
                         </div>
                     </div>
                     <button class="save-btn" [class.active]="isFavorite()" (click)="toggleFav()">
-                        {{isFavorite() ? '★ Saved' : '☆ Save to Favorites'}}
+                        {{isFavorite() ? 'Saved' : 'Save to Favorites'}}
                     </button>
                 </div>
             </div>
@@ -61,7 +61,7 @@
                     <div class="services-grid" *ngIf="products.length > 0">
                         <div class="service-card" *ngFor="let product of products" (click)="openServiceModal(product)">
                             <div class="card-header">
-                                <span class="text-2xl">✨</span>
+                                <i class="bi bi-stars text-2xl"></i>
                                 <span class="text-xs uppercase tracking-widest text-gold">Details →</span>
                             </div>
                             <h3 class="card-title">{{product.name}}</h3>
@@ -144,7 +144,7 @@
                         </select>
                     </div>
 
-                    <button class="btn-gold" (click)="scrollToServices()">✨ View Available Services</button>
+                    <button class="btn-gold" (click)="scrollToServices()"><i class="bi bi-stars"></i> View Available Services</button>
                     <button class="btn-whatsapp flex items-center justify-center gap-2" *ngIf="vendor.phone">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.012l-.582 2.128 2.18-.571c.703.351 1.446.543 2.226.543h.001c3.181 0 5.766-2.586 5.767-5.766 0-3.18-2.585-5.766-5.766-5.766zm3.377 8.203c-.145-.072-.858-.423-.99-.471-.132-.048-.229-.072-.325.072-.096.144-.372.471-.456.567-.084.096-.168.108-.313.036-.145-.072-.611-.225-1.164-.718-.431-.384-.722-.859-.806-1.003-.084-.144-.009-.223.063-.294.065-.064.145-.168.217-.252.072-.084.096-.144.145-.24.048-.096.024-.18-.012-.252-.036-.072-.325-.783-.445-1.071-.117-.282-.236-.243-.325-.248-.084-.004-.18-.005-.276-.005s-.252.036-.384.18c-.132.144-.504.492-.504 1.2s.516 1.392.588 1.488c.072.096 1.015 1.55 2.459 2.173.344.149.611.238.819.304.346.11.66.095.909.058.277-.041.858-.351.978-.69s.12-.63.084-.69c-.036-.06-.132-.096-.277-.168z"/></svg>
                         WhatsApp Us
@@ -154,3 +154,4 @@
         </main>
     </ng-container>
 </div>
+

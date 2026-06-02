@@ -1,4 +1,4 @@
-.dash-grid-top {
+﻿.dash-grid-top {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
@@ -9,7 +9,7 @@
     background: var(--white);
     border-radius: var(--r2);
     padding: 20px;
-    box-shadow: var(--sh1);
+    box-shadow: var(--sh);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -50,7 +50,7 @@
 .event-card {
     background: var(--white);
     border-radius: var(--r2);
-    box-shadow: var(--sh1);
+    box-shadow: var(--sh);
     padding: 24px;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -121,7 +121,7 @@
     background: var(--white);
     border-radius: var(--r2);
     padding: 24px;
-    box-shadow: var(--sh1);
+    box-shadow: var(--sh);
 }
 
 .event-card {
@@ -193,3 +193,4 @@
         }
     }
 }
+

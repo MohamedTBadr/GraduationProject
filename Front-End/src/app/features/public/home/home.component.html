@@ -1,10 +1,10 @@
-<div class="page active" id="page-home">
+﻿<div class="page active" id="page-home">
     <section class="hero">
         <div class="hero-bg"></div>
         <div class="hero-orb"></div>
         <div class="hero-orb"></div>
         <div class="hero-content">
-            <div class="hero-eyebrow fade-up">✨ EGYPT'S PREMIER EVENT PLATFORM</div>
+            <div class="hero-eyebrow fade-up">EGYPT'S PREMIER EVENT PLATFORM</div>
             <h1 class="fade-up fu1">Don't Plan,<br /><em>Go Epic.</em></h1>
             <p class="hero-sub fade-up fu2">Discover trusted vendors, book services, and manage everything in one elegant platform.<br/>Join Egypt's top event marketplace.</p>
             <div class="hero-search fade-up fu3">
@@ -13,11 +13,11 @@
                 <button (click)="doSearch(searchInput.value)">Search →</button>
             </div>
             <div class="hero-cats fade-up fu4">
-                <div class="hero-cat active" (click)="filterCat('wedding')">💍 Weddings</div>
-                <div class="hero-cat" (click)="filterCat('birthday')">🎂 Birthdays</div>
-                <div class="hero-cat" (click)="filterCat('corporate')">🏢 Corporate</div>
-                <div class="hero-cat" (click)="filterCat('graduation')">🎓 Graduation</div>
-                <div class="hero-cat" (click)="filterCat('engagement')">💐 Engagement</div>
+                <div class="hero-cat active" (click)="filterCat('wedding')"><i class="bi bi-heart"></i> Weddings</div>
+                <div class="hero-cat" (click)="filterCat('birthday')"><i class="bi bi-gift"></i> Birthdays</div>
+                <div class="hero-cat" (click)="filterCat('corporate')"><i class="bi bi-buildings"></i> Corporate</div>
+                <div class="hero-cat" (click)="filterCat('graduation')"><i class="bi bi-mortarboard"></i> Graduation</div>
+                <div class="hero-cat" (click)="filterCat('engagement')"><i class="bi bi-heart-fill"></i> Engagement</div>
             </div>
             <div class="hero-stats">
                 <div class="hero-stat">
@@ -41,32 +41,32 @@
         <div class="container">
             <div class="cats-grid">
                 <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Venue'}">
-                    <div class="cat-icon">️️🏛️</div>
+                    <div class="cat-icon"><i class="bi bi-building"></i></div>
                     <div class="cat-name">Venues</div>
                     <div class="cat-count">68 venues</div>
                 </div>
                 <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Catering'}">
-                    <div class="cat-icon">️🍽️</div>
+                    <div class="cat-icon"><i class="bi bi-cup-hot"></i></div>
                     <div class="cat-name">Catering</div>
                     <div class="cat-count">52 caterers</div>
                 </div>
                 <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Decoration'}">
-                    <div class="cat-icon">🌸</div>
+                    <div class="cat-icon"><i class="bi bi-flower1"></i></div>
                     <div class="cat-name">Decoration</div>
                     <div class="cat-count">74 vendors</div>
                 </div>
                 <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Photography'}">
-                    <div class="cat-icon">📸</div>
+                    <div class="cat-icon"><i class="bi bi-camera"></i></div>
                     <div class="cat-name">Photography</div>
                     <div class="cat-count">89 studios</div>
                 </div>
                 <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Entertainment'}">
-                    <div class="cat-icon">🎤</div>       
+                    <div class="cat-icon"><i class="bi bi-music-note-beamed"></i></div>       
                     <div class="cat-name">Entertainment</div>
                     <div class="cat-count">41 acts</div>        
                 </div>
                 <div class="cat-card" routerLink="/explore">
-                    <div class="cat-icon">✨</div>
+                    <div class="cat-icon"><i class="bi bi-stars"></i></div>
                     <div class="cat-name">More</div>
                     <div class="cat-count">60+ services</div>
                 </div>
@@ -78,7 +78,7 @@
         <div class="container">
             <div class="flex justify-between items-end mb-[40px]">
                 <div>
-                    <div class="tag">★ Top Picks</div>
+                    <div class="tag">Top Picks</div>
                     <h2 class="section-title">Featured Vendors</h2>
                     <p class="section-sub">Handpicked professionals trusted by thousands of happy clients.</p>
                 </div>
@@ -153,7 +153,7 @@
                             <div class="pkg-vendor-name">Nile City Venue</div><span class="pkg-vendor-service">Wedding
                                 Hall</span><span class="pkg-vendor-price">30,000 EGP</span>
                         </div>
-                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji">️</span>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"><i class="bi bi-shop"></i></span>
                             <div class="pkg-vendor-name">Elite Catering</div><span class="pkg-vendor-service">Catering &
                                 Live Stations</span><span class="pkg-vendor-price">12,000 EGP</span>
                         </div>
@@ -188,12 +188,12 @@
                     </ul>
                     <div class="pkg-vendors">
                         <div class="pkg-vendors-title">Vendors in this package</div>
-                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji">️</span>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"><i class="bi bi-shop"></i></span>
                             <div class="pkg-vendor-name">Royal Hall Cairo</div><span
                                 class="pkg-vendor-service">Conference Venue & AV</span><span
                                 class="pkg-vendor-price">Custom</span>
                         </div>
-                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji">️</span>
+                        <div class="pkg-vendor-row"><span class="pkg-vendor-emoji"><i class="bi bi-shop"></i></span>
                             <div class="pkg-vendor-name">Elite Catering</div><span class="pkg-vendor-service">Catering &
                                 Coffee Stations</span><span class="pkg-vendor-price">Custom</span>
                         </div>
@@ -216,11 +216,11 @@
                 <div class="whyus-visual">
                     <div class="whyus-card-main"></div>
                     <div class="whyus-float">
-                        <div class="wf-icon">️</div>
+                        <div class="wf-icon"><i class="bi bi-patch-check"></i></div>
                         <div class="wf-text"><strong>All Vendors Verified</strong><span>340+ screened pros</span></div>
                     </div>
                     <div class="whyus-float">
-                        <div class="wf-icon">⭐</div>
+                        <div class="wf-icon"><i class="bi bi-star-fill"></i></div>
                         <div class="wf-text"><strong>4.9 Average Rating</strong><span>from 3,200+ reviews</span></div>
                     </div>
                 </div>
@@ -231,7 +231,7 @@
                     </p>
                     <div class="whyus-points">
                         <div class="wp-card">
-                            <div class="wp-icon">️</div>
+                            <div class="wp-icon"><i class="bi bi-patch-check"></i></div>
                             <div class="wp-title">All Vendors Verified</div>
                             <div class="wp-desc">Every vendor is screened and approved before joining.</div>
                         </div>
@@ -241,12 +241,12 @@
                             <div class="wp-desc">No hidden fees — prices shown upfront, always.</div>
                         </div>
                         <div class="wp-card">
-                            <div class="wp-icon">⚡</div>
+                            <div class="wp-icon"><i class="bi bi-lightning-charge"></i></div>
                             <div class="wp-title">Fast Booking</div>
                             <div class="wp-desc">Confirm vendors in minutes. Instant confirmations.</div>
                         </div>
                         <div class="wp-card">
-                            <div class="wp-icon">💬</div>
+                            <div class="wp-icon"><i class="bi bi-chat"></i></div>
                             <div class="wp-title">WhatsApp Support</div>
                             <div class="wp-desc">Real humans, fast replies in Arabic & English.</div>
                         </div>
@@ -259,7 +259,7 @@
     <section class="testimonials">
         <div class="container">
             <div class="text-center mb-[40px]">
-                <div class="tag">️ Success Stories</div>
+                <div class="tag">Success Stories</div>
                 <h2 class="section-title">What Our Clients Say</h2>
             </div>
             <div class="testi-grid">

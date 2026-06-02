@@ -1,10 +1,10 @@
-<div class="fav-header">
+﻿﻿<div class="fav-header">
   <div>
     <h2 class="fav-title">My Saved Vendors</h2>
     <p class="fav-subtitle">Your curated selection of outstanding professionals saved for your upcoming events.</p>
   </div>
   <button class="btn btn-outline" *ngIf="favorites.length > 0" (click)="clearFavorites()">
-    🧹 Clear All
+    <i class="bi bi-trash3"></i> Clear All
   </button>
 </div>
 
@@ -14,7 +14,7 @@
 </div>
 
 <div class="fav-empty-card" *ngIf="!loading && favorites.length === 0">
-  <div class="empty-icon">💖</div>
+  <div class="empty-icon"><i class="bi bi-heart" style="font-size:2.5rem;color:var(--gray)"></i></div>
   <h3>Your Favorites List is Empty</h3>
   <p>Explore our premium vendor network, find services that inspire you, and tap the heart icon to compile your dream team here.</p>
   <button class="btn btn-gold mt-4" routerLink="/explore">
@@ -31,7 +31,7 @@
       <div class="fav-top-actions">
         <span class="fav-badge">{{ vendor.vendorTypeName || 'Premium Vendor' }}</span>
         <button class="fav-heart-btn" (click)="removeFromFavorites(vendor.id, $event)" title="Remove from favorites">
-          ❤️
+          <i class="bi bi-heart-fill"></i>
         </button>
       </div>
     </div>
@@ -39,7 +39,7 @@
     <div class="fav-card-body">
       <h3 class="fav-vendor-name">{{ vendor.name }}</h3>
       <div class="fav-vendor-location" *ngIf="vendor.location">
-        <span>📍</span> {{ vendor.location }}
+        <i class="bi bi-geo-alt-fill"></i> {{ vendor.location }}
       </div>
       <div class="fav-vendor-rating">
         <span class="stars-gold">★</span>
@@ -56,3 +56,7 @@
     </div>
   </div>
 </div>
+
+
+
+

@@ -1,7 +1,7 @@
-<div class="vd-section active">
+﻿<div class="vd-section active">
   <div class="vd-page-header">
     <div>
-      <div class="vd-page-title">Welcome back, {{ vendorName }} 👋</div>
+      <div class="vd-page-title">Welcome back, {{ vendorName }} </div>
       <div class="vd-page-sub">Sunday, 1 March 2026 &middot; Your business at a glance</div>
     </div>
     <button class="vd-btn vd-btn-gold" routerLink="/vendor-dashboard/services">+ Add Service</button>
@@ -9,7 +9,7 @@
 
   <div class="vd-stats">
     <div class="vd-stat vds-gold">
-      <div class="vd-stat-bg text-[1.8rem]">📦</div>
+      <div class="vd-stat-bg text-[1.8rem]"><i class="bi bi-box"></i></div>
       <div class="vd-stat-val">{{ totalBookings() }}</div>
       <div class="vd-stat-lbl">Total Bookings</div>
       <div class="vd-stat-trend">Confirmed services</div>
@@ -21,13 +21,13 @@
       <div class="vd-stat-trend flat text-[#f59e0b]">Waiting for approval</div>
     </div>
     <div class="vd-stat vds-green">
-      <div class="vd-stat-bg text-[1.8rem]">💰</div>
+      <div class="vd-stat-bg text-[1.8rem]"><i class="bi bi-currency-dollar"></i></div>
       <div class="vd-stat-val">{{ totalRevenue() | number:'1.0-0' }}</div>
       <div class="vd-stat-lbl">Revenue (EGP)</div>
       <div class="vd-stat-trend text-[#10b981]">Total approved value</div>
     </div>
     <div class="vd-stat vds-blue">
-      <div class="vd-stat-bg text-[1.8rem]">⭐</div>
+      <div class="vd-stat-bg text-[1.8rem]"><i class="bi bi-star-fill"></i></div>
       <div class="vd-stat-val">{{ averageRating() | number:'1.1-1' }}</div>
       <div class="vd-stat-lbl">Average Rating</div>
       <div class="vd-stat-trend text-[#3b82f6]">From client reviews</div>
@@ -57,7 +57,7 @@
         </div>
         <div class="flex justify-between items-center pb-[12px] [border-bottom:1px_solid_var(--cream)]" *ngFor="let event of upcomingEvents()">
             <div class="flex gap-[10px] items-center">
-              <div class="w-[38px] h-[38px] bg-[var(--cream)] rounded-[8px] flex items-center justify-center text-[1.1rem]">📅</div>
+              <div class="w-[38px] h-[38px] bg-[var(--cream)] rounded-[8px] flex items-center justify-center text-[1.1rem]"><i class="bi bi-calendar3"></i></div>
               <div>
                 <div class="font-bold text-[0.9rem] text-[var(--navy)]">{{ event.title }}</div>
                 <div class="text-[0.75rem] text-[var(--gray)]">{{ event.eventDate | date:'MMM d, y' }}</div>
@@ -120,3 +120,4 @@
 </div>
 
 <!-- ADD SERVICE MODAL REMOVED - Managed in Services Component -->
+

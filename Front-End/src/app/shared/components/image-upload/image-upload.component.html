@@ -1,4 +1,4 @@
-<div class="iu-container">
+﻿<div class="iu-container">
   <div class="iu-error" *ngIf="errorMsg">{{ errorMsg }}</div>
 
   <div class="iu-dropzone" 
@@ -9,7 +9,7 @@
     
     <label class="iu-label">
       <input type="file" #fileInput class="iu-input" [multiple]="multiple" [accept]="acceptFormats.join(',')" (change)="onFileSelected($event)" />
-      <div class="iu-icon">📷</div>
+      <div class="iu-icon"><i class="bi bi-camera" style="font-size:1.8rem"></i></div>
       <div class="iu-text"><strong>Click to upload</strong> or drag and drop</div>
       <div class="iu-subtext">JPG, PNG, or WebP (max {{ maxSizeMB }}MB)</div>
     </label>
@@ -34,3 +34,4 @@
     </div>
   </div>
 </div>
+

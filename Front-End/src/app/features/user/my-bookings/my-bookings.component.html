@@ -1,4 +1,4 @@
-<div class="mb-header">
+﻿<div class="mb-header">
   <div class="mb-title">My Bookings & Orders</div>
   <div class="mb-subtitle">Manage your reservations and financial transactions</div>
 </div>
@@ -16,9 +16,9 @@
     <div class="val">{{stats.completed}}</div>
     <div class="lbl">Completed</div>
   </div>
-  <div class="mb-stat-card card-loyalty" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+  <div class="mb-stat-card card-loyalty">
     <div class="val">{{loyaltyPoints}}</div>
-    <div class="lbl" style="color: rgba(255,255,255,0.8);">Loyalty Points 🌟</div>
+    <div class="lbl">Loyalty Points</div>
   </div>
 </div>
 
@@ -51,7 +51,7 @@
   <div class="mb-tab" 
        [class.active]="activeTab === 'rewards'"
        (click)="setTab('rewards')">
-    Rewards 🌟
+    Rewards
   </div>
 </div>
 
@@ -84,12 +84,12 @@
         </ng-container>
 
         <ng-container *ngIf="bk.status === 'Done'">
-          <button class="btn" style="background-color: #10b981; color: white; border-color: #10b981;" (click)="confirmCompletion(bk)">Confirm Service Completion ✅</button>
-          <button class="btn cancel" (click)="reportIssue(bk)">Report an Issue ⚠️</button>
+          <button class="btn btn-confirm-completion" (click)="confirmCompletion(bk)"><i class="bi bi-check-circle"></i> Confirm Service Completion</button>
+          <button class="btn cancel" (click)="reportIssue(bk)"><i class="bi bi-exclamation-triangle"></i> Report an Issue</button>
         </ng-container>
 
         <ng-container *ngIf="bk.status === 'Completed'">
-          <button class="btn" style="background-color: #eba834; color: white; border-color: #eba834;" (click)="openReviewModal(bk)">Leave Review ⭐</button>
+          <button class="btn btn-leave-review" (click)="openReviewModal(bk)"><i class="bi bi-star"></i> Leave Review</button>
         </ng-container>
       </div>
       <div class="bk-id">{{bk.id}}</div>
@@ -101,7 +101,7 @@
   <div class="mb-booking-card" *ngFor="let order of orders">
     <div class="bk-top">
       <div class="bk-info">
-        <div class="bk-icon">💰</div>
+        <div class="bk-icon"><i class="bi bi-currency-dollar"></i></div>
         <div>
           <div class="bk-vendor-name">Order #{{order.id.substring(0,8)}}</div>
           <div class="bk-service-type">Event Order</div>
@@ -119,15 +119,15 @@
 
     <div class="bk-actions-bar">
       <div class="bk-actions">
-        <div class="bk-order-items" style="font-size: 0.9rem; color: #6b7280;">
+        <div class="bk-order-items">
           <span>Event booking payment</span>
         </div>
       </div>
     </div>
   </div>
   
-  <div class="empty-state" *ngIf="orders.length === 0" style="text-align: center; padding: 3rem; color: #6b7280;">
-    <div style="font-size: 3rem; margin-bottom: 1rem;">🛍️</div>
+  <div class="empty-state" *ngIf="orders.length === 0">
+    <div class="empty-state-icon"><i class="bi bi-bag"></i></div>
     <h3>No orders found</h3>
     <p>You haven't made any transactions yet.</p>
   </div>
@@ -139,13 +139,13 @@
     <div class="mb-referral-card">
       <div class="card-glow"></div>
       <div class="referral-content">
-        <span class="gift-icon">🎁</span>
+        <span class="gift-icon"><i class="bi bi-gift"></i></span>
         <h3>Invite Friends & Earn Rewards</h3>
         <p>Share Eventora with your friends. When they sign up using your referral link, you both get an exclusive 15% discount voucher!</p>
         <div class="referral-link-box">
           <input type="text" [value]="referralLink || 'Generating your link...'" readonly class="referral-input-readonly" />
           <button class="btn btn-gold btn-copy" (click)="copyReferralLink()" [disabled]="!referralLink">
-            <span>📋</span> Copy Link
+            <i class="bi bi-clipboard"></i> Copy Link
           </button>
         </div>
       </div>
@@ -173,8 +173,8 @@
         </div>
       </div>
       
-      <div class="empty-state" *ngIf="myVouchers.length === 0" style="text-align: center; padding: 3rem; background: var(--white); border-radius: var(--r2); box-shadow: var(--sh1);">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">🎟️</div>
+      <div class="empty-state rewards-empty" *ngIf="myVouchers.length === 0">
+        <div class="empty-state-icon"><i class="bi bi-ticket-perforated"></i></div>
         <h3>No vouchers yet</h3>
         <p>Share your referral link above to earn your first voucher!</p>
       </div>
@@ -194,3 +194,4 @@
   [bookingRef]="selectedBookingRef"
   (close)="closeReportModal()">
 </app-report-issue-modal>
+

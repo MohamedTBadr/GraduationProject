@@ -1,4 +1,4 @@
-<div class="vd-section active block">
+﻿<div class="vd-section active block">
   <div class="vd-page-header">
     <div><div class="vd-page-title">My Services</div><div class="vd-page-sub">Manage the services you offer clients. Changes go live immediately.</div></div>
     <button class="vd-btn vd-btn-gold" (click)="openAddServiceModal()">+ Add Service</button>
@@ -135,7 +135,7 @@
       <img class="w-[80px] h-[80px] rounded-[12px] object-cover shrink-0 [box-shadow:0_4px_12px_rgba(0,0,0,0.08)]" *ngIf="selectedService.imageUrl; else detailFallbackIcon" [src]="selectedService.imageUrl">
       <ng-template #detailFallbackIcon>
         <div class="text-[3rem] bg-[#f8fafc] rounded-[12px] w-[80px] h-[80px] flex items-center justify-center shrink-0">
-          🛠️
+          <i class="bi bi-tools"></i>
         </div>
       </ng-template>
       

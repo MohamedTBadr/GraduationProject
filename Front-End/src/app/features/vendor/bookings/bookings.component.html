@@ -1,4 +1,4 @@
-<div class="vd-section active">
+﻿<div class="vd-section active">
   <div class="vd-page-header">
     <div>
       <div class="vd-page-title">Bookings</div>
@@ -28,9 +28,9 @@
         <div class="vd-badge-pill vdb-amber">Pending</div>
       </div>
       <div class="vd-bk-meta">
-        <span>⚒️ {{b.service}}</span>
-        <span>👥 {{b.guests}} guests</span>
-        <span class="text-[var(--gold)] font-semibold">💰 {{b.value | number}} EGP</span>
+        <span><i class="bi bi-tools"></i> {{b.service}}</span>
+        <span><i class="bi bi-people"></i> {{b.guests}} guests</span>
+        <span class="text-[var(--gold)] font-semibold"><i class="bi bi-currency-dollar"></i> {{b.value | number}} EGP</span>
       </div>
       <div class="vd-bk-note" *ngIf="b.note">"{{b.note}}"</div>
       <div class="vd-bk-actions">
@@ -156,7 +156,7 @@
   <div class="vd-tab-pane" [class.active]="currentTab === 'history'" id="bk-history">
     <div class="vd-search-row">
       <div class="vd-search-wrap">
-        <span class="vd-search-icon">🔍</span>
+        <i class="bi bi-search vd-search-icon"></i>
         <input type="text" placeholder="Search...">
       </div>
       <select class="vd-filter-sel">
@@ -211,7 +211,7 @@
     
     <ng-container *ngIf="selectedBooking as booking">
       <div class="vd-modal-title flex items-center gap-[8px]">
-        <span class="text-[1.2rem]">📋</span> Booking Request Details
+        <i class="bi bi-list-check text-[1.2rem]"></i> Booking Request Details
       </div>
       
       <div class="bg-[var(--cream)] rounded-[8px] p-[16px] mt-[20px] mb-[20px]">
@@ -281,3 +281,4 @@
     </div>
   </div>
 </div>
+

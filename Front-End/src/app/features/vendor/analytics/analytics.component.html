@@ -1,4 +1,4 @@
-<div class="vd-section active block">
+﻿<div class="vd-section active block">
   <div class="vd-page-header">
     <div>
       <div class="vd-page-title">Analytics Dashboard</div>
@@ -118,12 +118,12 @@
       <!-- AI Recommendations -->
       <div class="vd-card">
         <div class="flex items-center gap-[8px] mb-[12px]">
-          <span class="text-[1.5rem]">💡</span>
+          <i class="bi bi-lightbulb text-[1.5rem]"></i>
           <div class="vd-card-title m-0">AI Optimization Recommendations</div>
         </div>
         <div class="flex flex-col gap-[10px] mt-[12px]">
           <div *ngFor="let rec of report.recommendations" class="flex gap-[10px] items-start p-[12px] bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.15)] rounded-[8px]">
-            <span class="text-[var(--gold)] text-[1.1rem]">✦</span>
+            <i class="bi bi-star-fill text-[var(--gold)] text-[1.1rem]"></i>
             <p class="text-[0.85rem] text-[#f7e1b9] m-0 leading-[1.4]">{{ rec }}</p>
           </div>
           <div *ngIf="!report.recommendations || report.recommendations.length === 0" class="text-center text-[var(--gray)] py-[30px]">
@@ -164,3 +164,4 @@
     </div>
   </ng-container>
 </div>
+

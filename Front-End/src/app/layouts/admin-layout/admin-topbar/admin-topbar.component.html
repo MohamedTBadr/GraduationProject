@@ -1,12 +1,16 @@
 <div class="ad-topbar">
   <div class="ad-topbar-title" id="adTopTitle">Dashboard</div>
-  <div class="ad-topbar-search"><input type="text" placeholder="Search vendors, users, bookings…"/></div>
+  <div class="ad-topbar-search">
+    <i class="bi bi-search ad-search-icon"></i>
+    <input type="text" placeholder="Search vendors, users, bookings…"/>
+  </div>
   <div class="ad-topbar-actions">
-    <div class="ad-icon-btn theme-toggle" title="Toggle Theme"   (click)="theme.toggleTheme()">{{ theme.isDark() ? '☀️' : '🌙' }}
-</div>
+    <div class="ad-icon-btn theme-toggle" title="Toggle Theme" (click)="theme.toggleTheme()">
+      <i [class]="theme.isDark() ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
+    </div>
     <div class="ad-icon-btn" title="Alerts"><div class="ad-notif-pip"></div></div>
-    <div class="ad-icon-btn" title="Quick actions">⚡</div>
-    <div class="ad-icon-btn bg-[rgba(239,68,68,.15)] border-[rgba(239,68,68,.3)]" title="Critical alerts">🚨</div>
-    <div class="w-[30px] h-[30px] rounded-[8px] bg-[linear-gradient(135deg,#c0392b,#8e1010)] flex items-center justify-center text-[.9rem] cursor-pointer" title="Admin profile">👤</div>
+    <div class="ad-icon-btn" title="Quick actions"><i class="bi bi-lightning-charge"></i></div>
+    <div class="ad-icon-btn bg-[rgba(239,68,68,.15)] border-[rgba(239,68,68,.3)]" title="Critical alerts"><i class="bi bi-exclamation-octagon"></i></div>
+    <div class="w-[30px] h-[30px] rounded-[8px] bg-[linear-gradient(135deg,#c0392b,#8e1010)] flex items-center justify-center text-[.9rem] cursor-pointer" title="Admin profile"><i class="bi bi-person" style="color:#fff"></i></div>
   </div>
 </div>

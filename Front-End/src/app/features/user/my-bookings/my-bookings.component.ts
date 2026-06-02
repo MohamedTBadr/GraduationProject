@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../../core/services/event.service';
 import { EventResponseDto } from '../../../shared/types/api.interfaces';
@@ -104,7 +104,7 @@ export class MyBookingsComponent implements OnInit {
                 eventRef: `${ev.title} · ${new Date(ev.eventDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`,
                 status: localStatus,
                 price: `${item.price.toLocaleString()} EGP`,
-                icon: '🏪'
+                icon: 'shop'
               });
             });
           }
@@ -223,3 +223,4 @@ export class MyBookingsComponent implements OnInit {
     });
   }
 }
+

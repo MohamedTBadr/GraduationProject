@@ -1,38 +1,85 @@
-<aside class="vd-sidebar">
-  <div class="vd-sb-top">
-    <div class="vd-logo">Epic<span>Hub</span></div>
-    <div class="vd-logo-sub">VENDOR PORTAL</div>
+<aside class="vendor-sidebar">
+  <!-- Header / Logo -->
+  <div class="sidebar-header">
+    <div class="logo">Epic<span>Hub</span></div>
+    <div class="logo-sub">Vendor Portal</div>
   </div>
-  <div class="vd-vendor-row">
-    <div class="vd-avatar">🌸</div>
-    <div>
-      <div class="vd-vendor-name">White Rose Decor</div>
-      <div class="vd-vendor-sub">Decoration &middot; New Cairo</div>
-      <div class="vd-verified">✔ Verified</div>
+
+  <!-- Vendor Identity -->
+  <div class="vendor-identity">
+    <div class="v-avatar">W</div>
+    <div class="v-details">
+      <div class="v-name">White Rose Decor</div>
+      <div class="v-cat">Decoration · New Cairo</div>
+      <div class="v-badge">
+        <i class="bi bi-patch-check-fill"></i> Verified
+      </div>
     </div>
   </div>
-  <nav class="vd-nav">
-    <div class="vd-section-lbl">MAIN</div>
-    <a class="vd-item" routerLink="/vendor-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><span class="vd-item-icon">🏠</span>Dashboard</a>
-    <a class="vd-item" routerLink="/vendor-dashboard/bookings" routerLinkActive="active"><span class="vd-item-icon">📅</span>Bookings<span class="vd-badge">8</span></a>
-    <a class="vd-item" routerLink="/vendor-dashboard/messages" routerLinkActive="active"><span class="vd-item-icon">💬</span>Messages<span class="vd-badge red">3</span></a>
-    <a class="vd-item" routerLink="/vendor-dashboard/notifications" routerLinkActive="active"><span class="vd-item-icon">🔔</span>Notifications<span class="vd-badge red">5</span></a>
-    
-    <div class="vd-section-lbl">CATALOG</div>
-    <a class="vd-item" routerLink="/vendor-dashboard/services" routerLinkActive="active"><span class="vd-item-icon">🛠️</span>My Services</a>
-    <a class="vd-item" routerLink="/vendor-dashboard/packages" routerLinkActive="active"><span class="vd-item-icon">💎</span>Packages</a>
-    <a class="vd-item" routerLink="/vendor-dashboard/portfolio" routerLinkActive="active"><span class="vd-item-icon">🖼️</span>Portfolio</a>
-    
-    <div class="vd-section-lbl">INSIGHTS</div>
-    <a class="vd-item" routerLink="/vendor-dashboard/analytics" routerLinkActive="active"><span class="vd-item-icon">📊</span>Analytics</a>
-    <a class="vd-item" routerLink="/vendor-dashboard/earnings" routerLinkActive="active"><span class="vd-item-icon">💰</span>Earnings</a>
-    <a class="vd-item" routerLink="/vendor-dashboard/reviews" routerLinkActive="active"><span class="vd-item-icon">⭐</span>Reviews</a>
-    
-    <div class="vd-section-lbl">ACCOUNT</div>
-    <a class="vd-item" routerLink="/vendor-dashboard/profile" routerLinkActive="active"><span class="vd-item-icon">👤</span>Profile</a>
-    <a class="vd-item" routerLink="/" ><span class="vd-item-icon">🚪</span>Back to EpicHub</a>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <div class="group-title">Main</div>
+      <a routerLink="/vendor-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+        <i class="bi bi-house icon"></i>Dashboard
+      </a>
+      <a routerLink="/vendor-dashboard/bookings" routerLinkActive="active">
+        <i class="bi bi-calendar3 icon"></i>Bookings
+        <span class="badge badge-gold">8</span>
+      </a>
+      <a routerLink="/vendor-dashboard/messages" routerLinkActive="active">
+        <i class="bi bi-chat icon"></i>Messages
+        <span class="badge badge-red">3</span>
+      </a>
+      <a routerLink="/vendor-dashboard/notifications" routerLinkActive="active">
+        <i class="bi bi-bell icon"></i>Notifications
+        <span class="badge badge-red">5</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <div class="group-title">Catalog</div>
+      <a routerLink="/vendor-dashboard/services" routerLinkActive="active">
+        <i class="bi bi-tools icon"></i>My Services
+      </a>
+      <a routerLink="/vendor-dashboard/packages" routerLinkActive="active">
+        <i class="bi bi-gem icon"></i>Packages
+      </a>
+      <a routerLink="/vendor-dashboard/portfolio" routerLinkActive="active">
+        <i class="bi bi-images icon"></i>Portfolio
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <div class="group-title">Insights</div>
+      <a routerLink="/vendor-dashboard/analytics" routerLinkActive="active">
+        <i class="bi bi-bar-chart icon"></i>Analytics
+      </a>
+      <a routerLink="/vendor-dashboard/earnings" routerLinkActive="active">
+        <i class="bi bi-currency-dollar icon"></i>Earnings
+      </a>
+      <a routerLink="/vendor-dashboard/reviews" routerLinkActive="active">
+        <i class="bi bi-star icon"></i>Reviews
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <div class="group-title">Account</div>
+      <a routerLink="/vendor-dashboard/profile" routerLinkActive="active">
+        <i class="bi bi-person icon"></i>Profile
+      </a>
+      <a routerLink="/" class="exit-item">
+        <i class="bi bi-arrow-left icon"></i>Back to EpicHub
+      </a>
+    </div>
   </nav>
-  <div class="vd-footer">
-    <div class="vd-online"><div class="vd-online-dot"></div>Online &middot; Accepting bookings</div>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <div class="system-status">
+      <div class="status-dot"></div>
+      Online · Accepting bookings
+    </div>
   </div>
 </aside>

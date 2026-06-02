@@ -98,9 +98,9 @@
         <div class="results-header">
             <div class="results-count">Showing <strong>{{vendorCount}}</strong> vendors</div>
             <div class="flex gap-[16px] items-center">
-                <div class="view-toggle" style="display: flex; background: #f0ebe0; border-radius: 50px; padding: 3px; gap: 2px;">
-                    <button class="vt-btn" [class.active]="viewMode === 'grid'" (click)="setView('grid')" style="width: 32px; height: 32px; border-radius: 50px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; background: transparent;" [style.background]="viewMode === 'grid' ? '#fff' : 'transparent'" [style.color]="viewMode === 'grid' ? '#1a2540' : '#6b7280'">⊞</button>
-                    <button class="vt-btn" [class.active]="viewMode === 'map'" (click)="setView('map')" style="width: 32px; height: 32px; border-radius: 50px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; background: transparent;" [style.background]="viewMode === 'map' ? '#fff' : 'transparent'" [style.color]="viewMode === 'map' ? '#1a2540' : '#6b7280'">📍</button>
+                <div class="view-toggle">
+                    <button class="vt-btn" [class.active]="viewMode === 'grid'" (click)="setView('grid')"><i class="bi bi-grid"></i></button>
+                    <button class="vt-btn" [class.active]="viewMode === 'map'" (click)="setView('map')"><i class="bi bi-map"></i></button>
                 </div>
                 <select class="sort-select" [(ngModel)]="sortOption" (change)="triggerSearch()">
                     <option value="rating">Top Rated</option>
@@ -121,7 +121,7 @@
         <div class="explore-grid" *ngIf="!loading && viewMode === 'grid'">
             <app-vendor-card *ngFor="let v of displayVendors" [vendor]="v"></app-vendor-card>
             <div class="no-results" *ngIf="displayVendors.length === 0">
-                <div class="text-[3rem] mb-[12px]">🔍</div>
+                <div class="text-[3rem] mb-[12px]"><i class="bi bi-search" style="color:var(--gray)"></i></div>
                 <h3>No vendors found</h3>
                 <p>Try adjusting your filters or search query.</p>
                 <button class="btn btn-gold btn-sm mt-[16px]" (click)="clearAllFilters()">Clear All

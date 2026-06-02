@@ -199,12 +199,14 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
           lng = baseLng + lngOffset;
         }
 
-        const iconText = vendor.profilePictureUrl ? '🏪' : '📍';
+        const markerIcon = vendor.profilePictureUrl
+          ? '<i class="bi bi-shop" style="font-size:1rem;color:#c9a84c"></i>'
+          : '<i class="bi bi-geo-alt-fill" style="font-size:1rem;color:#c9a84c"></i>';
 
         const customIcon = L.divIcon({
           className: 'custom-map-marker',
           html: `<div style="background: white; border-radius: 50px; padding: 6px 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; border: 1.5px solid #e8e4dc; white-space: nowrap; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'; this.style.borderColor='#c9a84c'" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#e8e4dc'">
-                   <span style="font-size: 1rem;">${iconText}</span>
+                   ${markerIcon}
                    <span style="color: #1a2540;">${vendor.name}</span>
                  </div>`,
           iconSize: [220, 40],
