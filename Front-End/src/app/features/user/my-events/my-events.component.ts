@@ -50,6 +50,7 @@ export class MyEventsComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
         if(params['id']) {
             this.activeEventId = params['id'];
+            this.loadActiveEventDetails(this.activeEventId);
         }
     });
 
@@ -58,7 +59,7 @@ export class MyEventsComponent implements OnInit {
 
   loadEvents() {
     const user = this.authService.user();
-    if (!user || user.role !== 'User') {
+    if (!user || (user.role !== 'User' && (user.role as any) !== 'Customer')) {
       this.loading = false;
       return;
     }
@@ -66,8 +67,11 @@ export class MyEventsComponent implements OnInit {
     this.eventService.getByUser(user.id).subscribe({
       next: (data: EventResponseDto[]) => {
         this.events = data.map(ev => this.mapEvent(ev));
-        if (this.events.length > 0 && !this.events.find(e => e.id === this.activeEventId)) {
-          this.activeEventId = this.events[0].id;
+        if (this.events.length > 0) {
+          if (!this.activeEventId || !this.events.find(e => e.id === this.activeEventId)) {
+            this.activeEventId = this.events[0].id;
+          }
+          this.loadActiveEventDetails(this.activeEventId);
         }
         this.loading = false;
       },
@@ -75,6 +79,22 @@ export class MyEventsComponent implements OnInit {
         console.error('Failed to load events:', err);
         this.toastService.show('Failed to load your events.', 'error');
         this.loading = false;
+      }
+    });
+  }
+
+  loadActiveEventDetails(id: string | null) {
+    if (!id) return;
+    this.eventService.getById(id).subscribe({
+      next: (res: any) => {
+        const fullEvent = res?.value ?? res;
+        const index = this.events.findIndex(e => e.id === id);
+        if (index !== -1) {
+          this.events[index] = this.mapEvent(fullEvent);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load event details:', err);
       }
     });
   }
@@ -153,6 +173,7 @@ export class MyEventsComponent implements OnInit {
   switchEvent(id: string) {
     this.activeEventId = id;
     this.eventServicesTab = 'all';
+    this.loadActiveEventDetails(id);
   }
 
   toggleCheck(index: number) {

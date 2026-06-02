@@ -139,12 +139,14 @@ export class AddEventComponent implements OnInit {
     };
 
     this.eventService.create(createDto).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isSubmitting = false;
         this.toastService.show('Event created successfully!', 'success');
-        
-        if (res && res.id) {
-          this.router.navigate(['/user/my-events'], { queryParams: { id: res.id } });
+
+        // Backend returns a Result wrapper: { isSuccess, value: { id, ... } }
+        const eventId = res?.value?.id ?? res?.id ?? null;
+        if (eventId) {
+          this.router.navigate(['/user/my-events'], { queryParams: { id: eventId } });
         } else {
           this.router.navigate(['/user/my-events']);
         }

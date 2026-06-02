@@ -293,6 +293,7 @@ export interface AiPlanItem {
   vendor: string;
   price: number;
   reason: string;
+  selected?: boolean;
 }
 
 export interface AiEventPlanParsed {

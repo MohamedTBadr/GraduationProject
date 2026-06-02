@@ -2,10 +2,10 @@
 
   <!-- Page breadcrumb / title -->
   <div class="ust-breadcrumb">
-    <div class="ust-page-title">Welcome back, Sara </div>
+    <div class="ust-page-title">Welcome back, {{ authService.user()?.name || 'User' }} </div>
     <div class="ust-page-sub">
       <i class="fa-solid fa-calendar-days"></i>
-      Thursday, 12 Mar 2026 &nbsp;·&nbsp;
+      {{ today | date:'short' }} &nbsp;·&nbsp;
       <span>3 active events</span>
     </div>
   </div>
@@ -31,7 +31,7 @@
     </button>
 
     <!-- Add Event CTA -->
-    <button class="ust-add-btn" routerLink="/user/my-events">
+    <button class="ust-add-btn" routerLink="/add-event">
       🆕
       New Event
     </button>
