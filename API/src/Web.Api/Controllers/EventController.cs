@@ -215,7 +215,7 @@ Only return JSON. No markdown. No explanation.
 
             var created = await serviceManager.EventService.CreateAsync(dto, cancellationToken);
             return created.IsSuccess
-                ? Created()
+                ? Ok(created)
                 : created.ToActionResult();
         }
 

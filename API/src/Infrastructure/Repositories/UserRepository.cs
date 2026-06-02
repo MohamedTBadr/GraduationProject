@@ -74,5 +74,8 @@ namespace Infrastructure.Repositories
                 return vendor?.IsVerified ?? false;
 
         }
+
+
+        public async Task SaveChangesAsync(CancellationToken ct) => await dbContext.SaveChangesAsync(ct);
     }
 }

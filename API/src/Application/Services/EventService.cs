@@ -48,24 +48,24 @@ namespace Application.Services
             return Result<IEnumerable<EventSummaryDto>>.Success(entities.Select(e => e.ToSummaryDto()));
         }
 
-        public async Task<Result<IEnumerable<EventSummaryDto>>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<EventResponseDto>>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
             var entities = await _eventRepo.GetByUserIdAsync(userId, cancellationToken);
-            return Result<IEnumerable<EventSummaryDto>>.Success(entities.Select(e => e.ToSummaryDto()));
+            return Result<IEnumerable<EventResponseDto>>.Success(entities.Select(e => e.ToResponseDto()));
         }
 
-        public async Task<Result<IEnumerable<EventSummaryDto>>> GetByUserIdAndStatusAsync(Guid userId, string status, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<EventResponseDto>>> GetByUserIdAndStatusAsync(Guid userId, string status, CancellationToken cancellationToken)
         {
             ValidateStatus(status);
             var entities = await _eventRepo.GetByUserIdAsync(userId, cancellationToken);
-            return Result<IEnumerable<EventSummaryDto>>.Success(entities.Where(e => e.EventStatus == status).Select(e => e.ToSummaryDto()));
+            return Result<IEnumerable<EventResponseDto>>.Success(entities.Where(e => e.EventStatus == status).Select(e => e.ToResponseDto()));
         }
 
-        public async Task<Result<IEnumerable<EventSummaryDto>>> GetByStatusAsync(string status, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<EventResponseDto>>> GetByStatusAsync(string status, CancellationToken cancellationToken)
         {
             ValidateStatus(status);
             var entities = await _eventRepo.GetByStatusAsync(status, cancellationToken);
-            return Result<IEnumerable<EventSummaryDto>>.Success(entities.Select(e => e.ToSummaryDto()));
+            return Result<IEnumerable<EventResponseDto>>.Success(entities.Select(e => e.ToResponseDto()));
         }
 
         // ── Write ─────────────────────────────────────────────────

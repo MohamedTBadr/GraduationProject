@@ -25,5 +25,9 @@ namespace Domain.Contracts
         Task<bool> IsVendorVerifiedAsync(Guid userId, CancellationToken cancellationToken);
 
         Task<ApplicationUser?> GetByReferralCodeAsync(string referralCode, CancellationToken ct);
+
+
+
+        Task SaveChangesAsync(CancellationToken ct);
     }
 }
