@@ -46,9 +46,13 @@ public class VoucherService(
     {
         var user = await userRepo.GetByIdAsync(userId, ct)
             ?? throw new KeyNotFoundException("User not found.");
-
-        var baseUrl = config["App:BaseUrl"];
-        return Result<string>.Success($"{baseUrl}/register?ref={user.ReferralCode}");
+        if(user.ReferralCode is null)
+        {
+            // Generate a unique referral code (e.g., using a GUID or a hash)
+            user.ReferralCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+            await userRepo.SaveChangesAsync(ct);
+        }        
+        return Result<string>.Success(user.ReferralCode);
     }
 
     // Returns all vouchers for a user
