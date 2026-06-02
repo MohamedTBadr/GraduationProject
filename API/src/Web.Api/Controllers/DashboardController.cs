@@ -8,6 +8,7 @@ using Web.Api.Controllers.Attributes;
 namespace Web.Api.Controllers
 {
     [Authorize(Policy = "DashboardAccess")]
+    [Route("api/[controller]")]
     public class DashboardController : APIController
     {
         private readonly ApplicationDbContext _context;
