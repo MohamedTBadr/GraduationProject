@@ -7,6 +7,7 @@ export interface CreateOrderPayload {
   userId: string;
   eventId: string;
   currency: string;
+  voucherCode?: string; // Optional discount voucher code
   shippingAddress: {
     street: string;
     city: string;
@@ -28,14 +29,22 @@ export interface OrderResponse {
   eventId: string;
 }
 
+/** Matches the backend Result<T> JSON shape returned by Ok(order) */
+export interface ResultWrapper<T> {
+  isSuccess: boolean;
+  isFailure: boolean;
+  value: T;
+  error: { code: number; type: string; description: string } | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private readonly apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
-  createOrder(payload: CreateOrderPayload): Observable<OrderResponse> {
-    return this.http.post<OrderResponse>(`${this.apiUrl}/Order`, payload);
+  createOrder(payload: CreateOrderPayload): Observable<ResultWrapper<OrderResponse>> {
+    return this.http.post<ResultWrapper<OrderResponse>>(`${this.apiUrl}/Order`, payload);
   }
 
   getOrdersByUser(userId: string): Observable<OrderResponse[]> {

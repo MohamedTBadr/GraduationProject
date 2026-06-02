@@ -5,6 +5,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../../core/services/product.service';
 import { ServiceTypeService } from '../../../core/services/service-type.service';
 import { ApiProduct, ServiceType } from '../../../shared/types/api.interfaces';
+import { ModalService } from '../../../shared/services/modal.service';
 import { Subject, takeUntil } from 'rxjs';
 import * as L from 'leaflet';
 
@@ -62,12 +63,14 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
   // Preview
   selectedPreviewService: ApiProduct | null = null;
   showPreview = false;
+  previewSlideIndex = 0;
 
   constructor(
     private productService: ProductService,
     private serviceTypeService: ServiceTypeService,
     private route: ActivatedRoute,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private modalService: ModalService
   ) {}
 
   ngOnInit() {
@@ -370,10 +373,52 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
   openPreview(svc: ApiProduct) {
     this.selectedPreviewService = svc;
     this.showPreview = true;
+    this.previewSlideIndex = 0;
   }
 
   closePreview() {
     this.showPreview = false;
     this.selectedPreviewService = null;
+    this.previewSlideIndex = 0;
+  }
+
+  getPreviewImages(svc: ApiProduct): string[] {
+    if (!svc) return [];
+    if (svc.imageUrls && Array.isArray(svc.imageUrls) && svc.imageUrls.length > 0) {
+      return svc.imageUrls.filter((u: string) => !!u);
+    }
+    if (svc.imageUrl) {
+      const parts = svc.imageUrl.split(',').map((s: string) => s.trim()).filter((s: string) => !!s);
+      if (parts.length > 0) return parts;
+    }
+    return [];
+  }
+
+  prevPreviewSlide(images: string[]) {
+    this.previewSlideIndex = this.previewSlideIndex > 0 ? this.previewSlideIndex - 1 : images.length - 1;
+  }
+
+  nextPreviewSlide(images: string[]) {
+    this.previewSlideIndex = this.previewSlideIndex < images.length - 1 ? this.previewSlideIndex + 1 : 0;
+  }
+
+  goToPreviewSlide(index: number) {
+    this.previewSlideIndex = index;
+  }
+
+  togglePreviewWishlist(id: string, event: Event) {
+    event.stopPropagation();
+    const idx = this.wishlist.indexOf(id);
+    if (idx > -1) {
+      this.wishlist.splice(idx, 1);
+    } else {
+      this.wishlist.push(id);
+    }
+  }
+
+  openServiceModal(product: ApiProduct) {
+    this.closePreview();
+    this.modalService.open('service-detail', product);
   }
 }
+

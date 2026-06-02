@@ -1,5 +1,5 @@
 <div class="modal-overlay" [class.open]="modalService.activeModal()" (click)="onOverlayClick($event)">
-    <div class="modal">
+    <div class="modal" [class.service-detail-modal]="modalService.activeModal() === 'service-detail'">
         <button class="modal-close" (click)="modalService.close()"><i class="fa-solid fa-x fa-xs"></i></button>
 
         <!-- Dynamic Content based on ModalType -->
@@ -63,34 +63,133 @@
 
             <!-- Service Detail -->
             <div *ngSwitchCase="'service-detail'">
-                <!-- Rich Service Detail -->
-                <div class="sdm-header" *ngIf="modalService.modalData()">
-                    <div class="sdm-icon">{{modalService.modalData().icon}}</div>
-                    <div>
-                        <div class="sdm-title">{{modalService.modalData().name}}</div>
-                        <div class="sdm-price">{{modalService.modalData().price}}</div>
+                <div class="sdm-container" *ngIf="modalService.modalData() as product">
+                    <!-- Image Slider Area -->
+                    <div class="sdm-media-wrapper">
+                        <!-- Wishlist Heart Button -->
+                        <button class="sdm-wishlist-toggle" 
+                                [class.active]="isInWishlist(product.id)" 
+                                (click)="toggleWishlist(product.id, $event)"
+                                aria-label="Toggle Wishlist">
+                            <i class="fa-heart" [class.fa-solid]="isInWishlist(product.id)" [class.fa-regular]="!isInWishlist(product.id)"></i>
+                        </button>
+
+                        <!-- Image Carousel -->
+                        <div class="sdm-slider" *ngIf="getModalImages(product).length > 0; else noImages">
+                            <div class="sdm-slide" *ngFor="let img of getModalImages(product); let idx = index" [class.active]="currentSlideIndex === idx">
+                                <img [src]="img" [alt]="product.name" />
+                            </div>
+                            
+                            <!-- Slider Arrows -->
+                            <button class="sdm-slider-arrow left" *ngIf="getModalImages(product).length > 1" (click)="prevSlide(getModalImages(product))">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <button class="sdm-slider-arrow right" *ngIf="getModalImages(product).length > 1" (click)="nextSlide(getModalImages(product))">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+
+                            <!-- Slider Dots -->
+                            <div class="sdm-slider-dots" *ngIf="getModalImages(product).length > 1">
+                                <span *ngFor="let img of getModalImages(product); let idx = index" 
+                                      [class.active]="currentSlideIndex === idx" 
+                                      (click)="goToSlide(idx)">
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- No Images Fallback -->
+                        <ng-template #noImages>
+                            <div class="sdm-no-images">
+                                <i class="fa-solid fa-image sdm-placeholder-icon"></i>
+                                <span>Premium Event Service</span>
+                            </div>
+                        </ng-template>
                     </div>
-                </div>
-                <div class="sdm-content" *ngIf="modalService.modalData()">
-                    <p class="sdm-desc">{{modalService.modalData().desc}}</p>
-                    <div class="sdm-meta" *ngIf="modalService.modalData().delivery">
-                        <span> {{modalService.modalData().delivery}}</span>
-                        <span>⏱️ {{modalService.modalData().duration}}</span>
+
+                    <!-- Product Information -->
+                    <div class="sdm-body">
+                        <!-- Category / Type Badge & Vendor Link -->
+                        <div class="sdm-header-meta">
+                            <span class="sdm-type-badge" *ngIf="product.serviceTypeName">{{ product.serviceTypeName }}</span>
+                            <span class="sdm-class-badge" *ngIf="product.classification">{{ product.classification }}</span>
+                        </div>
+
+                        <!-- Service Name -->
+                        <h2 class="sdm-main-title">{{ product.name }}</h2>
+
+                        <!-- Vendor Name (Clickable link) -->
+                        <div class="sdm-vendor-info" *ngIf="product.vendorName">
+                            <span>by</span>
+                            <a (click)="navigateToVendor(product.vendorId)" class="sdm-vendor-link">
+                                {{ product.vendorName }} <i class="fa-solid fa-arrow-up-right-from-square sdm-link-icon"></i>
+                            </a>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="sdm-price-box">
+                            <span class="price-label">Starting Price</span>
+                            <span class="price-value">{{ product.price | currency:'EGP ':'symbol':'1.0-0' }}</span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="sdm-desc-section" *ngIf="product.description">
+                            <p class="sdm-desc-text">{{ product.description }}</p>
+                        </div>
+
+                        <!-- Specifications (Setup & Lead Time) -->
+                        <div class="sdm-spec-grid" *ngIf="product.duration || product.leadTime">
+                            <div class="sdm-spec-card" *ngIf="product.duration">
+                                <span class="spec-icon"><i class="fa-solid fa-clock"></i></span>
+                                <div class="spec-details">
+                                    <span class="spec-label">Setup Duration</span>
+                                    <span class="spec-val">{{ product.duration }} Hours</span>
+                                </div>
+                            </div>
+                            <div class="sdm-spec-card" *ngIf="product.leadTime">
+                                <span class="spec-icon"><i class="fa-solid fa-calendar-check"></i></span>
+                                <div class="spec-details">
+                                    <span class="spec-label">Lead Time Required</span>
+                                    <span class="spec-val">{{ product.leadTime }} Weeks</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Areas -->
+                        <div class="sdm-areas-section" *ngIf="product.serviceAreas && product.serviceAreas.length > 0">
+                            <h4 class="sdm-section-title"><i class="fa-solid fa-map-location-dot"></i> Service Areas</h4>
+                            <div class="sdm-area-badges">
+                                <span class="area-pill" *ngFor="let area of product.serviceAreas">
+                                    <i class="fa-solid fa-location-dot"></i> {{ area.city }}<span *ngIf="area.region">, {{ area.region }}</span>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="sdm-actions" *ngIf="!showEventDropdown">
-                    <button class="sdm-cta" [disabled]="submitting" (click)="handleServiceRequest(modalService.modalData())">
-                        {{ submitting ? 'Processing...' : 'Request This Service' }}
-                    </button>
-                </div>
-                <div class="sdm-dropdown-actions mt-[20px] flex gap-[10px]" *ngIf="showEventDropdown">
-                    <select class="flex-1 p-[10px] rounded-[8px] [border:1px_solid_#ddd]" [(ngModel)]="selectedEventId">
-                        <option *ngFor="let ev of userEvents" [value]="ev.id">{{ev.title}} ({{ev.eventDate | date}})</option>
-                        <option value="NEW_EVENT">+ Create New Event</option>
-                    </select>
-                    <button class="sdm-cta flex-1" [disabled]="submitting" (click)="submitChooseEvent(modalService.modalData())">
-                        {{ submitting ? 'Adding...' : 'Confirm' }}
-                    </button>
+
+                    <!-- Footer Action Buttons -->
+                    <div class="sdm-footer">
+                        <!-- Default Actions -->
+                        <div class="sdm-action-bar" *ngIf="!showEventDropdown">
+                            <button class="sdm-btn-book" [disabled]="submitting" (click)="handleServiceRequest(product)">
+                                <span *ngIf="!submitting">Book Now <i class="fa-solid fa-arrow-right"></i></span>
+                                <span *ngIf="submitting"><i class="fa-solid fa-circle-notch fa-spin"></i> Processing...</span>
+                            </button>
+                        </div>
+
+                        <!-- Event Select Dropdown Actions -->
+                        <div class="sdm-dropdown-wrapper" *ngIf="showEventDropdown">
+                            <label class="dropdown-label">Select Event for Booking:</label>
+                            <div class="sdm-dropdown-actions">
+                                <select class="sdm-event-select" [(ngModel)]="selectedEventId">
+                                    <option *ngFor="let ev of userEvents" [value]="ev.id">{{ev.title}} ({{ev.eventDate | date:'mediumDate'}})</option>
+                                    <option value="NEW_EVENT">+ Create New Event</option>
+                                </select>
+                                <button class="sdm-btn-confirm" [disabled]="submitting" (click)="submitChooseEvent(product)">
+                                    <span *ngIf="!submitting">Confirm Booking</span>
+                                    <span *ngIf="submitting"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

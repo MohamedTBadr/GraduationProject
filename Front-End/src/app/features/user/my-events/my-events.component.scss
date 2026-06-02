@@ -354,3 +354,78 @@
         }
     }
 }
+
+/* Voucher Checkout Styling */
+.voucher-container {
+    background: var(--cream2);
+    padding: 12px;
+    border-radius: var(--r2);
+    border: 1px dashed var(--lgray);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.voucher-input-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.voucher-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--lgray);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    outline: none;
+    background: var(--white);
+    color: var(--navy);
+    transition: border-color 0.2s;
+
+    &:focus {
+        border-color: var(--gold);
+    }
+}
+
+.voucher-btn {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.applied-voucher-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(22, 163, 74, 0.08);
+    border: 1px solid rgba(22, 163, 74, 0.2);
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.applied-voucher-badge {
+    font-size: 0.85rem;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.remove-voucher-btn {
+    background: none;
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+
+    &:hover {
+        color: #b91c1c;
+    }
+}

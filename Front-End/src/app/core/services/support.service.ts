@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  CreateTicketRequest,
   SupportTicket,
   TicketStats,
   TicketFilters,
@@ -59,5 +60,10 @@ export class SupportService {
   /** POST /admin/support/tickets/{ticket_id}/escalate - Escalate ticket */
   escalate(ticketId: string, payload: EscalateTicketRequest): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/${ticketId}/escalate`, payload);
+  }
+
+  /** POST /api/support/tickets - Open a support ticket (Vendor, Customer) */
+  openTicket(payload: CreateTicketRequest): Observable<SupportTicket> {
+    return this.http.post<SupportTicket>(`${environment.apiUrl}/support/tickets`, payload);
   }
 }

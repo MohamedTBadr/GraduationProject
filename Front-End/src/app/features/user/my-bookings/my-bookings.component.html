@@ -48,9 +48,14 @@
        (click)="setTab('orders')">
     Order History <span class="mb-tab-badge" [class.inactive]="activeTab !== 'orders'">{{orders.length}}</span>
   </div>
+  <div class="mb-tab" 
+       [class.active]="activeTab === 'rewards'"
+       (click)="setTab('rewards')">
+    Rewards 🌟
+  </div>
 </div>
 
-<div class="mb-list" *ngIf="activeTab !== 'orders'">
+<div class="mb-list" *ngIf="activeTab !== 'orders' && activeTab !== 'rewards'">
   <div class="mb-booking-card" *ngFor="let bk of filteredBookings">
     <div class="bk-top">
       <div class="bk-info">
@@ -128,9 +133,64 @@
   </div>
 </div>
 
+<div class="mb-list" *ngIf="activeTab === 'rewards'">
+  <!-- Referral Card -->
+  <div class="mb-rewards-container">
+    <div class="mb-referral-card">
+      <div class="card-glow"></div>
+      <div class="referral-content">
+        <span class="gift-icon">🎁</span>
+        <h3>Invite Friends & Earn Rewards</h3>
+        <p>Share Eventora with your friends. When they sign up using your referral link, you both get an exclusive 15% discount voucher!</p>
+        <div class="referral-link-box">
+          <input type="text" [value]="referralLink || 'Generating your link...'" readonly class="referral-input-readonly" />
+          <button class="btn btn-gold btn-copy" (click)="copyReferralLink()" [disabled]="!referralLink">
+            <span>📋</span> Copy Link
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vouchers List Section -->
+    <div class="vouchers-section">
+      <h3 class="section-title">My Vouchers</h3>
+      <div class="vouchers-grid" *ngIf="myVouchers.length > 0">
+        <div class="voucher-ticket" *ngFor="let v of myVouchers" [class.used]="v.isUsed">
+          <div class="ticket-left">
+            <div class="discount-badge">{{v.discountPercent}}%</div>
+            <div class="discount-lbl">OFF</div>
+          </div>
+          <div class="ticket-middle">
+            <div class="ticket-code">{{v.code}}</div>
+            <div class="ticket-desc">{{v.description || 'Valid on any event booking deposit.'}}</div>
+            <div class="ticket-expiry" *ngIf="v.expiresAt">Expires: {{v.expiresAt | date:'mediumDate'}}</div>
+          </div>
+          <div class="ticket-right">
+            <div class="ticket-status" [class.used]="v.isUsed">
+              {{v.isUsed ? 'USED' : 'ACTIVE'}}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="empty-state" *ngIf="myVouchers.length === 0" style="text-align: center; padding: 3rem; background: var(--white); border-radius: var(--r2); box-shadow: var(--sh1);">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🎟️</div>
+        <h3>No vouchers yet</h3>
+        <p>Share your referral link above to earn your first voucher!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <app-review-modal 
   [isOpen]="isReviewModalOpen"
   [serviceId]="selectedServiceId"
   [userId]="userId"
   (close)="closeReviewModal()">
 </app-review-modal>
+
+<app-report-issue-modal
+  [isOpen]="isReportModalOpen"
+  [bookingRef]="selectedBookingRef"
+  (close)="closeReportModal()">
+</app-report-issue-modal>
