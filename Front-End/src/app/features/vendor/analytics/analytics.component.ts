@@ -28,7 +28,7 @@ export class AnalyticsComponent implements OnInit {
 
   loadAnalytics() {
     this.loading = true;
-    this.http.post<any>(`${environment.apiUrl}/dashboard/vendor-report`, {}).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/Dashboard/vendor-report`, {}).subscribe({
       next: (data) => {
         this.report = data;
         this.loading = false;
