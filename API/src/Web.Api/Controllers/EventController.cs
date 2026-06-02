@@ -30,14 +30,25 @@ namespace Web.Api.Controllers
         // ─────────────────────────────────────────────────────────
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [HybridCache(1800, "events", Variance =CacheVariance.Adaptive)]
+        [HybridCache(1800, "events", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            var result = IsAdmin()
-                ? await serviceManager.EventService.GetAllAsync(cancellationToken)
-                : await serviceManager.EventService.GetByUserIdAsync(UserId, cancellationToken);
+            if (IsAdmin())
+            {
+                var result = await serviceManager.EventService
+                    .GetAllAsync(cancellationToken);
 
-            return result.IsSuccess ? Ok(result) : NotFound(result);
+                return result.IsSuccess
+                    ? Ok(result)
+                    : NotFound(result);
+            }
+
+            var userResult = await serviceManager.EventService
+                .GetByUserIdAsync(UserId, cancellationToken);
+
+            return userResult.IsSuccess
+                ? Ok(userResult)
+                : NotFound(userResult);
         }
 
         // ─────────────────────────────────────────────────────────
