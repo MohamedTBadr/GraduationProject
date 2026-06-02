@@ -95,6 +95,7 @@ services:
       - "http"
       - "gateway.api:8081"
       - "--url=pierre-sacred-sparkishly.ngrok-free.dev"
+      - "--conflict-policy=disconnect-old"  # 👈 this is the key
 
     environment:
       NGROK_AUTHTOKEN: 3EXzLM2Ial0tURTtHVJZdmcqSCv_2GAKBiCkHi4GQuUTJeEGS
