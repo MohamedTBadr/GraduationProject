@@ -1,0 +1,98 @@
+/* ═══ TESTIMONIALS ══════════════════════ */
+.testimonials {
+  background: var(--cream2);
+}
+.testi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.testi-card {
+  background: var(--white);
+  border-radius: var(--r2);
+  padding: 26px;
+  box-shadow: var(--sh);
+  position: relative;
+}
+.testi-card::before {
+  content: '"';
+  font-family: var(--ff-d);
+  font-size: 4.5rem;
+  color: var(--gold);
+  opacity: 0.13;
+  position: absolute;
+  top: 8px;
+  left: 18px;
+  line-height: 1;
+}
+.testi-text {
+  font-size: 0.92rem;
+  color: var(--gray);
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+.testi-author {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.testi-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--gold) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.testi-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--navy);
+}
+.testi-event {
+  font-size: 0.76rem;
+  color: var(--gray);
+}
+/* ═══ CTA ════════════════════════════════ */
+.cta-section {
+  background: linear-gradient(135deg, #161022 0%, #7a114c 100%);
+  text-align: center;
+  padding: 90px 24px;
+}
+.cta-section .section-title {
+  color: #ffff;
+  margin-bottom: 14px;
+}
+.cta-section p {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 1rem;
+  margin-bottom: 36px;
+}
+.cta-btns {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cta-btns .start-btn {
+  font-size: 0.83rem;
+  font-weight: 700;
+  padding: 9px 18px;
+  border-radius: 50px;
+  background: #c9a84c;
+  color:  #7a114c ;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+.cta-btns .start-btn:hover {
+  background: #e8c97a;
+}
+
+.btn-outline:hover{
+      color:  #7a114c ;
+}
