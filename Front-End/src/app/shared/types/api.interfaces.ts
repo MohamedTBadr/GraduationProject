@@ -207,6 +207,7 @@ export interface ApiProduct {
   serviceTypeId?: string;
   serviceTypeName?: string;
   imageUrl?: string;
+  imageUrls?: string[]; // Multiple images for slider
   status?: 'active' | 'paused';
   duration?: string;
   leadTime?: string;
@@ -215,6 +216,10 @@ export interface ApiProduct {
   allowedEventTypes?: string[]; // backwards compatibility
   createdAt?: string;
   serviceAreas?: ServiceAreaDTO[];
+  rating?: number;
+  reviewCount?: number;
+  requiresApproval?: boolean;
+  bookedCount?: number;
 }
 
 export interface CreateProductRequest {
@@ -288,6 +293,7 @@ export interface AiPlanItem {
   vendor: string;
   price: number;
   reason: string;
+  selected?: boolean;
 }
 
 export interface AiEventPlanParsed {
@@ -486,6 +492,7 @@ export interface PaymobPaymentRequest {
   amount: number;
   billing: PaymobBillingData;
   orderId?: string;
+  voucherCode?: string; // Optional discount voucher code
 }
 
 export interface PaymobPaymentResponse {
@@ -495,6 +502,14 @@ export interface PaymobPaymentResponse {
 // ─────────────────────────────────────────────
 // Support Tickets
 // ─────────────────────────────────────────────
+export interface CreateTicketRequest {
+  title: string;
+  description: string;
+  type: string;
+  priority: string;
+  bookingRef?: string | null;
+}
+
 export interface SupportTicket {
   ticket_id: string;
   title: string;

@@ -66,12 +66,17 @@
             </div>
           </div>
 
-          <h4 class="mt-4 mb-3">Recommended Vendors</h4>
+          <h4 class="mt-4 mb-3">Recommended Vendors <small class="text-muted" style="font-size: 0.8rem; font-weight: normal; margin-left: 8px;">(Click to select/deselect)</small></h4>
           <div class="ai-vendor-list">
-            <div class="ai-vendor-item" *ngFor="let item of aiPlan.selected_items">
+            <div class="ai-vendor-item" *ngFor="let item of aiPlan.selected_items"
+                 [class.selected]="item.selected"
+                 (click)="toggleItemSelection(item)">
               <div class="avi-header">
                 <span class="avi-cat">{{item.category}}</span>
-                <span class="avi-price">{{item.price | number}} EGP</span>
+                <div class="avi-price-wrap">
+                  <span class="avi-price">{{item.price | number}} EGP</span>
+                  <input type="checkbox" class="avi-checkbox" [checked]="item.selected" />
+                </div>
               </div>
               <div class="avi-name">{{item.vendor}}</div>
               <div class="avi-reason">"{{item.reason}}"</div>

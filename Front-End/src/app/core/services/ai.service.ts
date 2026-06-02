@@ -25,7 +25,7 @@ export class AiService {
       totalBudget,
       eventTypeName
     }).pipe(
-      map(res => res.value)
+      map(res => res?.value ?? res)
     );
   }
 
@@ -35,7 +35,7 @@ export class AiService {
    */
   getEventTimeline(eventId: string): Observable<EventTimelineResponse> {
     return this.http.post<ApiResult<EventTimelineResponse>>(`${this.apiUrl}/event-timeline/${eventId}`, {}).pipe(
-      map(res => res.value)
+      map(res => res?.value ?? res)
     );
   }
 
@@ -45,7 +45,7 @@ export class AiService {
    */
   getClientsLikeYouRecommendations(eventId: string): Observable<RecommendationResponse> {
     return this.http.get<ApiResult<RecommendationResponse>>(`${this.apiUrl}/clients-like-you/${eventId}`).pipe(
-      map(res => res.value)
+      map(res => res?.value ?? res)
     );
   }
 }

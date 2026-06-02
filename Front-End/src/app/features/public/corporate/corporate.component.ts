@@ -4,8 +4,8 @@ import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { CompanyInquiryService } from '../../../core/services/company-inquiry.service';
-import { VendorTypeService } from '../../../core/services/vendor-type.service';
-import { VendorType } from '../../../core/models/taxonomy.models';
+import { EventTypeService } from '../../../core/services/event-type.service';
+import { EventType } from '../../../core/models/taxonomy.models';
 
 @Component({
   selector: 'app-corporate',
@@ -16,20 +16,20 @@ import { VendorType } from '../../../core/models/taxonomy.models';
 })
 export class CorporateComponent implements OnInit {
   corpForm!: FormGroup;
-  vendorTypes: VendorType[] = [];
+  eventTypes: EventType[] = [];
   isSubmitting = false;
 
   constructor(
     private fb: FormBuilder,
     private toastService: ToastService,
     private companyInquiryService: CompanyInquiryService,
-    private vendorTypeService: VendorTypeService,
+    private eventTypeService: EventTypeService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
   ngOnInit() {
     this.initForm();
-    this.loadVendorTypes();
+    this.loadEventTypes();
   }
 
   private initForm() {
@@ -38,7 +38,7 @@ export class CorporateComponent implements OnInit {
       contactPerson: ['', Validators.required],
       phoneNumber: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      vendorTypeId: ['', [Validators.required]],
+      eventTypeId: ['', [Validators.required]],
       expectedDate: ['', Validators.required],
       estimatedAttendees: [null, [Validators.min(1)]],
       approximateBudget: [null, [Validators.min(0)]],
@@ -46,12 +46,12 @@ export class CorporateComponent implements OnInit {
     });
   }
 
-  private loadVendorTypes() {
-    this.vendorTypeService.getAll().subscribe({
-      next: (data) => this.vendorTypes = data,
+  private loadEventTypes() {
+    this.eventTypeService.getAll().subscribe({
+      next: (data) => this.eventTypes = data,
       error: (err) => {
-        console.error('Failed to load vendor types', err);
-        this.toastService.show('Failed to load vendor types.', 'error');
+        console.error('Failed to load event types', err);
+        this.toastService.show('Failed to load event types.', 'error');
       }
     });
   }

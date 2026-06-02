@@ -69,17 +69,22 @@ export class VendorCreateComponent implements OnInit {
 
     this.submitting = true;
     const val = this.form.value;
-    const payload = {
-      ...val,
-      address: {
-        street: val.street,
-        city: val.city,
-        state: val.state,
-        postalCode: val.postalCode
-      }
-    };
+    const formData = new FormData();
 
-    this.vendorService.create(payload).subscribe({
+    // Append standard fields
+    Object.keys(val).forEach(key => {
+      if (key !== 'street' && key !== 'city' && key !== 'state' && key !== 'postalCode') {
+        formData.append(key, val[key]);
+      }
+    });
+
+    // Append Address fields
+    formData.append('Address.Street', val.street || '');
+    formData.append('Address.City', val.city || '');
+    formData.append('Address.State', val.state || '');
+    formData.append('Address.PostalCode', val.postalCode || '');
+
+    this.vendorService.create(formData).subscribe({
       next: (res) => {
         this.toastService.show('Vendor created successfully!', 'success');
         this.router.navigate(['/admin/vendors']);

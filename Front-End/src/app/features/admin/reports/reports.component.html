@@ -1,53 +1,171 @@
 <div class="ad-section active block">
+  <!-- Header -->
   <div class="ad-page-hd">
     <div>
       <div class="ad-page-title">Reports & Analytics</div>
-      <div class="ad-page-sub">Deep dives into platform performance, growth, and retention.</div>
+      <div class="ad-page-sub">Deep dives into platform performance, revenue growth, and vendor metrics.</div>
     </div>
-    <div class="flex gap-[7px]"><button class="ad-btn ad-btn-ghost">Export PDF</button><button class="ad-btn ad-btn-gold">Schedule Report</button></div>
-  </div>
-  <div class="ad-kpi-grid">
-    <div class="ad-kpi ak-blue"><div class="ad-kpi-val">38%</div><div class="ad-kpi-lbl">Month-over-month Growth</div><div class="ad-kpi-trend akt-up">Best month ever</div></div>
-    <div class="ad-kpi ak-green"><div class="ad-kpi-val">67%</div><div class="ad-kpi-lbl">User Retention Rate</div><div class="ad-kpi-trend akt-up">↑ 5%</div></div>
-    <div class="ad-kpi ak-gold"><div class="ad-kpi-val">4.2 min</div><div class="ad-kpi-lbl">Avg Session Duration</div><div class="ad-kpi-trend akt-up">↑ 40 sec</div></div>
-    <div class="ad-kpi ak-purple"><div class="ad-kpi-val">18%</div><div class="ad-kpi-lbl">Browse → Inquiry Rate</div><div class="ad-kpi-trend akt-up">↑ 3%</div></div>
-  </div>
-  <div class="ad-g2">
-    <div class="ad-card">
-      <div class="ad-card-title">User Acquisition (Last 6 Months)</div>
-      <div class="ad-bar-chart flex items-end gap-[15px] h-[120px] pt-[20px] mt-[10px] justify-center" id="ad-acq-chart">
-          <div class="w-[25px] bg-[#3b82f6] h-[62%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Oct</span></div>
-          <div class="w-[25px] bg-[#3b82f6] h-[71%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Nov</span></div>
-          <div class="w-[25px] bg-[#3b82f6] h-[98%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Dec</span></div>
-          <div class="w-[25px] bg-[#3b82f6] h-[82%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Jan</span></div>
-          <div class="w-[25px] bg-[#3b82f6] h-[91%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Feb</span></div>
-      </div>
-    </div>
-    <div class="ad-card">
-      <div class="ad-card-title">Traffic Sources</div>
-      <div id="ad-traffic-sources">
-          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Organic Search</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[#10b981] w-[44%]"></div></div><div class="w-[30px] text-right">44%</div></div>
-      </div>
+    <div class="flex gap-[7px]">
+      <button class="ad-btn ad-btn-ghost" (click)="downloadPdf()" [disabled]="loading || isDownloadingPdf">
+        <span>📄</span> {{ isDownloadingPdf ? 'Generating...' : 'Export PDF' }}
+      </button>
+      <button class="ad-btn ad-btn-gold" (click)="emailReport()" [disabled]="loading || isSendingEmail">
+        <span>📧</span> {{ isSendingEmail ? 'Sending...' : 'Schedule Report' }}
+      </button>
     </div>
   </div>
-  <div class="ad-g3">
-    <div class="ad-card">
-      <div class="ad-card-title">Event Type Distribution</div>
-      <div id="ad-event-dist">
-          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Wedding</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[44%]"></div></div><div class="w-[30px] text-right">44%</div></div>
-      </div>
-    </div>
-    <div class="ad-card">
-      <div class="ad-card-title">Top Performing Cities</div>
-      <div id="ad-cities">
-          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Cairo</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[58%]"></div></div><div class="w-[30px] text-right">58%</div></div>
-      </div>
-    </div>
-    <div class="ad-card">
-      <div class="ad-card-title">Seasonal Trends</div>
-      <div id="ad-seasonal">
-          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Q4 (Oct-Dec)</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[38%]"></div></div><div class="w-[30px] text-right">38%</div></div>
-      </div>
-    </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex flex-col items-center justify-center p-[60px] text-center bg-[#151026] rounded-[12px] border border-[rgba(255,255,255,.05)]">
+    <div class="animate-spin rounded-full h-[40px] w-[40px] border-b-2 border-[var(--gold)] mb-[16px]"></div>
+    <p class="text-[0.9rem] text-[var(--gray)]">Generating executive report and fetching AI insights...</p>
   </div>
+
+  <ng-container *ngIf="!loading && report">
+    <!-- KPI Grid -->
+    <div class="ad-kpi-grid">
+      <div class="ad-kpi ak-blue">
+        <div class="ad-kpi-val">{{ report.kpis.lifetimeRevenue | number }} EGP</div>
+        <div class="ad-kpi-lbl">Lifetime Platform Revenue</div>
+        <div class="ad-kpi-trend akt-up">All-time paid</div>
+      </div>
+      <div class="ad-kpi ak-green">
+        <div class="ad-kpi-val">{{ report.kpis.currentMonthRevenue | number }} EGP</div>
+        <div class="ad-kpi-lbl">Current Month Revenue</div>
+        <div class="ad-kpi-trend" [ngClass]="report.kpis.growthPercentage >= 0 ? 'akt-up' : 'akt-down'">
+          {{ report.kpis.growthPercentage >= 0 ? '↑' : '↓' }} {{ report.kpis.growthPercentage | number:'1.0-2' }}% MoM
+        </div>
+      </div>
+      <div class="ad-kpi ak-gold">
+        <div class="ad-kpi-val">{{ report.adminMetrics?.totalCustomers || 0 }}</div>
+        <div class="ad-kpi-lbl">Registered Customers</div>
+        <div class="ad-kpi-trend akt-up">Active users</div>
+      </div>
+      <div class="ad-kpi ak-purple">
+        <div class="ad-kpi-val">{{ report.adminMetrics?.totalVendors || 0 }}</div>
+        <div class="ad-kpi-lbl">Registered Vendors</div>
+        <div class="ad-kpi-trend akt-up">
+          {{ report.adminMetrics?.vendorVerificationRate | number:'1.0-1' }}% verified
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts and Top Services -->
+    <div class="ad-g2">
+      <!-- Revenue history chart -->
+      <div class="ad-card">
+        <div class="ad-card-title">Platform Revenue History (MoM)</div>
+        <div class="ad-bar-chart flex items-end gap-[15px] h-[140px] pt-[20px] pb-[10px] mt-[10px] justify-center">
+            <div *ngFor="let h of report.revenueHistory" 
+                 [style.height.%]="getHistoryHeight(h.revenue)" 
+                 class="w-[28px] bg-[#3b82f6] rounded-t-[4px] relative group cursor-pointer hover:bg-opacity-80 transition-colors">
+                <span class="absolute text-[10px] bottom-[-25px] left-1/2 transform -translate-x-1/2 whitespace-nowrap text-[var(--gray)]">{{ h.label }}</span>
+                <!-- Tooltip on hover -->
+                <div class="absolute bottom-[100%] left-1/2 transform -translate-x-1/2 bg-[#1e1b4b] text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none mb-1 z-10 border border-rgba(255,255,255,0.1) shadow-lg whitespace-nowrap">
+                    {{ h.revenue | number }} EGP ({{ h.orders }} orders)
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Top Services bar list -->
+      <div class="ad-card">
+        <div class="ad-card-title">Top Performing Services</div>
+        <div class="flex flex-col gap-[14px] mt-[12px]">
+            <div *ngFor="let s of report.topServices" class="flex items-center text-[.8rem]">
+                <div class="flex-1 font-semibold text-white truncate" [title]="s.serviceName">{{ s.serviceName }}</div>
+                <div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]">
+                    <div class="h-[100%] bg-[var(--gold)]" [style.width.%]="s.revenueShare"></div>
+                </div>
+                <div class="w-[90px] text-right font-bold text-[var(--gold)]">{{ s.revenue | number }} EGP</div>
+            </div>
+            <div *ngIf="!report.topServices || report.topServices.length === 0" class="text-center text-[var(--gray)] py-[20px]">
+              No service sales record.
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI powered insights section -->
+    <div class="ad-card mt-[24px]" *ngIf="report.aiInsights">
+      <div class="flex items-center gap-[10px] mb-[16px] [border-bottom:1px_solid_rgba(255,255,255,.05)] pb-[12px]">
+        <span class="text-[1.8rem]">🧠</span>
+        <div>
+          <h3 class="font-family-[var(--ff-d)] text-[1.3rem] text-white m-0">Gemini AI Executive Insights</h3>
+          <p class="text-[0.78rem] text-[var(--gray)] m-0">Generated by {{ report.aiInsights.modelUsed }}</p>
+        </div>
+      </div>
+
+      <div class="text-[0.92rem] leading-[1.6] text-[#e2e8f0] mb-[20px] bg-[rgba(255,255,255,.02)] p-[16px] rounded-[8px] border border-[rgba(255,255,255,.05)]">
+        {{ report.aiInsights.summary }}
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+        <div>
+          <h4 class="text-[0.85rem] text-[#ef4444] font-bold tracking-wider uppercase mb-[10px] flex items-center gap-[6px]">
+            ⚠️ Identified Risks
+          </h4>
+          <ul class="flex flex-col gap-[8px] pl-[18px] text-[0.85rem] text-[var(--gray)] m-0">
+            <li *ngFor="let risk of report.aiInsights.risks">{{ risk }}</li>
+          </ul>
+          <p *ngIf="!report.aiInsights.risks || report.aiInsights.risks.length === 0" class="text-[0.85rem] text-[var(--gray)] italic">No critical risks identified.</p>
+        </div>
+
+        <div>
+          <h4 class="text-[0.85rem] text-[#10b981] font-bold tracking-wider uppercase mb-[10px] flex items-center gap-[6px]">
+            🚀 Growth Opportunities
+          </h4>
+          <ul class="flex flex-col gap-[8px] pl-[18px] text-[0.85rem] text-[var(--gray)] m-0">
+            <li *ngFor="let opp of report.aiInsights.opportunities">{{ opp }}</li>
+          </ul>
+          <p *ngIf="!report.aiInsights.opportunities || report.aiInsights.opportunities.length === 0" class="text-[0.85rem] text-[var(--gray)] italic">No significant opportunities found.</p>
+        </div>
+      </div>
+
+      <div class="mt-[20px] pt-[16px] [border-top:1px_solid_rgba(255,255,255,.05)]">
+        <h4 class="text-[0.85rem] text-[var(--gold)] font-bold tracking-wider uppercase mb-[10px]">
+          📋 Actionable Recommendations
+        </h4>
+        <ul class="flex flex-col gap-[8px] pl-[18px] text-[0.85rem] text-[var(--gray)] m-0">
+          <li *ngFor="let rec of report.aiInsights.recommendations">{{ rec }}</li>
+        </ul>
+      </div>
+
+      <div class="mt-[16px] text-[0.8rem] text-[var(--gray)] italic text-right">
+        Analysis generated at {{ report.aiInsights.generatedAt | date:'medium' }}
+      </div>
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="ad-card mt-[24px]">
+      <div class="ad-card-title mb-[16px]">Recent Platform Orders</div>
+      <div class="overflow-x-auto">
+        <table class="ad-table w-[100%] text-left border-collapse">
+          <thead>
+            <tr class="[border-bottom:1px_solid_rgba(255,255,255,.1)] text-[var(--gray)] text-[0.8rem] font-bold">
+              <th class="py-[12px] px-[8px]">Order ID</th>
+              <th class="py-[12px] px-[8px]">Customer</th>
+              <th class="py-[12px] px-[8px]">Vendor</th>
+              <th class="py-[12px] px-[8px]">Service</th>
+              <th class="py-[12px] px-[8px] text-right">Amount</th>
+              <th class="py-[12px] px-[8px] text-right">Date</th>
+            </tr>
+          </thead>
+          <tbody class="text-[0.85rem] text-[#e2e8f0]">
+            <tr *ngFor="let o of report.recentOrders" class="[border-bottom:1px_solid_rgba(255,255,255,.05)] hover:bg-[rgba(255,255,255,.02)] transition-colors">
+              <td class="py-[12px] px-[8px] font-mono text-[0.75rem] text-[var(--gold)]">#{{ o.orderId.substring(0, 8) }}</td>
+              <td class="py-[12px] px-[8px] font-semibold">{{ o.customerName }}</td>
+              <td class="py-[12px] px-[8px] text-[var(--gray)]">{{ o.vendorName || '-' }}</td>
+              <td class="py-[12px] px-[8px] text-[var(--gray)]">{{ o.serviceName }}</td>
+              <td class="py-[12px] px-[8px] text-right font-bold text-white">{{ o.amount | number }} EGP</td>
+              <td class="py-[12px] px-[8px] text-right text-[var(--gray)]">{{ o.createdAt | date:'mediumDate' }}</td>
+            </tr>
+            <tr *ngIf="!report.recentOrders || report.recentOrders.length === 0">
+              <td colspan="6" class="text-center text-[var(--gray)] py-[20px]">No orders recorded recently.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
 </div>

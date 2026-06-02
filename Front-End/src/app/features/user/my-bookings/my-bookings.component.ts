@@ -5,7 +5,9 @@ import { EventResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReviewModalComponent } from './review-modal.component';
+import { ReportIssueModalComponent } from './report-issue-modal.component';
 import { OrderService, OrderResponse } from '../../../core/services/order.service';
+import { VoucherService, Voucher } from '../../../core/services/voucher.service';
 
 interface Booking {
   id: string;
@@ -22,7 +24,7 @@ interface Booking {
 @Component({
   selector: 'app-my-bookings',
   standalone: true,
-  imports: [CommonModule, ReviewModalComponent],
+  imports: [CommonModule, ReviewModalComponent, ReportIssueModalComponent],
   templateUrl: './my-bookings.component.html',
   styleUrls: ['./my-bookings.component.scss']
 })
@@ -45,15 +47,24 @@ export class MyBookingsComponent implements OnInit {
   isReviewModalOpen = false;
   selectedServiceId = '';
 
+  isReportModalOpen = false;
+  selectedBookingRef = '';
+
+  // Voucher and referral variables
+  myVouchers: Voucher[] = [];
+  referralLink = '';
+
   constructor(
     private eventService: EventService,
     private authService: AuthService,
     private toastService: ToastService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private voucherService: VoucherService
   ) {}
 
   ngOnInit() {
     this.loadBookings();
+    this.loadVouchers();
   }
 
   loadBookings() {
@@ -173,6 +184,42 @@ export class MyBookingsComponent implements OnInit {
   }
 
   reportIssue(bk: Booking) {
-    // To be implemented (Open support ticket modal)
+    this.selectedBookingRef = bk.id;
+    this.isReportModalOpen = true;
+  }
+
+  closeReportModal() {
+    this.isReportModalOpen = false;
+    this.selectedBookingRef = '';
+  }
+
+  loadVouchers() {
+    this.voucherService.getReferralLink().subscribe({
+      next: (res) => {
+        this.referralLink = res;
+      },
+      error: (err) => {
+        console.error('Failed to load referral link', err);
+      }
+    });
+
+    this.voucherService.getMyVouchers().subscribe({
+      next: (vouchers) => {
+        this.myVouchers = vouchers;
+      },
+      error: (err) => {
+        console.error('Failed to load vouchers', err);
+      }
+    });
+  }
+
+  copyReferralLink() {
+    if (!this.referralLink) return;
+    navigator.clipboard.writeText(this.referralLink).then(() => {
+      this.toastService.show('Referral link copied to clipboard!', 'success');
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+      this.toastService.show('Failed to copy referral link.', 'error');
+    });
   }
 }

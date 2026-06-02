@@ -75,7 +75,13 @@ export class EventStudioComponent implements OnInit {
         this.isGenerating = false;
         try {
           const planStr = response.aiPlan.replace(/```json/g, '').replace(/```/g, '').trim();
-          this.aiPlan = JSON.parse(planStr) as AiEventPlanParsed;
+          const parsed = JSON.parse(planStr) as AiEventPlanParsed;
+          if (parsed && parsed.selected_items) {
+            parsed.selected_items.forEach((item: any) => {
+              item.selected = true;
+            });
+          }
+          this.aiPlan = parsed;
         } catch (e) {
           this.error = "Failed to parse the AI response. Please try again.";
           console.error("Parse error:", e, response.aiPlan);
@@ -89,12 +95,16 @@ export class EventStudioComponent implements OnInit {
     });
   }
 
+  toggleItemSelection(item: any) {
+    item.selected = !item.selected;
+  }
+
   loadRecommendations() {
     this.loadingRecommendations = true;
     this.aiService.getClientsLikeYouRecommendations(this.eventId).subscribe({
       next: (res) => {
         this.loadingRecommendations = false;
-        this.recommendations = res.recommendations || [];
+        this.recommendations = res?.recommendations || [];
       },
       error: (err) => {
         this.loadingRecommendations = false;
@@ -136,8 +146,21 @@ export class EventStudioComponent implements OnInit {
   }
 
   acceptPlan() {
-    this.planAccepted.emit(this.aiPlan);
-    this.toastService.show('AI Plan accepted! Selected vendors are being added to your event.', 'success');
+    if (!this.aiPlan || !this.aiPlan.selected_items) return;
+    const selectedItems = this.aiPlan.selected_items.filter((item: any) => item.selected !== false);
+    
+    if (selectedItems.length === 0) {
+      this.toastService.show('Please select at least one vendor to add.', 'info');
+      return;
+    }
+    
+    const planToEmit = {
+      ...this.aiPlan,
+      selected_items: selectedItems
+    };
+
+    this.planAccepted.emit(planToEmit);
+    this.toastService.show('Selected vendors are being added to your event.', 'success');
     this.close.emit();
   }
 }

@@ -1,46 +1,166 @@
 <div class="vd-section active block">
   <div class="vd-page-header">
-    <div><div class="vd-page-title">Analytics</div><div class="vd-page-sub">Track visibility, conversion, and revenue trends over time.</div></div>
-    <div class="flex gap-[6px]"><button class="vd-btn vd-btn-ghost vd-btn-sm">7d</button><button class="vd-btn vd-btn-gold vd-btn-sm">30d</button><button class="vd-btn vd-btn-ghost vd-btn-sm">3m</button><button class="vd-btn vd-btn-ghost vd-btn-sm">1yr</button></div>
-  </div>
-  <div class="vd-stats [grid-template-columns:repeat(4,1fr)]">
-    <div class="vd-stat vds-gold"><div class="vd-stat-val">1,240</div><div class="vd-stat-lbl">Profile Views</div><div class="vd-stat-trend">↑ 24%</div></div>
-    <div class="vd-stat vds-blue"><div class="vd-stat-val">38</div><div class="vd-stat-lbl">Inquiries</div><div class="vd-stat-trend">↑ 8%</div></div>
-    <div class="vd-stat vds-green"><div class="vd-stat-val">24%</div><div class="vd-stat-lbl">Conversion</div><div class="vd-stat-trend">↑ 3%</div></div>
-    <div class="vd-stat vds-amber"><div class="vd-stat-val">1.8h</div><div class="vd-stat-lbl">Avg Response</div><div class="vd-stat-trend flat">Target: 2h ✓</div></div>
-  </div>
-  <div class="vd-g2">
-    <div class="vd-card">
-      <div class="vd-card-title">Revenue Trend</div>
-      <div class="vd-bar-chart flex items-end gap-[20px] h-[120px] pt-[20px] mt-[10px] justify-center" id="vd-analytics-chart">
-         <div class="w-[25px] bg-[var(--gold)] h-[40%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Oct</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[60%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Nov</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[30%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Dec</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[75%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Jan</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[50%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Feb</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[80%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Mar</span></div>
-      </div>
+    <div>
+      <div class="vd-page-title">Analytics Dashboard</div>
+      <div class="vd-page-sub">Track lifetime sales, monthly trends, and performance recommendations.</div>
     </div>
-    <div class="vd-card"><div class="vd-card-title">Booking Sources</div>
-      <div id="vd-sources">
-        <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Direct Search</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[65%]"></div></div><div class="w-[30px] text-right">65%</div></div>
-        <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Packages</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[#3b82f6] w-[25%]"></div></div><div class="w-[30px] text-right">25%</div></div>
+    <div class="flex gap-[6px]" *ngIf="report">
+      <div class="text-[0.8rem] text-[var(--gray)] bg-[rgba(255,255,255,.05)] py-[4px] px-[12px] rounded-[50px] border border-[rgba(255,255,255,.1)]">
+        Generated At: {{ report.generatedAt | date:'medium' }}
       </div>
     </div>
   </div>
-  <div class="vd-g2">
-    <div class="vd-card"><div class="vd-card-title">Top Services</div>
-      <div id="vd-top-svcs">
-        <div class="flex justify-between items-center py-[12px] px-[0] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
-            <div><div class="font-semibold text-[0.9rem]">Wedding Stage Floral Design</div><div class="text-[0.8rem] text-[var(--gray)]">12 bookings</div></div>
-            <div class="font-semibold text-[var(--gold)]">180,000 EGP</div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex flex-col items-center justify-center p-[60px] text-center bg-[#151026] rounded-[12px] border border-[rgba(255,255,255,.05)]">
+    <div class="animate-spin rounded-full h-[40px] w-[40px] border-b-2 border-[var(--gold)] mb-[16px]"></div>
+    <p class="text-[0.9rem] text-[var(--gray)]">Processing vendor analytics and generating AI recommendations...</p>
+  </div>
+
+  <ng-container *ngIf="!loading && report">
+    <!-- KPIs -->
+    <div class="vd-stats [grid-template-columns:repeat(4,1fr)] mb-[24px]">
+      <div class="vd-stat vds-gold">
+        <div class="vd-stat-val">{{ report.kpis.lifetimeRevenue | number }} EGP</div>
+        <div class="vd-stat-lbl">Lifetime Revenue</div>
+        <div class="vd-stat-trend">Total Sales</div>
+      </div>
+      <div class="vd-stat vds-blue">
+        <div class="vd-stat-val">{{ report.kpis.currentMonthRevenue | number }} EGP</div>
+        <div class="vd-stat-lbl">Current Month Revenue</div>
+        <div class="vd-stat-trend" [ngClass]="report.kpis.growthPercentage >= 0 ? 'text-[#10b981]' : 'text-[#ef4444]'">
+          {{ report.kpis.growthPercentage >= 0 ? '↑' : '↓' }} {{ report.kpis.growthPercentage | number:'1.0-2' }}% MoM
+        </div>
+      </div>
+      <div class="vd-stat vds-green">
+        <div class="vd-stat-val">{{ report.kpis.totalOrders || 0 }}</div>
+        <div class="vd-stat-lbl">Total Paid Bookings</div>
+        <div class="vd-stat-trend">Completed orders</div>
+      </div>
+      <div class="vd-stat vds-amber">
+        <div class="vd-stat-val">{{ report.kpis.averageOrderValue | number }} EGP</div>
+        <div class="vd-stat-lbl">Average Order Value</div>
+        <div class="vd-stat-trend">Per transaction</div>
+      </div>
+    </div>
+
+    <!-- Charts and Insights Grid -->
+    <div class="vd-g2 mb-[24px]">
+      <!-- Revenue Chart -->
+      <div class="vd-card">
+        <div class="vd-card-title">Monthly Revenue Trend</div>
+        <div class="vd-bar-chart flex items-end gap-[20px] h-[140px] pt-[20px] pb-[10px] mt-[10px] justify-center">
+           <div *ngFor="let h of report.revenueHistory" 
+                [style.height.%]="getHistoryHeight(h.revenue)" 
+                class="w-[28px] bg-[var(--gold)] rounded-t-[4px] relative group cursor-pointer hover:bg-opacity-80 transition-colors">
+               <span class="absolute text-[10px] bottom-[-25px] left-1/2 transform -translate-x-1/2 whitespace-nowrap text-[var(--gray)]">{{ h.label }}</span>
+               <!-- Tooltip on hover -->
+               <div class="absolute bottom-[100%] left-1/2 transform -translate-x-1/2 bg-[#1e1b4b] text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none mb-1 z-10 border border-rgba(255,255,255,0.1) shadow-lg whitespace-nowrap">
+                   {{ h.revenue | number }} EGP ({{ h.orders }} bookings)
+               </div>
+           </div>
+           <div *ngIf="!report.revenueHistory || report.revenueHistory.length === 0" class="text-center text-[var(--gray)] py-[40px] w-full">
+             No monthly revenue history found.
+           </div>
+        </div>
+      </div>
+
+      <!-- Business Insights -->
+      <div class="vd-card">
+        <div class="vd-card-title">Business Insights</div>
+        <div class="flex flex-col gap-[12px] mt-[16px]">
+          <div class="flex justify-between items-center py-[8px] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+            <span class="text-[var(--gray)] text-[0.85rem]">Best Performing Month</span>
+            <span class="font-bold text-white text-[0.9rem]" *ngIf="report.insights.bestMonth">
+              {{ report.insights.bestMonth.label }} ({{ report.insights.bestMonth.revenue | number }} EGP)
+            </span>
+            <span class="text-[var(--gray)] italic" *ngIf="!report.insights.bestMonth">N/A</span>
+          </div>
+          <div class="flex justify-between items-center py-[8px] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+            <span class="text-[var(--gray)] text-[0.85rem]">Lowest Performing Month</span>
+            <span class="font-bold text-white text-[0.9rem]" *ngIf="report.insights.worstMonth">
+              {{ report.insights.worstMonth.label }} ({{ report.insights.worstMonth.revenue | number }} EGP)
+            </span>
+            <span class="text-[var(--gray)] italic" *ngIf="!report.insights.worstMonth">N/A</span>
+          </div>
+          <div class="flex justify-between items-center py-[8px]">
+            <span class="text-[var(--gray)] text-[0.85rem]">Average Monthly Revenue</span>
+            <span class="font-bold text-[var(--gold)] text-[0.95rem]">
+              {{ report.kpis.averageMonthlyRevenue | number }} EGP
+            </span>
+          </div>
         </div>
       </div>
     </div>
-    <div class="vd-card"><div class="vd-card-title">Event Types</div>
-      <div id="vd-event-types">
-        <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Wedding</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[70%]"></div></div><div class="w-[30px] text-right">70%</div></div>
+
+    <!-- Top Services and Recommendations Grid -->
+    <div class="vd-g2 mb-[24px]">
+      <!-- Top Services -->
+      <div class="vd-card">
+        <div class="vd-card-title">Top Performing Services</div>
+        <div class="flex flex-col mt-[12px]">
+          <div *ngFor="let s of report.topServices" class="flex justify-between items-center py-[12px] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+              <div>
+                <div class="font-semibold text-[0.9rem] text-white">{{ s.serviceName }}</div>
+                <div class="text-[0.8rem] text-[var(--gray)]">{{ s.orders }} bookings · {{ s.quantitySold || 0 }} units sold</div>
+              </div>
+              <div class="text-right">
+                <div class="font-semibold text-[var(--gold)]">{{ s.revenue | number }} EGP</div>
+                <div class="text-[0.75rem] text-[var(--gray)]">{{ s.revenueShare }}% share</div>
+              </div>
+          </div>
+          <div *ngIf="!report.topServices || report.topServices.length === 0" class="text-center text-[var(--gray)] py-[30px]">
+            No services sold yet.
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Recommendations -->
+      <div class="vd-card">
+        <div class="flex items-center gap-[8px] mb-[12px]">
+          <span class="text-[1.5rem]">💡</span>
+          <div class="vd-card-title m-0">AI Optimization Recommendations</div>
+        </div>
+        <div class="flex flex-col gap-[10px] mt-[12px]">
+          <div *ngFor="let rec of report.recommendations" class="flex gap-[10px] items-start p-[12px] bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.15)] rounded-[8px]">
+            <span class="text-[var(--gold)] text-[1.1rem]">✦</span>
+            <p class="text-[0.85rem] text-[#f7e1b9] m-0 leading-[1.4]">{{ rec }}</p>
+          </div>
+          <div *ngIf="!report.recommendations || report.recommendations.length === 0" class="text-center text-[var(--gray)] py-[30px]">
+            No recommendations currently available.
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+
+    <!-- Recent Orders Table -->
+    <div class="vd-card">
+      <div class="vd-card-title mb-[16px]">Recent Paid Bookings</div>
+      <div class="overflow-x-auto">
+        <table class="ad-table w-[100%] text-left border-collapse">
+          <thead>
+            <tr class="[border-bottom:1px_solid_rgba(255,255,255,.1)] text-[var(--gray)] text-[0.8rem] font-bold">
+              <th class="py-[12px] px-[8px]">Order ID</th>
+              <th class="py-[12px] px-[8px]">Customer Name</th>
+              <th class="py-[12px] px-[8px]">Service / Product</th>
+              <th class="py-[12px] px-[8px] text-right">Revenue</th>
+              <th class="py-[12px] px-[8px] text-right">Date</th>
+            </tr>
+          </thead>
+          <tbody class="text-[0.85rem] text-[#e2e8f0]">
+            <tr *ngFor="let o of report.recentOrders" class="[border-bottom:1px_solid_rgba(255,255,255,.05)] hover:bg-[rgba(255,255,255,.02)] transition-colors">
+              <td class="py-[12px] px-[8px] font-mono text-[0.75rem] text-[var(--gold)]">#{{ o.orderId.substring(0, 8) }}</td>
+              <td class="py-[12px] px-[8px] font-semibold">{{ o.customerName }}</td>
+              <td class="py-[12px] px-[8px] text-[var(--gray)]">{{ o.serviceName }}</td>
+              <td class="py-[12px] px-[8px] text-right font-bold text-white">{{ o.amount | number }} EGP</td>
+              <td class="py-[12px] px-[8px] text-right text-[var(--gray)]">{{ o.createdAt | date:'mediumDate' }}</td>
+            </tr>
+            <tr *ngIf="!report.recentOrders || report.recentOrders.length === 0">
+              <td colspan="5" class="text-center text-[var(--gray)] py-[20px]">No orders recorded recently.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
 </div>

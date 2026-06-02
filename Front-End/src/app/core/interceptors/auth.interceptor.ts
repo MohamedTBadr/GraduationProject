@@ -1,7 +1,7 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
-import { AuthService } from '../services/auth.service';
+import { AuthService, SKIP_AUTH } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
     const authService = inject(AuthService);
@@ -9,7 +9,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
 
     // Attach Bearer token and/or IdempotencyKey
     const headersConfig: any = {};
-    if (token) {
+    if (token && !req.context.get(SKIP_AUTH)) {
         headersConfig['Authorization'] = `Bearer ${token}`;
     }
 
@@ -30,24 +30,22 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
 
     return next(authedReq).pipe(
         catchError((error: HttpErrorResponse) => {
-            // Attempt token refresh on 401 Unauthorized
-            if (
-                error.status === 401 &&
-                !req.url.includes('RefreshToken') &&
-                !req.url.includes('Login') &&
-                !req.url.includes('Register')
-            ) {
-                return authService.refreshToken().pipe(
-                    switchMap((res) => {
+            // Attempt token refresh on 401 Unauthorized if not on skip-auth routes
+            if (error.status === 401 && !req.context.get(SKIP_AUTH)) {
+                return authService.refreshTokenOnce().pipe(
+                    switchMap((accessToken) => {
                         const retryReq = req.clone({
-                            setHeaders: { Authorization: `Bearer ${res.accessToken}` }
+                            setHeaders: { Authorization: `Bearer ${accessToken}` }
                         });
                         return next(retryReq);
                     }),
                     catchError((refreshError) => {
                         // Refresh also failed – log the user out
                         authService.logout();
-                        return throwError(() => refreshError);
+                        // Tag the error as handled so errorInterceptor skips it
+                        const handledError = refreshError;
+                        (handledError as any).handled = true;
+                        return throwError(() => handledError);
                     })
                 );
             }

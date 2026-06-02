@@ -226,43 +226,120 @@
   </div>
 
   <!-- ═══ SERVICE PREVIEW MODAL ════════════════════════════════════════ -->
-  <div class="modal-backdrop" *ngIf="showPreview" (click)="closePreview()" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-    <div class="modal-content" (click)="$event.stopPropagation()" style="background: white; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-      <button class="close-btn" (click)="closePreview()" style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.05); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.05)'">✕</button>
-      
-      <div *ngIf="selectedPreviewService">
-        <!-- Image Banner -->
-        <div style="width: 100%; height: 250px; background: #1a2540; border-radius: 12px; overflow: hidden; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 4rem;">
-          <img *ngIf="selectedPreviewService.imageUrl" [src]="selectedPreviewService.imageUrl" style="width: 100%; height: 100%; object-fit: cover;" />
-          <span *ngIf="!selectedPreviewService.imageUrl">🎨</span>
+  <div class="es-preview-backdrop" *ngIf="showPreview" (click)="closePreview()">
+    <div class="es-preview-card" (click)="$event.stopPropagation()">
+
+      <!-- Close Button -->
+      <button class="es-preview-close" (click)="closePreview()">
+        <i class="fa-solid fa-x fa-xs"></i>
+      </button>
+
+      <ng-container *ngIf="selectedPreviewService as svc">
+
+        <!-- ── Image Slider ── -->
+        <div class="es-preview-media">
+          <!-- Heart Wishlist Button -->
+          <button class="es-preview-wishlist" [class.active]="isInWishlist(svc.id)" (click)="togglePreviewWishlist(svc.id, $event)">
+            <i class="fa-heart" [class.fa-solid]="isInWishlist(svc.id)" [class.fa-regular]="!isInWishlist(svc.id)"></i>
+          </button>
+
+          <!-- Slider when images exist -->
+          <ng-container *ngIf="getPreviewImages(svc).length > 0; else noPreviewImages">
+            <div class="es-preview-slider">
+              <div class="es-preview-slide" *ngFor="let img of getPreviewImages(svc); let idx = index" [class.active]="previewSlideIndex === idx">
+                <img [src]="img" [alt]="svc.name" />
+              </div>
+
+              <button class="es-preview-arrow left" *ngIf="getPreviewImages(svc).length > 1" (click)="prevPreviewSlide(getPreviewImages(svc))">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button class="es-preview-arrow right" *ngIf="getPreviewImages(svc).length > 1" (click)="nextPreviewSlide(getPreviewImages(svc))">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+
+              <div class="es-preview-dots" *ngIf="getPreviewImages(svc).length > 1">
+                <span *ngFor="let img of getPreviewImages(svc); let idx = index"
+                      [class.active]="previewSlideIndex === idx"
+                      (click)="goToPreviewSlide(idx)"></span>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #noPreviewImages>
+            <div class="es-preview-no-img">
+              <i class="fa-solid fa-image"></i>
+              <span>Premium Event Service</span>
+            </div>
+          </ng-template>
         </div>
-        
-        <!-- Header Info -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 16px;">
-          <div>
-            <h2 style="font-size: 1.5rem; font-weight: 700; color: #1a2540; margin-bottom: 8px; line-height: 1.2;">{{selectedPreviewService.name}}</h2>
-            <div style="font-size: 0.9rem; color: #6b7280; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-              <span style="background: rgba(201,168,76,0.15); color: #c9a84c; padding: 4px 10px; border-radius: 50px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">{{selectedPreviewService.vendorTypeName || selectedPreviewService.serviceTypeName || 'Service'}}</span>
-              <span *ngIf="selectedPreviewService.vendorName">by <strong style="color: #1a2540;">{{selectedPreviewService.vendorName}}</strong></span>
+
+        <!-- ── Body Info ── -->
+        <div class="es-preview-body">
+
+          <!-- Badges -->
+          <div class="es-preview-badges">
+            <span class="es-badge-type" *ngIf="svc.serviceTypeName">{{ svc.serviceTypeName }}</span>
+            <span class="es-badge-class" *ngIf="svc.classification">{{ svc.classification }}</span>
+          </div>
+
+          <!-- Name -->
+          <h2 class="es-preview-title">{{ svc.name }}</h2>
+
+          <!-- Vendor (clickable) -->
+          <div class="es-preview-vendor" *ngIf="svc.vendorName">
+            <span>by</span>
+            <a [routerLink]="['/vendor', svc.vendorId]" class="es-preview-vendor-link" (click)="closePreview()">
+              {{ svc.vendorName }} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.6rem;"></i>
+            </a>
+          </div>
+
+          <!-- Price -->
+          <div class="es-preview-price-box">
+            <span class="es-price-label">Starting Price</span>
+            <span class="es-price-val">{{ svc.price | currency:'EGP ':'symbol':'1.0-0' }}</span>
+          </div>
+
+          <!-- Description -->
+          <div class="es-preview-desc" *ngIf="svc.description">
+            <p>{{ svc.description }}</p>
+          </div>
+
+          <!-- Specs: Duration & Lead Time -->
+          <div class="es-preview-specs" *ngIf="svc.duration || svc.leadTime">
+            <div class="es-spec-card" *ngIf="svc.duration">
+              <span class="es-spec-icon"><i class="fa-solid fa-clock"></i></span>
+              <div>
+                <span class="es-spec-label">Setup Duration</span>
+                <span class="es-spec-val">{{ svc.duration }} Hours</span>
+              </div>
+            </div>
+            <div class="es-spec-card" *ngIf="svc.leadTime">
+              <span class="es-spec-icon"><i class="fa-solid fa-calendar-check"></i></span>
+              <div>
+                <span class="es-spec-label">Lead Time</span>
+                <span class="es-spec-val">{{ svc.leadTime }} Weeks</span>
+              </div>
             </div>
           </div>
-          <div style="font-size: 1.3rem; font-weight: 700; color: #1a2540; background: #f9f6f0; padding: 10px 16px; border-radius: 12px; white-space: nowrap;">
-            {{selectedPreviewService.price | currency:'EGP':'symbol':'1.0-0'}}
+
+          <!-- Service Areas -->
+          <div class="es-preview-areas" *ngIf="svc.serviceAreas && svc.serviceAreas.length > 0">
+            <p class="es-areas-title"><i class="fa-solid fa-map-location-dot"></i> Service Areas</p>
+            <div class="es-areas-pills">
+              <span class="es-area-pill" *ngFor="let area of svc.serviceAreas">
+                <i class="fa-solid fa-location-dot"></i> {{ area.city }}<span *ngIf="area.region">, {{ area.region }}</span>
+              </span>
+            </div>
           </div>
         </div>
-        
-        <!-- Description -->
-        <div style="margin-top: 24px; border-top: 1.5px solid #e8e4dc; padding-top: 20px;">
-          <h3 style="font-size: 1.1rem; font-weight: 600; color: #1a2540; margin-bottom: 8px;">About this service</h3>
-          <p style="color: #6b7280; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap;">{{selectedPreviewService.description || 'No description available for this service.'}}</p>
+
+        <!-- ── Footer ── -->
+        <div class="es-preview-footer">
+          <button class="es-btn-book" (click)="openServiceModal(svc)">
+            Book Now <i class="fa-solid fa-arrow-right"></i>
+          </button>
         </div>
-        
-        <!-- Action Buttons -->
-        <div style="display: flex; gap: 12px; margin-top: 32px;">
-           <button class="btn btn-gold" style="flex: 1; justify-content: center; padding: 12px;" *ngIf="selectedPreviewService.vendorId" [routerLink]="['/vendor', selectedPreviewService.vendorId]">Visit Vendor Profile</button>
-           <button class="btn btn-outline" style="flex: 1; justify-content: center; padding: 12px;" (click)="addToCompare(selectedPreviewService, $event)">Add to Compare</button>
-        </div>
-      </div>
+
+      </ng-container>
     </div>
   </div>
 </div>

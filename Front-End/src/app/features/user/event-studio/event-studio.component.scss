@@ -168,17 +168,40 @@
   border: 1px solid var(--border);
   padding: 16px;
   border-radius: 8px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.2s;
   background: white;
+  cursor: pointer;
+  
   &:hover { border-color: var(--gold); }
+  
+  &.selected {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.05);
+  }
   
   .avi-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 4px;
     
     .avi-cat { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--gold); letter-spacing: 1px; }
+    
+    .avi-price-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
     .avi-price { font-weight: 600; color: var(--navy); font-size: 0.9rem; }
+    
+    .avi-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      pointer-events: none;
+      accent-color: var(--gold);
+    }
   }
   
   .avi-name { font-weight: 600; color: var(--navy); margin-bottom: 8px; }

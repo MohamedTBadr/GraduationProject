@@ -62,6 +62,7 @@ export class ProductService {
       serviceTypeId: raw?.serviceTypeId ?? raw?.ServiceTypeId,
       serviceTypeName: raw?.serviceTypeName ?? raw?.ServiceTypeName,
       imageUrl: firstImage,
+      imageUrls: Array.isArray(images) ? images : (firstImage ? [firstImage] : []),
       status: raw?.status ?? raw?.Status ?? 'active',
       duration:
         raw?.duration ??
@@ -73,7 +74,8 @@ export class ProductService {
         (raw?.leadTimeRequired != null ? String(raw.leadTimeRequired ?? raw.LeadTimeRequired) : undefined),
       classification: raw?.classification ?? raw?.Classification,
       allowedEventTypes: raw?.allowedEventTypes ?? raw?.AllowedEventTypes,
-      createdAt: raw?.createdAt ?? raw?.CreatedAt
+      createdAt: raw?.createdAt ?? raw?.CreatedAt,
+      serviceAreas: raw?.serviceAreas ?? raw?.ServiceAreas ?? []
     };
   }
 
