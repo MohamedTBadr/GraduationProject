@@ -65,7 +65,7 @@
         (click)="goToFavorites()"
         title="My Favorites"
       >
-        🤍
+        <i class="bi bi-heart-fill"></i>
         <div class="notif-badge" [class.visible]="favoriteService.favoritesCount() > 0">
           {{ favoriteService.favoritesCount() }}
         </div>

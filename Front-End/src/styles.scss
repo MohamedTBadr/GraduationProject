@@ -1,12 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "bootstrap-icons/font/bootstrap-icons.css";
 
 /* ═══ TOKENS ═══════════════════════════ */
 :root {
   --footerBg: #f9f6f0;
   --footerText: #161022;
   --footerTitle: #000;
+  --navScrolled: #6b7280;
   --grayHover: rgba(255, 255, 255, 0.8);
   --navy: #1a2540;
   --navy2: #243050;
@@ -14,7 +16,6 @@
   --gold2: #e8c97a;
   --cream: #f9f6f0;
   --cream2: #f0ebe0;
- 
   --gray: #6b7280;
   --lgray: #e8e4dc;
   --dark: #0e1627;
@@ -30,12 +31,13 @@
   --nav-h: 68px;
   --success: #22c55e;
   --danger: #ef4444;
-    --white: #1a2035;
+  --white: #1a2035;
 }
 .dark {
   --footerBg: #161022;
   --footerText: rgba(255, 255, 255, 0.52);
-  --footerTitle: #FFFF;
+  --footerTitle: #ffff;
+  --navScrolled: #ccc;
   --grayHover: rgba(20, 17, 17, 0.8);
   --navy: #e8e4dc;
   --navy2: #f0ebe0;
