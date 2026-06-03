@@ -33,34 +33,67 @@ namespace Infrastructure.Repositories
 
         public async Task<Event?> GetByIdWithItemsAsync(Guid id, CancellationToken cancellationToken)
         {
-            return
-                await _context.Events
-                    .Include(e => e.EventType)
-                    .Include(e => e.EventItems)
-                    .Include(e => e.Collaborators)
-                        .ThenInclude(c => c.User)
-                    .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+            return await _context.Events
+                .Include(e => e.EventType)
+
+                .Include(e => e.EventItems)
+                    .ThenInclude(x => x.Service)
+                        .ThenInclude(s => s.ServiceImages)
+
+                .Include(e => e.EventItems)
+                    .ThenInclude(x => x.Service)
+                        .ThenInclude(s => s.Vendor)
+
+                .Include(e => e.EventItems)
+                    .ThenInclude(x => x.Package)
+
+                .Include(e => e.Collaborators)
+                    .ThenInclude(c => c.User)
+
+                .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
         }
+
 
         public async Task<IEnumerable<Event>> GetAllAsync(CancellationToken cancellationToken)
         {
-            return 
-                await _context.Events
-                    .Include(e => e.EventType)
-                    .Include(e => e.EventItems)
-                    .ToListAsync(cancellationToken);
+            return await _context.Events
+                .Include(e => e.EventType)
+
+                .Include(e => e.EventItems)
+                    .ThenInclude(x => x.Service)
+                        .ThenInclude(s => s.ServiceImages)
+
+                .Include(e => e.EventItems)
+                    .ThenInclude(x => x.Service)
+                        .ThenInclude(s => s.Vendor)
+
+                .Include(e => e.EventItems)
+                    .ThenInclude(x => x.Package)
+
+                .ToListAsync(cancellationToken);
         }
 
- 
 
         public async Task<IEnumerable<Event>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return 
-                await _context.Events
-                    .Include(e => e.EventType)
-                    .Include(e => e.EventItems)
-                    .Where(e => e.UserId == userId || e.Collaborators.Any(c => c.UserId == userId))
-                    .ToListAsync(cancellationToken);
+            return await _context.Events
+                .Include(e => e.EventType)
+
+                .Include(e => e.EventItems)
+                    .ThenInclude(x => x.Service)
+                        .ThenInclude(s => s.ServiceImages)
+
+                .Include(e => e.EventItems)
+                    .ThenInclude(x => x.Service)
+                        .ThenInclude(s => s.Vendor)
+
+                .Include(e => e.EventItems)
+                    .ThenInclude(x => x.Package)
+
+                .Where(e => e.UserId == userId ||
+                            e.Collaborators.Any(c => c.UserId == userId))
+
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<Event>> GetByStatusAsync(string status, CancellationToken cancellationToken)

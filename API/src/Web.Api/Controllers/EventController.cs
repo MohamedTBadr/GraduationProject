@@ -71,6 +71,21 @@ namespace Web.Api.Controllers
         }
 
         // ─────────────────────────────────────────────────────────
+        // GET api/events/my-events
+        // ─────────────────────────────────────────────────────────
+        [HttpGet("my-events")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [HybridCache(1800, "events", "events/user/{userId}", Variance = CacheVariance.Adaptive)]
+        public async Task<IActionResult> GetUserEvents(Guid userId, CancellationToken cancellationToken)
+        {
+            if (IsClient()) userId = GetUserIdFromToken();
+
+            var result = await serviceManager.EventService.GetByUserIdAsync(userId, cancellationToken);
+            return result.IsSuccess ? Ok(result) : NotFound(result);
+        }
+
+        // ─────────────────────────────────────────────────────────
         // GET api/events/user/{userId}
         // ─────────────────────────────────────────────────────────
         [HttpGet("user/{userId:guid}")]
@@ -79,8 +94,7 @@ namespace Web.Api.Controllers
         [HybridCache(1800, "events", "events/user/{userId}", Variance = CacheVariance.Adaptive)]
         public async Task<IActionResult> GetByUser(Guid userId, CancellationToken cancellationToken)
         {
-            if (!IsAdminOrOwner(userId))
-                return Forbid();
+            if (IsClient()) userId = GetUserIdFromToken(); 
 
             var result = await serviceManager.EventService.GetByUserIdAsync(userId, cancellationToken);
             return result.IsSuccess ? Ok(result) : NotFound(result);

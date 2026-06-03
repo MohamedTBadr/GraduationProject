@@ -372,7 +372,9 @@ namespace Application.Services
             Id = e.Id,
             UserId = e.UserId,
             Title = e.Title,
-            EventTypeName = e.EventType.Name,
+
+            EventTypeName = e.EventType?.Name,
+
             EventDate = e.EventDate,
             TotalBudget = e.TotalBudget,
             GuestCount = e.GuestCount,
@@ -381,10 +383,18 @@ namespace Application.Services
             CancellationReason = e.CancellationReason,
             AdditionalNotes = e.AdditionalNotes,
             CancelledAt = e.CancelledAt,
+
             Location = e.Location?.ToDto(),
-            EventItems = e.EventItems?.Select(i => i.ToResponseDto()).ToList() ?? new(),
-            Collaborators = e.Collaborators?.Select(c => c.ToCollaboratorDto()).ToList() ?? new()
+
+            EventItems = e.EventItems?
+                .Select(i => i.ToResponseDto())
+                .ToList() ?? new(),
+
+            Collaborators = e.Collaborators?
+                .Select(c => c.ToCollaboratorDto())
+                .ToList() ?? new()
         };
+
 
         internal static EventSummaryDto ToSummaryDto(this Event e) => new()
         {
@@ -396,19 +406,43 @@ namespace Application.Services
             ItemCount = e.EventItems?.Count ?? 0
         };
 
-        internal static EventItemResponseDto ToResponseDto(this EventItem i) => new()
+
+        internal static EventItemResponseDto ToResponseDto(this EventItem i)
         {
-            Id = i.Id,
-            EventId = i.EventId,
-            ServiceImage = i.Service.ServiceImages.FirstOrDefault()?.ToString(),
-            ServiceName = i.Service.Name,
-            Price = i.Price,
-            VendorId = i.Service.VendorId,
-            VendorName = i.Service.Vendor.BusinessName,
-            Quantity = i.Quantity,
-            ItemStatus = i.ItemStatus,
-            RejectionReason = i.RejectionReason
-        };
+            var service = i.Service;
+            var package = i.Package;
+            var vendorId = service != null
+            ? service.VendorId
+            : package?.VendorId;
+
+            return new()
+            {
+                Id = i.Id,
+                EventId = i.EventId,
+
+                ServiceImage = service != null
+                    ? service.ServiceImages?.FirstOrDefault()?.ToString()
+                    : null,
+
+                ServiceName = service != null
+                    ? service.Name
+                    : package?.Name,
+
+                Price = i.Price,
+
+                VendorId =  vendorId ?? Guid.Empty,
+
+                VendorName = service != null
+            ? service.Vendor?.BusinessName
+            : package?.Vendor?.BusinessName,
+
+                Quantity = i.Quantity,
+
+                ItemStatus = i.ItemStatus,
+
+                RejectionReason = i.RejectionReason
+            };
+        }
 
         internal static AddressDto ToDto(this Address a) => new()
         {
