@@ -141,7 +141,7 @@
         <div *ngFor="let vt of vendorTypes" class="ad-card border border-[rgba(255,255,255,0.05)] bg-[rgba(20,20,25,0.6)] relative">
           <div class="flex justify-between items-start mb-[15px]">
             <div class="flex items-center gap-[15px]">
-              <div class="text-[1.8rem]">{{ getIconForVendorType(vt.name) }}</div>
+              <div class="text-[1.8rem]"><i [class]="getIconForVendorType(vt.name)"></i></div>
               <div>
                 <h4 class="text-[1.2rem] text-white font-bold m-0">{{ vt.name }}</h4>
                 <div class="text-[0.8rem] text-[gray] mt-[3px]">
@@ -154,7 +154,7 @@
 
           <div class="flex flex-wrap gap-[10px]">
             <div *ngFor="let st of getMappedServices(vt.id)" class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-full border border-[rgba(255,255,255,0.1)] bg-[rgba(0,0,0,0.2)] text-[0.85rem] text-[var(--white)]">
-              <span>{{ getIconForServiceType(st.name) }}</span>
+              <i [class]="getIconForServiceType(st.name)"></i>
               <span>{{ st.name }}</span>
             </div>
             <button class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-full border border-[rgba(255,215,0,0.3)] bg-[rgba(255,215,0,0.05)] text-[0.85rem] text-[var(--gold)] cursor-pointer hover:bg-[rgba(255,215,0,0.1)] transition-colors" (click)="openAddModal('serviceType', vt.id)">

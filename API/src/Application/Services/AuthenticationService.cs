@@ -164,13 +164,13 @@ namespace Application.Services
             <div style=""width: 100%; max-width: 720px; margin: 0 auto"">
                 <div
                     style=""
-                        background-color: #2d5a4b;
+                        background-color: linear-gradient(135deg, #161022 0%, #7a114c 100%);
                         border-radius: 16px 16px 0 0;
                         padding: 44px 40px 40px;
                         text-align: center;
                     "">
                     <h1 style=""font-size: 32px; color: #ffffff; line-height: 1.3; margin: 0"">
-                        Welcome to Eventora, {user.UserName} !
+                        Welcome to EpicHub, {user.UserName} !
                     </h1>
                 </div>
                 <div style=""background-color: #ffffff; padding: 40px 40px 36px"">
