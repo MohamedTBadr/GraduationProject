@@ -42,7 +42,10 @@ namespace Application.Services
 
             var result = await _ServiceRepository.GetAllAsync(request, visibilityFilter, ct);
             var mappedItems = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
-
+            if (!mappedItems.Any())
+            {
+                return Result<PaginatedResponse<ServiceDTO>>.NotFound(404, "No services found matching the criteria.");
+            }
             return Result<PaginatedResponse<ServiceDTO>>.Success(
                 new PaginatedResponse<ServiceDTO>(mappedItems, result.TotalCount, result.PageNumber, result.PageSize));
         }

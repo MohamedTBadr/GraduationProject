@@ -3063,19 +3063,27 @@ namespace Infrastructure.Persistence
         // ─────────────────────────────────────────────────────────────────────
         private async Task SeedEventAsync()
         {
-            var user      = context.ApplicationUsers.FirstOrDefault(u => u.Email == "customer@example.com");
+            Console.WriteLine("[EventSeeding] Starting event seeding...");
+
+            var user = context.ApplicationUsers.FirstOrDefault(u => u.Email == "customer@example.com");
             var eventType = context.EventTypes.FirstOrDefault(x => x.Name == "Wedding");
-            var vendor    = context.ApplicationUsers.FirstOrDefault(v => v.Email == "vendor@example.com");
+            var vendor = context.ApplicationUsers.FirstOrDefault(v => v.Email == "vendor@example.com");
 
-            if (user == null || eventType == null || vendor == null) return;
+            if (user == null) { Console.WriteLine("[EventSeeding] ❌ user not found"); return; }
+            if (eventType == null) { Console.WriteLine("[EventSeeding] ❌ eventType not found"); return; }
+            if (vendor == null) { Console.WriteLine("[EventSeeding] ❌ vendor not found"); return; }
 
-            var cateringService = context.Services.FirstOrDefault(s => s.Name == "Premium Catering");
-            var photoService    = context.Services.FirstOrDefault(s => s.Name == "Wedding Photography Package");
-            var decorService    = context.Services.FirstOrDefault(s => s.Name == "Wedding Decoration");
+            var photoService = context.Services.FirstOrDefault(s => s.Name == "Candy Buffet");
+            var decorService = context.Services.FirstOrDefault(s => s.Name == "Luxury Pastry Table");
 
-            if (cateringService == null || photoService == null || decorService == null) return;
+            if (photoService == null) { Console.WriteLine("[EventSeeding] ❌ photoService not found"); return; }
+            if (decorService == null) { Console.WriteLine("[EventSeeding] ❌ decorService not found"); return; }
 
-            if (context.Events.Any(e => e.Title == "Luxury Wedding Cairo 2026")) return;
+            if (context.Events.Any(e => e.Title == "Luxury Wedding Cairo 2026"))
+            {
+                Console.WriteLine("[EventSeeding] ⚠️ Event already exists, skipping.");
+                return;
+            }
 
             var newEvent = new Event
             {
@@ -3091,13 +3099,52 @@ namespace Infrastructure.Persistence
                 EventStatus = "Planned",
                 EventItems  = new List<EventItem>
                 {
-                    new EventItem { Id = Guid.NewGuid(), ServiceId = cateringService.Id, Service = cateringService, Price = cateringService.Price, Quantity = 1, ItemStatus = "Approved", RejectionReason = null },
-                    new EventItem { Id = Guid.NewGuid(), ServiceId = photoService.Id,    Service = photoService,    Price = photoService.Price,    Quantity = 1, ItemStatus = "Pending"  },
-                    new EventItem { Id = Guid.NewGuid(), ServiceId = decorService.Id,    Service = decorService,    Price = decorService.Price,    Quantity = 1, ItemStatus = "Pending"  }
+                    new EventItem { Id = Guid.NewGuid(), ServiceId = photoService.Id,  Price = photoService.Price, Quantity = 1, ItemStatus = "Approved", RejectionReason = null },
+                    new EventItem { Id = Guid.NewGuid(), ServiceId = photoService.Id,       Price = photoService.Price,    Quantity = 1, ItemStatus = "Pending"  },
+                    new EventItem { Id = Guid.NewGuid(), ServiceId = decorService.Id,    Price = decorService.Price,    Quantity = 1, ItemStatus = "Pending"  }
                 }
             };
+            var newEvent2 = new Event
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                EventTypeId = eventType.Id,
+                Title = "Luxury Wedding Cairo 2026",
+                EventDate = DateTime.UtcNow.AddMonths(3),
+                Location = new Address { City = "Cairo", State = "Giza", Street = "Pyramids Road" },
+                TotalBudget = 75000m,
+                GuestCount = 250,
+                Notes = "Premium wedding with full vendor coordination",
+                EventStatus = "Planned",
+                EventItems = new List<EventItem>
+                {
+                    new EventItem { Id = Guid.NewGuid(), ServiceId = photoService.Id,  Price = photoService.Price, Quantity = 1, ItemStatus = "Approved", RejectionReason = null },
+                    new EventItem { Id = Guid.NewGuid(), ServiceId = photoService.Id,       Price = photoService.Price,    Quantity = 1, ItemStatus = "Pending"  },
+                    new EventItem { Id = Guid.NewGuid(), ServiceId = decorService.Id,    Price = decorService.Price,    Quantity = 1, ItemStatus = "Pending"  }
+                }
+            };
+            var newEvent3 = new Event
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                EventTypeId = eventType.Id,
+                Title = "Luxury Wedding Cairo 2026",
+                EventDate = DateTime.UtcNow.AddMonths(3),
+                Location = new Address { City = "Cairo", State = "Giza", Street = "Pyramids Road" },
+                TotalBudget = 75000m,
+                GuestCount = 250,
+                Notes = "Premium wedding with full vendor coordination",
+                EventStatus = "Planned",
+                EventItems = new List<EventItem>
+                {
+                    new EventItem { Id = Guid.NewGuid(), ServiceId = photoService.Id,  Price = photoService.Price, Quantity = 1, ItemStatus = "Approved", RejectionReason = null },
+                    new EventItem { Id = Guid.NewGuid(), ServiceId = photoService.Id,       Price = photoService.Price,    Quantity = 1, ItemStatus = "Pending"  },
+                    new EventItem { Id = Guid.NewGuid(), ServiceId = decorService.Id,    Price = decorService.Price,    Quantity = 1, ItemStatus = "Pending"  }
+                }
+            };
+            Console.WriteLine("[EventSeeding] Event created successfully.");
 
-            await context.Events.AddAsync(newEvent);
+            await context.Events.AddRangeAsync(newEvent,newEvent2,newEvent3);
             await context.SaveChangesAsync();
         }
 
