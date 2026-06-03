@@ -32,6 +32,12 @@ namespace Infrastructure.Search
 
             _directory = FSDirectory.Open(_indexPath);
             _analyzer = new StandardAnalyzer(AppLuceneVersion);
+
+            if (!DirectoryReader.IndexExists(_directory))
+            {
+                using var writer = CreateWriter();
+                writer.Commit();
+            }
         }
 
         public Task IndexVendorAsync(Vendor vendor)
