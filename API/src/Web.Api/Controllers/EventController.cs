@@ -76,10 +76,13 @@ namespace Web.Api.Controllers
         [HttpGet("my-events")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [HybridCache(1800, "events", "events/user/{userId}", Variance = CacheVariance.Adaptive)]
-        public async Task<IActionResult> GetUserEvents(Guid userId, CancellationToken cancellationToken)
+        [HybridCache(1800, "events", "events/my-events", Variance = CacheVariance.Adaptive)]
+        public async Task<IActionResult> GetUserEvents( CancellationToken cancellationToken)
         {
-            if (IsClient()) userId = GetUserIdFromToken();
+            if(!IsClient())
+                return Forbid();
+
+            var userId = GetUserIdFromToken();
 
             var result = await serviceManager.EventService.GetByUserIdAsync(userId, cancellationToken);
             return result.IsSuccess ? Ok(result) : NotFound(result);
