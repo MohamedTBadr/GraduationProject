@@ -8,7 +8,6 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PaymentService } from '../../../core/services/payment.service';
 import { EventStudioComponent } from '../event-studio/event-studio.component';
-import { ProductService } from '../../../core/services/product.service';
 import { OrderService } from '../../../core/services/order.service';
 import { VoucherService } from '../../../core/services/voucher.service';
 
@@ -41,7 +40,6 @@ export class MyEventsComponent implements OnInit {
     private authService: AuthService,
     private toastService: ToastService,
     private paymentService: PaymentService,
-    private productService: ProductService,
     private orderService: OrderService,
     private voucherService: VoucherService
   ) {}
@@ -223,32 +221,13 @@ export class MyEventsComponent implements OnInit {
         return;
       }
 
-      this.productService.getById(serviceId).subscribe({
-        next: (product) => {
-          const payload = {
-            eventId: this.activeEventId!,
-            serviceImage: product.imageUrl || '',
-            serviceName: product.name,
-            price: product.price,
-            vendorId: product.vendorId || '',
-            vendorName: product.vendorName || item.vendor || '',
-            quantity: 1
-          };
-
-          this.eventService.addItem(this.activeEventId!, payload).subscribe({
-            next: () => {
-              completedCount++;
-              processNext(index + 1);
-            },
-            error: (err) => {
-              console.error(`Failed to add item ${serviceId}:`, err);
-              errorCount++;
-              processNext(index + 1);
-            }
-          });
+      this.eventService.addItem(this.activeEventId!, { eventId: this.activeEventId!, serviceId, quantity: 1 }).subscribe({
+        next: () => {
+          completedCount++;
+          processNext(index + 1);
         },
         error: (err) => {
-          console.error(`Failed to fetch service ${serviceId}:`, err);
+          console.error(`Failed to add item ${serviceId}:`, err);
           errorCount++;
           processNext(index + 1);
         }

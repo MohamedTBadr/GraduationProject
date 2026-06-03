@@ -35,7 +35,7 @@
         <div class="qs-card" *ngFor="let t of eventTypes" 
              [class.selected]="selectedEventType?.id === t.id" 
              (click)="selectType(t)">
-          <div class="qs-icon">{{t.icon}}</div>
+          <div class="qs-icon"><i class="bi bi-{{t.icon}}"></i></div>
           <div class="qs-name">{{t.title}}</div>
           <div class="qs-desc">{{t.desc}}</div>
           <div class="qs-includes">{{t.services}}</div>

@@ -420,12 +420,14 @@ export interface EventResponseDto {
 export interface CreateEventItemDto {
   eventId: string;
   serviceId?: string;
-  serviceImage: string;
-  serviceName: string;
-  price: number;
-  vendorId: string;
-  vendorName: string;
+  packageId?: string;
   quantity: number;
+  // Legacy fields sent by some callers — backend ignores these
+  serviceImage?: string;
+  serviceName?: string;
+  price?: number;
+  vendorId?: string;
+  vendorName?: string;
 }
 
 export interface CartItem {
