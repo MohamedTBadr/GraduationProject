@@ -1,5 +1,4 @@
 name: Build and deploy ASP.Net Core app to Azure Web App - EpicHub
-
 on:
   push:
     branches:
@@ -20,20 +19,32 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Restore dependencies
+      # ── Web.API ──────────────────────────────────────────────
+      - name: Restore Web.API
         run: dotnet restore ./API/src/Web.API/Web.API.csproj
 
-      - name: Build
+      - name: Build Web.API
         run: dotnet build ./API/src/Web.API/Web.API.csproj --configuration Release --no-restore
 
-      - name: Publish
-        run: dotnet publish ./API/src/Web.API/Web.API.csproj --configuration Release --no-restore -o ./publish
+      - name: Publish Web.API
+        run: dotnet publish ./API/src/Web.API/Web.API.csproj --configuration Release --no-restore -o ./publish/webapi
 
+      # ── Gateway ──────────────────────────────────────────────
+      - name: Restore Gateway
+        run: dotnet restore ./API/src/Gateway/Gateway.csproj        # 👈 adjust path
+
+      - name: Build Gateway
+        run: dotnet build ./API/src/Gateway/Gateway.csproj --configuration Release --no-restore
+
+      - name: Publish Gateway
+        run: dotnet publish ./API/src/Gateway/Gateway.csproj --configuration Release --no-restore -o ./publish/gateway
+
+      # ── Upload both as one artifact ───────────────────────────
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-app
-          path: ./publish
+          path: ./publish          # contains /webapi and /gateway sub-folders
 
   deploy:
     runs-on: windows-latest
@@ -54,8 +65,16 @@ jobs:
           tenant-id: 36cbfff1-02d2-4e78-a1d5-c57da5717a64
           subscription-id: 0080d04c-1f5b-4b85-97fe-909115140e80
 
-      - name: Deploy to Azure Web App
+      # Deploy Gateway first — it's the public entry point
+      - name: Deploy Gateway to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'EpicHub-Gateway'      # 👈 your Gateway App Service name
+          package: ./gateway
+
+      # Deploy Web.API — only reachable through the Gateway
+      - name: Deploy Web.API to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'EpicHub'
-          package: .
+          package: ./webapi
