@@ -1,5 +1,6 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { EventService } from '../../../core/services/event.service';
 import { EventResponseDto, EventItemResponseDto } from '../../../shared/types/api.interfaces';
@@ -17,12 +18,20 @@ export interface Booking {
   note?: string;
   status: 'Pending' | 'Approved' | 'Rejected' | 'Done' | 'Completed';
   stars?: number;
+  rejectionReason?: string;
+}
+
+interface CalendarDay {
+  day: number;
+  inMonth: boolean;
+  isToday: boolean;
+  bookings: Booking[];
 }
 
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './bookings.component.html',
   styleUrls: ['./bookings.component.scss']
 })
@@ -35,8 +44,93 @@ export class BookingsComponent implements OnInit {
   confirmedBookings: Booking[] = [];
   historyBookings: Booking[] = [];
 
-  calendarDays = Array.from({length: 31}, (_, i) => i + 1);
-  bookedDates = [5, 12, 14, 18, 22, 25, 28];
+  // ── History filter/search state ─────────────────────────────
+  historySearch = '';
+  historyStatusFilter: 'All' | 'Rejected' | 'Done' | 'Completed' = 'All';
+
+  get filteredHistory(): Booking[] {
+    let result = this.historyBookings;
+    if (this.historyStatusFilter !== 'All') {
+      result = result.filter(b => b.status === this.historyStatusFilter);
+    }
+    if (this.historySearch.trim()) {
+      const q = this.historySearch.toLowerCase();
+      result = result.filter(b =>
+        b.client.toLowerCase().includes(q) ||
+        b.service.toLowerCase().includes(q) ||
+        (b.event ?? '').toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }
+
+  // ── Calendar state ──────────────────────────────────────────
+  calendarYear = new Date().getFullYear();
+  calendarMonth = new Date().getMonth(); // 0-indexed
+  selectedCalendarDate: string | null = null; // ISO date string
+  selectedDayBookings: Booking[] = [];
+
+  get calendarMonthName(): string {
+    return new Date(this.calendarYear, this.calendarMonth, 1)
+      .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  get calendarDays(): CalendarDay[] {
+    const days: CalendarDay[] = [];
+    const firstDay = new Date(this.calendarYear, this.calendarMonth, 1).getDay();
+    const daysInMonth = new Date(this.calendarYear, this.calendarMonth + 1, 0).getDate();
+    const today = new Date();
+
+    // Leading empty days
+    for (let i = 0; i < firstDay; i++) {
+      days.push({ day: 0, inMonth: false, isToday: false, bookings: [] });
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = this.toISODate(this.calendarYear, this.calendarMonth + 1, d);
+      const isToday =
+        today.getFullYear() === this.calendarYear &&
+        today.getMonth() === this.calendarMonth &&
+        today.getDate() === d;
+
+      const bookingsOnDay = this.confirmedBookings.filter(b => {
+        const bd = new Date(b.dateStr);
+        return (
+          bd.getFullYear() === this.calendarYear &&
+          bd.getMonth() === this.calendarMonth &&
+          bd.getDate() === d
+        );
+      });
+
+      days.push({ day: d, inMonth: true, isToday, bookings: bookingsOnDay });
+    }
+
+    return days;
+  }
+
+  // Bookings that fall in the current displayed month (for the sidebar list)
+  get monthBookings(): Booking[] {
+    return this.confirmedBookings.filter(b => {
+      const bd = new Date(b.dateStr);
+      return bd.getFullYear() === this.calendarYear && bd.getMonth() === this.calendarMonth;
+    });
+  }
+
+  // ── Modal state ─────────────────────────────────────────────
+  isDetailsModalOpen = false;
+  isDeclineModalOpen = false;
+  selectedBooking: Booking | null = null;
+  declineReason = '';
+  declineNote = '';
+
+  declineReasons = [
+    'Already booked on that date',
+    'Outside my service area',
+    'Budget doesn\'t meet minimum requirements',
+    'Service not available in requested format',
+    'Capacity exceeded for that period',
+    'Other (describe below)'
+  ];
 
   constructor(
     private authService: AuthService,
@@ -51,6 +145,8 @@ export class BookingsComponent implements OnInit {
       this.loadBookings();
     }
   }
+
+  // ── Data loading ────────────────────────────────────────────
 
   loadBookings() {
     if (!this.vendorId) return;
@@ -87,15 +183,22 @@ export class BookingsComponent implements OnInit {
             value: item.price * item.quantity,
             guests: event.guestCount,
             note: event.notes,
-            status: item.itemStatus
+            status: item.itemStatus,
+            rejectionReason: item.rejectionReason
           };
 
-          if (item.itemStatus === 'Pending') {
-            pending.push(booking);
-          } else if (item.itemStatus === 'Approved') {
-            confirmed.push(booking);
-          } else if (item.itemStatus === 'Rejected') {
-            history.push(booking);
+          switch (item.itemStatus) {
+            case 'Pending':
+              pending.push(booking);
+              break;
+            case 'Approved':
+              confirmed.push(booking);
+              break;
+            case 'Rejected':
+            case 'Done':
+            case 'Completed':
+              history.push(booking);
+              break;
           }
         }
       });
@@ -104,22 +207,69 @@ export class BookingsComponent implements OnInit {
     this.pendingBookings = pending;
     this.confirmedBookings = confirmed;
     this.historyBookings = history;
+
+    // Refresh selected day bookings if calendar is open
+    this.refreshSelectedDay();
   }
 
-  isDetailsModalOpen = false;
-  isDeclineModalOpen = false;
-  selectedBooking: Booking | null = null;
-  declineReason = '';
-  declineNote = '';
+  // ── Calendar navigation ─────────────────────────────────────
 
-  declineReasons = [
-    'Already booked on that date',
-    'Outside my service area',
-    'Budget doesn\'t meet minimum requirements',
-    'Service not available in requested format',
-    'Capacity exceeded for that period',
-    'Other (describe below)'
-  ];
+  prevMonth() {
+    if (this.calendarMonth === 0) {
+      this.calendarMonth = 11;
+      this.calendarYear--;
+    } else {
+      this.calendarMonth--;
+    }
+    this.selectedCalendarDate = null;
+    this.selectedDayBookings = [];
+  }
+
+  nextMonth() {
+    if (this.calendarMonth === 11) {
+      this.calendarMonth = 0;
+      this.calendarYear++;
+    } else {
+      this.calendarMonth++;
+    }
+    this.selectedCalendarDate = null;
+    this.selectedDayBookings = [];
+  }
+
+  selectDay(day: CalendarDay) {
+    if (!day.inMonth) return;
+    const dateStr = this.toISODate(this.calendarYear, this.calendarMonth + 1, day.day);
+    if (this.selectedCalendarDate === dateStr) {
+      // toggle off
+      this.selectedCalendarDate = null;
+      this.selectedDayBookings = [];
+    } else {
+      this.selectedCalendarDate = dateStr;
+      this.selectedDayBookings = day.bookings;
+    }
+  }
+
+  isSelectedDay(day: CalendarDay): boolean {
+    if (!day.inMonth) return false;
+    const dateStr = this.toISODate(this.calendarYear, this.calendarMonth + 1, day.day);
+    return this.selectedCalendarDate === dateStr;
+  }
+
+  private refreshSelectedDay() {
+    if (this.selectedCalendarDate) {
+      const [y, m, d] = this.selectedCalendarDate.split('-').map(Number);
+      this.selectedDayBookings = this.confirmedBookings.filter(b => {
+        const bd = new Date(b.dateStr);
+        return bd.getFullYear() === y && bd.getMonth() === m - 1 && bd.getDate() === d;
+      });
+    }
+  }
+
+  private toISODate(year: number, month: number, day: number): string {
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+
+  // ── Modal helpers ────────────────────────────────────────────
 
   openDetails(booking: Booking) {
     this.selectedBooking = booking;
@@ -136,7 +286,7 @@ export class BookingsComponent implements OnInit {
     this.isDeclineModalOpen = true;
     this.declineReason = '';
     this.declineNote = '';
-    this.isDetailsModalOpen = false; // close details if open
+    this.isDetailsModalOpen = false;
   }
 
   closeDeclineForm() {
@@ -154,8 +304,11 @@ export class BookingsComponent implements OnInit {
     this.declineNote = textarea.value;
   }
 
+  // ── Actions ──────────────────────────────────────────────────
+
   acceptBooking() {
     if (this.selectedBooking) {
+      this.loading.set(true);
       this.eventService.approveItem(this.selectedBooking.eventId, this.selectedBooking.id, { approve: true }).subscribe({
         next: () => {
           this.toastService.show('Booking accepted successfully.', 'success');
@@ -165,6 +318,7 @@ export class BookingsComponent implements OnInit {
         error: (err) => {
           console.error('Error accepting booking', err);
           this.toastService.show('Failed to accept booking.', 'error');
+          this.loading.set(false);
         }
       });
     }
@@ -173,6 +327,7 @@ export class BookingsComponent implements OnInit {
   submitDecline() {
     if (this.selectedBooking && this.declineReason) {
       const fullReason = `${this.declineReason}${this.declineNote ? ': ' + this.declineNote : ''}`;
+      this.loading.set(true);
       this.eventService.approveItem(this.selectedBooking.eventId, this.selectedBooking.id, { approve: false, reason: fullReason }).subscribe({
         next: () => {
           this.toastService.show('Booking declined.', 'info');
@@ -182,6 +337,7 @@ export class BookingsComponent implements OnInit {
         error: (err) => {
           console.error('Error declining booking', err);
           this.toastService.show('Failed to decline booking.', 'error');
+          this.loading.set(false);
         }
       });
     }
@@ -203,4 +359,29 @@ export class BookingsComponent implements OnInit {
   switchTab(tab: 'pending' | 'confirmed' | 'calendar' | 'history') {
     this.currentTab = tab;
   }
+
+  // ── Utility ──────────────────────────────────────────────────
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'Approved': return 'vdb-green';
+      case 'Pending':  return 'vdb-amber';
+      case 'Done':     return 'vdb-blue';
+      case 'Completed': return 'vdb-gold';
+      case 'Rejected': return 'vdb-red';
+      default:         return 'vdb-gray';
+    }
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'Approved':  return 'Confirmed';
+      case 'Done':      return 'Done';
+      case 'Completed': return 'Completed';
+      case 'Rejected':  return 'Declined';
+      default:          return status;
+    }
+  }
+
+  trackByBookingId(_: number, b: Booking) { return b.id; }
 }

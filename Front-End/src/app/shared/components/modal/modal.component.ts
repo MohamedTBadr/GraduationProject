@@ -76,7 +76,7 @@ export class ModalComponent implements OnInit {
     if (!userId) return;
 
     this.submitting = true;
-    this.eventService.getByUser(userId).subscribe({
+    this.eventService.getByUser().subscribe({
       next: (events) => {
         this.submitting = false;
         if (events.length === 0) {

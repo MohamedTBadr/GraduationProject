@@ -96,10 +96,15 @@
           <h4 class="section-title">Recommended For You (Based on past hosts)</h4>
           <p class="section-desc">Hosts organizing similar events also selected these services:</p>
           <div class="rec-list">
-            <div class="rec-card" *ngFor="let rec of recommendations">
+            <div class="rec-card rec-card--clickable"
+                 *ngFor="let rec of recommendations"
+                 (click)="openServiceDetails(rec)"
+                 [class.rec-card--loading]="openingServiceId === rec.ServiceId">
               <div class="rec-header">
                 <span class="rec-service-name">{{ rec.ServiceName }}</span>
                 <span class="rec-vendor-name">by {{ rec.VendorName }}</span>
+                <i class="bi bi-box-arrow-up-right rec-open-icon" *ngIf="openingServiceId !== rec.ServiceId"></i>
+                <span class="rec-spinner" *ngIf="openingServiceId === rec.ServiceId"></span>
               </div>
               <div class="rec-reason">"{{ rec.Reasoning }}"</div>
             </div>

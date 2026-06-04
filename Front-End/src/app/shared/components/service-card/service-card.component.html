@@ -29,12 +29,10 @@
   <div class="vd-svc-actions flex gap-[8px] items-center">
     <span class="bg-[rgba(253,_230,_138,_0.4)] text-[#b45309] py-[4px] px-[12px] rounded-[20px] text-[0.75rem] font-semibold" *ngIf="service.status === 'paused'">Paused</span>
     <span class="bg-[#dcfce7] text-[#166534] py-[4px] px-[12px] rounded-[20px] text-[0.75rem] font-semibold" *ngIf="service.status !== 'paused'">Active</span>
-    
-    <button class="bg-[rgba(220,_252,_231,_0.4)] [border:1px_solid_#bbf7d0] rounded-[20px] py-[6px] px-[16px] text-[0.85rem] text-[#16a34a] font-semibold cursor-pointer [transition:all_0.2s]" *ngIf="service.status === 'paused'" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='rgba(220, 252, 231, 0.4)'" (click)="$event.stopPropagation(); actionClick.emit('activate')">Activate</button>
-    <button class="bg-[white] [border:1px_solid_#cbd5e1] rounded-[20px] py-[6px] px-[16px] text-[0.85rem] text-[#334155] cursor-pointer [transition:all_0.2s]" *ngIf="service.status !== 'paused'" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'" (click)="$event.stopPropagation(); actionClick.emit('pause')">Pause</button>
 
-    <button class="bg-[white] [border:1px_solid_#cbd5e1] rounded-[20px] py-[6px] px-[16px] text-[0.85rem] text-[#334155] cursor-pointer [transition:all_0.2s]" *ngIf="service.status !== 'paused'" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'" (click)="$event.stopPropagation(); actionClick.emit('edit')">Edit</button>
-    
-    <button class="bg-[white] [border:1px_solid_#fecaca] rounded-[20px] py-[6px] px-[16px] text-[0.85rem] text-[#ef4444] font-semibold cursor-pointer [transition:all_0.2s]" *ngIf="service.status === 'paused'" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'" (click)="$event.stopPropagation(); actionClick.emit('delete')">Delete</button>
+    <button class="w-[34px] h-[34px] flex items-center justify-center rounded-full bg-[white] [border:1px_solid_#bbf7d0] text-[#16a34a] cursor-pointer [transition:all_0.2s] hover:bg-[#dcfce7]" *ngIf="service.status === 'paused'" title="Activate" (click)="$event.stopPropagation(); actionClick.emit('activate')"><i class="bi bi-play-fill" style="font-size:0.95rem"></i></button>
+    <button class="w-[34px] h-[34px] flex items-center justify-center rounded-full bg-[white] [border:1px_solid_#e2e8f0] text-[#64748b] cursor-pointer [transition:all_0.2s] hover:bg-[#f1f5f9]" *ngIf="service.status !== 'paused'" title="Pause" (click)="$event.stopPropagation(); actionClick.emit('pause')"><i class="bi bi-pause-fill" style="font-size:0.95rem"></i></button>
+    <button class="w-[34px] h-[34px] flex items-center justify-center rounded-full bg-[white] [border:1px_solid_#e2e8f0] text-[#334155] cursor-pointer [transition:all_0.2s] hover:bg-[#f1f5f9]" title="Edit" (click)="$event.stopPropagation(); actionClick.emit('edit')"><i class="bi bi-pencil" style="font-size:0.9rem"></i></button>
+    <button class="w-[34px] h-[34px] flex items-center justify-center rounded-full bg-[white] [border:1px_solid_#fecaca] text-[#ef4444] cursor-pointer [transition:all_0.2s] hover:bg-[#fef2f2]" title="Delete" (click)="$event.stopPropagation(); actionClick.emit('delete')"><i class="bi bi-trash" style="font-size:0.9rem"></i></button>
   </div>
 </div>

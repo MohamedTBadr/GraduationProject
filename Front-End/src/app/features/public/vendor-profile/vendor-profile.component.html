@@ -1,157 +1,392 @@
-﻿<div class="page-vendor-profile">
-    <!-- Loading State -->
-    <div class="container loading-screen" *ngIf="loading">
-        <div class="loader"></div>
-        <p class="text-muted">Curating vendor details for you...</p>
+<div class="vp-page">
+
+  <!-- ═══ LOADING ═════════════════════════════════════════════ -->
+  <div class="vp-loading" *ngIf="loading">
+    <div class="vp-spinner"></div>
+    <p>Loading vendor profile...</p>
+  </div>
+
+  <!-- ═══ ERROR ════════════════════════════════════════════════ -->
+  <div class="vp-error" *ngIf="!loading && error">
+    <i class="bi bi-exclamation-triangle"></i>
+    <h2>Could not load this profile</h2>
+    <p>The vendor profile may be temporarily unavailable.</p>
+    <button class="btn btn-gold" (click)="loadVendorProfile()">Try Again</button>
+  </div>
+
+  <!-- ═══ MAIN CONTENT ══════════════════════════════════════════ -->
+  <ng-container *ngIf="!loading && !error && vendor">
+
+    <!-- ── Hero / Carousel ──────────────────────────────────── -->
+    <section class="vp-hero">
+      <div class="vp-hero-stage">
+
+        <!-- Main image -->
+        <div class="vp-hero-img"
+             [style.backgroundImage]="carouselImages.length ? 'url(' + carouselImages[activeImageIndex] + ')' : ''">
+          <div class="vp-hero-placeholder" *ngIf="!carouselImages.length">
+            <span class="vp-placeholder-letter">{{ vendor.name.charAt(0) }}</span>
+          </div>
+
+          <!-- Arrows -->
+          <button class="vp-arr vp-arr-prev" (click)="prevImage()" *ngIf="carouselImages.length > 1" aria-label="Previous">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button class="vp-arr vp-arr-next" (click)="nextImage()" *ngIf="carouselImages.length > 1" aria-label="Next">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+
+          <!-- Dots -->
+          <div class="vp-dots" *ngIf="carouselImages.length > 1">
+            <span class="vp-dot" *ngFor="let img of carouselImages; let i = index"
+                  [class.active]="i === activeImageIndex"
+                  (click)="activeImageIndex = i"></span>
+          </div>
+        </div>
+
+        <!-- Thumbnails strip -->
+        <div class="vp-thumbs" *ngIf="carouselImages.length > 1">
+          <button class="vp-thumb" *ngFor="let img of carouselImages.slice(0, 4); let i = index"
+                  [class.active]="i === activeImageIndex"
+                  (click)="activeImageIndex = i"
+                  [style.backgroundImage]="'url(' + img + ')'">
+          </button>
+        </div>
+      </div>
+
+      <!-- Vendor info bar -->
+      <div class="vp-info-bar">
+        <div class="container vp-info-inner">
+          <div class="vp-info-left">
+            <h1 class="vp-name">{{ vendor.name }}</h1>
+            <div class="vp-meta">
+              <span class="vp-rating-badge" *ngIf="vendor.rating">
+                <i class="bi bi-star-fill"></i> {{ vendor.rating }}
+              </span>
+              <span class="vp-meta-chip" *ngIf="vendor.location">
+                <i class="bi bi-geo-alt-fill"></i> {{ vendor.location }}
+              </span>
+              <span class="vp-meta-chip">
+                <i class="bi bi-tag"></i> {{ vendor.vendorTypeName || 'Vendor' }}
+              </span>
+            </div>
+          </div>
+          <button class="vp-save-btn" [class.active]="isFavorite()" (click)="toggleFav()">
+            <i class="bi" [class.bi-heart]="!isFavorite()" [class.bi-heart-fill]="isFavorite()"></i>
+            {{ isFavorite() ? 'Saved' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sticky Tab Nav ────────────────────────────────────── -->
+    <nav class="vp-tabs-nav">
+      <div class="container">
+        <div class="vp-tabs">
+          <button class="vp-tab" [class.active]="activeTab === 'services'" (click)="activeTab = 'services'">Services</button>
+          <button class="vp-tab" [class.active]="activeTab === 'packages'" (click)="activeTab = 'packages'">Packages</button>
+          <button class="vp-tab" [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">Reviews</button>
+          <button class="vp-tab" [class.active]="activeTab === 'contact'" (click)="activeTab = 'contact'">Contact Vendor</button>
+          <button class="vp-tab" [class.active]="activeTab === 'about'" (click)="activeTab = 'about'">About</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Body Grid (content + sidebar) ────────────────────── -->
+    <div class="container vp-body-grid">
+
+      <!-- LEFT: Tab content -->
+      <main class="vp-content">
+
+        <!-- Services ─────────────────────────────────────────── -->
+        <section *ngIf="activeTab === 'services'">
+          <div class="vp-svc-grid" *ngIf="products.length > 0">
+            <div class="vp-svc-card" *ngFor="let p of products" (click)="selectedProduct = p">
+              <div class="vp-svc-top">
+                <i class="bi bi-stars vp-svc-icon"></i>
+                <span class="vp-svc-link">View details</span>
+              </div>
+              <h3 class="vp-svc-name">{{ p.name }}</h3>
+              <div class="vp-svc-price">
+                <span *ngIf="p.price > 0">{{ p.price | currency:'EGP':'symbol':'1.0-0' }}</span>
+                <span *ngIf="p.price === 0">Price on request</span>
+              </div>
+              <p class="vp-svc-desc">
+                {{ (p.description || '') | slice:0:120 }}<ng-container *ngIf="(p.description || '').length > 120">...</ng-container>
+              </p>
+            </div>
+          </div>
+          <div class="vp-empty" *ngIf="products.length === 0">
+            <i class="bi bi-grid"></i>
+            <p>No services listed yet.</p>
+          </div>
+        </section>
+
+        <!-- Packages ─────────────────────────────────────────── -->
+        <!-- Loaded independently from GET /Package?vendorId={id} -->
+        <section *ngIf="activeTab === 'packages'">
+          <div class="vp-pkg-grid" *ngIf="packages.length > 0">
+            <div class="vp-pkg-card" *ngFor="let pkg of packages; let i = index" [class.featured]="i === 0">
+              <div class="vp-pkg-badge" *ngIf="i === 0">Most Popular</div>
+              <h3 class="vp-pkg-name">{{ pkg.name }}</h3>
+              <div class="vp-pkg-price">
+                <ng-container *ngIf="pkg.price > 0">
+                  {{ pkg.price | currency:'EGP':'symbol':'1.0-0' }}
+                  <span class="vp-pkg-discount" *ngIf="pkg.discount > 0">
+                    {{ pkg.discount }}% off
+                  </span>
+                </ng-container>
+                <span *ngIf="pkg.price === 0">Quote on request</span>
+              </div>
+              <p class="vp-pkg-desc">{{ pkg.description }}</p>
+              <!-- Services bundled in this package -->
+              <div class="vp-pkg-services" *ngIf="pkg.services && pkg.services.length > 0">
+                <p class="vp-pkg-includes-label">Includes:</p>
+                <ul class="vp-pkg-includes">
+                  <li *ngFor="let s of pkg.services">
+                    <i class="bi bi-check-circle"></i> {{ s.name || s.Name }}
+                  </li>
+                </ul>
+              </div>
+              <button class="vp-pkg-btn" (click)="activeTab = 'contact'">Inquire About This</button>
+            </div>
+          </div>
+
+          <div class="vp-empty" *ngIf="packages.length === 0">
+            <i class="bi bi-box-seam"></i>
+            <p>No packages available from this vendor yet.</p>
+          </div>
+        </section>
+
+        <!-- Reviews ──────────────────────────────────────────── -->
+        <section *ngIf="activeTab === 'reviews'">
+
+          <!-- Rating summary -->
+          <div class="vp-review-summary">
+            <div class="vp-rating-score">{{ vendor.rating || '—' }}</div>
+            <div class="vp-rating-stars">
+              <i class="bi" *ngFor="let s of [1,2,3,4,5]"
+                 [class.bi-star-fill]="s <= (vendor.rating || 0)"
+                 [class.bi-star]="s > (vendor.rating || 0)"></i>
+            </div>
+            <p class="vp-rating-label">Overall Rating</p>
+          </div>
+
+          <!-- Per-service ratings -->
+          <div class="vp-product-ratings" *ngIf="products.length > 0">
+            <h3 class="vp-section-title">Service Ratings</h3>
+            <div class="vp-prod-row" *ngFor="let p of products">
+              <span class="vp-prod-row-name">{{ p.name }}</span>
+              <div class="vp-prod-row-stars">
+                <i class="bi bi-star-fill" *ngFor="let s of [1,2,3,4,5]"
+                   [style.color]="s <= (p.rating || 0) ? 'var(--gold)' : 'var(--lgray)'"></i>
+                <span class="vp-prod-row-val" *ngIf="p.rating">{{ p.rating }}</span>
+                <span class="vp-prod-row-new" *ngIf="!p.rating">New</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit review form -->
+          <div class="vp-review-form">
+            <h3 class="vp-section-title">Write a Review</h3>
+
+            <div class="vp-login-note" *ngIf="!authService.isLoggedIn()">
+              <i class="bi bi-lock"></i>
+              <span><a routerLink="/">Log in</a> to submit a review.</span>
+            </div>
+
+            <ng-container *ngIf="authService.isLoggedIn()">
+              <div class="vp-field">
+                <label>Select Service</label>
+                <select [(ngModel)]="selectedServiceId">
+                  <option value="">Select a service to review</option>
+                  <option *ngFor="let p of products" [value]="p.id">{{ p.name }}</option>
+                </select>
+              </div>
+              <div class="vp-field">
+                <label>Your Rating</label>
+                <div class="vp-star-picker">
+                  <button class="vp-star-btn" *ngFor="let s of [1,2,3,4,5]"
+                          [class.active]="s <= reviewRating"
+                          (click)="reviewRating = s">
+                    <i class="bi bi-star-fill"></i>
+                  </button>
+                  <span class="vp-star-label">{{ getRatingLabel(reviewRating) }}</span>
+                </div>
+              </div>
+              <div class="vp-field">
+                <label>Your Review</label>
+                <textarea [(ngModel)]="reviewText" rows="4"
+                          placeholder="Share your experience with this vendor..."></textarea>
+              </div>
+              <button class="btn btn-gold" (click)="submitReview()" [disabled]="submittingReview">
+                {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
+              </button>
+            </ng-container>
+          </div>
+        </section>
+
+        <!-- Contact Vendor ────────────────────────────────────── -->
+        <section *ngIf="activeTab === 'contact'">
+          <div class="vp-contact-grid">
+
+            <div class="vp-contact-info">
+              <h3 class="vp-section-title">Direct Contact</h3>
+              <div class="vp-contact-row" *ngIf="vendor.email">
+                <i class="bi bi-envelope"></i>
+                <a [href]="'mailto:' + vendor.email">{{ vendor.email }}</a>
+              </div>
+              <div class="vp-contact-row" *ngIf="vendor.phone">
+                <i class="bi bi-telephone"></i>
+                <a [href]="'tel:' + vendor.phone">{{ vendor.phone }}</a>
+              </div>
+              <div class="vp-contact-row" *ngIf="vendor.location">
+                <i class="bi bi-geo-alt"></i>
+                <span>{{ vendor.location }}</span>
+              </div>
+              <div class="vp-contact-note">
+                <i class="bi bi-clock"></i>
+                <span>Available for consultations and site visits by appointment.</span>
+              </div>
+              <button class="vp-whatsapp-btn" *ngIf="vendor.phone" (click)="openWhatsApp()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.012l-.582 2.128 2.18-.571c.703.351 1.446.543 2.226.543h.001c3.181 0 5.766-2.586 5.767-5.766 0-3.18-2.585-5.766-5.766-5.766zm3.377 8.203c-.145-.072-.858-.423-.99-.471-.132-.048-.229-.072-.325.072-.096.144-.372.471-.456.567-.084.096-.168.108-.313.036-.145-.072-.611-.225-1.164-.718-.431-.384-.722-.859-.806-1.003-.084-.144-.009-.223.063-.294.065-.064.145-.168.217-.252.072-.084.096-.144.145-.24.048-.096.024-.18-.012-.252-.036-.072-.325-.783-.445-1.071-.117-.282-.236-.243-.325-.248-.084-.004-.18-.005-.276-.005s-.252.036-.384.18c-.132.144-.504.492-.504 1.2s.516 1.392.588 1.488c.072.096 1.015 1.55 2.459 2.173.344.149.611.238.819.304.346.11.66.095.909.058.277-.041.858-.351.978-.69s.12-.63.084-.69c-.036-.06-.132-.096-.277-.168z"/>
+                </svg>
+                Chat on WhatsApp
+              </button>
+            </div>
+
+            <div class="vp-contact-form-wrap">
+              <h3 class="vp-section-title">Send a Message</h3>
+              <div class="vp-field">
+                <label>Your Name <span class="required">*</span></label>
+                <input type="text" [(ngModel)]="contactName" placeholder="Full name" />
+              </div>
+              <div class="vp-field">
+                <label>Email Address</label>
+                <input type="email" [(ngModel)]="contactEmail" placeholder="email@example.com" />
+              </div>
+              <div class="vp-field">
+                <label>Message <span class="required">*</span></label>
+                <textarea [(ngModel)]="contactMessage" rows="5"
+                          placeholder="Describe your event and what you need..."></textarea>
+              </div>
+              <button class="btn btn-gold" (click)="sendInquiry()">Send Message</button>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- About ────────────────────────────────────────────── -->
+        <section *ngIf="activeTab === 'about'">
+          <div class="vp-about">
+            <div *ngIf="vendor.about">
+              <h3 class="vp-section-title">About {{ vendor.name }}</h3>
+              <p class="vp-about-text">{{ vendor.about }}</p>
+            </div>
+            <div class="vp-empty" *ngIf="!vendor.about">
+              <i class="bi bi-info-circle"></i>
+              <p>No description provided by this vendor yet.</p>
+            </div>
+
+            <!-- Service areas -->
+            <div class="vp-areas" *ngIf="vendor.serviceAreas && vendor.serviceAreas.length > 0">
+              <h3 class="vp-section-title">Service Areas</h3>
+              <div class="vp-areas-list">
+                <span class="vp-area-chip" *ngFor="let area of vendor.serviceAreas">
+                  <i class="bi bi-geo-alt"></i>
+                  {{ area.city }}<ng-container *ngIf="area.region">, {{ area.region }}</ng-container>
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- RIGHT: Booking sidebar ──────────────────────────────── -->
+      <aside class="vp-sidebar">
+        <div class="vp-booking-card">
+          <div class="vp-price-from" *ngIf="startingPrice > 0">
+            From {{ startingPrice | currency:'EGP':'symbol':'1.0-0' }}
+          </div>
+          <div class="vp-price-from vp-price-request" *ngIf="startingPrice === 0">
+            Price on request
+          </div>
+          <p class="vp-price-note">Starting price · exact quote on request</p>
+
+          <div class="vp-field">
+            <label>Event Date</label>
+            <input type="date" [(ngModel)]="eventDate" [min]="today" />
+          </div>
+          <div class="vp-field">
+            <label>Event Type</label>
+            <select [(ngModel)]="eventType">
+              <option>Wedding</option>
+              <option>Birthday</option>
+              <option>Corporate</option>
+              <option>Engagement</option>
+              <option>Graduation</option>
+            </select>
+          </div>
+
+          <button class="vp-book-btn" (click)="requestBooking()">
+            <i class="bi bi-calendar-check"></i> Request Booking
+          </button>
+          <button class="vp-whatsapp-btn" *ngIf="vendor.phone" (click)="openWhatsApp()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.012l-.582 2.128 2.18-.571c.703.351 1.446.543 2.226.543h.001c3.181 0 5.766-2.586 5.767-5.766 0-3.18-2.585-5.766-5.766-5.766zm3.377 8.203c-.145-.072-.858-.423-.99-.471-.132-.048-.229-.072-.325.072-.096.144-.372.471-.456.567-.084.096-.168.108-.313.036-.145-.072-.611-.225-1.164-.718-.431-.384-.722-.859-.806-1.003-.084-.144-.009-.223.063-.294.065-.064.145-.168.217-.252.072-.084.096-.144.145-.24.048-.096.024-.18-.012-.252-.036-.072-.325-.783-.445-1.071-.117-.282-.236-.243-.325-.248-.084-.004-.18-.005-.276-.005s-.252.036-.384.18c-.132.144-.504.492-.504 1.2s.516 1.392.588 1.488c.072.096 1.015 1.55 2.459 2.173.344.149.611.238.819.304.346.11.66.095.909.058.277-.041.858-.351.978-.69s.12-.63.084-.69c-.036-.06-.132-.096-.277-.168z"/>
+            </svg>
+            WhatsApp
+          </button>
+        </div>
+      </aside>
     </div>
 
-    <!-- Error State -->
-    <div class="container error-screen" *ngIf="!loading && error">
-        <h2 class="text-3xl font-bold mb-4">Something went wrong</h2>
-        <p class="text-muted mb-8">We couldn't load this vendor's profile. It might be temporarily unavailable.</p>
-        <button class="btn-gold max-w-[200px]" (click)="loadVendorProfile()">Try Again</button>
+    <!-- ── Similar Vendors ────────────────────────────────────── -->
+    <section class="vp-similar" *ngIf="similarVendors.length > 0">
+      <div class="container">
+        <h2 class="vp-similar-title">Similar Vendors</h2>
+        <div class="vp-similar-grid">
+          <app-vendor-card *ngFor="let v of similarVendors" [vendor]="v"></app-vendor-card>
+        </div>
+      </div>
+    </section>
+
+  </ng-container>
+
+  <!-- ═══ SERVICE DETAIL MODAL ══════════════════════════════════ -->
+  <div class="vp-modal-overlay" *ngIf="selectedProduct" (click)="selectedProduct = null">
+    <div class="vp-modal" (click)="$event.stopPropagation()">
+      <button class="vp-modal-close" (click)="selectedProduct = null" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <div class="vp-modal-img" *ngIf="selectedProduct.imageUrl"
+           [style.backgroundImage]="'url(' + selectedProduct.imageUrl + ')'"></div>
+      <div class="vp-modal-body">
+        <div class="vp-modal-badge" *ngIf="selectedProduct.serviceTypeName">
+          {{ selectedProduct.serviceTypeName }}
+        </div>
+        <h2 class="vp-modal-name">{{ selectedProduct.name }}</h2>
+        <div class="vp-modal-price" *ngIf="selectedProduct.price > 0">
+          {{ selectedProduct.price | currency:'EGP':'symbol':'1.0-0' }}
+        </div>
+        <div class="vp-modal-price vp-price-request" *ngIf="selectedProduct.price === 0">
+          Price on request
+        </div>
+        <p class="vp-modal-desc">{{ selectedProduct.description }}</p>
+        <div class="vp-modal-meta-row" *ngIf="selectedProduct.duration">
+          <i class="bi bi-clock"></i> Duration: {{ selectedProduct.duration }}
+        </div>
+        <div class="vp-modal-meta-row" *ngIf="selectedProduct.classification">
+          <i class="bi bi-tag"></i> {{ selectedProduct.classification }}
+        </div>
+        <button class="btn btn-gold" style="margin-top: 20px;"
+                (click)="activeTab = 'contact'; selectedProduct = null">
+          Inquire About This Service
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- Main Content -->
-    <ng-container *ngIf="!loading && !error && vendor">
-        <!-- Header -->
-        <header class="vp-header-dark">
-            <div class="container vp-header-content">
-                <div class="flex justify-between items-end gap-6 flex-wrap">
-                    <div class="flex-1">
-                        <h1 class="vp-title">{{vendor.name}}</h1>
-                        <div class="vp-meta">
-                            <div class="badge-item rating-badge">
-                                <i class="bi bi-star-fill" style="color:var(--gold)"></i> {{vendor.rating || 'New'}}
-                            </div>
-                            <div class="badge-item" *ngIf="vendor.location">
-                                <i class="bi bi-geo-alt-fill"></i> {{vendor.location}}
-                            </div>
-                            <div class="badge-item">
-                                <i class="bi bi-tag"></i> {{vendor.vendorTypeName || 'Vendor'}}
-                            </div>
-                        </div>
-                    </div>
-                    <button class="save-btn" [class.active]="isFavorite()" (click)="toggleFav()">
-                        {{isFavorite() ? 'Saved' : 'Save to Favorites'}}
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Navigation Tabs -->
-        <nav class="vp-nav">
-            <div class="container">
-                <div class="tabs">
-                    <div class="tab" [class.active]="activeTab === 'services'" (click)="activeTab = 'services'">Services</div>
-                    <div class="tab" [class.active]="activeTab === 'packages'" (click)="activeTab = 'packages'">Packages</div>
-                    <div class="tab" [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">Reviews</div>
-                    <div class="tab" [class.active]="activeTab === 'about'" (click)="activeTab = 'about'">Story</div>
-                    <div class="tab" [class.active]="activeTab === 'contact'" (click)="activeTab = 'contact'">Inquiry</div>
-                </div>
-            </div>
-        </nav>
-
-        <main class="container vp-main-grid">
-            <!-- Left Column Content -->
-            <div class="vp-content-left">
-                
-                <!-- Services Tab -->
-                <section *ngIf="activeTab === 'services'" class="animate-fade-in">
-                    <div class="services-grid" *ngIf="products.length > 0">
-                        <div class="service-card" *ngFor="let product of products" (click)="openServiceModal(product)">
-                            <div class="card-header">
-                                <i class="bi bi-stars text-2xl"></i>
-                                <span class="text-xs uppercase tracking-widest text-gold">Details →</span>
-                            </div>
-                            <h3 class="card-title">{{product.name}}</h3>
-                            <div class="card-price text-gold">{{product.price | currency:'EGP'}}</div>
-                            <p class="card-desc">{{product.description | slice:0:120}}{{product.description && product.description.length > 120 ? '...' : ''}}</p>
-                        </div>
-                    </div>
-                    <div class="py-20 text-center" *ngIf="products.length === 0">
-                        <p class="text-muted text-lg italic">No services listed at the moment.</p>
-                    </div>
-                </section>
-
-                <!-- About Tab -->
-                <section *ngIf="activeTab === 'about'" class="animate-fade-in">
-                    <h2 class="text-2xl font-bold mb-6">Our Story</h2>
-                    <p class="text-muted leading-relaxed text-lg" *ngIf="vendor.about">
-                        {{vendor.about}}
-                    </p>
-                    <div class="py-10" *ngIf="!vendor.about">
-                        <p class="text-muted italic">This vendor is letting their work speak for itself (no description provided).</p>
-                    </div>
-                </section>
-
-                <!-- Contact Tab -->
-                <section *ngIf="activeTab === 'contact'" class="animate-fade-in">
-                    <h2 class="text-2xl font-bold mb-6">Send an Inquiry</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="bg-[var(--glass-bg)] p-8 rounded-3xl border border-[var(--glass-border)]">
-                            <h3 class="text-xl font-semibold mb-4">Direct Contact</h3>
-                            <p class="mb-4" *ngIf="vendor.email"><strong class="text-gold">Email:</strong> {{vendor.email}}</p>
-                            <p class="mb-4" *ngIf="vendor.phone"><strong class="text-gold">Phone:</strong> {{vendor.phone}}</p>
-                        </div>
-                        <div class="bg-[var(--glass-bg)] p-8 rounded-3xl border border-[var(--glass-border)]">
-                            <h3 class="text-xl font-semibold mb-4">Business Hours</h3>
-                            <p class="text-muted">Available for consultations and site visits by appointment.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Reviews Tab -->
-                <section *ngIf="activeTab === 'reviews'" class="animate-fade-in">
-                    <div class="flex items-center gap-10 bg-[var(--glass-bg)] p-10 rounded-[32px] border border-[var(--glass-border)]">
-                        <div class="text-center">
-                            <div class="text-6xl font-black text-gold mb-2">{{vendor.rating || '-'}}</div>
-                            <div class="text-xs uppercase tracking-tighter text-muted">Overall Rating</div>
-                        </div>
-                        <div class="flex-1">
-                            <h2 class="text-2xl font-bold mb-2">Verified Reviews</h2>
-                            <p class="text-muted italic">Reviews are verified bookings only. Currently collecting feedback.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Packages Tab -->
-                <section *ngIf="activeTab === 'packages'" class="animate-fade-in">
-                    <div class="py-20 text-center">
-                        <p class="text-muted text-lg italic">Custom event packages are available upon request.</p>
-                    </div>
-                </section>
-            </div>
-
-            <!-- Right Column Sidebar -->
-            <aside class="vp-sidebar">
-                <div class="booking-widget">
-                    <div class="widget-price">Booking Request</div>
-                    <p class="widget-sub">Secure your date and get a personalized quote today.</p>
-
-                    <div class="form-group">
-                        <label>Target Date</label>
-                        <input type="date" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Guest Count</label>
-                        <select>
-                            <option>10 - 50</option>
-                            <option>50 - 200</option>
-                            <option>200 - 500</option>
-                            <option>500+</option>
-                        </select>
-                    </div>
-
-                    <button class="btn-gold" (click)="scrollToServices()"><i class="bi bi-stars"></i> View Available Services</button>
-                    <button class="btn-whatsapp flex items-center justify-center gap-2" *ngIf="vendor.phone">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.012l-.582 2.128 2.18-.571c.703.351 1.446.543 2.226.543h.001c3.181 0 5.766-2.586 5.767-5.766 0-3.18-2.585-5.766-5.766-5.766zm3.377 8.203c-.145-.072-.858-.423-.99-.471-.132-.048-.229-.072-.325.072-.096.144-.372.471-.456.567-.084.096-.168.108-.313.036-.145-.072-.611-.225-1.164-.718-.431-.384-.722-.859-.806-1.003-.084-.144-.009-.223.063-.294.065-.064.145-.168.217-.252.072-.084.096-.144.145-.24.048-.096.024-.18-.012-.252-.036-.072-.325-.783-.445-1.071-.117-.282-.236-.243-.325-.248-.084-.004-.18-.005-.276-.005s-.252.036-.384.18c-.132.144-.504.492-.504 1.2s.516 1.392.588 1.488c.072.096 1.015 1.55 2.459 2.173.344.149.611.238.819.304.346.11.66.095.909.058.277-.041.858-.351.978-.69s.12-.63.084-.69c-.036-.06-.132-.096-.277-.168z"/></svg>
-                        WhatsApp Us
-                    </button>
-                </div>
-            </aside>
-        </main>
-    </ng-container>
 </div>
-

@@ -75,7 +75,7 @@ export class MyBookingsComponent implements OnInit {
     }
     this.userId = user.id;
 
-    this.eventService.getByUser(user.id).subscribe({
+    this.eventService.getByUser().subscribe({
       next: (events: EventResponseDto[]) => {
         let allBookings: Booking[] = [];
         

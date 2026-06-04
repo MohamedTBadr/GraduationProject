@@ -11,7 +11,8 @@ export const PUBLIC_ROUTES: Routes = [
     },
     {
         path: 'explore-services',
-        loadComponent: () => import('./explore-services/explore-services.component').then(m => m.ExploreServicesComponent)
+        loadComponent: () => import('./explore/explore.component').then(m => m.ExploreComponent),
+        data: { tab: 'services' }
     },
     {
         path: 'packages',

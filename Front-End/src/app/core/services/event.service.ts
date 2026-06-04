@@ -56,30 +56,106 @@ export class EventService {
   getById(id: string): Observable<EventResponseDto> {
     return this.http.get<EventResponseDto>(`${this.apiUrl}/${id}`);
   }
-
-  /**
-   * Vendor dashboard: events this vendor is involved in.
-   * When the backend adds `GET /Event/for-vendor/{vendorUserId}`, switch the HTTP URL here;
-   * response shape should remain `EventResponseDto[]`.
-   * Until then this delegates to {@link getByUser} (current behavior).
-   */
   getForVendor(vendorUserId: string): Observable<EventResponseDto[]> {
-    return this.getByUser(vendorUserId);
-  }
-
-  /** GET /Event/user/{userId} - Get events for a specific user/vendor */
-  getByUser(userId: string): Observable<EventResponseDto[]> {
-    return this.http.get<any>(`${this.apiUrl}/user/${userId}`).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/Vendor/bookings`).pipe(
       map(res => {
-        if (!res) return [];
-        if (Array.isArray(res)) return res;
-        if (res.value && Array.isArray(res.value)) return res.value;
-        if (res.value?.items && Array.isArray(res.value.items)) return res.value.items;
-        if (res.items && Array.isArray(res.items)) return res.items;
-        return res.value || res;
+        const bookings = res?.value || res?.Value || (Array.isArray(res) ? res : []);
+        if (!Array.isArray(bookings)) return [];
+
+        const eventsMap = new Map<string, EventResponseDto>();
+
+        bookings.forEach(b => {
+          const eventId = b.eventId || b.EventId;
+          const eventItemId = b.eventItemId || b.EventItemId;
+          const serviceName = b.serviceName || b.ServiceName;
+          const price = b.price || b.Price;
+          const bookingStatus = b.bookingStatus || b.BookingStatus;
+          const notes = b.notes || b.Notes;
+          const eventTitle = b.eventTitle || b.EventTitle;
+          const eventType = b.eventType || b.EventType;
+          const eventDate = b.eventDate || b.EventDate;
+          const eventStatus = b.eventStatus || b.EventStatus;
+          const guestCount = b.guestCount || b.GuestCount;
+          const location = b.location || b.Location;
+
+          if (!eventsMap.has(eventId)) {
+            eventsMap.set(eventId, {
+              id: eventId,
+              userId: '',
+              userName: 'Client',
+              title: eventTitle,
+              eventTypeName: eventType,
+              eventDate: eventDate,
+              totalBudget: 0,
+              guestCount: guestCount,
+              notes: notes,
+              eventStatus: eventStatus,
+              eventItems: []
+            });
+          }
+
+          const ev = eventsMap.get(eventId)!;
+          ev.eventItems.push({
+            id: eventItemId,
+            eventId: eventId,
+            vendorId: vendorUserId,
+            vendorName: '',
+            serviceName: serviceName,
+            price: price,
+            quantity: 1,
+            itemStatus: bookingStatus
+          });
+        });
+
+        return Array.from(eventsMap.values());
       })
     );
   }
+
+  /** GET /Event/my-events - Get events for the authenticated user */
+  getByUser(): Observable<EventResponseDto[]> {
+    return this.http.get<any>(`${this.apiUrl}/my-events`).pipe(
+      map(res => {
+        if (!res) return [];
+        if (Array.isArray(res)) return res.map(this.normalizeEvent);
+        const arr = res.value ?? res.Value;
+        if (arr && Array.isArray(arr)) return arr.map(this.normalizeEvent);
+        const items = res.value?.items ?? res.Value?.items ?? res.items ?? res.Items;
+        if (items && Array.isArray(items)) return items.map(this.normalizeEvent);
+        return [];
+      })
+    );
+  }
+
+  private normalizeEvent = (e: any): EventResponseDto => ({
+    id: e.id ?? e.Id,
+    userId: e.userId ?? e.UserId,
+    userName: e.userName ?? e.UserName,
+    title: e.title ?? e.Title,
+    eventTypeName: e.eventTypeName ?? e.EventTypeName,
+    eventDate: e.eventDate ?? e.EventDate,
+    totalBudget: e.totalBudget ?? e.TotalBudget ?? 0,
+    guestCount: e.guestCount ?? e.GuestCount ?? 0,
+    notes: e.notes ?? e.Notes,
+    eventStatus: e.eventStatus ?? e.EventStatus,
+    cancellationReason: e.cancellationReason ?? e.CancellationReason,
+    additionalNotes: e.additionalNotes ?? e.AdditionalNotes,
+    cancelledAt: e.cancelledAt ?? e.CancelledAt,
+    location: e.location ?? e.Location,
+    eventItems: (e.eventItems ?? e.EventItems ?? []).map((item: any) => ({
+      id: item.id ?? item.Id,
+      eventId: item.eventId ?? item.EventId,
+      serviceId: item.serviceId ?? item.ServiceId,
+      serviceImage: item.serviceImage ?? item.ServiceImage,
+      serviceName: item.serviceName ?? item.ServiceName,
+      price: item.price ?? item.Price ?? 0,
+      vendorId: item.vendorId ?? item.VendorId,
+      vendorName: item.vendorName ?? item.VendorName,
+      quantity: item.quantity ?? item.Quantity ?? 1,
+      itemStatus: item.itemStatus ?? item.ItemStatus,
+      rejectionReason: item.rejectionReason ?? item.RejectionReason
+    }))
+  });
 
   /** GET /Event/status/{status} - Get events by status */
   getByStatus(status: string): Observable<EventResponseDto[]> {
@@ -105,6 +181,9 @@ export class EventService {
 
   /** POST /Event/createEventByAI/{eventId} - Generate an event plan using AI (Llama 3) */
   generateEventByAI(eventId: string): Observable<AiEventPlanResponse> {
-    return this.http.post<AiEventPlanResponse>(`${this.apiUrl}/createEventByAI/${eventId}`, {});
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    return this.http.post<any>(`${this.apiUrl}/createEventByAI/${eventId}`, {}, { headers }).pipe(
+      map(res => res?.value ?? res?.Value ?? res)
+    );
   }
 }

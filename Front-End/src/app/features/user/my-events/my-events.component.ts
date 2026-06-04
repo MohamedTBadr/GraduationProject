@@ -62,7 +62,7 @@ export class MyEventsComponent implements OnInit {
       return;
     }
 
-    this.eventService.getByUser(user.id).subscribe({
+    this.eventService.getByUser().subscribe({
       next: (data: EventResponseDto[]) => {
         this.events = data.map(ev => this.mapEvent(ev));
         if (this.events.length > 0) {
@@ -85,7 +85,33 @@ export class MyEventsComponent implements OnInit {
     if (!id) return;
     this.eventService.getById(id).subscribe({
       next: (res: any) => {
-        const fullEvent = res?.value ?? res;
+        const raw = res?.value ?? res?.Value ?? res;
+        const fullEvent = {
+          id: raw.id ?? raw.Id,
+          userId: raw.userId ?? raw.UserId,
+          userName: raw.userName ?? raw.UserName,
+          title: raw.title ?? raw.Title,
+          eventTypeName: raw.eventTypeName ?? raw.EventTypeName,
+          eventDate: raw.eventDate ?? raw.EventDate,
+          totalBudget: raw.totalBudget ?? raw.TotalBudget ?? 0,
+          guestCount: raw.guestCount ?? raw.GuestCount ?? 0,
+          notes: raw.notes ?? raw.Notes,
+          eventStatus: raw.eventStatus ?? raw.EventStatus,
+          location: raw.location ?? raw.Location,
+          eventItems: (raw.eventItems ?? raw.EventItems ?? []).map((item: any) => ({
+            id: item.id ?? item.Id,
+            eventId: item.eventId ?? item.EventId,
+            serviceId: item.serviceId ?? item.ServiceId,
+            serviceImage: item.serviceImage ?? item.ServiceImage,
+            serviceName: item.serviceName ?? item.ServiceName,
+            price: item.price ?? item.Price ?? 0,
+            vendorId: item.vendorId ?? item.VendorId,
+            vendorName: item.vendorName ?? item.VendorName,
+            quantity: item.quantity ?? item.Quantity ?? 1,
+            itemStatus: item.itemStatus ?? item.ItemStatus,
+            rejectionReason: item.rejectionReason ?? item.RejectionReason
+          }))
+        };
         const index = this.events.findIndex(e => e.id === id);
         if (index !== -1) {
           this.events[index] = this.mapEvent(fullEvent);

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -21,10 +21,11 @@ export class AiService {
    * Returns a budget breakdown by categories based on total budget and event type.
    */
   getBudgetAllocation(totalBudget: number, eventTypeName: string): Observable<BudgetAllocationResponse> {
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
     return this.http.post<ApiResult<BudgetAllocationResponse>>(`${this.apiUrl}/budget-allocation`, {
       totalBudget,
       eventTypeName
-    }).pipe(
+    }, { headers }).pipe(
       map(res => res?.value ?? res)
     );
   }
@@ -34,7 +35,8 @@ export class AiService {
    * Generates a minute-by-minute timeline for the event.
    */
   getEventTimeline(eventId: string): Observable<EventTimelineResponse> {
-    return this.http.post<ApiResult<EventTimelineResponse>>(`${this.apiUrl}/event-timeline/${eventId}`, {}).pipe(
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    return this.http.post<ApiResult<EventTimelineResponse>>(`${this.apiUrl}/event-timeline/${eventId}`, {}, { headers }).pipe(
       map(res => res?.value ?? res)
     );
   }

@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, inject, OnInit } from '@angular
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../../core/services/event.service';
 import { AiService } from '../../../core/services/ai.service';
+import { ProductService } from '../../../core/services/product.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import {
   AiEventPlanParsed,
@@ -27,7 +28,10 @@ export class EventStudioComponent implements OnInit {
 
   eventService = inject(EventService);
   aiService = inject(AiService);
+  productService = inject(ProductService);
   toastService = inject(ToastService);
+
+  openingServiceId: string | null = null;
 
   // Tabs state
   activeTab: 'package' | 'budget' | 'timeline' = 'package';
@@ -162,5 +166,24 @@ export class EventStudioComponent implements OnInit {
     this.planAccepted.emit(planToEmit);
     this.toastService.show('Selected vendors are being added to your event.', 'success');
     this.close.emit();
+  }
+
+  openServiceDetails(rec: RecommendationItem) {
+    if (this.openingServiceId === rec.ServiceId) return;
+    this.openingServiceId = rec.ServiceId;
+    this.productService.getById(rec.ServiceId).subscribe({
+      next: (svc) => {
+        this.openingServiceId = null;
+        if (svc?.vendorId) {
+          window.open(`/vendor/${svc.vendorId}`, '_blank');
+        } else {
+          this.toastService.show('Could not find vendor details.', 'error');
+        }
+      },
+      error: () => {
+        this.openingServiceId = null;
+        this.toastService.show('Failed to load service details.', 'error');
+      }
+    });
   }
 }

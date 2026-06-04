@@ -19,7 +19,8 @@ export const VENDOR_ROUTES: Routes = [
     },
     {
         path: 'packages',
-        loadComponent: () => import('./packages/packages.component').then(m => m.PackagesComponent)
+        redirectTo: 'services',
+        pathMatch: 'full'
     },
     {
         path: 'portfolio',

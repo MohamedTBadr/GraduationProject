@@ -43,7 +43,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.eventService.getByUser(user.id).subscribe({
+    this.eventService.getByUser().subscribe({
       next: (data: EventResponseDto[]) => {
         this.processEventsData(data);
         this.loading = false;
