@@ -1,9 +1,4 @@
-# Docs for the Azure Web Apps Deploy action:
-# https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure:
-# https://github.com/Azure/actions
-
-name: Build and deploy ASP.Net Core app to Azure Web App - GraduationProject
+name: Build and deploy ASP.Net Core app to Azure Web App - EpicHub
 
 on:
   push:
@@ -14,56 +9,44 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     permissions:
       contents: read
-
     steps:
-      # Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install .NET 9 SDK
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
 
-      # Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore ./API/src/Gateway.API/Gateway.API.csproj
+        run: dotnet restore ./API/src/Web.API/Web.API.csproj
 
-      # Build Gateway API
-      - name: Build Gateway API
-        run: dotnet build ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore
+      - name: Build
+        run: dotnet build ./API/src/Web.API/Web.API.csproj --configuration Release --no-restore
 
-      # Publish Gateway API
-      - name: Publish Gateway API
-        run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp" --no-build
+      - name: Publish
+        run: dotnet publish ./API/src/Web.API/Web.API.csproj --configuration Release --no-restore -o ./publish
 
-      # Upload published files
-      - name: Upload artifact for deployment
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-app
-          path: ${{ env.DOTNET_ROOT }}/myapp
+          path: ./publish
 
   deploy:
     runs-on: windows-latest
     needs: build
-
     permissions:
       id-token: write
       contents: read
-
     steps:
-      # Download published artifact
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: dotnet-app
 
-      # Login to Azure
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -71,9 +54,7 @@ jobs:
           tenant-id: 36cbfff1-02d2-4e78-a1d5-c57da5717a64
           subscription-id: 0080d04c-1f5b-4b85-97fe-909115140e80
 
-      # Deploy to Azure App Service
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'EpicHub'
