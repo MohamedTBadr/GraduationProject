@@ -49,6 +49,7 @@ namespace Infrastructure.Persistence
                     await SeedNotificationAsnyc();
                     await SeedEventAsync();
                     await SeedOrderAsync();
+                    await SeedCilantroDataAsync();
 
                     await transaction.CommitAsync();
 
@@ -3217,6 +3218,269 @@ namespace Infrastructure.Persistence
 
             context.Orders.Add(order);
             await context.SaveChangesAsync();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  CILANTRO ACCOUNT SEEDING
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task SeedCilantroDataAsync()
+        {
+            var cilantroEmail = "catering.cilantro@placeholder.com";
+            var cilantroUser = await context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == cilantroEmail);
+            var customer = await context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == "customer@example.com");
+
+            if (cilantroUser == null)
+            {
+                Console.WriteLine("[CilantroSeeding] Cilantro user not found.");
+                return;
+            }
+
+            var cilantroVendor = await context.Vendors.FirstOrDefaultAsync(v => v.UserId == cilantroUser.Id);
+
+            if (cilantroVendor != null)
+            {
+                // Profile
+                cilantroVendor.BusinessName = "Cilantro Catering Excellence";
+                cilantroVendor.Description = "Premium catering services with an exquisite touch. Specializing in high-end events, luxury dining experiences, corporate gatherings, and unforgettable weddings.";
+                cilantroVendor.YearsInBusiness = 15;
+                cilantroVendor.IsVerified = true;
+                cilantroVendor.PortfolioLink = "https://cilantrocatering.example.com";
+                cilantroVendor.ProfilePicture = "https://example.com/cilantro-profile.jpg";
+            }
+
+            // Reference Data
+            var wedding = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Wedding");
+            var birthday = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Birthday");
+            var graduation = await context.EventTypes.FirstOrDefaultAsync(e => e.Name == "Graduation");
+
+            var stOpenBuffet = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Open Buffet");
+            var stDrinksCorner = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Drinks Corner");
+            var stSetMenu = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Set Menu");
+            var stLiveCooking = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Live Cooking");
+            var stDessert = await context.ServiceTypes.FirstOrDefaultAsync(s => s.Name == "Dessert & Candy Bar");
+
+            var allEvents = new List<EventType>();
+            if (wedding != null) allEvents.Add(wedding);
+            if (birthday != null) allEvents.Add(birthday);
+            if (graduation != null) allEvents.Add(graduation);
+
+            // Services
+            if (!await context.Services.AnyAsync(s => s.VendorId == cilantroUser.Id && s.Name.Contains("Cilantro")))
+            {
+                var services = new List<Service>();
+
+                if (stOpenBuffet != null)
+                {
+                    services.Add(new Service
+                    {
+                        Id = Guid.NewGuid(), Name = "Cilantro Royal Open Buffet",
+                        Description = "A luxurious open buffet featuring international cuisines and delicate desserts.",
+                        Price = 45000, VendorId = cilantroUser.Id, ServiceTypeId = stOpenBuffet.Id,
+                        SetupDuration = 6, LeadTimeRequired = 7, EventTypes = allEvents.ToList()
+                    });
+                    services.Add(new Service
+                    {
+                        Id = Guid.NewGuid(), Name = "Cilantro Corporate Buffet",
+                        Description = "Professional setup for corporate events including finger foods, appetizers, and light meals.",
+                        Price = 25000, VendorId = cilantroUser.Id, ServiceTypeId = stOpenBuffet.Id,
+                        SetupDuration = 3, LeadTimeRequired = 5, EventTypes = allEvents.ToList()
+                    });
+                }
+
+                if (stDrinksCorner != null)
+                {
+                    services.Add(new Service
+                    {
+                        Id = Guid.NewGuid(), Name = "Cilantro Premium Drinks Corner",
+                        Description = "Fresh juices, premium coffee, and mocktails served by professional baristas.",
+                        Price = 12000, VendorId = cilantroUser.Id, ServiceTypeId = stDrinksCorner.Id,
+                        SetupDuration = 3, LeadTimeRequired = 3, EventTypes = allEvents.ToList()
+                    });
+                }
+
+                if (stSetMenu != null)
+                {
+                    services.Add(new Service
+                    {
+                        Id = Guid.NewGuid(), Name = "Cilantro Gourmet Set Menu",
+                        Description = "Three-course gourmet meal perfect for intimate gatherings and upscale weddings.",
+                        Price = 30000, VendorId = cilantroUser.Id, ServiceTypeId = stSetMenu.Id,
+                        SetupDuration = 4, LeadTimeRequired = 10, EventTypes = wedding != null ? new List<EventType> { wedding } : new List<EventType>()
+                    });
+                }
+
+                if (stLiveCooking != null)
+                {
+                    services.Add(new Service
+                    {
+                        Id = Guid.NewGuid(), Name = "Cilantro Live Pasta & Grill Station",
+                        Description = "Interactive live cooking stations featuring fresh pasta, premium steaks, and seafood.",
+                        Price = 35000, VendorId = cilantroUser.Id, ServiceTypeId = stLiveCooking.Id,
+                        SetupDuration = 5, LeadTimeRequired = 14, EventTypes = allEvents.ToList()
+                    });
+                }
+
+                if (stDessert != null)
+                {
+                    services.Add(new Service
+                    {
+                        Id = Guid.NewGuid(), Name = "Cilantro Dreamy Dessert Bar",
+                        Description = "An elaborate dessert and candy bar featuring chocolate fountains, macarons, and custom cakes.",
+                        Price = 18000, VendorId = cilantroUser.Id, ServiceTypeId = stDessert.Id,
+                        SetupDuration = 3, LeadTimeRequired = 7, EventTypes = allEvents.ToList()
+                    });
+                }
+
+                if (services.Any())
+                {
+                    await context.Services.AddRangeAsync(services);
+                    await context.SaveChangesAsync();
+                }
+            }
+
+            // Packages
+            if (!await context.Packages.AnyAsync(p => p.VendorId == cilantroUser.Id && p.Name.Contains("Cilantro")))
+            {
+                var cilantroServices = await context.Services.Where(s => s.VendorId == cilantroUser.Id).ToListAsync();
+                
+                var buffetServices = cilantroServices.Where(s => s.Name.Contains("Buffet") || s.Name.Contains("Drinks")).Select(s => s.Id).ToList();
+                var premiumServices = cilantroServices.Select(s => s.Id).ToList();
+                var corporateServices = cilantroServices.Where(s => s.Name.Contains("Corporate") || s.Name.Contains("Drinks")).Select(s => s.Id).ToList();
+
+                var packages = new List<Package>();
+
+                if (buffetServices.Any())
+                {
+                    packages.Add(new Package
+                    {
+                        Id = Guid.NewGuid(), Name = "Cilantro Platinum Wedding Package",
+                        Description = "Complete catering solution including our royal open buffet and drinks corner.",
+                        Price = 50000, Discount = 15, VendorId = cilantroUser.Id, ServiceIds = buffetServices
+                    });
+                }
+                
+                if (premiumServices.Any())
+                {
+                    packages.Add(new Package
+                    {
+                        Id = Guid.NewGuid(), Name = "Cilantro Ultimate VIP Experience",
+                        Description = "Everything we have to offer: Buffet, Live Cooking, Drinks, and Dessert Bar.",
+                        Price = 90000, Discount = 25, VendorId = cilantroUser.Id, ServiceIds = premiumServices
+                    });
+                }
+
+                if (corporateServices.Any())
+                {
+                    packages.Add(new Package
+                    {
+                        Id = Guid.NewGuid(), Name = "Cilantro Business Elite Package",
+                        Description = "Perfect for corporate retreats and large business meetings.",
+                        Price = 32000, Discount = 10, VendorId = cilantroUser.Id, ServiceIds = corporateServices
+                    });
+                }
+
+                if (packages.Any())
+                {
+                    await context.Packages.AddRangeAsync(packages);
+                    await context.SaveChangesAsync();
+                }
+            }
+
+            // Rating & Review
+            var cilantroServiceIds = await context.Services.Where(s => s.VendorId == cilantroUser.Id).Select(s => s.Id).ToListAsync();
+            if (customer != null && cilantroServiceIds.Any() && !await context.ServiceRatings.AnyAsync(r => r.UserId == customer.Id && cilantroServiceIds.Contains(r.ServiceId)))
+            {
+                var ratings = new List<ServiceRating>
+                {
+                    new ServiceRating { Id = Guid.NewGuid(), ServiceId = cilantroServiceIds.First(), UserId = customer.Id, Rating = 4.8m, Review = "Exceptional service! The food was delicious and the presentation was breathtaking." },
+                    new ServiceRating { Id = Guid.NewGuid(), ServiceId = cilantroServiceIds.Last(), UserId = customer.Id, Rating = 5.0m, Review = "Absolutely amazing! The staff was so professional and the live cooking station was a huge hit." },
+                    new ServiceRating { Id = Guid.NewGuid(), ServiceId = cilantroServiceIds[cilantroServiceIds.Count / 2], UserId = customer.Id, Rating = 4.5m, Review = "Great variety of drinks. Only minor issue was they arrived slightly late, but they made up for it." },
+                    new ServiceRating { Id = Guid.NewGuid(), ServiceId = cilantroServiceIds.First(), UserId = customer.Id, Rating = 4.9m, Review = "Highly recommend for any major event. Best catering we've ever hired." }
+                };
+                await context.ServiceRatings.AddRangeAsync(ratings);
+            }
+
+            // Analytics (OrderInsight)
+            if (!await context.OrderInsights.AnyAsync(o => o.Year == DateTime.UtcNow.Year - 1))
+            {
+                var insights = new List<OrderInsight>();
+                var baseRevenue = 80000m;
+                var baseOrders = 8;
+                var currentDate = DateTime.UtcNow;
+
+                for (int i = 6; i >= 0; i--)
+                {
+                    var targetDate = currentDate.AddMonths(-i);
+                    var growth = (decimal)new Random().Next(-5, 20);
+                    var newRevenue = baseRevenue * (1 + (growth / 100));
+                    
+                    insights.Add(new OrderInsight
+                    {
+                        Year = targetDate.Year,
+                        Month = targetDate.Month,
+                        MonthlyRevenue = newRevenue,
+                        OrderCount = baseOrders + new Random().Next(-2, 5),
+                        LastMonthRevenue = baseRevenue,
+                        PercentageGrowth = growth
+                    });
+
+                    baseRevenue = newRevenue;
+                    baseOrders = (int)(baseOrders * (1 + (growth / 100)));
+                }
+                
+                await context.OrderInsights.AddRangeAsync(insights);
+            }
+
+            // Chat (Conversation & Messages)
+            if (customer != null && !await context.Conversations.AnyAsync(c => c.User1Id == customer.Id && c.User2Id == cilantroUser.Id))
+            {
+                var conv1 = Conversation.Create(customer.Id, cilantroUser.Id);
+                await context.Conversations.AddAsync(conv1);
+                await context.SaveChangesAsync();
+
+                var messages = new List<Message>
+                {
+                    Message.Create(customer.Id, cilantroUser.Id, "Hello, we are interested in your royal buffet for our upcoming wedding."),
+                    Message.Create(cilantroUser.Id, customer.Id, "Welcome! We would be delighted to cater for your special day. Could you share the date and expected number of guests?"),
+                    Message.Create(customer.Id, cilantroUser.Id, "We are planning for October 15th, around 200 guests."),
+                    Message.Create(cilantroUser.Id, customer.Id, "Perfect! For 200 guests, I would also recommend looking into our Ultimate VIP package which includes the live cooking station."),
+                    Message.Create(customer.Id, cilantroUser.Id, "That sounds interesting, do you have a detailed menu for that?"),
+                    Message.Create(cilantroUser.Id, customer.Id, "Yes, absolutely! I will send over the brochure shortly. Will there be any dietary restrictions?"),
+                    Message.Create(customer.Id, cilantroUser.Id, "A few vegan guests, maybe 10 people."),
+                    Message.Create(cilantroUser.Id, customer.Id, "Not a problem at all, we can customize a dedicated section for them.")
+                };
+                
+                await context.Messages.AddRangeAsync(messages);
+            }
+
+            // Notifications
+            if (!await context.Notifications.AnyAsync(n => n.UserId == cilantroUser.Id && n.Title.Contains("Cilantro")))
+            {
+                var notificationTypes = Enum.GetValues(typeof(NotificationType)).Cast<NotificationType>();
+                var notifications = new List<Notification>();
+                foreach (var type in notificationTypes)
+                {
+                    notifications.Add(new Notification
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = cilantroUser.Id,
+                        Type = type,
+                        Title = $"System Update: {type}",
+                        Message = $"This is an automated system event regarding {type}. Please check your dashboard for more details.",
+                        CreatedAt = DateTime.UtcNow.AddHours(-new Random().Next(1, 48)),
+                        IsRead = new Random().Next(0, 2) == 1
+                    });
+                }
+                
+                // Add some duplicate specific ones for more volume
+                notifications.Add(new Notification { Id = Guid.NewGuid(), UserId = cilantroUser.Id, Type = NotificationType.ORDER_PLACED, Title = "New Corporate Order", Message = "A new corporate event has been booked for next week.", CreatedAt = DateTime.UtcNow.AddMinutes(-30), IsRead = false });
+                notifications.Add(new Notification { Id = Guid.NewGuid(), UserId = cilantroUser.Id, Type = NotificationType.ORDER_COMPLETED, Title = "Event Concluded", Message = "The wedding at Grand Hotel has been marked as completed. Please review.", CreatedAt = DateTime.UtcNow.AddDays(-1), IsRead = true });
+
+                await context.Notifications.AddRangeAsync(notifications);
+            }
+
+            await context.SaveChangesAsync();
+            Console.WriteLine("[CilantroSeeding] Completed with expanded data.");
         }
     }
 }
