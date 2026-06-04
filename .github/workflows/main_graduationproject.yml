@@ -1,5 +1,7 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+# Docs for the Azure Web Apps Deploy action:
+# https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure:
+# https://github.com/Azure/actions
 
 name: Build and deploy ASP.Net Core app to Azure Web App - GraduationProject
 
@@ -12,49 +14,64 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      # Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      # Install .NET 9 SDK
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 'dotnet9.x'
+          dotnet-version: '9.0.x'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore ./API/Gateway.API/Gateway.API.csproj
 
-      - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+      # Build Gateway API
+      - name: Build Gateway API
+        run: dotnet build ./API/Gateway.API/Gateway.API.csproj --configuration Release --no-restore
 
-      - name: Upload artifact for deployment job
+      # Publish Gateway API
+      - name: Publish Gateway API
+        run: dotnet publish ./API/Gateway.API/Gateway.API.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp" --no-build
+
+      # Upload published files
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          name: dotnet-app
+          path: ${{ env.DOTNET_ROOT }}/myapp
 
   deploy:
     runs-on: windows-latest
     needs: build
+
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
-      - name: Download artifact from build job
+      # Download published artifact
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
-      
-      - name: Login to Azure
+          name: dotnet-app
+
+      # Login to Azure
+      - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_33760B73D51E4E29B68BD3D7A310209E }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_420127AFF3074A21A8A3F9CC25A2F359 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C94DCF6DF5BF414A83C1114136C461C7 }}
 
+      # Deploy to Azure App Service
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -62,4 +79,3 @@ jobs:
           app-name: 'GraduationProject'
           slot-name: 'Production'
           package: .
-          
