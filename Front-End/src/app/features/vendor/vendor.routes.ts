@@ -28,7 +28,8 @@ export const VENDOR_ROUTES: Routes = [
     },
     {
         path: 'analytics',
-        loadComponent: () => import('./analytics/analytics.component').then(m => m.AnalyticsComponent)
+        redirectTo: '',
+        pathMatch: 'full'
     },
     {
         path: 'settings',

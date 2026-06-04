@@ -7,7 +7,7 @@ import { FavoriteService } from '../../../shared/services/favorite.service';
 import { ApiVendor, ApiProduct, CreateReviewDto } from '../../../shared/types/api.interfaces';
 import { VendorService } from '../../../core/services/vendor.service';
 import { ProductService } from '../../../core/services/product.service';
-import { PackageService, ApiPackage } from '../../../core/services/package.service';
+import { ApiPackage } from '../../../core/services/package.service';
 import { ReviewService } from '../../../core/services/review.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { VendorCardComponent } from '../../../shared/components/vendor-card/vendor-card.component';
@@ -66,7 +66,7 @@ export class VendorProfileComponent implements OnInit {
     private toastService: ToastService,
     private vendorService: VendorService,
     private productService: ProductService,
-    private packageService: PackageService,
+
     private reviewService: ReviewService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -79,7 +79,6 @@ export class VendorProfileComponent implements OnInit {
         this.resetState();
         this.loadVendorProfile();
         this.loadVendorProducts();
-        this.loadVendorPackages();
       }
     });
   }
@@ -97,8 +96,6 @@ export class VendorProfileComponent implements OnInit {
   }
 
   // ── Vendor info + packages (GET /Vendor/{id} returns both) ──────
-  // GET /Package?vendorId= is auth-restricted (vendors only see own packages),
-  // but GET /Vendor/{id} returns packages for anyone — use it as the source.
   loadVendorProfile() {
     if (!this.vendorId) return;
     this.vendorService.getById(this.vendorId).subscribe({
@@ -106,8 +103,6 @@ export class VendorProfileComponent implements OnInit {
         this.vendor = data;
         this.loading = false;
 
-        // VendorDetailsDTO includes Packages — PascalCase because the /Vendor/{id}
-        // controller returns result.Value directly (not wrapped in Result<T>).
         const raw = data as any;
         const rawPkgs: any[] = raw.Packages || raw.packages || [];
         this.packages = rawPkgs.map((p: any) => ({
@@ -121,12 +116,23 @@ export class VendorProfileComponent implements OnInit {
         }));
 
         this.buildCarousel();
+        this.loadSimilarVendors();
       },
       error: () => {
         this.loading = false;
         this.error = true;
         this.toastService.show('Failed to load vendor profile.', 'error');
       }
+    });
+  }
+
+  private loadSimilarVendors() {
+    if (!this.vendor?.vendorTypeId) return;
+    this.vendorService.getAll({ vendorTypeId: this.vendor.vendorTypeId, pageSize: 5 }).subscribe({
+      next: (vendors) => {
+        this.similarVendors = vendors.filter(v => v.id !== this.vendorId).slice(0, 4);
+      },
+      error: () => {}
     });
   }
 
@@ -143,16 +149,7 @@ export class VendorProfileComponent implements OnInit {
     });
   }
 
-  // ── Package fallback: only runs when the logged-in user IS the vendor ───
-  // Keeps the call alive so the vendor can see their own packages if the
-  // vendor-details response somehow doesn't include them.
-  loadVendorPackages() {
-    if (!this.vendorId || this.packages.length > 0) return;
-    this.packageService.getByVendor(this.vendorId).subscribe({
-      next: (data) => { if (data?.length) this.packages = data; },
-      error: () => {}
-    });
-  }
+  // Packages are loaded inside loadVendorProfile() from the vendor details response.
 
   private buildCarousel() {
     const images: string[] = [];

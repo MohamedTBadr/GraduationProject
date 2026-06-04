@@ -15,10 +15,6 @@ export const PUBLIC_ROUTES: Routes = [
         data: { tab: 'services' }
     },
     {
-        path: 'packages',
-        loadComponent: () => import('./packages/packages.component').then(m => m.PackagesComponent)
-    },
-    {
         path: 'corporate',
         loadComponent: () => import('./corporate/corporate.component').then(m => m.CorporateComponent)
     },

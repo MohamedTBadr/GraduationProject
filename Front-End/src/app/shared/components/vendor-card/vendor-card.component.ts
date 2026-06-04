@@ -33,14 +33,14 @@ export class VendorCardComponent {
     event.stopPropagation();
     this.favoriteService.toggleFavorite(this.vendor.id);
     const isFav = this.isFavorite();
-    this.toastService.show(isFav ? '️ Saved to favorites!' : ' Removed from favorites', isFav ? 'success' : 'info');
+    this.toastService.show(isFav ? 'Saved to favorites!' : 'Removed from favorites', isFav ? 'success' : 'info');
   }
 
   onToggleCompare(event: Event) {
     event.stopPropagation();
     const result = this.compareService.toggleCompare(this.vendor);
     if (result.success) {
-      this.toastService.show(result.added ? '️ Added to comparison!' : 'Removed from comparison', 'success');
+      this.toastService.show(result.added ? 'Added to comparison!' : 'Removed from comparison', 'success');
     } else {
       this.toastService.show(result.message || 'Error adding to comparison', 'error');
     }

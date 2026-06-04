@@ -25,7 +25,9 @@
         <div class="vp-hero-img"
              [style.backgroundImage]="carouselImages.length ? 'url(' + carouselImages[activeImageIndex] + ')' : ''">
           <div class="vp-hero-placeholder" *ngIf="!carouselImages.length">
-            <span class="vp-placeholder-letter">{{ vendor.name.charAt(0) }}</span>
+            <div class="vp-placeholder-avatar">{{ vendor.name.charAt(0) }}</div>
+            <p class="vp-placeholder-vendor-name">{{ vendor.name }}</p>
+            <span class="vp-placeholder-tag">{{ vendor.vendorTypeName || 'Vendor' }}</span>
           </div>
 
           <!-- Arrows -->
@@ -42,38 +44,38 @@
                   [class.active]="i === activeImageIndex"
                   (click)="activeImageIndex = i"></span>
           </div>
+
+          <!-- Vendor info overlay -->
+          <div class="vp-hero-overlay">
+            <div class="vp-overlay-inner container">
+              <div class="vp-overlay-left">
+                <h1 class="vp-name">{{ vendor.name }}</h1>
+                <div class="vp-meta">
+                  <span class="vp-rating-badge" *ngIf="vendor.rating">
+                    <i class="bi bi-star-fill"></i> {{ vendor.rating }}
+                  </span>
+                  <span class="vp-meta-chip" *ngIf="vendor.location">
+                    <i class="bi bi-geo-alt-fill"></i> {{ vendor.location }}
+                  </span>
+                  <span class="vp-meta-chip vp-meta-type">
+                    <i class="bi bi-tag-fill"></i> {{ vendor.vendorTypeName || 'Vendor' }}
+                  </span>
+                </div>
+              </div>
+              <button class="vp-save-btn" [class.active]="isFavorite()" (click)="toggleFav()">
+                <i class="bi" [class.bi-heart]="!isFavorite()" [class.bi-heart-fill]="isFavorite()"></i>
+                {{ isFavorite() ? 'Saved' : 'Save' }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Thumbnails strip -->
         <div class="vp-thumbs" *ngIf="carouselImages.length > 1">
-          <button class="vp-thumb" *ngFor="let img of carouselImages.slice(0, 4); let i = index"
+          <button class="vp-thumb" *ngFor="let img of carouselImages.slice(0, 5); let i = index"
                   [class.active]="i === activeImageIndex"
                   (click)="activeImageIndex = i"
                   [style.backgroundImage]="'url(' + img + ')'">
-          </button>
-        </div>
-      </div>
-
-      <!-- Vendor info bar -->
-      <div class="vp-info-bar">
-        <div class="container vp-info-inner">
-          <div class="vp-info-left">
-            <h1 class="vp-name">{{ vendor.name }}</h1>
-            <div class="vp-meta">
-              <span class="vp-rating-badge" *ngIf="vendor.rating">
-                <i class="bi bi-star-fill"></i> {{ vendor.rating }}
-              </span>
-              <span class="vp-meta-chip" *ngIf="vendor.location">
-                <i class="bi bi-geo-alt-fill"></i> {{ vendor.location }}
-              </span>
-              <span class="vp-meta-chip">
-                <i class="bi bi-tag"></i> {{ vendor.vendorTypeName || 'Vendor' }}
-              </span>
-            </div>
-          </div>
-          <button class="vp-save-btn" [class.active]="isFavorite()" (click)="toggleFav()">
-            <i class="bi" [class.bi-heart]="!isFavorite()" [class.bi-heart-fill]="isFavorite()"></i>
-            {{ isFavorite() ? 'Saved' : 'Save' }}
           </button>
         </div>
       </div>
@@ -144,7 +146,7 @@
                 <p class="vp-pkg-includes-label">Includes:</p>
                 <ul class="vp-pkg-includes">
                   <li *ngFor="let s of pkg.services">
-                    <i class="bi bi-check-circle"></i> {{ s.name || s.Name }}
+                    <i class="bi bi-check-circle"></i> {{ s.name }}
                   </li>
                 </ul>
               </div>
@@ -347,6 +349,9 @@
     <section class="vp-similar" *ngIf="similarVendors.length > 0">
       <div class="container">
         <h2 class="vp-similar-title">Similar Vendors</h2>
+        <p class="vp-similar-subtitle">
+          Other vendors offering {{ vendor.vendorTypeName || 'similar' }} services you might like
+        </p>
         <div class="vp-similar-grid">
           <app-vendor-card *ngFor="let v of similarVendors" [vendor]="v"></app-vendor-card>
         </div>

@@ -130,7 +130,7 @@
           <button type="button"
                   *ngFor="let evt of eventTypes"
                   (click)="toggleEventType(evt.id)"
-                  [ngClass]="serviceForm.get('eventTypeIds')?.value.includes(evt.id)
+                  [ngClass]="(serviceForm.get('eventTypeIds')?.value || []).includes(evt.id)
                     ? 'bg-[#b34a6c] text-white border-[#b34a6c]'
                     : 'bg-white text-[#475569] border-[#cbd5e1]'"
                   class="rounded-[50px] px-[16px] py-[6px] text-[0.9rem] font-medium border-[1.5px] transition-all cursor-pointer">

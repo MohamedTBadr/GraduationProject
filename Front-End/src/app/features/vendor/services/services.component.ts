@@ -144,7 +144,7 @@ export class ServicesComponent implements OnInit {
   closeAddServiceModal() {
     this.isAddServiceModalOpen = false;
     this.isSubmitting = false;
-    this.serviceForm.reset();
+    this.serviceForm.reset({ name: '', serviceTypeId: '', eventTypeIds: [], price: 0, description: '', duration: 0, leadTime: 0 });
   }
 
   toggleEventType(evtId: string) {
@@ -242,8 +242,10 @@ export class ServicesComponent implements OnInit {
   }
 
   loadPackages(): void {
+    const user = this.authService.user();
+    if (!user) return;
     this.packagesLoading = true;
-    this.packageService.getAll().subscribe({
+    this.packageService.getByVendor(user.id).subscribe({
       next: (data) => { this.packages = data; this.packagesLoading = false; },
       error: (err) => { console.error('Failed to load packages', err); this.toastService.show('Failed to load packages', 'error'); this.packagesLoading = false; }
     });
