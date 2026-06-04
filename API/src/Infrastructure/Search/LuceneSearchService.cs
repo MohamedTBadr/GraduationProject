@@ -191,9 +191,9 @@ namespace Infrastructure.Search
             booleanQuery.Add(new TermQuery(new Term("Type", "Vendor")), Occur.MUST);
 
             var hits = searcher.Search(booleanQuery, 50).ScoreDocs;
-            var results = hits.Select(hit => Guid.Parse(searcher.Doc(hit.Doc).Get("Id")));
+            var results = hits.Select(hit => Guid.Parse(searcher.Doc(hit.Doc).Get("Id"))).ToList();
 
-            return Task.FromResult(results);
+            return Task.FromResult<IEnumerable<Guid>>(results);
         }
 
         public Task<IEnumerable<Guid>> SearchServicesAsync(string query, Guid? serviceTypeId = null, decimal? minPrice = null, decimal? maxPrice = null)
@@ -223,9 +223,9 @@ namespace Infrastructure.Search
             booleanQuery.Add(new TermQuery(new Term("Type", "Service")), Occur.MUST);
 
             var hits = searcher.Search(booleanQuery, 50).ScoreDocs;
-            var results = hits.Select(hit => Guid.Parse(searcher.Doc(hit.Doc).Get("Id")));
+            var results = hits.Select(hit => Guid.Parse(searcher.Doc(hit.Doc).Get("Id"))).ToList();
 
-            return Task.FromResult(results);
+            return Task.FromResult<IEnumerable<Guid>>(results);
         }
 
         public Task IndexUserProfilesBatchAsync(IEnumerable<(Guid UserId, string BookedVendorIds, string BookedCategories)> userProfiles)
@@ -274,9 +274,9 @@ namespace Infrastructure.Search
             booleanQuery.Add(new TermQuery(new Term("Type", "UserProfile")), Occur.MUST);
 
             var hits = searcher.Search(booleanQuery, limit).ScoreDocs;
-            var results = hits.Select(hit => Guid.Parse(searcher.Doc(hit.Doc).Get("Id")));
+            var results = hits.Select(hit => Guid.Parse(searcher.Doc(hit.Doc).Get("Id"))).ToList();
 
-            return Task.FromResult(results);
+            return Task.FromResult<IEnumerable<Guid>>(results);
         }
 
         private IndexWriter CreateWriter()
