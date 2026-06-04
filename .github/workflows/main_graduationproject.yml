@@ -31,7 +31,7 @@ jobs:
 
       # ── Gateway ──────────────────────────────────────────────
       - name: Restore Gateway
-        run: dotnet restore ./API/src/Gateway.API/Gateway.API.csproj        # 👈 adjust path
+        run: dotnet restore ./API/src/Gateway.API/Gateway.API.csproj
 
       - name: Build Gateway
         run: dotnet build ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore
@@ -39,12 +39,40 @@ jobs:
       - name: Publish Gateway
         run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore -o ./publish/gateway
 
-      # ── Upload both as one artifact ───────────────────────────
-      - name: Upload artifact
+      # ── Upload .NET artifacts ─────────────────────────────────
+      - name: Upload dotnet artifact
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-app
-          path: ./publish          # contains /webapi and /gateway sub-folders
+          path: ./publish
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./Front-End
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+        working-directory: ./Front-End
+
+      # ── Upload frontend artifact ──────────────────────────────
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-app
+          path: ./Front-End/dist/eventora/browser
 
   deploy:
     runs-on: windows-latest
@@ -53,7 +81,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download artifact
+      - name: Download dotnet artifact
         uses: actions/download-artifact@v4
         with:
           name: dotnet-app
@@ -69,7 +97,7 @@ jobs:
       - name: Deploy Gateway to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'EpicHub-Gateway'      # 👈 your Gateway App Service name
+          app-name: 'EpicHub-Gateway'
           package: ./gateway
 
       # Deploy Web.API — only reachable through the Gateway
@@ -78,3 +106,29 @@ jobs:
         with:
           app-name: 'EpicHub'
           package: ./webapi
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-app
+          path: ./frontend
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: 3bf0e4c7-3b85-469f-b536-f4d980252043
+          tenant-id: 36cbfff1-02d2-4e78-a1d5-c57da5717a64
+          subscription-id: 0080d04c-1f5b-4b85-97fe-909115140e80
+
+      - name: Deploy Frontend to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'EpicHub'
+          package: ./frontend
