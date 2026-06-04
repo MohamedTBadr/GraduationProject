@@ -3400,36 +3400,6 @@ namespace Infrastructure.Persistence
                 await context.ServiceRatings.AddRangeAsync(ratings);
             }
 
-            // Analytics (OrderInsight)
-            if (!await context.OrderInsights.AnyAsync(o => o.Year == DateTime.UtcNow.Year - 1))
-            {
-                var insights = new List<OrderInsight>();
-                var baseRevenue = 80000m;
-                var baseOrders = 8;
-                var currentDate = DateTime.UtcNow;
-
-                for (int i = 6; i >= 0; i--)
-                {
-                    var targetDate = currentDate.AddMonths(-i);
-                    var growth = (decimal)new Random().Next(-5, 20);
-                    var newRevenue = baseRevenue * (1 + (growth / 100));
-                    
-                    insights.Add(new OrderInsight
-                    {
-                        Year = targetDate.Year,
-                        Month = targetDate.Month,
-                        MonthlyRevenue = newRevenue,
-                        OrderCount = baseOrders + new Random().Next(-2, 5),
-                        LastMonthRevenue = baseRevenue,
-                        PercentageGrowth = growth
-                    });
-
-                    baseRevenue = newRevenue;
-                    baseOrders = (int)(baseOrders * (1 + (growth / 100)));
-                }
-                
-                await context.OrderInsights.AddRangeAsync(insights);
-            }
 
             // Chat (Conversation & Messages)
             if (customer != null && !await context.Conversations.AnyAsync(c => c.User1Id == customer.Id && c.User2Id == cilantroUser.Id))
