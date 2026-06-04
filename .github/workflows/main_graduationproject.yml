@@ -31,15 +31,15 @@ jobs:
 
       # Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore ./API/Gateway.API/Gateway.API.csproj
+        run: dotnet restore ./API/src/Gateway.API/Gateway.API.csproj
 
       # Build Gateway API
       - name: Build Gateway API
-        run: dotnet build ./API/Gateway.API/Gateway.API.csproj --configuration Release --no-restore
+        run: dotnet build ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore
 
       # Publish Gateway API
       - name: Publish Gateway API
-        run: dotnet publish ./API/Gateway.API/Gateway.API.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp" --no-build
+        run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp" --no-build
 
       # Upload published files
       - name: Upload artifact for deployment
