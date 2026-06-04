@@ -8,7 +8,7 @@ using Web.Api.Controllers.Attributes;
 namespace Web.Api.Controllers
 {
     [ApiController]
-    [Authorize(Policy = "DashboardAccess")]
+    [Authorize(Roles = "Admin,Vendor")]
     [Route("api/[controller]")]
     public class DashboardController : APIController
     {
