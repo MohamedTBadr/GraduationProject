@@ -31,13 +31,13 @@ jobs:
 
       # ── Gateway ──────────────────────────────────────────────
       - name: Restore Gateway
-        run: dotnet restore ./API/src/Gateway/Gateway.csproj        # 👈 adjust path
+        run: dotnet restore ./API/src/Gateway.API/Gateway.API.csproj        # 👈 adjust path
 
       - name: Build Gateway
-        run: dotnet build ./API/src/Gateway/Gateway.csproj --configuration Release --no-restore
+        run: dotnet build ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore
 
       - name: Publish Gateway
-        run: dotnet publish ./API/src/Gateway/Gateway.csproj --configuration Release --no-restore -o ./publish/gateway
+        run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore -o ./publish/gateway
 
       # ── Upload both as one artifact ───────────────────────────
       - name: Upload artifact
