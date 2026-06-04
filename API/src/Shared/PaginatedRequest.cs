@@ -27,6 +27,7 @@ namespace Shared
        
         public Guid? ServiceTypeId { get; init; }
         public Guid? VendorId { get; init; }
+        public Guid? VendorTypeId { get; init; }
         public decimal? MinPrice { get; init; }
         public decimal? MaxPrice { get; init; }
 

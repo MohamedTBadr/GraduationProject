@@ -42,7 +42,8 @@ namespace Infrastructure.Repositories
 
                 if (request.VendorId.HasValue)
                     query = query.Where(p => p.VendorId == request.VendorId.Value);
-
+                if (request.VendorTypeId.HasValue)
+                    query.Where(p => p.Vendor.VendorTypeId == request.VendorTypeId.Value);
                 if (request.ServiceTypeId.HasValue)
                     query = query.Where(p => p.ServiceTypeId == request.ServiceTypeId.Value);
 
@@ -51,7 +52,7 @@ namespace Infrastructure.Repositories
 
                 if (request.MaxPrice.HasValue)
                     query = query.Where(p => p.Price <= request.MaxPrice.Value);
-
+             
                 query = request.SortBy?.ToLower() switch
                 {
                     "name" => request.IsDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
