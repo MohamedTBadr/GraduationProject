@@ -1,10 +1,4 @@
-# Docs for the Azure Web Apps Deploy action:
-# https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure:
-# https://github.com/Azure/actions
-
-name: Build and deploy ASP.Net Core app to Azure Web App - GraduationProject
-
+name: Build and deploy ASP.Net Core app to Azure Web App - EpicHub
 on:
   push:
     branches:
@@ -14,56 +8,84 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     permissions:
       contents: read
-
     steps:
-      # Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install .NET 9 SDK
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
 
-      # Restore dependencies
-      - name: Restore dependencies
+      # ── Web.API ──────────────────────────────────────────────
+      - name: Restore Web.API
+        run: dotnet restore ./API/src/Web.API/Web.API.csproj
+
+      - name: Build Web.API
+        run: dotnet build ./API/src/Web.API/Web.API.csproj --configuration Release --no-restore
+
+      - name: Publish Web.API
+        run: dotnet publish ./API/src/Web.API/Web.API.csproj --configuration Release --no-restore -o ./publish/webapi
+
+      # ── Gateway ──────────────────────────────────────────────
+      - name: Restore Gateway
         run: dotnet restore ./API/src/Gateway.API/Gateway.API.csproj
 
-      # Build Gateway API
-      - name: Build Gateway API
+      - name: Build Gateway
         run: dotnet build ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore
 
-      # Publish Gateway API
-      - name: Publish Gateway API
-        run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp" --no-build
+      - name: Publish Gateway
+        run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore -o ./publish/gateway
 
-      # Upload published files
-      - name: Upload artifact for deployment
+      # ── Upload .NET artifacts ─────────────────────────────────
+      - name: Upload dotnet artifact
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-app
-          path: ${{ env.DOTNET_ROOT }}/myapp
+          path: ./publish
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./Front-End
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+        working-directory: ./Front-End
+
+      # ── Upload frontend artifact ──────────────────────────────
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-app
+          path: ./Front-End/dist/eventora/browser
 
   deploy:
     runs-on: windows-latest
     needs: build
-
     permissions:
       id-token: write
       contents: read
-
     steps:
-      # Download published artifact
-      - name: Download artifact
+      - name: Download dotnet artifact
         uses: actions/download-artifact@v4
         with:
           name: dotnet-app
 
-      # Login to Azure
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -71,11 +93,42 @@ jobs:
           tenant-id: 36cbfff1-02d2-4e78-a1d5-c57da5717a64
           subscription-id: 0080d04c-1f5b-4b85-97fe-909115140e80
 
-      # Deploy to Azure App Service
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
+      # Deploy Gateway first — it's the public entry point
+      - name: Deploy Gateway to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'GraduationProject'
-          slot-name: 'Production'
-          package: .
+          app-name: 'EpicHub-Gateway'
+          package: ./gateway
+
+      # Deploy Web.API — only reachable through the Gateway
+      - name: Deploy Web.API to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'EpicHub'
+          package: ./webapi
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-app
+          path: ./frontend
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: 3bf0e4c7-3b85-469f-b536-f4d980252043
+          tenant-id: 36cbfff1-02d2-4e78-a1d5-c57da5717a64
+          subscription-id: 0080d04c-1f5b-4b85-97fe-909115140e80
+
+      - name: Deploy Frontend to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'EpicHubWeb'
+          package: ./frontend
