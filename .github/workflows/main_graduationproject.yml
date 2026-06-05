@@ -67,6 +67,29 @@ jobs:
         run: npm run build -- --configuration production
         working-directory: ./Front-End
 
+      # ── Inject web.config for Azure routing ──────────────────
+      - name: Add web.config for Angular routing
+        run: |
+          cat > ./Front-End/dist/eventora/browser/web.config << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <rewrite>
+                <rules>
+                  <rule name="Angular Routes" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="/index.html" />
+                  </rule>
+                </rules>
+              </rewrite>
+            </system.webServer>
+          </configuration>
+          EOF
+
       # ── Upload frontend artifact ──────────────────────────────
       - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
