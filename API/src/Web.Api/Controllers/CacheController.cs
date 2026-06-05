@@ -6,7 +6,7 @@ namespace Web.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
     public class CacheController(HybridCache cache) : APIController
     {
         [HttpDelete("invalidate-all")]
