@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { EventService } from '../../../core/services/event.service';
 import { EventResponseDto, EventItemResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
 export interface Booking {
   id: string; // itemId
@@ -31,7 +32,7 @@ interface CalendarDay {
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   templateUrl: './bookings.component.html',
   styleUrls: ['./bookings.component.scss']
 })
@@ -47,6 +48,8 @@ export class BookingsComponent implements OnInit {
   // ── History filter/search state ─────────────────────────────
   historySearch = '';
   historyStatusFilter: 'All' | 'Rejected' | 'Done' | 'Completed' = 'All';
+  historyPageNumber = 1;
+  historyPageSize = 10;
 
   get filteredHistory(): Booking[] {
     let result = this.historyBookings;
@@ -62,6 +65,23 @@ export class BookingsComponent implements OnInit {
       );
     }
     return result;
+  }
+
+  get paginatedHistory(): Booking[] {
+    const start = (this.historyPageNumber - 1) * this.historyPageSize;
+    return this.filteredHistory.slice(start, start + this.historyPageSize);
+  }
+
+  get historyTotalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredHistory.length / this.historyPageSize));
+  }
+
+  onHistoryPageChange(page: number): void {
+    this.historyPageNumber = page;
+  }
+
+  onHistoryFilterChange(): void {
+    this.historyPageNumber = 1;
   }
 
   // ── Calendar state ──────────────────────────────────────────

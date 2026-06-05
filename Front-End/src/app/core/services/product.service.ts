@@ -7,7 +7,8 @@ import {
   ApiProduct,
   CreateProductRequest,
   UpdateProductRequest,
-  PaginatedRequest
+  PaginatedRequest,
+  PagedResult
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -23,50 +24,64 @@ export class ProductService {
     if (!res) return [];
     if (Array.isArray(res)) return res;
 
-    const inner = res.value;
+    const inner = res.value ?? res.Value;
     if (inner != null) {
-      const items = inner.items;
+      const items = inner.items ?? inner.Items;
       if (Array.isArray(items)) return items;
       if (Array.isArray(inner)) return inner;
     }
 
-    const top = res.items;
+    const top = res.items ?? res.Items;
     if (Array.isArray(top)) return top;
 
     return [];
   }
 
+  private pickField(obj: any, ...keys: string[]): any {
+    if (!obj) return undefined;
+    for (const key of keys) {
+      const val = obj[key];
+      if (val !== undefined && val !== null && val !== '') return val;
+    }
+    return undefined;
+  }
+
   /** Maps API ServiceDTO fields to ApiProduct. */
   private normalizeProduct(raw: any): ApiProduct {
     if (raw == null || typeof raw !== 'object') {
-      return { id: '', name: 'Unknown', description: '', price: 0 };
+      return { id: '', name: 'Unknown Service', description: '', price: 0 };
     }
-    const images = raw.serviceImages;
-    const firstImage = raw.imageUrl ?? (Array.isArray(images) && images.length > 0 ? images[0] : undefined);
 
-    const priceRaw = raw.price ?? 0;
+    const images = raw.serviceImages ?? raw.ServiceImages;
+    const firstImage = this.pickField(raw, 'imageUrl', 'ImageUrl')
+      ?? (Array.isArray(images) && images.length > 0 ? images[0] : undefined);
+
+    const priceRaw = this.pickField(raw, 'price', 'Price') ?? 0;
     const price = typeof priceRaw === 'number' ? priceRaw : parseFloat(String(priceRaw));
+    const areas = raw.serviceAreas ?? raw.ServiceAreas ?? [];
 
     return {
-      id: String(raw.id ?? ''),
-      name: (raw.name ?? 'Service').toString(),
-      description: (raw.description ?? '').toString(),
+      id: String(this.pickField(raw, 'id', 'Id') ?? ''),
+      name: String(this.pickField(raw, 'name', 'Name') ?? 'Unknown Service'),
+      description: String(this.pickField(raw, 'description', 'Description') ?? ''),
       price: Number.isFinite(price) ? price : 0,
-      vendorTypeId: raw.vendorTypeId ?? raw.categoryId,
-      vendorTypeName: raw.vendorTypeName ?? raw.categoryName,
-      vendorId: raw.vendorId,
-      vendorName: raw.vendorName,
-      serviceTypeId: raw.serviceTypeId,
-      serviceTypeName: raw.serviceTypeName,
+      vendorTypeId: this.pickField(raw, 'vendorTypeId', 'VendorTypeId', 'categoryId', 'CategoryId'),
+      vendorTypeName: this.pickField(raw, 'vendorTypeName', 'VendorTypeName', 'categoryName', 'CategoryName'),
+      vendorId: this.pickField(raw, 'vendorId', 'VendorId'),
+      vendorName: this.pickField(raw, 'vendorName', 'VendorName'),
+      serviceTypeId: this.pickField(raw, 'serviceTypeId', 'ServiceTypeId'),
+      serviceTypeName: this.pickField(raw, 'serviceTypeName', 'ServiceTypeName'),
       imageUrl: firstImage,
       imageUrls: Array.isArray(images) ? images : (firstImage ? [firstImage] : []),
-      status: raw.status ?? 'active',
-      duration: raw.duration ?? (raw.setupDuration != null ? String(raw.setupDuration) : undefined),
-      leadTime: raw.leadTime ?? (raw.leadTimeRequired != null ? String(raw.leadTimeRequired) : undefined),
-      classification: raw.classification,
-      allowedEventTypes: raw.allowedEventTypes,
-      createdAt: raw.createdAt,
-      serviceAreas: raw.serviceAreas ?? []
+      status: this.pickField(raw, 'status', 'Status') ?? 'active',
+      duration: this.pickField(raw, 'duration', 'Duration')
+        ?? (raw.setupDuration != null ? String(raw.setupDuration) : raw.SetupDuration != null ? String(raw.SetupDuration) : undefined),
+      leadTime: this.pickField(raw, 'leadTime', 'LeadTime')
+        ?? (raw.leadTimeRequired != null ? String(raw.leadTimeRequired) : raw.LeadTimeRequired != null ? String(raw.LeadTimeRequired) : undefined),
+      classification: this.pickField(raw, 'classification', 'Classification'),
+      allowedEventTypes: raw.allowedEventTypes ?? raw.AllowedEventTypes,
+      createdAt: this.pickField(raw, 'createdAt', 'CreatedAt'),
+      serviceAreas: Array.isArray(areas) ? areas : []
     };
   }
 
@@ -74,33 +89,64 @@ export class ProductService {
     return this.extractArrayData(res).map(item => this.normalizeProduct(item));
   }
 
+  private buildParams(filters?: PaginatedRequest): HttpParams {
+    let params = new HttpParams();
+    if (!filters) return params;
+
+    if (filters.pageIndex) params = params.set('pageIndex', filters.pageIndex.toString());
+    if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
+    if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
+    if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
+    if (filters.isDescending !== undefined) params = params.set('isDescending', filters.isDescending.toString());
+    if (filters.city) params = params.set('city', filters.city);
+    if (filters.region) params = params.set('region', filters.region);
+    if (filters.latitude) params = params.set('latitude', filters.latitude.toString());
+    if (filters.longitude) params = params.set('longitude', filters.longitude.toString());
+    if (filters.radiusKm) params = params.set('radiusKm', filters.radiusKm.toString());
+    if (filters.classification && filters.classification !== 'all') params = params.set('classification', filters.classification);
+    if (filters.vendorTypeId) params = params.set('vendorTypeId', filters.vendorTypeId);
+    if (filters.serviceTypeId) params = params.set('serviceTypeId', filters.serviceTypeId);
+    if (filters.minPrice != null) params = params.set('minPrice', filters.minPrice.toString());
+    if (filters.maxPrice != null) params = params.set('maxPrice', filters.maxPrice.toString());
+
+    return params;
+  }
+
+  private mapPagedProducts(res: any): PagedResult<ApiProduct> {
+    const data = res?.value ?? res?.Value ?? res;
+    const items = Array.isArray(data)
+      ? data
+      : (data?.items ?? data?.Items ?? []);
+    const totalCount = data?.totalCount ?? data?.TotalCount ?? (Array.isArray(items) ? items.length : 0);
+    const pageSize = data?.pageSize ?? data?.PageSize ?? 10;
+    const pageNumber = data?.pageNumber ?? data?.PageNumber ?? 1;
+
+    return {
+      items: (Array.isArray(items) ? items : []).map(item => this.normalizeProduct(item)),
+      totalCount,
+      pageNumber,
+      pageSize,
+      totalPages: data?.totalPages ?? data?.TotalPages ?? (Math.ceil(totalCount / pageSize) || 1)
+    };
+  }
+
   /** GET /Service – returns filtered/paginated products */
   getAll(filters?: PaginatedRequest): Observable<ApiProduct[]> {
-    let params = new HttpParams();
-    if (filters) {
-      if (filters.pageIndex) params = params.set('pageIndex', filters.pageIndex.toString());
-      if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
-      if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
-      if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
-      if (filters.isDescending !== undefined) params = params.set('isDescending', filters.isDescending.toString());
-      
-      // Location
-      if (filters.city) params = params.set('city', filters.city);
-      if (filters.region) params = params.set('region', filters.region);
-      if (filters.latitude) params = params.set('latitude', filters.latitude.toString());
-      if (filters.longitude) params = params.set('longitude', filters.longitude.toString());
-      if (filters.radiusKm) params = params.set('radiusKm', filters.radiusKm.toString());
+    return this.getAllPaged(filters).pipe(map(r => r.items));
+  }
 
-      // Taxonomy
-      if (filters.classification && filters.classification !== 'all') params = params.set('classification', filters.classification);
-      if (filters.eventTypeId) params = params.set('eventTypeId', filters.eventTypeId);
-      if (filters.vendorTypeId) params = params.set('vendorTypeId', filters.vendorTypeId);
-      if (filters.serviceTypeId) params = params.set('serviceTypeId', filters.serviceTypeId);
-    }
-
-    return this.http.get<any>(`${this.apiUrl}/Service`, { params }).pipe(
-      map(res => this.mapProductList(res))
+  /** GET /Service – paginated with total count */
+  getAllPaged(filters?: PaginatedRequest): Observable<PagedResult<ApiProduct>> {
+    return this.http.get<any>(`${this.apiUrl}/Service`, { params: this.buildParams(filters) }).pipe(
+      map(res => this.mapPagedProducts(res))
     );
+  }
+
+  /** GET /Service/by-event-type/{eventTypeId} – paginated */
+  getByEventTypePaged(eventTypeId: string, filters?: PaginatedRequest): Observable<PagedResult<ApiProduct>> {
+    return this.http.get<any>(`${this.apiUrl}/Service/by-event-type/${eventTypeId}`, {
+      params: this.buildParams(filters)
+    }).pipe(map(res => this.mapPagedProducts(res)));
   }
 
   /** GET /Service/{productId} */

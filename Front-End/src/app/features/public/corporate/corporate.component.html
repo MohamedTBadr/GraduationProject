@@ -1,18 +1,12 @@
 <div class="page active" id="page-corporate">
     <div class="corp-hero">
-        <div>
-            <div class="hero-eyebrow inline-flex items-center gap-[9px] bg-[rgba(201,168,76,.13)] [border:1px_solid_rgba(201,168,76,.3)] py-[6px] px-[16px] rounded-[50px] text-[.75rem] font-bold text-[var(--gold)] mb-[24px] tracking-[1.5px] uppercase">
-                B2B Corporate Solutions
-            </div>
-            <h1 class="text-[clamp(2.2rem,5vw,4rem)] text-[var(--white)] mb-[14px] max-w-[660px] font-[var(--ff-d)] font-light">
-                Professional Events, <em class="text-[var(--gold)]">Flawlessly</em> Executed
-            </h1>
-            <p class="text-[rgba(255,255,255,.52)] text-[.97rem] max-w-[460px] mb-[34px] leading-[1.7]">
-                From 50-person conferences to 2,000-guest brand activations — precision and reliability every time.
-            </p>
-            <div class="flex gap-[12px] flex-wrap">
-                <button class="btn btn-gold" (click)="scrollToForm()">Request a Quote</button>
-                <button class="btn btn-outline" routerLink="/contact">Talk to an Expert</button>
+        <div class="container">
+            <div class="hero-eyebrow">B2B Corporate Solutions</div>
+            <h1>Professional Events, <em>Flawlessly</em> Executed</h1>
+            <p>From 50-person conferences to 2,000-guest brand activations — precision and reliability every time.</p>
+            <div class="corp-hero-actions">
+                <button type="button" class="btn btn-gold" (click)="scrollToForm()">Request a Quote</button>
+                <a class="btn btn-outline-light" routerLink="/contact">Talk to an Expert</a>
             </div>
         </div>
     </div>

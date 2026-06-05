@@ -26,7 +26,7 @@
       <div *ngIf="filteredNotifications.length > 0; else noNotifs">
         <div
           class="notif-row"
-          *ngFor="let notif of filteredNotifications"
+          *ngFor="let notif of paginatedNotifications"
           [class.unread]="!notif.isRead"
           (click)="markAsRead(notif)">
 
@@ -55,6 +55,15 @@
           No {{ activeTab === 'All' ? '' : activeTab.toLowerCase() + ' ' }}notifications found.
         </div>
       </ng-template>
+
+      <app-pagination
+        *ngIf="filteredNotifications.length > pageSize"
+        [currentPage]="pageNumber"
+        [totalPages]="totalPages"
+        [totalCount]="filteredNotifications.length"
+        [pageSize]="pageSize"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
     </div>
   </div>
 </div>

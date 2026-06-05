@@ -4,6 +4,7 @@ import { AppNotification } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { SignalRService } from '../../../core/services/signalr.service';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
 // Backend NotificationType enum ordinals (no StringEnumConverter — serialized as integers)
 const TYPE = {
@@ -33,13 +34,15 @@ const TAB_TYPES: Record<string, number[]> = {
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PaginationComponent],
   templateUrl: './notifications.component.html',
   styleUrls: ['./notifications.component.scss']
 })
 export class NotificationsComponent implements OnInit {
   activeTab = 'All';
   tabs = ['All', 'Bookings', 'Events', 'Payments', 'Account'];
+  pageNumber = 1;
+  pageSize = 12;
 
   constructor(
     private notificationService: NotificationService,
@@ -81,8 +84,22 @@ export class NotificationsComponent implements OnInit {
     return unread.filter(n => types.includes(n.type ?? -1)).length;
   }
 
+  get paginatedNotifications(): AppNotification[] {
+    const start = (this.pageNumber - 1) * this.pageSize;
+    return this.filteredNotifications.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredNotifications.length / this.pageSize));
+  }
+
   setTab(tab: string): void {
     this.activeTab = tab;
+    this.pageNumber = 1;
+  }
+
+  onPageChange(page: number): void {
+    this.pageNumber = page;
   }
 
   getTypeIcon(type?: number): string {

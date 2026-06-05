@@ -25,7 +25,7 @@
   <ng-container *ngIf="filteredNotifications.length > 0; else empty">
     <div
       class="notif-card"
-      *ngFor="let n of filteredNotifications"
+      *ngFor="let n of paginatedNotifications"
       [class.unread]="!n.isRead"
       (click)="markAsRead(n)">
 
@@ -51,4 +51,13 @@
       No {{ activeTab === 'All' ? '' : activeTab.toLowerCase() + ' ' }}notifications yet.
     </div>
   </ng-template>
+
+  <app-pagination
+    *ngIf="filteredNotifications.length > pageSize"
+    [currentPage]="pageNumber"
+    [totalPages]="totalPages"
+    [totalCount]="filteredNotifications.length"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-pagination>
 </div>

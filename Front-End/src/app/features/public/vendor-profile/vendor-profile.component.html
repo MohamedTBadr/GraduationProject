@@ -25,7 +25,7 @@
         <div class="vp-hero-img"
              [style.backgroundImage]="carouselImages.length ? 'url(' + carouselImages[activeImageIndex] + ')' : ''">
           <div class="vp-hero-placeholder" *ngIf="!carouselImages.length">
-            <div class="vp-placeholder-avatar">{{ vendor.name.charAt(0) }}</div>
+            <div class="vp-placeholder-avatar">{{ (vendor.name || 'U').charAt(0) }}</div>
             <p class="vp-placeholder-vendor-name">{{ vendor.name }}</p>
             <span class="vp-placeholder-tag">{{ vendor.vendorTypeName || 'Vendor' }}</span>
           </div>

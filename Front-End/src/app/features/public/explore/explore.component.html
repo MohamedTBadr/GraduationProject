@@ -1,12 +1,14 @@
 <div class="page active" id="page-explore">
 
-  <!-- ═══ HERO ════════════════════════════════════════════════ -->
   <div class="explore-hero">
     <h1>Explore</h1>
     <p>Verified vendors &amp; services across Egypt — filter to match your vision</p>
+    <div class="explore-search-bar">
+      <i class="bi bi-search"></i>
+      <input type="text" placeholder="Search vendors or services…" [ngModel]="searchQuery" (ngModelChange)="onSearchInput($event)" />
+    </div>
   </div>
 
-  <!-- ═══ TAB BAR ═════════════════════════════════════════════ -->
   <div class="explore-tabs">
     <div class="et-inner container">
       <button class="et-tab" [class.active]="activeTab === 'vendors'" (click)="switchTab('vendors')">
@@ -18,192 +20,167 @@
     </div>
   </div>
 
-  <!-- ═══ STICKY FILTER BAR ════════════════════════════════════ -->
   <div class="filter-bar-wrap">
     <div class="container relative">
       <div class="filter-bar-scroll">
         <div class="filter-bar">
 
-          <!-- VENDOR FILTERS -->
           <ng-container *ngIf="activeTab === 'vendors'">
             <div class="filter-pill" [class.active]="activePanel === 'type'" (click)="togglePanel('type')">
               <span>Vendor Type</span>
-              <span class="pill-arrow" *ngIf="filters.type">({{filters.type}})</span>
+              <span class="pill-arrow" *ngIf="selectedVendorTypeId">({{ vendorTypeName(selectedVendorTypeId) }})</span>
               <span class="pill-arrow">▾</span>
             </div>
             <div class="filter-divider"></div>
-
             <div class="filter-pill" [class.active]="activePanel === 'loc'" (click)="togglePanel('loc')">
               <span>Location</span>
-              <span class="pill-arrow" *ngIf="filters.loc">({{filters.loc}})</span>
+              <span class="pill-arrow" *ngIf="selectedLocation">({{ selectedLocation }})</span>
               <span class="pill-arrow">▾</span>
             </div>
             <div class="filter-divider"></div>
-
             <div class="filter-pill" [class.active]="activePanel === 'rating'" (click)="togglePanel('rating')">
               <span>Rating</span>
-              <span class="pill-arrow" *ngIf="filters.rating">({{filters.rating}}+)</span>
+              <span class="pill-arrow" *ngIf="minRating">({{ minRating }}+)</span>
               <span class="pill-arrow">▾</span>
             </div>
           </ng-container>
 
-          <!-- SERVICE FILTERS -->
           <ng-container *ngIf="activeTab === 'services'">
             <div class="filter-pill" [class.active]="activePanel === 'type'" (click)="togglePanel('type')">
               <span>Service Type</span>
-              <span class="pill-arrow" *ngIf="selectedCategories.length">({{selectedCategories.length}})</span>
+              <span class="pill-arrow" *ngIf="selectedServiceTypeId">({{ serviceTypeName(selectedServiceTypeId) }})</span>
               <span class="pill-arrow">▾</span>
             </div>
             <div class="filter-divider"></div>
-
             <div class="filter-pill" [class.active]="activePanel === 'event'" (click)="togglePanel('event')">
               <span>Event Type</span>
-              <span class="pill-arrow" *ngIf="selectedEventTypes.length">({{selectedEventTypes.length}})</span>
+              <span class="pill-arrow" *ngIf="selectedEventTypeId">({{ eventTypeName(selectedEventTypeId) }})</span>
               <span class="pill-arrow">▾</span>
             </div>
             <div class="filter-divider"></div>
-
             <div class="filter-pill" [class.active]="activePanel === 'price'" (click)="togglePanel('price')">
               <span>Price</span>
-              <span class="pill-arrow" *ngIf="maxPrice < 100000">(up to {{maxPrice | number}})</span>
+              <span class="pill-arrow" *ngIf="maxPrice < 100000">(up to {{ maxPrice | number }})</span>
               <span class="pill-arrow">▾</span>
             </div>
             <div class="filter-divider"></div>
-
             <div class="filter-pill" [class.active]="activePanel === 'rating'" (click)="togglePanel('rating')">
               <span>Rating</span>
-              <span class="pill-arrow" *ngIf="minRating > 0">({{minRating}}+)</span>
+              <span class="pill-arrow" *ngIf="minRating > 0">({{ minRating }}+)</span>
               <span class="pill-arrow">▾</span>
             </div>
             <div class="filter-divider"></div>
-
             <div class="filter-pill" [class.active]="activePanel === 'loc'" (click)="togglePanel('loc')">
               <span>City</span>
-              <span class="pill-arrow" *ngIf="selectedCity">({{selectedCity}})</span>
+              <span class="pill-arrow" *ngIf="selectedCity">({{ selectedCity }})</span>
               <span class="pill-arrow">▾</span>
             </div>
           </ng-container>
 
           <div class="filter-divider"></div>
-          <button class="filter-pill text-[#dc2626] border-[#fecaca]" (click)="clearAllFilters()">Clear All</button>
-
+          <button type="button" class="filter-pill text-[#dc2626] border-[#fecaca]" (click)="clearAllFilters()">Clear All</button>
         </div>
       </div>
 
-      <!-- Dropdown Panels -->
       <div class="filter-panels-layer" *ngIf="activePanel">
-
-        <!-- Vendor Type / Service Type -->
         <div class="filter-panel open left-[0]" *ngIf="activePanel === 'type'">
           <div class="fp-title">{{ activeTab === 'vendors' ? 'Vendor Type' : 'Service Type' }}</div>
           <div class="fp-chips">
-            <!-- Vendor types -->
             <ng-container *ngIf="activeTab === 'vendors'">
-              <div class="fp-chip" *ngFor="let t of ['Venue','Catering','Decoration','Photography','Entertainment']"
-                [class.selected]="activeType === t" (click)="activeType = t">{{t}}</div>
+              <div class="fp-chip" *ngFor="let t of vendorTypes"
+                [class.selected]="selectedVendorTypeId === t.id"
+                (click)="selectVendorType(t.id)">{{ t.name }}</div>
+              <div class="fp-chip text-[var(--gray)]" *ngIf="vendorTypes.length === 0">Loading…</div>
             </ng-container>
-            <!-- Service categories -->
             <ng-container *ngIf="activeTab === 'services'">
               <div class="fp-chip" *ngFor="let cat of serviceCategories"
-                [class.selected]="selectedCategories.includes(cat.id)"
-                (click)="toggleCategory(cat.id)">{{cat.name}}</div>
+                [class.selected]="selectedServiceTypeId === cat.id"
+                (click)="selectServiceType(cat.id)">{{ cat.name }}</div>
+              <div class="fp-chip text-[var(--gray)]" *ngIf="serviceCategories.length === 0">Loading…</div>
             </ng-container>
           </div>
           <div class="fp-footer">
-            <button class="fp-clear" (click)="activeTab === 'vendors' ? (activeType = '') : clearServiceType()">Clear</button>
-            <button class="fp-apply btn btn-gold btn-sm" (click)="activeTab === 'vendors' ? updateFilters() : (activePanel = null)">Apply</button>
+            <button type="button" class="fp-clear" (click)="activeTab === 'vendors' ? clearVendorType() : clearServiceType()">Clear</button>
           </div>
         </div>
 
-        <!-- Event Type (services only) -->
         <div class="filter-panel open left-[140px]" *ngIf="activePanel === 'event' && activeTab === 'services'">
           <div class="fp-title">Event Type</div>
           <div class="fp-chips">
-            <div class="fp-chip" *ngFor="let ev of ['Wedding','Birthday','Corporate','Graduation','Engagement']"
-              [class.selected]="selectedEventTypes.includes(ev.toLowerCase())"
-              (click)="toggleEventType(ev.toLowerCase())">{{ev}}</div>
+            <div class="fp-chip" *ngFor="let ev of eventTypes"
+              [class.selected]="selectedEventTypeId === ev.id"
+              (click)="selectEventType(ev.id)">{{ ev.name }}</div>
+            <div class="fp-chip text-[var(--gray)]" *ngIf="eventTypes.length === 0">Loading…</div>
           </div>
           <div class="fp-footer">
-            <button class="fp-clear" (click)="selectedEventTypes = []; loadServices()">Clear</button>
-            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null">Apply</button>
+            <button type="button" class="fp-clear" (click)="clearEventType()">Clear</button>
           </div>
         </div>
 
-        <!-- Location (vendors) -->
         <div class="filter-panel open left-[140px]" *ngIf="activePanel === 'loc' && activeTab === 'vendors'">
           <div class="fp-title">Location</div>
           <div class="fp-chips">
-            <div class="fp-chip" *ngFor="let l of ['Cairo','New Cairo','Giza','Alexandria','North Coast']"
-              [class.selected]="activeLoc === l" (click)="activeLoc = l">{{l}}</div>
+            <div class="fp-chip" *ngFor="let l of cities"
+              [class.selected]="selectedLocation === l"
+              (click)="selectLocation(l)">{{ l }}</div>
           </div>
           <div class="fp-footer">
-            <button class="fp-clear" (click)="activeLoc = ''; updateFilters()">Clear</button>
-            <button class="fp-apply btn btn-gold btn-sm" (click)="updateFilters()">Apply</button>
+            <button type="button" class="fp-clear" (click)="clearLocation()">Clear</button>
           </div>
         </div>
 
-        <!-- City (services) -->
         <div class="filter-panel open left-[360px]" *ngIf="activePanel === 'loc' && activeTab === 'services'">
           <div class="fp-title">City</div>
           <div class="fp-chips">
-            <div class="fp-chip" *ngFor="let city of ['Cairo','New Cairo','Giza','Alexandria','Mansoura']"
+            <div class="fp-chip" *ngFor="let city of cities"
               [class.selected]="selectedCity === city"
-              (click)="selectedCity = city; loadServices()">{{city}}</div>
+              (click)="selectCity(city)">{{ city }}</div>
           </div>
           <div class="fp-footer">
-            <button class="fp-clear" (click)="selectedCity = ''; loadServices()">Clear</button>
-            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null">Apply</button>
+            <button type="button" class="fp-clear" (click)="clearCity()">Clear</button>
           </div>
         </div>
 
-        <!-- Price (services) -->
         <div class="filter-panel open left-[290px]" *ngIf="activePanel === 'price' && activeTab === 'services'">
           <div class="fp-title">Max Price (EGP)</div>
           <div class="fp-chips">
-            <div class="fp-chip" *ngFor="let p of [5000, 15000, 30000, 50000, 100000]"
+            <div class="fp-chip" *ngFor="let p of priceOptions"
               [class.selected]="maxPrice === p"
-              (click)="setMaxPrice(p)">
-              {{p >= 100000 ? 'Any' : (p | number)}}
+              (click)="selectMaxPrice(p)">
+              {{ p >= 100000 ? 'Any' : (p | number) }}
             </div>
           </div>
           <div class="fp-footer">
-            <button class="fp-clear" (click)="clearMaxPrice()">Clear</button>
-            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null">Apply</button>
+            <button type="button" class="fp-clear" (click)="clearMaxPrice()">Clear</button>
           </div>
         </div>
 
-        <!-- Rating -->
         <div class="filter-panel open"
           [style.left]="activeTab === 'vendors' ? '280px' : '430px'"
           *ngIf="activePanel === 'rating'">
           <div class="fp-title">Minimum Rating</div>
           <div class="fp-chips">
-            <div class="fp-chip" *ngFor="let r of [3, 4, 4.5, 4.8]"
-              [class.selected]="activeTab === 'vendors' ? activeRating === r : minRating === r"
-              (click)="setRating(r)">
-              {{r}}+
-            </div>
+            <div class="fp-chip" *ngFor="let r of ratingOptions"
+              [class.selected]="minRating === r"
+              (click)="selectRating(r)">{{ r }}+</div>
           </div>
           <div class="fp-footer">
-            <button class="fp-clear" (click)="clearRating()">Clear</button>
-            <button class="fp-apply btn btn-gold btn-sm" (click)="activeTab === 'vendors' ? updateFilters() : (activePanel = null)">Apply</button>
+            <button type="button" class="fp-clear" (click)="clearRating()">Clear</button>
           </div>
         </div>
-
       </div>
 
       <div class="filter-panel-overlay" *ngIf="activePanel" (click)="activePanel = null"></div>
     </div>
   </div>
 
-  <!-- ═══ RESULTS ═══════════════════════════════════════════════ -->
   <div class="container">
     <div class="results-header">
       <div class="results-count">
         <strong>{{ activeTab === 'vendors' ? vendorCount : serviceCount }}</strong>
         {{ activeTab === 'vendors' ? 'vendors' : 'services' }}
         <span class="results-page-hint" *ngIf="totalPages > 1">
-          &nbsp;·&nbsp; page {{currentPage}} of {{totalPages}}
+          &nbsp;·&nbsp; page {{ currentPage }} of {{ totalPages }}
         </span>
       </div>
       <div class="flex gap-[16px] items-center">
@@ -218,8 +195,7 @@
             <i class="bi bi-map"></i>
           </button>
         </div>
-        <select class="sort-select" [(ngModel)]="sortOption"
-          (change)="activeTab === 'vendors' ? triggerSearch() : applyServiceFilters()">
+        <select class="sort-select" [(ngModel)]="sortOption" (change)="onSortChange()">
           <option value="rating">Top Rated</option>
           <ng-container *ngIf="activeTab === 'services'">
             <option value="price-asc">Price: Low → High</option>
@@ -229,20 +205,19 @@
       </div>
     </div>
 
-    <div class="p-[40px] text-center text-[var(--gray)]" *ngIf="loading">
+    <div class="p-[40px] text-center text-[var(--gray)]"
+      *ngIf="loading && (activeTab === 'vendors' ? displayVendors.length === 0 : filteredServices.length === 0)">
       Loading {{ activeTab === 'vendors' ? 'vendors' : 'services' }}…
     </div>
 
-    <!-- Map -->
     <div class="vendor-map-container" [class.hidden]="viewMode !== 'map'">
       <div id="explore-map" class="w-full h-[600px] rounded-[20px] border border-[rgba(0,0,0,0.1)] shadow-[0_8px_40px_rgba(26,37,64,0.18)] relative z-0 mb-8"></div>
     </div>
 
-    <!-- Vendor Grid -->
-    <ng-container *ngIf="activeTab === 'vendors' && !loading && viewMode !== 'map'">
+    <ng-container *ngIf="activeTab === 'vendors' && (!loading || displayVendors.length > 0) && viewMode !== 'map'">
       <div class="explore-grid">
-        <app-vendor-card *ngFor="let v of pagedVendors" [vendor]="v"></app-vendor-card>
-        <div class="no-results" *ngIf="displayVendors.length === 0">
+        <app-vendor-card *ngFor="let v of displayVendors" [vendor]="v"></app-vendor-card>
+        <div class="no-results" *ngIf="!loading && displayVendors.length === 0">
           <div class="text-[3rem] mb-[12px]"><i class="bi bi-search" style="color:var(--gray)"></i></div>
           <h3>No vendors found</h3>
           <p>Try adjusting your filters or search query.</p>
@@ -251,15 +226,14 @@
       </div>
     </ng-container>
 
-    <!-- Service Grid -->
-    <ng-container *ngIf="activeTab === 'services' && !loading && viewMode !== 'map'">
+    <ng-container *ngIf="activeTab === 'services' && (!loading || filteredServices.length > 0) && viewMode !== 'map'">
       <div class="svc-explore-grid" [class.list-view]="viewMode === 'list'">
-        <div class="svc-card" *ngFor="let svc of pagedServices" (click)="openPreview(svc)">
+        <div class="svc-card" *ngFor="let svc of filteredServices" (click)="openPreview(svc)">
           <div class="svc-card-img">
-            <img *ngIf="svc.imageUrl" [src]="svc.imageUrl" />
+            <img *ngIf="svc.imageUrl" [src]="svc.imageUrl" alt="" />
             <span *ngIf="!svc.imageUrl" class="svc-img-placeholder"><i class="bi bi-image"></i></span>
             <div class="svc-card-top">
-              <span class="svc-cat-badge">{{svc.vendorTypeName || svc.serviceTypeName}}</span>
+              <span class="svc-cat-badge">{{ svc.vendorTypeName || svc.serviceTypeName }}</span>
               <div class="svc-card-actions">
                 <button class="svc-action-btn" [class.active]="isInWishlist(svc.id)" (click)="toggleWishlist(svc, $event)" title="Save">
                   <i class="bi bi-heart"></i>
@@ -271,14 +245,14 @@
             </div>
           </div>
           <div class="svc-card-body">
-            <div class="svc-vendor" *ngIf="svc.vendorName">{{svc.vendorName}}</div>
-            <div class="svc-name">{{svc.name}}</div>
-            <div class="svc-price">{{svc.price | currency:'EGP':'symbol':'1.0-0'}}</div>
+            <div class="svc-vendor" *ngIf="svc.vendorName">{{ svc.vendorName }}</div>
+            <div class="svc-name">{{ svc.name }}</div>
+            <div class="svc-price">{{ svc.price | currency:'EGP':'symbol':'1.0-0' }}</div>
             <p class="svc-desc">{{ (svc.description || '') | slice:0:80 }}<ng-container *ngIf="(svc.description || '').length > 80">…</ng-container></p>
           </div>
         </div>
 
-        <div class="no-results" *ngIf="filteredServices.length === 0">
+        <div class="no-results" *ngIf="!loading && filteredServices.length === 0">
           <div class="text-[3rem] mb-[12px]"><i class="bi bi-search" style="color:var(--gray)"></i></div>
           <h3>No services found</h3>
           <p>Try adjusting your filters or search terms.</p>
@@ -287,41 +261,22 @@
       </div>
     </ng-container>
 
-    <!-- ═══ PAGINATION ══════════════════════════════════════════ -->
-    <div class="pagination-wrap" *ngIf="!loading && viewMode !== 'map' && (activeTab === 'vendors' ? vendorCount : serviceCount) > 0">
-      <button class="pg-btn pg-nav"
-        [disabled]="currentPage === 1"
-        (click)="goToPage(currentPage - 1)"
-        aria-label="Previous page">
-        <i class="bi bi-chevron-left"></i>
-      </button>
-
-      <ng-container *ngFor="let p of pageNumbers">
-        <span class="pg-ellipsis" *ngIf="p === -1">…</span>
-        <button class="pg-btn"
-          *ngIf="p !== -1"
-          [class.active]="p === currentPage"
-          (click)="goToPage(p)"
-          [attr.aria-current]="p === currentPage ? 'page' : null">
-          {{ p }}
-        </button>
-      </ng-container>
-
-      <button class="pg-btn pg-nav"
-        [disabled]="currentPage === totalPages"
-        (click)="goToPage(currentPage + 1)"
-        aria-label="Next page">
-        <i class="bi bi-chevron-right"></i>
-      </button>
-    </div>
-
+    <app-pagination
+      *ngIf="!loading && viewMode !== 'map' && (activeTab === 'vendors' ? vendorCount : serviceCount) > 0"
+      variant="explore"
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      [totalCount]="activeTab === 'vendors' ? vendorCount : serviceCount"
+      [pageSize]="pageSize"
+      [showSummary]="false"
+      (pageChange)="onPageChange($event)">
+    </app-pagination>
   </div>
 
-  <!-- ═══ COMPARE BAR ═════════════════════════════════════════ -->
   <div class="compare-bar" [class.show]="showCompareBar">
-    <div class="cb-title"><i class="bi bi-arrow-left-right"></i> Compare ({{compareList.length}}/3)</div>
+    <div class="cb-title"><i class="bi bi-arrow-left-right"></i> Compare ({{ compareList.length }}/3)</div>
     <div class="cb-slots">
-      <div class="cb-slot" *ngFor="let s of compareList" class="cb-slot filled">{{s.name}}</div>
+      <div class="cb-slot" *ngFor="let s of compareList" class="cb-slot filled">{{ s.name }}</div>
       <div class="cb-slot" *ngIf="compareList.length < 3">+ Add service</div>
     </div>
     <div class="cb-actions">
@@ -330,28 +285,27 @@
     </div>
   </div>
 
-  <!-- ═══ SERVICE PREVIEW MODAL ══════════════════════════════ -->
   <div class="es-preview-backdrop" *ngIf="showPreview" (click)="closePreview()">
     <div class="es-preview-card" (click)="$event.stopPropagation()">
       <button class="es-preview-close" (click)="closePreview()">
         <i class="fa-solid fa-x fa-xs"></i>
       </button>
       <div class="es-preview-images" *ngIf="previewImages.length > 0">
-        <img [src]="previewImages[activeImageIndex]" class="es-preview-main-img" />
+        <img [src]="previewImages[activeImageIndex]" class="es-preview-main-img" alt="" />
         <div class="es-preview-thumbs" *ngIf="previewImages.length > 1">
-          <img *ngFor="let img of previewImages; let i = index" [src]="img"
+          <img *ngFor="let img of previewImages; let i = index" [src]="img" alt=""
             [class.active]="i === activeImageIndex"
             (click)="activeImageIndex = i; $event.stopPropagation()" />
         </div>
       </div>
       <div class="es-preview-info">
-        <div class="es-preview-badge" *ngIf="selectedService?.vendorTypeName">{{selectedService?.vendorTypeName}}</div>
-        <h2 class="es-preview-title">{{selectedService?.name}}</h2>
+        <div class="es-preview-badge" *ngIf="selectedService?.vendorTypeName">{{ selectedService?.vendorTypeName }}</div>
+        <h2 class="es-preview-title">{{ selectedService?.name }}</h2>
         <div class="es-preview-vendor" *ngIf="selectedService?.vendorName">
-          <i class="bi bi-shop"></i> {{selectedService?.vendorName}}
+          <i class="bi bi-shop"></i> {{ selectedService?.vendorName }}
         </div>
-        <div class="es-preview-price">{{selectedService?.price | currency:'EGP':'symbol':'1.0-0'}}</div>
-        <p class="es-preview-desc">{{selectedService?.description}}</p>
+        <div class="es-preview-price">{{ selectedService?.price | currency:'EGP':'symbol':'1.0-0' }}</div>
+        <p class="es-preview-desc">{{ selectedService?.description }}</p>
         <div class="es-preview-actions">
           <button class="btn btn-gold" (click)="bookService(selectedService!)">Book Now</button>
           <button class="btn btn-ghost btn-sm" [routerLink]="['/vendor', selectedService?.vendorId]" (click)="closePreview()">

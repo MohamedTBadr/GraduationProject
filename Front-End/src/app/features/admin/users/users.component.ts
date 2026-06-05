@@ -6,11 +6,12 @@ import { ApiUser, PagedResult } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   providers: [DatePipe],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss']
@@ -70,10 +71,9 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  changePage(delta: number) {
-    const newPage = this.pageNumber + delta;
-    if (newPage >= 1 && newPage <= this.totalPages) {
-      this.pageNumber = newPage;
+  onPageChange(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.pageNumber = page;
       this.loadUsers();
     }
   }

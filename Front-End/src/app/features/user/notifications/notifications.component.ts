@@ -4,6 +4,7 @@ import { AppNotification } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { SignalRService } from '../../../core/services/signalr.service';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
 const TYPE = {
   ACCOUNT_ACCEPTED:    0,
@@ -32,13 +33,15 @@ const TAB_TYPES: Record<string, number[]> = {
 @Component({
   selector: 'app-user-notifications',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PaginationComponent],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })
 export class UserNotificationsComponent implements OnInit {
   activeTab = 'All';
   tabs = ['All', 'Bookings', 'Events', 'Payments', 'Account'];
+  pageNumber = 1;
+  pageSize = 12;
 
   constructor(
     private notificationService: NotificationService,
@@ -72,6 +75,15 @@ export class UserNotificationsComponent implements OnInit {
     return this.notifications.filter(n => types.includes(n.type ?? -1));
   }
 
+  get paginatedNotifications(): AppNotification[] {
+    const start = (this.pageNumber - 1) * this.pageSize;
+    return this.filteredNotifications.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredNotifications.length / this.pageSize));
+  }
+
   tabUnreadCount(tab: string): number {
     const unread = this.notifications.filter(n => !n.isRead);
     const types = TAB_TYPES[tab];
@@ -79,7 +91,14 @@ export class UserNotificationsComponent implements OnInit {
     return unread.filter(n => types.includes(n.type ?? -1)).length;
   }
 
-  setTab(tab: string): void { this.activeTab = tab; }
+  setTab(tab: string): void {
+    this.activeTab = tab;
+    this.pageNumber = 1;
+  }
+
+  onPageChange(page: number): void {
+    this.pageNumber = page;
+  }
 
   getTypeIcon(type?: number): string {
     switch (type) {

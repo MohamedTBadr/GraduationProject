@@ -15,9 +15,9 @@
   <div class="ad-search-row">
     <div class="ad-search-wrap">
       <i class="bi bi-search ad-search-icon"></i>
-      <input type="text" placeholder="Search by order ID, event ID or user ID…" [(ngModel)]="searchTerm"/>
+      <input type="text" placeholder="Search by order ID, event ID or user ID…" [(ngModel)]="searchTerm" (input)="onSearchChange()"/>
     </div>
-    <select class="ad-filter-sel" [(ngModel)]="statusFilter">
+    <select class="ad-filter-sel" [(ngModel)]="statusFilter" (change)="onStatusChange()">
       <option *ngFor="let s of statusOptions">{{ s }}</option>
     </select>
   </div>
@@ -40,7 +40,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let o of filteredOrders">
+        <tr *ngFor="let o of paginatedOrders">
           <td class="font-[monospace] text-[.74rem] text-[rgba(255,255,255,.5)]">{{ shortId(o.id) }}</td>
           <td class="font-[monospace] text-[.74rem] text-[rgba(255,255,255,.5)]">{{ shortId(o.eventId) }}</td>
           <td class="font-[monospace] text-[.74rem] text-[rgba(255,255,255,.5)]">{{ shortId(o.userId) }}</td>
@@ -49,10 +49,20 @@
           <td class="font-bold text-[var(--gold)]">{{ o.amount | number }} EGP</td>
           <td><span class="ad-pill" [ngClass]="statusPillClass(o.paymentStatus)">{{ o.paymentStatus }}</span></td>
         </tr>
-        <tr *ngIf="!filteredOrders.length">
+        <tr *ngIf="!paginatedOrders.length">
           <td colspan="7" style="text-align:center;padding:32px;color:rgba(255,255,255,.3)">No orders found</td>
         </tr>
       </tbody>
     </table>
+
+    <app-pagination
+      *ngIf="!loading && filteredOrders.length > 0"
+      variant="admin"
+      [currentPage]="pageNumber"
+      [totalPages]="totalPages"
+      [totalCount]="filteredOrders.length"
+      [pageSize]="pageSize"
+      (pageChange)="onPageChange($event)">
+    </app-pagination>
   </div>
 </div>

@@ -8,11 +8,15 @@ import { CreateReviewDto } from '../../shared/types/api.interfaces';
   providedIn: 'root'
 })
 export class ReviewService {
-  private readonly apiUrl = `${environment.apiUrl}/Review`;
+  private readonly apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
-  submitReview(payload: CreateReviewDto): Observable<any> {
-    return this.http.post<any>(this.apiUrl, payload);
+  /** POST /Service/{serviceId}/ratings — backend sets userId from token */
+  submitReview(payload: CreateReviewDto): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/Service/${payload.serviceId}/ratings`, {
+      rating: payload.rating,
+      review: payload.review
+    });
   }
 }

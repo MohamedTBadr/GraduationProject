@@ -1,7 +1,7 @@
 ﻿<div class="vendor-card" [routerLink]="['/vendor', vendor.id]">
     <div class="vc-photo">
         <div class="vc-photo-inner" [style.background]="getGradient(vendor.id)">
-            <span class="vc-initial">{{vendor.name.charAt(0)}}</span>
+            <span class="vc-initial">{{ (vendor.name || 'U').charAt(0) }}</span>
         </div>
         <div class="vc-top-row">
             <span class="vc-cat-badge">{{vendor.vendorTypeName || 'Vendor'}}</span>

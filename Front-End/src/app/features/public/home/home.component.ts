@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { VendorCardComponent } from '../../../shared/components/vendor-card/vendor-card.component';
 import { ApiVendor } from '../../../shared/types/api.interfaces';
 import { VendorService } from '../../../core/services/vendor.service';
+import { EventTypeService } from '../../../core/services/event-type.service';
+import { EventType } from '../../../core/models/taxonomy.models';
 
 @Component({
   selector: 'app-home',
@@ -14,18 +16,23 @@ import { VendorService } from '../../../core/services/vendor.service';
 })
 export class HomeComponent implements OnInit {
   featuredVendors: ApiVendor[] = [];
+  eventTypes: EventType[] = [];
   loading = false;
 
-  constructor(private router: Router, private vendorService: VendorService) { }
+  constructor(
+    private router: Router,
+    private vendorService: VendorService,
+    private eventTypeService: EventTypeService
+  ) { }
 
   ngOnInit() {
     this.loading = true;
-    this.vendorService.getAll().subscribe({
+    this.eventTypeService.getAll().subscribe({
+      next: (types) => { this.eventTypes = Array.isArray(types) ? types : []; }
+    });
+    this.vendorService.getAll({ pageSize: 20, pageIndex: 1, sortBy: 'rating', isDescending: true }).subscribe({
       next: (data) => {
-        // Take top 4 rated or approved vendors
-        this.featuredVendors = data.filter(v => v.status === 'active' || v.isApproved)
-          .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-          .slice(0, 4);
+        this.featuredVendors = data.filter(v => v.status === 'active' || v.isApproved).slice(0, 4);
         this.loading = false;
       },
       error: () => {
@@ -40,8 +47,22 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  filterCat(category: string) {
-    this.router.navigate(['/explore'], { queryParams: { type: category } });
+  filterByEventType(slug: string) {
+    const match = this.eventTypes.find(t =>
+      t.name.toLowerCase() === slug.toLowerCase() ||
+      t.name.toLowerCase().includes(slug.toLowerCase())
+    );
+    this.router.navigate(['/explore'], {
+      queryParams: {
+        tab: 'services',
+        eventTypeId: match?.id ?? null,
+        eventType: match ? null : slug
+      }
+    });
+  }
+
+  filterVendorType(typeName: string) {
+    this.router.navigate(['/explore'], { queryParams: { tab: 'vendors', type: typeName } });
   }
 
   bookPackage() {

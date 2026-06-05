@@ -23,7 +23,7 @@
         </div>
 
         <div class="explore-grid" *ngIf="!loading && favorites.length > 0">
-            <div class="vendor-card" routerLink="/vendor/{{v.id}}" *ngFor="let v of favorites">
+            <div class="vendor-card" routerLink="/vendor/{{v.id}}" *ngFor="let v of paginatedFavorites">
                 <div class="vc-photo">
                     <div class="vc-photo-inner bg-[linear-gradient(135deg,_hsl(230,_40%,_25%)_0%,_hsl(250,_45%,_30%)_100%)]">{{v.name.charAt(0)}}</div>
                     <div class="vc-top-row">
@@ -45,5 +45,14 @@
                 </div>
             </div>
         </div>
+
+        <app-pagination
+            *ngIf="!loading && favorites.length > pageSize"
+            [currentPage]="pageNumber"
+            [totalPages]="totalPages"
+            [totalCount]="favorites.length"
+            [pageSize]="pageSize"
+            (pageChange)="onPageChange($event)">
+        </app-pagination>
     </div>
 </div>

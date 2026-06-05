@@ -73,8 +73,8 @@
             </div>
           </div>
           <div class="fp-footer">
-            <button class="fp-clear" (click)="selectedCategories = []; applyFilters()">Clear</button>
-            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null; applyFilters()">Apply</button>
+            <button class="fp-clear" (click)="selectedCategories = []; loadData()">Clear</button>
+            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null">Apply</button>
           </div>
         </div>
 
@@ -90,8 +90,8 @@
             </div>
           </div>
           <div class="fp-footer">
-            <button class="fp-clear" (click)="selectedEventTypes = []; applyFilters()">Clear</button>
-            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null; applyFilters()">Apply</button>
+            <button class="fp-clear" (click)="selectedEventTypes = []; loadData()">Clear</button>
+            <button class="fp-apply btn btn-gold btn-sm" (click)="activePanel = null">Apply</button>
           </div>
         </div>
 

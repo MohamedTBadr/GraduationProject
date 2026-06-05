@@ -270,14 +270,31 @@ export class MyEventsComponent implements OnInit {
 
     this.orderService.createOrder(orderPayload).subscribe({
       next: (result) => {
-        this.isPaying = false;
-        if (!result?.id) {
+        if (result?.id) {
+          this.finishCheckout(result);
+          return;
+        }
+        // Fallback when API succeeds but omits id in the response body
+        const userId = user?.id;
+        if (!userId) {
+          this.isPaying = false;
           this.toastService.show('Order creation failed. Please try again.', 'error');
           return;
         }
-        // Track new order locally so button switches to "Resume" immediately
-        this.userOrders = [...this.userOrders, result];
-        this.router.navigate(['/checkout', result.id]);
+        this.orderService.findLatestOrderForEvent(userId, this.activeEvent.id).subscribe({
+          next: (fallback) => {
+            if (fallback?.id) {
+              this.finishCheckout(fallback);
+            } else {
+              this.isPaying = false;
+              this.toastService.show('Order creation failed. Please try again.', 'error');
+            }
+          },
+          error: () => {
+            this.isPaying = false;
+            this.toastService.show('Order creation failed. Please try again.', 'error');
+          }
+        });
       },
       error: (err) => {
         this.isPaying = false;
@@ -285,6 +302,14 @@ export class MyEventsComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  private finishCheckout(order: OrderResponse) {
+    this.isPaying = false;
+    if (!this.userOrders.some(o => o.id === order.id)) {
+      this.userOrders = [...this.userOrders, order];
+    }
+    this.router.navigate(['/checkout', order.id]);
   }
 
   // ── Collaborators ─────────────────────────────────────────────────────────

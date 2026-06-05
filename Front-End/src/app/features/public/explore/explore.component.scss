@@ -1,3 +1,27 @@
+.explore-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 520px;
+  margin: 20px auto 0;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--lgray, #e8e0ec);
+  border-radius: 50px;
+  box-shadow: 0 4px 20px rgba(30, 14, 44, 0.06);
+
+  i { color: var(--gold, #c9a84c); }
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.95rem;
+    color: var(--navy, #1e0e2c);
+  }
+}
+
 /* ═══ TAB BAR ══════════════════════════════════════════════ */
 .explore-tabs {
   background: var(--white);

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { environment } from '../../../../environments/environment';
 
@@ -28,9 +28,14 @@ export class ReportsComponent implements OnInit {
 
   loadReport() {
     this.loading = true;
-    this.http.get<any>(`${environment.apiUrl}/reports/executive`).subscribe({
+    // /reports/executive has an unregistered DI service on the backend;
+    // /dashboard/executive-report returns equivalent data
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    this.http.post<any>(`${environment.apiUrl}/dashboard/executive-report`, {}, { headers }).subscribe({
       next: (data) => {
-        this.report = data;
+        const d = data?.value ?? data;
+        // Normalize kpIs -> kpis for template compatibility
+        this.report = { ...d, kpis: d?.kpIs ?? d?.KPIs ?? d?.kpis ?? {} };
         this.loading = false;
       },
       error: (err) => {
@@ -78,8 +83,8 @@ export class ReportsComponent implements OnInit {
   emailReport() {
     this.isSendingEmail = true;
     this.toastService.show('Scheduling report email...', 'info');
-    
-    this.http.post<any>(`${environment.apiUrl}/reports/executive/send-email`, {}).subscribe({
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    this.http.post<any>(`${environment.apiUrl}/reports/executive/send-email`, {}, { headers }).subscribe({
       next: (res) => {
         this.toastService.show(res.message || 'Report scheduled! Check your email shortly.', 'success');
         this.isSendingEmail = false;

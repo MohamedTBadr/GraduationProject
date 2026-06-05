@@ -299,9 +299,10 @@
           type="text"
           placeholder="Search by client, service or event..."
           [(ngModel)]="historySearch"
+          (ngModelChange)="onHistoryFilterChange()"
         >
       </div>
-      <select class="vd-filter-sel" [(ngModel)]="historyStatusFilter">
+      <select class="vd-filter-sel" [(ngModel)]="historyStatusFilter" (ngModelChange)="onHistoryFilterChange()">
         <option value="All">All Status</option>
         <option value="Done">Done</option>
         <option value="Completed">Completed</option>
@@ -339,7 +340,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let hb of filteredHistory; trackBy: trackByBookingId" class="bk-tbl-row">
+          <tr *ngFor="let hb of paginatedHistory; trackBy: trackByBookingId" class="bk-tbl-row">
             <td>
               <div class="bk-client-cell">
                 <div class="bk-client-avatar" [style.background]="hb.status === 'Rejected' ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)'"
@@ -382,6 +383,15 @@
           </tr>
         </tbody>
       </table>
+
+      <app-pagination
+        *ngIf="filteredHistory.length > historyPageSize"
+        [currentPage]="historyPageNumber"
+        [totalPages]="historyTotalPages"
+        [totalCount]="filteredHistory.length"
+        [pageSize]="historyPageSize"
+        (pageChange)="onHistoryPageChange($event)">
+      </app-pagination>
     </div>
   </div>
 </div>
