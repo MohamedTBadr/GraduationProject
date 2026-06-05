@@ -86,6 +86,19 @@ jobs:
                   </rule>
                 </rules>
               </rewrite>
+
+              <staticContent>
+                <clientCache cacheControlMode="DisableCache" />
+              </staticContent>
+
+              <httpProtocol>
+                <customHeaders>
+                  <add name="Cache-Control" value="no-cache, no-store, must-revalidate" />
+                  <add name="Pragma" value="no-cache" />
+                  <add name="Expires" value="0" />
+                </customHeaders>
+              </httpProtocol>
+
             </system.webServer>
           </configuration>
           EOF
@@ -140,7 +153,7 @@ jobs:
       - name: Download frontend artifact
         uses: actions/download-artifact@v4
         with:
-          name: frontend-app
+          name: dotnet-app
           path: ./frontend
 
       - name: Azure Login
