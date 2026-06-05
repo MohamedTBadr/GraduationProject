@@ -151,7 +151,13 @@ public class PaymobService(
                 order_id = paymobOrderId,
                 billing_data = billing,
                 currency = "EGP",
-                integration_id = _options.IntegrationId
+                integration_id = _options.IntegrationId,
+                // add these
+                notification_url =
+                _options.WebhookUrl,
+
+                redirection_url =
+                _options.RedirectUrl
             })
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);

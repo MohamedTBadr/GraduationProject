@@ -122,15 +122,17 @@ namespace Application.Services
                 return Result<VendorDetailsDTO>.Failure(new Error(ErrorType.AlreadyExists, 409, errors));
             }
 
-            var profilePicture = await _fileService.Upload("Vendors", request.ProfilePicture, cancellationToken);
-            var document = await _fileService.Upload("VendorDocuments", request.Document, cancellationToken);
+            var profilePicture = request.ProfilePicture != null ? await _fileService.Upload("Vendors", request.ProfilePicture, cancellationToken) : string.Empty;
+            var document = request.Document != null ? await _fileService.Upload("VendorDocuments", request.Document, cancellationToken) : string.Empty;
+            var portfolioLink = request.PortfolioLink != null ? await _fileService.Upload("PortfolioLinks", request.PortfolioLink, cancellationToken) : string.Empty;
+            
             var vendor = new Vendor
             {
                 UserId = user.Id,
                 BusinessName = request.BusinessName,
                 YearsInBusiness = request.YearsInBusiness,
                 Description = request.Description,
-                PortfolioLink = request.PortfolioLink,
+                PortfolioLink = portfolioLink,
                 Address = request.Address,
                 IsVerified = false,
                 VendorTypeId = request.VendorTypeId,
@@ -163,6 +165,16 @@ namespace Application.Services
                 return Result<VendorDetailsDTO>.NotFound(404, "Vendor not found");
             }
             var vendorMapped = mapper.Map(request, existingVendor);
+
+            if (request.ProfilePicture != null)
+                vendorMapped.ProfilePicture = await _fileService.Upload("Vendors", request.ProfilePicture, cancellationToken);
+            
+            if (request.Document != null)
+                vendorMapped.Document = await _fileService.Upload("VendorDocuments", request.Document, cancellationToken);
+                
+            if (request.PortfolioLink != null)
+                vendorMapped.PortfolioLink = await _fileService.Upload("PortfolioLinks", request.PortfolioLink, cancellationToken);
+
             await vendorRepository.UpdateVendorAsync(vendorMapped, cancellationToken);
 
             // Update Lucene Index

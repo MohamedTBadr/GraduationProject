@@ -1,5 +1,4 @@
-﻿namespace Application.DTOs.PaymobDTOs
+namespace Application.DTOs.PaymobDTOs
 {
-    public record PaymentRequest(Guid OrderId, BillingData Billing);
-
+    public record PaymentRequest(Guid OrderId);
 }

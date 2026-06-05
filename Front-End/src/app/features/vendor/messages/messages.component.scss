@@ -61,8 +61,13 @@
   font-size: 0.85rem;
   text-align: center;
 
-  span { font-size: 2rem; opacity: 0.5; }
-  p { margin: 0; }
+  span {
+    font-size: 2rem;
+    opacity: 0.5;
+  }
+  p {
+    margin: 0;
+  }
 }
 
 .vd-conv-item {
@@ -75,7 +80,9 @@
   transition: background 0.15s;
   position: relative;
 
-  &:hover { background: var(--cream); }
+  &:hover {
+    background: var(--cream);
+  }
 
   &.active {
     background: rgba(201, 168, 76, 0.08);
@@ -86,7 +93,11 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: linear-gradient(135deg, hsl(230, 40%, 22%) 0%, hsl(250, 45%, 32%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(230, 40%, 22%) 0%,
+      hsl(250, 45%, 32%) 100%
+    );
     color: rgba(201, 168, 76, 0.8);
     font-size: 1.2rem;
     font-weight: 700;
@@ -170,7 +181,8 @@
   justify-content: center;
   padding: 40px;
   text-align: center;
-  background: var(--cream);
+  // background: var(--cream);
+  background: #ccc;
 
   .vd-empty-icon {
     font-size: 3.5rem;
@@ -180,13 +192,15 @@
 
   h3 {
     font-family: var(--ff-d);
-    color: var(--navy);
+    // color: var(--navy);
+    color: #1e0e2c;
     font-size: 1.4rem;
     margin: 0 0 8px 0;
   }
 
   p {
-    color: var(--gray);
+    // color: var(--gray);
+    color: #6b6478;
     font-size: 0.9rem;
     margin: 0;
     max-width: 280px;
@@ -215,7 +229,11 @@
     width: 46px;
     height: 46px;
     border-radius: 50%;
-    background: linear-gradient(135deg, hsl(230, 40%, 22%) 0%, hsl(250, 45%, 32%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(230, 40%, 22%) 0%,
+      hsl(250, 45%, 32%) 100%
+    );
     color: rgba(201, 168, 76, 0.85);
     font-size: 1.3rem;
     font-weight: 700;
@@ -258,8 +276,13 @@
 }
 
 @keyframes pulse-online {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 // Messages Scroll
@@ -275,7 +298,9 @@
   &::-webkit-scrollbar {
     width: 4px;
   }
-  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
   &::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 4px;
@@ -303,8 +328,14 @@
 }
 
 @keyframes ripple {
-  0% { transform: scale(0.8); opacity: 1; }
-  100% { transform: scale(1.8); opacity: 0; }
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
 }
 
 // Message Bubbles
@@ -376,8 +407,12 @@
     background: var(--cream);
     color: var(--navy);
 
-    &:focus { border-color: var(--gold); }
-    &::placeholder { color: var(--gray); }
+    &:focus {
+      border-color: var(--gold);
+    }
+    &::placeholder {
+      color: var(--gray);
+    }
   }
 
   .vd-send-btn {
@@ -394,7 +429,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, color 0.2s, transform 0.15s;
+    transition:
+      background 0.2s,
+      color 0.2s,
+      transform 0.15s;
     flex-shrink: 0;
 
     &.active {
@@ -421,4 +459,3 @@
     display: none;
   }
 }
-

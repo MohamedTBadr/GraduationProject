@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ namespace Application.DTOs.VendorDTOs
         public decimal YearsInBusiness { get; set; }
 
         public string Description { get; set; }
-        public string PortfolioLink { get; set; }
+        public IFormFile PortfolioLink { get; set; }
         public Address Address { get; set; }
 
         public IFormFile Document { get; set; }
