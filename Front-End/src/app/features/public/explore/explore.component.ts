@@ -135,8 +135,29 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       if (params['q']) this.filters.searchQuery = params['q'];
 
       // Service params
-      if (params['serviceCategory']) this.selectedCategories = [params['serviceCategory']];
+      if (params['serviceCategory']) {
+        let cat = params['serviceCategory'];
+        if (cat.toLowerCase() === 'decor') {
+          cat = 'Decoration';
+        }
+        this.selectedCategories = [cat];
+      }
       if (params['eventType']) this.selectedEventTypes = [params['eventType']];
+
+      const openServiceId = params['openServiceId'];
+      if (openServiceId) {
+        this.productService.getById(openServiceId).subscribe({
+          next: (svc) => {
+            if (svc) {
+              this.activeTab = 'services';
+              this.modalService.open('service-detail', svc);
+            }
+          },
+          error: (err) => {
+            console.error('Error fetching service for auto-open:', err);
+          }
+        });
+      }
 
       this.loadData();
     });
