@@ -70,14 +70,14 @@ namespace Infrastructure.Repositories
             // ✅ Paginate + fetch from DB
             var items = await query
                 .Include(p => p.Vendor)
-
-                    .ThenInclude(v => v.ServiceAreas)   // 👈 needed for Haversine phase
+                    .ThenInclude(v => v.ServiceAreas)
+                .Include(p => p.Vendor)
+                    .ThenInclude(v => v.VendorType)
                 .Include(p => p.ServiceType)
                 .Include(p => p.ServiceImages)
                 .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .ToListAsync(ct);                    // ← only DB round-trip
-
+                .ToListAsync(ct);
 
             // ✅ Phase 2 — Haversine in-memory on paged items only
             var filtered = ApplyHaversineFilter(request, items);
