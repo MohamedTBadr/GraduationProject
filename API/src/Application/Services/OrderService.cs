@@ -27,7 +27,7 @@ namespace Application.Services
                 return Result<OrderResponse>.Unauthorized(403, "You are not authorized to create an order for this event.");
 
             // 2. Calculate base amount in-memory (Performance Optimization)
-            var amount = eventWithItems.EventItems?.Sum(ei => ei.Quantity * ei.Price) ?? 0;
+            var amount = eventWithItems.EventItems?.Where(x=>x.ItemStatus =="Approved").Sum(ei => ei.Quantity * ei.Price) ?? 0;
 
             // 3. Apply voucher discount if provided
             if (!string.IsNullOrEmpty(request.VoucherCode))
@@ -87,7 +87,7 @@ namespace Application.Services
                     await notificationService.SendBulkAsync(vendorNotifications);
                 }
             }
-
+            
            var result = MapToResponse(order);
            return Result<OrderResponse>.Success(result);
         }
@@ -128,6 +128,15 @@ namespace Application.Services
                 return Result<OrderResponse>.Success(MapToResponse(order));
 
             order.PaymentStatus = request.PaymentStatus;
+
+            if (request.PaymentStatus.Equals("Paid", StringComparison.OrdinalIgnoreCase) && order.Event?.EventItems != null)
+            {
+                foreach (var item in order.Event.EventItems.Where(i => i.ItemStatus == "Approved"))
+                {
+                    item.ItemStatus = "Paid";
+                }
+            }
+
             await orderRepo.UpdateAsync(order, ct);
 
             // Revert voucher if payment fails or is rejected

@@ -75,7 +75,7 @@ namespace Application.UnitTests.Controllers
             var otherUserId = Guid.NewGuid();
             var request = new PaymentRequest(orderId); // we don't care about billing here
             
-            var orderResponse = new OrderResponse(orderId, ownerId, 100m, "EGP", null, "Pending", DateTime.UtcNow, null, null);
+            var orderResponse = new OrderResponse(orderId, ownerId, 100m, "EGP", null, "Pending", DateTime.UtcNow, null, Guid.NewGuid());
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Result<OrderResponse>.Success(orderResponse));
 
@@ -96,7 +96,7 @@ namespace Application.UnitTests.Controllers
             var userId = Guid.NewGuid();
             var request = new PaymentRequest(orderId);
             
-            var orderResponse = new OrderResponse(orderId, userId, 100m, "EGP", null, "Paid", DateTime.UtcNow, null, null);
+            var orderResponse = new OrderResponse(orderId, userId, 100m, "EGP", null, "Paid", DateTime.UtcNow, null, Guid.NewGuid());
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Result<OrderResponse>.Success(orderResponse));
 
@@ -118,7 +118,7 @@ namespace Application.UnitTests.Controllers
             var userId = Guid.NewGuid();
             var request = new PaymentRequest(orderId);
             
-            var orderResponse = new OrderResponse(orderId, userId, 100m, "EGP", null, "Completed", DateTime.UtcNow, null, null);
+            var orderResponse = new OrderResponse(orderId, userId, 100m, "EGP", null, "Completed", DateTime.UtcNow, null, Guid.NewGuid());
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Result<OrderResponse>.Success(orderResponse));
 
@@ -140,7 +140,7 @@ namespace Application.UnitTests.Controllers
             var userId = Guid.NewGuid();
             var request = new PaymentRequest(orderId);
             
-            var orderResponse = new OrderResponse(orderId, userId, 0m, "EGP", null, "Pending", DateTime.UtcNow, null, null);
+            var orderResponse = new OrderResponse(orderId, userId, 0m, "EGP", null, "Pending", DateTime.UtcNow, null, Guid.NewGuid());
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Result<OrderResponse>.Success(orderResponse));
 
@@ -168,7 +168,7 @@ namespace Application.UnitTests.Controllers
             var expectedIframeUrl = "https://paymob.com/iframe/xyz";
             var request = new PaymentRequest(orderId);
             
-            var orderResponse = new OrderResponse(orderId, userId, 200m, "EGP", null, "Pending", DateTime.UtcNow, null, null);
+            var orderResponse = new OrderResponse(orderId, userId, 200m, "EGP", null, "Pending", DateTime.UtcNow, null, Guid.NewGuid());
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Result<OrderResponse>.Success(orderResponse));
 

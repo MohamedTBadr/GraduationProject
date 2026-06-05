@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Orders;
+using Application.DTOs.Orders;
 using Application.DTOs.Vouchers;
 using Application.Interfaces.Services;
 using Application.Services;
@@ -117,6 +117,7 @@ namespace Application.UnitTests.Services
                         {
                             Quantity = 2,
                             Price = 100,
+                            ItemStatus = "Approved",
                             Service = new Service
                             {
                                 Name = "Decor",
@@ -127,6 +128,7 @@ namespace Application.UnitTests.Services
                         {
                             Quantity = 1,
                             Price = 50,
+                            ItemStatus = "Approved",
                             Service = new Service
                             {
                                 Name = "Lighting",
@@ -191,6 +193,7 @@ namespace Application.UnitTests.Services
                 {
                     Quantity = 2,
                     Price = 100,
+                    ItemStatus = "Approved",
                     Service = new Service
                     {
                         Name = "Decor",
