@@ -125,6 +125,10 @@ export const routes: Routes = [
                 path: 'favorites',
                 loadComponent: () => import('./features/user/favorites.component').then(m => m.FavoritesComponent)
             },
+            {
+                path: 'notifications',
+                loadComponent: () => import('./features/user/notifications/notifications.component').then(m => m.UserNotificationsComponent)
+            },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
         ]
     },

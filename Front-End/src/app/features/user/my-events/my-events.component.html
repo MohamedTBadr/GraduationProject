@@ -173,8 +173,55 @@
     </div>
 </div>
 
-<app-event-studio 
-    *ngIf="showAiStudio && activeEvent" 
+<!-- Collaborators -->
+<div class="dash-card" *ngIf="activeEvent">
+    <div class="dash-card-header">
+        <h3>Collaborators</h3>
+    </div>
+
+    <!-- Add collaborator form -->
+    <div class="flex gap-[8px] mb-[16px] flex-wrap">
+        <input
+            class="flex-1 min-w-[180px] rounded-[8px] py-[8px] px-[12px] text-[.85rem] [border:1.5px_solid_var(--lgray)] bg-transparent text-[var(--white)]"
+            type="text"
+            placeholder="Email or name"
+            [(ngModel)]="collaboratorInput"
+            (keyup.enter)="addCollaborator()" />
+        <select
+            class="rounded-[8px] py-[8px] px-[12px] text-[.85rem] [border:1.5px_solid_var(--lgray)] bg-transparent text-[var(--white)]"
+            [(ngModel)]="collaboratorRole">
+            <option [ngValue]="0">Viewer</option>
+            <option [ngValue]="1">Editor</option>
+        </select>
+        <button
+            class="btn btn-gold btn-sm"
+            [disabled]="collaboratorsLoading || !collaboratorInput.trim()"
+            (click)="addCollaborator()">
+            <i class="bi bi-person-plus"></i> Invite
+        </button>
+    </div>
+
+    <!-- Collaborator list -->
+    <div *ngIf="collaborators.length > 0" class="vendors-list">
+        <div *ngFor="let c of collaborators" class="vendor-row">
+            <div class="vendor-emoji"><i class="bi bi-person-circle"></i></div>
+            <div class="vendor-info">
+                <div class="vi-name">{{ c.fullName }}</div>
+                <div class="vi-type">{{ c.email }}</div>
+            </div>
+            <span class="badge badge-pending" style="margin-right:8px">{{ collaboratorRoleLabel(c.role) }}</span>
+            <button class="btn btn-sm" style="color:var(--red,#ef4444);background:none;border:none;cursor:pointer" (click)="removeCollaborator(c.userId)">
+                <i class="bi bi-x-circle"></i>
+            </button>
+        </div>
+    </div>
+    <p *ngIf="collaborators.length === 0" class="empty-services-hint">
+        No collaborators yet. Invite someone by email or name.
+    </p>
+</div>
+
+<app-event-studio
+    *ngIf="showAiStudio && activeEvent"
     [eventId]="activeEvent.id" 
     [eventBudget]="activeEvent.budget"
     [eventTypeName]="activeEvent.type"

@@ -457,6 +457,14 @@ export interface UpdateEventDto {
   eventStatus: string;
 }
 
+export interface EventCollaboratorDto {
+  userId: string;
+  fullName: string;
+  email: string;
+  role: 0 | 1; // 0 = Viewer, 1 = Editor
+  invitedAt: string;
+}
+
 export interface ApproveItemRequest {
   approve: boolean;
   reason?: string;
@@ -475,9 +483,10 @@ export interface AppNotification {
   userId: string;
   title: string;
   message: string;
-  type?: string;
+  type?: number; // NotificationType enum ordinal from backend (integer, no StringEnumConverter)
   isRead: boolean;
   createdAt: string;
+  isLive?: boolean; // true when pushed in real-time via SSE or SignalR
 }
 
 // ─────────────────────────────────────────────

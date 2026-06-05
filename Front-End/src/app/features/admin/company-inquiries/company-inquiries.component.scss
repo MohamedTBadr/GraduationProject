@@ -1,0 +1,53 @@
+:host {
+  display: block;
+}
+
+.vd-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+
+  &.open {
+    display: flex;
+  }
+}
+
+.vd-modal {
+  background: var(--dark-surface, #1a2540);
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.vd-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+
+  &:hover { color: #fff; }
+}
+
+.vd-modal-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.vd-modal-sub {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+}

@@ -13,7 +13,8 @@ import {
   ApproveItemRequest,
   CancelEventRequest,
   CreateEventItemDto,
-  AiEventPlanResponse
+  AiEventPlanResponse,
+  EventCollaboratorDto
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -166,5 +167,33 @@ export class EventService {
     return this.http.post<any>(`${this.apiUrl}/createEventByAI/${eventId}`, {}, { headers }).pipe(
       map(res => res?.value ?? res?.Value ?? res)
     );
+  }
+
+  // ── Collaborators ─────────────────────────────────────────────────────────
+
+  /** GET /Event/{id}/collaborators */
+  getCollaborators(eventId: string): Observable<EventCollaboratorDto[]> {
+    return this.http.get<any>(`${this.apiUrl}/${eventId}/collaborators`).pipe(
+      map(res => {
+        const data = res?.value ?? res;
+        return Array.isArray(data) ? data : [];
+      })
+    );
+  }
+
+  /** POST /Event/{id}/collaborators */
+  addCollaborator(eventId: string, userEmailOrName: string, role: 0 | 1): Observable<any> {
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    return this.http.post<any>(
+      `${this.apiUrl}/${eventId}/collaborators`,
+      { userEmailOrName, role },
+      { headers }
+    );
+  }
+
+  /** DELETE /Event/{id}/collaborators/{userId} */
+  removeCollaborator(eventId: string, userId: string): Observable<void> {
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    return this.http.delete<void>(`${this.apiUrl}/${eventId}/collaborators/${userId}`, { headers });
   }
 }

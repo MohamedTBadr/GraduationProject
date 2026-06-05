@@ -1,49 +1,77 @@
 <div class="ad-section active block">
   <div class="ad-page-hd">
     <div><div class="ad-page-title">Financials</div><div class="ad-page-sub">Platform-wide revenue, commission breakdown, and financial health.</div></div>
-    <button class="ad-btn ad-btn-ghost">Export Report</button>
-  </div>
-  <div class="ad-kpi-grid">
-    <div class="ad-kpi ak-gold"><div class="ad-kpi-icon"></div><div class="ad-kpi-val">847K</div><div class="ad-kpi-lbl">Gross Revenue (EGP)</div><div class="ad-kpi-trend akt-up">↑ 23%</div></div>
-    <div class="ad-kpi ak-green"><div class="ad-kpi-icon"></div><div class="ad-kpi-val">84.7K</div><div class="ad-kpi-lbl">Platform Commission</div><div class="ad-kpi-trend akt-up">10% avg rate</div></div>
-    <div class="ad-kpi ak-blue"><div class="ad-kpi-icon"></div><div class="ad-kpi-val">142.5K</div><div class="ad-kpi-lbl">Payouts This Month</div><div class="ad-kpi-trend akt-flat">47 vendors paid</div></div>
-    <div class="ad-kpi ak-red"><div class="ad-kpi-icon"></div><div class="ad-kpi-val">8.2K</div><div class="ad-kpi-lbl">Disputes / Refunds</div><div class="ad-kpi-trend akt-down">↑ 2 new this week</div></div>
-  </div>
-  <div class="ad-g2">
-    <div class="ad-card">
-      <div class="ad-card-title">Revenue Trend (Monthly)</div>
-      <div class="ad-bar-chart flex items-end gap-[15px] h-[120px] pt-[20px] mt-[10px] justify-center" id="ad-fin-chart">
-          <div class="w-[25px] bg-[var(--gold)] h-[62%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Oct</span></div>
-          <div class="w-[25px] bg-[var(--gold)] h-[71%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Nov</span></div>
-          <div class="w-[25px] bg-[var(--gold)] h-[98%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Dec</span></div>
-          <div class="w-[25px] bg-[var(--gold)] h-[82%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Jan</span></div>
-          <div class="w-[25px] bg-[var(--gold)] h-[91%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-4px]">Feb</span></div>
-      </div>
-    </div>
-    <div class="ad-card">
-      <div class="ad-card-title">Commission Breakdown</div>
-      <div id="ad-commission-breakdown">
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Venue (15%)</span><div class="flex-1 my-[0] mx-[14px]"><div class="ad-prog"><div class="ad-prog-fill w-[57%]"></div></div></div><span class="ad-rev-val">48K EGP</span></div>
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Photography (10%)</span><div class="flex-1 my-[0] mx-[14px]"><div class="ad-prog"><div class="ad-prog-fill w-[11%]"></div></div></div><span class="ad-rev-val">9K EGP</span></div>
-      </div>
+    <div class="flex gap-[8px]">
+      <button class="ad-btn ad-btn-ghost" (click)="sendEmail()">Email Report</button>
+      <button class="ad-btn ad-btn-ghost" (click)="downloadPdf()">Download PDF</button>
     </div>
   </div>
-  <div class="ad-g2">
-    <div class="ad-card">
-      <div class="ad-card-title">Revenue by Event Type</div>
-      <div id="ad-rev-event-type">
-          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Wedding</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[48%]"></div></div><div class="w-[30px] text-right">48%</div></div>
-          <div class="flex items-center my-[12px] mx-[0] text-[.8rem]"><div class="flex-1">Engagement</div><div class="my-[0] mx-[12px] flex items-center h-[8px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[#10b981] w-[20%]"></div></div><div class="w-[30px] text-right">20%</div></div>
+
+  <div *ngIf="loading" style="text-align:center;padding:40px;color:rgba(255,255,255,.4)">Loading financial report…</div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- KPIs -->
+    <div class="ad-kpi-grid">
+      <div class="ad-kpi ak-gold">
+        <div class="ad-kpi-val">{{ formatCurrency(lifetimeRevenue) }}</div>
+        <div class="ad-kpi-lbl">Gross Revenue (EGP)</div>
+        <div class="ad-kpi-trend akt-up" *ngIf="growthPercentage > 0">↑ {{ growthPercentage | number:'1.0-1' }}%</div>
+      </div>
+      <div class="ad-kpi ak-green">
+        <div class="ad-kpi-val">{{ formatCurrency(currentMonthRevenue) }}</div>
+        <div class="ad-kpi-lbl">This Month (EGP)</div>
+      </div>
+      <div class="ad-kpi ak-blue">
+        <div class="ad-kpi-val">{{ formatCurrency(lastMonthRevenue) }}</div>
+        <div class="ad-kpi-lbl">Last Month (EGP)</div>
+      </div>
+      <div class="ad-kpi" [ngClass]="growthPercentage >= 0 ? 'ak-green' : 'ak-red'">
+        <div class="ad-kpi-val">{{ growthPercentage >= 0 ? '+' : '' }}{{ growthPercentage | number:'1.0-1' }}%</div>
+        <div class="ad-kpi-lbl">Month-on-Month Growth</div>
       </div>
     </div>
-    <div class="ad-card">
-      <div class="ad-card-title">Monthly P&L Summary</div>
-      <div id="ad-pnl">
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Gross Revenue</span><span class="ad-rev-val text-[#4ade80]">847,000 EGP</span></div>
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Platform Commission (10%)</span><span class="ad-rev-val text-[#4ade80]">84,700 EGP</span></div>
-          <div class="ad-rev-row"><span class="ad-rev-lbl">Vendor Payouts Processed</span><span class="ad-rev-val text-[#f87171]">(142,500 EGP)</span></div>
-          <div class="ad-rev-row"><span class="ad-rev-lbl ad-rev-val">Platform Operating Revenue</span><span class="ad-rev-val text-[var(--gold)] text-[.95rem]">76,500 EGP</span></div>
+
+    <div class="ad-g2">
+
+      <!-- Revenue trend chart -->
+      <div class="ad-card">
+        <div class="ad-card-title">Revenue Trend (Monthly)</div>
+        <ng-container *ngIf="revenueHistory.length; else noChart">
+          <div class="flex items-end gap-[10px] h-[120px] pt-[20px] mt-[10px] justify-center">
+            <div *ngFor="let point of revenueHistory" class="flex flex-col items-center gap-[4px]">
+              <div class="w-[22px] bg-[var(--gold)] rounded-[4px_4px_0_0]"
+                   [style.height.%]="getBarHeight(point.revenue)"></div>
+              <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ point.month | slice:0:3 }}</span>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noChart>
+          <div style="text-align:center;padding:32px;color:rgba(255,255,255,.3);font-size:.85rem">No revenue history yet</div>
+        </ng-template>
       </div>
+
+      <!-- Top services -->
+      <div class="ad-card">
+        <div class="ad-card-title">Top Services by Revenue</div>
+        <ng-container *ngIf="topServices.length; else noServices">
+          <div *ngFor="let svc of topServices | slice:0:5" class="ad-rev-row">
+            <span class="ad-rev-lbl">{{ svc.name ?? svc.serviceName ?? 'Service' }}</span>
+            <span class="ad-rev-val">{{ formatCurrency(svc.revenue ?? svc.totalRevenue ?? 0) }} EGP</span>
+          </div>
+        </ng-container>
+        <ng-template #noServices>
+          <div style="text-align:center;padding:24px;color:rgba(255,255,255,.3);font-size:.85rem">No service data yet</div>
+        </ng-template>
+      </div>
+
     </div>
-  </div>
+
+    <!-- AI summary if present -->
+    <div class="ad-card" *ngIf="report?.aiSummary ?? report?.AiSummary">
+      <div class="ad-card-title">AI Executive Summary</div>
+      <p style="font-size:.88rem;line-height:1.6;color:rgba(255,255,255,.7)">{{ report?.aiSummary ?? report?.AiSummary }}</p>
+    </div>
+
+  </ng-container>
 </div>

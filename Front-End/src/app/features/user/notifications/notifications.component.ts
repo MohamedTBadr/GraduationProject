@@ -5,7 +5,6 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 
-// Backend NotificationType enum ordinals (no StringEnumConverter — serialized as integers)
 const TYPE = {
   ACCOUNT_ACCEPTED:    0,
   ACCOUNT_SUSPENDED:   1,
@@ -31,13 +30,13 @@ const TAB_TYPES: Record<string, number[]> = {
 };
 
 @Component({
-  selector: 'app-notifications',
+  selector: 'app-user-notifications',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './notifications.component.html',
-  styleUrls: ['./notifications.component.scss']
+  styleUrl: './notifications.component.scss'
 })
-export class NotificationsComponent implements OnInit {
+export class UserNotificationsComponent implements OnInit {
   activeTab = 'All';
   tabs = ['All', 'Bookings', 'Events', 'Payments', 'Account'];
 
@@ -68,22 +67,19 @@ export class NotificationsComponent implements OnInit {
   }
 
   get filteredNotifications(): AppNotification[] {
-    const all = this.notifications;
     const types = TAB_TYPES[this.activeTab];
-    if (!types) return all;
-    return all.filter(n => types.includes(n.type ?? -1));
+    if (!types) return this.notifications;
+    return this.notifications.filter(n => types.includes(n.type ?? -1));
   }
 
   tabUnreadCount(tab: string): number {
     const unread = this.notifications.filter(n => !n.isRead);
     const types = TAB_TYPES[tab];
-    if (!types) return unread.length; // 'All'
+    if (!types) return unread.length;
     return unread.filter(n => types.includes(n.type ?? -1)).length;
   }
 
-  setTab(tab: string): void {
-    this.activeTab = tab;
-  }
+  setTab(tab: string): void { this.activeTab = tab; }
 
   getTypeIcon(type?: number): string {
     switch (type) {
@@ -109,12 +105,12 @@ export class NotificationsComponent implements OnInit {
       case TYPE.PAYMENT_ACCEPTED:
       case TYPE.EVENT_ITEM_APPROVED:
       case TYPE.ORDER_COMPLETED:
-      case TYPE.ACCOUNT_ACCEPTED:    return 'color:var(--gold)';
+      case TYPE.ACCOUNT_ACCEPTED:    return 'var(--gold, #c9a84c)';
       case TYPE.PAYMENT_REJECTED:
       case TYPE.ORDER_REJECTED:
       case TYPE.ORDER_CANCELLED:
       case TYPE.ACCOUNT_SUSPENDED:
-      case TYPE.EVENT_ITEM_REJECTED: return 'color:#ef4444';
+      case TYPE.EVENT_ITEM_REJECTED: return '#ef4444';
       default:                       return '';
     }
   }

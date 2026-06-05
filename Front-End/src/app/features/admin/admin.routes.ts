@@ -67,6 +67,10 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () => import('./categories/categories.component').then(m => m.CategoriesComponent)
     },
     {
+        path: 'company-inquiries',
+        loadComponent: () => import('./company-inquiries/company-inquiries.component').then(m => m.CompanyInquiriesComponent)
+    },
+    {
         path: 'notifications',
         loadComponent: () => import('./notifications/notifications.component').then(m => m.NotificationsComponent)
     }

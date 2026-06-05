@@ -1,20 +1,46 @@
 <div class="vd-section active block">
   <div class="vd-page-header">
-    <div><div class="vd-page-title">Portfolio</div><div class="vd-page-sub">Your work gallery — first 5 photos appear in your public vendor profile.</div></div>
-    <div class="flex gap-[7px]"><button class="vd-btn vd-btn-ghost">Settings</button><button class="vd-btn vd-btn-gold">Upload Photos</button></div>
+    <div>
+      <div class="vd-page-title">Portfolio</div>
+      <div class="vd-page-sub">Your work gallery — images come from your listed services.</div>
+    </div>
   </div>
-  <div class="vd-tab-bar">
-    <button class="vd-tab active">All (18)</button>
-    <button class="vd-tab">Wedding</button>
-    <button class="vd-tab">Engagement</button>
-    <button class="vd-tab">Birthday</button>
-    <button class="vd-tab">Corporate</button>
+
+  <!-- Loading -->
+  <div *ngIf="loading" style="text-align:center;padding:48px;color:rgba(255,255,255,.4)">Loading portfolio…</div>
+
+  <!-- Empty state -->
+  <ng-container *ngIf="!loading && !images.length">
+    <div class="vd-card" style="text-align:center;padding:48px">
+      <div style="font-size:2.5rem;margin-bottom:12px">🖼️</div>
+      <div style="font-weight:600;margin-bottom:8px">No portfolio images yet</div>
+      <div style="font-size:.85rem;color:rgba(255,255,255,.4)">Upload images when creating or editing your services — they'll appear here automatically.</div>
+    </div>
+  </ng-container>
+
+  <!-- Gallery grid -->
+  <div class="vd-portfolio-grid" *ngIf="!loading && images.length">
+    <div class="vd-pf-item" *ngFor="let img of images" (click)="openLightbox(img)"
+         style="cursor:pointer;background:#1a2540;overflow:hidden">
+      <img [src]="img.url" [alt]="img.serviceName"
+           style="width:100%;height:100%;object-fit:cover;transition:transform .2s"
+           (error)="$any($event.target).style.display='none'"/>
+      <div class="vd-pf-overlay">
+        <span style="font-size:.75rem;font-weight:600">{{ img.serviceName }}</span>
+      </div>
+    </div>
   </div>
-  <div class="vd-portfolio-grid">
-    <div class="vd-pf-item bg-[linear-gradient(135deg,#1a2540,#2a3560)]"><div class="vd-pf-emoji"></div><div class="vd-pf-overlay"><button class="vd-btn vd-btn-ghost vd-btn-sm">Remove</button></div><div class="vd-pf-tag">Cover</div></div>
-    <div class="vd-pf-item bg-[linear-gradient(135deg,#2a1030,#401520)]"><div class="vd-pf-emoji"></div><div class="vd-pf-overlay"><button class="vd-btn vd-btn-ghost vd-btn-sm">Remove</button></div></div>
-    <div class="vd-pf-item bg-[linear-gradient(135deg,#302030,#1a2050)]"><div class="vd-pf-emoji"></div><div class="vd-pf-overlay"><button class="vd-btn vd-btn-ghost vd-btn-sm">Remove</button></div></div>
-    <div class="vd-pf-item bg-[linear-gradient(135deg,#103020,#204030)]"><div class="vd-pf-emoji"></div><div class="vd-pf-overlay"><button class="vd-btn vd-btn-ghost vd-btn-sm">Remove</button></div></div>
-    <div class="vd-pf-add"><div class="text-[1.6rem] text-[var(--lgray)]">+</div><div class="text-[.72rem] text-[var(--gray)]">Add Photo</div></div>
+
+  <!-- Lightbox -->
+  <div *ngIf="selectedImage"
+       style="position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000"
+       (click)="closeLightbox()">
+    <div (click)="$event.stopPropagation()" style="position:relative;max-width:90vw;max-height:90vh">
+      <img [src]="selectedImage.url" [alt]="selectedImage.serviceName"
+           style="max-width:90vw;max-height:85vh;object-fit:contain;border-radius:8px"/>
+      <div style="text-align:center;margin-top:10px;color:rgba(255,255,255,.7);font-size:.85rem">{{ selectedImage.serviceName }}</div>
+      <button (click)="closeLightbox()"
+              style="position:absolute;top:-12px;right:-12px;background:#333;border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
+    </div>
   </div>
 </div>

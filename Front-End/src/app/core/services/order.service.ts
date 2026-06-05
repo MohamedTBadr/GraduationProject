@@ -44,6 +44,17 @@ export class OrderService {
     );
   }
 
+  /** GET /Order — Admin only, lists all platform orders */
+  getAllOrders(): Observable<OrderResponse[]> {
+    return this.http.get<any>(`${this.apiUrl}/Order`).pipe(
+      map(res => {
+        const data = res?.value ?? res;
+        const items = Array.isArray(data) ? data : (data?.items ?? []);
+        return items.map((o: any) => this.normalizeOrder(o));
+      })
+    );
+  }
+
   getOrdersByUser(userId: string): Observable<OrderResponse[]> {
     return this.http.get<any[]>(`${this.apiUrl}/Order/user/${userId}`).pipe(
       map(orders => orders.map(o => this.normalizeOrder(o)))
