@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface CreateOrderPayload {
@@ -29,25 +30,55 @@ export interface OrderResponse {
   eventId: string;
 }
 
-/** Matches the backend Result<T> JSON shape returned by Ok(order) */
-export interface ResultWrapper<T> {
-  isSuccess: boolean;
-  isFailure: boolean;
-  value: T;
-  error: { code: number; type: string; description: string } | null;
-}
-
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private readonly apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
-  createOrder(payload: CreateOrderPayload): Observable<ResultWrapper<OrderResponse>> {
-    return this.http.post<ResultWrapper<OrderResponse>>(`${this.apiUrl}/Order`, payload);
+  // POST /Order — backend returns Result<OrderResponse> wrapper which the interceptor
+  // unwraps; the inner value arrives as PascalCase, so we normalise it.
+  createOrder(payload: CreateOrderPayload): Observable<OrderResponse> {
+    return this.http.post<any>(`${this.apiUrl}/Order`, payload).pipe(
+      map(o => this.normalizeOrder(o))
+    );
+  }
+
+  /** GET /Order — Admin only, lists all platform orders */
+  getAllOrders(): Observable<OrderResponse[]> {
+    return this.http.get<any>(`${this.apiUrl}/Order`).pipe(
+      map(res => {
+        const data = res?.value ?? res;
+        const items = Array.isArray(data) ? data : (data?.items ?? []);
+        return items.map((o: any) => this.normalizeOrder(o));
+      })
+    );
   }
 
   getOrdersByUser(userId: string): Observable<OrderResponse[]> {
-    return this.http.get<OrderResponse[]>(`${this.apiUrl}/Order/user/${userId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/Order/user/${userId}`).pipe(
+      map(orders => orders.map(o => this.normalizeOrder(o)))
+    );
+  }
+
+  getOrderById(id: string): Observable<OrderResponse> {
+    return this.http.get<any>(`${this.apiUrl}/Order/${id}`).pipe(
+      map(o => this.normalizeOrder(o))
+    );
+  }
+
+  // Handles both PascalCase (API) and camelCase (already-normalized) responses
+  private normalizeOrder(o: any): OrderResponse {
+    return {
+      id:             o.id             ?? o.Id             ?? '',
+      userId:         o.userId         ?? o.UserId         ?? '',
+      amount:         o.amount         ?? o.Amount         ?? 0,
+      currency:       o.currency       ?? o.Currency       ?? 'EGP',
+      paymentIntentId:o.paymentIntentId?? o.PaymentIntentId?? null,
+      paymentStatus:  o.paymentStatus  ?? o.PaymentStatus  ?? '',
+      createdAt:      o.createdAt      ?? o.CreatedAt      ?? '',
+      appointment:    o.appointment    ?? o.Appointment    ?? '',
+      eventId:        o.eventId        ?? o.EventId        ?? '',
+    };
   }
 }

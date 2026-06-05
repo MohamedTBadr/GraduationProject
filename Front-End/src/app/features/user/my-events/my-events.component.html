@@ -78,14 +78,59 @@
                     <span>{{(activeEvent.budget - spent) | number}} EGP</span>
                 </div>
             </div>
-            <!-- Pay Now -->
+            <!-- Pay Now — partial payment -->
             <div class="pay-now-section">
-                <button class="btn btn-gold w-100 flex justify-center items-center gap-[8px]"
-                    [disabled]="isPaying || spent === 0"
-                    (click)="payNow()">
-                    <span *ngIf="!isPaying"><i class="bi bi-credit-card"></i> Pay Now ({{spent | number}} EGP)</span>
-                    <span *ngIf="isPaying">Loading Gateway...</span>
-                </button>
+                <!-- Resume existing pending order -->
+                <ng-container *ngIf="existingPendingOrder">
+                    <button class="btn btn-gold w-100 flex justify-center items-center gap-[8px]"
+                            [disabled]="isPaying"
+                            (click)="payNow()">
+                        <i class="bi bi-arrow-repeat"></i> Resume Payment
+                        ({{ existingPendingOrder.amount | number }} EGP)
+                    </button>
+                    <p class="pay-hint pay-hint--info">
+                        <i class="bi bi-info-circle"></i>
+                        You have an unpaid order. Complete it or it will be cancelled.
+                    </p>
+                </ng-container>
+
+                <!-- New payment for approved items -->
+                <ng-container *ngIf="!existingPendingOrder">
+                    <button class="btn btn-gold w-100 flex justify-center items-center gap-[8px]"
+                            [disabled]="isPaying || approvedItems.length === 0"
+                            (click)="payNow()">
+                        <ng-container *ngIf="!isPaying">
+                            <i class="bi bi-credit-card"></i>
+                            <ng-container *ngIf="approvedItems.length > 0">
+                                Pay for {{ approvedItems.length }} service(s) — {{ approvedAmount | number }} EGP
+                            </ng-container>
+                            <ng-container *ngIf="approvedItems.length === 0">
+                                Awaiting Vendor Approval
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="isPaying">Loading Gateway...</ng-container>
+                    </button>
+
+                    <!-- Messaging -->
+                    <p class="pay-hint pay-hint--success" *ngIf="approvedItems.length > 0 && pendingItems.length > 0">
+                        <i class="bi bi-check-circle"></i>
+                        You can pay for the {{ approvedItems.length }} approved service(s) now.
+                        {{ pendingItems.length }} more are still awaiting vendor approval and can be paid later once approved.
+                    </p>
+                    <p class="pay-hint pay-hint--warn" *ngIf="approvedItems.length === 0 && pendingItems.length > 0">
+                        <i class="bi bi-hourglass-split"></i>
+                        No services are currently approved for payment.
+                        Please wait for vendor confirmation ({{ pendingItems.length }} pending).
+                    </p>
+                    <p class="pay-hint pay-hint--success" *ngIf="approvedItems.length > 0 && pendingItems.length === 0">
+                        <i class="bi bi-check-circle-fill"></i>
+                        All approved services ready — {{ approvedItems.length }} service(s), {{ approvedAmount | number }} EGP.
+                    </p>
+                    <p class="pay-hint pay-hint--muted" *ngIf="paidItems.length > 0">
+                        <i class="bi bi-bag-check"></i>
+                        {{ paidItems.length }} service(s) already paid in a previous round.
+                    </p>
+                </ng-container>
             </div>
         </div>
     </div>
@@ -111,9 +156,12 @@
                 <div class="vendor-emoji"><i class="bi bi-shop"></i></div>
                 <div class="vendor-info">
                     <div class="vi-name">{{ item.vendorName }}</div>
-                    <div class="vi-type">{{ item.serviceName }} {{ item.price > 0 ? '· ' + (item.price | number) + ' EGP' : '' }}</div>
+                    <div class="vi-type">
+                        {{ item.serviceName }}
+                        {{ item.price > 0 ? '· ' + ((item.price * (item.quantity || 1)) | number) + ' EGP' : '' }}
+                    </div>
                 </div>
-                <span class="badge" [ngClass]="itemBadgeClass(item)">{{ item.itemStatus }}</span>
+                <span class="badge" [ngClass]="itemBadgeClass(item)">{{ itemStatusLabel(item) }}</span>
             </div>
         </div>
         <p *ngIf="displayedEventItems.length === 0 && eventServicesTab === 'approved'" class="empty-services-hint">
@@ -125,8 +173,55 @@
     </div>
 </div>
 
-<app-event-studio 
-    *ngIf="showAiStudio && activeEvent" 
+<!-- Collaborators -->
+<div class="dash-card" *ngIf="activeEvent">
+    <div class="dash-card-header">
+        <h3>Collaborators</h3>
+    </div>
+
+    <!-- Add collaborator form -->
+    <div class="flex gap-[8px] mb-[16px] flex-wrap">
+        <input
+            class="flex-1 min-w-[180px] rounded-[8px] py-[8px] px-[12px] text-[.85rem] [border:1.5px_solid_var(--lgray)] bg-transparent text-[var(--white)]"
+            type="text"
+            placeholder="Email or name"
+            [(ngModel)]="collaboratorInput"
+            (keyup.enter)="addCollaborator()" />
+        <select
+            class="rounded-[8px] py-[8px] px-[12px] text-[.85rem] [border:1.5px_solid_var(--lgray)] bg-transparent text-[var(--white)]"
+            [(ngModel)]="collaboratorRole">
+            <option [ngValue]="0">Viewer</option>
+            <option [ngValue]="1">Editor</option>
+        </select>
+        <button
+            class="btn btn-gold btn-sm"
+            [disabled]="collaboratorsLoading || !collaboratorInput.trim()"
+            (click)="addCollaborator()">
+            <i class="bi bi-person-plus"></i> Invite
+        </button>
+    </div>
+
+    <!-- Collaborator list -->
+    <div *ngIf="collaborators.length > 0" class="vendors-list">
+        <div *ngFor="let c of collaborators" class="vendor-row">
+            <div class="vendor-emoji"><i class="bi bi-person-circle"></i></div>
+            <div class="vendor-info">
+                <div class="vi-name">{{ c.fullName }}</div>
+                <div class="vi-type">{{ c.email }}</div>
+            </div>
+            <span class="badge badge-pending" style="margin-right:8px">{{ collaboratorRoleLabel(c.role) }}</span>
+            <button class="btn btn-sm" style="color:var(--red,#ef4444);background:none;border:none;cursor:pointer" (click)="removeCollaborator(c.userId)">
+                <i class="bi bi-x-circle"></i>
+            </button>
+        </div>
+    </div>
+    <p *ngIf="collaborators.length === 0" class="empty-services-hint">
+        No collaborators yet. Invite someone by email or name.
+    </p>
+</div>
+
+<app-event-studio
+    *ngIf="showAiStudio && activeEvent"
     [eventId]="activeEvent.id" 
     [eventBudget]="activeEvent.budget"
     [eventTypeName]="activeEvent.type"

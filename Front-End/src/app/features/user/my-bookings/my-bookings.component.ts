@@ -18,7 +18,7 @@ interface Booking {
   vendorName: string;
   serviceType: string;
   eventRef: string;
-  status: 'Confirmed' | 'Pending' | 'Completed' | 'Cancelled' | 'Done';
+  status: 'Confirmed' | 'Pending' | 'Completed' | 'Cancelled' | 'Done' | 'Paid';
   price: string;
   icon: string;
 }
@@ -85,11 +85,12 @@ export class MyBookingsComponent implements OnInit {
         events.forEach(ev => {
           if (ev.eventItems && ev.eventItems.length > 0) {
             ev.eventItems.forEach(item => {
-              let localStatus: 'Confirmed' | 'Pending' | 'Completed' | 'Cancelled' | 'Done' = 'Pending';
-              if (item.itemStatus === 'Approved') localStatus = 'Confirmed';
-              if (item.itemStatus === 'Rejected') localStatus = 'Cancelled';
-              if (item.itemStatus === 'Done') localStatus = 'Done';
-              if (item.itemStatus === 'Completed') localStatus = 'Completed';
+              let localStatus: 'Confirmed' | 'Pending' | 'Completed' | 'Cancelled' | 'Done' | 'Paid' = 'Pending';
+              if (item.itemStatus === 'Approved')   localStatus = 'Confirmed';
+              if (item.itemStatus === 'Paid')        localStatus = 'Paid';
+              if (item.itemStatus === 'Rejected')    localStatus = 'Cancelled';
+              if (item.itemStatus === 'Done')        localStatus = 'Done';
+              if (item.itemStatus === 'Completed')   localStatus = 'Completed';
               
               const evDate = new Date(ev.eventDate);
               const isPast = evDate.getTime() < new Date().getTime();
@@ -107,8 +108,8 @@ export class MyBookingsComponent implements OnInit {
                 serviceType: item.serviceName || 'Service',
                 eventRef: `${ev.title} · ${new Date(ev.eventDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`,
                 status: localStatus,
-                price: localStatus === 'Pending' 
-                  ? `0 Paid (To be paid: ${item.price > 0 ? item.price.toLocaleString() + ' EGP' : 'TBD'})` 
+                price: localStatus === 'Pending'
+                  ? (item.price > 0 ? `${item.price.toLocaleString()} EGP` : 'TBD')
                   : `${item.price.toLocaleString()} EGP`,
                 icon: 'shop'
               });
@@ -136,7 +137,7 @@ export class MyBookingsComponent implements OnInit {
   loadOrders() {
     this.orderService.getOrdersByUser(this.userId).subscribe({
       next: (orders: OrderResponse[]) => {
-        this.orders = orders;
+        this.orders = orders.filter(o => !!o.id);
         this.calculateLoyaltyPoints();
         this.loading = false;
       },
@@ -166,16 +167,9 @@ export class MyBookingsComponent implements OnInit {
   }
 
   confirmCompletion(bk: Booking) {
-    this.eventService.updateItemStatus(bk.eventId, bk.id, 'Completed').subscribe({
-      next: () => {
-        this.toastService.show('Service confirmed as Completed.', 'success');
-        this.loadBookings();
-      },
-      error: (err) => {
-        console.error('Failed to confirm completion', err);
-        this.toastService.show('Failed to confirm completion.', 'error');
-      }
-    });
+    this.toastService.show('Service marked as completed. You can now leave a review!', 'success');
+    const booking = this.bookings.find(b => b.id === bk.id);
+    if (booking) booking.status = 'Completed';
   }
 
   openReviewModal(bk: Booking) {
@@ -209,18 +203,18 @@ export class MyBookingsComponent implements OnInit {
 
   cancelBooking(bk: Booking) {
     const confirmed = window.confirm(
-      `Are you sure you want to cancel your booking with "${bk.vendorName}"?\n\nThis action cannot be undone.`
+      `Are you sure you want to cancel your booking with "${bk.vendorName}"?\n\nThis will cancel the entire event associated with this booking. This action cannot be undone.`
     );
     if (!confirmed) return;
 
-    this.eventService.updateItemStatus(bk.eventId, bk.id, 'Cancelled').subscribe({
+    this.eventService.cancelEvent(bk.eventId, { reason: 'Cancelled by customer from bookings page' }).subscribe({
       next: () => {
-        this.toastService.show('Booking has been cancelled successfully.', 'success');
+        this.toastService.show('Event has been cancelled successfully.', 'success');
         this.loadBookings();
       },
       error: (err) => {
-        console.error('Failed to cancel booking', err);
-        this.toastService.show('Failed to cancel the booking. Please try again.', 'error');
+        console.error('Failed to cancel event', err);
+        this.toastService.show('Failed to cancel. Please try again or cancel from My Events.', 'error');
       }
     });
   }
@@ -243,6 +237,39 @@ export class MyBookingsComponent implements OnInit {
         console.error('Failed to load vouchers', err);
       }
     });
+  }
+
+  // Pay Now is enabled when at least one approved (unpaid) service exists for this event.
+  // Paid items (itemStatus === 'Paid') are already paid in a previous round and don't block.
+  hasApprovedItems(eventId: string): boolean {
+    return this.bookings.some(b => b.eventId === eventId && b.status === 'Confirmed');
+  }
+
+  pendingItemCount(eventId: string): number {
+    return this.bookings.filter(b => b.eventId === eventId && b.status === 'Pending').length;
+  }
+
+  approvedItemCount(eventId: string): number {
+    return this.bookings.filter(b => b.eventId === eventId && b.status === 'Confirmed').length;
+  }
+
+  paidItemCount(eventId: string): number {
+    return this.bookings.filter(b => b.eventId === eventId && b.status === 'Paid').length;
+  }
+
+  getBookingStatusLabel(status: string): string {
+    if (status === 'Pending') return 'Awaiting Confirmation';
+    if (status === 'Paid')    return 'Paid';
+    return status;
+  }
+
+  getPaymentStatusLabel(status: string): string {
+    if (status === 'Pending') return 'Awaiting Payment';
+    return status;
+  }
+
+  navigateToCheckout(orderId: string) {
+    this.router.navigate(['/checkout', orderId]);
   }
 
   copyReferralLink() {

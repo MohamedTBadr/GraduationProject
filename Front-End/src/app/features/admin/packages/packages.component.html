@@ -1,29 +1,38 @@
 <div class="ad-section active block">
   <div class="ad-page-hd">
-    <div><div class="ad-page-title">Platform Packages</div><div class="ad-page-sub">Curate and manage the bundled packages shown to clients.</div></div>
-    <button class="ad-btn ad-btn-gold">+ New Package</button>
+    <div>
+      <div class="ad-page-title">Platform Packages</div>
+      <div class="ad-page-sub">All vendor packages registered on the platform.</div>
+    </div>
   </div>
-  <div class="grid gap-[12px]" id="ad-packages-list">
-    <div class="ad-tbl-wrap py-[16px] px-[20px]">
+
+  <div *ngIf="loading" class="text-center text-[rgba(255,255,255,.4)] py-[40px]">Loading packages...</div>
+
+  <div *ngIf="!loading && packages.length === 0" class="text-center text-[rgba(255,255,255,.4)] py-[40px]">
+    No packages found.
+  </div>
+
+  <div class="grid gap-[12px]" id="ad-packages-list" *ngIf="!loading && packages.length > 0">
+    <div class="ad-tbl-wrap py-[16px] px-[20px]" *ngFor="let pkg of packages">
       <div class="flex gap-[14px] items-start flex-wrap">
-        <div class="text-[2rem] shrink-0"></div>
+        <div class="text-[2rem] shrink-0">📦</div>
         <div class="flex-1 min-w-[200px]">
           <div class="flex items-center gap-[9px] mb-[4px] flex-wrap">
-            <div class="font-bold text-[var(--white)] text-[.95rem]">Wedding Dream</div>
+            <div class="font-bold text-[var(--white)] text-[.95rem]">{{ pkg.name }}</div>
             <span class="ad-pill ap-green">Active</span>
-            <span class="ad-pill ap-gold">Featured</span>
           </div>
-          <div class="text-[var(--gold)] font-bold text-[.85rem] mb-[7px]">45,000 EGP</div>
+          <div class="text-[var(--gold)] font-bold text-[.85rem] mb-[7px]">{{ pkg.price | number }} EGP</div>
           <div class="flex gap-[5px] mb-[7px] flex-wrap">
-            <span class="text-[.69rem] bg-[rgba(255,255,255,.07)] text-[rgba(255,255,255,.6)] py-[3px] px-[8px] rounded-[50px]">Nile City Venue</span>
-            <span class="text-[.69rem] bg-[rgba(255,255,255,.07)] text-[rgba(255,255,255,.6)] py-[3px] px-[8px] rounded-[50px]">Elite Catering</span>
+            <span
+              class="text-[.69rem] bg-[rgba(255,255,255,.07)] text-[rgba(255,255,255,.6)] py-[3px] px-[8px] rounded-[50px]"
+              *ngFor="let svc of pkg.services">
+              {{ svc.name }}
+            </span>
           </div>
-          <div class="text-[.73rem] text-[rgba(255,255,255,.4)]">14 bookings · 630K EGP revenue</div>
+          <div class="text-[.73rem] text-[rgba(255,255,255,.4)]" *ngIf="pkg.description">{{ pkg.description }}</div>
         </div>
         <div class="flex flex-col gap-[7px] shrink-0">
-          <button class="ad-btn ad-btn-ghost ad-btn-sm">Edit</button>
-          <button class="ad-btn ad-btn-gold ad-btn-sm">Unfeature</button>
-          <button class="ad-btn ad-btn-red ad-btn-sm">Remove</button>
+          <button class="ad-btn ad-btn-red ad-btn-sm" (click)="deletePackage(pkg.id)">Remove</button>
         </div>
       </div>
     </div>

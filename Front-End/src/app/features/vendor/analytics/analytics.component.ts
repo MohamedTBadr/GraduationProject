@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
@@ -28,9 +28,11 @@ export class AnalyticsComponent implements OnInit {
 
   loadAnalytics() {
     this.loading = true;
-    this.http.post<any>(`${environment.apiUrl}/Dashboard/vendor-report`, {}).subscribe({
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    this.http.post<any>(`${environment.apiUrl}/Dashboard/vendor-report`, {}, { headers }).subscribe({
       next: (data) => {
-        this.report = data;
+        // Normalize kpIs -> kpis so the template can use report.kpis.*
+        this.report = { ...data, kpis: data?.kpIs ?? data?.KPIs ?? data?.kpis ?? {} };
         this.loading = false;
       },
       error: (err) => {

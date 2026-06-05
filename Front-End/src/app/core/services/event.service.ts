@@ -13,7 +13,8 @@ import {
   ApproveItemRequest,
   CancelEventRequest,
   CreateEventItemDto,
-  AiEventPlanResponse
+  AiEventPlanResponse,
+  EventCollaboratorDto
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -59,51 +60,37 @@ export class EventService {
   getForVendor(vendorUserId: string): Observable<EventResponseDto[]> {
     return this.http.get<any>(`${environment.apiUrl}/Vendor/bookings`).pipe(
       map(res => {
-        const bookings = res?.value || res?.Value || (Array.isArray(res) ? res : []);
+        const bookings = res?.value ?? (Array.isArray(res) ? res : []);
         if (!Array.isArray(bookings)) return [];
 
         const eventsMap = new Map<string, EventResponseDto>();
 
-        bookings.forEach(b => {
-          const eventId = b.eventId || b.EventId;
-          const eventItemId = b.eventItemId || b.EventItemId;
-          const serviceName = b.serviceName || b.ServiceName;
-          const price = b.price || b.Price;
-          const bookingStatus = b.bookingStatus || b.BookingStatus;
-          const notes = b.notes || b.Notes;
-          const eventTitle = b.eventTitle || b.EventTitle;
-          const eventType = b.eventType || b.EventType;
-          const eventDate = b.eventDate || b.EventDate;
-          const eventStatus = b.eventStatus || b.EventStatus;
-          const guestCount = b.guestCount || b.GuestCount;
-          const location = b.location || b.Location;
-
-          if (!eventsMap.has(eventId)) {
-            eventsMap.set(eventId, {
-              id: eventId,
+        bookings.forEach((b: any) => {
+          if (!eventsMap.has(b.eventId)) {
+            eventsMap.set(b.eventId, {
+              id: b.eventId,
               userId: '',
               userName: 'Client',
-              title: eventTitle,
-              eventTypeName: eventType,
-              eventDate: eventDate,
+              title: b.eventTitle,
+              eventTypeName: b.eventType,
+              eventDate: b.eventDate,
               totalBudget: 0,
-              guestCount: guestCount,
-              notes: notes,
-              eventStatus: eventStatus,
+              guestCount: b.guestCount,
+              notes: b.notes,
+              eventStatus: b.eventStatus,
               eventItems: []
             });
           }
 
-          const ev = eventsMap.get(eventId)!;
-          ev.eventItems.push({
-            id: eventItemId,
-            eventId: eventId,
+          eventsMap.get(b.eventId)!.eventItems.push({
+            id: b.eventItemId,
+            eventId: b.eventId,
             vendorId: vendorUserId,
             vendorName: '',
-            serviceName: serviceName,
-            price: price,
+            serviceName: b.serviceName,
+            price: b.price,
             quantity: 1,
-            itemStatus: bookingStatus
+            itemStatus: b.bookingStatus
           });
         });
 
@@ -118,9 +105,9 @@ export class EventService {
       map(res => {
         if (!res) return [];
         if (Array.isArray(res)) return res.map(this.normalizeEvent);
-        const arr = res.value ?? res.Value;
+        const arr = res.value;
         if (arr && Array.isArray(arr)) return arr.map(this.normalizeEvent);
-        const items = res.value?.items ?? res.Value?.items ?? res.items ?? res.Items;
+        const items = res.value?.items ?? res.items;
         if (items && Array.isArray(items)) return items.map(this.normalizeEvent);
         return [];
       })
@@ -128,32 +115,32 @@ export class EventService {
   }
 
   private normalizeEvent = (e: any): EventResponseDto => ({
-    id: e.id ?? e.Id,
-    userId: e.userId ?? e.UserId,
-    userName: e.userName ?? e.UserName,
-    title: e.title ?? e.Title,
-    eventTypeName: e.eventTypeName ?? e.EventTypeName,
-    eventDate: e.eventDate ?? e.EventDate,
-    totalBudget: e.totalBudget ?? e.TotalBudget ?? 0,
-    guestCount: e.guestCount ?? e.GuestCount ?? 0,
-    notes: e.notes ?? e.Notes,
-    eventStatus: e.eventStatus ?? e.EventStatus,
-    cancellationReason: e.cancellationReason ?? e.CancellationReason,
-    additionalNotes: e.additionalNotes ?? e.AdditionalNotes,
-    cancelledAt: e.cancelledAt ?? e.CancelledAt,
-    location: e.location ?? e.Location,
-    eventItems: (e.eventItems ?? e.EventItems ?? []).map((item: any) => ({
-      id: item.id ?? item.Id,
-      eventId: item.eventId ?? item.EventId,
-      serviceId: item.serviceId ?? item.ServiceId,
-      serviceImage: item.serviceImage ?? item.ServiceImage,
-      serviceName: item.serviceName ?? item.ServiceName,
-      price: item.price ?? item.Price ?? 0,
-      vendorId: item.vendorId ?? item.VendorId,
-      vendorName: item.vendorName ?? item.VendorName,
-      quantity: item.quantity ?? item.Quantity ?? 1,
-      itemStatus: item.itemStatus ?? item.ItemStatus,
-      rejectionReason: item.rejectionReason ?? item.RejectionReason
+    id: e.id,
+    userId: e.userId,
+    userName: e.userName,
+    title: e.title,
+    eventTypeName: e.eventTypeName,
+    eventDate: e.eventDate,
+    totalBudget: e.totalBudget ?? 0,
+    guestCount: e.guestCount ?? 0,
+    notes: e.notes,
+    eventStatus: e.eventStatus,
+    cancellationReason: e.cancellationReason,
+    additionalNotes: e.additionalNotes,
+    cancelledAt: e.cancelledAt,
+    location: e.location,
+    eventItems: (e.eventItems ?? []).map((item: any) => ({
+      id: item.id,
+      eventId: item.eventId,
+      serviceId: item.serviceId,
+      serviceImage: item.serviceImage,
+      serviceName: item.serviceName,
+      price: item.price ?? 0,
+      vendorId: item.vendorId,
+      vendorName: item.vendorName,
+      quantity: item.quantity ?? 1,
+      itemStatus: item.itemStatus,
+      rejectionReason: item.rejectionReason
     }))
   });
 
@@ -169,11 +156,6 @@ export class EventService {
     return this.http.patch<void>(`${this.apiUrl}/${eventId}/items/${itemId}/approve`, payload);
   }
 
-  /** PATCH /Event/{eventId}/items/{itemId}/status - Update item status (e.g., Done, Completed) */
-  updateItemStatus(eventId: string, itemId: string, status: string): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/${eventId}/items/${itemId}/status`, { status });
-  }
-
   /** PATCH /Event/{id}/cancel - Cancel an event */
   cancelEvent(id: string, payload: CancelEventRequest): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${id}/cancel`, payload);
@@ -185,5 +167,33 @@ export class EventService {
     return this.http.post<any>(`${this.apiUrl}/createEventByAI/${eventId}`, {}, { headers }).pipe(
       map(res => res?.value ?? res?.Value ?? res)
     );
+  }
+
+  // ── Collaborators ─────────────────────────────────────────────────────────
+
+  /** GET /Event/{id}/collaborators */
+  getCollaborators(eventId: string): Observable<EventCollaboratorDto[]> {
+    return this.http.get<any>(`${this.apiUrl}/${eventId}/collaborators`).pipe(
+      map(res => {
+        const data = res?.value ?? res;
+        return Array.isArray(data) ? data : [];
+      })
+    );
+  }
+
+  /** POST /Event/{id}/collaborators */
+  addCollaborator(eventId: string, userEmailOrName: string, role: 0 | 1): Observable<any> {
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    return this.http.post<any>(
+      `${this.apiUrl}/${eventId}/collaborators`,
+      { userEmailOrName, role },
+      { headers }
+    );
+  }
+
+  /** DELETE /Event/{id}/collaborators/{userId} */
+  removeCollaborator(eventId: string, userId: string): Observable<void> {
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    return this.http.delete<void>(`${this.apiUrl}/${eventId}/collaborators/${userId}`, { headers });
   }
 }

@@ -1,18 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
-import { EventItemResponseDto, EventResponseDto } from '../../../shared/types/api.interfaces';
+import { EventCollaboratorDto, EventItemResponseDto, EventResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { PaymentService } from '../../../core/services/payment.service';
-import { OrderService } from '../../../core/services/order.service';
+import { OrderService, OrderResponse } from '../../../core/services/order.service';
 import { EventStudioComponent } from '../event-studio/event-studio.component';
 
 @Component({
   selector: 'app-my-events',
   standalone: true,
-  imports: [CommonModule, RouterLink, EventStudioComponent],
+  imports: [CommonModule, FormsModule, RouterLink, EventStudioComponent],
   templateUrl: './my-events.component.html',
   styleUrls: ['./my-events.component.scss']
 })
@@ -22,8 +22,10 @@ export class MyEventsComponent implements OnInit {
   loading = true;
   showAiStudio = false;
   isPaying = false;
-  /** Sub-tab under event detail: all line items vs vendor-approved only */
   eventServicesTab: 'all' | 'approved' = 'all';
+
+  /** All orders for this user — used to detect existing pending orders */
+  private userOrders: OrderResponse[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -31,18 +33,16 @@ export class MyEventsComponent implements OnInit {
     private eventService: EventService,
     private authService: AuthService,
     private toastService: ToastService,
-    private paymentService: PaymentService,
     private orderService: OrderService
   ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
-        if(params['id']) {
-            this.activeEventId = params['id'];
-            this.loadActiveEventDetails(this.activeEventId);
-        }
+      if (params['id']) {
+        this.activeEventId = params['id'];
+        this.loadActiveEventDetails(this.activeEventId);
+      }
     });
-
     this.loadEvents();
   }
 
@@ -61,8 +61,15 @@ export class MyEventsComponent implements OnInit {
             this.activeEventId = this.events[0].id;
           }
           this.loadActiveEventDetails(this.activeEventId);
+          if (this.activeEventId) this.loadCollaborators(this.activeEventId);
         }
         this.loading = false;
+
+        // Load user orders in parallel for pending-order detection
+        this.orderService.getOrdersByUser(user.id).subscribe({
+          next: orders => { this.userOrders = orders; },
+          error: () => {}
+        });
       },
       error: (err) => {
         console.error('Failed to load events:', err);
@@ -76,31 +83,31 @@ export class MyEventsComponent implements OnInit {
     if (!id) return;
     this.eventService.getById(id).subscribe({
       next: (res: any) => {
-        const raw = res?.value ?? res?.Value ?? res;
+        const raw = res?.value ?? res;
         const fullEvent = {
-          id: raw.id ?? raw.Id,
-          userId: raw.userId ?? raw.UserId,
-          userName: raw.userName ?? raw.UserName,
-          title: raw.title ?? raw.Title,
-          eventTypeName: raw.eventTypeName ?? raw.EventTypeName,
-          eventDate: raw.eventDate ?? raw.EventDate,
-          totalBudget: raw.totalBudget ?? raw.TotalBudget ?? 0,
-          guestCount: raw.guestCount ?? raw.GuestCount ?? 0,
-          notes: raw.notes ?? raw.Notes,
-          eventStatus: raw.eventStatus ?? raw.EventStatus,
-          location: raw.location ?? raw.Location,
-          eventItems: (raw.eventItems ?? raw.EventItems ?? []).map((item: any) => ({
-            id: item.id ?? item.Id,
-            eventId: item.eventId ?? item.EventId,
-            serviceId: item.serviceId ?? item.ServiceId,
-            serviceImage: item.serviceImage ?? item.ServiceImage,
-            serviceName: item.serviceName ?? item.ServiceName,
-            price: item.price ?? item.Price ?? 0,
-            vendorId: item.vendorId ?? item.VendorId,
-            vendorName: item.vendorName ?? item.VendorName,
-            quantity: item.quantity ?? item.Quantity ?? 1,
-            itemStatus: item.itemStatus ?? item.ItemStatus,
-            rejectionReason: item.rejectionReason ?? item.RejectionReason
+          id: raw.id,
+          userId: raw.userId,
+          userName: raw.userName,
+          title: raw.title,
+          eventTypeName: raw.eventTypeName,
+          eventDate: raw.eventDate,
+          totalBudget: raw.totalBudget ?? 0,
+          guestCount: raw.guestCount ?? 0,
+          notes: raw.notes,
+          eventStatus: raw.eventStatus,
+          location: raw.location,
+          eventItems: (raw.eventItems ?? []).map((item: any) => ({
+            id: item.id,
+            eventId: item.eventId,
+            serviceId: item.serviceId,
+            serviceImage: item.serviceImage,
+            serviceName: item.serviceName,
+            price: item.price ?? 0,
+            vendorId: item.vendorId,
+            vendorName: item.vendorName,
+            quantity: item.quantity ?? 1,
+            itemStatus: item.itemStatus,
+            rejectionReason: item.rejectionReason
           }))
         };
         const index = this.events.findIndex(e => e.id === id);
@@ -108,15 +115,13 @@ export class MyEventsComponent implements OnInit {
           this.events[index] = this.mapEvent(fullEvent);
         }
       },
-      error: (err) => {
-        console.error('Failed to load event details:', err);
-      }
+      error: (err) => console.error('Failed to load event details:', err)
     });
   }
 
   mapEvent(ev: EventResponseDto): any {
     const mappedVendors = (ev.eventItems || []).map(item => ({
-      emoji: '', 
+      emoji: '',
       name: item.vendorName || 'Vendor',
       type: item.serviceName || 'Service',
       price: item.price || 0,
@@ -148,7 +153,6 @@ export class MyEventsComponent implements OnInit {
     return this.events.find(e => e.id === this.activeEventId);
   }
 
-  /** Line items for the active event, filtered by {@link eventServicesTab}. */
   get displayedEventItems(): EventItemResponseDto[] {
     const items = this.activeEvent?.eventItems as EventItemResponseDto[] | undefined;
     if (!items?.length) return [];
@@ -158,15 +162,63 @@ export class MyEventsComponent implements OnInit {
     return items;
   }
 
+  // ─── Partial payment getters ───────────────────────────────────────────────
+
+  /** Items the vendor has approved but the user hasn't paid yet. */
+  get approvedItems(): EventItemResponseDto[] {
+    return (this.activeEvent?.eventItems as EventItemResponseDto[] ?? [])
+      .filter(i => i.itemStatus === 'Approved');
+  }
+
+  /** Items still waiting for vendor response. */
+  get pendingItems(): EventItemResponseDto[] {
+    return (this.activeEvent?.eventItems as EventItemResponseDto[] ?? [])
+      .filter(i => i.itemStatus === 'Pending');
+  }
+
+  /** Items already paid in a previous payment round. */
+  get paidItems(): EventItemResponseDto[] {
+    return (this.activeEvent?.eventItems as EventItemResponseDto[] ?? [])
+      .filter(i => i.itemStatus === 'Paid' || i.itemStatus === 'Done' || i.itemStatus === 'Completed');
+  }
+
+  /** Total for the currently-approved (unpaid) items. */
+  get approvedAmount(): number {
+    return this.approvedItems.reduce((sum, i) => sum + (i.price * (i.quantity ?? 1)), 0);
+  }
+
+  /** True when there is already an unpaid pending order for the active event. */
+  get existingPendingOrder(): OrderResponse | null {
+    if (!this.activeEventId) return null;
+    return this.userOrders.find(
+      o => o.eventId === this.activeEventId && o.paymentStatus === 'Pending'
+    ) ?? null;
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+
   itemBadgeClass(item: EventItemResponseDto): string {
     const s = (item.itemStatus || '').toLowerCase();
-    if (s === 'approved' || s === 'done' || s === 'completed') return 'badge-confirmed';
+    if (s === 'approved') return 'badge-confirmed';
+    if (s === 'paid' || s === 'done' || s === 'completed') return 'badge-paid';
     if (s === 'rejected') return 'badge-rejected';
     return 'badge-pending';
   }
 
+  itemStatusLabel(item: EventItemResponseDto): string {
+    const s = item.itemStatus || '';
+    if (s === 'Approved') return 'Approved — Ready to Pay';
+    if (s === 'Paid') return 'Paid';
+    if (s === 'Done') return 'Done';
+    if (s === 'Completed') return 'Completed';
+    if (s === 'Rejected') return 'Rejected';
+    return 'Awaiting Confirmation';
+  }
+
   get spent() {
-    return this.activeEvent?.vendors.reduce((sum: number, v: any) => sum + (v.status !== 'rejected' ? v.price : 0), 0) || 0;
+    return this.activeEvent?.vendors.reduce(
+      (sum: number, v: any) => sum + (v.status !== 'rejected' ? v.price : 0), 0
+    ) || 0;
   }
 
   get budgetPct() {
@@ -175,7 +227,7 @@ export class MyEventsComponent implements OnInit {
   }
 
   get daysLeft() {
-    if (!this.activeEvent || !this.activeEvent.date) return 0;
+    if (!this.activeEvent?.date) return 0;
     const diff = new Date(this.activeEvent.date).getTime() - new Date().getTime();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }
@@ -184,6 +236,7 @@ export class MyEventsComponent implements OnInit {
     this.activeEventId = id;
     this.eventServicesTab = 'all';
     this.loadActiveEventDetails(id);
+    this.loadCollaborators(id);
   }
 
   toggleCheck(index: number) {
@@ -192,18 +245,99 @@ export class MyEventsComponent implements OnInit {
     }
   }
 
-  openAddEvent() {
-    this.router.navigate(['/add-event']);
-  }
+  openAddEvent() { this.router.navigate(['/add-event']); }
+  openAiStudio() { this.showAiStudio = true; }
 
-  openAiStudio() {
-    this.showAiStudio = true;
-  }
-
-  onAiPlanAccepted(plan: any) {
-    if (!this.activeEventId || !plan || !plan.selected_items || plan.selected_items.length === 0) {
+  payNow() {
+    // If a pending order already exists for this event, resume it
+    if (this.existingPendingOrder) {
+      this.router.navigate(['/checkout', this.existingPendingOrder.id]);
       return;
     }
+
+    if (this.approvedItems.length === 0) return;
+
+    this.isPaying = true;
+    const user = this.authService.user();
+
+    const orderPayload = {
+      userId: user?.id || '',
+      eventId: this.activeEvent.id,
+      currency: 'EGP',
+      shippingAddress: { street: 'NA', city: 'Cairo', state: 'Cairo', postalCode: '12345' },
+      appointment: new Date(this.activeEvent.date).toISOString()
+    };
+
+    this.orderService.createOrder(orderPayload).subscribe({
+      next: (result) => {
+        this.isPaying = false;
+        if (!result?.id) {
+          this.toastService.show('Order creation failed. Please try again.', 'error');
+          return;
+        }
+        // Track new order locally so button switches to "Resume" immediately
+        this.userOrders = [...this.userOrders, result];
+        this.router.navigate(['/checkout', result.id]);
+      },
+      error: (err) => {
+        this.isPaying = false;
+        this.toastService.show('Failed to create order.', 'error');
+        console.error(err);
+      }
+    });
+  }
+
+  // ── Collaborators ─────────────────────────────────────────────────────────
+
+  collaborators: EventCollaboratorDto[] = [];
+  collaboratorInput = '';
+  collaboratorRole: 0 | 1 = 0;
+  collaboratorsLoading = false;
+
+  loadCollaborators(eventId: string): void {
+    this.eventService.getCollaborators(eventId).subscribe({
+      next: (list) => { this.collaborators = list; },
+      error: () => {}
+    });
+  }
+
+  addCollaborator(): void {
+    const input = this.collaboratorInput.trim();
+    if (!input || !this.activeEventId) return;
+    this.collaboratorsLoading = true;
+    this.eventService.addCollaborator(this.activeEventId, input, this.collaboratorRole).subscribe({
+      next: () => {
+        this.toastService.show('Collaborator added.', 'success');
+        this.collaboratorInput = '';
+        this.loadCollaborators(this.activeEventId!);
+        this.collaboratorsLoading = false;
+      },
+      error: (err) => {
+        this.toastService.show(err?.error?.error ?? 'User not found or already a collaborator.', 'error');
+        this.collaboratorsLoading = false;
+      }
+    });
+  }
+
+  removeCollaborator(userId: string): void {
+    if (!this.activeEventId) return;
+    this.eventService.removeCollaborator(this.activeEventId, userId).subscribe({
+      next: () => {
+        this.collaborators = this.collaborators.filter(c => c.userId !== userId);
+        this.toastService.show('Collaborator removed.', 'success');
+      },
+      error: () => this.toastService.show('Failed to remove collaborator.', 'error')
+    });
+  }
+
+  collaboratorRoleLabel(role: 0 | 1): string {
+    return role === 1 ? 'Editor' : 'Viewer';
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+
+  onAiPlanAccepted(plan: any) {
+    if (!this.activeEventId || !plan?.selected_items?.length) return;
 
     this.toastService.show('Adding recommended vendors to your event...', 'info');
     this.loading = true;
@@ -227,84 +361,14 @@ export class MyEventsComponent implements OnInit {
       const item = items[index];
       const serviceId = item.ServiceId || item.serviceId;
 
-      if (!serviceId) {
-        errorCount++;
-        processNext(index + 1);
-        return;
-      }
+      if (!serviceId) { errorCount++; processNext(index + 1); return; }
 
       this.eventService.addItem(this.activeEventId!, { eventId: this.activeEventId!, serviceId, quantity: 1 }).subscribe({
-        next: () => {
-          completedCount++;
-          processNext(index + 1);
-        },
-        error: (err) => {
-          console.error(`Failed to add item ${serviceId}:`, err);
-          errorCount++;
-          processNext(index + 1);
-        }
+        next: () => { completedCount++; processNext(index + 1); },
+        error: (err) => { console.error(`Failed to add item ${serviceId}:`, err); errorCount++; processNext(index + 1); }
       });
     };
 
     processNext(0);
   }
-
-  payNow() {
-    if (!this.activeEvent || this.spent === 0) return;
-
-    this.isPaying = true;
-    const user = this.authService.user();
-    const nameParts = user?.name ? user.name.split(' ') : ['User', 'Name'];
-
-    const orderPayload = {
-      userId: user?.id || '',
-      eventId: this.activeEvent.id,
-      currency: 'EGP',
-      shippingAddress: {
-        street: 'Default Street',
-        city: 'Cairo',
-        state: 'Cairo',
-        postalCode: '12345'
-      },
-      appointment: new Date(this.activeEvent.date).toISOString()
-    };
-
-    this.orderService.createOrder(orderPayload).subscribe({
-      next: (result) => {
-        if (!result.isSuccess || !result.value?.id) {
-          this.isPaying = false;
-          this.toastService.show('Order creation failed. Please try again.', 'error');
-          return;
-        }
-        this.paymentService.initiatePaymob({
-          amount: this.spent,
-          billing: {
-            first_name: nameParts[0] || 'User',
-            last_name: nameParts[1] || 'Name',
-            email: user?.email || 'test@example.com',
-            phone_number: '+201234567890'
-          },
-          orderId: result.value.id
-        }).subscribe({
-          next: (res) => {
-            this.isPaying = false;
-            window.open(res.iframeUrl, '_blank');
-          },
-          error: (err) => {
-            this.isPaying = false;
-            this.toastService.show('Failed to initialize payment gateway.', 'error');
-            console.error(err);
-          }
-        });
-      },
-      error: (err) => {
-        this.isPaying = false;
-        this.toastService.show('Failed to create order.', 'error');
-        console.error(err);
-      }
-    });
-  }
-
 }
-
-

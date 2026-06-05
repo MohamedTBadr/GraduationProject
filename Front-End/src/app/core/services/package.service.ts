@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -27,7 +27,8 @@ export class PackageService {
     const params = new HttpParams().set('vendorId', vendorId);
     return this.http.get<any>(`${this.apiUrl}/Package`, { params }).pipe(
       map(res => {
-        const items = res?.value?.items ?? res?.value?.Items ?? res?.Value?.items ?? res?.Value?.Items ?? [];
+        const data = res?.value ?? res;
+        const items = Array.isArray(data) ? data : (data?.items ?? []);
         return Array.isArray(items) ? (items as ApiPackage[]) : [];
       })
     );
@@ -36,32 +37,35 @@ export class PackageService {
   getAll(): Observable<ApiPackage[]> {
     return this.http.get<any>(`${this.apiUrl}/Package`).pipe(
       map(res => {
-        const items = res?.value?.items ?? res?.value?.Items ?? res?.Value?.items ?? res?.Value?.Items ?? [];
+        const data = res?.value ?? res;
+        const items = Array.isArray(data) ? data : (data?.items ?? []);
         return Array.isArray(items) ? (items as ApiPackage[]) : [];
       })
     );
   }
 
   create(dto: { name: string; description: string; price: number; discount: number; serviceIds: string[] }): Observable<any> {
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
     return this.http.post<any>(`${this.apiUrl}/Package`, {
-      Name: dto.name,
-      Description: dto.description,
-      Price: dto.price,
-      Discount: dto.discount,
-      ServiceIds: dto.serviceIds
-    });
+      name: dto.name,
+      description: dto.description,
+      price: dto.price,
+      discount: dto.discount,
+      serviceIds: dto.serviceIds
+    }, { headers });
   }
 
   update(id: string, dto: { name: string; description: string; price: number; discount: number; serviceIds: string[]; vendorId: string }): Observable<any> {
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
     return this.http.put<any>(`${this.apiUrl}/Package/${id}`, {
-      Id: id,
-      Name: dto.name,
-      Description: dto.description,
-      Price: dto.price,
-      Discount: dto.discount,
-      ServiceIds: dto.serviceIds,
-      VendorId: dto.vendorId
-    });
+      id,
+      name: dto.name,
+      description: dto.description,
+      price: dto.price,
+      discount: dto.discount,
+      serviceIds: dto.serviceIds,
+      vendorId: dto.vendorId
+    }, { headers });
   }
 
   delete(id: string): Observable<void> {

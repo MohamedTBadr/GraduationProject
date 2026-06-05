@@ -1,42 +1,60 @@
-﻿<div class="vd-section active block">
+<div class="vd-section active block">
   <div class="vd-page-header">
-    <div><div class="vd-page-title">Notifications</div><div class="vd-page-sub">Stay up to date on bookings, messages, reviews, and payouts.</div></div>
-    <div class="flex gap-[7px]"><button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="markAllAsRead()">Mark All Read</button><button class="vd-btn vd-btn-ghost vd-btn-sm"> Preferences</button></div>
+    <div>
+      <div class="vd-page-title">Notifications</div>
+      <div class="vd-page-sub">Stay up to date on bookings, events, payments, and account activity.</div>
+    </div>
+    <div class="flex gap-[7px]">
+      <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="markAllAsRead()">Mark All Read</button>
+    </div>
   </div>
+
+  <!-- Tabs with per-tab unread counts -->
   <div class="vd-tab-bar">
-    <button *ngFor="let tab of tabs" 
-            class="vd-tab" 
-            [class.active]="activeTab === tab"
-            (click)="setTab(tab)">
-      {{tab}} <span *ngIf="tab === 'All' && getUnreadCount() > 0">({{getUnreadCount()}})</span>
+    <button
+      *ngFor="let tab of tabs"
+      class="vd-tab"
+      [class.active]="activeTab === tab"
+      (click)="setTab(tab)">
+      {{ tab }}
+      <span class="tab-count" *ngIf="tabUnreadCount(tab) > 0">{{ tabUnreadCount(tab) }}</span>
     </button>
   </div>
-  <div class="vd-tab-pane active" id="nf-all">
+
+  <div class="vd-tab-pane active">
     <div class="vd-card">
-      <div id="vd-notifs-all" *ngIf="filteredNotifications.length > 0; else noNotifs">
-        <div class="flex gap-[12px] py-[12px] px-[16px] [border-bottom:1px_solid_rgba(255,255,255,.05)] cursor-pointer rounded-[8px]" *ngFor="let notif of filteredNotifications" (click)="markAsRead(notif)" [ngClass]="!notif.isRead ? 'bg-[var(--cream)]' : 'bg-transparent'">
-            <div class="text-[1.4rem]">
-              <i class="bi bi-calendar3" *ngIf="notif.type === 'booking'"></i>
-              <i class="bi bi-chat" *ngIf="notif.type === 'message'"></i>
-              <i class="bi bi-star-fill" *ngIf="notif.type === 'review'" style="color:var(--gold)"></i>
-              <i class="bi bi-currency-dollar" *ngIf="notif.type === 'finance'"></i>
-              <span *ngIf="!['booking', 'message', 'review', 'finance'].includes(notif.type || '')"><i class="bi bi-bell"></i></span>
+      <div *ngIf="filteredNotifications.length > 0; else noNotifs">
+        <div
+          class="notif-row"
+          *ngFor="let notif of filteredNotifications"
+          [class.unread]="!notif.isRead"
+          (click)="markAsRead(notif)">
+
+          <!-- Icon -->
+          <div class="notif-icon" [style]="getTypeColor(notif.type)">
+            <i class="bi" [ngClass]="getTypeIcon(notif.type)"></i>
+          </div>
+
+          <!-- Body -->
+          <div class="notif-body">
+            <div class="notif-title-row">
+              <span class="notif-title">{{ notif.title }}</span>
+              <span class="live-badge" *ngIf="notif.isLive && !notif.isRead">● Live</span>
             </div>
-            <div class="flex-1">
-                <div class="font-semibold text-[.9rem] mb-[4px]" [ngClass]="!notif.isRead ? 'text-[var(--navy)]' : 'text-inherit'">{{notif.title}}</div>
-                <div class="text-[.8rem] text-[var(--gray)]">{{notif.message}}</div>
-                <div class="text-[.7rem] text-[rgba(255,255,255,.3)] mt-[6px]">{{notif.createdAt | date:'medium'}}</div>
-            </div>
-            <div class="w-[8px] h-[8px] rounded-[50%] bg-[var(--gold)] mt-[6px]" *ngIf="!notif.isRead"></div>
+            <div class="notif-message">{{ notif.message }}</div>
+            <div class="notif-time">{{ notif.createdAt | date:'medium' }}</div>
+          </div>
+
+          <!-- Unread dot -->
+          <div class="unread-dot" *ngIf="!notif.isRead"></div>
         </div>
       </div>
+
       <ng-template #noNotifs>
         <div class="p-[40px] text-center text-[var(--gray)]">
-          No notifications found.
+          No {{ activeTab === 'All' ? '' : activeTab.toLowerCase() + ' ' }}notifications found.
         </div>
       </ng-template>
     </div>
   </div>
 </div>
-
-

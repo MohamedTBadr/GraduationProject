@@ -94,9 +94,8 @@ export class ReviewModalComponent {
   constructor(private reviewService: ReviewService, private toastService: ToastService) {}
 
   onFileSelected(event: any) {
-    // In a real scenario, this would upload the file to S3 and set the photoUrl.
-    // We will just mock it for now.
-    this.photoUrl = 'https://mock-s3-url.com/event-photo.jpg';
+    // File upload to storage not yet implemented; photoUrl stays empty
+    this.photoUrl = '';
   }
 
   submitReview() {
@@ -107,7 +106,7 @@ export class ReviewModalComponent {
       serviceId: this.serviceId,
       rating: this.rating,
       review: this.reviewText,
-      photoUrl: this.photoUrl
+      photoUrl: this.photoUrl || undefined
     }).subscribe({
       next: () => {
         this.toastService.show('Review submitted successfully!', 'success');
@@ -115,9 +114,8 @@ export class ReviewModalComponent {
       },
       error: (err: any) => {
         console.error('Error submitting review', err);
-        // Mock success since endpoint doesn't exist yet
-        this.toastService.show('Review submitted successfully! (Mock)', 'success');
-        this.closeModal();
+        const msg = err?.error?.detail || err?.error?.message || 'Failed to submit review. Please try again.';
+        this.toastService.show(msg, 'error');
       }
     });
   }

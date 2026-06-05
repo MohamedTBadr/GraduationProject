@@ -5,23 +5,50 @@
       <div class="ad-page-sub">Send mass announcements to users or vendors via push/email.</div>
     </div>
   </div>
+
+  <div class="ad-alert warn" style="margin-bottom:16px">
+    Broadcast functionality requires a backend endpoint
+    (<code>POST /api/admin/notifications/broadcast</code>) — not yet implemented.
+  </div>
+
   <div class="ad-g2 items-start">
     <div class="ad-card sticky top-[30px]">
       <div class="ad-card-title">Compose Message</div>
-      <div class="ad-form-group"><label>Target Audience</label><select><option>All Vendors</option><option>All Users</option><option>Specific Vendors (City)</option></select></div>
-      <div class="ad-form-group"><label>Subject</label><input type="text" placeholder="e.g. System Maintenance Notice"/></div>
-      <div class="ad-form-group"><label>Message</label><textarea class="min-h-[120px]" placeholder="Type your announcement here..."></textarea></div>
-      <div class="ad-form-group"><label>Channel</label><div class="flex gap-[15px] mt-[5px] text-[.9rem]"><label class="flex items-center gap-[6px] text-[var(--white)] m-[0] font-normal"><input type="checkbox" checked/> Push Notification</label><label class="flex items-center gap-[6px] text-[var(--white)] m-[0] font-normal"><input type="checkbox" checked/> Email</label></div></div>
-      <button class="ad-btn ad-btn-gold w-[100%] justify-center mt-[10px]">Send Broadcast </button>
+      <div class="ad-form-group">
+        <label>Target Audience</label>
+        <select [(ngModel)]="audience">
+          <option>All Vendors</option>
+          <option>All Users</option>
+        </select>
+      </div>
+      <div class="ad-form-group">
+        <label>Subject</label>
+        <input type="text" placeholder="e.g. System Maintenance Notice" [(ngModel)]="subject"/>
+      </div>
+      <div class="ad-form-group">
+        <label>Message</label>
+        <textarea class="min-h-[120px]" placeholder="Type your announcement here..." [(ngModel)]="message"></textarea>
+      </div>
+      <div class="ad-form-group">
+        <label>Channel</label>
+        <div class="flex gap-[15px] mt-[5px] text-[.9rem]">
+          <label class="flex items-center gap-[6px] text-[var(--white)] m-[0] font-normal">
+            <input type="checkbox" [(ngModel)]="channels.push"/> Push Notification
+          </label>
+          <label class="flex items-center gap-[6px] text-[var(--white)] m-[0] font-normal">
+            <input type="checkbox" [(ngModel)]="channels.email"/> Email
+          </label>
+        </div>
+      </div>
+      <button class="ad-btn ad-btn-gold w-[100%] justify-center mt-[10px]" (click)="sendBroadcast()">
+        Send Broadcast
+      </button>
     </div>
+
     <div class="ad-card">
       <div class="ad-card-title">Recent Broadcasts</div>
-      <div id="ad-recent-broadcasts">
-        <div class="py-[14px] px-[0] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
-          <div class="flex justify-between mb-[6px]"><span class="ad-pill ap-amber">All Vendors</span><span class="text-[.75rem] text-[rgba(255,255,255,.4)]">Today, 10:00 AM</span></div>
-          <div class="font-semibold mb-[4px]">March Payouts Processed</div>
-          <div class="text-[.85rem] text-[rgba(255,255,255,.6)] leading-[1.4]">All pending payouts for February have been processed. Funds should reflect in your accounts within 1-3 business days.</div>
-        </div>
+      <div style="text-align:center;padding:32px;color:rgba(255,255,255,.3);font-size:.85rem">
+        No broadcast history — endpoint pending implementation.
       </div>
     </div>
   </div>

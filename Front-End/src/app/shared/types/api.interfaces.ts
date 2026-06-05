@@ -395,7 +395,7 @@ export interface EventItemResponseDto {
   vendorId: string;
   vendorName: string;
   quantity: number;
-  itemStatus: 'Pending' | 'Approved' | 'Rejected' | 'Done' | 'Completed';
+  itemStatus: 'Pending' | 'Approved' | 'Paid' | 'Rejected' | 'Done' | 'Completed';
   rejectionReason?: string;
 }
 
@@ -457,6 +457,14 @@ export interface UpdateEventDto {
   eventStatus: string;
 }
 
+export interface EventCollaboratorDto {
+  userId: string;
+  fullName: string;
+  email: string;
+  role: 0 | 1; // 0 = Viewer, 1 = Editor
+  invitedAt: string;
+}
+
 export interface ApproveItemRequest {
   approve: boolean;
   reason?: string;
@@ -475,9 +483,10 @@ export interface AppNotification {
   userId: string;
   title: string;
   message: string;
-  type?: string;
+  type?: number; // NotificationType enum ordinal from backend (integer, no StringEnumConverter)
   isRead: boolean;
   createdAt: string;
+  isLive?: boolean; // true when pushed in real-time via SSE or SignalR
 }
 
 // ─────────────────────────────────────────────
@@ -491,14 +500,15 @@ export interface PaymobBillingData {
 }
 
 export interface PaymobPaymentRequest {
-  amount: number;
-  billing: PaymobBillingData;
-  orderId?: string;
-  voucherCode?: string; // Optional discount voucher code
+  orderId: string;
 }
 
-export interface PaymobPaymentResponse {
-  iframeUrl: string;
+// Backend returns a plain string (iframe URL) for paid orders,
+// or this object for free/zero-amount orders.
+export interface PaymobFreeResponse {
+  isFree: true;
+  message: string;
+  redirectUrl: string;
 }
 
 // ─────────────────────────────────────────────

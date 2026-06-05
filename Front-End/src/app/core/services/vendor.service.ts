@@ -39,8 +39,8 @@ export class VendorService {
 
     return this.http.get<any>(`${this.apiUrl}/Vendor`, { params }).pipe(
       map(res => {
-        const data = res?.value || res?.Value || res;
-        const items = Array.isArray(data) ? data : (data?.items || data?.Items || []);
+        const data = res?.value ?? res;
+        const items = Array.isArray(data) ? data : (data?.items ?? []);
         if (!Array.isArray(items)) return [];
         return items.map((v: any) => this.normalizeVendor(v));
       })
@@ -50,10 +50,7 @@ export class VendorService {
   getById(vendorId: string): Observable<ApiVendor> {
     if (!vendorId) throw new Error('Vendor ID is required');
     return this.http.get<any>(`${this.apiUrl}/Vendor/${vendorId}`).pipe(
-      map((res: any) => {
-        const v = res?.value || res?.Value || res;
-        return this.normalizeVendor(v);
-      })
+      map((res: any) => this.normalizeVendor(res?.value ?? res))
     );
   }
 
@@ -61,25 +58,25 @@ export class VendorService {
     if (!v) return {} as ApiVendor;
     return {
       ...v,
-      id: v.userId || v.UserId || v.id || v.Id || v.vendorId || v.VendorId,
-      name: v.businessName || v.BusinessName || v.name || v.Name || 'Unknown Vendor',
-      vendorTypeId: v.vendorTypeId || v.VendorTypeId || v.vendorType?.id || v.VendorType?.Id || '',
-      vendorTypeName: v.vendorTypeName || v.VendorTypeName || v.serviceType || v.ServiceType || v.categoryName || v.CategoryName || 'Vendor',
-      about: v.description || v.Description || v.about || v.About || '',
-      status: v.status || v.Status || 'active',
-      isApproved: v.isApproved !== undefined ? v.isApproved : (v.IsApproved !== undefined ? v.IsApproved : true),
-      createdAt: v.createdAt || v.CreatedAt || new Date(),
-      rating: v.rating || v.Rating || 0,
-      location: v.location || v.Location || v.address || v.Address || '',
-      documentUrl: v.document || v.Document || v.documentUrl || v.DocumentUrl,
-      profilePictureUrl: v.profilePicture || v.ProfilePicture || v.profilePictureUrl || v.ProfilePictureUrl,
-      serviceAreas: (v.serviceAreas || v.ServiceAreas || []).map((sa: any) => ({
+      id: v.userId || v.id || v.vendorId,
+      name: v.businessName || v.name || 'Unknown Vendor',
+      vendorTypeId: v.vendorTypeId || v.vendorType?.id || '',
+      vendorTypeName: v.vendorTypeName || v.serviceType || v.categoryName || 'Vendor',
+      about: v.description || v.about || '',
+      status: v.status || 'active',
+      isApproved: v.isApproved ?? true,
+      createdAt: v.createdAt || new Date(),
+      rating: v.rating || 0,
+      location: v.location || v.address || '',
+      documentUrl: v.documentUrl || v.document,
+      profilePictureUrl: v.profilePictureUrl || v.profilePicture,
+      serviceAreas: (v.serviceAreas ?? []).map((sa: any) => ({
         ...sa,
-        id: sa.id || sa.Id,
-        city: sa.city || sa.City,
-        region: sa.region || sa.Region,
-        latitude: sa.latitude !== undefined ? sa.latitude : (sa.Latitude !== undefined ? sa.Latitude : (sa.Lattitude || sa.lattitude || 0)),
-        longitude: sa.longitude !== undefined ? sa.longitude : (sa.Longitude !== undefined ? sa.Longitude : 0)
+        id: sa.id,
+        city: sa.city,
+        region: sa.region,
+        latitude: sa.latitude ?? sa.lattitude ?? 0,
+        longitude: sa.longitude ?? 0
       }))
     } as ApiVendor;
   }
@@ -89,10 +86,7 @@ export class VendorService {
     // If it's not FormData, we should probably convert it if it contains files
     // But usually the component will pass FormData if files are involved
     return this.http.post<any>(`${this.apiUrl}/Vendor`, payload).pipe(
-      map(res => {
-        const v = res?.value || res?.Value || res;
-        return this.normalizeVendor(v);
-      })
+      map(res => this.normalizeVendor(res?.value ?? res))
     );
   }
 

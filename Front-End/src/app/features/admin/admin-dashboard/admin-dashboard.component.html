@@ -1,110 +1,97 @@
-﻿<div class="ad-section active block admin-dashboard-root">
+<div class="ad-section active block admin-dashboard-root">
 
-    <div class="ad-page-hd">
-        <div>
-            <div class="ad-page-title">Platform Overview</div>
-            <div class="ad-page-sub">Real-time pulse of the Eventora platform · March 2026</div>
-        </div>
-
-        <div class="flex gap-[8px]">
-            <button class="ad-btn ad-btn-ghost">Export Report</button>
-            <button class="ad-btn ad-btn-gold"><i class="bi bi-lightning-charge"></i> Quick Actions</button>
-        </div>
+  <div class="ad-page-hd">
+    <div>
+      <div class="ad-page-title">Platform Overview</div>
+      <div class="ad-page-sub">Real-time pulse of the EpicHub platform</div>
     </div>
-
-    <!-- Alerts -->
-    <div id="ad-alerts-strip">
-        <div class="ad-alert err mb-[8px]">
-            <strong>Critical:</strong> 2 unresolved support tickets require immediate admin action.
-            <span class="cursor-pointer ml-[8px] underline" routerLink="/admin/support">View Tickets →</span>
-        </div>
-
-        <div class="ad-alert warn">
-            <strong>Pending:</strong> 14 vendor applications and 5 payout requests awaiting review.
-            <span class="cursor-pointer ml-[8px] underline" routerLink="/admin/vendors">Review Now →</span>
-        </div>
+    <div class="flex gap-[8px]">
+      <button class="ad-btn ad-btn-ghost" (click)="openScheduleReport()">Export Report</button>
+      <button class="ad-btn ad-btn-gold" (click)="openQuickActions()"><i class="bi bi-lightning-charge"></i> Quick Actions</button>
     </div>
+  </div>
 
-    <!-- KPI GRID -->
+  <ng-container *ngIf="loading">
+    <div class="ad-card" style="text-align:center;padding:32px;color:rgba(255,255,255,.4)">Loading dashboard…</div>
+  </ng-container>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- KPI ROW 1 -->
     <div class="ad-kpi-grid">
-
-        <div class="ad-kpi ak-gold">
-            <div class="ad-kpi-val">847K</div>
-            <div class="ad-kpi-lbl">Total Revenue (EGP)</div>
-        </div>
-
-        <div class="ad-kpi ak-blue">
-            <div class="ad-kpi-val">312</div>
-            <div class="ad-kpi-lbl">Total Bookings</div>
-        </div>
-
-        <div class="ad-kpi ak-green">
-            <div class="ad-kpi-val">47</div>
-            <div class="ad-kpi-lbl">Active Vendors</div>
-        </div>
-
-        <div class="ad-kpi ak-purple">
-            <div class="ad-kpi-val">1,284</div>
-            <div class="ad-kpi-lbl">Registered Users</div>
-        </div>
+      <div class="ad-kpi ak-gold">
+        <div class="ad-kpi-val">{{ formatCurrency(lifetimeRevenue) }}</div>
+        <div class="ad-kpi-lbl">Total Revenue (EGP)</div>
+      </div>
+      <div class="ad-kpi ak-blue">
+        <div class="ad-kpi-val">{{ totalOrders }}</div>
+        <div class="ad-kpi-lbl">Total Orders</div>
+      </div>
+      <div class="ad-kpi ak-green">
+        <div class="ad-kpi-val">{{ activeVendors }}</div>
+        <div class="ad-kpi-lbl">Active Vendors</div>
+      </div>
+      <div class="ad-kpi ak-purple">
+        <div class="ad-kpi-val">{{ totalCustomers }}</div>
+        <div class="ad-kpi-lbl">Registered Users</div>
+      </div>
     </div>
 
-    <!-- SECOND KPI ROW -->
+    <!-- KPI ROW 2 -->
     <div class="ad-kpi-grid">
-
-        <div class="ad-kpi ak-cyan">
-            <div class="ad-kpi-val">4.82</div>
-            <div class="ad-kpi-lbl">Platform Avg Rating</div>
-        </div>
-
-        <div class="ad-kpi ak-red">
-            <div class="ad-kpi-val">7</div>
-            <div class="ad-kpi-lbl">Open Support Tickets</div>
-        </div>
-
-        <div class="ad-kpi ak-gold">
-            <div class="ad-kpi-val">84.7K</div>
-            <div class="ad-kpi-lbl">Platform Commission (EGP)</div>
-        </div>
-
-        <div class="ad-kpi ak-green">
-            <div class="ad-kpi-val">5</div>
-            <div class="ad-kpi-lbl">Pending Payouts</div>
-        </div>
+      <div class="ad-kpi ak-cyan">
+        <div class="ad-kpi-val">{{ formatCurrency(currentMonthRevenue) }}</div>
+        <div class="ad-kpi-lbl">This Month (EGP)</div>
+      </div>
+      <div class="ad-kpi" [ngClass]="growthPercentage >= 0 ? 'ak-green' : 'ak-red'">
+        <div class="ad-kpi-val">{{ growthPercentage >= 0 ? '+' : '' }}{{ growthPercentage | number:'1.0-1' }}%</div>
+        <div class="ad-kpi-lbl">Month-on-Month Growth</div>
+      </div>
     </div>
 
     <!-- CHARTS -->
     <div class="ad-g2">
 
-        <div class="ad-card">
-            <div class="ad-card-title">Monthly Revenue (EGP)</div>
+      <div class="ad-card">
+        <div class="ad-card-title">Monthly Revenue (EGP)</div>
+        <ng-container *ngIf="revenueHistory.length; else noChart">
+          <div class="flex items-end gap-[10px] h-[120px] pt-[20px] mt-[10px] justify-center">
+            <ng-container *ngFor="let point of revenueHistory">
+              <div class="flex flex-col items-center gap-[4px]">
+                <div class="w-[22px] bg-[var(--primary)] rounded-[4px]"
+                     [style.height.%]="getBarHeight(point.revenue)"></div>
+                <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ point.month | slice:0:3 }}</span>
+              </div>
+            </ng-container>
+          </div>
+        </ng-container>
+        <ng-template #noChart>
+          <div style="text-align:center;padding:32px;color:rgba(255,255,255,.3);font-size:.85rem">No revenue data yet</div>
+        </ng-template>
+      </div>
 
-            <div class="flex items-end gap-[15px] h-[120px] pt-[20px] mt-[10px] justify-center">
-
-                <div class="w-[25px] bg-[var(--primary)] h-[62%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[71%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[98%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[82%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[91%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[85%] rounded-[4px]"></div>
-
+      <div class="ad-card">
+        <div class="ad-card-title">Recent Orders</div>
+        <ng-container *ngIf="recentOrders.length; else noOrders">
+          <div *ngFor="let o of recentOrders | slice:0:5"
+               style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+            <div>
+              <div style="font-size:.82rem;font-weight:600">{{ o.vendorName ?? 'Order' }}</div>
+              <div style="font-size:.72rem;color:rgba(255,255,255,.4)">{{ o.createdAt | date:'mediumDate' }}</div>
             </div>
-        </div>
-
-        <div class="ad-card">
-            <div class="ad-card-title">Booking Volume</div>
-
-            <div class="flex items-end gap-[15px] h-[120px] pt-[20px] mt-[10px] justify-center">
-
-                <div class="w-[25px] bg-[var(--primary)] h-[42%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[51%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[73%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[60%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[68%] rounded-[4px]"></div>
-                <div class="w-[25px] bg-[var(--primary)] h-[55%] rounded-[4px]"></div>
-
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-weight:600;font-size:.88rem;color:var(--gold)">{{ o.amount | number }} EGP</span>
+              <span class="ad-pill" [ngClass]="statusPill(o.paymentStatus)">{{ o.paymentStatus }}</span>
             </div>
-        </div>
+          </div>
+        </ng-container>
+        <ng-template #noOrders>
+          <div style="text-align:center;padding:32px;color:rgba(255,255,255,.3);font-size:.85rem">No recent orders</div>
+        </ng-template>
+      </div>
+
     </div>
+
+  </ng-container>
 
 </div>

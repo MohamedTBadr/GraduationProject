@@ -14,6 +14,24 @@ export const routes: Routes = [
         loadComponent: () => import('./features/user/add-event/add-event.component').then(m => m.AddEventComponent)
     },
     {
+        path: 'checkout/:orderId',
+        canActivate: [authGuard],
+        loadComponent: () => import('./features/user/checkout/checkout.component').then(m => m.CheckoutComponent)
+    },
+    {
+        // Paymob redirects here for both success and failure (?success=true/false&merchant_order_id=<guid>)
+        path: 'payment-result',
+        loadComponent: () => import('./features/user/payment-result/payment-result.component').then(m => m.PaymentResultComponent)
+    },
+    {
+        path: 'payment/success',
+        loadComponent: () => import('./features/user/payment-success/payment-success.component').then(m => m.PaymentSuccessComponent)
+    },
+    {
+        path: 'payment/failed',
+        loadComponent: () => import('./features/user/payment-failed/payment-failed.component').then(m => m.PaymentFailedComponent)
+    },
+    {
         path: 'change-password',
         canActivate: [authGuard],
         loadComponent: () => import('./features/auth/change-password/change-password.component').then(m => m.ChangePasswordComponent)
@@ -106,6 +124,10 @@ export const routes: Routes = [
             {
                 path: 'favorites',
                 loadComponent: () => import('./features/user/favorites.component').then(m => m.FavoritesComponent)
+            },
+            {
+                path: 'notifications',
+                loadComponent: () => import('./features/user/notifications/notifications.component').then(m => m.UserNotificationsComponent)
             },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
         ]

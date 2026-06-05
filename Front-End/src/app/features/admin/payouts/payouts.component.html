@@ -1,41 +1,15 @@
-﻿<div class="ad-section active block">
+<div class="ad-section active block">
   <div class="ad-page-hd">
     <div><div class="ad-page-title">Payout Management</div><div class="ad-page-sub">Review, approve, and process vendor payout requests.</div></div>
-    <button class="ad-btn ad-btn-gold">Process All Approved</button>
   </div>
-  <div class="ad-alert warn"> 5 payout requests are pending review totalling 142,500 EGP. Please review before the March 15 processing deadline.</div>
-  <div class="ad-tbl-wrap mb-[16px]">
-    <div class="ad-tbl-head"><div class="ad-tbl-head-title">Pending Payouts</div></div>
-    <table class="ad-tbl">
-      <thead><tr><th>Vendor</th><th>Amount (EGP)</th><th>Method</th><th>Requested On</th><th>Balance</th><th>Actions</th></tr></thead>
-      <tbody id="ad-payouts-pending">
-        <tr>
-          <td> White Rose Decor</td>
-          <td class="font-bold text-[var(--gold)]">18,500 EGP</td>
-          <td>Bank Transfer</td><td>Mar 3, 2026</td>
-          <td class="text-[#4ade80]">18,500 EGP available</td>
-          <td><div class="flex gap-[5px]">
-            <button class="ad-btn ad-btn-green ad-btn-sm">Approve</button>
-            <button class="ad-btn ad-btn-red ad-btn-sm">Reject</button>
-          </div></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="ad-tbl-wrap">
-    <div class="ad-tbl-head"><div class="ad-tbl-head-title">Completed Payouts</div></div>
-    <table class="ad-tbl">
-      <thead><tr><th>Vendor</th><th>Amount</th><th>Method</th><th>Date</th><th>Reference</th><th>Status</th></tr></thead>
-      <tbody id="ad-payouts-done">
-        <tr>
-          <td>Royal Hall Cairo</td>
-          <td class="font-bold text-[var(--gold)]">75,000 EGP</td>
-          <td>Bank Transfer</td><td>Feb 15, 2026</td>
-          <td class="text-[.74rem] text-[rgba(255,255,255,.4)] font-[monospace]">TXN-20260215B</td>
-          <td><span class="ad-pill ap-green">Completed</span></td>
-        </tr>
-      </tbody>
-    </table>
+
+  <div class="ad-card" style="text-align:center;padding:56px 24px">
+    <div style="font-size:2.4rem;margin-bottom:14px">💳</div>
+    <div style="font-weight:700;font-size:1.05rem;margin-bottom:10px">Payout management coming soon</div>
+    <div style="font-size:.85rem;color:rgba(255,255,255,.4);max-width:420px;margin:0 auto;line-height:1.6">
+      Payout endpoints are pending backend implementation. Required:
+      <br><code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">GET /api/payouts</code>,
+      <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">PATCH /api/payouts/&#123;id&#125;/approve</code>
+    </div>
   </div>
 </div>
-

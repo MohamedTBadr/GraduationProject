@@ -5,6 +5,31 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 
+// Backend NotificationType enum ordinals (no StringEnumConverter — serialized as integers)
+const TYPE = {
+  ACCOUNT_ACCEPTED:    0,
+  ACCOUNT_SUSPENDED:   1,
+  ORDER_PLACED:        2,
+  ORDER_REJECTED:      3,
+  PAYMENT_REJECTED:    4,
+  PAYMENT_ACCEPTED:    5,
+  ORDER_CANCELLED:     6,
+  ORDER_COMPLETED:     7,
+  EVENT_STATUS_UPDATED:  8,
+  EVENT_STATUS_DELETED:  9,
+  EVENT_ITEM_APPROVED:  10,
+  EVENT_ITEM_REJECTED:  11,
+  EVENT_COMPLETED:      12
+} as const;
+
+const TAB_TYPES: Record<string, number[]> = {
+  Bookings: [TYPE.ORDER_PLACED, TYPE.ORDER_REJECTED, TYPE.ORDER_CANCELLED, TYPE.ORDER_COMPLETED,
+             TYPE.EVENT_ITEM_APPROVED, TYPE.EVENT_ITEM_REJECTED],
+  Events:   [TYPE.EVENT_STATUS_UPDATED, TYPE.EVENT_STATUS_DELETED, TYPE.EVENT_COMPLETED],
+  Payments: [TYPE.PAYMENT_ACCEPTED, TYPE.PAYMENT_REJECTED],
+  Account:  [TYPE.ACCOUNT_ACCEPTED, TYPE.ACCOUNT_SUSPENDED]
+};
+
 @Component({
   selector: 'app-notifications',
   standalone: true,
@@ -13,8 +38,8 @@ import { SignalRService } from '../../../core/services/signalr.service';
   styleUrls: ['./notifications.component.scss']
 })
 export class NotificationsComponent implements OnInit {
-  activeTab: string = 'All';
-  tabs = ['All', 'Bookings', 'Messages', 'Reviews', 'Finance'];
+  activeTab = 'All';
+  tabs = ['All', 'Bookings', 'Events', 'Payments', 'Account'];
 
   constructor(
     private notificationService: NotificationService,
@@ -23,7 +48,6 @@ export class NotificationsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Only load if we don't have notifications yet or to refresh
     if (this.signalRService.notifications().length === 0) {
       this.loadNotifications();
     }
@@ -33,14 +57,9 @@ export class NotificationsComponent implements OnInit {
     this.notificationService.getNotifications().subscribe({
       next: (data) => {
         this.signalRService.notifications.set(data || []);
-        // Update unread count based on loaded data
-        const unreadCount = (data || []).filter(n => !n.isRead).length;
-        this.signalRService.unreadCount.set(unreadCount);
+        this.signalRService.unreadCount.set((data || []).filter(n => !n.isRead).length);
       },
-      error: (err) => {
-        console.error('Failed to load notifications', err);
-        this.toastService.show('Failed to load notifications', 'error');
-      }
+      error: () => this.toastService.show('Failed to load notifications', 'error')
     });
   }
 
@@ -50,46 +69,69 @@ export class NotificationsComponent implements OnInit {
 
   get filteredNotifications(): AppNotification[] {
     const all = this.notifications;
-    if (this.activeTab === 'All') return all;
-    // Map tabs to types
-    const typeMapping: { [key: string]: string } = {
-      'Bookings': 'booking',
-      'Messages': 'message',
-      'Reviews': 'review',
-      'Finance': 'finance'
-    };
-    const targetType = typeMapping[this.activeTab];
-    return all.filter(n => n.type === targetType);
+    const types = TAB_TYPES[this.activeTab];
+    if (!types) return all;
+    return all.filter(n => types.includes(n.type ?? -1));
   }
 
-  getUnreadCount(): number {
-    return this.signalRService.unreadCount();
+  tabUnreadCount(tab: string): number {
+    const unread = this.notifications.filter(n => !n.isRead);
+    const types = TAB_TYPES[tab];
+    if (!types) return unread.length; // 'All'
+    return unread.filter(n => types.includes(n.type ?? -1)).length;
   }
 
   setTab(tab: string): void {
     this.activeTab = tab;
   }
 
+  getTypeIcon(type?: number): string {
+    switch (type) {
+      case TYPE.ORDER_PLACED:
+      case TYPE.ORDER_REJECTED:
+      case TYPE.ORDER_CANCELLED:
+      case TYPE.ORDER_COMPLETED:       return 'bi-calendar3';
+      case TYPE.EVENT_ITEM_APPROVED:
+      case TYPE.EVENT_ITEM_REJECTED:   return 'bi-calendar-check';
+      case TYPE.EVENT_STATUS_UPDATED:
+      case TYPE.EVENT_STATUS_DELETED:
+      case TYPE.EVENT_COMPLETED:       return 'bi-calendar-event';
+      case TYPE.PAYMENT_ACCEPTED:      return 'bi-credit-card';
+      case TYPE.PAYMENT_REJECTED:      return 'bi-credit-card-2-back';
+      case TYPE.ACCOUNT_ACCEPTED:      return 'bi-person-check';
+      case TYPE.ACCOUNT_SUSPENDED:     return 'bi-person-slash';
+      default:                         return 'bi-bell';
+    }
+  }
+
+  getTypeColor(type?: number): string {
+    switch (type) {
+      case TYPE.PAYMENT_ACCEPTED:
+      case TYPE.EVENT_ITEM_APPROVED:
+      case TYPE.ORDER_COMPLETED:
+      case TYPE.ACCOUNT_ACCEPTED:    return 'color:var(--gold)';
+      case TYPE.PAYMENT_REJECTED:
+      case TYPE.ORDER_REJECTED:
+      case TYPE.ORDER_CANCELLED:
+      case TYPE.ACCOUNT_SUSPENDED:
+      case TYPE.EVENT_ITEM_REJECTED: return 'color:#ef4444';
+      default:                       return '';
+    }
+  }
+
   markAsRead(notification: AppNotification): void {
     if (notification.isRead) return;
     this.notificationService.markAsRead(notification.id).subscribe({
       next: () => {
-        // Update both the notification object and the global signal count
         notification.isRead = true;
         this.signalRService.unreadCount.update(c => Math.max(0, c - 1));
-        
-        // Ensure the signal triggers a UI update if needed (though modifying the object might work, updating signal is cleaner)
         this.signalRService.notifications.update(n => [...n]);
       },
-      error: (err) => {
-        console.error('Failed to mark notification as read', err);
-        this.toastService.show('Failed to mark notification as read', 'error');
-      }
+      error: () => this.toastService.show('Failed to mark as read', 'error')
     });
   }
 
   markAllAsRead(): void {
-    const unread = this.notifications.filter(n => !n.isRead);
-    unread.forEach(n => this.markAsRead(n));
+    this.notifications.filter(n => !n.isRead).forEach(n => this.markAsRead(n));
   }
 }

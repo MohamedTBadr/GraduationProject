@@ -1,0 +1,25 @@
+<div class="result-page">
+  <div class="result-card">
+
+    <div class="icon-circle">
+      <i class="bi bi-x-lg"></i>
+    </div>
+
+    <h2>Payment Failed</h2>
+    <p class="subtitle">
+      Something went wrong during payment processing.<br>
+      Your order has not been charged. You can try again.
+    </p>
+
+    <div class="actions">
+      <button class="btn-retry" (click)="retry()">
+        <i class="bi bi-arrow-repeat"></i> Try Again
+      </button>
+      <button class="btn-ghost" (click)="goToBookings()">
+        <i class="bi bi-calendar2-x"></i> Back to Bookings
+      </button>
+      <a class="btn-link" routerLink="/">Back to Home</a>
+    </div>
+
+  </div>
+</div>

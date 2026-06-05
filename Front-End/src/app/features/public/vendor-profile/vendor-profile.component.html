@@ -324,11 +324,7 @@
           <div class="vp-field">
             <label>Event Type</label>
             <select [(ngModel)]="eventType">
-              <option>Wedding</option>
-              <option>Birthday</option>
-              <option>Corporate</option>
-              <option>Engagement</option>
-              <option>Graduation</option>
+              <option *ngFor="let type of eventTypes" [value]="type.name">{{ type.name }}</option>
             </select>
           </div>
 

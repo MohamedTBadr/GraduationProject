@@ -1,32 +1,15 @@
 <div class="vd-section active block">
-  <div class="vd-page-header"><div><div class="vd-page-title">Reviews</div><div class="vd-page-sub">Monitor client feedback and manage your public reputation.</div></div></div>
-  <div class="vd-g2 mb-[14px]">
-    <div class="vd-card text-center">
-      <div class="text-[3.8rem] text-[var(--gold)] mb-[5px] font-[var(--ff-d)] leading-[1]">4.9</div>
-      <div class="text-[var(--gold)] text-[1.2rem] mb-[5px] tracking-[2px]"></div>
-      <div class="text-[.79rem] text-[var(--gray)] mb-[18px]">Based on 127 verified reviews</div>
-      <div id="vd-rating-dist">
-        <div class="flex items-center my-[6px] mx-[0] text-[.7rem]"><div class="flex-1 text-right mr-[8px] text-[rgba(255,255,255,.5)]">5 Star</div><div class="flex items-center h-[6px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[90%]"></div></div></div>
-        <div class="flex items-center my-[6px] mx-[0] text-[.7rem]"><div class="flex-1 text-right mr-[8px] text-[rgba(255,255,255,.5)]">4 Star</div><div class="flex items-center h-[6px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[8%]"></div></div></div>
-        <div class="flex items-center my-[6px] mx-[0] text-[.7rem]"><div class="flex-1 text-right mr-[8px] text-[rgba(255,255,255,.5)]">3 Star</div><div class="flex items-center h-[6px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[2%]"></div></div></div>
-        <div class="flex items-center my-[6px] mx-[0] text-[.7rem]"><div class="flex-1 text-right mr-[8px] text-[rgba(255,255,255,.5)]">2 Star</div><div class="flex items-center h-[6px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[0%]"></div></div></div>
-        <div class="flex items-center my-[6px] mx-[0] text-[.7rem]"><div class="flex-1 text-right mr-[8px] text-[rgba(255,255,255,.5)]">1 Star</div><div class="flex items-center h-[6px] bg-[rgba(255,255,255,.05)] rounded-[4px] overflow-hidden [flex:2]"><div class="h-[100%] bg-[var(--gold)] w-[0%]"></div></div></div>
-      </div>
-    </div>
-    <div class="vd-card"><div class="vd-card-title">Awaiting Your Reply (3)</div>
-      <div id="vd-reviews-pending">
-        <div class="pb-[12px] mb-[12px] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
-            <div class="flex justify-between"><div class="font-semibold">Nada & Ahmed</div><div class="text-[var(--gold)]"></div></div>
-            <div class="text-[0.8rem] text-[var(--gray)] my-[6px] mx-[0]">The stage setup was absolutely magical. Everything we asked for and more! Highly recommend White Rose Decor.</div>
-            <button class="vd-btn vd-btn-ghost vd-btn-sm py-[4px] px-[8px] text-[0.75rem] mt-[4px]">️ Reply Publicly</button>
-        </div>
-      </div>
-    </div>
+  <div class="vd-page-header">
+    <div><div class="vd-page-title">Reviews</div><div class="vd-page-sub">Monitor client feedback and manage your public reputation.</div></div>
   </div>
-  <div class="vd-card">
-    <div class="vd-card-title">All Reviews
-      <div class="flex gap-[7px]"><select class="w-[auto] text-[.76rem] py-[4px] px-[9px] rounded-[50px]"><option>All Stars</option><option>5</option><option>4</option><option>3</option></select></div>
+
+  <div class="vd-card" style="text-align:center;padding:56px 24px">
+    <div style="font-size:2.4rem;margin-bottom:14px">⭐</div>
+    <div style="font-weight:700;font-size:1.05rem;margin-bottom:10px">Reviews coming soon</div>
+    <div style="font-size:.85rem;color:rgba(255,255,255,.4);max-width:380px;margin:0 auto;line-height:1.6">
+      The review retrieval endpoint is pending backend implementation. Once
+      <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">GET /api/vendor/&#123;id&#125;/ratings</code>
+      is available, your reviews will appear here automatically.
     </div>
-    <div id="vd-all-reviews"></div>
   </div>
 </div>

@@ -10,7 +10,7 @@
   </div>
   <div class="mb-stat-card card-pending">
     <div class="val">{{stats.pending}}</div>
-    <div class="lbl">Pending</div>
+    <div class="lbl">Awaiting Confirmation</div>
   </div>
   <div class="mb-stat-card card-completed">
     <div class="val">{{stats.completed}}</div>
@@ -28,10 +28,10 @@
        (click)="setTab('all')">
     All Bookings <span class="mb-tab-badge" [class.inactive]="activeTab !== 'all'">{{stats.all}}</span>
   </div>
-  <div class="mb-tab" 
+  <div class="mb-tab"
        [class.active]="activeTab === 'pending'"
        (click)="setTab('pending')">
-    Pending <span class="mb-tab-badge" [class.inactive]="activeTab !== 'pending'">{{stats.pending}}</span>
+    Awaiting Confirmation <span class="mb-tab-badge" [class.inactive]="activeTab !== 'pending'">{{stats.pending}}</span>
   </div>
   <div class="mb-tab" 
        [class.active]="activeTab === 'confirmed'"
@@ -68,7 +68,17 @@
       </div>
       
       <div class="bk-status-col">
-        <div class="bk-status-chip" [ngClass]="bk.status">{{bk.status}}</div>
+        <div class="bk-status-chip" [ngClass]="bk.status">
+          <i class="bi" [ngClass]="{
+            'bi-hourglass-split': bk.status === 'Pending',
+            'bi-check-circle':   bk.status === 'Confirmed',
+            'bi-star-fill':      bk.status === 'Completed',
+            'bi-x-circle':       bk.status === 'Cancelled',
+            'bi-check2-all':     bk.status === 'Done',
+            'bi-bag-check-fill': bk.status === 'Paid'
+          }"></i>
+          {{ getBookingStatusLabel(bk.status) }}
+        </div>
         <div class="bk-price">{{bk.price}}</div>
       </div>
     </div>
@@ -109,19 +119,59 @@
       </div>
       
       <div class="bk-status-col">
-        <div class="bk-status-chip" [ngClass]="order.paymentStatus.toLowerCase()">{{order.paymentStatus}}</div>
+        <div class="bk-status-chip" [ngClass]="order.paymentStatus === 'Pending' ? 'awaiting-payment' : order.paymentStatus.toLowerCase()">
+          <i class="bi" [ngClass]="{
+            'bi-clock':        order.paymentStatus === 'Pending',
+            'bi-check-circle': order.paymentStatus === 'Paid' || order.paymentStatus === 'Completed',
+            'bi-x-circle':     order.paymentStatus === 'Failed' || order.paymentStatus === 'Cancelled'
+          }"></i>
+          {{ getPaymentStatusLabel(order.paymentStatus) }}
+        </div>
         <div class="bk-price">{{order.amount | number}} {{order.currency}}</div>
       </div>
     </div>
-    
+
     <div class="bk-divider"></div>
 
     <div class="bk-actions-bar">
       <div class="bk-actions">
-        <div class="bk-order-items">
+        <ng-container *ngIf="order.paymentStatus === 'Pending'">
+          <div class="pay-wrapper">
+            <button class="btn btn-pay-now"
+                    [disabled]="!hasApprovedItems(order.eventId)"
+                    (click)="navigateToCheckout(order.id)">
+              <i class="bi bi-lock-fill"></i>
+              <ng-container *ngIf="hasApprovedItems(order.eventId)">
+                Pay for {{ approvedItemCount(order.eventId) }} service(s)
+              </ng-container>
+              <ng-container *ngIf="!hasApprovedItems(order.eventId)">
+                Awaiting Approval
+              </ng-container>
+            </button>
+
+            <!-- Informational — never a hard blocker -->
+            <span class="pending-hint pending-hint--approved"
+                  *ngIf="hasApprovedItems(order.eventId) && pendingItemCount(order.eventId) > 0">
+              <i class="bi bi-info-circle"></i>
+              {{ pendingItemCount(order.eventId) }} more service(s) still awaiting vendor approval — pay for those later.
+            </span>
+            <span class="pending-hint"
+                  *ngIf="!hasApprovedItems(order.eventId)">
+              <i class="bi bi-hourglass-split"></i>
+              No services approved yet. Payment will unlock once vendors confirm.
+            </span>
+            <span class="pending-hint pending-hint--paid"
+                  *ngIf="paidItemCount(order.eventId) > 0">
+              <i class="bi bi-bag-check"></i>
+              {{ paidItemCount(order.eventId) }} service(s) already paid in a previous round.
+            </span>
+          </div>
+        </ng-container>
+        <div class="bk-order-items" *ngIf="order.paymentStatus !== 'Pending'">
           <span>Event booking payment</span>
         </div>
       </div>
+      <div class="bk-id">{{order.id.substring(0,8)}}</div>
     </div>
   </div>
   

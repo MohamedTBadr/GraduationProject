@@ -21,18 +21,11 @@ export class ServiceTypeService {
     
     return this.http.get<any>(`${this.apiUrl}/ServiceType`).pipe(
       map(res => {
-        const data = res.value || res.Value || res;
-        const arr = Array.isArray(data) ? data : (data?.items || data?.Items || []);
-        return Array.isArray(arr) ? arr : [];
+        const data = res.value ?? res;
+        return Array.isArray(data) ? data : (data?.items ?? []);
       }),
       tap(data => {
-        const normalizedData = data.map((item: any) => ({
-           ...item,
-           id: item.id || item.Id,
-           name: item.name || item.Name,
-           vendorTypeId: item.vendorTypeId || item.VendorTypeId
-        }));
-        this.cachedServiceTypes = normalizedData;
+        this.cachedServiceTypes = data;
       }),
       map(() => this.cachedServiceTypes as ServiceType[])
     );
@@ -42,13 +35,8 @@ export class ServiceTypeService {
   getById(serviceTypeId: string): Observable<ServiceType> {
     return this.http.get<any>(`${this.apiUrl}/ServiceType/${serviceTypeId}`).pipe(
       map(res => {
-        const item = res.value || res.Value || res;
-        return {
-          ...item,
-          id: item.id || item.Id,
-          name: item.name || item.Name,
-          vendorTypeId: item.vendorTypeId || item.VendorTypeId
-        };
+        const item = res.value ?? res;
+        return { ...item, id: item.id, name: item.name, vendorTypeId: item.vendorTypeId };
       })
     );
   }

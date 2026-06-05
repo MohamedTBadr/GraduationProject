@@ -1,14 +1,14 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PackageService, ApiPackage } from '../../../core/services/package.service';
+import { ProductService } from '../../../core/services/product.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../shared/components/toast/toast.service';
+import { ApiProduct } from '../../../shared/types/api.interfaces';
 
-export interface VendorServiceItem {
-  id: number;
-  name: string;
-}
-
-export interface PackageItem {
-  id: number;
+interface DisplayPackage {
+  id: string;
   icon: string;
   name: string;
   status: 'Active' | 'Paused';
@@ -16,6 +16,7 @@ export interface PackageItem {
   price: number;
   description: string;
   services: string[];
+  serviceIds: string[];
   savings: string;
   bookings: number;
 }
@@ -28,53 +29,10 @@ export interface PackageItem {
   styleUrls: ['./packages.component.scss']
 })
 export class PackagesComponent implements OnInit {
-  packages: PackageItem[] = [
-    {
-      id: 1,
-      icon: 'heart',
-      name: 'Full Wedding Package',
-      status: 'Active',
-      pricePrefix: 'From',
-      price: 32000,
-      description: 'Complete wedding florals — ceremony to reception. Stage arch, table centerpieces, bridal suite, entrance arrangement, setup, teardown, and coordinator included.',
-      services: ['Wedding Stage Floral', 'Table Centerpieces', 'Bridal Bouquet'],
-      savings: 'Save 5,000 EGP vs. individual booking',
-      bookings: 12
-    },
-    {
-      id: 2,
-      icon: 'heart-fill',
-      name: 'Engagement Bundle',
-      status: 'Active',
-      pricePrefix: 'From',
-      price: 14000,
-      description: 'Full engagement room transformation: arch, backdrop, dessert table styling, candle arrangement, and petal floor design.',
-      services: ['Engagement Styling', 'Dessert Table Setup'],
-      savings: 'Save 2,500 EGP vs. individual booking',
-      bookings: 7
-    },
-    {
-      id: 3,
-      icon: 'gift',
-      name: 'Birthday Bloom',
-      status: 'Paused',
-      pricePrefix: 'From',
-      price: 6500,
-      description: 'Birthday decor bundle: balloon art, themed florals, and dessert table styling. Available in any theme.',
-      services: ['Balloon Art', 'Dessert Table Setup'],
-      savings: 'Save 1,200 EGP vs. individual booking',
-      bookings: 4
-    }
-  ];
-
-  vendorServices: VendorServiceItem[] = [
-    { id: 1, name: 'Wedding Stage Floral' },
-    { id: 2, name: 'Table Centerpieces' },
-    { id: 3, name: 'Balloon Art' },
-    { id: 4, name: 'Engagement Styling' },
-    { id: 5, name: 'Bridal Bouquet' },
-    { id: 6, name: 'Dessert Table Setup' }
-  ];
+  packages: DisplayPackage[] = [];
+  vendorServices: ApiProduct[] = [];
+  vendorId = '';
+  loading = false;
 
   activeTab: 'Active' | 'Paused' = 'Active';
 
@@ -90,16 +48,28 @@ export class PackagesComponent implements OnInit {
     return this.packages.filter(p => p.status === 'Paused').length;
   }
 
-  selectedServicesIds: number[] = [];
+  selectedServicesIds: string[] = [];
 
   isModalOpen = false;
-  editingPackageId: number | null = null;
+  editingPackageId: string | null = null;
   packageForm!: FormGroup;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private packageService: PackageService,
+    private productService: ProductService,
+    private authService: AuthService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.initForm();
+    const user = this.authService.user();
+    if (user) {
+      this.vendorId = user.id;
+      this.loadPackages();
+      this.loadVendorServices();
+    }
   }
 
   initForm(): void {
@@ -111,46 +81,67 @@ export class PackagesComponent implements OnInit {
     });
   }
 
-  openCreateModal(pkgToEdit?: any): void {
-    try {
-      console.log('openCreateModal', pkgToEdit);
-      // Check if what was passed is actually a package object
-      if (pkgToEdit && typeof pkgToEdit.id !== 'undefined') {
-        this.editingPackageId = pkgToEdit.id;
-        
-        // Ensure form is initialized
-        if (!this.packageForm) this.initForm();
-
-        this.packageForm.patchValue({
-          name: pkgToEdit.name || '',
-          description: pkgToEdit.description || '',
-          price: pkgToEdit.price || 0,
-          priceType: pkgToEdit.pricePrefix === 'From' ? 'Starting From' : 'Fixed'
-        });
-        
-        // Safely map names back to IDs
-        const serviceList = pkgToEdit.services || [];
-        this.selectedServicesIds = serviceList
-            .map((srvName: string) => this.vendorServices.find(vs => vs.name === srvName)?.id)
-            .filter((id: any) => id !== undefined) as number[];
-      } else {
-        this.editingPackageId = null;
-        this.initForm();
-        this.selectedServicesIds = [];
+  loadPackages(): void {
+    this.loading = true;
+    this.packageService.getByVendor(this.vendorId).subscribe({
+      next: (pkgs) => {
+        this.packages = pkgs.map(p => this.mapToDisplay(p));
+        this.loading = false;
+      },
+      error: () => {
+        this.toastService.show('Failed to load packages.', 'error');
+        this.loading = false;
       }
-      
-      this.isModalOpen = true;
-    } catch (e: any) {
-      alert('Error opening modal: ' + e.message);
-      console.error(e);
+    });
+  }
+
+  loadVendorServices(): void {
+    this.productService.getByVendor(this.vendorId).subscribe({
+      next: (services) => { this.vendorServices = services; },
+      error: () => {}
+    });
+  }
+
+  private mapToDisplay(p: ApiPackage): DisplayPackage {
+    return {
+      id: p.id,
+      icon: '📦',
+      name: p.name,
+      status: 'Active',
+      pricePrefix: '',
+      price: p.price,
+      description: p.description ?? '',
+      services: (p.services ?? []).map(s => s.name),
+      serviceIds: (p.services ?? []).map(s => s.id),
+      savings: p.discount > 0 ? `Save ${p.discount}% on this bundle` : 'Value-packed deal',
+      bookings: 0
+    };
+  }
+
+  openCreateModal(pkgToEdit?: DisplayPackage): void {
+    if (pkgToEdit && pkgToEdit.id) {
+      this.editingPackageId = pkgToEdit.id;
+      if (!this.packageForm) this.initForm();
+      this.packageForm.patchValue({
+        name: pkgToEdit.name,
+        description: pkgToEdit.description,
+        price: pkgToEdit.price,
+        priceType: pkgToEdit.pricePrefix === 'From' ? 'Starting From' : 'Fixed'
+      });
+      this.selectedServicesIds = [...pkgToEdit.serviceIds];
+    } else {
+      this.editingPackageId = null;
+      this.initForm();
+      this.selectedServicesIds = [];
     }
+    this.isModalOpen = true;
   }
 
   closeModal(): void {
     this.isModalOpen = false;
   }
 
-  toggleServiceSelection(serviceId: number): void {
+  toggleServiceSelection(serviceId: string): void {
     const index = this.selectedServicesIds.indexOf(serviceId);
     if (index > -1) {
       this.selectedServicesIds.splice(index, 1);
@@ -159,68 +150,59 @@ export class PackagesComponent implements OnInit {
     }
   }
 
-  isServiceSelected(serviceId: number): boolean {
+  isServiceSelected(serviceId: string): boolean {
     return this.selectedServicesIds.includes(serviceId);
   }
 
   createPackage(): void {
-    if (this.packageForm.valid && this.selectedServicesIds.length > 0) {
-      const formVal = this.packageForm.value;
-      const resolvedServices = this.vendorServices.filter(s => this.selectedServicesIds.includes(s.id)).map(s => s.name);
-      
-      if (this.editingPackageId !== null) {
-        // Update existing item
-        const idx = this.packages.findIndex(p => p.id === this.editingPackageId);
-        if (idx !== -1) {
-          this.packages[idx] = {
-            ...this.packages[idx],
-            name: formVal.name,
-            pricePrefix: formVal.priceType === 'Starting From' ? 'From' : '',
-            price: formVal.price,
-            description: formVal.description,
-            services: resolvedServices
-          };
-        }
-      } else {
-        // Create new item
-        const newPackage: PackageItem = {
-          id: Date.now(),
-          icon: 'stars', 
-          name: formVal.name,
-          status: 'Active',
-          pricePrefix: formVal.priceType === 'Starting From' ? 'From' : '',
-          price: formVal.price,
-          description: formVal.description,
-          services: resolvedServices,
-          savings: 'Value-packed deal',
-          bookings: 0
-        };
-
-        this.packages.unshift(newPackage);
-      }
-      
-      this.closeModal();
-    } else {
-      // Force display validation errors if they missed something
+    if (!this.packageForm.valid) {
       this.packageForm.markAllAsTouched();
+      return;
     }
-  }
+    const formVal = this.packageForm.value;
+    const dto = {
+      name: formVal.name as string,
+      description: formVal.description as string,
+      price: Number(formVal.price),
+      discount: 0,
+      serviceIds: this.selectedServicesIds
+    };
 
-  togglePackageStatus(pkg: PackageItem): void {
-    if (pkg.status === 'Active') {
-      pkg.status = 'Paused';
-      this.activeTab = 'Paused';
+    if (this.editingPackageId !== null) {
+      this.packageService.update(this.editingPackageId, { ...dto, vendorId: this.vendorId }).subscribe({
+        next: () => {
+          this.toastService.show('Package updated successfully.', 'success');
+          this.loadPackages();
+          this.closeModal();
+        },
+        error: () => this.toastService.show('Failed to update package.', 'error')
+      });
     } else {
-      pkg.status = 'Active';
-      this.activeTab = 'Active';
+      this.packageService.create(dto).subscribe({
+        next: () => {
+          this.toastService.show('Package created successfully.', 'success');
+          this.loadPackages();
+          this.closeModal();
+        },
+        error: () => this.toastService.show('Failed to create package.', 'error')
+      });
     }
   }
 
-  deletePackage(id: number): void {
+  togglePackageStatus(pkg: DisplayPackage): void {
+    pkg.status = pkg.status === 'Active' ? 'Paused' : 'Active';
+    this.activeTab = pkg.status;
+  }
+
+  deletePackage(id: string): void {
     if (confirm('Are you sure you want to delete this package?')) {
-      this.packages = this.packages.filter(p => p.id !== id);
+      this.packageService.delete(id).subscribe({
+        next: () => {
+          this.toastService.show('Package deleted.', 'success');
+          this.packages = this.packages.filter(p => p.id !== id);
+        },
+        error: () => this.toastService.show('Failed to delete package.', 'error')
+      });
     }
   }
 }
-
-

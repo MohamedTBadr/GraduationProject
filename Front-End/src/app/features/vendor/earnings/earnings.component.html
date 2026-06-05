@@ -1,56 +1,68 @@
 <div class="vd-section active block">
   <div class="vd-page-header">
-    <div><div class="vd-page-title">Earnings</div><div class="vd-page-sub">Revenue, commissions, and payout history in full detail.</div></div>
+    <div><div class="vd-page-title">Earnings</div><div class="vd-page-sub">Revenue, commissions, and transaction history.</div></div>
   </div>
-  <div class="vd-earn-banner">
-    <div>
-      <div class="text-[.73rem] text-[rgba(255,255,255,.36)] mb-[3px] tracking-[.5px] uppercase">Available Balance</div>
-      <div class="vd-earn-val">18,500 EGP</div>
-      <div class="vd-earn-lbl">Next auto-payout: March 15, 2026</div>
-    </div>
-    <div class="vd-earn-stats">
-      <div class="vd-earn-stat"><div class="vd-earn-stat-val">142K</div><div class="vd-earn-stat-lbl">Gross Revenue</div></div>
-      <div class="vd-earn-stat"><div class="vd-earn-stat-val">14.2K</div><div class="vd-earn-stat-lbl">Commission (10%)</div></div>
-      <div class="vd-earn-stat"><div class="vd-earn-stat-val">127.8K</div><div class="vd-earn-stat-lbl">Net Earned</div></div>
-      <div class="vd-earn-stat"><div class="vd-earn-stat-val">47</div><div class="vd-earn-stat-lbl">Total Bookings</div></div>
-    </div>
-    <button class="vd-btn vd-btn-gold">Request Payout →</button>
-  </div>
-  <div class="vd-g2">
-    <div class="vd-card"><div class="vd-card-title">Monthly Breakdown</div>
-      <div class="vd-bar-chart flex items-end gap-[20px] h-[120px] pt-[20px] mt-[10px] justify-center" id="vd-earn-chart">
-         <div class="w-[25px] bg-[var(--gold)] h-[40%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Oct</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[60%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Nov</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[30%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Dec</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[75%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Jan</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[50%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Feb</span></div>
-         <div class="w-[25px] bg-[var(--gold)] h-[80%] rounded-[4px 4px 0 0] relative"><span class="absolute text-[10px] bottom-[-20px] left-[-5px]">Mar</span></div>
-      </div>
-    </div>
-    <div class="vd-card"><div class="vd-card-title">Latest Transactions</div>
-      <div id="vd-transactions">
-        <div class="flex justify-between items-center py-[12px] px-[0] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
-            <div><div class="font-semibold text-[0.9rem]">Payout Processed</div><div class="text-[0.8rem] text-[var(--gray)]">Feb 15, 2026</div></div>
-            <div class="font-semibold text-[var(--green)]">+ 24,000 EGP</div>
+
+  <div *ngIf="loading" style="text-align:center;padding:48px;color:rgba(255,255,255,.4)">Loading earnings…</div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Banner -->
+    <div class="vd-earn-banner">
+      <div>
+        <div class="text-[.73rem] text-[rgba(255,255,255,.36)] mb-[3px] tracking-[.5px] uppercase">This Month</div>
+        <div class="vd-earn-val">{{ currentMonthRevenue | number }} EGP</div>
+        <div class="vd-earn-lbl">
+          <span *ngIf="growthPercentage >= 0" style="color:#4ade80">↑ {{ growthPercentage | number:'1.0-1' }}% vs last month</span>
+          <span *ngIf="growthPercentage < 0"  style="color:#f87171">↓ {{ growthPercentage | number:'1.0-1' }}% vs last month</span>
         </div>
       </div>
+      <div class="vd-earn-stats">
+        <div class="vd-earn-stat"><div class="vd-earn-stat-val">{{ formatK(lifetimeRevenue) }}</div><div class="vd-earn-stat-lbl">Gross Revenue</div></div>
+        <div class="vd-earn-stat"><div class="vd-earn-stat-val">{{ formatK(commission) }}</div><div class="vd-earn-stat-lbl">Commission (10%)</div></div>
+        <div class="vd-earn-stat"><div class="vd-earn-stat-val">{{ formatK(netEarned) }}</div><div class="vd-earn-stat-lbl">Net Earned</div></div>
+        <div class="vd-earn-stat"><div class="vd-earn-stat-val">{{ totalOrders }}</div><div class="vd-earn-stat-lbl">Total Orders</div></div>
+      </div>
     </div>
-  </div>
-  <div class="vd-card">
-    <div class="vd-card-title">Payout History</div>
-    <div class="overflow-x-auto">
-      <table class="vd-tbl">
-        <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th></tr></thead>
-        <tbody id="vd-payout-tbody">
-          <tr>
-            <td>Feb 15, 2026</td>
-            <td class="font-semibold">24,000 EGP</td>
-            <td>Bank Transfer</td>
-            <td class="text-[.76rem] text-[rgba(255,255,255,.5)] font-[monospace]">TXN-102938</td>
-            <td><span class="vd-badge-pill vdb-green">Completed</span></td>
-          </tr>
-        </tbody>
-      </table>
+
+    <div class="vd-g2">
+
+      <!-- Monthly breakdown chart -->
+      <div class="vd-card">
+        <div class="vd-card-title">Monthly Breakdown</div>
+        <ng-container *ngIf="revenueHistory.length; else noChart">
+          <div class="flex items-end gap-[12px] h-[120px] pt-[20px] mt-[10px] justify-center">
+            <div *ngFor="let point of revenueHistory" class="flex flex-col items-center gap-[4px]">
+              <div class="w-[22px] bg-[var(--gold)] rounded-[4px_4px_0_0]"
+                   [style.height.%]="getBarHeight(point.revenue)"></div>
+              <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ point.month | slice:0:3 }}</span>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noChart>
+          <div style="text-align:center;padding:32px;color:rgba(255,255,255,.3);font-size:.85rem">No revenue history yet</div>
+        </ng-template>
+      </div>
+
+      <!-- Recent orders -->
+      <div class="vd-card">
+        <div class="vd-card-title">Latest Orders</div>
+        <ng-container *ngIf="recentOrders.length; else noOrders">
+          <div *ngFor="let o of recentOrders | slice:0:5"
+               class="flex justify-between items-center py-[12px] px-[0] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+            <div>
+              <div class="font-semibold text-[0.9rem]">Order #{{ (o.id ?? o.Id ?? '').slice(0,8).toUpperCase() }}</div>
+              <div class="text-[0.8rem] text-[var(--gray)]">{{ (o.createdAt ?? o.CreatedAt) | date:'mediumDate' }}</div>
+            </div>
+            <div class="font-semibold text-[var(--green)]">+ {{ (o.amount ?? o.Amount ?? 0) | number }} EGP</div>
+          </div>
+        </ng-container>
+        <ng-template #noOrders>
+          <div style="text-align:center;padding:24px;color:rgba(255,255,255,.3);font-size:.85rem">No recent orders</div>
+        </ng-template>
+      </div>
+
     </div>
-  </div>
+
+  </ng-container>
 </div>

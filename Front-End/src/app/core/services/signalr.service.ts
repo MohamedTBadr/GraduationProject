@@ -62,7 +62,7 @@ export class SignalRService {
 
     this.hubConnection.on('ReceiveNotification', (notification: AppNotification) => {
       this.toastService.show(`New Notification: ${notification.title}`, 'info');
-      this.notifications.update(n => [notification, ...n]);
+      this.notifications.update(n => [{ ...notification, isLive: true }, ...n]);
       this.unreadCount.update(c => c + 1);
     });
 
@@ -109,7 +109,7 @@ export class SignalRService {
       try {
         const notification: AppNotification = JSON.parse(event.data);
         this.toastService.show(`New Notification: ${notification.title}`, 'info');
-        this.notifications.update(n => [notification, ...n]);
+        this.notifications.update(n => [{ ...notification, isLive: true }, ...n]);
         this.unreadCount.update(c => c + 1);
       } catch (err) {
         console.error('Error parsing SSE notification:', err);

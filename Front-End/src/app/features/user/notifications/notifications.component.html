@@ -1,0 +1,54 @@
+<div class="mb-header">
+  <div class="mb-title">Notifications</div>
+  <div class="mb-subtitle">Your bookings, events, payments, and account updates.</div>
+</div>
+
+<!-- Tabs -->
+<div class="mb-tabs">
+  <div
+    class="mb-tab"
+    *ngFor="let tab of tabs"
+    [class.active]="activeTab === tab"
+    (click)="setTab(tab)">
+    {{ tab }}
+    <span class="mb-tab-badge" [class.inactive]="activeTab !== tab" *ngIf="tabUnreadCount(tab) > 0">
+      {{ tabUnreadCount(tab) }}
+    </span>
+  </div>
+  <div class="mb-tab" style="margin-left:auto" (click)="markAllAsRead()">
+    Mark All Read
+  </div>
+</div>
+
+<!-- List -->
+<div class="notif-list">
+  <ng-container *ngIf="filteredNotifications.length > 0; else empty">
+    <div
+      class="notif-card"
+      *ngFor="let n of filteredNotifications"
+      [class.unread]="!n.isRead"
+      (click)="markAsRead(n)">
+
+      <div class="notif-icon-wrap" [style.color]="getTypeColor(n.type)">
+        <i class="bi" [ngClass]="getTypeIcon(n.type)"></i>
+      </div>
+
+      <div class="notif-body">
+        <div class="notif-head">
+          <span class="notif-title">{{ n.title }}</span>
+          <span class="live-badge" *ngIf="n.isLive && !n.isRead">● Live</span>
+        </div>
+        <div class="notif-msg">{{ n.message }}</div>
+        <div class="notif-time">{{ n.createdAt | date:'medium' }}</div>
+      </div>
+
+      <div class="unread-dot" *ngIf="!n.isRead"></div>
+    </div>
+  </ng-container>
+
+  <ng-template #empty>
+    <div class="notif-empty">
+      No {{ activeTab === 'All' ? '' : activeTab.toLowerCase() + ' ' }}notifications yet.
+    </div>
+  </ng-template>
+</div>

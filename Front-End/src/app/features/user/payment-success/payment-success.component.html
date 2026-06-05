@@ -1,0 +1,61 @@
+<div class="result-page">
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Confirming your payment…</p>
+  </div>
+
+  <div *ngIf="!loading" class="result-card">
+
+    <!-- Success -->
+    <ng-container *ngIf="confirmed">
+      <div class="icon-circle success">
+        <i class="bi bi-check-lg"></i>
+      </div>
+      <h2>Payment Successful!</h2>
+      <p class="subtitle">Your booking is confirmed and we've sent a confirmation to your email.</p>
+
+      <div class="order-detail" *ngIf="order">
+        <div class="detail-row">
+          <span>Amount Paid</span>
+          <span class="highlight">{{ order.amount | currency:'EGP ':'symbol':'1.0-0' }}</span>
+        </div>
+        <div class="detail-row">
+          <span>Status</span>
+          <span class="badge paid">{{ order.paymentStatus }}</span>
+        </div>
+        <div class="detail-row" *ngIf="order.appointment">
+          <span>Appointment</span>
+          <span>{{ order.appointment | date:'mediumDate' }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Pending / unknown -->
+    <ng-container *ngIf="!confirmed && order">
+      <div class="icon-circle pending">
+        <i class="bi bi-hourglass-split"></i>
+      </div>
+      <h2>Payment Pending</h2>
+      <p class="subtitle">Your payment is being processed. This page will update once confirmed.</p>
+    </ng-container>
+
+    <!-- No order found -->
+    <ng-container *ngIf="!confirmed && !order">
+      <div class="icon-circle success">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <h2>Thank You!</h2>
+      <p class="subtitle">Your payment has been submitted. Check your bookings for the latest status.</p>
+    </ng-container>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="goToBookings()">
+        <i class="bi bi-calendar2-check"></i> View My Bookings
+      </button>
+      <a class="btn-ghost" routerLink="/">Back to Home</a>
+    </div>
+
+  </div>
+
+</div>

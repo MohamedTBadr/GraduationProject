@@ -175,17 +175,17 @@ export class EventStudioComponent implements OnInit {
     this.aiService.getBudgetAllocation(this.selectedBudget, this.selectedEventType).subscribe({
       next: (res: any) => {
         this.loadingBudget = false;
-        const raw = res?.value ?? res?.Value ?? res;
+        const raw = res?.value ?? res;
         if (raw) {
           this.budgetAllocation = {
-            totalBudget: raw.totalBudget ?? raw.TotalBudget ?? 0,
-            eventType: raw.eventType ?? raw.EventType ?? '',
-            advice: raw.advice ?? raw.Advice ?? '',
-            categories: (raw.categories ?? raw.Categories ?? []).map((cat: any) => ({
-              name: cat.name ?? cat.Name ?? '',
-              amount: cat.amount ?? cat.Amount ?? 0,
-              percentage: cat.percentage ?? cat.Percentage ?? 0,
-              description: cat.description ?? cat.Description ?? ''
+            totalBudget: raw.totalBudget ?? 0,
+            eventType: raw.eventType ?? '',
+            advice: raw.advice ?? '',
+            categories: (raw.categories ?? []).map((cat: any) => ({
+              name: cat.name ?? '',
+              amount: cat.amount ?? 0,
+              percentage: cat.percentage ?? 0,
+              description: cat.description ?? ''
             }))
           };
         }
@@ -215,28 +215,28 @@ export class EventStudioComponent implements OnInit {
 
     this.eventService.getById(this.eventId).subscribe({
       next: (res: any) => {
-        const raw = res?.value ?? res?.Value ?? res;
+        const raw = res?.value ?? res;
         if (!raw) {
           this.isSavingBudget = false;
           this.toastService.show('Failed to retrieve current event details.', 'error');
           return;
         }
 
-        const oldType = this.eventTypes.find(t => t.name === (raw.eventTypeName ?? raw.EventTypeName));
+        const oldType = this.eventTypes.find(t => t.name === raw.eventTypeName);
         const oldTypeId = oldType ? oldType.id : '';
 
         const matchingType = this.eventTypes.find(t => t.name === this.selectedEventType);
         const eventTypeId = matchingType ? matchingType.id : oldTypeId;
 
         const payload: any = {
-          title: raw.title ?? raw.Title,
+          title: raw.title,
           eventTypeId: eventTypeId,
-          eventDate: raw.eventDate ?? raw.EventDate,
-          location: raw.location ?? raw.Location,
+          eventDate: raw.eventDate,
+          location: raw.location,
           totalBudget: this.selectedBudget,
-          guestCount: raw.guestCount ?? raw.GuestCount ?? 0,
-          notes: raw.notes ?? raw.Notes,
-          eventStatus: raw.eventStatus ?? raw.EventStatus ?? 'Planned'
+          guestCount: raw.guestCount ?? 0,
+          notes: raw.notes,
+          eventStatus: raw.eventStatus ?? 'Planned'
         };
 
         this.eventService.update(this.eventId, payload).subscribe({
@@ -322,17 +322,17 @@ export class EventStudioComponent implements OnInit {
     this.aiService.getEventTimeline(this.eventId).subscribe({
       next: (res: any) => {
         this.loadingTimeline = false;
-        const raw = res?.value ?? res?.Value ?? res;
+        const raw = res?.value ?? res;
         if (raw) {
           this.timelineData = {
-            eventId: raw.eventId ?? raw.EventId ?? '',
-            eventTitle: raw.eventTitle ?? raw.EventTitle ?? '',
-            planningNotes: raw.planningNotes ?? raw.PlanningNotes ?? '',
-            timeline: (raw.timeline ?? raw.Timeline ?? []).map((item: any) => ({
-              time: item.time ?? item.Time ?? '',
-              activity: item.activity ?? item.Activity ?? '',
-              duration: item.duration ?? item.Duration ?? '',
-              importance: item.importance ?? item.Importance ?? 'Low'
+            eventId: raw.eventId ?? '',
+            eventTitle: raw.eventTitle ?? '',
+            planningNotes: raw.planningNotes ?? '',
+            timeline: (raw.timeline ?? []).map((item: any) => ({
+              time: item.time ?? '',
+              activity: item.activity ?? '',
+              duration: item.duration ?? '',
+              importance: item.importance ?? 'Low'
             }))
           };
           // Seed local mutable copy

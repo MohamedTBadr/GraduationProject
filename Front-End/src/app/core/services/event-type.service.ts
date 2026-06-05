@@ -21,12 +21,9 @@ export class EventTypeService {
     return this.http.get<any>(`${this.apiUrl}/EventTypes`).pipe(
       map(res => {
         if (!res) return [];
-        const data = res.value || res.Value || res;
-        const arr = Array.isArray(data) ? data : (data.items || data.Items || []);
-        return arr.map((item: any) => ({
-           id: item?.id || item?.Id,
-           name: item?.name || item?.Name
-        }));
+        const data = res.value ?? res;
+        const arr = Array.isArray(data) ? data : (data.items ?? []);
+        return arr.map((item: any) => ({ id: item.id, name: item.name }));
       }),
       tap(data => this.cachedEventTypes = data)
     );
@@ -37,11 +34,8 @@ export class EventTypeService {
     return this.http.get<any>(`${this.apiUrl}/EventTypes/${id}`).pipe(
       map(res => {
         if (!res) return { id: '', name: '' };
-        const item = res.value || res.Value || res;
-        return {
-          id: item?.id || item?.Id,
-          name: item?.name || item?.Name
-        };
+        const item = res.value ?? res;
+        return { id: item.id, name: item.name };
       })
     );
   }

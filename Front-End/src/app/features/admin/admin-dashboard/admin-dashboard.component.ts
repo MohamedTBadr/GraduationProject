@@ -1,83 +1,82 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import { ModalService } from '../../../shared/services/modal.service';
 
-interface DashboardStat {
-  label: string;
-  value: string;
-  icon: string;
-  trend: string;
-  isCurrency?: boolean;
-  isDanger?: boolean;
-}
+interface RevenuePoint { month: string; revenue: number; }
+interface RecentOrder { id: string; vendorName?: string; amount: number; paymentStatus: string; createdAt: string; }
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss']
 })
-export class AdminDashboardComponent {
+export class AdminDashboardComponent implements OnInit {
   modalService = inject(ModalService);
+  private http = inject(HttpClient);
 
-  stats: DashboardStat[] = [
-    { label: 'Total Users', value: '12,450', icon: '', trend: '+12%' },
-    { label: 'Active Vendors', value: '842', icon: '', trend: '+5%' },
-    { label: 'Platform Revenue', value: '345,000', icon: '', trend: '+24%', isCurrency: true },
-    { label: 'Open Tickets', value: '12', icon: '', trend: '-2%', isDanger: true }
-  ];
+  loading = true;
 
-  healthMetrics = [
-    { label: 'Booking Success Rate', value: '98.5%', status: 'optimal' },
-    { label: 'Avg. Response Time', value: '18m', status: 'optimal' },
-    { label: 'System Uptime', value: '99.99%', status: 'optimal' },
-    { label: 'Dispute Rate', value: '0.4%', status: 'warning' }
-  ];
+  lifetimeRevenue = 0;
+  currentMonthRevenue = 0;
+  growthPercentage = 0;
+  totalOrders = 0;
+  activeVendors = 0;
+  totalCustomers = 0;
+  revenueHistory: RevenuePoint[] = [];
+  recentOrders: RecentOrder[] = [];
 
-  chartData = [
-    { day: 'Mon', value: 45 },
-    { day: 'Tue', value: 72 },
-    { day: 'Wed', value: 65 },
-    { day: 'Thu', value: 89 },
-    { day: 'Fri', value: 110 },
-    { day: 'Sat', value: 95 },
-    { day: 'Sun', value: 55 }
-  ];
-
-  applications = [
-    { id: 1, name: 'Lumiere Events', vendorTypeName: 'Photography', location: 'Cairo, Egypt', date: 'Oct 24, 2026', status: 'Reviewing' },
-    { id: 2, name: 'The Golden Plate', vendorTypeName: 'Catering', location: 'Giza, Egypt', date: 'Oct 23, 2026', status: 'Approved' },
-    { id: 3, name: 'White Rose Decor', vendorTypeName: 'Decoration', location: 'New Cairo, Egypt', date: 'Oct 22, 2026', status: 'Pending' }
-  ];
-
-  approveApp(id: number) {
-    const app = this.applications.find(a => a.id === id);
-    if (app) app.status = 'Approved';
+  ngOnInit() {
+    // /dashboard/stats has a missing DB view; executive-report returns equivalent data
+    const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
+    this.http.post<any>(`${environment.apiUrl}/dashboard/executive-report`, {}, { headers }).subscribe({
+      next: (res) => {
+        const d = res?.value ?? res;
+        const kpis    = d?.kpIs ?? d?.KPIs ?? d?.kpis ?? {};
+        const metrics = d?.adminMetrics ?? d?.AdminMetrics ?? {};
+        this.lifetimeRevenue    = kpis?.lifetimeRevenue    ?? kpis?.LifetimeRevenue    ?? 0;
+        this.currentMonthRevenue= kpis?.currentMonthRevenue?? kpis?.CurrentMonthRevenue?? 0;
+        this.growthPercentage   = kpis?.growthPercentage   ?? kpis?.GrowthPercentage   ?? 0;
+        this.totalOrders        = metrics?.totalOrders     ?? metrics?.TotalOrders     ?? 0;
+        this.activeVendors      = metrics?.activeVendors   ?? metrics?.ActiveVendors   ?? 0;
+        this.totalCustomers     = metrics?.totalCustomers  ?? metrics?.TotalCustomers  ?? 0;
+        const hist = d?.revenueHistory ?? d?.RevenueHistory ?? [];
+        this.revenueHistory     = Array.isArray(hist) ? hist : [];
+        const orders = d?.recentOrders ?? d?.RecentOrders ?? [];
+        this.recentOrders       = Array.isArray(orders) ? orders : [];
+        this.loading = false;
+      },
+      error: () => { this.loading = false; }
+    });
   }
 
-  reviewApp(app: any) {
-    this.modalService.open('review-vendor', app);
+  getBarHeight(revenue: number): number {
+    if (!this.revenueHistory.length) return 10;
+    const max = Math.max(...this.revenueHistory.map(h => h.revenue ?? 0));
+    if (max === 0) return 10;
+    return Math.max(8, Math.round((revenue / max) * 100));
   }
 
-  rejectApp(id: number) {
-    const app = this.applications.find(a => a.id === id);
-    if (app) app.status = 'Rejected';
+  formatCurrency(n: number): string {
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+    if (n >= 1_000) return (n / 1_000).toFixed(0) + 'K';
+    return n.toString();
   }
 
-  openQuickActions() {
-    this.modalService.open('quick-action');
+  statusPill(status: string): string {
+    const s = (status ?? '').toLowerCase();
+    if (s === 'paid' || s === 'confirmed') return 'ap-green';
+    if (s === 'pending') return 'ap-amber';
+    if (s === 'cancelled' || s === 'failed') return 'ap-red';
+    return 'ap-amber';
   }
 
-  openAddVendor() {
-    this.modalService.open('add-vendor');
-  }
-
-  openAddPackage() {
-    this.modalService.open('add-package');
-  }
-
-  openScheduleReport() {
-    this.modalService.open('schedule-report');
-  }
+  openQuickActions() { this.modalService.open('quick-action'); }
+  openAddVendor()    { this.modalService.open('add-vendor'); }
+  openAddPackage()   { this.modalService.open('add-package'); }
+  openScheduleReport(){ this.modalService.open('schedule-report'); }
 }

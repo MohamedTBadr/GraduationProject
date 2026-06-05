@@ -1,0 +1,123 @@
+<div class="ad-section active block">
+  <div class="ad-page-hd">
+    <div>
+      <div class="ad-page-title">Company Inquiries</div>
+      <div class="ad-page-sub">Corporate event requests submitted by companies.</div>
+    </div>
+  </div>
+
+  <div class="ad-kpi-grid [grid-template-columns:repeat(3,1fr)]">
+    <div class="ad-kpi ak-blue">
+      <div class="ad-kpi-val">{{ totalCount }}</div>
+      <div class="ad-kpi-lbl">Total Inquiries</div>
+    </div>
+    <div class="ad-kpi ak-gold">
+      <div class="ad-kpi-val">{{ pendingCount }}</div>
+      <div class="ad-kpi-lbl">Pending</div>
+    </div>
+  </div>
+
+  <!-- Status filter tabs -->
+  <div class="ad-tab-bar flex gap-[8px] my-[16px]">
+    <button
+      *ngFor="let s of statusTabs"
+      class="ad-btn ad-btn-ghost ad-btn-sm"
+      [class.ad-btn-gold]="statusFilter === s"
+      (click)="statusFilter = s">
+      {{ s }}
+    </button>
+  </div>
+
+  <div class="p-[2rem] text-center text-[var(--gold)]" *ngIf="loading">Loading inquiries...</div>
+
+  <div *ngIf="!loading" class="ad-tbl-wrap">
+    <table class="ad-tbl">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Contact</th>
+          <th>Date</th>
+          <th>Budget</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inq of filteredInquiries" (click)="openDetails(inq)" style="cursor:pointer">
+          <td>
+            <div class="font-semibold">{{ inq.companyName }}</div>
+            <div class="text-[.7rem] text-[rgba(255,255,255,.35)]">{{ inq.eventType?.name || '—' }}</div>
+          </td>
+          <td>
+            <div>{{ inq.contactPerson }}</div>
+            <div class="text-[.7rem] text-[rgba(255,255,255,.35)]">{{ inq.email }}</div>
+          </td>
+          <td>{{ inq.expectedDate | date:'mediumDate' }}</td>
+          <td>{{ inq.approximateBudget | number }} EGP</td>
+          <td><span class="ad-pill" [ngClass]="statusPillClass(inq.status)">{{ inq.status }}</span></td>
+          <td (click)="$event.stopPropagation()">
+            <div class="flex gap-[5px]">
+              <button
+                *ngFor="let s of statuses"
+                [class]="'ad-btn ad-btn-sm ' + (inq.status === s ? 'ad-btn-ghost' : 'ad-btn-ghost')"
+                [disabled]="inq.status === s"
+                (click)="updateStatus(inq, s)">
+                {{ s }}
+              </button>
+              <button class="ad-btn ad-btn-red ad-btn-sm" (click)="deleteInquiry(inq.id)">Delete</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredInquiries.length === 0">
+          <td class="text-center p-[2rem] text-[#888]" colspan="6">No inquiries found.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="flex justify-between items-center p-[1rem] text-[#fff]">
+      <span>Page {{ pageNumber }} of {{ totalPages }}</span>
+      <div class="flex gap-[10px]">
+        <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === 1" (click)="changePage(-1)">Previous</button>
+        <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === totalPages" (click)="changePage(1)">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="vd-modal-overlay" [class.open]="isModalOpen" (click)="closeModal()">
+  <div class="vd-modal max-w-[560px]" (click)="$event.stopPropagation()" *ngIf="selectedInquiry">
+    <button class="vd-modal-close" (click)="closeModal()">&times;</button>
+
+    <div class="vd-modal-title">{{ selectedInquiry.companyName }}</div>
+    <div class="vd-modal-sub mb-[20px]">
+      <span class="ad-pill" [ngClass]="statusPillClass(selectedInquiry.status)">{{ selectedInquiry.status }}</span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-[12px] text-[.85rem] text-[rgba(255,255,255,.8)]">
+      <div><span class="text-[rgba(255,255,255,.45)]">Contact:</span> {{ selectedInquiry.contactPerson }}</div>
+      <div><span class="text-[rgba(255,255,255,.45)]">Email:</span> {{ selectedInquiry.email }}</div>
+      <div><span class="text-[rgba(255,255,255,.45)]">Phone:</span> {{ selectedInquiry.phoneNumber }}</div>
+      <div><span class="text-[rgba(255,255,255,.45)]">Event Type:</span> {{ selectedInquiry.eventType?.name || '—' }}</div>
+      <div><span class="text-[rgba(255,255,255,.45)]">Expected Date:</span> {{ selectedInquiry.expectedDate | date:'mediumDate' }}</div>
+      <div><span class="text-[rgba(255,255,255,.45)]">Attendees:</span> {{ selectedInquiry.estimatedAttendees | number }}</div>
+      <div class="col-span-2"><span class="text-[rgba(255,255,255,.45)]">Budget:</span> {{ selectedInquiry.approximateBudget | number }} EGP</div>
+      <div class="col-span-2" *ngIf="selectedInquiry.additionalRequirements">
+        <span class="text-[rgba(255,255,255,.45)]">Requirements:</span>
+        <p class="mt-[4px]">{{ selectedInquiry.additionalRequirements }}</p>
+      </div>
+    </div>
+
+    <div class="flex gap-[8px] mt-[24px]">
+      <button
+        *ngFor="let s of statuses"
+        class="ad-btn ad-btn-ghost ad-btn-sm"
+        [class.ad-btn-gold]="selectedInquiry.status !== s"
+        [disabled]="selectedInquiry.status === s"
+        (click)="updateStatus(selectedInquiry, s)">
+        Mark {{ s }}
+      </button>
+      <button class="ad-btn ad-btn-red ad-btn-sm" (click)="deleteInquiry(selectedInquiry.id)">Delete</button>
+    </div>
+  </div>
+</div>
