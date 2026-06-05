@@ -33,9 +33,6 @@ export class ProductService {
     const top = res.items ?? res.Items;
     if (Array.isArray(top)) return top;
 
-    // #region agent log
-    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'product.service.ts:extractArrayData',message:'Service API parse failed',data:{resKeys:Object.keys(res),innerKeys:inner&&typeof inner==='object'?Object.keys(inner):[]},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     return [];
   }
 
@@ -88,11 +85,7 @@ export class ProductService {
   }
 
   private mapProductList(res: any): ApiProduct[] {
-    const raw = this.extractArrayData(res);
-    // #region agent log
-    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'product.service.ts:mapProductList',message:'Service API parse',data:{resKeys:res?Object.keys(res):[],rawCount:raw.length,firstItemKeys:raw[0]?Object.keys(raw[0]):[]},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-    return raw.map(item => this.normalizeProduct(item));
+    return this.extractArrayData(res).map(item => this.normalizeProduct(item));
   }
 
   /** GET /Service – returns filtered/paginated products */

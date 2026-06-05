@@ -41,9 +41,6 @@ export class VendorService {
       map(res => {
         const data = res?.value ?? res?.Value ?? res;
         const items = Array.isArray(data) ? data : (data?.items ?? data?.Items ?? []);
-        // #region agent log
-        fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'vendor.service.ts:getAll',message:'Vendor API parse',data:{resKeys:res?Object.keys(res):[],dataKeys:data&&typeof data==='object'&&!Array.isArray(data)?Object.keys(data):[],isResArray:Array.isArray(res),isDataArray:Array.isArray(data),itemsCount:Array.isArray(items)?items.length:-1,firstItemKeys:Array.isArray(items)&&items[0]?Object.keys(items[0]):[]},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         if (!Array.isArray(items)) return [];
         return items.map((v: any) => this.normalizeVendor(v));
       })
@@ -103,10 +100,6 @@ export class VendorService {
         longitude: sa.longitude ?? sa.Longitude ?? 0
       }))
     } as ApiVendor;
-
-    // #region agent log
-    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'vendor.service.ts:normalizeVendor',message:'Vendor normalized',data:{rawKeys:Object.keys(v),id:normalized.id,name:normalized.name,vendorTypeName:normalized.vendorTypeName,fallbackId},timestamp:Date.now(),hypothesisId:'H',runId:'post-fix-3'})}).catch(()=>{});
-    // #endregion
 
     return normalized;
   }

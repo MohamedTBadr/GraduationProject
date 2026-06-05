@@ -173,7 +173,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.skipNextQueryParamsLoad) {
         this.skipNextQueryParamsLoad = false;
       } else {
-        this.loadData('queryParams');
+        this.loadData();
       }
     });
   }
@@ -200,13 +200,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
-    this.loadData('switchTab');
+    this.loadData();
   }
 
-  loadData(source = 'manual') {
-    // #region agent log
-    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:loadData',message:'loadData called',data:{source,activeTab:this.activeTab,loading:this.loading,servicesCount:this.services.length,filteredCount:this.filteredServices.length,vendorsCount:this.displayVendors.length},timestamp:Date.now(),hypothesisId:'F'})}).catch(()=>{});
-    // #endregion
+  loadData() {
     if (this.activeTab === 'vendors') {
       this.loadVendors();
     } else {
@@ -242,20 +239,12 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (data) => {
         if (seq !== this.vendorFetchSeq) return;
         if (data.length === 0 && this.allVendors.length > 0 && !this.hasActiveVendorFilters()) return;
-        const before = data.length;
-        // Backend already scopes public vendors; don't re-filter verified/active here
         this.allVendors = data;
-        // #region agent log
-        fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:loadVendors',message:'Vendor filter',data:{apiCount:before,allVendors:this.allVendors.length,sample:data.slice(0,3).map(v=>({status:v.status,isApproved:v.isApproved,name:v.name}))},timestamp:Date.now(),hypothesisId:'B',runId:'post-fix-2'})}).catch(()=>{});
-        // #endregion
         this.loading = false;
         this.triggerSearch();
       },
-      error: (err) => {
+      error: () => {
         if (seq !== this.vendorFetchSeq) return;
-        // #region agent log
-        fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:loadVendors:error',message:'Vendor API error',data:{status:err?.status,message:err?.message},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
-        // #endregion
         this.loading = false;
       }
     });
@@ -311,9 +300,6 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.displayVendors = filtered;
     this.vendorCount = filtered.length;
-    // #region agent log
-    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:triggerSearch',message:'Vendor display',data:{allVendors:this.allVendors.length,displayVendors:this.displayVendors.length,filters:this.filters},timestamp:Date.now(),hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
     this.currentPage = 1;
     this.updateMapMarkers();
   }
@@ -408,9 +394,6 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.filteredServices = f;
     this.serviceCount = f.length;
-    // #region agent log
-    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:applyServiceFilters',message:'Service filter',data:{servicesIn:this.services.length,filteredOut:f.length,selectedCategories:this.selectedCategories,maxPrice:this.maxPrice,minRating:this.minRating},timestamp:Date.now(),hypothesisId:'C,E'})}).catch(()=>{});
-    // #endregion
     this.currentPage = 1;
     this.updateMapMarkers();
   }
