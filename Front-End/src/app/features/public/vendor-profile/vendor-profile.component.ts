@@ -143,10 +143,14 @@ export class VendorProfileComponent implements OnInit {
   }
 
   private loadSimilarVendors() {
-    if (!this.vendor?.vendorTypeId) return;
-    this.vendorService.getAll({ vendorTypeId: this.vendor.vendorTypeId, pageSize: 5 }).subscribe({
+    const filters = this.vendor?.vendorTypeId
+      ? { vendorTypeId: this.vendor.vendorTypeId, pageSize: 5 }
+      : { pageSize: 5 };
+    this.vendorService.getAll(filters).subscribe({
       next: (vendors) => {
-        this.similarVendors = vendors.filter(v => v.id !== this.vendorId).slice(0, 4);
+        this.similarVendors = vendors
+          .filter(v => v.id !== this.vendorId && v.id !== this.vendor?.id)
+          .slice(0, 4);
       },
       error: () => {}
     });

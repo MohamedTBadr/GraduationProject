@@ -1,0 +1,112 @@
+.result-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  padding: 2rem 1rem;
+
+  :host-context(.dark) & { background: #06091a; }
+}
+
+.result-card {
+  background: #fff;
+  border-radius: var(--r2);
+  padding: 3rem 2.5rem;
+  text-align: center;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: var(--sh2);
+  border: 1px solid rgba(239,68,68,0.15);
+
+  :host-context(.dark) & {
+    background: #111c30;
+    border-color: rgba(239,68,68,0.2);
+  }
+}
+
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(239,68,68,0.12);
+  border: 2px solid rgba(239,68,68,0.25);
+  color: #ef4444;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 0.6rem;
+
+  :host-context(.dark) & { color: #d4e0f0; }
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-retry {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: var(--r3);
+  background: linear-gradient(135deg, #b5196c 0%, #c9a84c 100%);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: var(--trans);
+
+  &:hover { opacity: 0.9; transform: translateY(-1px); }
+}
+
+.btn-ghost {
+  padding: 0.7rem 1.5rem;
+  border: 1.5px solid rgba(26,37,64,0.2);
+  border-radius: var(--r3);
+  background: none;
+  color: var(--navy);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: var(--trans);
+
+  &:hover { border-color: var(--gold); color: var(--gold); }
+
+  :host-context(.dark) & {
+    border-color: rgba(212,224,240,0.2);
+    color: #b0c4de;
+  }
+}
+
+.btn-link {
+  color: #6b7280;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: var(--trans);
+
+  &:hover { color: var(--gold); }
+}

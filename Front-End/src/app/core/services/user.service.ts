@@ -34,25 +34,17 @@ export class UserService {
     }
     return this.http.get<any>(`${this.apiUrl}/User`, { params }).pipe(
       map(res => {
-        const data = res.value || res.Value || res;
-        const totalCount = data.totalCount || data.TotalCount || 0;
-        const pageSize = data.pageSize || data.PageSize || 10;
-        const items = data.items || data.Items || [];
-        const mappedItems = items.map((u: any) => ({
-          ...u,
-          id: u.id || u.Id,
-          name: u.name || u.Name || u.userName || u.UserName,
-          email: u.email || u.Email,
-          role: u.role || u.Role || 'User',
-          status: u.status || u.Status || 'active'
-        }));
+        const data = res.value ?? res;
+        const totalCount = data.totalCount ?? 0;
+        const pageSize = data.pageSize ?? 10;
+        const items = data.items ?? [];
 
         return {
-          items: mappedItems,
-          totalCount: totalCount,
-          pageNumber: data.pageNumber || data.PageNumber || 1,
-          pageSize: pageSize,
-          totalPages: data.totalPages || data.TotalPages || Math.ceil(totalCount / pageSize) || 1
+          items,
+          totalCount,
+          pageNumber: data.pageNumber ?? 1,
+          pageSize,
+          totalPages: data.totalPages ?? (Math.ceil(totalCount / pageSize) || 1)
         } as PagedResult<ApiUser>;
       })
     );

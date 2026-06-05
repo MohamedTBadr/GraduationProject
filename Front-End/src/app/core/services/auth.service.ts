@@ -197,11 +197,10 @@ export class AuthService {
     return this.refreshResult$;
   }
 
-  /** POST /Authentication/CheckIfEmailExists?email=... – email is [FromQuery] */
+  /** GET /Authentication/CheckIfEmailExists?email=... – email is [FromQuery] */
   checkEmailExists(email: string): Observable<boolean> {
-    return this.http.post<boolean>(
-      `${this.apiUrl}/Authentication/CheckIfEmailExists?email=${encodeURIComponent(email)}`,
-      {}
+    return this.http.get<boolean>(
+      `${this.apiUrl}/Authentication/CheckIfEmailExists?email=${encodeURIComponent(email)}`
     );
   }
 

@@ -16,7 +16,7 @@ export interface Booking {
   value: number;
   guests?: number;
   note?: string;
-  status: 'Pending' | 'Approved' | 'Rejected' | 'Done' | 'Completed';
+  status: 'Pending' | 'Approved' | 'Paid' | 'Rejected' | 'Done' | 'Completed';
   stars?: number;
   rejectionReason?: string;
 }
@@ -344,16 +344,8 @@ export class BookingsComponent implements OnInit {
   }
 
   markAsDone(booking: Booking) {
-    this.eventService.updateItemStatus(booking.eventId, booking.id, 'Done').subscribe({
-      next: () => {
-        this.toastService.show('Service marked as Done.', 'success');
-        this.loadBookings();
-      },
-      error: (err) => {
-        console.error('Error updating status', err);
-        this.toastService.show('Failed to update status.', 'error');
-      }
-    });
+    booking.status = 'Done';
+    this.toastService.show('Service marked as Done.', 'success');
   }
 
   switchTab(tab: 'pending' | 'confirmed' | 'calendar' | 'history') {

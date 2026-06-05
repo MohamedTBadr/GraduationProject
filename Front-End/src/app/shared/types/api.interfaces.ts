@@ -395,7 +395,7 @@ export interface EventItemResponseDto {
   vendorId: string;
   vendorName: string;
   quantity: number;
-  itemStatus: 'Pending' | 'Approved' | 'Rejected' | 'Done' | 'Completed';
+  itemStatus: 'Pending' | 'Approved' | 'Paid' | 'Rejected' | 'Done' | 'Completed';
   rejectionReason?: string;
 }
 
@@ -491,14 +491,15 @@ export interface PaymobBillingData {
 }
 
 export interface PaymobPaymentRequest {
-  amount: number;
-  billing: PaymobBillingData;
-  orderId?: string;
-  voucherCode?: string; // Optional discount voucher code
+  orderId: string;
 }
 
-export interface PaymobPaymentResponse {
-  iframeUrl: string;
+// Backend returns a plain string (iframe URL) for paid orders,
+// or this object for free/zero-amount orders.
+export interface PaymobFreeResponse {
+  isFree: true;
+  message: string;
+  redirectUrl: string;
 }
 
 // ─────────────────────────────────────────────

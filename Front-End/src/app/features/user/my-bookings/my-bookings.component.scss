@@ -212,9 +212,69 @@
   letter-spacing: 1px;
 }
 
+.bk-status-chip { display: inline-flex; align-items: center; gap: 5px; }
+
 .bk-status-chip.paid, .bk-status-chip.Completed, .bk-status-chip.Done { background: rgba(34,197,94,0.15); color: #10b981; }
-.bk-status-chip.pending, .bk-status-chip.Pending { background: rgba(245,158,11,0.15); color: #f59e0b; }
-.bk-status-chip.failed, .bk-status-chip.Cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.bk-status-chip.Paid { background: rgba(99,102,241,0.12); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); font-weight: 700; }
+.bk-status-chip.pending, .bk-status-chip.Pending { background: rgba(245,158,11,0.15); color: #d97706; }
+.bk-status-chip.failed, .bk-status-chip.Cancelled { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+/* Vendor confirmation pending — amber, action required from vendor */
+.bk-status-chip.Pending {
+  background: rgba(245,158,11,0.12);
+  color: #d97706;
+  border: 1px solid rgba(245,158,11,0.25);
+}
+
+/* Payment pending — blue/indigo, action required from user */
+.bk-status-chip.awaiting-payment {
+  background: rgba(99,102,241,0.12);
+  color: #6366f1;
+  border: 1px solid rgba(99,102,241,0.25);
+  font-weight: 700;
+}
+
+.pay-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bk-actions .btn.btn-pay-now {
+  background: linear-gradient(135deg, #b5196c 0%, #c9a84c 100%);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+
+  &:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.pending-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: #d97706;
+  font-weight: 600;
+
+  i { font-size: 0.7rem; }
+
+  &--approved { color: #16a34a; }
+  &--paid     { color: #6366f1; }
+}
 
 /* Rewards & Vouchers Styles */
 .mb-rewards-container {

@@ -1,0 +1,111 @@
+<div class="checkout-page">
+
+  <!-- Skeleton loader -->
+  <div *ngIf="loadingOrder" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading order details…</p>
+  </div>
+
+  <!-- Paymob iframe (shown after initiating payment) -->
+  <div *ngIf="iframeUrl" id="paymob-iframe" class="iframe-wrapper">
+    <div class="iframe-header">
+      <i class="bi bi-shield-lock-fill"></i>
+      <span>Secure Payment — Powered by Paymob</span>
+    </div>
+    <iframe
+      [src]="iframeUrl"
+      frameborder="0"
+      allowtransparency="true"
+      title="Paymob Payment">
+    </iframe>
+    <p class="iframe-note">
+      <i class="bi bi-info-circle"></i>
+      You will be redirected automatically after payment completes.
+    </p>
+  </div>
+
+  <!-- Checkout layout -->
+  <div *ngIf="!loadingOrder && !iframeUrl && order" class="checkout-layout">
+
+    <!-- Back button -->
+    <button class="btn-back" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i> Back to Bookings
+    </button>
+
+    <div class="checkout-grid">
+
+      <!-- Order Summary Card -->
+      <div class="summary-card">
+        <h3 class="card-title"><i class="bi bi-receipt"></i> Order Summary</h3>
+
+        <div class="summary-row total-row">
+          <span>Total Amount</span>
+          <span class="total-amount">{{ order.amount | currency:'EGP ':'symbol':'1.0-0' }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Currency</span>
+          <span>{{ order.currency }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Payment Status</span>
+          <span class="status-badge" [ngClass]="order.paymentStatus.toLowerCase()">
+            {{ order.paymentStatus }}
+          </span>
+        </div>
+
+        <div class="summary-row" *ngIf="order.appointment">
+          <span>Appointment</span>
+          <span>{{ order.appointment | date:'mediumDate' }}</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="secure-note">
+          <i class="bi bi-lock-fill"></i>
+          <span>Your payment is secured by 256-bit SSL encryption.</span>
+        </div>
+      </div>
+
+      <!-- Billing Details Card (read-only — billing is handled by the server) -->
+      <div class="billing-card">
+        <h3 class="card-title"><i class="bi bi-person-vcard"></i> Billing Details</h3>
+
+        <div class="detail-row">
+          <i class="bi bi-person"></i>
+          <div>
+            <span class="detail-label">Name</span>
+            <span class="detail-value">{{ userName || '—' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <i class="bi bi-envelope"></i>
+          <div>
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ userEmail || '—' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-note">
+          <i class="bi bi-info-circle"></i>
+          Your billing information is pulled from your account profile. To update it, edit your profile settings.
+        </div>
+
+        <button class="btn-pay" (click)="proceed()" [disabled]="isLoading">
+          <ng-container *ngIf="!isLoading">
+            <i class="bi bi-lock-fill"></i>
+            Pay {{ order.amount | currency:'EGP ':'symbol':'1.0-0' }}
+          </ng-container>
+          <ng-container *ngIf="isLoading">
+            <i class="bi bi-arrow-repeat spin"></i>
+            Initializing payment…
+          </ng-container>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

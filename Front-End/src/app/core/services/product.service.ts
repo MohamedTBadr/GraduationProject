@@ -23,59 +23,50 @@ export class ProductService {
     if (!res) return [];
     if (Array.isArray(res)) return res;
 
-    const inner = res.value ?? res.Value;
+    const inner = res.value;
     if (inner != null) {
-      const items = inner.items ?? inner.Items;
+      const items = inner.items;
       if (Array.isArray(items)) return items;
       if (Array.isArray(inner)) return inner;
     }
 
-    const top = res.items ?? res.Items;
+    const top = res.items;
     if (Array.isArray(top)) return top;
 
     return [];
   }
 
-  /** Maps API / ServiceDTO fields (incl. PascalCase & ServiceImages) to ApiProduct. */
+  /** Maps API ServiceDTO fields to ApiProduct. */
   private normalizeProduct(raw: any): ApiProduct {
     if (raw == null || typeof raw !== 'object') {
       return { id: '', name: 'Unknown', description: '', price: 0 };
     }
-    const images = raw?.serviceImages ?? raw?.ServiceImages;
-    const firstImage =
-      raw?.imageUrl ||
-      raw?.ImageUrl ||
-      (Array.isArray(images) && images.length > 0 ? images[0] : undefined);
+    const images = raw.serviceImages;
+    const firstImage = raw.imageUrl ?? (Array.isArray(images) && images.length > 0 ? images[0] : undefined);
 
-    const priceRaw = raw?.price ?? raw?.Price ?? 0;
+    const priceRaw = raw.price ?? 0;
     const price = typeof priceRaw === 'number' ? priceRaw : parseFloat(String(priceRaw));
 
     return {
-      id: String(raw?.id ?? raw?.Id ?? ''),
-      name: (raw?.name ?? raw?.Name ?? 'Service').toString(),
-      description: (raw?.description ?? raw?.Description ?? '')?.toString(),
+      id: String(raw.id ?? ''),
+      name: (raw.name ?? 'Service').toString(),
+      description: (raw.description ?? '').toString(),
       price: Number.isFinite(price) ? price : 0,
-      vendorTypeId: raw?.vendorTypeId ?? raw?.VendorTypeId ?? raw?.categoryId ?? raw?.CategoryId,
-      vendorTypeName: raw?.vendorTypeName ?? raw?.VendorTypeName ?? raw?.categoryName ?? raw?.CategoryName,
-      vendorId: raw?.vendorId ?? raw?.VendorId,
-      vendorName: raw?.vendorName ?? raw?.VendorName,
-      serviceTypeId: raw?.serviceTypeId ?? raw?.ServiceTypeId,
-      serviceTypeName: raw?.serviceTypeName ?? raw?.ServiceTypeName,
+      vendorTypeId: raw.vendorTypeId ?? raw.categoryId,
+      vendorTypeName: raw.vendorTypeName ?? raw.categoryName,
+      vendorId: raw.vendorId,
+      vendorName: raw.vendorName,
+      serviceTypeId: raw.serviceTypeId,
+      serviceTypeName: raw.serviceTypeName,
       imageUrl: firstImage,
       imageUrls: Array.isArray(images) ? images : (firstImage ? [firstImage] : []),
-      status: raw?.status ?? raw?.Status ?? 'active',
-      duration:
-        raw?.duration ??
-        raw?.Duration ??
-        (raw?.setupDuration != null ? String(raw.setupDuration ?? raw.SetupDuration) : undefined),
-      leadTime:
-        raw?.leadTime ??
-        raw?.LeadTime ??
-        (raw?.leadTimeRequired != null ? String(raw.leadTimeRequired ?? raw.LeadTimeRequired) : undefined),
-      classification: raw?.classification ?? raw?.Classification,
-      allowedEventTypes: raw?.allowedEventTypes ?? raw?.AllowedEventTypes,
-      createdAt: raw?.createdAt ?? raw?.CreatedAt,
-      serviceAreas: raw?.serviceAreas ?? raw?.ServiceAreas ?? []
+      status: raw.status ?? 'active',
+      duration: raw.duration ?? (raw.setupDuration != null ? String(raw.setupDuration) : undefined),
+      leadTime: raw.leadTime ?? (raw.leadTimeRequired != null ? String(raw.leadTimeRequired) : undefined),
+      classification: raw.classification,
+      allowedEventTypes: raw.allowedEventTypes,
+      createdAt: raw.createdAt,
+      serviceAreas: raw.serviceAreas ?? []
     };
   }
 

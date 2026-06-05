@@ -1,0 +1,66 @@
+<div class="result-page">
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Confirming your payment…</p>
+  </div>
+
+  <!-- Result card -->
+  <div *ngIf="!loading" class="result-card" [class.is-failed]="!success">
+
+    <!-- Success -->
+    <ng-container *ngIf="success">
+      <div class="icon-circle success">
+        <i class="bi bi-check-lg"></i>
+      </div>
+      <h2>Payment Successful!</h2>
+      <p class="subtitle">Your booking is confirmed. A confirmation has been sent to your email.</p>
+
+      <div class="order-detail" *ngIf="order">
+        <div class="detail-row">
+          <span>Amount Paid</span>
+          <span class="highlight">{{ order.amount | currency:'EGP ':'symbol':'1.0-0' }}</span>
+        </div>
+        <div class="detail-row">
+          <span>Status</span>
+          <span class="badge paid">{{ order.paymentStatus }}</span>
+        </div>
+        <div class="detail-row" *ngIf="order.appointment">
+          <span>Appointment</span>
+          <span>{{ order.appointment | date:'mediumDate' }}</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" (click)="goToBookings()">
+          <i class="bi bi-calendar2-check"></i> View My Bookings
+        </button>
+        <a class="btn-link" routerLink="/">Back to Home</a>
+      </div>
+    </ng-container>
+
+    <!-- Failure -->
+    <ng-container *ngIf="!success">
+      <div class="icon-circle failed">
+        <i class="bi bi-x-lg"></i>
+      </div>
+      <h2>Payment Failed</h2>
+      <p class="subtitle">
+        Something went wrong during payment processing.<br>
+        Your order has not been charged. You can try again.
+      </p>
+
+      <div class="actions">
+        <button class="btn-primary" (click)="retry()">
+          <i class="bi bi-arrow-repeat"></i> Try Again
+        </button>
+        <button class="btn-ghost" (click)="goToBookings()">
+          Back to Bookings
+        </button>
+      </div>
+    </ng-container>
+
+  </div>
+
+</div>

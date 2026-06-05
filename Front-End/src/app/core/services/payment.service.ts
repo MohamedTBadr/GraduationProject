@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { PaymobPaymentRequest, PaymobPaymentResponse } from '../../shared/types/api.interfaces';
+import { PaymobFreeResponse, PaymobPaymentRequest } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
@@ -10,12 +10,10 @@ export class PaymentService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * POST /payments/paymob
-   * Initiates a Paymob payment flow and returns a redirect URL or payment key.
-   */
-  initiatePaymob(payload: PaymobPaymentRequest): Observable<PaymobPaymentResponse> {
-    return this.http.post<PaymobPaymentResponse>(`${this.apiUrl}/payments/paymob`, payload);
+  // POST /payments/paymob — sends only orderId; backend fetches amount + billing.
+  // Returns a string (iframe URL) for paid orders, or PaymobFreeResponse for free orders.
+  initiatePaymob(payload: PaymobPaymentRequest): Observable<string | PaymobFreeResponse> {
+    return this.http.post<string | PaymobFreeResponse>(`${this.apiUrl}/payments/paymob`, payload);
   }
 
   /**
