@@ -7,10 +7,12 @@ import { FavoriteService } from '../../../shared/services/favorite.service';
 import { ApiVendor, ApiProduct, CreateReviewDto } from '../../../shared/types/api.interfaces';
 import { VendorService } from '../../../core/services/vendor.service';
 import { ProductService } from '../../../core/services/product.service';
-import { ApiPackage } from '../../../core/services/package.service';
+import { ApiPackage, PackageService } from '../../../core/services/package.service';
 import { ReviewService } from '../../../core/services/review.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { VendorCardComponent } from '../../../shared/components/vendor-card/vendor-card.component';
+import { EventTypeService } from '../../../core/services/event-type.service';
+import { EventType } from '../../../core/models/taxonomy.models';
 
 @Component({
   selector: 'app-vendor-profile',
@@ -38,7 +40,8 @@ export class VendorProfileComponent implements OnInit {
   selectedProduct: ApiProduct | null = null;
 
   eventDate = '';
-  eventType = 'Wedding';
+  eventType = '';
+  eventTypes: EventType[] = [];
 
   reviewRating = 5;
   reviewText = '';
@@ -66,12 +69,14 @@ export class VendorProfileComponent implements OnInit {
     private toastService: ToastService,
     private vendorService: VendorService,
     private productService: ProductService,
-
+    private packageService: PackageService,
+    private eventTypeService: EventTypeService,
     private reviewService: ReviewService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit() {
+    this.loadEventTypes();
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -102,19 +107,8 @@ export class VendorProfileComponent implements OnInit {
       next: (data) => {
         this.vendor = data;
         this.loading = false;
-
-        const raw = data as any;
-        const rawPkgs: any[] = raw.Packages || raw.packages || [];
-        this.packages = rawPkgs.map((p: any) => ({
-          id: p.Id || p.id || '',
-          name: p.Name || p.name || '',
-          description: p.Description || p.description || '',
-          price: +(p.Price ?? p.price ?? 0),
-          discount: +(p.Discount ?? p.discount ?? 0),
-          services: p.Services || p.services || [],
-          vendorId: p.VendorId || p.vendorId || ''
-        }));
-
+        
+        this.loadVendorPackages();
         this.buildCarousel();
         this.loadSimilarVendors();
       },
@@ -123,6 +117,28 @@ export class VendorProfileComponent implements OnInit {
         this.error = true;
         this.toastService.show('Failed to load vendor profile.', 'error');
       }
+    });
+  }
+
+  private loadVendorPackages() {
+    if (!this.vendorId) return;
+    this.packageService.getByVendor(this.vendorId).subscribe({
+      next: (data) => {
+        this.packages = data || [];
+      },
+      error: () => {}
+    });
+  }
+
+  private loadEventTypes() {
+    this.eventTypeService.getAll().subscribe({
+      next: (types) => {
+        this.eventTypes = types || [];
+        if (this.eventTypes.length > 0) {
+          this.eventType = this.eventTypes[0].name;
+        }
+      },
+      error: () => {}
     });
   }
 

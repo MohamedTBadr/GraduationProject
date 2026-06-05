@@ -34,10 +34,14 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ═══ HERO ══════════════════════════════════════════════════════ */
+.vp-hero {
+  margin-top: calc(var(--nav-h, 80px) * -1);
+}
+
 .vp-hero-stage {
   position: relative;
   height: 440px;
+  padding-top: var(--nav-h, 80px);
   background: var(--navy-dk);
   overflow: hidden;
   display: flex;
@@ -88,24 +92,11 @@
 }
 
 .vp-placeholder-vendor-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-family: var(--ff-d);
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
-  letter-spacing: 0.02em;
+  display: none; /* Hide duplicated name */
 }
 
 .vp-placeholder-tag {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--gold);
-  background: rgba(201, 168, 76, 0.15);
-  border: 1px solid rgba(201, 168, 76, 0.4);
-  padding: 4px 14px;
-  border-radius: 50px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  display: none; /* Hide duplicated tag */
 }
 
 /* Carousel arrows */
@@ -307,7 +298,7 @@
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 40px;
-  padding-top: 48px;
+  padding-top: 24px;
   padding-bottom: 64px;
   align-items: start;
 }
