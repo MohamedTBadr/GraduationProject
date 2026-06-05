@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 using Web.Api.Controllers;
+using Microsoft.AspNetCore.Identity;
 
 namespace Application.UnitTests.Controllers
 {
@@ -22,6 +23,7 @@ namespace Application.UnitTests.Controllers
     {
         private readonly Mock<IPaymobService> _paymobServiceMock;
         private readonly Mock<IOrderService> _orderServiceMock;
+        private readonly Mock<UserManager<Domain.Entities.ApplicationUser>> _userManagerMock;
         private readonly PaymentsController _sut;
 
         public PaymobControllerTests()
@@ -36,8 +38,15 @@ namespace Application.UnitTests.Controllers
             _paymobServiceMock = new Mock<IPaymobService>();
 
             _orderServiceMock = new Mock<IOrderService>();
+            var serviceManagerMock = new Mock<Application.Interfaces.IServiceManager>();
+            serviceManagerMock.Setup(x => x.OrderService).Returns(_orderServiceMock.Object);
+            var eventServiceMock = new Mock<Application.Interfaces.IEventService>();
+            serviceManagerMock.Setup(x => x.EventService).Returns(eventServiceMock.Object);
             
-            _sut = new PaymentsController(_paymobServiceMock.Object, _orderServiceMock.Object);
+            var store = new Mock<Microsoft.AspNetCore.Identity.IUserStore<Domain.Entities.ApplicationUser>>();
+            _userManagerMock = new Mock<UserManager<Domain.Entities.ApplicationUser>>(store.Object, null, null, null, null, null, null, null, null);
+
+            _sut = new PaymentsController(_paymobServiceMock.Object, serviceManagerMock.Object, _userManagerMock.Object);
         }
 
         private void SetupUserClaims(Guid userId, string role = "Customer")
@@ -64,7 +73,7 @@ namespace Application.UnitTests.Controllers
             var orderId = Guid.NewGuid();
             var ownerId = Guid.NewGuid();
             var otherUserId = Guid.NewGuid();
-            var request = new PaymentRequest(orderId, null!); // we don't care about billing here
+            var request = new PaymentRequest(orderId); // we don't care about billing here
             
             var orderResponse = new OrderResponse(orderId, ownerId, 100m, "EGP", null, "Pending", DateTime.UtcNow, null, null);
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
@@ -85,7 +94,7 @@ namespace Application.UnitTests.Controllers
             // Arrange
             var orderId = Guid.NewGuid();
             var userId = Guid.NewGuid();
-            var request = new PaymentRequest(orderId, null!);
+            var request = new PaymentRequest(orderId);
             
             var orderResponse = new OrderResponse(orderId, userId, 100m, "EGP", null, "Paid", DateTime.UtcNow, null, null);
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
@@ -107,7 +116,7 @@ namespace Application.UnitTests.Controllers
             // Arrange
             var orderId = Guid.NewGuid();
             var userId = Guid.NewGuid();
-            var request = new PaymentRequest(orderId, null!);
+            var request = new PaymentRequest(orderId);
             
             var orderResponse = new OrderResponse(orderId, userId, 100m, "EGP", null, "Completed", DateTime.UtcNow, null, null);
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
@@ -129,7 +138,7 @@ namespace Application.UnitTests.Controllers
             // Arrange
             var orderId = Guid.NewGuid();
             var userId = Guid.NewGuid();
-            var request = new PaymentRequest(orderId, null!);
+            var request = new PaymentRequest(orderId);
             
             var orderResponse = new OrderResponse(orderId, userId, 0m, "EGP", null, "Pending", DateTime.UtcNow, null, null);
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
@@ -157,7 +166,7 @@ namespace Application.UnitTests.Controllers
             var orderId = Guid.NewGuid();
             var userId = Guid.NewGuid();
             var expectedIframeUrl = "https://paymob.com/iframe/xyz";
-            var request = new PaymentRequest(orderId, null!);
+            var request = new PaymentRequest(orderId);
             
             var orderResponse = new OrderResponse(orderId, userId, 200m, "EGP", null, "Pending", DateTime.UtcNow, null, null);
             _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId, It.IsAny<CancellationToken>()))
@@ -165,6 +174,9 @@ namespace Application.UnitTests.Controllers
 
             _paymobServiceMock.Setup(s => s.CreatePaymentAsync(orderId, 200m, It.IsAny<BillingData>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedIframeUrl);
+
+            _userManagerMock.Setup(m => m.FindByIdAsync(userId.ToString()))
+                .ReturnsAsync(new Domain.Entities.ApplicationUser { FirstName = "Test", LastName = "User", Email = "test@test.com", PhoneNumber = "123456789" });
 
             SetupUserClaims(userId);
 
@@ -181,7 +193,10 @@ namespace Application.UnitTests.Controllers
         public void Constructor_SetsDependencies_DoesNotThrow()
         {
             // Act
-            var controller = new PaymentsController(_paymobServiceMock.Object, _orderServiceMock.Object);
+            var serviceManagerMock = new Mock<Application.Interfaces.IServiceManager>();
+            var store = new Mock<Microsoft.AspNetCore.Identity.IUserStore<Domain.Entities.ApplicationUser>>();
+            var userManagerMock = new Mock<UserManager<Domain.Entities.ApplicationUser>>(store.Object, null, null, null, null, null, null, null, null);
+            var controller = new PaymentsController(_paymobServiceMock.Object, serviceManagerMock.Object, userManagerMock.Object);
 
             // Assert
             Assert.NotNull(controller);
