@@ -82,14 +82,13 @@ export class VendorService {
     const areas = v.serviceAreas ?? v.ServiceAreas ?? [];
 
     const normalized = {
-      ...v,
       id,
       name,
       vendorTypeId: String(this.pickField(v, 'vendorTypeId', 'VendorTypeId') ?? v.vendorType?.id ?? v.VendorType?.Id ?? ''),
       vendorTypeName,
       about: this.pickField(v, 'description', 'Description', 'about', 'About') ?? '',
       status: (this.pickField(v, 'status', 'Status') ?? 'active') as ApiVendor['status'],
-      isApproved: v.isVerified ?? v.IsVerified ?? v.isApproved ?? v.IsApproved ?? false,
+      isApproved: !!(this.pickField(v, 'isVerified', 'IsVerified', 'isApproved', 'IsApproved') ?? false),
       createdAt: this.pickField(v, 'createdAt', 'CreatedAt') ?? new Date().toISOString(),
       rating: Number(this.pickField(v, 'rating', 'Rating') ?? 0),
       location: this.pickField(v, 'location', 'Location', 'address', 'Address') ?? '',
@@ -117,7 +116,7 @@ export class VendorService {
     // If it's not FormData, we should probably convert it if it contains files
     // But usually the component will pass FormData if files are involved
     return this.http.post<any>(`${this.apiUrl}/Vendor`, payload).pipe(
-      map(res => this.normalizeVendor(res?.value ?? res))
+      map(res => this.normalizeVendor(res?.value ?? res?.Value ?? res))
     );
   }
 

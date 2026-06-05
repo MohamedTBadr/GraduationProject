@@ -24,6 +24,8 @@ import * as L from 'leaflet';
 export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
   private skipNextQueryParamsLoad = false;
+  private vendorFetchSeq = 0;
+  private serviceFetchSeq = 0;
 
   // ── Tab ──────────────────────────────────────────────────
   activeTab: 'vendors' | 'services' = 'services';
@@ -214,6 +216,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // ── Vendor logic ─────────────────────────────────────────
   loadVendors() {
+    const seq = ++this.vendorFetchSeq;
     this.loading = this.displayVendors.length === 0;
 
     // Load vendor types in the background for the filter UI — never block vendor loading
@@ -237,6 +240,8 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       vendorTypeId: typeMatch?.id,
     }).subscribe({
       next: (data) => {
+        if (seq !== this.vendorFetchSeq) return;
+        if (data.length === 0 && this.allVendors.length > 0 && !this.hasActiveVendorFilters()) return;
         const before = data.length;
         // Backend already scopes public vendors; don't re-filter verified/active here
         this.allVendors = data;
@@ -247,13 +252,18 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
         this.triggerSearch();
       },
       error: (err) => {
+        if (seq !== this.vendorFetchSeq) return;
         // #region agent log
         fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:loadVendors:error',message:'Vendor API error',data:{status:err?.status,message:err?.message},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
         // #endregion
         this.loading = false;
       }
     });
-  } 
+  }
+
+  private hasActiveVendorFilters(): boolean {
+    return !!(this.filters.type || this.filters.loc || this.filters.searchQuery || this.filters.rating);
+  }
 
   updateFilters() {
     this.filters.type = this.activeType;
@@ -310,6 +320,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // ── Service logic ────────────────────────────────────────
   loadServices() {
+    const seq = ++this.serviceFetchSeq;
     this.loading = this.filteredServices.length === 0;
     this.serviceTypeService.getAll().subscribe({
       next: (cats) => {
@@ -335,15 +346,32 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.productService.getAll(req).subscribe({
       next: (data) => {
-        this.services = Array.isArray(data) ? data : [];
+        if (seq !== this.serviceFetchSeq) return;
+        const list = Array.isArray(data) ? data : [];
+        if (list.length === 0 && this.services.length > 0 && !this.hasActiveServiceFilters()) return;
+        this.services = list;
         this.applyServiceFilters();
         this.loading = false;
       },
       error: () => {
+        if (seq !== this.serviceFetchSeq) return;
+        if (!this.hasActiveServiceFilters()) {
+          this.loading = false;
+          return;
+        }
         this.services = [];
         this.loading = false;
       }
     });
+  }
+
+  private hasActiveServiceFilters(): boolean {
+    return !!(
+      this.selectedCategories.length ||
+      this.selectedEventTypes.length ||
+      this.filters.searchQuery ||
+      this.selectedCity
+    );
   }
 
   applyServiceFilters() {

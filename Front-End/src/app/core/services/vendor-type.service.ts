@@ -21,8 +21,8 @@ export class VendorTypeService {
     return this.http.get<any>(`${this.apiUrl}/VendorType`).pipe(
       map(res => {
         if (!res) return [];
-        const data = res.value ?? res;
-        const arr = Array.isArray(data) ? data : (data.items ?? []);
+        const data = res.value ?? res.Value ?? res;
+        const arr = Array.isArray(data) ? data : (data?.items ?? data?.Items ?? []);
         return arr.map((item: any) => ({
           id: item.Id ?? item.id,
           name: item.Name ?? item.name
