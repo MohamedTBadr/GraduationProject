@@ -98,7 +98,7 @@ namespace Web.Api.Controllers
         [HttpPatch("{id}")]
         [Idempotent]
         [InvalidateCache("vendors", "vendors/{id}", "vendors/{id}/bookings")]
-        public async Task<IActionResult> UpdateVendorAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateVendorAsync(Guid id, [FromForm] UpdateVendorRequest request, CancellationToken cancellationToken)
         {
             if (!IsAdminOrOwner(id))
                 return Forbid();

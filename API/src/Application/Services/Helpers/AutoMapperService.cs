@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+using Application.DTOs;
 using Application.DTOs.CategoryDTOs;
 using Application.DTOs.Orders;
 using Application.DTOs.PackageDTOs;
@@ -55,7 +55,16 @@ namespace Application.Services.Helpers
                 .ForMember(dest => dest.Rating, opt => opt.MapFrom(src =>
                     src.Services.SelectMany(s => s.ServiceRatings).Any()
                     ? src.Services.SelectMany(s => s.ServiceRatings).Average(r => r.Rating)
-                    : 0)); CreateMap<CreateVendorRequest, Vendor>().ReverseMap();
+                    : 0)); 
+            CreateMap<CreateVendorRequest, Vendor>()
+                .ForMember(d => d.ProfilePicture, o => o.Ignore())
+                .ForMember(d => d.Document, o => o.Ignore())
+                .ForMember(d => d.PortfolioLink, o => o.Ignore())
+                .ReverseMap();
+            CreateMap<UpdateVendorRequest, Vendor>()
+                .ForMember(d => d.ProfilePicture, o => o.Ignore())
+                .ForMember(d => d.Document, o => o.Ignore())
+                .ForMember(d => d.PortfolioLink, o => o.Ignore());
             CreateMap<VendorListDTO, Vendor>().ReverseMap();
             //CreateMap<Vendor, VendorListDTO>().ForMember(d => d.UserId, o => o.MapFrom(s => s.User.Id));
             CreateMap<ServiceRating, VendorRatingDTO>()
