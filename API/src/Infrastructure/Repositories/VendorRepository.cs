@@ -46,6 +46,7 @@ namespace Infrastructure.Repositories
             // ✅ Single DB round-trip with all includes
             var items = await query
                 .Include(x => x.User)
+                .Include(x => x.VendorType)
                 .Include(x => x.ServiceAreas)          // 👈 needed for Haversine phase
                 .Include(x => x.Services)
                     .ThenInclude(s => s.ServiceRatings)

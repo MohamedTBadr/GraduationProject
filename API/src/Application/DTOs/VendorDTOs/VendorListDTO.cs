@@ -10,6 +10,7 @@ namespace Application.DTOs.VendorDTOs
         public string BusinessName { get; set; }
         public decimal Rating { get; set; }
         public string Description { get; set; }
+        public string VendorType { get; set; }
         public string ServiceType { get; set; }
         public decimal YearsInBusiness { get; set; }
         public decimal StartingPrice { get; set; }
