@@ -174,6 +174,16 @@ namespace Infrastructure.Repositories
                 return item;
         }
 
+        public async Task<bool> DeleteItemAsync(Guid itemId, CancellationToken cancellationToken)
+        {
+            var item = await _context.EventItems.FindAsync([itemId], cancellationToken);
+            if (item == null) return false;
+
+            _context.EventItems.Remove(item);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         public async Task AddCollaboratorAsync(EventCollaborator collaborator, CancellationToken cancellationToken)
         {
             

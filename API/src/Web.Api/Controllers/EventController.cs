@@ -340,6 +340,34 @@ Only return JSON. No markdown. No explanation.
         }
 
         // ─────────────────────────────────────────────────────────
+        // DELETE api/events/{eventId}/items/{itemId}
+        // ─────────────────────────────────────────────────────────
+        [HttpDelete("{eventId:guid}/items/{itemId:guid}")]
+        [Idempotent]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [InvalidateCache("events", "events/{eventId}", "dashboard-stats")]
+        public async Task<IActionResult> DeleteItem(
+            Guid eventId,
+            Guid itemId,
+            CancellationToken cancellationToken)
+        {
+            if (IsVendor())
+                return Forbid();
+
+            var existing = await serviceManager.EventService.GetByIdAsync(eventId, cancellationToken);
+            if (existing.IsFailure) return existing.ToActionResult();
+
+            if (!await HasAccess(eventId, existing.Value.UserId, requiresEdit: true))
+                return Forbid();
+
+            var result = await serviceManager.EventService.DeleteItemAsync(eventId, itemId, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToActionResult();
+        }
+
+        // ─────────────────────────────────────────────────────────
         // PATCH api/events/{eventId}/items/{itemId}/approve
         // ─────────────────────────────────────────────────────────
         [HttpPatch("{eventId:guid}/items/{itemId:guid}/approve")]

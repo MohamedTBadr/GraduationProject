@@ -238,6 +238,17 @@ namespace Application.Services
             return Result<EventItemResponseDto>.Success(updated.ToResponseDto());
         }
 
+        public async Task<Result<bool>> DeleteItemAsync(Guid eventId, Guid itemId, CancellationToken cancellationToken)
+        {
+            var item = await _eventRepo.GetItemByIdAsync(itemId, cancellationToken);
+
+            if (item == null || item.EventId != eventId)
+                return Result<bool>.NotFound(404, "Item not found in this event.");
+
+            var deleted = await _eventRepo.DeleteItemAsync(itemId, cancellationToken);
+            return Result<bool>.Success(deleted);
+        }
+
         public async Task<Result<bool>> AddCollaboratorAsync(Guid eventId, string userEmailOrName, Domain.Enums.CollaboratorRole role, CancellationToken cancellationToken)
         {
             var ev = await _eventRepo.GetByIdAsync(eventId, cancellationToken);

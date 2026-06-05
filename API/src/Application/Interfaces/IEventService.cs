@@ -68,6 +68,11 @@ namespace Application.Interfaces
             UpdateEventItemDto dto,
             CancellationToken cancellationToken);
 
+        Task<Result<bool>> DeleteItemAsync(
+            Guid eventId,
+            Guid itemId,
+            CancellationToken cancellationToken);
+
         // Collaborators
         Task<Result<bool>> AddCollaboratorAsync(
             Guid eventId,

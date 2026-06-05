@@ -22,6 +22,7 @@ namespace Domain.Contracts
         Task<EventItem> AddItemAsync(EventItem item, CancellationToken cancellationToken);
         Task<EventItem?> GetItemByIdAsync(Guid itemId, CancellationToken cancellationToken); // already exists
         Task<EventItem> UpdateItemAsync(EventItem item, CancellationToken cancellationToken); // already exists
+        Task<bool> DeleteItemAsync(Guid itemId, CancellationToken cancellationToken);
 
         Task AddCollaboratorAsync(EventCollaborator collaborator, CancellationToken cancellationToken);
         Task RemoveCollaboratorAsync(Guid eventId, Guid userId, CancellationToken cancellationToken);
