@@ -8,6 +8,11 @@
     <div class="vd-icon-btn" routerLink="/vendor-dashboard/notifications" title="Notifications">
       <i class="bi bi-bell"></i><div class="vd-notif-dot"></div>
     </div>
+    <div  class="vd-icon-btn" title="Theme Toggle">
+      <button class="vd-icon-btn" (click)="theme.toggleTheme()" title="Toggle theme">
+          <i [class]="theme.isDark() ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
+        </button>
+    </div>
     <div class="vd-icon-btn" routerLink="/vendor-dashboard/messages" title="Messages">
       <i class="bi bi-chat"></i>
     </div>

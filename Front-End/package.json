@@ -26,6 +26,8 @@
     "@fortawesome/fontawesome-svg-core": "^7.2.0",
     "@fortawesome/free-solid-svg-icons": "^7.2.0",
     "@microsoft/signalr": "^10.0.0",
+    "@tailwindcss/postcss": "^4.3.0",
+    "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "express": "^4.18.2",
     "leaflet": "^1.9.4",
@@ -48,7 +50,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "postcss": "^8.5.10",
+    "postcss": "^8.5.15",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.4.2"
   }
