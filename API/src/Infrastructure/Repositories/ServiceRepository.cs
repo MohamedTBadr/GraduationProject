@@ -67,18 +67,20 @@ namespace Infrastructure.Repositories
                 // ✅ Count runs on EF IQueryable — no ToList yet
                 var totalCount = await query.CountAsync(ct);
 
-                // ✅ Paginate + fetch from DB
-                var items = await query
-                    .Include(p => p.Vendor)
-                        .ThenInclude(v => v.ServiceAreas)   // 👈 needed for Haversine phase
-                    .Include(p => p.ServiceType)
-                    .Include(p => p.ServiceImages)
-                    .Skip((request.PageIndex - 1) * request.PageSize)
-                    .Take(request.PageSize)
-                    .ToListAsync(ct);                    // ← only DB round-trip
+            // ✅ Paginate + fetch from DB
+            var items = await query
+                .Include(p => p.Vendor)
 
-                // ✅ Phase 2 — Haversine in-memory on paged items only
-                var filtered = ApplyHaversineFilter(request, items);
+                    .ThenInclude(v => v.ServiceAreas)   // 👈 needed for Haversine phase
+                .Include(p => p.ServiceType)
+                .Include(p => p.ServiceImages)
+                .Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToListAsync(ct);                    // ← only DB round-trip
+
+
+            // ✅ Phase 2 — Haversine in-memory on paged items only
+            var filtered = ApplyHaversineFilter(request, items);
 
                 return new PaginatedResponse<Service>(filtered, totalCount, request.PageIndex, request.PageSize);
             
