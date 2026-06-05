@@ -1,0 +1,9 @@
+version: "3"
+agent:
+  authtoken: 3EXzLM2Ial0tURTtHVJZdmcqSCv_2GAKBiCkHi4GQuUTJeEGS
+
+endpoints:
+  - name: gateway
+    url: pierre-sacred-sparkishly.ngrok-free.dev
+    upstream:
+      url: http://gateway.api:8081
