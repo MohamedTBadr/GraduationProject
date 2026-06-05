@@ -99,5 +99,15 @@
         </tr>
       </tbody>
     </table>
+
+    <app-pagination
+      *ngIf="!loading && totalTickets > 0"
+      variant="admin"
+      [currentPage]="filters.page || 1"
+      [totalPages]="totalPages"
+      [totalCount]="totalTickets"
+      [pageSize]="filters.limit || 10"
+      (pageChange)="onPageChange($event)">
+    </app-pagination>
   </div>
 </div>

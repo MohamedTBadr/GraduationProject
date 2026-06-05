@@ -13,11 +13,10 @@
                 <button (click)="doSearch(searchInput.value)">Search →</button>
             </div>
             <div class="hero-cats fade-up fu4">
-                <div class="hero-cat active" (click)="filterCat('wedding')"><i class="bi bi-heart"></i> Weddings</div>
-                <div class="hero-cat" (click)="filterCat('birthday')"><i class="bi bi-gift"></i> Birthdays</div>
-                <div class="hero-cat" (click)="filterCat('corporate')"><i class="bi bi-buildings"></i> Corporate</div>
-                <div class="hero-cat" (click)="filterCat('graduation')"><i class="bi bi-mortarboard"></i> Graduation</div>
-                <div class="hero-cat" (click)="filterCat('engagement')"><i class="bi bi-heart-fill"></i> Engagement</div>
+                <div class="hero-cat" *ngFor="let ev of eventTypes.slice(0, 5)" (click)="filterByEventType(ev.name)">
+                    <i class="bi bi-stars"></i> {{ ev.name }}
+                </div>
+                <div class="hero-cat" *ngIf="eventTypes.length === 0" (click)="filterByEventType('wedding')"><i class="bi bi-heart"></i> Weddings</div>
             </div>
             <div class="hero-stats">
                 <div class="hero-stat">
@@ -40,22 +39,22 @@
     <div class="cats-strip">
         <div class="container">
             <div class="cats-grid">
-                <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Venue'}">
+                <div class="cat-card" (click)="filterVendorType('Venue')">
                     <div class="cat-icon"><i class="bi bi-building"></i></div>
                     <div class="cat-name">Venues</div>
                     <div class="cat-count">68 venues</div>
                 </div>
-                <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Catering'}">
+                <div class="cat-card" (click)="filterVendorType('Catering')">
                     <div class="cat-icon"><i class="bi bi-cup-hot"></i></div>
                     <div class="cat-name">Catering</div>
                     <div class="cat-count">52 caterers</div>
                 </div>
-                <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Decoration'}">
+                <div class="cat-card" (click)="filterVendorType('Decoration')">
                     <div class="cat-icon"><i class="bi bi-flower1"></i></div>
                     <div class="cat-name">Decoration</div>
                     <div class="cat-count">74 vendors</div>
                 </div>
-                <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Photography'}">
+                <div class="cat-card" (click)="filterVendorType('Photography')">
                     <div class="cat-icon"><i class="bi bi-camera"></i></div>
                     <div class="cat-name">Photography</div>
                     <div class="cat-count">89 studios</div>

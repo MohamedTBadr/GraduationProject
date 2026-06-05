@@ -3,110 +3,76 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { VendorCardComponent } from '../../../shared/components/vendor-card/vendor-card.component';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { ApiVendor, ApiProduct, ServiceType } from '../../../shared/types/api.interfaces';
-import { VendorType } from '../../../core/models/taxonomy.models';
+import { VendorType, EventType } from '../../../core/models/taxonomy.models';
 import { VendorService } from '../../../core/services/vendor.service';
 import { ProductService } from '../../../core/services/product.service';
 import { ServiceTypeService } from '../../../core/services/service-type.service';
 import { VendorTypeService } from '../../../core/services/vendor-type.service';
+import { EventTypeService } from '../../../core/services/event-type.service';
 import { ModalService } from '../../../shared/services/modal.service';
-import { Subject, takeUntil } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { Subject, forkJoin, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import * as L from 'leaflet';
+
+const EGYPT_CITIES = ['Cairo', 'New Cairo', 'Giza', 'Alexandria', 'North Coast', 'Mansoura'];
+const MAX_PRICE_ANY = 100000;
 
 @Component({
   selector: 'app-explore',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, VendorCardComponent],
+  imports: [CommonModule, FormsModule, RouterLink, VendorCardComponent, PaginationComponent],
   templateUrl: './explore.component.html',
   styleUrls: ['./explore.component.scss']
 })
 export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
-  private skipNextQueryParamsLoad = false;
-  private vendorFetchSeq = 0;
-  private serviceFetchSeq = 0;
+  private searchSubject = new Subject<string>();
+  private fetchSeq = 0;
 
-  // ── Tab ──────────────────────────────────────────────────
   activeTab: 'vendors' | 'services' = 'services';
-
-  // ── Shared UI state ──────────────────────────────────────
   activePanel: string | null = null;
   sortOption = 'rating';
   loading = false;
   viewMode: 'grid' | 'list' | 'map' = 'grid';
 
-  // ── Map ──────────────────────────────────────────────────
   private map: L.Map | undefined;
   private markersLayer: L.LayerGroup | undefined;
 
-  // ── Vendor state ─────────────────────────────────────────
-  allVendors: ApiVendor[] = [];
-  displayVendors: ApiVendor[] = [];
-  vendorCount = 0;
-
-  activeType = '';
-  activeLoc = '';
-  activeRating = 0;
-  filters = { type: '', loc: '', rating: 0, searchQuery: '' };
+  // Taxonomy from backend
   vendorTypes: VendorType[] = [];
-
-  // ── Service state ────────────────────────────────────────
-  services: ApiProduct[] = [];
-  filteredServices: ApiProduct[] = [];
   serviceCategories: ServiceType[] = [];
+  eventTypes: EventType[] = [];
+  readonly cities = EGYPT_CITIES;
+  readonly priceOptions = [5000, 15000, 30000, 50000, MAX_PRICE_ANY];
+  readonly ratingOptions = [3, 4, 4.5, 4.8];
+
+  // Single-select filters
+  selectedVendorTypeId: string | null = null;
+  selectedServiceTypeId: string | null = null;
+  selectedEventTypeId: string | null = null;
+  selectedLocation = '';
+  selectedCity = '';
+  minRating = 0;
+  maxPrice = MAX_PRICE_ANY;
+  searchQuery = '';
+
+  // Results
+  displayVendors: ApiVendor[] = [];
+  filteredServices: ApiProduct[] = [];
+  vendorCount = 0;
   serviceCount = 0;
 
-  selectedCategories: string[] = [];
-  selectedEventTypes: string[] = [];
-  maxPrice = 100000;
-  minRating = 0;
-  selectedCity = '';
-
-  // ── Pagination ───────────────────────────────────────────
   currentPage = 1;
+  totalPages = 1;
   readonly pageSize = 12;
 
-  get totalPages(): number {
-    const total = this.activeTab === 'vendors' ? this.displayVendors.length : this.filteredServices.length;
-    return Math.max(1, Math.ceil(total / this.pageSize));
-  }
-
-  get pageNumbers(): number[] {
-    const t = this.totalPages;
-    if (t <= 7) return Array.from({ length: t }, (_, i) => i + 1);
-    const cur = this.currentPage;
-    const pages: number[] = [1];
-    if (cur > 3) pages.push(-1); // ellipsis
-    for (let i = Math.max(2, cur - 1); i <= Math.min(t - 1, cur + 1); i++) pages.push(i);
-    if (cur < t - 2) pages.push(-1); // ellipsis
-    pages.push(t);
-    return pages;
-  }
-
-  get pagedVendors(): ApiVendor[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.displayVendors.slice(start, start + this.pageSize);
-  }
-
-  get pagedServices(): ApiProduct[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.filteredServices.slice(start, start + this.pageSize);
-  }
-
-  goToPage(page: number) {
-    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
-    this.currentPage = page;
-    window.scrollTo({ top: 400, behavior: 'smooth' });
-  }
-
-  // Preview modal
   showPreview = false;
   selectedService: ApiProduct | null = null;
   previewImages: string[] = [];
   activeImageIndex = 0;
 
-  // Compare / wishlist
   compareList: ApiProduct[] = [];
   wishlist: string[] = [];
   showCompareBar = false;
@@ -118,345 +84,391 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     private productService: ProductService,
     private serviceTypeService: ServiceTypeService,
     private vendorTypeService: VendorTypeService,
+    private eventTypeService: EventTypeService,
     private modalService: ModalService,
     private ngZone: NgZone
   ) {}
 
   ngOnInit() {
-    // Support /explore-services route via route data
     const routeData = this.route.snapshot.data;
     if (routeData['tab'] === 'services') this.activeTab = 'services';
 
-    this.route.queryParams.pipe(
-      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
       takeUntil(this.destroy$)
-    ).subscribe(params => {
-      // Determine active tab from query param (default: services)
-      if (params['tab'] === 'vendors') {
-        this.activeTab = 'vendors';
-      } else if (!routeData['tab']) {
-        this.activeTab = 'services';
-      }
+    ).subscribe(q => {
+      this.searchQuery = q;
+      this.currentPage = 1;
+      this.syncUrl();
+      this.loadData();
+    });
 
-      // Vendor params — reset when absent so stale filters don't empty results on reuse
-      this.filters.type = params['category'] || params['type'] || '';
-      this.activeType = this.filters.type;
-      this.filters.searchQuery = params['q'] || '';
-
-      // Service params
-      if (params['serviceCategory']) {
-        let cat = params['serviceCategory'];
-        if (cat.toLowerCase() === 'decor') {
-          cat = 'Decoration';
-        }
-        this.selectedCategories = [cat];
-      } else {
-        this.selectedCategories = [];
-      }
-      this.selectedEventTypes = params['eventType'] ? [params['eventType']] : [];
-
-      const openServiceId = params['openServiceId'];
-      if (openServiceId) {
-        this.productService.getById(openServiceId).subscribe({
-          next: (svc) => {
-            if (svc) {
-              this.activeTab = 'services';
-              this.modalService.open('service-detail', svc);
-            }
-          },
-          error: (err) => {
-            console.error('Error fetching service for auto-open:', err);
-          }
-        });
-      }
-
-      if (this.skipNextQueryParamsLoad) {
-        this.skipNextQueryParamsLoad = false;
-      } else {
-        this.loadData();
-      }
+    this.loadTaxonomies().then(() => {
+      this.route.queryParams.pipe(
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        takeUntil(this.destroy$)
+      ).subscribe(params => this.applyRouteParams(params, routeData));
     });
   }
 
   ngAfterViewInit() {}
-
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
     if (this.map) this.map.remove();
   }
 
-  // ── Tab switching ────────────────────────────────────────
+  private loadTaxonomies(): Promise<void> {
+    return new Promise(resolve => {
+      forkJoin({
+        vendorTypes: this.vendorTypeService.getAll(),
+        serviceTypes: this.serviceTypeService.getAll(),
+        eventTypes: this.eventTypeService.getAll()
+      }).subscribe({
+        next: ({ vendorTypes, serviceTypes, eventTypes }) => {
+          this.vendorTypes = Array.isArray(vendorTypes) ? vendorTypes : [];
+          this.serviceCategories = Array.isArray(serviceTypes) ? serviceTypes : [];
+          this.eventTypes = Array.isArray(eventTypes) ? eventTypes : [];
+          resolve();
+        },
+        error: () => resolve()
+      });
+    });
+  }
+
+  private applyRouteParams(params: Record<string, string>, routeData: Record<string, unknown>) {
+    if (params['tab'] === 'vendors') {
+      this.activeTab = 'vendors';
+    } else if (!routeData['tab']) {
+      this.activeTab = 'services';
+    }
+
+    this.searchQuery = params['q'] || '';
+    this.currentPage = Math.max(1, parseInt(params['page'] || '1', 10) || 1);
+
+    const typeParam = params['category'] || params['type'] || params['serviceCategory'] || '';
+    if (typeParam) {
+      if (params['tab'] === 'vendors') {
+        this.selectedVendorTypeId = this.resolveVendorTypeId(typeParam);
+      } else {
+        const eventId = this.resolveEventTypeId(typeParam);
+        if (eventId) {
+          this.selectedEventTypeId = eventId;
+          this.activeTab = 'services';
+        } else {
+          this.selectedServiceTypeId = this.resolveServiceTypeId(typeParam);
+        }
+      }
+    }
+
+    const eventParam = params['eventType'] || params['eventTypeId'] || '';
+    if (eventParam) {
+      this.selectedEventTypeId = this.resolveEventTypeId(eventParam);
+      if (this.selectedEventTypeId) this.activeTab = 'services';
+    }
+
+    const openServiceId = params['openServiceId'];
+    if (openServiceId) {
+      this.productService.getById(openServiceId).subscribe({
+        next: (svc) => {
+          if (svc) {
+            this.activeTab = 'services';
+            this.modalService.open('service-detail', svc);
+          }
+        }
+      });
+    }
+
+    this.loadData();
+  }
+
+  onSearchInput(value: string) {
+    this.searchSubject.next(value.trim());
+  }
+
   switchTab(tab: 'vendors' | 'services') {
     if (this.activeTab === tab) return;
     this.activeTab = tab;
     this.activePanel = null;
     this.viewMode = 'grid';
     this.destroyMap();
-    this.skipNextQueryParamsLoad = true;
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { tab: tab === 'vendors' ? 'vendors' : null },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
+    this.currentPage = 1;
+    this.syncUrl();
     this.loadData();
   }
 
   loadData() {
-    if (this.activeTab === 'vendors') {
-      this.loadVendors();
-    } else {
-      this.loadServices();
-    }
+    if (this.activeTab === 'vendors') this.loadVendors();
+    else this.loadServices();
   }
 
-  // ── Vendor logic ─────────────────────────────────────────
+  private needsBulkFetchForRating(): boolean {
+    return this.minRating > 0;
+  }
+
+  private getSortParams(): { sortBy?: string; isDescending?: boolean } {
+    if (this.sortOption === 'price-asc') return { sortBy: 'price', isDescending: false };
+    if (this.sortOption === 'price-desc') return { sortBy: 'price', isDescending: true };
+    return { sortBy: 'rating', isDescending: true };
+  }
+
   loadVendors() {
-    const seq = ++this.vendorFetchSeq;
-    this.loading = this.displayVendors.length === 0;
+    const seq = ++this.fetchSeq;
+    this.loading = true;
 
-    // Load vendor types in the background for the filter UI — never block vendor loading
-    if (this.vendorTypes.length === 0) {
-      this.vendorTypeService.getAll().subscribe({
-        next: (types) => { this.vendorTypes = Array.isArray(types) ? types : []; },
-        error: () => {}
-      });
-    }
+    const bulk = this.needsBulkFetchForRating();
+    const sort = this.getSortParams();
 
-    // Use already-loaded types to resolve vendorTypeId (works after first load / Apply)
-    const typeMatch = this.filters.type
-      ? this.vendorTypes.find(t => this.vendorTypeMatches(t.name, this.filters.type))
-      : undefined;
-
-    this.vendorService.getAll({
-      pageSize: 1000,
-      pageIndex: 1,
-      searchTerm: this.filters.searchQuery || undefined,
-      city: this.filters.loc || undefined,
-      vendorTypeId: typeMatch?.id,
+    this.vendorService.getAllPaged({
+      pageIndex: bulk ? 1 : this.currentPage,
+      pageSize: bulk ? 500 : this.pageSize,
+      searchTerm: this.searchQuery || undefined,
+      city: this.selectedLocation || undefined,
+      vendorTypeId: this.selectedVendorTypeId || undefined,
+      sortBy: sort.sortBy,
+      isDescending: sort.isDescending
     }).subscribe({
-      next: (data) => {
-        if (seq !== this.vendorFetchSeq) return;
-        if (data.length === 0 && this.allVendors.length > 0 && !this.hasActiveVendorFilters()) return;
-        this.allVendors = data;
+      next: (result) => {
+        if (seq !== this.fetchSeq) return;
+        let items = result.items;
+        if (this.minRating > 0) {
+          items = items.filter(v => (v.rating || 0) >= this.minRating);
+          this.vendorCount = items.length;
+          this.totalPages = Math.max(1, Math.ceil(items.length / this.pageSize));
+          const start = (this.currentPage - 1) * this.pageSize;
+          this.displayVendors = items.slice(start, start + this.pageSize);
+        } else {
+          this.displayVendors = items;
+          this.vendorCount = result.totalCount;
+          this.totalPages = result.totalPages;
+        }
         this.loading = false;
-        this.triggerSearch();
+        this.updateMapMarkers();
       },
       error: () => {
-        if (seq !== this.vendorFetchSeq) return;
+        if (seq !== this.fetchSeq) return;
+        this.displayVendors = [];
+        this.vendorCount = 0;
+        this.totalPages = 1;
         this.loading = false;
       }
     });
   }
 
-  private hasActiveVendorFilters(): boolean {
-    return !!(this.filters.type || this.filters.loc || this.filters.searchQuery || this.filters.rating);
+  loadServices() {
+    const seq = ++this.fetchSeq;
+    this.loading = true;
+
+    const bulk = this.needsBulkFetchForRating();
+    const sort = this.getSortParams();
+    const baseReq = {
+      pageIndex: bulk ? 1 : this.currentPage,
+      pageSize: bulk ? 500 : this.pageSize,
+      searchTerm: this.searchQuery || undefined,
+      city: this.selectedCity || undefined,
+      serviceTypeId: this.selectedServiceTypeId || undefined,
+      maxPrice: this.maxPrice < MAX_PRICE_ANY ? this.maxPrice : undefined,
+      sortBy: sort.sortBy === 'rating' ? undefined : sort.sortBy,
+      isDescending: sort.isDescending
+    };
+
+    const request$ = this.selectedEventTypeId
+      ? this.productService.getByEventTypePaged(this.selectedEventTypeId, baseReq)
+      : this.productService.getAllPaged(baseReq);
+
+    request$.subscribe({
+      next: (result) => {
+        if (seq !== this.fetchSeq) return;
+        let items = result.items;
+        if (this.minRating > 0) {
+          items = items.filter(s => ((s as any).rating ?? 5) >= this.minRating);
+          this.serviceCount = items.length;
+          this.totalPages = Math.max(1, Math.ceil(items.length / this.pageSize));
+          const start = (this.currentPage - 1) * this.pageSize;
+          this.filteredServices = items.slice(start, start + this.pageSize);
+        } else {
+          this.filteredServices = items;
+          this.serviceCount = result.totalCount;
+          this.totalPages = result.totalPages;
+        }
+        this.loading = false;
+        this.updateMapMarkers();
+      },
+      error: () => {
+        if (seq !== this.fetchSeq) return;
+        this.filteredServices = [];
+        this.serviceCount = 0;
+        this.totalPages = 1;
+        this.loading = false;
+      }
+    });
   }
 
-  updateFilters() {
-    this.filters.type = this.activeType;
-    this.filters.loc = this.activeLoc;
-    this.filters.rating = this.activeRating;
+  // ── Single-select filter handlers (auto-apply) ─────────────
+  selectVendorType(id: string) {
+    this.selectedVendorTypeId = this.selectedVendorTypeId === id ? null : id;
+    this.closePanelAndReload();
+  }
+
+  selectServiceType(id: string) {
+    this.selectedServiceTypeId = this.selectedServiceTypeId === id ? null : id;
+    this.closePanelAndReload();
+  }
+
+  selectEventType(id: string) {
+    this.selectedEventTypeId = this.selectedEventTypeId === id ? null : id;
+    this.closePanelAndReload();
+  }
+
+  selectLocation(city: string) {
+    this.selectedLocation = this.selectedLocation === city ? '' : city;
+    this.closePanelAndReload();
+  }
+
+  selectCity(city: string) {
+    this.selectedCity = this.selectedCity === city ? '' : city;
+    this.closePanelAndReload();
+  }
+
+  selectRating(r: number) {
+    this.minRating = this.minRating === r ? 0 : r;
+    this.closePanelAndReload();
+  }
+
+  selectMaxPrice(p: number) {
+    this.maxPrice = this.maxPrice === p ? MAX_PRICE_ANY : p;
+    this.closePanelAndReload();
+  }
+
+  onSortChange() {
+    this.currentPage = 1;
+    this.loadData();
+  }
+
+  private closePanelAndReload() {
     this.activePanel = null;
-    this.loadVendors();
+    this.currentPage = 1;
+    this.syncUrl();
+    this.loadData();
   }
 
-  private vendorTypeMatches(vendorTypeName: string | undefined, filter: string): boolean {
-    const a = (vendorTypeName ?? '').toLowerCase();
-    const b = filter.toLowerCase();
-    return a === b || a.includes(b) || b.includes(a);
+  clearVendorType() { this.selectedVendorTypeId = null; this.closePanelAndReload(); }
+  clearServiceType() { this.selectedServiceTypeId = null; this.closePanelAndReload(); }
+  clearEventType() { this.selectedEventTypeId = null; this.closePanelAndReload(); }
+  clearLocation() { this.selectedLocation = ''; this.closePanelAndReload(); }
+  clearCity() { this.selectedCity = ''; this.closePanelAndReload(); }
+  clearRating() { this.minRating = 0; this.closePanelAndReload(); }
+  clearMaxPrice() { this.maxPrice = MAX_PRICE_ANY; this.closePanelAndReload(); }
+
+  clearAllFilters() {
+    this.activePanel = null;
+    this.selectedVendorTypeId = null;
+    this.selectedServiceTypeId = null;
+    this.selectedEventTypeId = null;
+    this.selectedLocation = '';
+    this.selectedCity = '';
+    this.minRating = 0;
+    this.maxPrice = MAX_PRICE_ANY;
+    this.searchQuery = '';
+    this.currentPage = 1;
+    this.syncUrl();
+    this.loadData();
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.syncUrl();
+    this.loadData();
+  }
+
+  private syncUrl() {
+    const queryParams: Record<string, string | null> = {
+      tab: this.activeTab === 'vendors' ? 'vendors' : null,
+      q: this.searchQuery || null,
+      page: this.currentPage > 1 ? String(this.currentPage) : null,
+      type: null,
+      category: null,
+      serviceCategory: null,
+      eventType: null,
+      eventTypeId: null
+    };
+
+    if (this.activeTab === 'vendors' && this.selectedVendorTypeId) {
+      queryParams['type'] = this.vendorTypeName(this.selectedVendorTypeId);
+    }
+    if (this.activeTab === 'services' && this.selectedServiceTypeId) {
+      queryParams['serviceCategory'] = this.serviceTypeName(this.selectedServiceTypeId);
+    }
+    if (this.selectedEventTypeId) {
+      queryParams['eventTypeId'] = this.selectedEventTypeId;
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  // ── Label helpers ──────────────────────────────────────────
+  vendorTypeName(id: string | null): string {
+    if (!id) return '';
+    return this.vendorTypes.find(t => t.id === id)?.name ?? '';
+  }
+
+  serviceTypeName(id: string | null): string {
+    if (!id) return '';
+    return this.serviceCategories.find(t => t.id === id)?.name ?? '';
+  }
+
+  eventTypeName(id: string | null): string {
+    if (!id) return '';
+    return this.eventTypes.find(t => t.id === id)?.name ?? '';
+  }
+
+  private resolveVendorTypeId(value: string): string | null {
+    if (!value) return null;
+    if (this.isGuid(value)) return value;
+    const match = this.vendorTypes.find(t =>
+      t.name.toLowerCase() === value.toLowerCase() ||
+      t.name.toLowerCase().includes(value.toLowerCase())
+    );
+    return match?.id ?? null;
+  }
+
+  private resolveServiceTypeId(value: string): string | null {
+    if (!value) return null;
+    if (this.isGuid(value)) return value;
+    const normalized = value.toLowerCase() === 'decor' ? 'decoration' : value.toLowerCase();
+    const match = this.serviceCategories.find(t =>
+      t.name.toLowerCase() === normalized ||
+      t.name.toLowerCase().includes(normalized) ||
+      normalized.includes(t.name.toLowerCase())
+    );
+    return match?.id ?? null;
+  }
+
+  private resolveEventTypeId(value: string): string | null {
+    if (!value) return null;
+    if (this.isGuid(value)) return value;
+    const match = this.eventTypes.find(t =>
+      t.name.toLowerCase() === value.toLowerCase() ||
+      t.name.toLowerCase().includes(value.toLowerCase()) ||
+      value.toLowerCase().includes(t.name.toLowerCase())
+    );
+    return match?.id ?? null;
   }
 
   private isGuid(value: string): boolean {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
   }
 
-  private resolveServiceTypeId(category: string): string | undefined {
-    if (!category) return undefined;
-    if (this.isGuid(category)) return category;
-    const match = this.serviceCategories.find(
-      c => c.name.toLowerCase() === category.toLowerCase() ||
-        c.name.toLowerCase().includes(category.toLowerCase()) ||
-        category.toLowerCase().includes(c.name.toLowerCase())
-    );
-    return match?.id;
-  }
-
-  triggerSearch() {
-    let filtered = this.allVendors.filter(v => {
-      const matchType = !this.filters.type || this.vendorTypeMatches(v.vendorTypeName, this.filters.type);
-      const matchLoc = !this.filters.loc ||
-        v.location?.toLowerCase().includes(this.filters.loc.toLowerCase()) ||
-        v.serviceAreas?.some(a => a.city?.toLowerCase().includes(this.filters.loc.toLowerCase()));
-      const matchRating = (v.rating || 0) >= this.filters.rating;
-      const matchQ = !this.filters.searchQuery ||
-        v.name.toLowerCase().includes(this.filters.searchQuery.toLowerCase()) ||
-        (v.vendorTypeName?.toLowerCase().includes(this.filters.searchQuery.toLowerCase()));
-      return matchType && matchLoc && matchRating && matchQ;
-    });
-
-    if (this.sortOption === 'rating') filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-
-    this.displayVendors = filtered;
-    this.vendorCount = filtered.length;
-    this.currentPage = 1;
-    this.updateMapMarkers();
-  }
-
-  // ── Service logic ────────────────────────────────────────
-  loadServices() {
-    const seq = ++this.serviceFetchSeq;
-    this.loading = this.filteredServices.length === 0;
-    this.serviceTypeService.getAll().subscribe({
-      next: (cats) => {
-        this.serviceCategories = Array.isArray(cats) ? cats : [];
-        if (this.selectedCategories.length > 0 && !this.loading) {
-          this.applyServiceFilters();
-        }
-      },
-      error: () => { this.serviceCategories = []; }
-    });
-
-    const req: any = {
-      city: this.selectedCity || undefined,
-      pageSize: 1000,
-      pageIndex: 1,
-      searchTerm: this.filters.searchQuery || undefined,
-    };
-    if (this.selectedEventTypes.length) req.eventTypeId = this.selectedEventTypes[0];
-    const resolvedServiceTypeId = this.selectedCategories.length
-      ? this.resolveServiceTypeId(this.selectedCategories[0])
-      : undefined;
-    if (resolvedServiceTypeId) req.serviceTypeId = resolvedServiceTypeId;
-
-    this.productService.getAll(req).subscribe({
-      next: (data) => {
-        if (seq !== this.serviceFetchSeq) return;
-        const list = Array.isArray(data) ? data : [];
-        if (list.length === 0 && this.services.length > 0 && !this.hasActiveServiceFilters()) return;
-        this.services = list;
-        this.applyServiceFilters();
-        this.loading = false;
-      },
-      error: () => {
-        if (seq !== this.serviceFetchSeq) return;
-        if (!this.hasActiveServiceFilters()) {
-          this.loading = false;
-          return;
-        }
-        this.services = [];
-        this.loading = false;
-      }
-    });
-  }
-
-  private hasActiveServiceFilters(): boolean {
-    return !!(
-      this.selectedCategories.length ||
-      this.selectedEventTypes.length ||
-      this.filters.searchQuery ||
-      this.selectedCity
-    );
-  }
-
-  applyServiceFilters() {
-    let f = [...this.services];
-    if (this.selectedCategories.length) {
-      const selectedNames = this.serviceCategories
-        .filter(cat => this.selectedCategories.includes(cat.id))
-        .map(cat => cat.name.toLowerCase());
-      const selectedNameHints = this.selectedCategories
-        .filter(c => !this.serviceCategories.some(t => t.id === c))
-        .map(c => c.toLowerCase());
-      const nameMatches = [...selectedNames, ...selectedNameHints];
-
-      f = f.filter(s =>
-        (s.serviceTypeId && this.selectedCategories.includes(s.serviceTypeId)) ||
-        (s.serviceTypeName && nameMatches.some(n =>
-          s.serviceTypeName!.toLowerCase() === n ||
-          s.serviceTypeName!.toLowerCase().includes(n) ||
-          n.includes(s.serviceTypeName!.toLowerCase())
-        )) ||
-        (s.vendorTypeName && nameMatches.some(n =>
-          s.vendorTypeName!.toLowerCase() === n ||
-          s.vendorTypeName!.toLowerCase().includes(n) ||
-          n.includes(s.vendorTypeName!.toLowerCase())
-        ))
-      );
-    }
-    f = f.filter(s => (s.price ?? 0) <= this.maxPrice);
-    f = f.filter(s => ((s as any).rating || 5) >= this.minRating);
-
-    if (this.sortOption === 'price-asc') f.sort((a, b) => a.price - b.price);
-    else if (this.sortOption === 'price-desc') f.sort((a, b) => b.price - a.price);
-    else if (this.sortOption === 'rating') f.sort((a, b) => ((b as any).rating || 5) - ((a as any).rating || 5));
-
-    this.filteredServices = f;
-    this.serviceCount = f.length;
-    this.currentPage = 1;
-    this.updateMapMarkers();
-  }
-
-  toggleCategory(id: string) {
-    const i = this.selectedCategories.indexOf(id);
-    if (i > -1) this.selectedCategories.splice(i, 1);
-    else this.selectedCategories.push(id);
-    this.loadServices();
-  }
-
-  toggleEventType(ev: string) {
-    const i = this.selectedEventTypes.indexOf(ev);
-    if (i > -1) this.selectedEventTypes.splice(i, 1);
-    else this.selectedEventTypes.push(ev);
-    this.loadServices();
-  }
-
-  // ── Shared filter helpers ────────────────────────────────
   togglePanel(panel: string) {
-    if (this.activePanel === panel) {
-      this.activePanel = null;
-    } else {
-      this.activePanel = panel;
-      if (this.activeTab === 'vendors') {
-        this.activeType = this.filters.type;
-        this.activeLoc = this.filters.loc;
-        this.activeRating = this.filters.rating;
-      }
-    }
+    this.activePanel = this.activePanel === panel ? null : panel;
   }
 
-  clearServiceType() { this.selectedCategories = []; this.loadServices(); }
-
-  setMaxPrice(p: number) { this.maxPrice = p; this.applyServiceFilters(); }
-  clearMaxPrice() { this.maxPrice = 100000; this.applyServiceFilters(); }
-
-  setRating(r: number) {
-    if (this.activeTab === 'vendors') { this.activeRating = r; }
-    else { this.minRating = r; this.applyServiceFilters(); }
-  }
-  clearRating() {
-    if (this.activeTab === 'vendors') { this.activeRating = 0; this.updateFilters(); }
-    else { this.minRating = 0; this.applyServiceFilters(); }
-  }
-
-  clearAllFilters() {
-    this.activePanel = null;
-    if (this.activeTab === 'vendors') {
-      this.filters = { type: '', loc: '', rating: 0, searchQuery: '' };
-      this.activeType = ''; this.activeLoc = ''; this.activeRating = 0;
-      this.triggerSearch();
-    } else {
-      this.selectedCategories = [];
-      this.selectedEventTypes = [];
-      this.maxPrice = 100000;
-      this.minRating = 0;
-      this.selectedCity = '';
-      this.loadServices();
-    }
-  }
-
-  // ── View & map ───────────────────────────────────────────
   setView(mode: 'grid' | 'list' | 'map') {
     this.viewMode = mode;
     if (mode === 'map') {
@@ -492,14 +504,13 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       this.displayVendors.forEach((vendor, i) => {
         const areas = vendor.serviceAreas?.length ? vendor.serviceAreas : [{ latitude: 0, longitude: 0 }];
         areas.forEach((area, ai) => {
-          let lat = area.latitude || baseLat + Math.sin((i + ai) * 23) * 0.05;
-          let lng = area.longitude || baseLng + Math.cos((i + ai) * 29) * 0.05;
+          const lat = area.latitude || baseLat + Math.sin((i + ai) * 23) * 0.05;
+          const lng = area.longitude || baseLng + Math.cos((i + ai) * 29) * 0.05;
           const icon = L.divIcon({
             className: 'custom-map-marker',
-            html: `<div style="background:white;border-radius:50px;padding:6px 16px;box-shadow:0 4px 15px rgba(0,0,0,.1);font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:8px;border:1.5px solid #e8e0ec;white-space:nowrap;cursor:pointer;" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#e8e0ec'">
-              <i class="bi bi-shop" style="color:#c9a84c"></i>
-              <span style="color:#1e0e2c">${vendor.name}</span>
-            </div>`, iconSize: [200, 40], iconAnchor: [100, 20]
+            html: `<div style="background:white;border-radius:50px;padding:6px 16px;box-shadow:0 4px 15px rgba(0,0,0,.1);font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:8px;border:1.5px solid #e8e0ec;white-space:nowrap;cursor:pointer;">
+              <i class="bi bi-shop" style="color:#c9a84c"></i><span style="color:#1e0e2c">${vendor.name}</span></div>`,
+            iconSize: [200, 40], iconAnchor: [100, 20]
           });
           const m = L.marker([lat, lng], { icon }).addTo(this.markersLayer!);
           m.on('click', () => this.ngZone.run(() => this.router.navigate(['/vendor', vendor.id])));
@@ -509,16 +520,14 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       this.filteredServices.forEach((svc, i) => {
         const areas = (svc as any).serviceAreas?.length ? (svc as any).serviceAreas : [{ latitude: 0, longitude: 0 }];
         areas.forEach((area: any, ai: number) => {
-          let lat = area.latitude || baseLat + Math.sin((i + ai) * 13) * 0.05;
-          let lng = area.longitude || baseLng + Math.cos((i + ai) * 17) * 0.05;
+          const lat = area.latitude || baseLat + Math.sin((i + ai) * 13) * 0.05;
+          const lng = area.longitude || baseLng + Math.cos((i + ai) * 17) * 0.05;
           const price = (svc.price || 0).toLocaleString() + ' EGP';
           const icon = L.divIcon({
             className: 'custom-map-marker',
-            html: `<div style="background:white;border-radius:50px;padding:6px 16px;box-shadow:0 4px 15px rgba(0,0,0,.1);font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:8px;border:1.5px solid #e8e0ec;white-space:nowrap;cursor:pointer;" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#e8e0ec'">
-              <i class="bi bi-image" style="color:#c9a84c"></i>
-              <span style="color:#1e0e2c">${svc.name}</span>
-              <span style="color:#c9a84c">${price}</span>
-            </div>`, iconSize: [260, 40], iconAnchor: [130, 20]
+            html: `<div style="background:white;border-radius:50px;padding:6px 16px;box-shadow:0 4px 15px rgba(0,0,0,.1);font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:8px;border:1.5px solid #e8e0ec;white-space:nowrap;cursor:pointer;">
+              <i class="bi bi-image" style="color:#c9a84c"></i><span style="color:#1e0e2c">${svc.name}</span><span style="color:#c9a84c">${price}</span></div>`,
+            iconSize: [260, 40], iconAnchor: [130, 20]
           });
           const m = L.marker([lat, lng], { icon }).addTo(this.markersLayer!);
           m.on('click', () => this.ngZone.run(() => this.openPreview(svc)));
@@ -527,7 +536,6 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  // ── Service preview ──────────────────────────────────────
   openPreview(svc: ApiProduct) {
     this.selectedService = svc;
     this.previewImages = this.getPreviewImages(svc);
@@ -535,10 +543,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     this.showPreview = true;
   }
 
-  closePreview() {
-    this.showPreview = false;
-    this.selectedService = null;
-  }
+  closePreview() { this.showPreview = false; this.selectedService = null; }
 
   bookService(svc: ApiProduct) {
     this.closePreview();
@@ -551,7 +556,6 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     return [];
   }
 
-  // ── Compare / wishlist ───────────────────────────────────
   toggleWishlist(svc: ApiProduct, e: Event) {
     e.stopPropagation();
     const i = this.wishlist.indexOf(svc.id);
@@ -571,6 +575,5 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   isInCompare(id: string) { return !!this.compareList.find(s => s.id === id); }
-
   clearCompare() { this.compareList = []; this.showCompareBar = false; }
 }

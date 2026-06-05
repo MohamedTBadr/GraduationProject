@@ -68,6 +68,10 @@ export interface PaginatedRequest {
   eventTypeId?: string;
   vendorTypeId?: string;
   serviceTypeId?: string;
+
+  // Price filters (services)
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export interface PagedResult<T> {

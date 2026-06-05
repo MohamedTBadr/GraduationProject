@@ -8,7 +8,7 @@
 
   <div class="ad-kpi-grid [grid-template-columns:repeat(3,1fr)]">
     <div class="ad-kpi ak-blue">
-      <div class="ad-kpi-val">{{ totalCount }}</div>
+      <div class="ad-kpi-val">{{ allInquiries.length }}</div>
       <div class="ad-kpi-lbl">Total Inquiries</div>
     </div>
     <div class="ad-kpi ak-gold">
@@ -23,7 +23,7 @@
       *ngFor="let s of statusTabs"
       class="ad-btn ad-btn-ghost ad-btn-sm"
       [class.ad-btn-gold]="statusFilter === s"
-      (click)="statusFilter = s">
+      (click)="setStatusFilter(s)">
       {{ s }}
     </button>
   </div>
@@ -43,7 +43,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let inq of filteredInquiries" (click)="openDetails(inq)" style="cursor:pointer">
+        <tr *ngFor="let inq of paginatedInquiries" (click)="openDetails(inq)" style="cursor:pointer">
           <td>
             <div class="font-semibold">{{ inq.companyName }}</div>
             <div class="text-[.7rem] text-[rgba(255,255,255,.35)]">{{ inq.eventType?.name || '—' }}</div>
@@ -68,19 +68,20 @@
             </div>
           </td>
         </tr>
-        <tr *ngIf="filteredInquiries.length === 0">
+        <tr *ngIf="paginatedInquiries.length === 0">
           <td class="text-center p-[2rem] text-[#888]" colspan="6">No inquiries found.</td>
         </tr>
       </tbody>
     </table>
 
-    <div class="flex justify-between items-center p-[1rem] text-[#fff]">
-      <span>Page {{ pageNumber }} of {{ totalPages }}</span>
-      <div class="flex gap-[10px]">
-        <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === 1" (click)="changePage(-1)">Previous</button>
-        <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === totalPages" (click)="changePage(1)">Next</button>
-      </div>
-    </div>
+    <app-pagination
+      variant="admin"
+      [currentPage]="pageNumber"
+      [totalPages]="totalPages"
+      [totalCount]="totalCount"
+      [pageSize]="pageSize"
+      (pageChange)="onPageChange($event)">
+    </app-pagination>
   </div>
 </div>
 

@@ -7,6 +7,7 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReviewModalComponent } from './review-modal.component';
 import { ReportIssueModalComponent } from './report-issue-modal.component';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { OrderService, OrderResponse } from '../../../core/services/order.service';
 import { VoucherService, Voucher } from '../../../core/services/voucher.service';
 
@@ -26,7 +27,7 @@ interface Booking {
 @Component({
   selector: 'app-my-bookings',
   standalone: true,
-  imports: [CommonModule, ReviewModalComponent, ReportIssueModalComponent],
+  imports: [CommonModule, ReviewModalComponent, ReportIssueModalComponent, PaginationComponent],
   templateUrl: './my-bookings.component.html',
   styleUrls: ['./my-bookings.component.scss']
 })
@@ -40,8 +41,12 @@ export class MyBookingsComponent implements OnInit {
   };
 
   activeTab = 'all';
+  pageNumber = 1;
+  pageSize = 8;
   bookings: Booking[] = [];
   orders: OrderResponse[] = [];
+  ordersPageNumber = 1;
+  readonly ordersPageSize = 8;
   loyaltyPoints = 0;
   loading = true;
   userId = '';
@@ -162,8 +167,36 @@ export class MyBookingsComponent implements OnInit {
     return this.bookings.filter(b => b.status.toLowerCase() === this.activeTab);
   }
 
+  get paginatedBookings(): Booking[] {
+    const start = (this.pageNumber - 1) * this.pageSize;
+    return this.filteredBookings.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredBookings.length / this.pageSize));
+  }
+
+  get paginatedOrders(): OrderResponse[] {
+    const start = (this.ordersPageNumber - 1) * this.ordersPageSize;
+    return this.orders.slice(start, start + this.ordersPageSize);
+  }
+
+  get ordersTotalPages(): number {
+    return Math.max(1, Math.ceil(this.orders.length / this.ordersPageSize));
+  }
+
   setTab(tab: string) {
     this.activeTab = tab;
+    this.pageNumber = 1;
+    this.ordersPageNumber = 1;
+  }
+
+  onPageChange(page: number) {
+    this.pageNumber = page;
+  }
+
+  onOrdersPageChange(page: number) {
+    this.ordersPageNumber = page;
   }
 
   confirmCompletion(bk: Booking) {

@@ -3,17 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompanyInquiryService, CompanyInquiryResponse } from '../../../core/services/company-inquiry.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-company-inquiries',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   templateUrl: './company-inquiries.component.html',
   styleUrl: './company-inquiries.component.scss'
 })
 export class CompanyInquiriesComponent implements OnInit {
-  inquiries: CompanyInquiryResponse[] = [];
-  totalCount = 0;
+  allInquiries: CompanyInquiryResponse[] = [];
   pageNumber = 1;
   pageSize = 15;
   loading = false;
@@ -37,10 +37,9 @@ export class CompanyInquiriesComponent implements OnInit {
 
   loadInquiries(): void {
     this.loading = true;
-    this.inquiryService.getAll(this.pageNumber, this.pageSize).subscribe({
-      next: ({ items, totalCount }) => {
-        this.inquiries = items;
-        this.totalCount = totalCount;
+    this.inquiryService.getAll(1, 500).subscribe({
+      next: ({ items }) => {
+        this.allInquiries = items;
         this.loading = false;
       },
       error: () => {
@@ -50,22 +49,35 @@ export class CompanyInquiriesComponent implements OnInit {
     });
   }
 
+  get filteredInquiries(): CompanyInquiryResponse[] {
+    if (this.statusFilter === 'All') return this.allInquiries;
+    return this.allInquiries.filter(i => i.status === this.statusFilter);
+  }
+
+  get paginatedInquiries(): CompanyInquiryResponse[] {
+    const start = (this.pageNumber - 1) * this.pageSize;
+    return this.filteredInquiries.slice(start, start + this.pageSize);
+  }
+
+  get totalCount(): number {
+    return this.filteredInquiries.length;
+  }
+
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
   }
 
-  get filteredInquiries(): CompanyInquiryResponse[] {
-    if (this.statusFilter === 'All') return this.inquiries;
-    return this.inquiries.filter(i => i.status === this.statusFilter);
-  }
-
   get pendingCount(): number {
-    return this.inquiries.filter(i => i.status === 'Pending').length;
+    return this.allInquiries.filter(i => i.status === 'Pending').length;
   }
 
-  changePage(delta: number): void {
-    this.pageNumber += delta;
-    this.loadInquiries();
+  setStatusFilter(status: 'All' | 'Pending' | 'Reviewed' | 'Closed'): void {
+    this.statusFilter = status;
+    this.pageNumber = 1;
+  }
+
+  onPageChange(page: number): void {
+    this.pageNumber = page;
   }
 
   openDetails(inquiry: CompanyInquiryResponse): void {
@@ -81,10 +93,10 @@ export class CompanyInquiriesComponent implements OnInit {
   updateStatus(inquiry: CompanyInquiryResponse, status: string): void {
     this.inquiryService.updateStatus(inquiry, status).subscribe({
       next: () => {
-        inquiry.status = status as any;
+        inquiry.status = status as CompanyInquiryResponse['status'];
         this.toastService.show(`Status updated to ${status}.`, 'success');
         if (this.selectedInquiry?.id === inquiry.id) {
-          this.selectedInquiry.status = status as any;
+          this.selectedInquiry.status = status as CompanyInquiryResponse['status'];
         }
       },
       error: () => this.toastService.show('Failed to update status.', 'error')
@@ -95,10 +107,10 @@ export class CompanyInquiriesComponent implements OnInit {
     if (!confirm('Delete this inquiry?')) return;
     this.inquiryService.delete(id).subscribe({
       next: () => {
-        this.inquiries = this.inquiries.filter(i => i.id !== id);
-        this.totalCount = Math.max(0, this.totalCount - 1);
+        this.allInquiries = this.allInquiries.filter(i => i.id !== id);
         this.toastService.show('Inquiry deleted.', 'success');
         if (this.selectedInquiry?.id === id) this.closeModal();
+        if (this.pageNumber > this.totalPages) this.pageNumber = this.totalPages;
       },
       error: () => this.toastService.show('Failed to delete inquiry.', 'error')
     });

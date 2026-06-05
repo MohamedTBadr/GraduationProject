@@ -1,4 +1,4 @@
-﻿﻿<div class="fav-header">
+﻿<div class="fav-header">
   <div>
     <h2 class="fav-title">My Saved Vendors</h2>
     <p class="fav-subtitle">Your curated selection of outstanding professionals saved for your upcoming events.</p>
@@ -23,7 +23,7 @@
 </div>
 
 <div class="fav-grid" *ngIf="!loading && favorites.length > 0">
-  <div class="fav-card" *ngFor="let vendor of favorites" [routerLink]="['/vendor', vendor.id]">
+  <div class="fav-card" *ngFor="let vendor of paginatedFavorites" [routerLink]="['/vendor', vendor.id]">
     <div class="fav-card-photo-wrapper">
       <div class="fav-card-avatar-placeholder">
         {{ vendor.name.charAt(0) }}
@@ -57,6 +57,12 @@
   </div>
 </div>
 
-
-
+<app-pagination
+  *ngIf="!loading && favorites.length > pageSize"
+  [currentPage]="pageNumber"
+  [totalPages]="totalPages"
+  [totalCount]="favorites.length"
+  [pageSize]="pageSize"
+  (pageChange)="onPageChange($event)">
+</app-pagination>
 

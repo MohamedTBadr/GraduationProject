@@ -37,12 +37,14 @@
       </tbody>
     </table>
     
-    <div class="flex justify-between items-center p-[1rem] text-[#fff]">
-       <span>Page {{ pageNumber }} of {{ totalPages }}</span>
-       <div class="flex gap-[10px]">
-          <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === 1" (click)="changePage(-1)">Previous</button>
-          <button class="ad-btn ad-btn-ghost ad-btn-sm" [disabled]="pageNumber === totalPages" (click)="changePage(1)">Next</button>
-       </div>
-    </div>
+    <app-pagination
+      *ngIf="totalCount > 0"
+      variant="admin"
+      [currentPage]="pageNumber"
+      [totalPages]="totalPages"
+      [totalCount]="totalCount"
+      [pageSize]="pageSize"
+      (pageChange)="onPageChange($event)">
+    </app-pagination>
   </div>
 </div>

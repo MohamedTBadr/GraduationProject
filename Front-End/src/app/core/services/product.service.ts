@@ -7,7 +7,8 @@ import {
   ApiProduct,
   CreateProductRequest,
   UpdateProductRequest,
-  PaginatedRequest
+  PaginatedRequest,
+  PagedResult
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -88,33 +89,64 @@ export class ProductService {
     return this.extractArrayData(res).map(item => this.normalizeProduct(item));
   }
 
+  private buildParams(filters?: PaginatedRequest): HttpParams {
+    let params = new HttpParams();
+    if (!filters) return params;
+
+    if (filters.pageIndex) params = params.set('pageIndex', filters.pageIndex.toString());
+    if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
+    if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
+    if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
+    if (filters.isDescending !== undefined) params = params.set('isDescending', filters.isDescending.toString());
+    if (filters.city) params = params.set('city', filters.city);
+    if (filters.region) params = params.set('region', filters.region);
+    if (filters.latitude) params = params.set('latitude', filters.latitude.toString());
+    if (filters.longitude) params = params.set('longitude', filters.longitude.toString());
+    if (filters.radiusKm) params = params.set('radiusKm', filters.radiusKm.toString());
+    if (filters.classification && filters.classification !== 'all') params = params.set('classification', filters.classification);
+    if (filters.vendorTypeId) params = params.set('vendorTypeId', filters.vendorTypeId);
+    if (filters.serviceTypeId) params = params.set('serviceTypeId', filters.serviceTypeId);
+    if (filters.minPrice != null) params = params.set('minPrice', filters.minPrice.toString());
+    if (filters.maxPrice != null) params = params.set('maxPrice', filters.maxPrice.toString());
+
+    return params;
+  }
+
+  private mapPagedProducts(res: any): PagedResult<ApiProduct> {
+    const data = res?.value ?? res?.Value ?? res;
+    const items = Array.isArray(data)
+      ? data
+      : (data?.items ?? data?.Items ?? []);
+    const totalCount = data?.totalCount ?? data?.TotalCount ?? (Array.isArray(items) ? items.length : 0);
+    const pageSize = data?.pageSize ?? data?.PageSize ?? 10;
+    const pageNumber = data?.pageNumber ?? data?.PageNumber ?? 1;
+
+    return {
+      items: (Array.isArray(items) ? items : []).map(item => this.normalizeProduct(item)),
+      totalCount,
+      pageNumber,
+      pageSize,
+      totalPages: data?.totalPages ?? data?.TotalPages ?? (Math.ceil(totalCount / pageSize) || 1)
+    };
+  }
+
   /** GET /Service – returns filtered/paginated products */
   getAll(filters?: PaginatedRequest): Observable<ApiProduct[]> {
-    let params = new HttpParams();
-    if (filters) {
-      if (filters.pageIndex) params = params.set('pageIndex', filters.pageIndex.toString());
-      if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
-      if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
-      if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
-      if (filters.isDescending !== undefined) params = params.set('isDescending', filters.isDescending.toString());
-      
-      // Location
-      if (filters.city) params = params.set('city', filters.city);
-      if (filters.region) params = params.set('region', filters.region);
-      if (filters.latitude) params = params.set('latitude', filters.latitude.toString());
-      if (filters.longitude) params = params.set('longitude', filters.longitude.toString());
-      if (filters.radiusKm) params = params.set('radiusKm', filters.radiusKm.toString());
+    return this.getAllPaged(filters).pipe(map(r => r.items));
+  }
 
-      // Taxonomy
-      if (filters.classification && filters.classification !== 'all') params = params.set('classification', filters.classification);
-      if (filters.eventTypeId) params = params.set('eventTypeId', filters.eventTypeId);
-      if (filters.vendorTypeId) params = params.set('vendorTypeId', filters.vendorTypeId);
-      if (filters.serviceTypeId) params = params.set('serviceTypeId', filters.serviceTypeId);
-    }
-
-    return this.http.get<any>(`${this.apiUrl}/Service`, { params }).pipe(
-      map(res => this.mapProductList(res))
+  /** GET /Service – paginated with total count */
+  getAllPaged(filters?: PaginatedRequest): Observable<PagedResult<ApiProduct>> {
+    return this.http.get<any>(`${this.apiUrl}/Service`, { params: this.buildParams(filters) }).pipe(
+      map(res => this.mapPagedProducts(res))
     );
+  }
+
+  /** GET /Service/by-event-type/{eventTypeId} – paginated */
+  getByEventTypePaged(eventTypeId: string, filters?: PaginatedRequest): Observable<PagedResult<ApiProduct>> {
+    return this.http.get<any>(`${this.apiUrl}/Service/by-event-type/${eventTypeId}`, {
+      params: this.buildParams(filters)
+    }).pipe(map(res => this.mapPagedProducts(res)));
   }
 
   /** GET /Service/{productId} */

@@ -7,7 +7,8 @@ import {
   ApiVendor,
   CreateVendorRequest,
   UpdateVendorRequest,
-  PaginatedRequest
+  PaginatedRequest,
+  PagedResult
 } from '../../shared/types/api.interfaces';
 
 @Injectable({ providedIn: 'root' })
@@ -16,34 +17,52 @@ export class VendorService {
 
   constructor(private http: HttpClient) {}
 
+  private buildParams(filters?: PaginatedRequest): HttpParams {
+    let params = new HttpParams();
+    if (!filters) return params;
+
+    if (filters.pageIndex) params = params.set('pageIndex', filters.pageIndex.toString());
+    if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
+    if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
+    if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
+    if (filters.isDescending !== undefined) params = params.set('isDescending', filters.isDescending.toString());
+    if (filters.city) params = params.set('city', filters.city);
+    if (filters.region) params = params.set('region', filters.region);
+    if (filters.latitude) params = params.set('latitude', filters.latitude.toString());
+    if (filters.longitude) params = params.set('longitude', filters.longitude.toString());
+    if (filters.radiusKm) params = params.set('radiusKm', filters.radiusKm.toString());
+    if (filters.vendorTypeId) params = params.set('vendorTypeId', filters.vendorTypeId);
+
+    return params;
+  }
+
+  private mapPagedVendors(res: any): PagedResult<ApiVendor> {
+    const data = res?.value ?? res?.Value ?? res;
+    const items = Array.isArray(data)
+      ? data
+      : (data?.items ?? data?.Items ?? []);
+    const totalCount = data?.totalCount ?? data?.TotalCount ?? (Array.isArray(items) ? items.length : 0);
+    const pageSize = data?.pageSize ?? data?.PageSize ?? 10;
+    const pageNumber = data?.pageNumber ?? data?.PageNumber ?? 1;
+
+    return {
+      items: (Array.isArray(items) ? items : []).map((v: any) => this.normalizeVendor(v)),
+      totalCount,
+      pageNumber,
+      pageSize,
+      totalPages: data?.totalPages ?? data?.TotalPages ?? (Math.ceil(totalCount / pageSize) || 1)
+    };
+  }
+
   /** GET /Vendor – returns all vendors (supports pagination & filters) */
   getAll(filters?: PaginatedRequest): Observable<ApiVendor[]> {
-    let params = new HttpParams();
-    if (filters) {
-      if (filters.pageIndex) params = params.set('pageIndex', filters.pageIndex.toString());
-      if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
-      if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
-      if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
-      if (filters.isDescending !== undefined) params = params.set('isDescending', filters.isDescending.toString());
-      
-      // Location
-      if (filters.city) params = params.set('city', filters.city);
-      if (filters.region) params = params.set('region', filters.region);
-      if (filters.latitude) params = params.set('latitude', filters.latitude.toString());
-      if (filters.longitude) params = params.set('longitude', filters.longitude.toString());
-      if (filters.radiusKm) params = params.set('radiusKm', filters.radiusKm.toString());
+    return this.getAllPaged(filters).pipe(map(r => r.items));
+  }
 
-      // Taxonomy
-      if (filters.vendorTypeId) params = params.set('vendorTypeId', filters.vendorTypeId);
-    }
-
-    return this.http.get<any>(`${this.apiUrl}/Vendor`, { params }).pipe(
-      map(res => {
-        const data = res?.value ?? res?.Value ?? res;
-        const items = Array.isArray(data) ? data : (data?.items ?? data?.Items ?? []);
-        if (!Array.isArray(items)) return [];
-        return items.map((v: any) => this.normalizeVendor(v));
-      })
+  /** GET /Vendor – paginated with total count */
+  getAllPaged(filters?: PaginatedRequest): Observable<PagedResult<ApiVendor>> {
+    return this.http.get<any>(`${this.apiUrl}/Vendor`, { params: this.buildParams(filters) }).pipe(
+      map(res => this.mapPagedVendors(res))
     );
   }
 

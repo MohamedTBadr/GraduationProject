@@ -1,26 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { VendorService } from '../../../core/services/vendor.service';
 import { ApiVendor } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { RouterModule } from '@angular/router';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-vendors',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PaginationComponent],
   templateUrl: './vendors.component.html',
   styleUrls: ['./vendors.component.scss']
 })
-export class VendorsComponent implements OnInit {
+export class VendorsComponent implements OnInit, OnDestroy {
   vendors: ApiVendor[] = [];
   loading = false;
   activeTab: 'all' | 'pending' | 'active' | 'suspended' = 'all';
 
-  searchQuery: string = '';
-  pageNumber: number = 1;
-  pageSize: number = 10;
+  searchQuery = '';
+  pageNumber = 1;
+  pageSize = 10;
+
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     private vendorService: VendorService,
@@ -29,14 +35,26 @@ export class VendorsComponent implements OnInit {
 
   ngOnInit() {
     this.loadVendors();
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.pageNumber = 1;
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadVendors() {
     this.loading = true;
-    this.vendorService.getAll().subscribe({
-      next: (data: any) => {
+    this.vendorService.getAll({ pageIndex: 1, pageSize: 500 }).subscribe({
+      next: (data) => {
         this.vendors = data;
-        this.resetPagination();
+        this.pageNumber = 1;
         this.loading = false;
       },
       error: () => {
@@ -57,10 +75,10 @@ export class VendorsComponent implements OnInit {
       result = result.filter(v => v.status === 'suspended');
     }
 
-    if (this.searchQuery && this.searchQuery.trim().length > 0) {
+    if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase();
-      result = result.filter(v => 
-        (v.name || '').toLowerCase().includes(q) || 
+      result = result.filter(v =>
+        (v.name || '').toLowerCase().includes(q) ||
         (v.vendorTypeName || '').toLowerCase().includes(q) ||
         (v.location || '').toLowerCase().includes(q)
       );
@@ -85,7 +103,7 @@ export class VendorsComponent implements OnInit {
   get pendingCount(): number {
     return this.vendors.filter(v => !v.isApproved).length;
   }
-  
+
   get activeCount(): number {
     return this.vendors.filter(v => v.isApproved && v.status === 'active').length;
   }
@@ -96,22 +114,15 @@ export class VendorsComponent implements OnInit {
 
   setTab(tab: 'all' | 'pending' | 'active' | 'suspended') {
     this.activeTab = tab;
-    this.resetPagination();
-  }
-
-  onSearchChange() {
-    this.resetPagination();
-  }
-
-  resetPagination() {
     this.pageNumber = 1;
   }
 
-  changePage(delta: number) {
-    const newPage = this.pageNumber + delta;
-    if (newPage >= 1 && newPage <= this.totalPages) {
-      this.pageNumber = newPage;
-    }
+  onSearchChange() {
+    this.searchSubject.next(this.searchQuery);
+  }
+
+  onPageChange(page: number) {
+    this.pageNumber = page;
   }
 
   approveVendor(vendor: ApiVendor) {
@@ -122,7 +133,7 @@ export class VendorsComponent implements OnInit {
           this.toastService.show(`${vendor.name} has been approved.`, 'success');
           this.loadVendors();
         },
-        error: (err) => {
+        error: () => {
           this.toastService.show('Error approving vendor. Please try again.', 'error');
           this.loading = false;
         }
@@ -139,7 +150,7 @@ export class VendorsComponent implements OnInit {
           this.toastService.show(`Vendor ${vendor.name} has been ${action}ed.`, 'success');
           this.loadVendors();
         },
-        error: (err) => {
+        error: () => {
           this.toastService.show(`Error attempting to ${action} vendor.`, 'error');
           this.loading = false;
         }
