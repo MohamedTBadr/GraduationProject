@@ -1,0 +1,554 @@
+// ─────────────────────────────────────────────────────────────
+// Bookings Component Styles
+// Uses global vd-* design tokens from styles.scss
+// ─────────────────────────────────────────────────────────────
+
+// ── Summary chips (page header) ────────────────────────────────
+.bk-summary-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.bk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--ff-b);
+  border: 1.5px solid transparent;
+
+  i { font-size: 0.82rem; }
+}
+
+.bk-chip-amber {
+  background: rgba(202, 138, 4, 0.08);
+  color: var(--amber);
+  border-color: rgba(202, 138, 4, 0.18);
+}
+
+.bk-chip-green {
+  background: rgba(34, 197, 94, 0.08);
+  color: #16a34a;
+  border-color: rgba(34, 197, 94, 0.18);
+}
+
+.bk-chip-gray {
+  background: rgba(107, 114, 128, 0.08);
+  color: var(--gray);
+  border-color: rgba(107, 114, 128, 0.15);
+}
+
+// ── Tab badges ─────────────────────────────────────────────────
+.bk-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 50px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-left: 5px;
+  line-height: 1;
+}
+
+.bk-tab-badge-amber {
+  background: rgba(202, 138, 4, 0.15);
+  color: var(--amber);
+}
+
+.bk-tab-badge-green {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+.bk-tab-badge-gray {
+  background: rgba(107, 114, 128, 0.1);
+  color: var(--gray);
+}
+
+// ── Loading bar ─────────────────────────────────────────────────
+.bk-loading-bar {
+  height: 3px;
+  background: var(--lgray);
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.bk-loading-fill {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, var(--gold), #e8c97a);
+  border-radius: 50px;
+  animation: bk-loading-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes bk-loading-slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+// ── Empty states ────────────────────────────────────────────────
+.bk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 52px 20px;
+  text-align: center;
+}
+
+.bk-empty-table {
+  padding: 40px 20px;
+}
+
+.bk-empty-sm {
+  padding: 22px 16px;
+}
+
+.bk-empty-icon {
+  font-size: 2.8rem;
+  color: var(--lgray);
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.bk-empty-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.bk-empty-sub {
+  font-size: 0.82rem;
+  color: var(--gray);
+  max-width: 280px;
+}
+
+// ── Pending card inline helpers ─────────────────────────────────
+.bk-value {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+// ── Confirmed table helpers ─────────────────────────────────────
+.bk-tbl-head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bk-count-chip {
+  background: var(--cream2);
+  border: 1px solid var(--lgray);
+  border-radius: 50px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gray);
+}
+
+.bk-tbl-row {
+  transition: background 0.15s;
+}
+
+.bk-client-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bk-client-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.bk-service-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--cream2);
+  border-radius: 50px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  color: var(--navy);
+  font-weight: 500;
+}
+
+.bk-date-cell {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.bk-value-cell {
+  font-weight: 700;
+  color: #9f1239;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.bk-action-btns {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+// ── Calendar tab ────────────────────────────────────────────────
+.bk-cal-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bk-cal-month-label {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+}
+
+// Selected day highlight in calendar grid
+.vd-cal-day.bk-cal-selected {
+  background: var(--navy) !important;
+  color: var(--white) !important;
+  font-weight: 700;
+
+  &::after {
+    background: var(--white) !important;
+  }
+}
+
+// Show booking count badge on days with events
+.bk-cal-dot-count {
+  font-size: 0.58rem;
+  font-weight: 700;
+  background: var(--gold);
+  color: #1e0e2c;
+  border-radius: 50px;
+  padding: 0 4px;
+  line-height: 1.4;
+  min-width: 14px;
+  text-align: center;
+}
+
+// Calendar legend
+.bk-cal-legend {
+  display: flex;
+  gap: 14px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--lgray);
+  flex-wrap: wrap;
+}
+
+.bk-cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--gray);
+}
+
+.bk-cal-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.bk-cal-legend-dot-gold     { background: var(--gold); }
+.bk-cal-legend-dot-today    { background: rgba(201, 168, 76, 0.5); border: 2px solid var(--gold); width: 10px; height: 10px; }
+.bk-cal-legend-dot-selected { background: var(--navy); }
+
+// Calendar sidebar
+.bk-cal-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bk-cal-day-card {
+  border-left: 3px solid var(--gold);
+  animation: bk-slide-in 0.2s ease;
+}
+
+@keyframes bk-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bk-cal-day-bookings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bk-cal-booking-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--cream);
+  border-radius: 10px;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--cream2);
+  }
+}
+
+.bk-cal-booking-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.bk-cal-booking-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.bk-cal-booking-client {
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bk-cal-booking-svc {
+  font-size: 0.74rem;
+  color: var(--gray);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bk-cal-booking-val {
+  font-size: 0.72rem;
+  color: var(--gold);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.bk-cal-month-card {
+  // inherits .vd-card
+}
+
+.bk-cal-month-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 340px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--lgray); border-radius: 4px; }
+}
+
+.bk-cal-month-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 9px;
+  border: 1px solid var(--lgray);
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    border-color: rgba(201, 168, 76, 0.3);
+    box-shadow: 0 1px 6px rgba(201, 168, 76, 0.1);
+  }
+}
+
+.bk-cal-month-date-box {
+  min-width: 40px;
+  background: var(--cream);
+  border-radius: 8px;
+  padding: 4px 6px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.bk-cal-month-date-mon {
+  font-size: 0.62rem;
+  color: #9f1239;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bk-cal-month-date-day {
+  font-size: 1.05rem;
+  color: var(--navy);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.bk-cal-month-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+// ── History tab ─────────────────────────────────────────────────
+.bk-rejection-reason {
+  font-size: 0.7rem;
+  color: #ef4444;
+  margin-top: 4px;
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  max-width: 180px;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.bk-stars {
+  color: var(--gold);
+  font-size: 0.92rem;
+  letter-spacing: 1px;
+
+  .filled { color: var(--gold); }
+  span:not(.filled) { color: var(--lgray); }
+}
+
+.bk-no-review {
+  font-size: 0.74rem;
+  color: var(--gray);
+  font-style: italic;
+}
+
+// ── Modal helpers ────────────────────────────────────────────────
+.bk-modal-client-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--cream);
+  border-radius: 10px;
+  padding: 14px;
+  margin: 18px 0;
+}
+
+.bk-modal-client-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #9a6b20);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.bk-modal-client-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--navy);
+}
+
+.bk-modal-client-meta {
+  font-size: 0.78rem;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
+.bk-modal-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bk-modal-detail-item {
+  background: var(--cream);
+  border-radius: 9px;
+  padding: 11px 13px;
+}
+
+.bk-modal-detail-label {
+  font-size: 0.72rem;
+  color: var(--gray);
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.bk-modal-detail-value {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.bk-modal-note {
+  background: var(--cream);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 11px 14px;
+  font-size: 0.82rem;
+  color: var(--gray);
+  line-height: 1.6;
+  font-style: italic;
+  margin-bottom: 18px;
+}
+
+.bk-modal-rejection {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 0.82rem;
+  color: #ef4444;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.5;
+}

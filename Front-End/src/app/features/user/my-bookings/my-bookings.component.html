@@ -1,4 +1,4 @@
-﻿<div class="mb-header">
+<div class="mb-header">
   <div class="mb-title">My Bookings & Orders</div>
   <div class="mb-subtitle">Manage your reservations and financial transactions</div>
 </div>
@@ -59,7 +59,7 @@
   <div class="mb-booking-card" *ngFor="let bk of filteredBookings">
     <div class="bk-top">
       <div class="bk-info">
-        <div class="bk-icon">{{bk.icon}}</div>
+        <div class="bk-icon"><i class="bi bi-{{bk.icon}}"></i></div>
         <div>
           <div class="bk-vendor-name">{{bk.vendorName}}</div>
           <div class="bk-service-type">{{bk.serviceType}}</div>
@@ -78,9 +78,8 @@
     <div class="bk-actions-bar">
       <div class="bk-actions">
         <ng-container *ngIf="bk.status !== 'Done' && bk.status !== 'Completed'">
-          <button class="btn">Message</button>
-          <button class="btn">View Contract</button>
-          <button class="btn cancel" *ngIf="bk.status === 'Pending' || bk.status === 'Confirmed'">Cancel</button>
+          <button class="btn" (click)="messageVendor(bk)"><i class="bi bi-chat-dots"></i> Message</button>
+          <button class="btn cancel" *ngIf="bk.status === 'Pending' || bk.status === 'Confirmed'" (click)="cancelBooking(bk)"><i class="bi bi-x-circle"></i> Cancel</button>
         </ng-container>
 
         <ng-container *ngIf="bk.status === 'Done'">

@@ -1,4 +1,4 @@
-﻿<!-- Event Tabs -->
+<!-- Event Tabs -->
 <div class="event-tabs-bar">
     <div *ngFor="let ev of events" 
         class="event-tab-item"
@@ -78,35 +78,12 @@
                     <span>{{(activeEvent.budget - spent) | number}} EGP</span>
                 </div>
             </div>
-            <!-- Paymob Checkout -->
-            <div class="mt-[24px] pt-[16px] text-center [border-top:1px_dashed_var(--border)]">
-                <p class="text-[0.85rem] text-[var(--gray)] mb-[12px]">A 25% deposit is required to confirm bookings.</p>
-                
-                <!-- Voucher Code Input -->
-                <div class="voucher-container mb-[16px]" *ngIf="spent > 0 && hasApprovedServices">
-                    <div class="voucher-input-row" *ngIf="!appliedVoucherCode">
-                        <input type="text" [(ngModel)]="voucherCode" placeholder="Enter voucher/referral code" class="voucher-input" [disabled]="isValidatingVoucher"/>
-                        <button class="btn btn-gold btn-sm voucher-btn" (click)="applyVoucher()" [disabled]="isValidatingVoucher || !voucherCode.trim()">
-                            {{ isValidatingVoucher ? 'Applying...' : 'Apply' }}
-                        </button>
-                    </div>
-                    <div class="applied-voucher-row" *ngIf="appliedVoucherCode">
-                        <span class="applied-voucher-badge">
-                            <i class="bi bi-ticket-perforated"></i> <strong>{{appliedVoucherCode}}</strong> (-{{appliedDiscountPercent}}%) applied
-                        </span>
-                        <button class="remove-voucher-btn" (click)="removeVoucher()" title="Remove Voucher">✕</button>
-                    </div>
-                </div>
-
-                <p *ngIf="spent > 0 && !hasApprovedServices" class="text-[0.85rem] text-[#b45309] mb-[12px] text-left">
-                    At least one service must be vendor-approved before you can pay a deposit.
-                </p>
-                <button class="btn btn-gold w-100 flex justify-center items-center gap-[8px]" [disabled]="isPaying || spent === 0 || !hasApprovedServices" (click)="payDeposit()">
-                    <span *ngIf="!isPaying">
-                        <i class="bi bi-credit-card"></i> Pay Deposit (
-                        <span *ngIf="appliedDiscountPercent > 0" class="line-through opacity-70 mr-1">{{(spent * 0.25) | number}}</span>
-                        {{discountedAmount | number}} EGP)
-                    </span>
+            <!-- Pay Now -->
+            <div class="pay-now-section">
+                <button class="btn btn-gold w-100 flex justify-center items-center gap-[8px]"
+                    [disabled]="isPaying || spent === 0"
+                    (click)="payNow()">
+                    <span *ngIf="!isPaying"><i class="bi bi-credit-card"></i> Pay Now ({{spent | number}} EGP)</span>
                     <span *ngIf="isPaying">Loading Gateway...</span>
                 </button>
             </div>
@@ -154,6 +131,7 @@
     [eventBudget]="activeEvent.budget"
     [eventTypeName]="activeEvent.type"
     (close)="showAiStudio = false"
-    (planAccepted)="onAiPlanAccepted($event)">
+    (planAccepted)="onAiPlanAccepted($event)"
+    (eventUpdated)="loadEvents()">
 </app-event-studio>
 

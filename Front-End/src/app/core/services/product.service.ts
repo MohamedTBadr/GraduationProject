@@ -151,6 +151,11 @@ export class ProductService {
     );
   }
 
+  /** PATCH /Service/{productId}/status – toggles active/paused */
+  toggleStatus(productId: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/Service/${productId}/status`, {});
+  }
+
   /** DELETE /Service/{productId} */
   delete(productId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/Service/${productId}`);

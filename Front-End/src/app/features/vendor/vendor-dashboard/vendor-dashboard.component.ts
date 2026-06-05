@@ -2,13 +2,15 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { EventService } from '../../../core/services/event.service';
 import { VendorService } from '../../../core/services/vendor.service';
-import { ProductService } from '../../../core/services/product.service';
-import { EventResponseDto, ApiVendor, ApiProduct } from '../../../shared/types/api.interfaces';
-import { forkJoin } from 'rxjs';
+import { EventResponseDto, ApiVendor } from '../../../shared/types/api.interfaces';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ToastService } from '../../../shared/components/toast/toast.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-vendor-dashboard',
@@ -20,21 +22,23 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 export class VendorDashboardComponent implements OnInit {
   vendorName: string = 'Vendor';
   vendorId: string | null = null;
-  
-  // Stats
-  totalBookings = signal(0);
+
+  // Stats from vendor/events
   pendingRequests = signal(0);
-  totalRevenue = signal(0);
   averageRating = signal(0);
-  
+
   upcomingEvents = signal<EventResponseDto[]>([]);
-  pendingEvents = signal<any[]>([]); // Items waiting for approval
+  pendingEvents = signal<any[]>([]);
+
+  // Analytics report from backend
+  report: any = null;
+  loading = true;
 
   constructor(
     private authService: AuthService,
     private eventService: EventService,
     private vendorService: VendorService,
-    private productService: ProductService,
+    private http: HttpClient,
     private toastService: ToastService
   ) {}
 
@@ -50,39 +54,35 @@ export class VendorDashboardComponent implements OnInit {
   private loadDashboardData() {
     if (!this.vendorId) return;
 
-    // In a real scenario, we'd fetch events and filter items belonging to this vendor
-    // Or call a dedicated statistics endpoint if available.
-    // For now, we fetch events related to the user and vendor profile.
-    
     forkJoin({
-      vendor: this.vendorService.getById(this.vendorId),
-      events: this.eventService.getForVendor(this.vendorId)
+      vendor: this.vendorService.getById(this.vendorId).pipe(catchError(() => of(null))),
+      events: this.eventService.getForVendor(this.vendorId).pipe(catchError(() => of([]))),
+      analytics: this.http.post<any>(`${environment.apiUrl}/Dashboard/vendor-report`, {}).pipe(catchError(() => of(null)))
     }).subscribe({
       next: (data) => {
-        this.processVendorStats(data.vendor, data.events);
+        this.processVendorStats(data.vendor, data.events as EventResponseDto[]);
+        this.report = data.analytics;
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error loading dashboard data', err);
         this.toastService.show('Failed to load dashboard data.', 'error');
+        this.loading = false;
       }
     });
   }
 
-  private processVendorStats(vendor: ApiVendor, events: EventResponseDto[]) {
+  private processVendorStats(vendor: ApiVendor | null, events: EventResponseDto[]) {
     this.averageRating.set(vendor?.rating || 0);
-    
-    let bookingsCount = 0;
+
     let pendingCount = 0;
-    let revenue = 0;
     const upcoming: EventResponseDto[] = [];
     const pending: any[] = [];
 
     events.forEach(event => {
-      event.eventItems.forEach(item => {
+      event.eventItems?.forEach(item => {
         if (item.vendorId === this.vendorId) {
           if (item.itemStatus === 'Approved') {
-            bookingsCount++;
-            revenue += item.price * item.quantity;
             upcoming.push(event);
           } else if (item.itemStatus === 'Pending') {
             pendingCount++;
@@ -99,11 +99,16 @@ export class VendorDashboardComponent implements OnInit {
       });
     });
 
-    this.totalBookings.set(bookingsCount);
     this.pendingRequests.set(pendingCount);
-    this.totalRevenue.set(revenue);
-    this.upcomingEvents.set(upcoming.slice(0, 5)); // Show top 5
+    this.upcomingEvents.set(upcoming.slice(0, 5));
     this.pendingEvents.set(pending.slice(0, 5));
+  }
+
+  getHistoryHeight(revenue: number): number {
+    if (!this.report?.revenueHistory?.length) return 0;
+    const maxRevenue = Math.max(...this.report.revenueHistory.map((h: any) => h.revenue));
+    if (maxRevenue === 0) return 10;
+    return Math.max(10, Math.round((revenue / maxRevenue) * 100));
   }
 
   acceptRequest(request: any) {

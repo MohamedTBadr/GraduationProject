@@ -63,6 +63,7 @@ export class VendorService {
       ...v,
       id: v.userId || v.UserId || v.id || v.Id || v.vendorId || v.VendorId,
       name: v.businessName || v.BusinessName || v.name || v.Name || 'Unknown Vendor',
+      vendorTypeId: v.vendorTypeId || v.VendorTypeId || v.vendorType?.id || v.VendorType?.Id || '',
       vendorTypeName: v.vendorTypeName || v.VendorTypeName || v.serviceType || v.ServiceType || v.categoryName || v.CategoryName || 'Vendor',
       about: v.description || v.Description || v.about || v.About || '',
       status: v.status || v.Status || 'active',

@@ -1,93 +1,144 @@
-﻿<div class="vd-section active block">
-  <div class="vd-page-header">
-    <div><div class="vd-page-title">My Services</div><div class="vd-page-sub">Manage the services you offer clients. Changes go live immediately.</div></div>
-    <button class="vd-btn vd-btn-gold" (click)="openAddServiceModal()">+ Add Service</button>
+<div class="vd-section active block">
+
+  <!-- ── Catalog top-level tabs ── -->
+  <div class="vd-tab-bar mb-[8px]">
+    <button class="vd-tab" [class.active]="catalogTab === 'services'" (click)="setCatalogTab('services')">
+      <i class="bi bi-tools me-1"></i> My Services
+    </button>
+    <button class="vd-tab" [class.active]="catalogTab === 'packages'" (click)="setCatalogTab('packages')">
+      <i class="bi bi-gem me-1"></i> Packages
+    </button>
   </div>
 
-  <div class="vd-tab-bar">
-    <button class="vd-tab" [class.active]="activeTab === 'active'" (click)="setTab('active')">Active ({{ activeServices.length }})</button>
-    <button class="vd-tab" [class.active]="activeTab === 'paused'" (click)="setTab('paused')">Paused ({{ pausedServices.length }})</button>
-  </div>
+  <!-- ════════════ SERVICES TAB ════════════ -->
+  <ng-container *ngIf="catalogTab === 'services'">
+    <div class="vd-page-header">
+      <div>
+        <div class="vd-page-title">My Services</div>
+        <div class="vd-page-sub">Manage the services you offer clients. Changes go live immediately.</div>
+      </div>
+      <button class="vd-btn vd-btn-gold" (click)="openAddServiceModal()">+ Add Service</button>
+    </div>
 
-  <div class="p-[40px] text-center text-[#94a3b8]" *ngIf="loading">
-    Loading services...
-  </div>
+    <div class="vd-tab-bar">
+      <button class="vd-tab" [class.active]="activeTab === 'active'" (click)="setTab('active')">Active ({{ activeServices.length }})</button>
+      <button class="vd-tab" [class.active]="activeTab === 'paused'" (click)="setTab('paused')">Paused ({{ pausedServices.length }})</button>
+    </div>
 
-  <div *ngIf="!loading">
-    <div class="grid gap-[11px]">
-      <app-service-card 
-        *ngFor="let service of currentServices" 
-        [service]="service" 
-        (actionClick)="handleAction($event, service)">
-      </app-service-card>
-      
-      <div class="p-[40px] text-center text-[#94a3b8] text-[0.95rem] bg-[white] rounded-[12px] [border:1px_dashed_#cbd5e1]" *ngIf="currentServices.length === 0">
-        No services found.
+    <div class="p-[40px] text-center text-[#94a3b8]" *ngIf="loading">Loading services...</div>
+
+    <div *ngIf="!loading">
+      <div class="grid gap-[11px]">
+        <app-service-card
+          *ngFor="let service of currentServices"
+          [service]="service"
+          (actionClick)="handleAction($event, service)">
+        </app-service-card>
+        <div class="p-[40px] text-center text-[#94a3b8] text-[0.95rem] bg-[white] rounded-[12px] [border:1px_dashed_#cbd5e1]" *ngIf="currentServices.length === 0">
+          No services found.
+        </div>
       </div>
     </div>
-  </div>
+  </ng-container>
+
+  <!-- ════════════ PACKAGES TAB ════════════ -->
+  <ng-container *ngIf="catalogTab === 'packages'">
+    <div class="vd-page-header">
+      <div>
+        <div class="vd-page-title">Packages</div>
+        <div class="vd-page-sub">Bundle your services into attractive all-inclusive packages.</div>
+      </div>
+      <button class="vd-btn vd-btn-gold" (click)="openPackageModal()">+ Create Package</button>
+    </div>
+
+    <div class="p-[40px] text-center text-[#94a3b8]" *ngIf="packagesLoading">Loading packages...</div>
+
+    <div *ngIf="!packagesLoading">
+      <div class="grid gap-[11px]">
+
+        <div class="vd-svc-card" *ngFor="let pkg of packages">
+          <!-- Icon -->
+          <div class="vd-svc-icon bg-[#f8fafc] rounded-[12px] flex items-center justify-center w-[70px] h-[70px] shrink-0">
+            <i class="bi bi-gem" style="font-size:1.6rem;color:var(--gray)"></i>
+          </div>
+
+          <!-- Content -->
+          <div class="svc-content flex-1 px-[16px]">
+            <div class="vd-svc-name font-bold text-[#1e3a5f] text-[1.05rem] mb-[4px]">{{ pkg.name }}</div>
+
+            <div class="flex items-center gap-[10px] mb-[6px]">
+              <span class="vd-svc-price text-[#b34a6c] font-semibold text-[0.95rem]">{{ pkg.price | currency:'EGP' }}</span>
+              <span *ngIf="pkg.discount > 0" class="bg-[#dcfce7] text-[#166534] text-[0.75rem] font-semibold px-[8px] py-[2px] rounded-[20px]">{{ pkg.discount }}% off</span>
+            </div>
+
+            <div class="vd-svc-desc text-[#64748b] text-[0.85rem] mb-[8px]">{{ pkg.description }}</div>
+
+            <div class="flex flex-wrap gap-[6px]" *ngIf="pkg.services?.length">
+              <span *ngFor="let s of pkg.services"
+                class="bg-[#f1f5f9] text-[#475569] px-[10px] py-[2px] rounded-[50px] text-[0.8rem] font-medium">
+                {{ s.name }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="vd-svc-actions flex gap-[8px] items-center">
+            <button class="w-[34px] h-[34px] flex items-center justify-center rounded-full bg-[white] [border:1px_solid_#e2e8f0] text-[#334155] cursor-pointer hover:bg-[#f1f5f9]" title="Edit" (click)="openPackageModal(pkg)">
+              <i class="bi bi-pencil" style="font-size:0.9rem"></i>
+            </button>
+            <button class="w-[34px] h-[34px] flex items-center justify-center rounded-full bg-[white] [border:1px_solid_#fecaca] text-[#ef4444] cursor-pointer hover:bg-[#fef2f2]" title="Delete" (click)="deletePackage(pkg.id)">
+              <i class="bi bi-trash" style="font-size:0.9rem"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-[40px] text-center bg-[white] rounded-[12px] [border:1px_dashed_#cbd5e1]" *ngIf="packages.length === 0">
+          <i class="bi bi-gem text-[2rem] text-[#cbd5e1]"></i>
+          <div class="text-[#94a3b8] text-[0.95rem] mt-[10px]">No packages yet.</div>
+          <button class="vd-btn vd-btn-gold mt-[14px]" (click)="openPackageModal()">+ Create your first package</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
 </div>
 
-<!-- ADD/EDIT SERVICE MODAL -->
+<!-- ══════════ ADD / EDIT SERVICE MODAL ══════════ -->
 <div class="vd-modal-overlay" [class.open]="isAddServiceModalOpen">
   <div class="vd-modal max-w-[540px]">
     <button class="vd-modal-close" (click)="closeAddServiceModal()">&times;</button>
     <div class="vd-modal-title text-[1.6rem]">{{ editingId ? 'Edit Service' : 'Add New Service' }}</div>
     <div class="vd-modal-sub mb-[24px]">{{ editingId ? 'Update the details for this service.' : 'Create a new listing that will appear on your vendor profile.' }}</div>
-    
+
     <form [formGroup]="serviceForm" (ngSubmit)="createService()">
       <div class="vd-form-group">
         <label>Service Name *</label>
         <input class="rounded-[8px] text-[0.9rem] py-[12px] px-[14px] [border:1.5px_solid_var(--lgray)]" type="text" formControlName="name" placeholder="e.g. Wedding Stage Floral Design">
         <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('name')?.invalid && serviceForm.get('name')?.touched">Service Name is required</div>
       </div>
-      
-      <div class="vd-form-row mb-[16px]">
-        <div class="flex-1">
-          <label>Vendor Type *</label>
-          <select class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%] bg-[white] appearance-auto" formControlName="vendorTypeId">
-            <option value="" disabled selected>Select a vendor type</option>
-            <option *ngFor="let vt of vendorTypes" [value]="vt.id">{{ vt.name }}</option>
-          </select>
-          <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('vendorTypeId')?.invalid && serviceForm.get('vendorTypeId')?.touched">Vendor Type is required</div>
-        </div>
-        <div class="flex-1">
-          <label>Service Type *</label>
-          <app-service-type-dropdown formControlName="serviceTypeId" [vendorTypeId]="serviceForm.get('vendorTypeId')?.value"></app-service-type-dropdown>
-          <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('serviceTypeId')?.invalid && serviceForm.get('serviceTypeId')?.touched">Service Type is required</div>
-        </div>
-      </div>
 
       <div class="vd-form-group mb-[16px]">
-        <label>Service Classification (Optional)</label>
-        <div class="flex gap-[16px] mt-[8px]">
-          <label class="flex items-center gap-[8px] cursor-pointer">
-            <input type="radio" formControlName="classification" value="Personal" class="accent-[#b34a6c]"> Personal Events
-          </label>
-          <label class="flex items-center gap-[8px] cursor-pointer">
-            <input type="radio" formControlName="classification" value="Corporate" class="accent-[#b34a6c]"> Corporate Events
-          </label>
-        </div>
+        <label>Service Type *</label>
+        <app-service-type-dropdown formControlName="serviceTypeId"></app-service-type-dropdown>
+        <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('serviceTypeId')?.invalid && serviceForm.get('serviceTypeId')?.touched">Service Type is required</div>
       </div>
 
       <div class="vd-form-group mb-[16px]">
         <label>Supported Event Types</label>
         <div class="text-[0.85rem] text-[#64748b] mb-[8px]">Select the events you want to offer this service for.</div>
         <div class="flex flex-wrap gap-[8px]">
-          <button type="button" 
+          <button type="button"
                   *ngFor="let evt of eventTypes"
                   (click)="toggleEventType(evt.id)"
-                  [class.bg-[#b34a6c]]="serviceForm.get('eventTypeIds')?.value.includes(evt.id)"
-                  [class.text-[white]]="serviceForm.get('eventTypeIds')?.value.includes(evt.id)"
-                  [class.border-[#b34a6c]]="serviceForm.get('eventTypeIds')?.value.includes(evt.id)"
-                  [class.bg-[white]]="!serviceForm.get('eventTypeIds')?.value.includes(evt.id)"
-                  [class.text-[#475569]]="!serviceForm.get('eventTypeIds')?.value.includes(evt.id)"
-                  class="rounded-[50px] px-[16px] py-[6px] text-[0.9rem] font-medium border-[1.5px] border-[#cbd5e1] transition-all cursor-pointer hover:border-[#b34a6c]">
+                  [ngClass]="(serviceForm.get('eventTypeIds')?.value || []).includes(evt.id)
+                    ? 'bg-[#b34a6c] text-white border-[#b34a6c]'
+                    : 'bg-white text-[#475569] border-[#cbd5e1]'"
+                  class="rounded-[50px] px-[16px] py-[6px] text-[0.9rem] font-medium border-[1.5px] transition-all cursor-pointer">
             {{ evt.name }}
           </button>
         </div>
       </div>
-      
+
       <div class="vd-form-row mb-[16px]">
         <div class="flex-1">
           <label>Starting Price (EGP) *</label>
@@ -95,21 +146,21 @@
           <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('price')?.invalid && serviceForm.get('price')?.touched">Starting Price is required</div>
         </div>
       </div>
-      
+
       <div class="vd-form-group mb-[16px]">
         <label>Description *</label>
-        <textarea class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" formControlName="description" placeholder="Describe the service in detail — what's included, materials, setup time..." rows="4"></textarea>
+        <textarea class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" formControlName="description" placeholder="Describe the service in detail..." rows="4"></textarea>
         <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="serviceForm.get('description')?.invalid && serviceForm.get('description')?.touched">Description is required</div>
       </div>
-      
+
       <div class="vd-form-row">
         <div class="flex-1">
           <label>Setup Duration (hours)</label>
-          <input class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" type="number" min="0" formControlName="duration" placeholder="e.g. 5 hours minimum">
+          <input class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" type="number" min="0" formControlName="duration" placeholder="e.g. 5">
         </div>
         <div class="flex-1">
           <label>Lead Time Required (weeks)</label>
-          <input class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" type="number" min="0" formControlName="leadTime" placeholder="e.g. 2 weeks minimum">
+          <input class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" type="number" min="0" formControlName="leadTime" placeholder="e.g. 2">
         </div>
       </div>
 
@@ -117,20 +168,20 @@
         <label>Service Images</label>
         <app-image-upload (imagesChanged)="onImagesChanged($event)"></app-image-upload>
       </div>
-      
+
       <div class="vd-submit-bar [border:none] mt-[24px] pt-[0] flex justify-end gap-[10px]">
         <button type="button" class="vd-btn vd-btn-ghost rounded-[50px] font-semibold py-[10px] px-[24px]" (click)="closeAddServiceModal()">Cancel</button>
-        <button type="submit" class="vd-btn vd-btn-gold">{{ editingId ? 'Save Changes' : 'Create Service' }}</button>
+        <button type="submit" class="vd-btn vd-btn-gold" [disabled]="isSubmitting">{{ isSubmitting ? 'Saving...' : (editingId ? 'Save Changes' : 'Create Service') }}</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- DETAILS MODAL -->
+<!-- ══════════ SERVICE DETAIL MODAL ══════════ -->
 <div class="vd-modal-overlay" [class.open]="isDetailModalOpen">
   <div class="vd-modal max-w-[500px]" *ngIf="selectedService">
     <button class="vd-modal-close" (click)="closeDetailModal()">&times;</button>
-    
+
     <div class="flex items-center gap-[16px] mb-[20px]">
       <img class="w-[80px] h-[80px] rounded-[12px] object-cover shrink-0 [box-shadow:0_4px_12px_rgba(0,0,0,0.08)]" *ngIf="selectedService.imageUrl; else detailFallbackIcon" [src]="selectedService.imageUrl">
       <ng-template #detailFallbackIcon>
@@ -138,43 +189,27 @@
           <i class="bi bi-tools"></i>
         </div>
       </ng-template>
-      
       <div>
         <div class="text-[1.4rem] font-bold text-[#1e3a5f]">{{ selectedService.name }}</div>
         <div class="text-[#b34a6c] font-semibold text-[1.1rem] mt-[4px]">{{ selectedService.price | currency:'EGP' }}</div>
       </div>
     </div>
 
-    <!-- Additional Images Gallery Strip -->
-    <div class="flex gap-[8px] mb-[20px] pb-[8px] overflow-x-auto" *ngIf="false">
-       <!-- Replaced by a single image -->
-    </div>
-
-    <div class="text-[#64748b] mb-[20px] text-[0.95rem] leading-[1.6]">
-      {{ selectedService.description }}
-    </div>
+    <div class="text-[#64748b] mb-[20px] text-[0.95rem] leading-[1.6]">{{ selectedService.description }}</div>
 
     <div class="grid [grid-template-columns:1fr_1fr] gap-[12px] mb-[24px] p-[16px] bg-[#f8fafc] rounded-[12px]">
       <div>
         <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">STATUS</div>
-        <div class="font-semibold text-[#1e293b] capitalize">Active</div>
-      </div>
-      <div>
-        <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">VENDOR TYPE</div>
-        <div class="font-semibold text-[#1e293b]">{{ selectedService.vendorTypeName || 'Not specified' }}</div>
+        <div class="font-semibold text-[#1e293b] capitalize">{{ selectedService.status || 'Active' }}</div>
       </div>
       <div>
         <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">SERVICE TYPE</div>
         <div class="font-semibold text-[#1e293b]">{{ selectedService.serviceTypeName || 'Not specified' }}</div>
       </div>
-      <div>
-        <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">CLASSIFICATION</div>
-        <div class="font-semibold text-[#1e293b]">{{ selectedService.classification || 'Not specified' }}</div>
-      </div>
       <div class="col-span-2">
         <div class="text-[0.8rem] text-[#94a3b8] font-semibold mb-[4px]">SUPPORTED EVENTS</div>
         <div class="flex flex-wrap gap-[6px] mt-[4px]">
-          <span *ngIf="!selectedService.eventTypeIds || selectedService.eventTypeIds.length === 0" class="text-[0.85rem] text-[#94a3b8]">No specific events mapped</span>
+          <span *ngIf="!selectedService.eventTypeIds?.length" class="text-[0.85rem] text-[#94a3b8]">No specific events mapped</span>
           <span *ngFor="let evt of selectedService.eventTypeIds" class="bg-[#e2e8f0] text-[#475569] px-[10px] py-[2px] rounded-[50px] text-[0.8rem] font-medium capitalize">{{ evt }}</span>
         </div>
       </div>
@@ -183,5 +218,64 @@
     <div class="flex justify-end">
       <button class="vd-btn vd-btn-ghost rounded-[50px] font-semibold py-[10px] px-[24px]" (click)="closeDetailModal()">Close</button>
     </div>
+  </div>
+</div>
+
+<!-- ══════════ CREATE / EDIT PACKAGE MODAL ══════════ -->
+<div class="vd-modal-overlay" [class.open]="isPackageModalOpen">
+  <div class="vd-modal max-w-[560px]">
+    <button class="vd-modal-close" (click)="closePackageModal()">&times;</button>
+    <div class="vd-modal-title text-[1.6rem]">{{ editingPackageId ? 'Edit Package' : 'Create Package' }}</div>
+    <div class="vd-modal-sub mb-[24px]">{{ editingPackageId ? 'Update your package details.' : 'Bundle your services into a complete event solution.' }}</div>
+
+    <form [formGroup]="packageForm" (ngSubmit)="savePackage()">
+      <div class="vd-form-group">
+        <label>Package Name *</label>
+        <input class="rounded-[8px] text-[0.9rem] py-[12px] px-[14px] [border:1.5px_solid_var(--lgray)] w-[100%]" type="text" formControlName="name" placeholder="e.g. Full Wedding Package">
+        <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="packageForm.get('name')?.invalid && packageForm.get('name')?.touched">Package Name is required</div>
+      </div>
+
+      <div class="vd-form-group mt-[16px]">
+        <label>Description *</label>
+        <textarea class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" formControlName="description" rows="3" placeholder="What does this package include? Who is it for?"></textarea>
+        <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="packageForm.get('description')?.invalid && packageForm.get('description')?.touched">Description is required</div>
+      </div>
+
+      <div class="vd-form-row mt-[16px]">
+        <div class="flex-1">
+          <label>Total Price (EGP) *</label>
+          <input class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" type="number" min="0" formControlName="price" placeholder="e.g. 32000">
+          <div class="text-[#ef4444] text-[0.8rem] mt-[4px]" *ngIf="packageForm.get('price')?.invalid && packageForm.get('price')?.touched">Price is required</div>
+        </div>
+        <div class="flex-1">
+          <label>Discount (%)</label>
+          <input class="rounded-[8px] py-[12px] px-[14px] text-[0.9rem] [border:1.5px_solid_var(--lgray)] w-[100%]" type="number" min="0" max="100" formControlName="discount" placeholder="e.g. 10">
+        </div>
+      </div>
+
+      <div class="mt-[24px] mb-[8px]">
+        <label class="block font-semibold text-[#1e3a5f] text-[0.9rem] mb-[4px]">Include Services</label>
+        <div class="text-[0.85rem] text-[#64748b] mb-[12px]">Select which of your services to bundle into this package.</div>
+
+        <div *ngIf="services.length === 0" class="text-[0.85rem] text-[#94a3b8]">No services found. Add services first.</div>
+
+        <div class="flex flex-wrap gap-[8px]">
+          <button type="button"
+                  *ngFor="let s of services"
+                  (click)="toggleServiceForPackage(s.id)"
+                  [style.background]="isServiceSelectedForPackage(s.id) ? '#1e3a5f' : 'white'"
+                  [style.color]="isServiceSelectedForPackage(s.id) ? 'white' : '#475569'"
+                  [style.border-color]="isServiceSelectedForPackage(s.id) ? '#1e3a5f' : '#cbd5e1'"
+                  class="rounded-[50px] px-[16px] py-[6px] text-[0.85rem] font-medium border-[1.5px] transition-all cursor-pointer">
+            {{ s.name }}
+          </button>
+        </div>
+      </div>
+
+      <div class="vd-submit-bar [border:none] mt-[24px] pt-[0] flex justify-end gap-[10px]">
+        <button type="button" class="vd-btn vd-btn-ghost rounded-[50px] font-semibold py-[10px] px-[24px]" (click)="closePackageModal()">Cancel</button>
+        <button type="submit" class="vd-btn vd-btn-gold" [disabled]="isPackageSubmitting">{{ isPackageSubmitting ? 'Saving...' : (editingPackageId ? 'Save Changes' : 'Create Package') }}</button>
+      </div>
+    </form>
   </div>
 </div>

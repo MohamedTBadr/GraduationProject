@@ -19,7 +19,8 @@ export const VENDOR_ROUTES: Routes = [
     },
     {
         path: 'packages',
-        loadComponent: () => import('./packages/packages.component').then(m => m.PackagesComponent)
+        redirectTo: 'services',
+        pathMatch: 'full'
     },
     {
         path: 'portfolio',
@@ -27,7 +28,8 @@ export const VENDOR_ROUTES: Routes = [
     },
     {
         path: 'analytics',
-        loadComponent: () => import('./analytics/analytics.component').then(m => m.AnalyticsComponent)
+        redirectTo: '',
+        pathMatch: 'full'
     },
     {
         path: 'settings',

@@ -1,4 +1,5 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../../core/services/event.service';
 import { EventResponseDto } from '../../../shared/types/api.interfaces';
@@ -13,6 +14,7 @@ interface Booking {
   id: string;
   eventId: string;
   serviceId?: string;
+  vendorId?: string;
   vendorName: string;
   serviceType: string;
   eventRef: string;
@@ -59,7 +61,8 @@ export class MyBookingsComponent implements OnInit {
     private authService: AuthService,
     private toastService: ToastService,
     private orderService: OrderService,
-    private voucherService: VoucherService
+    private voucherService: VoucherService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -75,7 +78,7 @@ export class MyBookingsComponent implements OnInit {
     }
     this.userId = user.id;
 
-    this.eventService.getByUser(user.id).subscribe({
+    this.eventService.getByUser().subscribe({
       next: (events: EventResponseDto[]) => {
         let allBookings: Booking[] = [];
         
@@ -99,11 +102,14 @@ export class MyBookingsComponent implements OnInit {
                 id: item.id || `BK-${Math.floor(Math.random() * 10000)}`,
                 eventId: ev.id,
                 serviceId: item.serviceId,
+                vendorId: item.vendorId,
                 vendorName: item.vendorName || 'Unknown Vendor',
                 serviceType: item.serviceName || 'Service',
                 eventRef: `${ev.title} · ${new Date(ev.eventDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`,
                 status: localStatus,
-                price: `${item.price.toLocaleString()} EGP`,
+                price: localStatus === 'Pending' 
+                  ? `0 Paid (To be paid: ${item.price > 0 ? item.price.toLocaleString() + ' EGP' : 'TBD'})` 
+                  : `${item.price.toLocaleString()} EGP`,
                 icon: 'shop'
               });
             });
@@ -191,6 +197,32 @@ export class MyBookingsComponent implements OnInit {
   closeReportModal() {
     this.isReportModalOpen = false;
     this.selectedBookingRef = '';
+  }
+
+  messageVendor(bk: Booking) {
+    if (!bk.vendorId) {
+      this.toastService.show('Vendor contact information is not available.', 'error');
+      return;
+    }
+    this.router.navigate(['/user/messages'], { queryParams: { vendorId: bk.vendorId } });
+  }
+
+  cancelBooking(bk: Booking) {
+    const confirmed = window.confirm(
+      `Are you sure you want to cancel your booking with "${bk.vendorName}"?\n\nThis action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    this.eventService.updateItemStatus(bk.eventId, bk.id, 'Cancelled').subscribe({
+      next: () => {
+        this.toastService.show('Booking has been cancelled successfully.', 'success');
+        this.loadBookings();
+      },
+      error: (err) => {
+        console.error('Failed to cancel booking', err);
+        this.toastService.show('Failed to cancel the booking. Please try again.', 'error');
+      }
+    });
   }
 
   loadVouchers() {

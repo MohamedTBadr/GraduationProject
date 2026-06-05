@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { ChatMessage, Conversation } from '../../../shared/types/api.interfaces';
@@ -28,10 +29,13 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   private messageSub?: Subscription;
 
+  private pendingVendorId: string | null = null;
+
   constructor(
     private authService: AuthService,
     private chatService: ChatService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private route: ActivatedRoute
   ) {}
 
   get filteredConversations(): Conversation[] {
@@ -45,6 +49,13 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.currentUserId = this.authService.user()?.id || '';
+
+    // Check for vendorId deep-link from My Bookings
+    this.route.queryParams.subscribe(params => {
+      if (params['vendorId']) {
+        this.pendingVendorId = params['vendorId'];
+      }
+    });
 
     // Start SignalR connection for real-time messages
     this.chatService.startConnection();
@@ -78,6 +89,17 @@ export class MessagesComponent implements OnInit, OnDestroy {
       next: (data) => {
         this.conversations = data || [];
         this.loadingConversations = false;
+
+        // Auto-select vendor if navigated from My Bookings
+        if (this.pendingVendorId) {
+          const match = this.conversations.find(c => c.userId === this.pendingVendorId);
+          if (match) {
+            this.selectChat(match);
+            this.pendingVendorId = null;
+            return;
+          }
+        }
+
         // Auto-select first conversation if none selected
         if (!this.selectedConversation && this.conversations.length > 0) {
           this.selectChat(this.conversations[0]);

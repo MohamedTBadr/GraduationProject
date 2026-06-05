@@ -1,13 +1,19 @@
 ﻿<div class="vendor-card" [routerLink]="['/vendor', vendor.id]">
     <div class="vc-photo">
-        <div class="vc-photo-inner" [style.background]="getGradient(vendor.id)">{{vendor.name.charAt(0)}}</div>
+        <div class="vc-photo-inner" [style.background]="getGradient(vendor.id)">
+            <span class="vc-initial">{{vendor.name.charAt(0)}}</span>
+        </div>
         <div class="vc-top-row">
             <span class="vc-cat-badge">{{vendor.vendorTypeName || 'Vendor'}}</span>
             <div class="flex gap-[7px]">
                 <button class="compare-btn" [class.active]="compareService.isInCompare(vendor.id)"
-                    (click)="onToggleCompare($event)">️</button>
+                    (click)="onToggleCompare($event)" title="Compare">
+                    <i class="bi bi-bar-chart-steps"></i>
+                </button>
                 <button class="vc-fav-btn" [class.active]="isFavorite()"
-                    (click)="onToggleFavorite($event)"></button>
+                    (click)="onToggleFavorite($event)" title="Save">
+                    <i class="bi" [class.bi-heart]="!isFavorite()" [class.bi-heart-fill]="isFavorite()"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -15,9 +21,12 @@
         <div class="vc-name">{{vendor.name}}</div>
         <div class="vc-loc" *ngIf="vendor.location"><i class="bi bi-geo-alt-fill"></i> {{vendor.location}}</div>
         <div class="vc-rating-row">
-            <span class="stars text-[var(--gold)] text-[.8rem]"></span>
-            <span class="font-bold text-[.85rem] text-[var(--navy)] ml-[4px]">{{vendor.rating || 'New'}}</span>
-            <span class="vc-review-count"></span>
+            <ng-container *ngIf="vendor.rating">
+                <i class="bi bi-star-fill" style="color:var(--gold);font-size:.8rem" *ngFor="let s of [1,2,3,4,5]; let i = index"
+                   [style.color]="(i+1) <= (vendor.rating || 0) ? 'var(--gold)' : 'var(--lgray)'"></i>
+                <span class="font-bold text-[.85rem] text-[var(--navy)] ml-[4px]">{{vendor.rating}}</span>
+            </ng-container>
+            <span *ngIf="!vendor.rating" class="vc-new-badge">New</span>
         </div>
         <div class="vc-footer">
             <div class="vc-price"><strong>Ask for price</strong></div>

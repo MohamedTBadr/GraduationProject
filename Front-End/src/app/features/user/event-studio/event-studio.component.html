@@ -1,4 +1,4 @@
-﻿<div class="ai-studio-overlay">
+<div class="ai-studio-overlay">
   <div class="ai-studio-modal">
     <div class="ai-header">
       <div class="ai-title">
@@ -66,16 +66,15 @@
             </div>
           </div>
 
-          <h4 class="mt-4 mb-3">Recommended Vendors <small class="text-muted text-studio-instruction">(Click to select/deselect)</small></h4>
+          <h4 class="mt-4 mb-3">Recommended Vendors <small class="text-muted text-studio-instruction">(Click to view details)</small></h4>
           <div class="ai-vendor-list">
             <div class="ai-vendor-item" *ngFor="let item of aiPlan.selected_items"
-                 [class.selected]="item.selected"
-                 (click)="toggleItemSelection(item)">
+                 (click)="openServiceInExplore(item.ServiceId || item.serviceId)">
               <div class="avi-header">
                 <span class="avi-cat">{{item.category}}</span>
                 <div class="avi-price-wrap">
                   <span class="avi-price">{{item.price | number}} EGP</span>
-                  <input type="checkbox" class="avi-checkbox" [checked]="item.selected" />
+                  <i class="bi bi-box-arrow-up-right text-gold text-xs ml-2"></i>
                 </div>
               </div>
               <div class="avi-name">{{item.vendor}}</div>
@@ -96,10 +95,13 @@
           <h4 class="section-title">Recommended For You (Based on past hosts)</h4>
           <p class="section-desc">Hosts organizing similar events also selected these services:</p>
           <div class="rec-list">
-            <div class="rec-card" *ngFor="let rec of recommendations">
+            <div class="rec-card rec-card--clickable"
+                 *ngFor="let rec of recommendations"
+                 (click)="openServiceInExplore(rec.ServiceId)">
               <div class="rec-header">
                 <span class="rec-service-name">{{ rec.ServiceName }}</span>
                 <span class="rec-vendor-name">by {{ rec.VendorName }}</span>
+                <i class="bi bi-box-arrow-up-right rec-open-icon"></i>
               </div>
               <div class="rec-reason">"{{ rec.Reasoning }}"</div>
             </div>
@@ -109,40 +111,125 @@
 
       <!-- 2. SMART BUDGET ALLOCATION TAB -->
       <div *ngIf="activeTab === 'budget'">
+        <!-- Interactive Parameters Playground Panel -->
+        <div class="budget-playground-panel">
+          <div class="playground-row">
+            <div class="playground-field">
+              <label class="playground-label"><i class="bi bi-wallet2"></i> Target Budget (EGP)</label>
+              <input type="number" [(ngModel)]="selectedBudget" class="playground-input" placeholder="e.g. 50000" />
+            </div>
+            <div class="playground-field">
+              <label class="playground-label"><i class="bi bi-tags"></i> Event Type</label>
+              <select [(ngModel)]="selectedEventType" class="playground-select">
+                <option *ngFor="let type of eventTypes" [value]="type.name">{{ type.name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="playground-actions">
+            <button class="btn btn-gold btn-playground-calc" (click)="recalculateBudget()" [disabled]="loadingBudget || isSavingBudget">
+              <i class="bi bi-stars"></i> Recalculate Allocation
+            </button>
+            <button class="btn btn-outline btn-playground-apply" *ngIf="budgetAllocation" (click)="saveBudgetToEvent()" [disabled]="loadingBudget || isSavingBudget">
+              <i class="bi" [ngClass]="isSavingBudget ? 'bi-hourglass-split' : 'bi-check-circle'"></i> 
+              {{ isSavingBudget ? 'Applying...' : 'Apply & Save to Event' }}
+            </button>
+          </div>
+        </div>
+
         <!-- Loading State -->
         <div class="ai-generating" *ngIf="loadingBudget">
           <div class="loader-pulse"></div>
           <h3>Calculating Optimal Budget Breakdown...</h3>
-          <p>Analyzing industry benchmarks for {{ eventTypeName }} events...</p>
+          <p>Analyzing industry benchmarks for {{ selectedEventType }} events...</p>
         </div>
 
         <!-- Error State -->
-        <div class="ai-error" *ngIf="budgetError">
+        <div class="ai-error" *ngIf="budgetError && !loadingBudget">
           <div class="error-icon"><i class="bi bi-exclamation-triangle"></i></div>
           <h3>Budget Analysis Failed</h3>
           <p>{{budgetError}}</p>
           <button class="btn btn-outline mt-3" (click)="loadBudgetAllocation()">Retry Analysis</button>
         </div>
 
+        <!-- Empty / Not Yet Loaded State -->
+        <div class="ai-initial" *ngIf="!loadingBudget && !budgetAllocation && !budgetError">
+          <h3>Smart Budget Breakdown</h3>
+          <p>Configure your target budget and event type above to get an AI-powered breakdown of how to allocate your funds across all key categories.</p>
+          <button class="btn btn-gold btn-lg mt-4" (click)="loadBudgetAllocation()">
+            <i class="bi bi-pie-chart"></i> Generate Budget Plan
+          </button>
+        </div>
+
         <!-- Budget Result State -->
         <div class="budget-result" *ngIf="!loadingBudget && budgetAllocation">
-          <div class="plan-summary-card">
-            <h4><i class="bi bi-pie-chart"></i> Smart Budget Breakdown</h4>
-            <p>Here is the recommended allocation of your <strong>{{ budgetAllocation.totalBudget | number }} EGP</strong> budget for a premium <strong>{{ budgetAllocation.eventType }}</strong> experience.</p>
+          <div class="plan-summary-card mb-4">
+            <h4><i class="bi bi-patch-check-fill text-gold"></i> Allocation Strategy Generated</h4>
+            <p>Here is the recommended allocation of your <strong>{{ budgetAllocation.totalBudget | number }} EGP</strong> budget for a <strong>{{ budgetAllocation.eventType }}</strong> experience.</p>
           </div>
 
-          <div class="budget-alloc-list mt-4">
-            <div class="budget-alloc-item" *ngFor="let cat of budgetAllocation.categories">
+          <!-- Dynamic SVG Donut Chart and Interactive Visualization -->
+          <div class="budget-visualization-box mb-4">
+            <div class="donut-chart-wrapper">
+              <svg width="180" height="180" viewBox="0 0 120 120" class="donut-chart">
+                <circle cx="60" cy="60" r="40" class="donut-bg"></circle>
+                <circle *ngFor="let seg of getDonutSegments(); let idx = index"
+                        cx="60" cy="60" r="40"
+                        class="donut-segment"
+                        [style.stroke]="seg.color"
+                        [style.strokeDasharray]="seg.strokeDashArray"
+                        [style.strokeDashoffset]="seg.strokeDashOffset"
+                        [class.hovered]="hoveredSegment === seg.category"
+                        (mouseenter)="hoveredSegment = seg.category"
+                        (mouseleave)="hoveredSegment = null"
+                        transform="rotate(-90 60 60)">
+                </circle>
+              </svg>
+              <div class="donut-center-text">
+                <span class="center-total">{{ budgetAllocation.totalBudget | number }}</span>
+                <span class="center-label">EGP Total</span>
+              </div>
+            </div>
+            
+            <!-- Donut Chart Legend Grid -->
+            <div class="donut-legend-grid">
+              <div class="legend-item" *ngFor="let seg of getDonutSegments(); let idx = index"
+                   [class.hovered]="hoveredSegment === seg.category"
+                   (mouseenter)="hoveredSegment = seg.category"
+                   (mouseleave)="hoveredSegment = null">
+                <span class="legend-color-dot" [style.backgroundColor]="seg.color"></span>
+                <div class="legend-info">
+                  <span class="legend-name">{{ seg.category }}</span>
+                  <span class="legend-value">{{ seg.percentage | number:'1.0-1' }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categorized List cards -->
+          <div class="budget-alloc-list">
+            <div class="budget-alloc-item budget-alloc-item--clickable" 
+                 *ngFor="let cat of budgetAllocation.categories; let i = index"
+                 (click)="openCategoryInExplore(cat.name)"
+                 [class.highlighted]="hoveredSegment === cat.name"
+                 (mouseenter)="hoveredSegment = cat.name"
+                 (mouseleave)="hoveredSegment = null"
+                 [style.borderLeftColor]="getCategoryColor(i)">
+              
               <div class="bai-header">
-                <span class="bai-name">{{ cat.name }}</span>
+                <span class="bai-name">
+                  {{ cat.name }}
+                  <i class="bi bi-box-arrow-up-right text-gold text-xs ml-1"></i>
+                </span>
                 <div class="bai-values">
-                  <span class="bai-pct">{{ cat.percentage | number:'1.0-1' }}%</span>
+                  <span class="bai-pct" [style.color]="getCategoryColor(i)" [style.borderColor]="getCategoryColor(i)" [style.backgroundColor]="getCategoryColor(i) + '15'">
+                    {{ cat.percentage | number:'1.0-1' }}%
+                  </span>
                   <span class="bai-amt">{{ cat.amount | number }} EGP</span>
                 </div>
               </div>
               
               <div class="budget-progress-bar">
-                <div class="budget-fill" [style.width]="cat.percentage + '%'"></div>
+                <div class="budget-fill" [style.width]="cat.percentage + '%'" [style.background]="getCategoryColor(i)"></div>
               </div>
               
               <p class="bai-desc" *ngIf="cat.description">{{ cat.description }}</p>
@@ -166,39 +253,189 @@
         </div>
 
         <!-- Error State -->
-        <div class="ai-error" *ngIf="timelineError">
+        <div class="ai-error" *ngIf="timelineError && !loadingTimeline">
           <div class="error-icon"><i class="bi bi-exclamation-triangle"></i></div>
           <h3>Timeline Generation Failed</h3>
           <p>{{timelineError}}</p>
           <button class="btn btn-outline mt-3" (click)="loadTimeline()">Retry Generation</button>
         </div>
 
+        <!-- Empty / Not Yet Loaded State -->
+        <div class="ai-initial" *ngIf="!loadingTimeline && !timelineData && !timelineError">
+          <h3>Day-Of Timeline Planner</h3>
+          <p>Generate a detailed minute-by-minute event schedule based on your booked services.</p>
+          <button class="btn btn-gold btn-lg mt-4" (click)="loadTimeline()">
+            <i class="bi bi-clock"></i> Generate Timeline
+          </button>
+        </div>
+
         <!-- Timeline Result State -->
         <div class="timeline-result" *ngIf="!loadingTimeline && timelineData">
-          <div class="plan-summary-card">
-            <h4><i class="bi bi-clock"></i> Day-Of Chronological Timeline</h4>
-            <p>Minute-by-minute scheduling proposed by AI planner for: <strong>{{ timelineData.eventTitle }}</strong></p>
-          </div>
 
-          <!-- Chronological Timeline Chain -->
-          <div class="timeline-chain mt-4">
-            <div class="timeline-node" *ngFor="let item of timelineData.timeline">
-              <div class="tn-time-bubble">
-                {{ item.time }}
+          <!-- Header + Progress -->
+          <div class="plan-summary-card timeline-header-card">
+            <div class="timeline-header-top">
+              <div>
+                <h4><i class="bi bi-calendar-check"></i> {{ timelineData.eventTitle }}</h4>
+                <p class="timeline-subtitle">AI-generated day-of schedule &middot; <strong>{{ localTimeline.length }}</strong> activities</p>
               </div>
-              <div class="tn-card">
-                <div class="tn-header">
-                  <span class="tn-activity">{{ item.activity }}</span>
-                  <span class="importance-tag tag-{{ item.importance.toLowerCase() }}">
-                    {{ item.importance }}
-                  </span>
+              <div class="timeline-progress-wrap">
+                <div class="timeline-progress-label">
+                  <span>{{ completedCount() }} / {{ localTimeline.length }} done</span>
+                  <span class="tpl-pct">{{ localTimeline.length ? ((completedCount() / localTimeline.length) * 100 | number:'1.0-0') : 0 }}%</span>
                 </div>
-                <div class="tn-meta">
-                  <span><i class="bi bi-clock"></i> Duration: {{ item.duration }}</span>
+                <div class="timeline-progress-bar">
+                  <div class="timeline-progress-fill"
+                       [style.width]="(localTimeline.length ? (completedCount() / localTimeline.length) * 100 : 0) + '%'">
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- Toolbar: Search + Filter + Buttons -->
+          <div class="timeline-toolbar">
+            <div class="tl-search-wrap">
+              <i class="bi bi-search tl-search-icon"></i>
+              <input class="tl-search-input" type="text" placeholder="Search activities..."
+                     [(ngModel)]="timelineSearch" id="timeline-search-input"/>
+            </div>
+            <div class="tl-filter-group">
+              <button class="tl-filter-btn" [class.active]="importanceFilter === 'All'"
+                      (click)="importanceFilter = 'All'">All</button>
+              <button class="tl-filter-btn filter-high" [class.active]="importanceFilter === 'High'"
+                      (click)="importanceFilter = 'High'">High</button>
+              <button class="tl-filter-btn filter-medium" [class.active]="importanceFilter === 'Medium'"
+                      (click)="importanceFilter = 'Medium'">Medium</button>
+              <button class="tl-filter-btn filter-low" [class.active]="importanceFilter === 'Low'"
+                      (click)="importanceFilter = 'Low'">Low</button>
+            </div>
+            <div class="tl-action-group">
+              <button class="tl-action-btn" (click)="showAddForm = !showAddForm" title="Add activity">
+                <i class="bi bi-plus-circle"></i> Add
+              </button>
+              <button class="tl-action-btn" (click)="printTimeline()" title="Print timeline">
+                <i class="bi bi-printer"></i> Print
+              </button>
+              <button class="tl-action-btn tl-regen-btn" (click)="loadTimeline()" title="Regenerate">
+                <i class="bi bi-arrow-clockwise"></i> Regenerate
+              </button>
+            </div>
+          </div>
+
+          <!-- Add Activity Form -->
+          <div class="add-activity-form" *ngIf="showAddForm">
+            <h5><i class="bi bi-plus-circle-fill"></i> Add Custom Activity</h5>
+            <div class="add-form-grid">
+              <div class="add-form-field">
+                <label>Time</label>
+                <input type="text" [(ngModel)]="newActivity.time" placeholder="e.g. 10:30 AM" id="new-activity-time"/>
+              </div>
+              <div class="add-form-field add-form-field--wide">
+                <label>Activity</label>
+                <input type="text" [(ngModel)]="newActivity.activity" placeholder="Activity description" id="new-activity-name"/>
+              </div>
+              <div class="add-form-field">
+                <label>Duration</label>
+                <input type="text" [(ngModel)]="newActivity.duration" placeholder="e.g. 30 min" id="new-activity-duration"/>
+              </div>
+              <div class="add-form-field">
+                <label>Importance</label>
+                <select [(ngModel)]="newActivity.importance" id="new-activity-importance">
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
+            <div class="add-form-actions">
+              <button class="btn btn-gold btn-sm" (click)="addCustomActivity()"><i class="bi bi-check2"></i> Add to Timeline</button>
+              <button class="btn btn-outline btn-sm" (click)="showAddForm = false">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Empty filter result -->
+          <div class="tl-empty-filter" *ngIf="getFilteredTimeline().length === 0">
+            <i class="bi bi-funnel"></i>
+            <p>No activities match your current filter.</p>
+          </div>
+
+          <!-- Chronological Timeline Chain -->
+          <div class="timeline-chain mt-3">
+            <ng-container *ngFor="let item of getFilteredTimeline(); let i = index">
+              <!-- Resolve original index -->
+              <ng-container [ngTemplateOutlet]="timelineItemTpl"
+                            [ngTemplateOutletContext]="{ item: item, origIdx: getOriginalIndex(item) }">
+              </ng-container>
+            </ng-container>
+          </div>
+
+          <!-- Item Template -->
+          <ng-template #timelineItemTpl let-item="item" let-origIdx="origIdx">
+            <!-- Inline Edit Mode -->
+            <div class="timeline-node editing" *ngIf="editingIndex === origIdx">
+              <div class="tn-time-bubble edit-bubble"><i class="bi bi-pencil"></i></div>
+              <div class="tn-card tn-edit-card">
+                <div class="add-form-grid">
+                  <div class="add-form-field">
+                    <label>Time</label>
+                    <input type="text" [(ngModel)]="editDraft.time" id="edit-time-{{origIdx}}"/>
+                  </div>
+                  <div class="add-form-field add-form-field--wide">
+                    <label>Activity</label>
+                    <input type="text" [(ngModel)]="editDraft.activity" id="edit-activity-{{origIdx}}"/>
+                  </div>
+                  <div class="add-form-field">
+                    <label>Duration</label>
+                    <input type="text" [(ngModel)]="editDraft.duration" id="edit-duration-{{origIdx}}"/>
+                  </div>
+                  <div class="add-form-field">
+                    <label>Importance</label>
+                    <select [(ngModel)]="editDraft.importance" id="edit-importance-{{origIdx}}">
+                      <option value="High">High</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Low">Low</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="add-form-actions mt-2">
+                  <button class="btn btn-gold btn-sm" (click)="saveEditedItem()"><i class="bi bi-check2"></i> Save</button>
+                  <button class="btn btn-outline btn-sm" (click)="cancelEditing()">Cancel</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Normal View Mode -->
+            <div class="timeline-node" *ngIf="editingIndex !== origIdx" [class.completed]="isCompleted(origIdx)">
+              <div class="tn-time-bubble" [class.done-bubble]="isCompleted(origIdx)">
+                <span *ngIf="!isCompleted(origIdx)">{{ item.time }}</span>
+                <i class="bi bi-check-lg" *ngIf="isCompleted(origIdx)"></i>
+              </div>
+              <div class="tn-card">
+                <div class="tn-header">
+                  <label class="tn-check-label">
+                    <input type="checkbox" class="tn-checkbox" [checked]="isCompleted(origIdx)"
+                           (change)="toggleItemCompleted(origIdx)"/>
+                    <span class="tn-activity" [class.strikethrough]="isCompleted(origIdx)">{{ item.activity }}</span>
+                  </label>
+                  <div class="tn-tags">
+                    <span class="importance-tag tag-{{ item.importance.toLowerCase() }}">{{ item.importance }}</span>
+                  </div>
+                </div>
+                <div class="tn-meta">
+                  <span><i class="bi bi-clock"></i> {{ item.duration }}</span>
+                </div>
+                <div class="tn-actions">
+                  <button class="tn-btn-edit" (click)="startEditingItem(origIdx)" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="tn-btn-delete" (click)="deleteTimelineItem(origIdx)" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ng-template>
 
           <div class="timeline-notes-box mt-4" *ngIf="timelineData.planningNotes">
             <h4><i class="bi bi-journal-text"></i> AI Coordinator Planning Notes</h4>
@@ -212,9 +449,6 @@
     <!-- Modal Footer -->
     <div class="ai-footer">
       <button class="btn btn-outline" (click)="close.emit()">Close Studio</button>
-      <button class="btn btn-gold" *ngIf="activeTab === 'package' && aiPlan" (click)="acceptPlan()">
-        Accept & Add Vendors
-      </button>
     </div>
   </div>
 </div>

@@ -9,8 +9,8 @@
   <div class="vendor-identity">
     <div class="v-avatar">W</div>
     <div class="v-details">
-      <div class="v-name">White Rose Decor</div>
-      <div class="v-cat">Decoration · New Cairo</div>
+      <div class="v-name">{{vendorName}}</div>
+      <div class="v-cat">{{vendorCategory}} · {{vendorLocation}}</div>
       <div class="v-badge">
         <i class="bi bi-patch-check-fill"></i> Verified
       </div>
@@ -41,10 +41,7 @@
     <div class="nav-group">
       <div class="group-title">Catalog</div>
       <a routerLink="/vendor-dashboard/services" routerLinkActive="active">
-        <i class="bi bi-tools icon"></i>My Services
-      </a>
-      <a routerLink="/vendor-dashboard/packages" routerLinkActive="active">
-        <i class="bi bi-gem icon"></i>Packages
+        <i class="bi bi-tools icon"></i>Services & Packages
       </a>
       <a routerLink="/vendor-dashboard/portfolio" routerLinkActive="active">
         <i class="bi bi-images icon"></i>Portfolio

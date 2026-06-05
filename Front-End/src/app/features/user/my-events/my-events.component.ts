@@ -1,20 +1,18 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
 import { EventItemResponseDto, EventResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PaymentService } from '../../../core/services/payment.service';
-import { EventStudioComponent } from '../event-studio/event-studio.component';
 import { OrderService } from '../../../core/services/order.service';
-import { VoucherService } from '../../../core/services/voucher.service';
+import { EventStudioComponent } from '../event-studio/event-studio.component';
 
 @Component({
   selector: 'app-my-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, EventStudioComponent],
+  imports: [CommonModule, RouterLink, EventStudioComponent],
   templateUrl: './my-events.component.html',
   styleUrls: ['./my-events.component.scss']
 })
@@ -27,21 +25,14 @@ export class MyEventsComponent implements OnInit {
   /** Sub-tab under event detail: all line items vs vendor-approved only */
   eventServicesTab: 'all' | 'approved' = 'all';
 
-  // Voucher / discount state
-  voucherCode = '';
-  appliedVoucherCode = '';
-  appliedDiscountPercent = 0;
-  isValidatingVoucher = false;
-
   constructor(
-    private route: ActivatedRoute, 
+    private route: ActivatedRoute,
     private router: Router,
     private eventService: EventService,
     private authService: AuthService,
     private toastService: ToastService,
     private paymentService: PaymentService,
-    private orderService: OrderService,
-    private voucherService: VoucherService
+    private orderService: OrderService
   ) {}
 
   ngOnInit() {
@@ -62,7 +53,7 @@ export class MyEventsComponent implements OnInit {
       return;
     }
 
-    this.eventService.getByUser(user.id).subscribe({
+    this.eventService.getByUser().subscribe({
       next: (data: EventResponseDto[]) => {
         this.events = data.map(ev => this.mapEvent(ev));
         if (this.events.length > 0) {
@@ -85,7 +76,33 @@ export class MyEventsComponent implements OnInit {
     if (!id) return;
     this.eventService.getById(id).subscribe({
       next: (res: any) => {
-        const fullEvent = res?.value ?? res;
+        const raw = res?.value ?? res?.Value ?? res;
+        const fullEvent = {
+          id: raw.id ?? raw.Id,
+          userId: raw.userId ?? raw.UserId,
+          userName: raw.userName ?? raw.UserName,
+          title: raw.title ?? raw.Title,
+          eventTypeName: raw.eventTypeName ?? raw.EventTypeName,
+          eventDate: raw.eventDate ?? raw.EventDate,
+          totalBudget: raw.totalBudget ?? raw.TotalBudget ?? 0,
+          guestCount: raw.guestCount ?? raw.GuestCount ?? 0,
+          notes: raw.notes ?? raw.Notes,
+          eventStatus: raw.eventStatus ?? raw.EventStatus,
+          location: raw.location ?? raw.Location,
+          eventItems: (raw.eventItems ?? raw.EventItems ?? []).map((item: any) => ({
+            id: item.id ?? item.Id,
+            eventId: item.eventId ?? item.EventId,
+            serviceId: item.serviceId ?? item.ServiceId,
+            serviceImage: item.serviceImage ?? item.ServiceImage,
+            serviceName: item.serviceName ?? item.ServiceName,
+            price: item.price ?? item.Price ?? 0,
+            vendorId: item.vendorId ?? item.VendorId,
+            vendorName: item.vendorName ?? item.VendorName,
+            quantity: item.quantity ?? item.Quantity ?? 1,
+            itemStatus: item.itemStatus ?? item.ItemStatus,
+            rejectionReason: item.rejectionReason ?? item.RejectionReason
+          }))
+        };
         const index = this.events.findIndex(e => e.id === id);
         if (index !== -1) {
           this.events[index] = this.mapEvent(fullEvent);
@@ -139,11 +156,6 @@ export class MyEventsComponent implements OnInit {
       return items.filter(i => i.itemStatus === 'Approved');
     }
     return items;
-  }
-
-  get hasApprovedServices(): boolean {
-    const items = this.activeEvent?.eventItems as EventItemResponseDto[] | undefined;
-    return !!items?.some(i => i.itemStatus === 'Approved');
   }
 
   itemBadgeClass(item: EventItemResponseDto): string {
@@ -237,55 +249,17 @@ export class MyEventsComponent implements OnInit {
     processNext(0);
   }
 
-  applyVoucher() {
-    if (!this.voucherCode.trim()) return;
-    this.isValidatingVoucher = true;
-    this.voucherService.validateVoucher(this.voucherCode.trim()).subscribe({
-      next: (res) => {
-        this.isValidatingVoucher = false;
-        if (res.isValid && res.discountPercent) {
-          this.appliedVoucherCode = this.voucherCode.trim();
-          this.appliedDiscountPercent = res.discountPercent;
-          this.toastService.show(`${res.discountPercent}% discount applied!`, 'success');
-        } else {
-          this.appliedVoucherCode = '';
-          this.appliedDiscountPercent = 0;
-          this.toastService.show(res.errorMessage || 'Invalid or expired voucher.', 'error');
-        }
-      },
-      error: () => {
-        this.isValidatingVoucher = false;
-        this.toastService.show('Could not validate voucher. Try again.', 'error');
-      }
-    });
-  }
+  payNow() {
+    if (!this.activeEvent || this.spent === 0) return;
 
-  removeVoucher() {
-    this.appliedVoucherCode = '';
-    this.appliedDiscountPercent = 0;
-    this.voucherCode = '';
-    this.toastService.show('Voucher removed.', 'info');
-  }
-
-  get discountedAmount(): number {
-    if (this.appliedDiscountPercent === 0) return this.spent * 0.25;
-    const full = this.spent * 0.25;
-    return full - (full * this.appliedDiscountPercent / 100);
-  }
-
-  payDeposit() {
-    if (!this.activeEvent || this.spent === 0 || !this.hasApprovedServices) return;
-    
     this.isPaying = true;
     const user = this.authService.user();
-    
     const nameParts = user?.name ? user.name.split(' ') : ['User', 'Name'];
 
     const orderPayload = {
       userId: user?.id || '',
       eventId: this.activeEvent.id,
       currency: 'EGP',
-      voucherCode: this.appliedVoucherCode || undefined,
       shippingAddress: {
         street: 'Default Street',
         city: 'Cairo',
@@ -303,15 +277,14 @@ export class MyEventsComponent implements OnInit {
           return;
         }
         this.paymentService.initiatePaymob({
-          amount: this.discountedAmount,
+          amount: this.spent,
           billing: {
             first_name: nameParts[0] || 'User',
             last_name: nameParts[1] || 'Name',
             email: user?.email || 'test@example.com',
             phone_number: '+201234567890'
           },
-          orderId: result.value.id,
-          voucherCode: this.appliedVoucherCode || undefined
+          orderId: result.value.id
         }).subscribe({
           next: (res) => {
             this.isPaying = false;
@@ -331,6 +304,7 @@ export class MyEventsComponent implements OnInit {
       }
     });
   }
+
 }
 
 
