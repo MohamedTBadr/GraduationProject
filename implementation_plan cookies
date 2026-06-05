@@ -1,0 +1,77 @@
+# Secure Refresh Token Cookie Migration Plan
+
+Migrate the Refresh Token storage from local storage (`localStorage`) to an `HttpOnly`, `Secure`, and `SameSite` cookie to mitigate XSS (Cross-Site Scripting) vulnerabilities.
+
+## User Review Required
+
+> [!IMPORTANT]
+> The backend CORS configuration in `Program.cs` is already configured with `.AllowCredentials()` and `.WithOrigins("http://localhost:4200")`, which allows credentials/cookies to be securely passed between the client and server. No modifications to `Program.cs` CORS settings are required.
+
+> [!WARNING]
+> Since the Refresh Token is stored in a cookie scoped to the backend domain, client-side Javascript cannot access it directly. The refresh token parameter inside `UserResponse` returned by the `Login`, `Register`, and `RefreshToken` JSON payloads will be set to an empty string (`""`) to prevent exposing it.
+
+## Open Questions
+
+None. The proposed cookie settings (`HttpOnly = true`, `Secure = true`, `SameSite = SameSiteMode.Lax`, `Path = "/"`) are standard best practices for localhost dev and secure web applications.
+
+---
+
+## Proposed Changes
+
+### Backend Web API
+
+#### [MODIFY] [AuthenticationController.cs](file:///c:/Users/win11/Documents/GitHub/GraduationProject/API/src/Web.Api/Controllers/AuthenticationController.cs)
+- Add private helper methods `SetRefreshTokenCookie(string refreshToken)` and `DeleteRefreshTokenCookie()`:
+  - Configure the cookie options with `HttpOnly = true`, `Secure = true`, `SameSite = SameSiteMode.Lax`, `Expires` matching token lifetime (30 days), and `Path = "/"`.
+- Update `Login` endpoint:
+  - If authentication is successful, set the cookie via `SetRefreshTokenCookie`.
+  - Return `UserResponse` with `RefreshToken` parameter set to `""`.
+- Update `Register` endpoint:
+  - If registration is successful, set the cookie via `SetRefreshTokenCookie`.
+  - Return `UserResponse` with `RefreshToken` parameter set to `""`.
+- Update `RefreshToken` endpoint:
+  - Read the refresh token from request cookies: `Request.Cookies["refreshToken"]`.
+  - If null/empty, return `Unauthorized`.
+  - Call the authentication service to get new tokens.
+  - Set the new refresh token in the cookie.
+  - Return `UserResponse` with `RefreshToken` parameter set to `""`.
+- Update `Logout` endpoint:
+  - Call `DeleteRefreshTokenCookie` to instruct the browser to delete the cookie.
+
+---
+
+### Frontend Angular App
+
+#### [MODIFY] [auth.service.ts](file:///c:/Users/win11/Documents/GitHub/GraduationProject/Front-End/src/app/core/services/auth.service.ts)
+- Update `login` method:
+  - Add `withCredentials: true` option in the post call to allow receiving the HTTP cookie.
+  - Remove all lines that save `res.refreshToken` to local storage.
+- Update `register` method:
+  - Add `withCredentials: true` option in the post call to allow receiving the HTTP cookie.
+  - Remove all lines that save `res.refreshToken` to local storage.
+- Update `refreshToken` method:
+  - Add `withCredentials: true` option in the post call to allow sending and receiving the HTTP cookies.
+  - Change the request body to an empty object `{}` since the refresh token is now automatically sent in the cookie header.
+  - Remove all lines that read or save `eventora_refresh_token` from/to local storage.
+- Update `logout` method:
+  - Add `withCredentials: true` option in the HTTP post call to revoke the token and delete the cookie on the server.
+  - Remove references to deleting `eventora_refresh_token` from local storage.
+- Update `getRefreshToken` method:
+  - Return `null` as the refresh token is no longer stored client-side.
+- Remove references to `eventora_refresh_token` in constructor error handling.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Build the backend using `dotnet build` to verify there are no compilation errors.
+- Run `ng build` (or check compilation status of the running `ng s` process) to ensure the frontend compiles without TypeScript errors.
+
+### Manual Verification
+- Test login, registration, refresh token, and logout flows in the browser.
+- Inspect the browser's DevTools Network tab to verify that:
+  - `Set-Cookie: refreshToken=...` header is present in the responses of Login, Register, and RefreshToken.
+  - The `refreshToken` cookie has `HttpOnly`, `Secure`, and `SameSite=Lax` attributes.
+  - The `refreshToken` cookie is automatically sent in request headers for the `/RefreshToken` call.
+  - The cookie is successfully deleted from the browser's storage upon Logout.

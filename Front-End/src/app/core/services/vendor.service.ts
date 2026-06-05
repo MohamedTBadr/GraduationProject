@@ -39,8 +39,11 @@ export class VendorService {
 
     return this.http.get<any>(`${this.apiUrl}/Vendor`, { params }).pipe(
       map(res => {
-        const data = res?.value ?? res;
-        const items = Array.isArray(data) ? data : (data?.items ?? []);
+        const data = res?.value ?? res?.Value ?? res;
+        const items = Array.isArray(data) ? data : (data?.items ?? data?.Items ?? []);
+        // #region agent log
+        fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'vendor.service.ts:getAll',message:'Vendor API parse',data:{resKeys:res?Object.keys(res):[],dataKeys:data&&typeof data==='object'&&!Array.isArray(data)?Object.keys(data):[],isResArray:Array.isArray(res),isDataArray:Array.isArray(data),itemsCount:Array.isArray(items)?items.length:-1,firstItemKeys:Array.isArray(items)&&items[0]?Object.keys(items[0]):[]},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         if (!Array.isArray(items)) return [];
         return items.map((v: any) => this.normalizeVendor(v));
       })
@@ -50,35 +53,63 @@ export class VendorService {
   getById(vendorId: string): Observable<ApiVendor> {
     if (!vendorId) throw new Error('Vendor ID is required');
     return this.http.get<any>(`${this.apiUrl}/Vendor/${vendorId}`).pipe(
-      map((res: any) => this.normalizeVendor(res?.value ?? res))
+      map((res: any) => this.normalizeVendor(res?.value ?? res?.Value ?? res, vendorId))
     );
   }
 
-  private normalizeVendor(v: any): ApiVendor {
-    if (!v) return {} as ApiVendor;
-    return {
+  /** Reads camelCase or PascalCase API fields (backend responses are inconsistent). */
+  private pickField(obj: any, ...keys: string[]): any {
+    if (!obj) return undefined;
+    for (const key of keys) {
+      const val = obj[key];
+      if (val !== undefined && val !== null && val !== '') return val;
+    }
+    return undefined;
+  }
+
+  private normalizeVendor(v: any, fallbackId?: string): ApiVendor {
+    if (!v || typeof v !== 'object') {
+      return { id: fallbackId ?? '', name: 'Unknown Vendor' } as ApiVendor;
+    }
+
+    const id = String(
+      this.pickField(v, 'userId', 'UserId', 'id', 'Id', 'vendorId', 'VendorId') ?? fallbackId ?? ''
+    );
+    const name = this.pickField(v, 'businessName', 'BusinessName', 'name', 'Name') ?? 'Unknown Vendor';
+    const vendorTypeName =
+      this.pickField(v, 'vendorTypeName', 'VendorTypeName', 'vendorType', 'VendorType', 'serviceType', 'ServiceType', 'categoryName', 'CategoryName')
+      ?? 'Vendor';
+    const areas = v.serviceAreas ?? v.ServiceAreas ?? [];
+
+    const normalized = {
       ...v,
-      id: v.userId || v.id || v.vendorId,
-      name: v.businessName || v.name || 'Unknown Vendor',
-      vendorTypeId: v.vendorTypeId || v.vendorType?.id || '',
-      vendorTypeName: v.vendorTypeName || v.serviceType || v.categoryName || 'Vendor',
-      about: v.description || v.about || '',
-      status: v.status || 'active',
-      isApproved: v.isApproved ?? true,
-      createdAt: v.createdAt || new Date(),
-      rating: v.rating || 0,
-      location: v.location || v.address || '',
-      documentUrl: v.documentUrl || v.document,
-      profilePictureUrl: v.profilePictureUrl || v.profilePicture,
-      serviceAreas: (v.serviceAreas ?? []).map((sa: any) => ({
+      id,
+      name,
+      vendorTypeId: String(this.pickField(v, 'vendorTypeId', 'VendorTypeId') ?? v.vendorType?.id ?? v.VendorType?.Id ?? ''),
+      vendorTypeName,
+      about: this.pickField(v, 'description', 'Description', 'about', 'About') ?? '',
+      status: (this.pickField(v, 'status', 'Status') ?? 'active') as ApiVendor['status'],
+      isApproved: v.isVerified ?? v.IsVerified ?? v.isApproved ?? v.IsApproved ?? false,
+      createdAt: this.pickField(v, 'createdAt', 'CreatedAt') ?? new Date().toISOString(),
+      rating: Number(this.pickField(v, 'rating', 'Rating') ?? 0),
+      location: this.pickField(v, 'location', 'Location', 'address', 'Address') ?? '',
+      documentUrl: this.pickField(v, 'documentUrl', 'DocumentUrl', 'document', 'Document'),
+      profilePictureUrl: this.pickField(v, 'profilePictureUrl', 'ProfilePictureUrl', 'profilePicture', 'ProfilePicture'),
+      serviceAreas: (Array.isArray(areas) ? areas : []).map((sa: any) => ({
         ...sa,
-        id: sa.id,
-        city: sa.city,
-        region: sa.region,
-        latitude: sa.latitude ?? sa.lattitude ?? 0,
-        longitude: sa.longitude ?? 0
+        id: sa.id ?? sa.Id,
+        city: sa.city ?? sa.City ?? '',
+        region: sa.region ?? sa.Region ?? '',
+        latitude: sa.latitude ?? sa.Latitude ?? sa.lattitude ?? 0,
+        longitude: sa.longitude ?? sa.Longitude ?? 0
       }))
     } as ApiVendor;
+
+    // #region agent log
+    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'vendor.service.ts:normalizeVendor',message:'Vendor normalized',data:{rawKeys:Object.keys(v),id:normalized.id,name:normalized.name,vendorTypeName:normalized.vendorTypeName,fallbackId},timestamp:Date.now(),hypothesisId:'H',runId:'post-fix-3'})}).catch(()=>{});
+    // #endregion
+
+    return normalized;
   }
 
   /** POST /Vendor – register a new vendor */

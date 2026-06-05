@@ -230,7 +230,8 @@
       </div>
     </div>
 
-    <div class="p-[40px] text-center text-[var(--gray)]" *ngIf="loading">
+    <div class="p-[40px] text-center text-[var(--gray)]"
+      *ngIf="loading && (activeTab === 'vendors' ? displayVendors.length === 0 : filteredServices.length === 0)">
       Loading {{ activeTab === 'vendors' ? 'vendors' : 'services' }}…
     </div>
 
@@ -240,7 +241,7 @@
     </div>
 
     <!-- Vendor Grid -->
-    <ng-container *ngIf="activeTab === 'vendors' && !loading && viewMode !== 'map'">
+    <ng-container *ngIf="activeTab === 'vendors' && (!loading || displayVendors.length > 0) && viewMode !== 'map'">
       <div class="explore-grid">
         <app-vendor-card *ngFor="let v of pagedVendors" [vendor]="v"></app-vendor-card>
         <div class="no-results" *ngIf="displayVendors.length === 0">
@@ -253,7 +254,7 @@
     </ng-container>
 
     <!-- Service Grid -->
-    <ng-container *ngIf="activeTab === 'services' && !loading && viewMode !== 'map'">
+    <ng-container *ngIf="activeTab === 'services' && (!loading || filteredServices.length > 0) && viewMode !== 'map'">
       <div class="svc-explore-grid" [class.list-view]="viewMode === 'list'">
         <div class="svc-card" *ngFor="let svc of pagedServices" (click)="openPreview(svc)">
           <div class="svc-card-img">

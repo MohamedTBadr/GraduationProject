@@ -23,7 +23,10 @@ export class VendorTypeService {
         if (!res) return [];
         const data = res.value ?? res;
         const arr = Array.isArray(data) ? data : (data.items ?? []);
-        return arr.map((item: any) => ({ id: item.id, name: item.name }));
+        return arr.map((item: any) => ({
+          id: item.Id ?? item.id,
+          name: item.Name ?? item.name
+        }));
       }),
       tap(data => this.cachedVendorTypes = data)
     );
@@ -35,7 +38,7 @@ export class VendorTypeService {
       map(res => {
         if (!res) return { id: '', name: '' };
         const item = res.value ?? res;
-        return { id: item.id, name: item.name };
+        return { id: item.Id ?? item.id, name: item.Name ?? item.name };
       })
     );
   }
@@ -46,7 +49,7 @@ export class VendorTypeService {
       map(res => {
         if (!res) return { id: '', name: '' };
         const item = res.value ?? res;
-        return { id: item.id, name: item.name };
+        return { id: item.Id ?? item.id, name: item.Name ?? item.name };
       }),
       tap(() => this.cachedVendorTypes = null)
     );
@@ -58,7 +61,7 @@ export class VendorTypeService {
       map(res => {
         if (!res) return { id: '', name: '' };
         const item = res.value ?? res;
-        return { id: item.id, name: item.name };
+        return { id: item.Id ?? item.id, name: item.Name ?? item.name };
       }),
       tap(() => this.cachedVendorTypes = null)
     );

@@ -114,6 +114,10 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
     this.serviceTypeService.getAll().subscribe({
       next: (cats) => {
         this.categories = Array.isArray(cats) ? cats : [];
+        // Re-apply if categories arrived after the products (race condition)
+        if (this.selectedCategories.length > 0 && !this.loading) {
+          this.applyFilters();
+        }
       },
       error: (err) => {
         console.error('Error loading service types', err);

@@ -1,0 +1,112 @@
+# Backend Integration: Missing Features
+
+## Goal
+Implement the 4 backend features that exist but are not connected to the frontend:
+1. **Vouchers & Referral** — service + user-facing UI on My Bookings
+2. **Admin Reports** — replace static dummy with real `/api/reports/executive` data
+3. **Vendor Analytics** — replace static dummy with real `/dashboard/vendor-report` data
+4. **Support Ticket (User "Report Issue")** — wire the `reportIssue()` stub on My Bookings
+
+---
+
+## Proposed Changes
+
+---
+
+### 1. Voucher / Referral System
+
+#### [NEW] `voucher.service.ts` (`core/services/`)
+New Angular service wrapping the 3 backend endpoints:
+- `GET /api/vouchers/referral-link` → `getReferralLink()`
+- `GET /api/vouchers/my` → `getMyVouchers()`
+- `GET /api/vouchers/validate?code=...` → `validateVoucher(code)`
+
+#### [MODIFY] `my-bookings.component.ts`
+- Inject `VoucherService`
+- Load referral link and vouchers on init
+- Expose `referralLink`, `myVouchers` and a `voucherCode` for discount input on checkout
+
+#### [MODIFY] `my-bookings.component.html`
+Add a new "Rewards & Vouchers" tab:
+- **Referral Link card**: shows the unique link + copy button
+- **My Vouchers list**: shows code, discount %, expiry, and used status
+- **Voucher validator**: input + validate button showing the discount if valid
+
+#### [MODIFY] `my-bookings.component.scss`
+Add styles for the rewards tab cards.
+
+---
+
+### 2. Admin Reports — Real Data
+
+#### [MODIFY] `reports.component.ts`
+- Inject `HttpClient`
+- `ngOnInit`: call `POST /api/reports/executive` (Admin scope)
+- Map response → `kpis`, `revenueHistory`, `topServices`, `recentOrders`
+- Add `downloadPdf()` method → calls `GET /api/reports/executive/pdf`
+- Add `emailReport()` method → calls `POST /api/reports/executive/send-email`
+
+#### [MODIFY] `reports.component.html`
+Replace all hardcoded values with bindings to the live data:
+- KPI grid → bind `kpis.GrowthPercentage`, `kpis.LifetimeRevenue`, etc.
+- Revenue chart bars → `*ngFor` over `revenueHistory` with dynamic height %
+- Top services section → `*ngFor` over `topServices`
+- Recent orders table (new) → `*ngFor` over `recentOrders`
+- Export PDF / Send Email buttons wired to the component methods
+
+---
+
+### 3. Vendor Analytics — Real Data
+
+#### [MODIFY] `analytics.component.ts`
+- Inject `HttpClient` and `AuthService`
+- `ngOnInit`: call `POST /dashboard/vendor-report`
+- Map response → `kpis`, `revenueHistory`, `topServices`, `insights`, `recommendations`
+
+#### [MODIFY] `analytics.component.html`
+Replace all static content:
+- KPI stat cards → bind lifetime revenue, current month revenue, total orders, avg order value
+- Revenue chart → `*ngFor` over `revenueHistory` with dynamic heights
+- Top services list → `*ngFor` over `topServices`
+- AI Recommendations cards (new) — render the backend's `recommendations[]` array
+
+#### [MODIFY] `analytics.component.scss`
+Add recommendation card styles.
+
+---
+
+### 4. Report Issue → Open Support Ticket
+
+#### [MODIFY] `support.service.ts`
+Add missing user-facing methods (the existing service only covers admin endpoints):
+- `openTicket(payload)` → `POST /api/admin/support/tickets/open-ticket`
+
+#### [NEW] `report-issue-modal.component.ts/.html/.scss`
+A modal component (similar to `ReviewModalComponent`) with:
+- Ticket type selector (Technical / Booking / Payment / General)
+- Priority selector (Low / Medium / High / Critical)
+- Description textarea
+- Submit → calls `supportService.openTicket()`
+- Toast on success
+
+#### [MODIFY] `my-bookings.component.ts`
+- Import `ReportIssueModalComponent`
+- `reportIssue(bk)` → opens modal, passing the booking reference
+- `closeReportModal()` handler
+
+#### [MODIFY] `my-bookings.component.html`
+- Wire `"Report an Issue"` button to open the modal
+- Add `<app-report-issue-modal>` to template
+
+---
+
+## Verification Plan
+
+### Automated
+- Angular compiler: `ng build --no-optimization` — must produce no errors
+
+### Manual
+1. **Vouchers tab**: Logged-in user sees "Rewards & Vouchers" tab, referral link renders, copy button works
+2. **Admin Reports**: Admin navigates to `/admin/reports` — real KPI numbers appear, PDF download triggers a browser download
+3. **Vendor Analytics**: Vendor navigates to `/vendor/analytics` — real revenue data renders, recommendations list shows
+4. **Report Issue**: On a "Done" booking, click "Report an Issue" → modal opens, fill form, submit → toast "Ticket submitted"

@@ -11,6 +11,7 @@ import { ServiceTypeService } from '../../../core/services/service-type.service'
 import { VendorTypeService } from '../../../core/services/vendor-type.service';
 import { ModalService } from '../../../shared/services/modal.service';
 import { Subject, takeUntil } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import * as L from 'leaflet';
 
 @Component({
@@ -22,6 +23,7 @@ import * as L from 'leaflet';
 })
 export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
+  private skipNextQueryParamsLoad = false;
 
   // ── Tab ──────────────────────────────────────────────────
   activeTab: 'vendors' | 'services' = 'services';
@@ -123,7 +125,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     const routeData = this.route.snapshot.data;
     if (routeData['tab'] === 'services') this.activeTab = 'services';
 
-    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+    this.route.queryParams.pipe(
+      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
       // Determine active tab from query param (default: services)
       if (params['tab'] === 'vendors') {
         this.activeTab = 'vendors';
@@ -131,12 +136,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
         this.activeTab = 'services';
       }
 
-      // Vendor params
-      if (params['category'] || params['type']) {
-        this.filters.type = params['category'] || params['type'];
-        this.activeType = this.filters.type;
-      }
-      if (params['q']) this.filters.searchQuery = params['q'];
+      // Vendor params — reset when absent so stale filters don't empty results on reuse
+      this.filters.type = params['category'] || params['type'] || '';
+      this.activeType = this.filters.type;
+      this.filters.searchQuery = params['q'] || '';
 
       // Service params
       if (params['serviceCategory']) {
@@ -145,8 +148,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
           cat = 'Decoration';
         }
         this.selectedCategories = [cat];
+      } else {
+        this.selectedCategories = [];
       }
-      if (params['eventType']) this.selectedEventTypes = [params['eventType']];
+      this.selectedEventTypes = params['eventType'] ? [params['eventType']] : [];
 
       const openServiceId = params['openServiceId'];
       if (openServiceId) {
@@ -163,7 +168,11 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
         });
       }
 
-      this.loadData();
+      if (this.skipNextQueryParamsLoad) {
+        this.skipNextQueryParamsLoad = false;
+      } else {
+        this.loadData('queryParams');
+      }
     });
   }
 
@@ -182,16 +191,20 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     this.activePanel = null;
     this.viewMode = 'grid';
     this.destroyMap();
+    this.skipNextQueryParamsLoad = true;
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: tab === 'vendors' ? { tab: 'vendors' } : {},
+      queryParams: { tab: tab === 'vendors' ? 'vendors' : null },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
-    this.loadData();
+    this.loadData('switchTab');
   }
 
-  loadData() {
+  loadData(source = 'manual') {
+    // #region agent log
+    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:loadData',message:'loadData called',data:{source,activeTab:this.activeTab,loading:this.loading,servicesCount:this.services.length,filteredCount:this.filteredServices.length,vendorsCount:this.displayVendors.length},timestamp:Date.now(),hypothesisId:'F'})}).catch(()=>{});
+    // #endregion
     if (this.activeTab === 'vendors') {
       this.loadVendors();
     } else {
@@ -201,37 +214,46 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // ── Vendor logic ─────────────────────────────────────────
   loadVendors() {
-    this.loading = true;
+    this.loading = this.displayVendors.length === 0;
 
-    const doLoad = () => {
-      const typeMatch = this.vendorTypes.find(
-        t => t.name.toLowerCase() === this.filters.type.toLowerCase()
-      );
-      this.vendorService.getAll({
-        pageSize: 1000,
-        pageIndex: 1,
-        searchTerm: this.filters.searchQuery || undefined,
-        city: this.filters.loc || undefined,
-        vendorTypeId: typeMatch?.id,
-      }).subscribe({
-        next: (data) => {
-          this.allVendors = data.filter(v => v.status === 'active' || v.isApproved);
-          this.loading = false;
-          this.triggerSearch();
-        },
-        error: () => { this.loading = false; }
-      });
-    };
-
-    if (this.vendorTypes.length > 0) {
-      doLoad();
-    } else {
+    // Load vendor types in the background for the filter UI — never block vendor loading
+    if (this.vendorTypes.length === 0) {
       this.vendorTypeService.getAll().subscribe({
-        next: (types) => { this.vendorTypes = Array.isArray(types) ? types : []; doLoad(); },
-        error: () => doLoad()
+        next: (types) => { this.vendorTypes = Array.isArray(types) ? types : []; },
+        error: () => {}
       });
     }
-  }
+
+    // Use already-loaded types to resolve vendorTypeId (works after first load / Apply)
+    const typeMatch = this.filters.type
+      ? this.vendorTypes.find(t => this.vendorTypeMatches(t.name, this.filters.type))
+      : undefined;
+
+    this.vendorService.getAll({
+      pageSize: 1000,
+      pageIndex: 1,
+      searchTerm: this.filters.searchQuery || undefined,
+      city: this.filters.loc || undefined,
+      vendorTypeId: typeMatch?.id,
+    }).subscribe({
+      next: (data) => {
+        const before = data.length;
+        // Backend already scopes public vendors; don't re-filter verified/active here
+        this.allVendors = data;
+        // #region agent log
+        fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:loadVendors',message:'Vendor filter',data:{apiCount:before,allVendors:this.allVendors.length,sample:data.slice(0,3).map(v=>({status:v.status,isApproved:v.isApproved,name:v.name}))},timestamp:Date.now(),hypothesisId:'B',runId:'post-fix-2'})}).catch(()=>{});
+        // #endregion
+        this.loading = false;
+        this.triggerSearch();
+      },
+      error: (err) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:loadVendors:error',message:'Vendor API error',data:{status:err?.status,message:err?.message},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
+        this.loading = false;
+      }
+    });
+  } 
 
   updateFilters() {
     this.filters.type = this.activeType;
@@ -241,9 +263,30 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadVendors();
   }
 
+  private vendorTypeMatches(vendorTypeName: string | undefined, filter: string): boolean {
+    const a = (vendorTypeName ?? '').toLowerCase();
+    const b = filter.toLowerCase();
+    return a === b || a.includes(b) || b.includes(a);
+  }
+
+  private isGuid(value: string): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+  }
+
+  private resolveServiceTypeId(category: string): string | undefined {
+    if (!category) return undefined;
+    if (this.isGuid(category)) return category;
+    const match = this.serviceCategories.find(
+      c => c.name.toLowerCase() === category.toLowerCase() ||
+        c.name.toLowerCase().includes(category.toLowerCase()) ||
+        category.toLowerCase().includes(c.name.toLowerCase())
+    );
+    return match?.id;
+  }
+
   triggerSearch() {
     let filtered = this.allVendors.filter(v => {
-      const matchType = !this.filters.type || (v.vendorTypeName?.toLowerCase() === this.filters.type.toLowerCase());
+      const matchType = !this.filters.type || this.vendorTypeMatches(v.vendorTypeName, this.filters.type);
       const matchLoc = !this.filters.loc ||
         v.location?.toLowerCase().includes(this.filters.loc.toLowerCase()) ||
         v.serviceAreas?.some(a => a.city?.toLowerCase().includes(this.filters.loc.toLowerCase()));
@@ -258,15 +301,23 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.displayVendors = filtered;
     this.vendorCount = filtered.length;
+    // #region agent log
+    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:triggerSearch',message:'Vendor display',data:{allVendors:this.allVendors.length,displayVendors:this.displayVendors.length,filters:this.filters},timestamp:Date.now(),hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     this.currentPage = 1;
     this.updateMapMarkers();
   }
 
   // ── Service logic ────────────────────────────────────────
   loadServices() {
-    this.loading = true;
+    this.loading = this.filteredServices.length === 0;
     this.serviceTypeService.getAll().subscribe({
-      next: (cats) => { this.serviceCategories = Array.isArray(cats) ? cats : []; },
+      next: (cats) => {
+        this.serviceCategories = Array.isArray(cats) ? cats : [];
+        if (this.selectedCategories.length > 0 && !this.loading) {
+          this.applyServiceFilters();
+        }
+      },
       error: () => { this.serviceCategories = []; }
     });
 
@@ -277,7 +328,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       searchTerm: this.filters.searchQuery || undefined,
     };
     if (this.selectedEventTypes.length) req.eventTypeId = this.selectedEventTypes[0];
-    if (this.selectedCategories.length) req.serviceTypeId = this.selectedCategories[0];
+    const resolvedServiceTypeId = this.selectedCategories.length
+      ? this.resolveServiceTypeId(this.selectedCategories[0])
+      : undefined;
+    if (resolvedServiceTypeId) req.serviceTypeId = resolvedServiceTypeId;
 
     this.productService.getAll(req).subscribe({
       next: (data) => {
@@ -285,7 +339,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
         this.applyServiceFilters();
         this.loading = false;
       },
-      error: () => { this.services = []; this.loading = false; }
+      error: () => {
+        this.services = [];
+        this.loading = false;
+      }
     });
   }
 
@@ -295,11 +352,23 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       const selectedNames = this.serviceCategories
         .filter(cat => this.selectedCategories.includes(cat.id))
         .map(cat => cat.name.toLowerCase());
+      const selectedNameHints = this.selectedCategories
+        .filter(c => !this.serviceCategories.some(t => t.id === c))
+        .map(c => c.toLowerCase());
+      const nameMatches = [...selectedNames, ...selectedNameHints];
 
       f = f.filter(s =>
         (s.serviceTypeId && this.selectedCategories.includes(s.serviceTypeId)) ||
-        (s.serviceTypeName && selectedNames.includes(s.serviceTypeName.toLowerCase())) ||
-        (s.vendorTypeName && selectedNames.includes(s.vendorTypeName.toLowerCase()))
+        (s.serviceTypeName && nameMatches.some(n =>
+          s.serviceTypeName!.toLowerCase() === n ||
+          s.serviceTypeName!.toLowerCase().includes(n) ||
+          n.includes(s.serviceTypeName!.toLowerCase())
+        )) ||
+        (s.vendorTypeName && nameMatches.some(n =>
+          s.vendorTypeName!.toLowerCase() === n ||
+          s.vendorTypeName!.toLowerCase().includes(n) ||
+          n.includes(s.vendorTypeName!.toLowerCase())
+        ))
       );
     }
     f = f.filter(s => (s.price ?? 0) <= this.maxPrice);
@@ -311,6 +380,9 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.filteredServices = f;
     this.serviceCount = f.length;
+    // #region agent log
+    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'explore.component.ts:applyServiceFilters',message:'Service filter',data:{servicesIn:this.services.length,filteredOut:f.length,selectedCategories:this.selectedCategories,maxPrice:this.maxPrice,minRating:this.minRating},timestamp:Date.now(),hypothesisId:'C,E'})}).catch(()=>{});
+    // #endregion
     this.currentPage = 1;
     this.updateMapMarkers();
   }

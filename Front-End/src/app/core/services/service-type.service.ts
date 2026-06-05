@@ -15,14 +15,24 @@ export class ServiceTypeService {
 
   /** GET /api/ServiceType */
   getAll(): Observable<ServiceType[]> {
+    // Re-fetch if cache has pre-normalization PascalCase entries (id missing)
+    if (this.cachedServiceTypes?.length && !this.cachedServiceTypes[0]?.id) {
+      this.cachedServiceTypes = null;
+    }
     if (this.cachedServiceTypes) {
       return of(this.cachedServiceTypes);
     }
     
     return this.http.get<any>(`${this.apiUrl}/ServiceType`).pipe(
       map(res => {
-        const data = res.value ?? res;
-        return Array.isArray(data) ? data : (data?.items ?? []);
+        if (!res) return [];
+        const data = res.value ?? res.Value ?? res;
+        const arr = Array.isArray(data) ? data : (data?.items ?? data?.Items ?? []);
+        return arr.map((item: any) => ({
+          id: item.id ?? item.Id ?? '',
+          name: item.name ?? item.Name ?? '',
+          vendorTypeId: item.vendorTypeId ?? item.VendorTypeId
+        }));
       }),
       tap(data => {
         this.cachedServiceTypes = data;

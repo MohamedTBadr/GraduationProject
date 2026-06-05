@@ -23,55 +23,76 @@ export class ProductService {
     if (!res) return [];
     if (Array.isArray(res)) return res;
 
-    const inner = res.value;
+    const inner = res.value ?? res.Value;
     if (inner != null) {
-      const items = inner.items;
+      const items = inner.items ?? inner.Items;
       if (Array.isArray(items)) return items;
       if (Array.isArray(inner)) return inner;
     }
 
-    const top = res.items;
+    const top = res.items ?? res.Items;
     if (Array.isArray(top)) return top;
 
+    // #region agent log
+    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'product.service.ts:extractArrayData',message:'Service API parse failed',data:{resKeys:Object.keys(res),innerKeys:inner&&typeof inner==='object'?Object.keys(inner):[]},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     return [];
+  }
+
+  private pickField(obj: any, ...keys: string[]): any {
+    if (!obj) return undefined;
+    for (const key of keys) {
+      const val = obj[key];
+      if (val !== undefined && val !== null && val !== '') return val;
+    }
+    return undefined;
   }
 
   /** Maps API ServiceDTO fields to ApiProduct. */
   private normalizeProduct(raw: any): ApiProduct {
     if (raw == null || typeof raw !== 'object') {
-      return { id: '', name: 'Unknown', description: '', price: 0 };
+      return { id: '', name: 'Unknown Service', description: '', price: 0 };
     }
-    const images = raw.serviceImages;
-    const firstImage = raw.imageUrl ?? (Array.isArray(images) && images.length > 0 ? images[0] : undefined);
 
-    const priceRaw = raw.price ?? 0;
+    const images = raw.serviceImages ?? raw.ServiceImages;
+    const firstImage = this.pickField(raw, 'imageUrl', 'ImageUrl')
+      ?? (Array.isArray(images) && images.length > 0 ? images[0] : undefined);
+
+    const priceRaw = this.pickField(raw, 'price', 'Price') ?? 0;
     const price = typeof priceRaw === 'number' ? priceRaw : parseFloat(String(priceRaw));
+    const areas = raw.serviceAreas ?? raw.ServiceAreas ?? [];
 
     return {
-      id: String(raw.id ?? ''),
-      name: (raw.name ?? 'Service').toString(),
-      description: (raw.description ?? '').toString(),
+      id: String(this.pickField(raw, 'id', 'Id') ?? ''),
+      name: String(this.pickField(raw, 'name', 'Name') ?? 'Unknown Service'),
+      description: String(this.pickField(raw, 'description', 'Description') ?? ''),
       price: Number.isFinite(price) ? price : 0,
-      vendorTypeId: raw.vendorTypeId ?? raw.categoryId,
-      vendorTypeName: raw.vendorTypeName ?? raw.categoryName,
-      vendorId: raw.vendorId,
-      vendorName: raw.vendorName,
-      serviceTypeId: raw.serviceTypeId,
-      serviceTypeName: raw.serviceTypeName,
+      vendorTypeId: this.pickField(raw, 'vendorTypeId', 'VendorTypeId', 'categoryId', 'CategoryId'),
+      vendorTypeName: this.pickField(raw, 'vendorTypeName', 'VendorTypeName', 'categoryName', 'CategoryName'),
+      vendorId: this.pickField(raw, 'vendorId', 'VendorId'),
+      vendorName: this.pickField(raw, 'vendorName', 'VendorName'),
+      serviceTypeId: this.pickField(raw, 'serviceTypeId', 'ServiceTypeId'),
+      serviceTypeName: this.pickField(raw, 'serviceTypeName', 'ServiceTypeName'),
       imageUrl: firstImage,
       imageUrls: Array.isArray(images) ? images : (firstImage ? [firstImage] : []),
-      status: raw.status ?? 'active',
-      duration: raw.duration ?? (raw.setupDuration != null ? String(raw.setupDuration) : undefined),
-      leadTime: raw.leadTime ?? (raw.leadTimeRequired != null ? String(raw.leadTimeRequired) : undefined),
-      classification: raw.classification,
-      allowedEventTypes: raw.allowedEventTypes,
-      createdAt: raw.createdAt,
-      serviceAreas: raw.serviceAreas ?? []
+      status: this.pickField(raw, 'status', 'Status') ?? 'active',
+      duration: this.pickField(raw, 'duration', 'Duration')
+        ?? (raw.setupDuration != null ? String(raw.setupDuration) : raw.SetupDuration != null ? String(raw.SetupDuration) : undefined),
+      leadTime: this.pickField(raw, 'leadTime', 'LeadTime')
+        ?? (raw.leadTimeRequired != null ? String(raw.leadTimeRequired) : raw.LeadTimeRequired != null ? String(raw.LeadTimeRequired) : undefined),
+      classification: this.pickField(raw, 'classification', 'Classification'),
+      allowedEventTypes: raw.allowedEventTypes ?? raw.AllowedEventTypes,
+      createdAt: this.pickField(raw, 'createdAt', 'CreatedAt'),
+      serviceAreas: Array.isArray(areas) ? areas : []
     };
   }
 
   private mapProductList(res: any): ApiProduct[] {
-    return this.extractArrayData(res).map(item => this.normalizeProduct(item));
+    const raw = this.extractArrayData(res);
+    // #region agent log
+    fetch('http://127.0.0.1:7491/ingest/eb6f68d1-7ed9-481a-83a5-e12a4599d43f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'af8321'},body:JSON.stringify({sessionId:'af8321',location:'product.service.ts:mapProductList',message:'Service API parse',data:{resKeys:res?Object.keys(res):[],rawCount:raw.length,firstItemKeys:raw[0]?Object.keys(raw[0]):[]},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    return raw.map(item => this.normalizeProduct(item));
   }
 
   /** GET /Service – returns filtered/paginated products */
