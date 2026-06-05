@@ -13,6 +13,9 @@ namespace Application.DTOs.PaymobDTOs
         public int IframeId { get; set; }
         public string BaseUrl { get; set; }
         public string HmacSecret { get; set; }
+
+        public string RedirectUrl { get; set; }
+        public string WebhookUrl { get; set; }
     }
 
 }
