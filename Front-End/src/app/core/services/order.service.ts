@@ -8,7 +8,7 @@ export interface CreateOrderPayload {
   userId: string;
   eventId: string;
   currency: string;
-  voucherCode?: string; // Optional discount voucher code
+  voucherCode?: string;
   shippingAddress: {
     street: string;
     city: string;
@@ -36,28 +36,33 @@ export class OrderService {
 
   constructor(private http: HttpClient) {}
 
-  // POST /Order — backend returns Result<OrderResponse> wrapper which the interceptor
-  // unwraps; the inner value arrives as PascalCase, so we normalise it.
   createOrder(payload: CreateOrderPayload): Observable<OrderResponse> {
     return this.http.post<any>(`${this.apiUrl}/Order`, payload).pipe(
       map(o => this.normalizeOrder(o))
     );
   }
 
-  /** GET /Order — Admin only, lists all platform orders */
   getAllOrders(): Observable<OrderResponse[]> {
     return this.http.get<any>(`${this.apiUrl}/Order`).pipe(
-      map(res => {
-        const data = res?.value ?? res;
-        const items = Array.isArray(data) ? data : (data?.items ?? []);
-        return items.map((o: any) => this.normalizeOrder(o));
-      })
+      map(res => this.mapOrderList(res))
     );
   }
 
   getOrdersByUser(userId: string): Observable<OrderResponse[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/Order/user/${userId}`).pipe(
-      map(orders => orders.map(o => this.normalizeOrder(o)))
+    return this.http.get<any>(`${this.apiUrl}/Order/user/${userId}`).pipe(
+      map(res => this.mapOrderList(res))
+    );
+  }
+
+  /** Resolve order id when create response body is empty but order exists server-side */
+  findLatestOrderForEvent(userId: string, eventId: string): Observable<OrderResponse | null> {
+    return this.getOrdersByUser(userId).pipe(
+      map(orders => {
+        const matches = orders
+          .filter(o => o.eventId === eventId)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return matches[0] ?? null;
+      })
     );
   }
 
@@ -67,18 +72,40 @@ export class OrderService {
     );
   }
 
-  // Handles both PascalCase (API) and camelCase (already-normalized) responses
+  private mapOrderList(res: any): OrderResponse[] {
+    const data = res?.value ?? res?.Value ?? res;
+    const items = Array.isArray(data) ? data : (data?.items ?? data?.Items ?? []);
+    return (Array.isArray(items) ? items : []).map((o: any) => this.normalizeOrder(o));
+  }
+
+  private unwrapOrderBody(o: any): any {
+    if (!o || typeof o !== 'object') return o;
+    const nested = o.value ?? o.Value;
+    if (nested && typeof nested === 'object' && (nested.id ?? nested.Id)) {
+      return nested;
+    }
+    return o;
+  }
+
   private normalizeOrder(o: any): OrderResponse {
+    const raw = this.unwrapOrderBody(o);
+    if (!raw || typeof raw !== 'object') {
+      return {
+        id: '', userId: '', amount: 0, currency: 'EGP',
+        paymentIntentId: null, paymentStatus: '', createdAt: '', appointment: '', eventId: ''
+      };
+    }
+
     return {
-      id:             o.id             ?? o.Id             ?? '',
-      userId:         o.userId         ?? o.UserId         ?? '',
-      amount:         o.amount         ?? o.Amount         ?? 0,
-      currency:       o.currency       ?? o.Currency       ?? 'EGP',
-      paymentIntentId:o.paymentIntentId?? o.PaymentIntentId?? null,
-      paymentStatus:  o.paymentStatus  ?? o.PaymentStatus  ?? '',
-      createdAt:      o.createdAt      ?? o.CreatedAt      ?? '',
-      appointment:    o.appointment    ?? o.Appointment    ?? '',
-      eventId:        o.eventId        ?? o.EventId        ?? '',
+      id:              String(raw.id ?? raw.Id ?? ''),
+      userId:          String(raw.userId ?? raw.UserId ?? ''),
+      amount:          Number(raw.amount ?? raw.Amount ?? 0),
+      currency:        String(raw.currency ?? raw.Currency ?? 'EGP'),
+      paymentIntentId: raw.paymentIntentId ?? raw.PaymentIntentId ?? null,
+      paymentStatus:   String(raw.paymentStatus ?? raw.PaymentStatus ?? ''),
+      createdAt:       String(raw.createdAt ?? raw.CreatedAt ?? ''),
+      appointment:     String(raw.appointment ?? raw.Appointment ?? ''),
+      eventId:         String(raw.eventId ?? raw.EventId ?? '')
     };
   }
 }
