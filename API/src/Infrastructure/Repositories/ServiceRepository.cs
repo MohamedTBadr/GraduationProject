@@ -43,7 +43,7 @@ namespace Infrastructure.Repositories
                 if (request.VendorId.HasValue)
                     query = query.Where(p => p.VendorId == request.VendorId.Value);
                 if (request.VendorTypeId.HasValue)
-                    query.Where(p => p.Vendor.VendorTypeId == request.VendorTypeId.Value);
+                   query= query.Where(p => p.Vendor.VendorTypeId == request.VendorTypeId.Value);
                 if (request.ServiceTypeId.HasValue)
                     query = query.Where(p => p.ServiceTypeId == request.ServiceTypeId.Value);
 
@@ -60,7 +60,7 @@ namespace Infrastructure.Repositories
                     "servicetype" => request.IsDescending ? query.OrderByDescending(p => p.ServiceType.Name) : query.OrderBy(p => p.ServiceType.Name),
                     _ => query.OrderBy(p => p.Name)
                 };
-
+                
                 // ✅ Phase 1 — SQL only (bounding box + city/region), stays IQueryable
                 query = ApplyLocationSqlFilter(request, query);
 
