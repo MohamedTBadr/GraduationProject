@@ -196,7 +196,7 @@ namespace Infrastructure.Search
             return Task.FromResult<IEnumerable<Guid>>(results);
         }
 
-        public Task<IEnumerable<Guid>> SearchServicesAsync(string query, Guid? serviceTypeId = null, decimal? minPrice = null, decimal? maxPrice = null)
+        public Task<IEnumerable<Guid>> SearchServicesAsync(string query, Guid? serviceTypeId = null, Guid? vendorTypeId = null, decimal? minPrice = null, decimal? maxPrice = null)
         {
             using var reader = DirectoryReader.Open(_directory);
             var searcher = new IndexSearcher(reader);
@@ -212,7 +212,10 @@ namespace Infrastructure.Search
             {
                 booleanQuery.Add(new TermQuery(new Term("ServiceTypeId", serviceTypeId.Value.ToString())), Occur.MUST);
             }
-
+            if (vendorTypeId.HasValue)
+            {
+                booleanQuery.Add(new TermQuery(new Term("VendorTypeId", vendorTypeId.Value.ToString())), Occur.MUST);
+            }
             if (minPrice.HasValue || maxPrice.HasValue)
             {
                 var min = minPrice.HasValue ? (double)minPrice.Value : double.MinValue;

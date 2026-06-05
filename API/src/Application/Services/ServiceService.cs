@@ -22,11 +22,14 @@ namespace Application.Services
             if (!string.IsNullOrWhiteSpace(request.SearchTerm) || 
                 request.ServiceTypeId.HasValue || 
                 request.MinPrice.HasValue || 
-                request.MaxPrice.HasValue)
+                request.MaxPrice.HasValue || 
+                request.VendorTypeId.HasValue
+                )
             {
                 var serviceIds = await _searchService.SearchServicesAsync(
                     request.SearchTerm ?? "", 
                     request.ServiceTypeId, 
+                    request.VendorTypeId,
                     request.MinPrice, 
                     request.MaxPrice);
                 var idList = serviceIds.ToList();
