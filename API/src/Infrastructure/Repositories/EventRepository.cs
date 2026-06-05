@@ -34,6 +34,7 @@ namespace Infrastructure.Repositories
         public async Task<Event?> GetByIdWithItemsAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _context.Events
+                .Include(e => e.User)
                 .Include(e => e.EventType)
 
                 .Include(e => e.EventItems)
@@ -77,6 +78,7 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Event>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
             return await _context.Events
+                .Include(e => e.User)
                 .Include(e => e.EventType)
 
                 .Include(e => e.EventItems)

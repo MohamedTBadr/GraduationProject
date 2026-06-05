@@ -382,6 +382,7 @@ namespace Application.Services
         {
             Id = e.Id,
             UserId = e.UserId,
+            UserName = e.User?.UserName ?? e.User?.Email ?? "",
             Title = e.Title,
 
             EventTypeName = e.EventType?.Name,
@@ -430,6 +431,7 @@ namespace Application.Services
             {
                 Id = i.Id,
                 EventId = i.EventId,
+                ServiceId = i.ServiceId ?? Guid.Empty,
 
                 ServiceImage = service != null
                     ? service.ServiceImages?.FirstOrDefault()?.ToString()

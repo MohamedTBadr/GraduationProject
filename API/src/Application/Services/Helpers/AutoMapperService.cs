@@ -65,7 +65,17 @@ namespace Application.Services.Helpers
                 .ForMember(d => d.ProfilePicture, o => o.Ignore())
                 .ForMember(d => d.Document, o => o.Ignore())
                 .ForMember(d => d.PortfolioLink, o => o.Ignore());
-            CreateMap<VendorListDTO, Vendor>().ReverseMap();
+            CreateMap<Vendor, VendorListDTO>()
+                .ForMember(dest => dest.ServiceType, opt => opt.MapFrom(src => src.VendorType != null ? src.VendorType.Name : string.Empty))
+                .ForMember(dest => dest.VendorType, opt => opt.MapFrom(src => src.VendorType != null ? src.VendorType.Name : string.Empty))
+                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src =>
+                    src.Services != null && src.Services.SelectMany(s => s.ServiceRatings).Any()
+                    ? src.Services.SelectMany(s => s.ServiceRatings).Average(r => r.Rating)
+                    : 0))
+                .ForMember(dest => dest.StartingPrice, opt => opt.MapFrom(src =>
+                    src.Services != null && src.Services.Any()
+                    ? src.Services.Min(s => s.Price)
+                    : 0));
             //CreateMap<Vendor, VendorListDTO>().ForMember(d => d.UserId, o => o.MapFrom(s => s.User.Id));
             CreateMap<ServiceRating, VendorRatingDTO>()
                 .ForMember(dest => dest.VendorName, opt => opt.MapFrom(src => src.Service.Vendor.BusinessName))
