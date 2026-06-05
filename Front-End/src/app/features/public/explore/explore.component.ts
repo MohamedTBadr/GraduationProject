@@ -4,9 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { VendorCardComponent } from '../../../shared/components/vendor-card/vendor-card.component';
 import { ApiVendor, ApiProduct, ServiceType } from '../../../shared/types/api.interfaces';
+import { VendorType } from '../../../core/models/taxonomy.models';
 import { VendorService } from '../../../core/services/vendor.service';
 import { ProductService } from '../../../core/services/product.service';
 import { ServiceTypeService } from '../../../core/services/service-type.service';
+import { VendorTypeService } from '../../../core/services/vendor-type.service';
 import { ModalService } from '../../../shared/services/modal.service';
 import { Subject, takeUntil } from 'rxjs';
 import * as L from 'leaflet';
@@ -43,6 +45,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   activeLoc = '';
   activeRating = 0;
   filters = { type: '', loc: '', rating: 0, searchQuery: '' };
+  vendorTypes: VendorType[] = [];
 
   // ── Service state ────────────────────────────────────────
   services: ApiProduct[] = [];
@@ -110,6 +113,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     private vendorService: VendorService,
     private productService: ProductService,
     private serviceTypeService: ServiceTypeService,
+    private vendorTypeService: VendorTypeService,
     private modalService: ModalService,
     private ngZone: NgZone
   ) {}
@@ -198,14 +202,35 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   // ── Vendor logic ─────────────────────────────────────────
   loadVendors() {
     this.loading = true;
-    this.vendorService.getAll({ pageSize: 1000, pageIndex: 1 }).subscribe({
-      next: (data) => {
-        this.allVendors = data.filter(v => v.status === 'active' || v.isApproved);
-        this.loading = false;
-        this.triggerSearch();
-      },
-      error: () => { this.loading = false; }
-    });
+
+    const doLoad = () => {
+      const typeMatch = this.vendorTypes.find(
+        t => t.name.toLowerCase() === this.filters.type.toLowerCase()
+      );
+      this.vendorService.getAll({
+        pageSize: 1000,
+        pageIndex: 1,
+        searchTerm: this.filters.searchQuery || undefined,
+        city: this.filters.loc || undefined,
+        vendorTypeId: typeMatch?.id,
+      }).subscribe({
+        next: (data) => {
+          this.allVendors = data.filter(v => v.status === 'active' || v.isApproved);
+          this.loading = false;
+          this.triggerSearch();
+        },
+        error: () => { this.loading = false; }
+      });
+    };
+
+    if (this.vendorTypes.length > 0) {
+      doLoad();
+    } else {
+      this.vendorTypeService.getAll().subscribe({
+        next: (types) => { this.vendorTypes = Array.isArray(types) ? types : []; doLoad(); },
+        error: () => doLoad()
+      });
+    }
   }
 
   updateFilters() {
@@ -213,13 +238,15 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     this.filters.loc = this.activeLoc;
     this.filters.rating = this.activeRating;
     this.activePanel = null;
-    this.triggerSearch();
+    this.loadVendors();
   }
 
   triggerSearch() {
     let filtered = this.allVendors.filter(v => {
       const matchType = !this.filters.type || (v.vendorTypeName?.toLowerCase() === this.filters.type.toLowerCase());
-      const matchLoc = !this.filters.loc || (v.location?.toLowerCase() === this.filters.loc.toLowerCase());
+      const matchLoc = !this.filters.loc ||
+        v.location?.toLowerCase().includes(this.filters.loc.toLowerCase()) ||
+        v.serviceAreas?.some(a => a.city?.toLowerCase().includes(this.filters.loc.toLowerCase()));
       const matchRating = (v.rating || 0) >= this.filters.rating;
       const matchQ = !this.filters.searchQuery ||
         v.name.toLowerCase().includes(this.filters.searchQuery.toLowerCase()) ||
@@ -243,8 +270,14 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       error: () => { this.serviceCategories = []; }
     });
 
-    const req: any = { city: this.selectedCity || undefined, pageSize: 1000, pageIndex: 1 };
+    const req: any = {
+      city: this.selectedCity || undefined,
+      pageSize: 1000,
+      pageIndex: 1,
+      searchTerm: this.filters.searchQuery || undefined,
+    };
     if (this.selectedEventTypes.length) req.eventTypeId = this.selectedEventTypes[0];
+    if (this.selectedCategories.length) req.serviceTypeId = this.selectedCategories[0];
 
     this.productService.getAll(req).subscribe({
       next: (data) => {
@@ -259,7 +292,15 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   applyServiceFilters() {
     let f = [...this.services];
     if (this.selectedCategories.length) {
-      f = f.filter(s => this.selectedCategories.includes(s.serviceTypeId ?? '') || this.selectedCategories.includes(s.vendorTypeName ?? ''));
+      const selectedNames = this.serviceCategories
+        .filter(cat => this.selectedCategories.includes(cat.id))
+        .map(cat => cat.name.toLowerCase());
+
+      f = f.filter(s =>
+        (s.serviceTypeId && this.selectedCategories.includes(s.serviceTypeId)) ||
+        (s.serviceTypeName && selectedNames.includes(s.serviceTypeName.toLowerCase())) ||
+        (s.vendorTypeName && selectedNames.includes(s.vendorTypeName.toLowerCase()))
+      );
     }
     f = f.filter(s => (s.price ?? 0) <= this.maxPrice);
     f = f.filter(s => ((s as any).rating || 5) >= this.minRating);
@@ -278,7 +319,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     const i = this.selectedCategories.indexOf(id);
     if (i > -1) this.selectedCategories.splice(i, 1);
     else this.selectedCategories.push(id);
-    this.applyServiceFilters();
+    this.loadServices();
   }
 
   toggleEventType(ev: string) {
@@ -302,7 +343,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  clearServiceType() { this.selectedCategories = []; this.applyServiceFilters(); }
+  clearServiceType() { this.selectedCategories = []; this.loadServices(); }
 
   setMaxPrice(p: number) { this.maxPrice = p; this.applyServiceFilters(); }
   clearMaxPrice() { this.maxPrice = 100000; this.applyServiceFilters(); }

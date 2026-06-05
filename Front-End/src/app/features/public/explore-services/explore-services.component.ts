@@ -135,7 +135,10 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
     if (this.selectedEventTypes.length > 0) {
       request.eventTypeId = this.selectedEventTypes[0];
     }
-    
+    if (this.selectedCategories.length > 0) {
+      request.serviceTypeId = this.selectedCategories[0];
+    }
+
     this.productService.getAll(request).subscribe({
       next: (data) => {
         this.services = Array.isArray(data) ? data : [];
@@ -166,9 +169,14 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
 
     // Service Type / Vendor Type (Multi-select)
     if (this.selectedCategories.length > 0) {
-      filtered = filtered.filter(s => 
-        (s.serviceTypeId && this.selectedCategories.includes(s.serviceTypeId)) || 
-        (s.vendorTypeName && this.selectedCategories.includes(s.vendorTypeName))
+      const selectedNames = this.categories
+        .filter(cat => this.selectedCategories.includes(cat.id))
+        .map(cat => cat.name.toLowerCase());
+
+      filtered = filtered.filter(s =>
+        (s.serviceTypeId && this.selectedCategories.includes(s.serviceTypeId)) ||
+        (s.serviceTypeName && selectedNames.includes(s.serviceTypeName.toLowerCase())) ||
+        (s.vendorTypeName && selectedNames.includes(s.vendorTypeName.toLowerCase()))
       );
     }
 
@@ -289,7 +297,7 @@ export class ExploreServicesComponent implements OnInit, OnDestroy, AfterViewIni
     } else {
       this.selectedCategories.push(cat);
     }
-    this.applyFilters();
+    this.loadData();
   }
 
   toggleEventType(evtId: string) {

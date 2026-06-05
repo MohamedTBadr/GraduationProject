@@ -99,8 +99,9 @@
           <div class="fp-chips">
             <!-- Vendor types -->
             <ng-container *ngIf="activeTab === 'vendors'">
-              <div class="fp-chip" *ngFor="let t of ['Venue','Catering','Decoration','Photography','Entertainment']"
-                [class.selected]="activeType === t" (click)="activeType = t">{{t}}</div>
+              <div class="fp-chip" *ngFor="let t of vendorTypes"
+                [class.selected]="activeType === t.name" (click)="activeType = t.name">{{t.name}}</div>
+              <div class="fp-chip text-[var(--gray)]" *ngIf="vendorTypes.length === 0">Loading…</div>
             </ng-container>
             <!-- Service categories -->
             <ng-container *ngIf="activeTab === 'services'">

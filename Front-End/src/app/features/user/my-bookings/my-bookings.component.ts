@@ -222,7 +222,8 @@ export class MyBookingsComponent implements OnInit {
   loadVouchers() {
     this.voucherService.getReferralLink().subscribe({
       next: (res) => {
-        this.referralLink = res;
+        const code = (res ?? '').trim();
+        this.referralLink = code ? `${window.location.origin}/register?ref=${code}` : '';
       },
       error: (err) => {
         console.error('Failed to load referral link', err);
