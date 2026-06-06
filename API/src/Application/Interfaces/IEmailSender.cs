@@ -11,5 +11,10 @@ namespace Application.Interfaces
         Task SendEmailAsync(string email, string subject, string htmlMessage);
         Task InviteCollaboratorAsync(string email, string eventTitle, string role);
         Task SendCongratulatoryEmailAsync(string userEmail, string userFirstName, string eventTitle);
+        Task SendAccountSuspensionEmailAsync(
+    string userEmail,
+    string userFirstName,
+    string reason,
+    DateTime? suspendedUntil = null);
     }
 }

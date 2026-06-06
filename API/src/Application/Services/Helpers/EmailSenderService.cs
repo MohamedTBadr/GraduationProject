@@ -26,7 +26,20 @@ namespace Application.Services.Helpers
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }
+        // ─────────────────────────────────────────────────────────────
+        //  Account suspension notification
+        // ─────────────────────────────────────────────────────────────
+        public async Task SendAccountSuspensionEmailAsync(
+            string userEmail,
+            string userFirstName,
+            string reason,
+            DateTime? suspendedUntil = null)
+        {
+            string subject = "Your Epic Hub Account Has Been Suspended";
+            string htmlBody = BuildSuspensionHtml(userFirstName, reason, suspendedUntil);
 
+            await SendEmailAsync(userEmail, subject, htmlBody);
+        }
         // ─────────────────────────────────────────────────────────────
         //  Collaborator invitation
         // ─────────────────────────────────────────────────────────────
@@ -328,5 +341,75 @@ namespace Application.Services.Helpers
                           font-family:'Cormorant Garamond',Georgia,serif;line-height:1">{value}</div>
             </div>
             """;
+
+
+        private static string BuildSuspensionHtml(
+        string userFirstName,
+        string reason,
+        DateTime? suspendedUntil) => Wrapper($"""
+        {Header("Account Suspended", "Important notice regarding your account")}
+
+        <div style="background:#F9F6F0;padding:36px">
+          <p style="margin:0 0 6px;font-size:15px;color:#1A2540">
+            Hello <strong style="font-weight:600">{userFirstName}</strong>,
+          </p>
+          <p style="margin:0 0 28px;font-size:14px;color:#243050;line-height:1.7">
+            We regret to inform you that your <strong>Epic Hub</strong> account has been
+            suspended. Please review the details below.
+          </p>
+
+          <!-- Suspension details card -->
+          <div style="background:#FFFFFF;border-top:3px solid #DC2626;border-radius:10px;
+                      padding:20px 22px;margin-bottom:28px;
+                      box-shadow:0 4px 24px rgba(26,37,64,0.08)">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-bottom:14px">
+                  <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;
+                              text-transform:uppercase;color:#6B7280;margin-bottom:6px">Reason</div>
+                  <div style="font-size:14px;color:#1A2540;line-height:1.6">{reason}</div>
+                </td>
+              </tr>
+              <tr>
+                <td style="border-top:1px solid #E8E4DC;padding-top:14px">
+                  <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;
+                              text-transform:uppercase;color:#6B7280;margin-bottom:6px">Status</div>
+                  {(suspendedUntil.HasValue
+                          ? $"""
+                        <div style="font-size:13px;color:#243050;line-height:1.6">
+                          Suspended until
+                          <strong style="color:#DC2626">{suspendedUntil.Value:MMMM dd, yyyy}</strong>
+                        </div>
+                        """
+                          : """
+                        <div style="display:inline-block;background:#FEE2E2;
+                                    border:1px solid #DC2626;border-radius:6px;
+                                    padding:4px 12px;font-size:13px;font-weight:600;
+                                    color:#DC2626;letter-spacing:0.04em">Indefinite</div>
+                        """)}
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <p style="margin:0 0 16px;font-size:14px;color:#243050;line-height:1.7">
+            If you believe this decision was made in error or would like to appeal,
+            please contact our support team and we will review your case as soon as possible.
+          </p>
+          <p style="margin:0 0 28px;font-size:14px;color:#243050;line-height:1.7">
+            During this period, access to your account and all associated services
+            will be restricted.
+          </p>
+
+          <div style="height:1px;background:#E8E4DC;margin-bottom:20px"></div>
+          <p style="margin:0;font-size:11px;color:#6B7280;line-height:1.6">
+            Best regards,<br />
+            <strong style="color:#1A2540">The Epic Hub Team</strong>
+          </p>
+        </div>
+
+        {Footer()}
+        """);
+
     }
 }
