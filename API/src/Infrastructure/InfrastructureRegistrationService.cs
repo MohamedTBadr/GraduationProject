@@ -12,6 +12,8 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Application.Contracts;
+using Infrastructure.Reporting;
 
 namespace Infrastructure
 {
@@ -37,6 +39,10 @@ namespace Infrastructure
             Services.AddScoped<IUserRepository, UserRepository>();
             Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
             Services.AddScoped<IPackageRepository, PackageRepository>();
+
+
+
+            Services.AddScoped<IReportingService, ReportingService>();
             Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             Services.AddScoped<ICompanyInquiryRepository, CompanyInquiryRepository>();
             // 1. Configure DbContext with SQL Server
