@@ -12,7 +12,7 @@ namespace Web.Api.Services
             => _hubContext = hubContext;
 
         public Task SendMessageAsync(string userId, MessageDto message)
-            => _hubContext.Clients.User(userId).SendAsync("ReceivePrivateMessage", message);
+            => _hubContext.Clients.User(userId).SendAsync("ReceiveMessage", message);
 
         public Task NotifyMessageReadAsync(string userId, Guid messageId)
             => _hubContext.Clients.User(userId).SendAsync("MessageRead", messageId);

@@ -144,7 +144,11 @@ namespace Infrastructure.Persistence
                 .HasForeignKey(m => m.SenderId)
                 .OnDelete(DeleteBehavior.NoAction); // ✅ No cascade
 
-
+            builder.Entity<Message>()
+    .HasOne(m => m.Conversation)
+    .WithMany(c => c.Messages)
+    .HasForeignKey(m => m.ConversationId)
+    .OnDelete(DeleteBehavior.Cascade);
 
 
             builder.Entity<Voucher>(

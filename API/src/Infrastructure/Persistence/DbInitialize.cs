@@ -13,6 +13,8 @@ namespace Infrastructure.Persistence
     {
         public async Task IntializeAsync()
         {
+            await context.Messages.ExecuteDeleteAsync();
+            await context.Conversations.ExecuteDeleteAsync();
             await context.Database.MigrateAsync();
 
             var strategy = context.Database.CreateExecutionStrategy();
@@ -3888,14 +3890,14 @@ namespace Infrastructure.Persistence
 
                 var messages = new List<Message>
                 {
-                    Message.Create(customer.Id, cilantroUser.Id, "Hello, we are interested in your royal buffet for our upcoming wedding."),
-                    Message.Create(cilantroUser.Id, customer.Id, "Welcome! We would be delighted to cater for your special day. Could you share the date and expected number of guests?"),
-                    Message.Create(customer.Id, cilantroUser.Id, "We are planning for October 15th, around 200 guests."),
-                    Message.Create(cilantroUser.Id, customer.Id, "Perfect! For 200 guests, I would also recommend looking into our Ultimate VIP package which includes the live cooking station."),
-                    Message.Create(customer.Id, cilantroUser.Id, "That sounds interesting, do you have a detailed menu for that?"),
-                    Message.Create(cilantroUser.Id, customer.Id, "Yes, absolutely! I will send over the brochure shortly. Will there be any dietary restrictions?"),
-                    Message.Create(customer.Id, cilantroUser.Id, "A few vegan guests, maybe 10 people."),
-                    Message.Create(cilantroUser.Id, customer.Id, "Not a problem at all, we can customize a dedicated section for them.")
+                    Message.Create(conv1.Id, customer.Id, cilantroUser.Id, "Hello, we are interested in your royal buffet for our upcoming wedding."),
+                    Message.Create(conv1.Id, cilantroUser.Id, customer.Id, "Welcome! We would be delighted to cater for your special day. Could you share the date and expected number of guests?"),
+                    Message.Create(conv1.Id, customer.Id, cilantroUser.Id, "We are planning for October 15th, around 200 guests."),
+                    Message.Create(conv1.Id, cilantroUser.Id, customer.Id, "Perfect! For 200 guests, I would also recommend looking into our Ultimate VIP package which includes the live cooking station."),
+                    Message.Create(conv1.Id, customer.Id, cilantroUser.Id, "That sounds interesting, do you have a detailed menu for that?"),
+                    Message.Create(conv1.Id, cilantroUser.Id, customer.Id, "Yes, absolutely! I will send over the brochure shortly. Will there be any dietary restrictions?"),
+                    Message.Create(conv1.Id, customer.Id, cilantroUser.Id, "A few vegan guests, maybe 10 people."),
+                    Message.Create(conv1.Id, cilantroUser.Id, customer.Id, "Not a problem at all, we can customize a dedicated section for them.")
                 };
 
                 await context.Messages.AddRangeAsync(messages);
