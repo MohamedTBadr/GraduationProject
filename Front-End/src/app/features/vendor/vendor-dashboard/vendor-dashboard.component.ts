@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { EventService } from '../../../core/services/event.service';
 import { VendorService } from '../../../core/services/vendor.service';
@@ -11,6 +11,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { environment } from '../../../../environments/environment';
+import { normalizeVendorReport, VendorReportView } from '../../../shared/utils/vendor-report.normalizer';
 
 @Component({
   selector: 'app-vendor-dashboard',
@@ -31,7 +32,7 @@ export class VendorDashboardComponent implements OnInit {
   pendingEvents = signal<any[]>([]);
 
   // Analytics report from backend
-  report: any = null;
+  report: VendorReportView = this.emptyReport();
   loading = true;
 
   constructor(
@@ -44,24 +45,31 @@ export class VendorDashboardComponent implements OnInit {
 
   ngOnInit() {
     const user = this.authService.user();
-    if (user) {
-      this.vendorName = user.name || 'Vendor';
-      this.vendorId = user.id;
-      this.loadDashboardData();
+    if (!user) {
+      this.loading = false;
+      return;
     }
+
+    this.vendorName = user.name || 'Vendor';
+    this.vendorId = user.id;
+    this.loadDashboardData();
   }
 
   private loadDashboardData() {
     if (!this.vendorId) return;
 
+    const headers = new HttpHeaders({ IdempotencyKey: crypto.randomUUID() });
+
     forkJoin({
       vendor: this.vendorService.getById(this.vendorId).pipe(catchError(() => of(null))),
       events: this.eventService.getForVendor(this.vendorId).pipe(catchError(() => of([]))),
-      analytics: this.http.post<any>(`${environment.apiUrl}/Dashboard/vendor-report`, {}).pipe(catchError(() => of(null)))
+      analytics: this.http
+        .post<any>(`${environment.apiUrl}/Dashboard/vendor-report`, {}, { headers })
+        .pipe(catchError(() => of(null)))
     }).subscribe({
       next: (data) => {
         this.processVendorStats(data.vendor, data.events as EventResponseDto[]);
-        this.report = data.analytics;
+        this.report = normalizeVendorReport(data.analytics) ?? this.emptyReport();
         this.loading = false;
       },
       error: (err) => {
@@ -70,6 +78,25 @@ export class VendorDashboardComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  private emptyReport(): VendorReportView {
+    return {
+      kpis: {
+        lifetimeRevenue: 0,
+        currentMonthRevenue: 0,
+        lastMonthRevenue: 0,
+        growthPercentage: 0,
+        totalOrders: 0,
+        averageOrderValue: 0,
+        averageMonthlyRevenue: 0
+      },
+      insights: { bestMonth: null, worstMonth: null },
+      topServices: [],
+      revenueHistory: [],
+      recentOrders: [],
+      recommendations: []
+    };
   }
 
   private normalizeId(id: string | null | undefined): string {

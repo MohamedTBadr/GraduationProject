@@ -71,9 +71,4 @@ export class PackageService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/Package/${id}`);
   }
-
-  /** PATCH /Package/{id}/status — toggles active/paused (awaiting backend confirmation) */
-  toggleStatus(packageId: string): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/Package/${packageId}/status`, {});
-  }
 }

@@ -7,29 +7,19 @@
   <button class="vd-btn vd-btn-gold" (click)="openCreateModal()">+ Create Package</button>
 </div>
 
-  <div class="vd-tab-bar">
-    <button class="vd-tab" [class.active]="activeTab === 'Active'" (click)="activeTab = 'Active'">
-      Active ({{ getActiveCount() }})
-    </button>
-    <button class="vd-tab" [class.active]="activeTab === 'Paused'" (click)="activeTab = 'Paused'">
-      Paused ({{ getPausedCount() }})
-    </button>
-  </div>
-
   <!-- Packages list -->
   <div class="vd-tab-pane active" id="packages-active">
-    <div class="p-[40px] text-center text-[#94a3b8] text-[0.95rem] bg-[white] rounded-[12px] [border:1px_dashed_#cbd5e1]" *ngIf="filteredPackages.length === 0">
-      No {{ activeTab.toLowerCase() }} packages found.
+    <div class="p-[40px] text-center text-[#94a3b8] text-[0.95rem] bg-[white] rounded-[12px] [border:1px_dashed_#cbd5e1]" *ngIf="packages.length === 0">
+      No packages found.
     </div>
 
-    <div class="package-card" *ngFor="let pkg of filteredPackages">
+    <div class="package-card" *ngFor="let pkg of packages">
       <div class="card-left">
         <div class="icon-wrapper">{{ pkg.icon }}</div>
 
         <div class="card-details">
           <div class="title-row">
             <div class="pkg-name">{{ pkg.name }}</div>
-            <div class="status-badge" [ngClass]="pkg.status.toLowerCase()">{{ pkg.status }}</div>
           </div>
 
           <div class="price-row">
@@ -56,12 +46,7 @@
       </div>
 
       <div class="card-actions">
-        <div>
-          <button class="btn-edit mb-[8px] block" (click)="openCreateModal(pkg)">Edit</button>
-          <button class="btn-pause mb-[8px] block" (click)="togglePackageStatus(pkg)" [disabled]="togglingPackageId === pkg.id">
-            {{ pkg.status === 'Active' ? 'Pause' : 'Activate' }}
-          </button>
-        </div>
+        <button class="btn-edit mb-[8px] block" (click)="openCreateModal(pkg)">Edit</button>
         <button class="btn-delete" (click)="deletePackage(pkg.id)">Delete</button>
       </div>
     </div>
