@@ -63,15 +63,34 @@ export class ProductService {
     return undefined;
   }
 
+  /** Normalizes a single image reference (URL string or { imagePath } object). */
+  private normalizeImageUrl(value: unknown): string | undefined {
+    if (value == null || value === '') return undefined;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object') {
+      const obj = value as Record<string, unknown>;
+      const path = obj['imagePath'] ?? obj['ImagePath'] ?? obj['url'] ?? obj['Url'];
+      if (typeof path === 'string' && path) return path;
+    }
+    return undefined;
+  }
+
+  private normalizeImageList(raw: unknown): string[] {
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map(item => this.normalizeImageUrl(item))
+      .filter((url): url is string => !!url);
+  }
+
   /** Maps API ServiceDTO fields to ApiProduct. */
   private normalizeProduct(raw: any): ApiProduct {
     if (raw == null || typeof raw !== 'object') {
       return { id: '', name: 'Unknown Service', description: '', price: 0 };
     }
 
-    const images = raw.serviceImages ?? raw.ServiceImages;
-    const firstImage = this.pickField(raw, 'imageUrl', 'ImageUrl')
-      ?? (Array.isArray(images) && images.length > 0 ? images[0] : undefined);
+    const imageUrls = this.normalizeImageList(raw.serviceImages ?? raw.ServiceImages);
+    const firstImage = this.normalizeImageUrl(this.pickField(raw, 'imageUrl', 'ImageUrl'))
+      ?? imageUrls[0];
 
     const priceRaw = this.pickField(raw, 'price', 'Price') ?? 0;
     const price = typeof priceRaw === 'number' ? priceRaw : parseFloat(String(priceRaw));
@@ -103,7 +122,7 @@ export class ProductService {
       serviceTypeId: this.pickField(raw, 'serviceTypeId', 'ServiceTypeId'),
       serviceTypeName: this.pickField(raw, 'serviceTypeName', 'ServiceTypeName'),
       imageUrl: firstImage,
-      imageUrls: Array.isArray(images) ? images : (firstImage ? [firstImage] : []),
+      imageUrls: imageUrls.length ? imageUrls : (firstImage ? [firstImage] : []),
       status: isHidden ? 'paused' : this.mapServiceStatus(raw),
       duration: this.pickField(raw, 'duration', 'Duration')
         ?? (raw.setupDuration != null ? String(raw.setupDuration) : raw.SetupDuration != null ? String(raw.SetupDuration) : undefined),

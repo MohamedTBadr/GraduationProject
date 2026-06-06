@@ -15,9 +15,8 @@ export class ServiceCardComponent {
   @Output() actionClick = new EventEmitter<string>();
 
   get coverImage(): string | null {
-    if (this.service?.imageUrl) {
-      return this.service.imageUrl;
-    }
+    if (this.service?.imageUrl) return this.service.imageUrl;
+    if (this.service?.imageUrls?.length) return this.service.imageUrls[0];
     return null;
   }
 }

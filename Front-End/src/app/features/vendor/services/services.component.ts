@@ -45,6 +45,7 @@ export class ServicesComponent implements OnInit {
 
   serviceForm!: FormGroup;
   uploadedImages: any[] = [];
+  serviceImageUrls: string[] = [];
 
   isDetailModalOpen = false;
   selectedService: ApiProduct | null = null;
@@ -150,11 +151,13 @@ export class ServicesComponent implements OnInit {
         duration: serviceToEdit.duration || 0,
         leadTime: serviceToEdit.leadTime || 0
       });
-      this.uploadedImages = serviceToEdit.imageUrl ? [{ previewUrl: serviceToEdit.imageUrl, status: 'done' }] : [];
+      this.serviceImageUrls = serviceToEdit.imageUrls?.length
+        ? serviceToEdit.imageUrls.filter((u: string) => !!u)
+        : (serviceToEdit.imageUrl ? [serviceToEdit.imageUrl] : []);
     } else {
       this.editingId = null;
       this.serviceForm.reset({ name: '', serviceTypeId: '', eventTypeIds: [], price: 0, description: '' });
-      this.uploadedImages = [];
+      this.serviceImageUrls = [];
     }
     this.isAddServiceModalOpen = true;
   }
@@ -162,6 +165,8 @@ export class ServicesComponent implements OnInit {
   closeAddServiceModal() {
     this.isAddServiceModalOpen = false;
     this.isSubmitting = false;
+    this.uploadedImages = [];
+    this.serviceImageUrls = [];
     this.serviceForm.reset({ name: '', serviceTypeId: '', eventTypeIds: [], price: 0, description: '', duration: 0, leadTime: 0 });
   }
 
@@ -174,6 +179,16 @@ export class ServicesComponent implements OnInit {
   }
 
   onImagesChanged(images: any[]) { this.uploadedImages = images; }
+
+  private appendServiceImages(formData: FormData, fieldName: 'ServiceImages' | 'Images'): void {
+    let index = 0;
+    this.uploadedImages.forEach(img => {
+      if (img.file) {
+        formData.append(`${fieldName}[${index}]`, img.file, img.file.name);
+        index++;
+      }
+    });
+  }
 
   createService() {
     if (this.serviceForm.invalid) { this.serviceForm.markAllAsTouched(); return; }
@@ -192,7 +207,7 @@ export class ServicesComponent implements OnInit {
       formData.append('Price', (val.price || 0).toString());
       if (val.duration != null) formData.append('SetupDuration', val.duration.toString());
       if (val.leadTime != null) formData.append('LeadTimeRequired', val.leadTime.toString());
-      this.uploadedImages.forEach(img => { if (img.file) formData.append('Images', img.file, img.file.name); });
+      this.appendServiceImages(formData, 'Images');
 
       this.productService.update(this.editingId, formData as any).subscribe({
         next: () => { this.isSubmitting = false; this.toastService.show('Service updated successfully', 'success'); this.loadProducts(); this.closeAddServiceModal(); },
@@ -207,7 +222,7 @@ export class ServicesComponent implements OnInit {
       formData.append('Price', (val.price || 0).toString());
       if (val.duration != null) formData.append('SetupDuration', val.duration.toString());
       if (val.leadTime != null) formData.append('LeadTimeRequired', val.leadTime.toString());
-      this.uploadedImages.forEach(img => { if (img.file) formData.append('ServiceImages', img.file, img.file.name); });
+      this.appendServiceImages(formData, 'ServiceImages');
 
       this.productService.create(formData as any).subscribe({
         next: () => { this.isSubmitting = false; this.toastService.show('Service created successfully', 'success'); this.loadProducts(); this.closeAddServiceModal(); },

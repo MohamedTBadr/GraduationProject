@@ -177,7 +177,7 @@
 
       <div class="vd-form-group mt-[16px]">
         <label>Service Images</label>
-        <app-image-upload (imagesChanged)="onImagesChanged($event)"></app-image-upload>
+        <app-image-upload [initialImages]="serviceImageUrls" (imagesChanged)="onImagesChanged($event)"></app-image-upload>
       </div>
 
       <div class="vd-submit-bar [border:none] mt-[24px] pt-[0] flex justify-end gap-[10px]">
