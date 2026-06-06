@@ -343,8 +343,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       searchTerm: this.searchQuery || undefined,
       serviceTypeId: this.selectedServiceTypeId || undefined,
       maxPrice: (!useEventTypeEndpoint && this.maxPrice < MAX_PRICE_ANY) ? this.maxPrice : undefined,
+      // Rating sort is applied client-side; omit sort params so authenticated
+      // customers don't hit a backend bug with isDescending-only requests.
       sortBy: sort.sortBy === 'rating' ? undefined : sort.sortBy,
-      isDescending: sort.isDescending
+      isDescending: sort.sortBy === 'rating' ? undefined : sort.isDescending
     };
 
     const request$ = useEventTypeEndpoint

@@ -137,7 +137,10 @@ export class ProductService {
     if (filters.pageSize) params = params.set('pageSize', filters.pageSize.toString());
     if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
     if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
-    if (filters.isDescending !== undefined) params = params.set('isDescending', filters.isDescending.toString());
+    // Backend returns empty 200 for Customer auth when isDescending is sent without sortBy.
+    if (filters.sortBy && filters.isDescending !== undefined) {
+      params = params.set('isDescending', filters.isDescending.toString());
+    }
     if (filters.city) params = params.set('city', filters.city);
     if (filters.region) params = params.set('region', filters.region);
     if (filters.latitude) params = params.set('latitude', filters.latitude.toString());

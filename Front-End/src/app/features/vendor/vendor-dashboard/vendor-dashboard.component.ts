@@ -72,16 +72,21 @@ export class VendorDashboardComponent implements OnInit {
     });
   }
 
+  private normalizeId(id: string | null | undefined): string {
+    return id == null ? '' : String(id).trim().toLowerCase();
+  }
+
   private processVendorStats(vendor: ApiVendor | null, events: EventResponseDto[]) {
     this.averageRating.set(vendor?.rating || 0);
 
     let pendingCount = 0;
     const upcoming: EventResponseDto[] = [];
     const pending: any[] = [];
+    const vendorIdNorm = this.normalizeId(this.vendorId);
 
     events.forEach(event => {
       event.eventItems?.forEach(item => {
-        if (item.vendorId === this.vendorId) {
+        if (!vendorIdNorm || this.normalizeId(item.vendorId) === vendorIdNorm) {
           if (item.itemStatus === 'Approved') {
             upcoming.push(event);
           } else if (item.itemStatus === 'Pending') {

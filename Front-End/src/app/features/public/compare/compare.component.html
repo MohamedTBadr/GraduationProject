@@ -1,116 +1,140 @@
 <div class="page active" id="page-compare">
-    <div class="container py-[60px] px-[0] min-h-[70vh]">
-        <div class="flex justify-between items-end mb-[24px]">
-            <div>
-                <h2 class="section-title">Compare</h2>
-                <p class="section-sub">Side-by-side comparison to help you make the best choice.</p>
-            </div>
-        </div>
 
-        <div class="compare-tabs mb-[32px]">
-            <button type="button" class="compare-tab" [class.active]="activeTab === 'vendors'" (click)="activeTab = 'vendors'">
-                Vendors ({{ compareService.compareCount() }})
-            </button>
-            <button type="button" class="compare-tab" [class.active]="activeTab === 'services'" (click)="activeTab = 'services'">
-                Services ({{ compareService.serviceCompareCount() }})
-            </button>
-        </div>
+  <div class="explore-hero compare-hero">
+    <h1>Compare</h1>
+    <p>Side-by-side comparison to help you make the best choice</p>
+  </div>
 
-        <!-- Vendors -->
-        <ng-container *ngIf="activeTab === 'vendors'">
-            <div class="flex justify-end mb-[16px]" *ngIf="compareService.compareCount() > 0">
-                <button class="btn btn-outline" (click)="compareService.clearCompare()">Clear All</button>
-            </div>
-
-            <div class="bg-[var(--cream)] p-[40px] rounded-[var(--r2)] text-center" *ngIf="compareService.compareCount() === 0">
-                <h3>No vendors selected for comparison</h3>
-                <p class="text-[var(--gray)] mt-[12px]">Add up to 3 vendors from the Explore page.</p>
-                <button class="btn btn-gold mt-[24px]" routerLink="/explore">Explore Vendors</button>
-            </div>
-
-            <div *ngIf="compareService.compareCount() > 0" class="overflow-x-auto pb-[20px]">
-                <div class="compare-grid">
-                    <div class="compare-col compare-features">
-                        <div class="comp-cell comp-header"></div>
-                        <div class="comp-cell" *ngFor="let f of getVendorFeatures()">{{ f.label }}</div>
-                        <div class="comp-cell">Actions</div>
-                    </div>
-
-                    <div class="compare-col" *ngFor="let v of compareService.compareListItems()">
-                        <div class="comp-cell comp-header relative">
-                            <button type="button" class="absolute bg-[none] [border:none] cursor-pointer text-[var(--gray)] hover:text-[var(--red)] top-[10px] right-[10px]" (click)="compareService.toggleCompare(v)" title="Remove">
-                                <i class="bi bi-x-lg"></i>
-                            </button>
-                            <strong class="block text-[var(--navy)] text-[1.1rem] mb-[4px] overflow-hidden whitespace-nowrap text-ellipsis">{{ v.name }}</strong>
-                            <div class="text-[var(--gray)] text-[.75rem] mb-[12px]">{{ v.vendorTypeName || 'Vendor' }}</div>
-                        </div>
-
-                        <div class="comp-cell" *ngFor="let f of getVendorFeatures()">
-                            <ng-container [ngSwitch]="f.key">
-                                <div *ngSwitchCase="'rating'" class="flex items-center justify-center gap-[4px]">
-                                    <i class="bi bi-star-fill text-[.85rem]" *ngFor="let s of [1,2,3,4,5]"
-                                       [style.color]="s <= (v.rating || 0) ? 'var(--gold)' : 'var(--lgray)'"></i>
-                                    <span *ngIf="v.rating">{{ v.rating }}</span>
-                                    <span *ngIf="!v.rating">New</span>
-                                </div>
-                                <span *ngSwitchDefault>{{ $any(v)[f.key] || '—' }}</span>
-                            </ng-container>
-                        </div>
-
-                        <div class="comp-cell">
-                            <button class="btn btn-navy btn-sm w-[100%] justify-center" [routerLink]="'/vendor/' + v.id">View Profile</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </ng-container>
-
-        <!-- Services -->
-        <ng-container *ngIf="activeTab === 'services'">
-            <div class="flex justify-end mb-[16px]" *ngIf="compareService.serviceCompareCount() > 0">
-                <button class="btn btn-outline" (click)="compareService.clearServiceCompare()">Clear All</button>
-            </div>
-
-            <div class="bg-[var(--cream)] p-[40px] rounded-[var(--r2)] text-center" *ngIf="compareService.serviceCompareCount() === 0">
-                <h3>No services selected for comparison</h3>
-                <p class="text-[var(--gray)] mt-[12px]">Add up to 3 services from the Explore services tab.</p>
-                <button class="btn btn-gold mt-[24px]" routerLink="/explore/services">Explore Services</button>
-            </div>
-
-            <div *ngIf="compareService.serviceCompareCount() > 0" class="overflow-x-auto pb-[20px]">
-                <div class="compare-grid">
-                    <div class="compare-col compare-features">
-                        <div class="comp-cell comp-header"></div>
-                        <div class="comp-cell" *ngFor="let f of getServiceFeatures()">{{ f.label }}</div>
-                        <div class="comp-cell">Actions</div>
-                    </div>
-
-                    <div class="compare-col" *ngFor="let s of compareService.serviceCompareItems()">
-                        <div class="comp-cell comp-header relative">
-                            <button type="button" class="absolute bg-[none] [border:none] cursor-pointer text-[var(--gray)] hover:text-[var(--red)] top-[10px] right-[10px]" (click)="compareService.toggleServiceCompare(s)" title="Remove">
-                                <i class="bi bi-x-lg"></i>
-                            </button>
-                            <strong class="block text-[var(--navy)] text-[1.1rem] mb-[4px] overflow-hidden whitespace-nowrap text-ellipsis">{{ s.name }}</strong>
-                            <div class="text-[var(--gray)] text-[.75rem] mb-[12px]">{{ s.vendorTypeName || s.serviceTypeName || 'Service' }}</div>
-                        </div>
-
-                        <div class="comp-cell" *ngFor="let f of getServiceFeatures()">
-                            <ng-container [ngSwitch]="f.key">
-                                <strong *ngSwitchCase="'price'" class="text-[var(--gold)]">{{ s.price | number:'1.0-0' }} EGP</strong>
-                                <div *ngSwitchCase="'rating'" class="flex items-center justify-center gap-[4px]">
-                                    <span *ngIf="s.rating">{{ s.rating }}</span>
-                                    <span *ngIf="!s.rating">—</span>
-                                </div>
-                                <span *ngSwitchDefault>{{ $any(s)[f.key] || '—' }}</span>
-                            </ng-container>
-                        </div>
-
-                        <div class="comp-cell">
-                            <button class="btn btn-navy btn-sm w-[100%] justify-center" *ngIf="s.vendorId" [routerLink]="'/vendor/' + s.vendorId">View Vendor</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </ng-container>
+  <div class="explore-tabs">
+    <div class="et-inner container">
+      <button type="button" class="et-tab" [class.active]="activeTab === 'vendors'" (click)="switchTab('vendors')">
+        <i class="bi bi-shop"></i> Vendors ({{ compareService.compareCount() }})
+      </button>
+      <button type="button" class="et-tab" [class.active]="activeTab === 'services'" (click)="switchTab('services')">
+        <i class="bi bi-grid-3x3-gap"></i> Services ({{ compareService.serviceCompareCount() }})
+      </button>
     </div>
+  </div>
+
+  <div class="container compare-content">
+
+    <!-- Vendors -->
+    <ng-container *ngIf="activeTab === 'vendors'">
+      <div class="compare-toolbar" *ngIf="compareService.compareCount() > 0">
+        <p class="compare-count">Comparing <strong>{{ compareService.compareCount() }}</strong> of 3 vendors</p>
+        <button type="button" class="btn btn-outline btn-sm" (click)="compareService.clearCompare()">
+          <i class="bi bi-trash3"></i> Clear All
+        </button>
+      </div>
+
+      <div class="compare-empty-card" *ngIf="compareService.compareCount() === 0">
+        <div class="compare-empty-icon"><i class="bi bi-arrow-left-right"></i></div>
+        <h3>No vendors selected for comparison</h3>
+        <p>Add up to 3 vendors from the Explore page using the compare button on each card.</p>
+        <button type="button" class="btn btn-gold" routerLink="/explore">Explore Vendors</button>
+      </div>
+
+      <div class="compare-cards-grid" *ngIf="compareService.compareCount() > 0">
+        <article class="compare-card" *ngFor="let v of compareService.compareListItems()">
+          <header class="compare-card-header">
+            <button type="button" class="compare-card-remove" (click)="compareService.toggleCompare(v)" title="Remove">
+              <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="compare-card-avatar" *ngIf="v.profilePictureUrl; else vendorInitial">
+              <img [src]="v.profilePictureUrl" [alt]="v.name" />
+            </div>
+            <ng-template #vendorInitial>
+              <div class="compare-card-avatar compare-card-avatar--initial">{{ v.name.charAt(0) }}</div>
+            </ng-template>
+            <h3 class="compare-card-name">{{ v.name }}</h3>
+            <p class="compare-card-cat">{{ v.vendorTypeName || 'Vendor' }}</p>
+          </header>
+
+          <dl class="compare-specs">
+            <div class="compare-spec" *ngFor="let f of getVendorFeatures()">
+              <dt>{{ f.label }}</dt>
+              <dd>
+                <ng-container [ngSwitch]="f.key">
+                  <div *ngSwitchCase="'rating'" class="compare-rating">
+                    <ng-container *ngIf="v.rating; else vendorNew">
+                      <i class="bi bi-star-fill" *ngFor="let s of [1,2,3,4,5]"
+                         [class.star-filled]="s <= (v.rating || 0)"
+                         [class.star-empty]="s > (v.rating || 0)"></i>
+                      <span>{{ v.rating | number:'1.1-1' }}</span>
+                    </ng-container>
+                    <ng-template #vendorNew><span class="compare-muted">New</span></ng-template>
+                  </div>
+                  <span *ngSwitchDefault>{{ formatVendorValue(v, f.key) }}</span>
+                </ng-container>
+              </dd>
+            </div>
+          </dl>
+
+          <footer class="compare-card-footer">
+            <a class="btn compare-card-btn w-full justify-center" [routerLink]="'/vendor/' + v.id">View Profile</a>
+          </footer>
+        </article>
+      </div>
+    </ng-container>
+
+    <!-- Services -->
+    <ng-container *ngIf="activeTab === 'services'">
+      <div class="compare-toolbar" *ngIf="compareService.serviceCompareCount() > 0">
+        <p class="compare-count">Comparing <strong>{{ compareService.serviceCompareCount() }}</strong> of 3 services</p>
+        <button type="button" class="btn btn-outline btn-sm" (click)="compareService.clearServiceCompare()">
+          <i class="bi bi-trash3"></i> Clear All
+        </button>
+      </div>
+
+      <div class="compare-empty-card" *ngIf="compareService.serviceCompareCount() === 0">
+        <div class="compare-empty-icon"><i class="bi bi-grid-3x3-gap"></i></div>
+        <h3>No services selected for comparison</h3>
+        <p>Add up to 3 services from the Explore services tab using the compare button on each card.</p>
+        <button type="button" class="btn btn-gold" routerLink="/explore/services">Explore Services</button>
+      </div>
+
+      <div class="compare-cards-grid" *ngIf="compareService.serviceCompareCount() > 0">
+        <article class="compare-card" *ngFor="let s of compareService.serviceCompareItems()">
+          <header class="compare-card-header">
+            <button type="button" class="compare-card-remove" (click)="compareService.toggleServiceCompare(s)" title="Remove">
+              <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="compare-card-thumb" *ngIf="s.imageUrl; else servicePlaceholder">
+              <img [src]="s.imageUrl" [alt]="s.name" />
+            </div>
+            <ng-template #servicePlaceholder>
+              <div class="compare-card-thumb compare-card-thumb--placeholder"><i class="bi bi-image"></i></div>
+            </ng-template>
+            <h3 class="compare-card-name">{{ s.name }}</h3>
+            <p class="compare-card-cat">{{ s.serviceTypeName || s.vendorTypeName || 'Service' }}</p>
+          </header>
+
+          <dl class="compare-specs">
+            <div class="compare-spec" *ngFor="let f of getServiceFeatures()">
+              <dt>{{ f.label }}</dt>
+              <dd>
+                <ng-container [ngSwitch]="f.key">
+                  <strong *ngSwitchCase="'price'" class="compare-price">{{ s.price | number:'1.0-0' }} EGP</strong>
+                  <div *ngSwitchCase="'rating'" class="compare-rating">
+                    <ng-container *ngIf="s.rating; else serviceNoRating">
+                      <i class="bi bi-star-fill star-filled"></i>
+                      <span>{{ s.rating | number:'1.1-1' }}</span>
+                    </ng-container>
+                    <ng-template #serviceNoRating><span class="compare-muted">—</span></ng-template>
+                  </div>
+                  <span *ngSwitchDefault>{{ formatServiceValue(s, f.key) }}</span>
+                </ng-container>
+              </dd>
+            </div>
+          </dl>
+
+          <footer class="compare-card-footer">
+            <a *ngIf="s.vendorId" class="btn compare-card-btn w-full justify-center" [routerLink]="'/vendor/' + s.vendorId">View Vendor</a>
+            <span *ngIf="!s.vendorId" class="compare-muted">No vendor linked</span>
+          </footer>
+        </article>
+      </div>
+    </ng-container>
+
+  </div>
 </div>
