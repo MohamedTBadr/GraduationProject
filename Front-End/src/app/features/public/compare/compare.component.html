@@ -99,8 +99,8 @@
             <button type="button" class="compare-card-remove" (click)="compareService.toggleServiceCompare(s)" title="Remove">
               <i class="bi bi-x-lg"></i>
             </button>
-            <div class="compare-card-thumb" *ngIf="s.imageUrl; else servicePlaceholder">
-              <img [src]="s.imageUrl" [alt]="s.name" />
+            <div class="compare-card-thumb" *ngIf="getServiceCover(s) as cover; else servicePlaceholder">
+              <img [src]="cover" [alt]="s.name" />
             </div>
             <ng-template #servicePlaceholder>
               <div class="compare-card-thumb compare-card-thumb--placeholder"><i class="bi bi-image"></i></div>

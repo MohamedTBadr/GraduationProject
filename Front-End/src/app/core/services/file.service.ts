@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { FileUploadResponse } from '../../shared/types/api.interfaces';
 
@@ -19,6 +20,15 @@ export class FileService {
   upload(file: File, fieldName = 'file'): Observable<FileUploadResponse> {
     const formData = new FormData();
     formData.append(fieldName, file, file.name);
-    return this.http.post<FileUploadResponse>(`${this.apiUrl}/files/upload`, formData);
+    return this.http.post<any>(`${this.apiUrl}/files/upload`, formData).pipe(
+      map(res => {
+        const data = res?.value ?? res?.Value ?? res ?? {};
+        return {
+          url: data.url ?? data.Url ?? '',
+          fileName: data.fileName ?? data.FileName ?? file.name,
+          size: data.size ?? data.Size ?? file.size
+        };
+      })
+    );
   }
 }

@@ -194,16 +194,19 @@
     <button class="vd-modal-close" (click)="closeDetailModal()">&times;</button>
 
     <div class="flex items-center gap-[16px] mb-[20px]">
-      <img class="w-[80px] h-[80px] rounded-[12px] object-cover shrink-0 [box-shadow:0_4px_12px_rgba(0,0,0,0.08)]" *ngIf="selectedService.imageUrl; else detailFallbackIcon" [src]="selectedService.imageUrl">
-      <ng-template #detailFallbackIcon>
-        <div class="text-[3rem] bg-[#f8fafc] rounded-[12px] w-[80px] h-[80px] flex items-center justify-center shrink-0">
-          <i class="bi bi-tools"></i>
-        </div>
-      </ng-template>
+      <img class="w-[80px] h-[80px] rounded-[12px] object-cover shrink-0 [box-shadow:0_4px_12px_rgba(0,0,0,0.08)]" *ngIf="getServiceCover(selectedService) as cover" [src]="cover">
+      <div class="text-[3rem] bg-[#f8fafc] rounded-[12px] w-[80px] h-[80px] flex items-center justify-center shrink-0" *ngIf="!getServiceCover(selectedService)">
+        <i class="bi bi-tools"></i>
+      </div>
       <div>
         <div class="text-[1.4rem] font-bold text-[#1e3a5f]">{{ selectedService.name }}</div>
         <div class="text-[#b34a6c] font-semibold text-[1.1rem] mt-[4px]">{{ selectedService.price | currency:'EGP' }}</div>
       </div>
+    </div>
+
+    <div class="flex gap-[8px] overflow-x-auto mb-[16px] pb-[4px]" *ngIf="getServiceImages(selectedService).length > 1">
+      <img *ngFor="let img of getServiceImages(selectedService)" [src]="img" [alt]="selectedService.name"
+           class="w-[72px] h-[72px] rounded-[10px] object-cover shrink-0 [box-shadow:0_2px_8px_rgba(0,0,0,0.08)]">
     </div>
 
     <div class="text-[#64748b] mb-[20px] text-[0.95rem] leading-[1.6]">{{ selectedService.description }}</div>

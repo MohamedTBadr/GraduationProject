@@ -19,6 +19,7 @@ import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 import { ServiceAreaDTO } from '../../../shared/types/api.interfaces';
 import { EGYPT_CITY_OPTIONS } from '../../../shared/constants/egypt-locations';
 import { matchesLocation } from '../../../shared/utils/location.utils';
+import { getProductCoverImage } from '../../../shared/utils/image.utils';
 import * as L from 'leaflet';
 const MAX_PRICE_ANY = 100000;
 
@@ -665,6 +666,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   bookService(svc: ApiProduct) {
     this.closePreview();
     this.modalService.open('service-detail', svc);
+  }
+
+  getServiceCover(svc: ApiProduct): string | null {
+    return getProductCoverImage(svc);
   }
 
   private getPreviewImages(svc: ApiProduct): string[] {

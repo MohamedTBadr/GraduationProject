@@ -14,9 +14,11 @@ export class ReviewService {
 
   /** POST /Service/{serviceId}/ratings — backend sets userId from token */
   submitReview(payload: CreateReviewDto): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/Service/${payload.serviceId}/ratings`, {
+    const body: Record<string, unknown> = {
       rating: payload.rating,
       review: payload.review
-    });
+    };
+    if (payload.photoUrl) body['photoUrl'] = payload.photoUrl;
+    return this.http.post<void>(`${this.apiUrl}/Service/${payload.serviceId}/ratings`, body);
   }
 }

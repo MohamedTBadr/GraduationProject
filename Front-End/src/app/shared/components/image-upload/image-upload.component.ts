@@ -6,6 +6,8 @@ export interface UploadedImage {
   previewUrl: string | ArrayBuffer | null;
   progress?: number;
   status?: 'pending' | 'uploading' | 'done' | 'error';
+  /** True when loaded from server URL (no local File yet). */
+  existing?: boolean;
 }
 
 @Component({
@@ -27,7 +29,8 @@ export class ImageUploadComponent {
       .filter(url => !!url)
       .map(url => ({
         previewUrl: url,
-        status: 'done' as const
+        status: 'done' as const,
+        existing: true
       }));
     this.emitChanges();
   }
@@ -75,16 +78,26 @@ export class ImageUploadComponent {
     if (!this.multiple && newFiles.length > 0) {
       this.processFile(newFiles[0], true);
     } else {
-      if (this.images.length + newFiles.length > this.maxFiles) {
+      const slotsLeft = this.maxFiles - this.images.length;
+      if (slotsLeft <= 0) {
         this.errorMsg = `You can only upload up to ${this.maxFiles} images.`;
         return;
       }
-      newFiles.forEach(file => this.processFile(file, false));
+      const toAdd = newFiles.slice(0, slotsLeft);
+      if (toAdd.length < newFiles.length) {
+        this.errorMsg = `Only ${toAdd.length} of ${newFiles.length} files were added (max ${this.maxFiles} total).`;
+      }
+      toAdd.forEach(file => this.processFile(file, false));
     }
   }
 
+  private isAcceptedImage(file: File): boolean {
+    if (this.acceptFormats.includes(file.type)) return true;
+    return /\.(jpe?g|png|webp)$/i.test(file.name);
+  }
+
   processFile(file: File, clearExisting: boolean) {
-    if (!this.acceptFormats.includes(file.type)) {
+    if (!this.isAcceptedImage(file)) {
       this.errorMsg = `File ${file.name} is not a supported format. Max allowed formats: JPG, PNG, WebP.`;
       return;
     }

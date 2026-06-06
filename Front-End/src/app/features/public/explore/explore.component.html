@@ -230,8 +230,8 @@
       <div class="svc-explore-grid" [class.list-view]="viewMode === 'list'">
         <div class="svc-card" *ngFor="let svc of filteredServices" (click)="openPreview(svc)">
           <div class="svc-card-img">
-            <img *ngIf="svc.imageUrl" [src]="svc.imageUrl" alt="" />
-            <span *ngIf="!svc.imageUrl" class="svc-img-placeholder"><i class="bi bi-image"></i></span>
+            <img *ngIf="getServiceCover(svc) as cover" [src]="cover" alt="" />
+            <span *ngIf="!getServiceCover(svc)" class="svc-img-placeholder"><i class="bi bi-image"></i></span>
             <div class="svc-card-top">
               <span class="svc-cat-badge">{{ svc.vendorTypeName || svc.serviceTypeName }}</span>
               <div class="svc-card-actions">

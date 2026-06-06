@@ -16,6 +16,7 @@ import {
   appendServiceAreasToFormData,
   normalizeAddressFields
 } from '../../../shared/utils/location.utils';
+import { appendFormFile } from '../../../shared/utils/form-data.utils';
 
 @Component({
   selector: 'app-vendor-join',
@@ -81,25 +82,41 @@ export class VendorJoinComponent implements OnInit {
     });
   }
 
-  onDocumentSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedDocument = file;
+  private readonly maxProfileMb = 5;
+  private readonly maxDocumentMb = 10;
+
+  onDocumentSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (file.size > this.maxDocumentMb * 1024 * 1024) {
+      this.toastService.show(`Document must be under ${this.maxDocumentMb}MB`, 'error');
+      input.value = '';
+      return;
     }
+    this.selectedDocument = file;
   }
 
-  onProfilePictureSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedProfilePicture = file;
-      
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.profilePreviewUrl = reader.result as string;
-      };
-      reader.readAsDataURL(file);
+  onProfilePictureSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/') && !/\.(jpe?g|png|webp)$/i.test(file.name)) {
+      this.toastService.show('Profile picture must be JPG, PNG, or WebP', 'error');
+      input.value = '';
+      return;
     }
+    if (file.size > this.maxProfileMb * 1024 * 1024) {
+      this.toastService.show(`Profile picture must be under ${this.maxProfileMb}MB`, 'error');
+      input.value = '';
+      return;
+    }
+    this.selectedProfilePicture = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.profilePreviewUrl = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
   onSubmit() {
@@ -115,9 +132,9 @@ export class VendorJoinComponent implements OnInit {
     const formData = new FormData();
     const formValue = this.vendorForm.getRawValue();
 
-    // Append standard fields
+    // Append standard fields (files and nested objects handled separately)
     Object.keys(formValue).forEach(key => {
-      if (key !== 'address' && key !== 'serviceAreas') {
+      if (key !== 'address' && key !== 'serviceAreas' && key !== 'portfolioLink') {
         formData.append(key, formValue[key]);
       }
     });
@@ -137,13 +154,8 @@ export class VendorJoinComponent implements OnInit {
       ]);
     }
 
-    // Append Files
-    if (this.selectedDocument) {
-      formData.append('Document', this.selectedDocument);
-    }
-    if (this.selectedProfilePicture) {
-      formData.append('ProfilePicture', this.selectedProfilePicture);
-    }
+    appendFormFile(formData, 'Document', this.selectedDocument);
+    appendFormFile(formData, 'ProfilePicture', this.selectedProfilePicture);
 
     this.vendorService.create(formData).subscribe({
       next: () => {

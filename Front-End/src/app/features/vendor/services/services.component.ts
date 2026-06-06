@@ -12,6 +12,9 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 import { EventType } from '../../../core/models/taxonomy.models';
 import { EventTypeService } from '../../../core/services/event-type.service';
 import { PackageService, ApiPackage } from '../../../core/services/package.service';
+import { appendFormFileList } from '../../../shared/utils/form-data.utils';
+import { getProductCoverImage, getProductImageUrls, urlToFile } from '../../../shared/utils/image.utils';
+import { UploadedImage } from '../../../shared/components/image-upload/image-upload.component';
 
 @Component({
   selector: 'app-services',
@@ -44,7 +47,7 @@ export class ServicesComponent implements OnInit {
   editingId: string | null = null;
 
   serviceForm!: FormGroup;
-  uploadedImages: any[] = [];
+  uploadedImages: UploadedImage[] = [];
   serviceImageUrls: string[] = [];
 
   isDetailModalOpen = false;
@@ -151,9 +154,7 @@ export class ServicesComponent implements OnInit {
         duration: serviceToEdit.duration || 0,
         leadTime: serviceToEdit.leadTime || 0
       });
-      this.serviceImageUrls = serviceToEdit.imageUrls?.length
-        ? serviceToEdit.imageUrls.filter((u: string) => !!u)
-        : (serviceToEdit.imageUrl ? [serviceToEdit.imageUrl] : []);
+      this.serviceImageUrls = getProductImageUrls(serviceToEdit);
     } else {
       this.editingId = null;
       this.serviceForm.reset({ name: '', serviceTypeId: '', eventTypeIds: [], price: 0, description: '' });
@@ -178,56 +179,99 @@ export class ServicesComponent implements OnInit {
     this.serviceForm.get('eventTypeIds')?.setValue(currentList);
   }
 
-  onImagesChanged(images: any[]) { this.uploadedImages = images; }
+  onImagesChanged(images: UploadedImage[]) { this.uploadedImages = images; }
 
-  private appendServiceImages(formData: FormData, fieldName: 'ServiceImages' | 'Images'): void {
-    let index = 0;
-    this.uploadedImages.forEach(img => {
+  getServiceCover(service: ApiProduct): string | null {
+    return getProductCoverImage(service);
+  }
+
+  getServiceImages(service: ApiProduct): string[] {
+    return getProductImageUrls(service);
+  }
+
+  private collectNewImageFiles(): File[] {
+    return this.uploadedImages
+      .filter(img => !!img.file)
+      .map(img => img.file!);
+  }
+
+  /** On update the API replaces all images — re-include kept server URLs as files. */
+  private async collectAllImageFilesForUpdate(): Promise<File[]> {
+    const files: File[] = [];
+    for (const img of this.uploadedImages) {
       if (img.file) {
-        formData.append(`${fieldName}[${index}]`, img.file, img.file.name);
-        index++;
+        files.push(img.file);
+        continue;
       }
-    });
+      const url = typeof img.previewUrl === 'string' ? img.previewUrl : null;
+      if (url && !url.startsWith('data:')) {
+        const existing = await urlToFile(url);
+        if (existing) files.push(existing);
+      }
+    }
+    return files;
   }
 
   createService() {
     if (this.serviceForm.invalid) { this.serviceForm.markAllAsTouched(); return; }
     if (this.isSubmitting) return;
-    this.isSubmitting = true;
+    void this.submitService();
+  }
 
+  private async submitService(): Promise<void> {
+    this.isSubmitting = true;
     const val = this.serviceForm.value;
 
-    if (this.editingId) {
-      const formData = new FormData();
-      formData.append('Id', this.editingId);
-      formData.append('Name', val.name);
-      formData.append('Description', val.description);
-      formData.append('ServiceTypeId', val.serviceTypeId);
-      if (val.eventTypeIds?.length) val.eventTypeIds.forEach((id: string) => formData.append('EventTypeIds', id));
-      formData.append('Price', (val.price || 0).toString());
-      if (val.duration != null) formData.append('SetupDuration', val.duration.toString());
-      if (val.leadTime != null) formData.append('LeadTimeRequired', val.leadTime.toString());
-      this.appendServiceImages(formData, 'Images');
+    try {
+      const imageFiles = this.editingId
+        ? await this.collectAllImageFilesForUpdate()
+        : this.collectNewImageFiles();
 
-      this.productService.update(this.editingId, formData as any).subscribe({
-        next: () => { this.isSubmitting = false; this.toastService.show('Service updated successfully', 'success'); this.loadProducts(); this.closeAddServiceModal(); },
-        error: (err) => { this.isSubmitting = false; console.error('Failed to update service', err); this.toastService.show('Failed to update service', 'error'); }
-      });
-    } else {
-      const formData = new FormData();
-      formData.append('Name', val.name);
-      formData.append('Description', val.description);
-      formData.append('ServiceTypeId', val.serviceTypeId);
-      if (val.eventTypeIds?.length) val.eventTypeIds.forEach((id: string) => formData.append('EventTypeIds', id));
-      formData.append('Price', (val.price || 0).toString());
-      if (val.duration != null) formData.append('SetupDuration', val.duration.toString());
-      if (val.leadTime != null) formData.append('LeadTimeRequired', val.leadTime.toString());
-      this.appendServiceImages(formData, 'ServiceImages');
+      if (this.editingId && imageFiles.length < this.uploadedImages.length) {
+        this.toastService.show(
+          'Some existing images could not be kept. Remove them or re-select all images you want to save.',
+          'error'
+        );
+        this.isSubmitting = false;
+        return;
+      }
 
-      this.productService.create(formData as any).subscribe({
-        next: () => { this.isSubmitting = false; this.toastService.show('Service created successfully', 'success'); this.loadProducts(); this.closeAddServiceModal(); },
-        error: (err) => { this.isSubmitting = false; console.error('Error creating service:', err); this.toastService.show('Failed to create service', 'error'); }
-      });
+      if (this.editingId) {
+        const formData = new FormData();
+        formData.append('Id', this.editingId);
+        formData.append('Name', val.name);
+        formData.append('Description', val.description);
+        formData.append('ServiceTypeId', val.serviceTypeId);
+        if (val.eventTypeIds?.length) val.eventTypeIds.forEach((id: string) => formData.append('EventTypeIds', id));
+        formData.append('Price', (val.price || 0).toString());
+        if (val.duration != null) formData.append('SetupDuration', val.duration.toString());
+        if (val.leadTime != null) formData.append('LeadTimeRequired', val.leadTime.toString());
+        if (imageFiles.length) appendFormFileList(formData, 'Images', imageFiles);
+
+        this.productService.update(this.editingId, formData as any).subscribe({
+          next: () => { this.isSubmitting = false; this.toastService.show('Service updated successfully', 'success'); this.loadProducts(); this.closeAddServiceModal(); },
+          error: (err) => { this.isSubmitting = false; console.error('Failed to update service', err); this.toastService.show('Failed to update service', 'error'); }
+        });
+      } else {
+        const formData = new FormData();
+        formData.append('Name', val.name);
+        formData.append('Description', val.description);
+        formData.append('ServiceTypeId', val.serviceTypeId);
+        if (val.eventTypeIds?.length) val.eventTypeIds.forEach((id: string) => formData.append('EventTypeIds', id));
+        formData.append('Price', (val.price || 0).toString());
+        if (val.duration != null) formData.append('SetupDuration', val.duration.toString());
+        if (val.leadTime != null) formData.append('LeadTimeRequired', val.leadTime.toString());
+        if (imageFiles.length) appendFormFileList(formData, 'ServiceImages', imageFiles);
+
+        this.productService.create(formData as any).subscribe({
+          next: () => { this.isSubmitting = false; this.toastService.show('Service created successfully', 'success'); this.loadProducts(); this.closeAddServiceModal(); },
+          error: (err) => { this.isSubmitting = false; console.error('Error creating service:', err); this.toastService.show('Failed to create service', 'error'); }
+        });
+      }
+    } catch (err) {
+      this.isSubmitting = false;
+      console.error('Failed to prepare service images', err);
+      this.toastService.show('Failed to prepare images for upload', 'error');
     }
   }
 
