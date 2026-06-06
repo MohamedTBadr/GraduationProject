@@ -6,6 +6,7 @@ import { EventService } from '../../../core/services/event.service';
 import { EventResponseDto, EventItemResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { formatEventLocation } from '../../../shared/utils/location.utils';
 
 export interface Booking {
   id: string; // itemId
@@ -16,6 +17,7 @@ export interface Booking {
   dateStr: string;
   value: number;
   guests?: number;
+  location?: string;
   note?: string;
   status: 'Pending' | 'Approved' | 'Paid' | 'Rejected' | 'Done' | 'Completed';
   stars?: number;
@@ -227,6 +229,7 @@ export class BookingsComponent implements OnInit {
             dateStr: event.eventDate,
             value: item.price * item.quantity,
             guests: event.guestCount,
+            location: formatEventLocation(event.location),
             note: event.notes,
             status: effectiveStatus,
             rejectionReason: item.rejectionReason

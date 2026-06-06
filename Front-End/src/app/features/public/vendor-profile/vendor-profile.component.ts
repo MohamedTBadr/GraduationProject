@@ -14,6 +14,7 @@ import { VendorCardComponent } from '../../../shared/components/vendor-card/vend
 import { EventTypeService } from '../../../core/services/event-type.service';
 import { EventType } from '../../../core/models/taxonomy.models';
 import { ModalService } from '../../../shared/services/modal.service';
+import { formatVendorLocation } from '../../../shared/utils/location.utils';
 
 @Component({
   selector: 'app-vendor-profile',
@@ -63,6 +64,10 @@ export class VendorProfileComponent implements OnInit {
   get startingPrice(): number {
     const priced = this.products.filter(p => p.price > 0).map(p => p.price);
     return priced.length > 0 ? Math.min(...priced) : 0;
+  }
+
+  get locationLabel(): string {
+    return formatVendorLocation(this.vendor);
   }
 
   constructor(

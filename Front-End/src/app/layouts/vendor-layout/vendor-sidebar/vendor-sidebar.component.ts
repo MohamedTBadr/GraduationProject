@@ -8,6 +8,7 @@ import { ChatService } from '../../../core/services/chat.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 import { ApiVendor, EventResponseDto } from '../../../shared/types/api.interfaces';
+import { formatVendorLocation } from '../../../shared/utils/location.utils';
 
 @Component({
   selector: 'app-vendor-sidebar',
@@ -45,7 +46,7 @@ export class VendorSidebarComponent implements OnInit {
     this.vendorService.getById(user.id).subscribe({
       next: (vendor: ApiVendor) => {
         this.vendorCategory = vendor.vendorTypeName || 'Vendor';
-        this.vendorLocation = vendor.location || '';
+        this.vendorLocation = formatVendorLocation(vendor);
       },
       error: () => {
         this.vendorCategory = 'Vendor';

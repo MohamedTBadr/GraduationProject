@@ -27,6 +27,7 @@
             <div class="event-hero-title">{{activeEvent.name}}</div>
             <div class="event-hero-meta">
                 <i class="bi bi-calendar3"></i> {{activeEvent.date}} · {{activeEvent.type}} · {{activeEvent.guests}} guests
+                <span *ngIf="activeEvent.locationLabel"> · <i class="bi bi-geo-alt-fill"></i> {{ activeEvent.locationLabel }}</span>
             </div>
             <button class="btn btn-gold btn-sm mt-3 inline-flex items-center gap-[6px]" (click)="openAiStudio()">
                 <i class="bi bi-stars"></i> Gemini Event Studio

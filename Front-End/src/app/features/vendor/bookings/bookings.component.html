@@ -77,6 +77,7 @@
       <div class="vd-bk-meta">
         <span><i class="bi bi-tools"></i> {{b.service}}</span>
         <span *ngIf="b.guests"><i class="bi bi-people"></i> {{b.guests}} guests</span>
+        <span *ngIf="b.location"><i class="bi bi-geo-alt-fill"></i> {{ b.location }}</span>
         <span class="bk-value"><i class="bi bi-currency-dollar"></i> {{b.value | number:'1.0-0'}} EGP</span>
       </div>
 

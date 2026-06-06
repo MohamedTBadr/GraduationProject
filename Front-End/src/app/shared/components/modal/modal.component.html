@@ -46,8 +46,24 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Location / Venue</label>
-                    <input type="text" [(ngModel)]="eventData.location" placeholder="Venue name or area" />
+                    <label>Street / Venue (optional)</label>
+                    <input type="text" [(ngModel)]="eventData.street" placeholder="Venue name or street" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City *</label>
+                        <select [(ngModel)]="eventData.city" (ngModelChange)="onEventCityChange($event)">
+                            <option value="" disabled>Select city</option>
+                            <option *ngFor="let c of cityOptions" [value]="c">{{ c }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Governorate *</label>
+                        <select [(ngModel)]="eventData.state">
+                            <option value="" disabled>Select governorate</option>
+                            <option *ngFor="let g of governorateOptions" [value]="g">{{ g }}</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Special Requirements</label>

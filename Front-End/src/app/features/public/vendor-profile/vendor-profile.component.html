@@ -54,8 +54,8 @@
                   <span class="vp-rating-badge" *ngIf="vendor.rating">
                     <i class="bi bi-star-fill"></i> {{ vendor.rating }}
                   </span>
-                  <span class="vp-meta-chip" *ngIf="vendor.location">
-                    <i class="bi bi-geo-alt-fill"></i> {{ vendor.location }}
+                  <span class="vp-meta-chip" *ngIf="locationLabel">
+                    <i class="bi bi-geo-alt-fill"></i> {{ locationLabel }}
                   </span>
                   <span class="vp-meta-chip vp-meta-type">
                     <i class="bi bi-tag-fill"></i> {{ vendor.vendorTypeName || 'Vendor' }}
@@ -248,9 +248,9 @@
                 <i class="bi bi-telephone"></i>
                 <a [href]="'tel:' + vendor.phone">{{ vendor.phone }}</a>
               </div>
-              <div class="vp-contact-row" *ngIf="vendor.location">
+              <div class="vp-contact-row" *ngIf="locationLabel">
                 <i class="bi bi-geo-alt"></i>
-                <span>{{ vendor.location }}</span>
+                <span>{{ locationLabel }}</span>
               </div>
               <div class="vp-contact-note">
                 <i class="bi bi-clock"></i>

@@ -7,6 +7,12 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { CreateEventDto } from '../../../shared/types/api.interfaces';
 import { EventTypeService } from '../../../core/services/event-type.service';
+import {
+  EGYPT_CITY_OPTIONS,
+  EGYPT_GOVERNORATE_OPTIONS,
+  getLocationByCity
+} from '../../../shared/constants/egypt-locations';
+import { normalizeAddressFields } from '../../../shared/utils/location.utils';
 
 
 @Component({
@@ -31,6 +37,8 @@ export class AddEventComponent implements OnInit {
 
   selectedEventType: any = null;
   eventForm: FormGroup;
+  readonly cityOptions = EGYPT_CITY_OPTIONS;
+  readonly governorateOptions = EGYPT_GOVERNORATE_OPTIONS;
   
   servicesRequired = [
     { id: 'venue', label: 'Venue', selected: true },
@@ -103,6 +111,13 @@ export class AddEventComponent implements OnInit {
     this.step = 1;
   }
 
+  onCityChange(city: string): void {
+    const loc = getLocationByCity(city);
+    if (loc) {
+      this.eventForm.get('state')?.setValue(loc.governorate);
+    }
+  }
+
   toggleService(service: any) {
     service.selected = !service.selected;
   }
@@ -123,6 +138,7 @@ export class AddEventComponent implements OnInit {
     this.isSubmitting = true;
     const formValues = this.eventForm.value;
 
+    const { city, state } = normalizeAddressFields(formValues.city, formValues.state);
     const createDto: CreateEventDto = {
       userId: user.id,
       title: formValues.name,
@@ -132,9 +148,9 @@ export class AddEventComponent implements OnInit {
       guestCount: Number(formValues.guests) || 0,
       notes: formValues.notes,
       location: {
-        street: formValues.street || 'Unknown',
-        city: formValues.city,
-        state: formValues.state
+        street: formValues.street || '',
+        city,
+        state
       }
     };
 

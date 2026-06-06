@@ -142,6 +142,7 @@ export interface ApiVendor {
   about?: string;
   documentUrl?: string;
   profilePictureUrl?: string;
+  address?: AddressDto;
   serviceAreas?: ServiceAreaDTO[];
 }
 
@@ -206,6 +207,7 @@ export interface UpdateVendorRequest {
   description?: string;
   portfolioLink?: string;
   address?: AddressDto;
+  serviceAreas?: ServiceAreaDTO[];
 }
 
 // ─────────────────────────────────────────────

@@ -6,6 +6,16 @@ import { VendorService } from '../../../core/services/vendor.service';
 import { VendorTypeService } from '../../../core/services/vendor-type.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { VendorType } from '../../../core/models/taxonomy.models';
+import {
+  EGYPT_CITY_OPTIONS,
+  EGYPT_GOVERNORATE_OPTIONS,
+  getLocationByCity
+} from '../../../shared/constants/egypt-locations';
+import {
+  addressToServiceArea,
+  appendServiceAreasToFormData,
+  normalizeAddressFields
+} from '../../../shared/utils/location.utils';
 
 @Component({
   selector: 'app-vendor-join',
@@ -24,6 +34,8 @@ export class VendorJoinComponent implements OnInit {
   selectedDocument: File | null = null;
   selectedProfilePicture: File | null = null;
   profilePreviewUrl: string | null = null;
+  readonly cityOptions = EGYPT_CITY_OPTIONS;
+  readonly governorateOptions = EGYPT_GOVERNORATE_OPTIONS;
 
   constructor(
     private fb: FormBuilder,
@@ -110,12 +122,19 @@ export class VendorJoinComponent implements OnInit {
       }
     });
 
-    // Append Address fields
+    // Append Address fields (canonical city/governorate)
     if (formValue.address) {
+      const { city, state } = normalizeAddressFields(
+        formValue.address.city || '',
+        formValue.address.state || ''
+      );
       formData.append('Address.Street', formValue.address.street || '');
-      formData.append('Address.City', formValue.address.city || '');
-      formData.append('Address.State', formValue.address.state || '');
+      formData.append('Address.City', city);
+      formData.append('Address.State', state);
       formData.append('Address.PostalCode', formValue.address.postalCode || '');
+      appendServiceAreasToFormData(formData, [
+        addressToServiceArea({ city, state, street: formValue.address.street })
+      ]);
     }
 
     // Append Files
@@ -208,6 +227,13 @@ export class VendorJoinComponent implements OnInit {
       currentFields.forEach(field => {
         this.vendorForm.get(field)?.markAsTouched();
       });
+    }
+  }
+
+  onCityChange(city: string): void {
+    const loc = getLocationByCity(city);
+    if (loc) {
+      this.vendorForm.get('address.state')?.setValue(loc.governorate);
     }
   }
 

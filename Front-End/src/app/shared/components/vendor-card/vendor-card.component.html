@@ -19,7 +19,7 @@
     </div>
     <div class="vc-body">
         <div class="vc-name">{{vendor.name}}</div>
-        <div class="vc-loc" *ngIf="vendor.location"><i class="bi bi-geo-alt-fill"></i> {{vendor.location}}</div>
+        <div class="vc-loc" *ngIf="locationLabel"><i class="bi bi-geo-alt-fill"></i> {{ locationLabel }}</div>
         <div class="vc-rating-row">
             <ng-container *ngIf="vendor.rating">
                 <i class="bi bi-star-fill" style="color:var(--gold);font-size:.8rem" *ngFor="let s of [1,2,3,4,5]; let i = index"

@@ -8,6 +8,8 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrderService, OrderResponse } from '../../../core/services/order.service';
 import { EventStudioComponent } from '../event-studio/event-studio.component';
+import { formatEventLocation } from '../../../shared/utils/location.utils';
+import { AddressDto } from '../../../shared/types/api.interfaces';
 
 @Component({
   selector: 'app-my-events',
@@ -151,10 +153,24 @@ export class MyEventsComponent implements OnInit {
       type: ev.eventTypeName || 'General',
       guests: ev.guestCount || 0,
       budget: ev.totalBudget || 0,
+      location: ev.location,
+      locationLabel: formatEventLocation(ev.location),
       vendors: mappedVendors,
       checklist: defaultChecklist,
       status: ev.eventStatus || 'Pending',
       eventItems: ev.eventItems || []
+    };
+  }
+
+  getEventShippingAddress(location: AddressDto | undefined) {
+    if (!location?.city) {
+      return { street: '', city: 'Cairo', state: 'Cairo', postalCode: '' };
+    }
+    return {
+      street: location.street || '',
+      city: location.city,
+      state: location.state || location.city,
+      postalCode: location.postalCode || ''
     };
   }
 
@@ -273,7 +289,7 @@ export class MyEventsComponent implements OnInit {
       userId: user?.id || '',
       eventId: this.activeEvent.id,
       currency: 'EGP',
-      shippingAddress: { street: 'NA', city: 'Cairo', state: 'Cairo', postalCode: '12345' },
+      shippingAddress: this.getEventShippingAddress(this.activeEvent?.location),
       appointment: new Date(this.activeEvent.date).toISOString()
     };
 

@@ -195,13 +195,19 @@
             <div class="form-row">
               <div class="form-group">
                 <label>City *</label>
-                <input type="text" formControlName="city" placeholder="Cairo"
-                       [class.error]="vendorForm.get('address.city')?.touched && vendorForm.get('address.city')?.invalid" />
+                <select formControlName="city" (change)="onCityChange($any($event.target).value)"
+                        [class.error]="vendorForm.get('address.city')?.touched && vendorForm.get('address.city')?.invalid">
+                  <option value="" disabled>Select city</option>
+                  <option *ngFor="let c of cityOptions" [value]="c">{{ c }}</option>
+                </select>
               </div>
               <div class="form-group">
                 <label>State / Governorate *</label>
-                <input type="text" formControlName="state" placeholder="Cairo"
-                       [class.error]="vendorForm.get('address.state')?.touched && vendorForm.get('address.state')?.invalid" />
+                <select formControlName="state"
+                        [class.error]="vendorForm.get('address.state')?.touched && vendorForm.get('address.state')?.invalid">
+                  <option value="" disabled>Select governorate</option>
+                  <option *ngFor="let g of governorateOptions" [value]="g">{{ g }}</option>
+                </select>
               </div>
             </div>
             <div class="form-group">
