@@ -2401,6 +2401,7 @@ table.ad-tbl {
   flex: 1;
   overflow-y: auto;
   padding: 26px 30px;
+  color: var(--navy);
 }
 
 .vd-section {
@@ -2526,6 +2527,7 @@ table.ad-tbl {
   padding: 19px 22px;
   box-shadow: var(--sh);
   border: 1px solid var(--lgray);
+  color: var(--navy);
 }
 
 .vd-card-title {
@@ -3132,6 +3134,7 @@ table.ad-tbl {
   position: absolute;
   inset: 0;
   background: rgba(14, 22, 39, 0.58);
+  color: #fff;
   opacity: 0;
   transition: opacity 0.22s;
   display: flex;

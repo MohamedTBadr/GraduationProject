@@ -7,7 +7,7 @@
   padding: 0 5px;
   border-radius: 50px;
   background: var(--gold, #c9a84c);
-  color: #fff;
+  color: var(--navy);
   font-size: 0.65rem;
   font-weight: 700;
   margin-left: 5px;
@@ -19,21 +19,30 @@
   align-items: flex-start;
   gap: 12px;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-bottom: 1px solid var(--lgray);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 
-  &:hover { background: rgba(255, 255, 255, 0.03); }
+  &:last-child {
+    border-bottom: none;
+  }
 
-  &.unread { background: rgba(201, 168, 76, 0.06); }
+  &:hover {
+    background: rgba(30, 58, 95, 0.03);
+  }
+
+  &.unread {
+    background: rgba(201, 168, 76, 0.08);
+    border-left: 3px solid var(--gold);
+    padding-left: 13px;
+  }
 }
 
 .notif-icon {
   font-size: 1.3rem;
   flex-shrink: 0;
   padding-top: 2px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--gray);
 }
 
 .notif-body {
@@ -52,17 +61,19 @@
 .notif-title {
   font-weight: 600;
   font-size: 0.9rem;
+  color: var(--navy);
 }
 
 .notif-message {
-  font-size: 0.8rem;
-  color: var(--gray, #94a3b8);
+  font-size: 0.82rem;
+  color: var(--gray);
   margin-bottom: 6px;
+  line-height: 1.4;
 }
 
 .notif-time {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.72rem;
+  color: #94a3b8;
 }
 
 .unread-dot {

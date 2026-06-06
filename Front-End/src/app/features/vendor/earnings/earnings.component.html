@@ -3,7 +3,7 @@
     <div><div class="vd-page-title">Earnings</div><div class="vd-page-sub">Revenue, commissions, and transaction history.</div></div>
   </div>
 
-  <div *ngIf="loading" style="text-align:center;padding:48px;color:rgba(255,255,255,.4)">Loading earnings…</div>
+  <div *ngIf="loading" class="text-center py-12 text-[var(--gray)]">Loading earnings…</div>
 
   <ng-container *ngIf="!loading">
 
@@ -35,12 +35,12 @@
             <div *ngFor="let point of revenueHistory" class="flex flex-col items-center gap-[4px]">
               <div class="w-[22px] bg-[var(--gold)] rounded-[4px_4px_0_0]"
                    [style.height.%]="getBarHeight(point.revenue)"></div>
-              <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ (point.label ?? point.month ?? '') | slice:0:3 }}</span>
+              <span class="text-[0.68rem] text-[var(--gray)]">{{ (point.label ?? point.month ?? '') | slice:0:3 }}</span>
             </div>
           </div>
         </ng-container>
         <ng-template #noChart>
-          <div style="text-align:center;padding:32px;color:rgba(255,255,255,.3);font-size:.85rem">No revenue history yet</div>
+          <div class="text-center py-8 text-[var(--gray)] text-[0.85rem]">No revenue history yet</div>
         </ng-template>
       </div>
 
@@ -49,7 +49,7 @@
         <div class="vd-card-title">Latest Orders</div>
         <ng-container *ngIf="recentOrders.length; else noOrders">
           <div *ngFor="let o of recentOrders | slice:0:5"
-               class="flex justify-between items-center py-[12px] px-[0] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+               class="flex justify-between items-center py-[12px] px-[0] border-b border-[var(--lgray)]">
             <div>
               <div class="font-semibold text-[0.9rem]">Order #{{ (o.orderId ?? o.id ?? o.Id ?? '').slice(0,8).toUpperCase() }}</div>
               <div class="text-[0.8rem] text-[var(--gray)]">{{ (o.createdAt ?? o.CreatedAt) | date:'mediumDate' }}</div>
@@ -58,7 +58,7 @@
           </div>
         </ng-container>
         <ng-template #noOrders>
-          <div style="text-align:center;padding:24px;color:rgba(255,255,255,.3);font-size:.85rem">No recent orders</div>
+          <div class="text-center py-6 text-[var(--gray)] text-[0.85rem]">No recent orders</div>
         </ng-template>
       </div>
 
