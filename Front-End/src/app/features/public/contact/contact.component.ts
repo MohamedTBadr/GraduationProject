@@ -111,7 +111,7 @@ export class ContactComponent implements OnInit {
       contactEmail: email,
     });
 
-    this.supportService.openTicket(payload, category).subscribe({
+    this.supportService.openTicket(payload).subscribe({
       next: (ticket) => {
         const suffix = ticket.ticket_id ? ` Reference: ${ticket.ticket_id}` : '';
         this.toastService.show(`Support ticket submitted.${suffix}`, 'success');

@@ -9,13 +9,18 @@
     </button>
   </div>
 
-  <div class="sth-note">
-    <i class="bi bi-info-circle"></i>
-    Tickets you submit here are saved on this device until the backend adds a “my tickets” API.
-    Our team will respond via email for urgent issues.
+  <div class="sth-error" *ngIf="loadError">
+    {{ loadError }}
+    <button type="button" class="sth-retry" (click)="loadTickets()">Try again</button>
   </div>
 
-  <div class="sth-list" *ngIf="tickets.length > 0; else emptyState">
+  <div class="sth-loading" *ngIf="loading">
+    <i class="bi bi-arrow-repeat"></i> Loading your tickets...
+  </div>
+
+  <div class="sth-section-label" *ngIf="!loading && tickets.length > 0">Your tickets</div>
+
+  <div class="sth-list" *ngIf="!loading && tickets.length > 0">
     <div class="sth-card" *ngFor="let t of tickets">
       <div class="sth-card-top">
         <span class="sth-id">{{ t.ticket_id }}</span>
@@ -34,12 +39,10 @@
     </div>
   </div>
 
-  <ng-template #emptyState>
-    <div class="sth-empty">
-      <i class="bi bi-inbox"></i>
-      <p>{{ emptyHint }}</p>
-    </div>
-  </ng-template>
+  <div class="sth-empty" *ngIf="!loading && !loadError && tickets.length === 0">
+    <i class="bi bi-inbox"></i>
+    <p>{{ emptyHint }}</p>
+  </div>
 </div>
 
 <app-support-ticket-modal

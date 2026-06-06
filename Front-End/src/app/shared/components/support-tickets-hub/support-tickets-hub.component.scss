@@ -36,16 +36,47 @@
   white-space: nowrap;
 }
 
-.sth-note {
+.sth-loading {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--gray, #64748b);
+  font-size: 0.95rem;
+
+  i {
+    margin-right: 8px;
+  }
+}
+
+.sth-error {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
   padding: 12px 14px;
   border-radius: 10px;
-  background: rgba(59, 130, 246, 0.08);
-  color: #1d4ed8;
-  font-size: 0.88rem;
-  margin-bottom: 20px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+.sth-retry {
+  border: none;
+  background: #fff;
+  color: #b91c1c;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.sth-section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gray, #64748b);
+  margin-bottom: 12px;
 }
 
 .sth-list {

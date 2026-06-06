@@ -126,14 +126,7 @@ export class TicketDetailComponent implements OnInit {
       },
       error: (err) => {
         const status = err?.status;
-        if (status === 403) {
-          this.toastService.show(
-            'Escalation is not permitted for this account. Backend may need to allow Admin on this endpoint.',
-            'error'
-          );
-        } else {
-          this.toastService.show('Failed to escalate ticket.', 'error');
-        }
+        this.toastService.show('Failed to escalate ticket. Please try again or contact a system administrator.', 'error');
       }
     });
   }

@@ -9,8 +9,8 @@ import { SupportTicketsHubComponent } from '../../../shared/components/support-t
     <app-support-tickets-hub
       submitterType="Client"
       pageTitle="Help & Support"
-      pageSubtitle="Get help with bookings, payments, or technical issues."
-      emptyHint="No support tickets yet. You can also report an issue from My Bookings.">
+      pageSubtitle="Get help with bookings, payments, or technical issues. We typically respond within 1–2 business days."
+      emptyHint="No tickets yet. Open one above, or report an issue from My Bookings.">
     </app-support-tickets-hub>
   `,
 })

@@ -46,6 +46,14 @@ export function buildCreateTicketPayload(input: BuildTicketPayloadInput): Create
   };
 }
 
+export function pickField<T>(obj: Record<string, unknown>, ...keys: string[]): T | undefined {
+  for (const key of keys) {
+    const value = obj[key];
+    if (value !== undefined && value !== null) return value as T;
+  }
+  return undefined;
+}
+
 export function normalizeTicketId(raw: Record<string, unknown> | null | undefined): string {
   if (!raw) return '';
   const id = raw['ticket_id'] ?? raw['ticketId'] ?? raw['TicketId'];
@@ -57,14 +65,14 @@ export function normalizeTicketResponse(raw: unknown): Record<string, unknown> {
   const obj = raw as Record<string, unknown>;
   return {
     ticket_id: normalizeTicketId(obj),
-    title: obj['title'] ?? obj['Title'] ?? '',
-    from: obj['from'] ?? obj['From'] ?? '',
-    type: obj['type'] ?? obj['Type'] ?? '',
-    priority: obj['priority'] ?? obj['Priority'] ?? '',
-    status: obj['status'] ?? obj['Status'] ?? 'open',
-    opened_at: obj['opened_at'] ?? obj['openedAt'] ?? obj['OpenedAt'] ?? new Date().toISOString(),
-    description: obj['description'] ?? obj['Description'] ?? '',
-    booking_ref: obj['booking_ref'] ?? obj['bookingRef'] ?? obj['BookingRef'] ?? null,
+    title: pickField(obj, 'title', 'Title') ?? '',
+    from: pickField(obj, 'from', 'From') ?? '',
+    type: pickField(obj, 'type', 'Type') ?? '',
+    priority: pickField(obj, 'priority', 'Priority') ?? '',
+    status: pickField(obj, 'status', 'Status') ?? 'open',
+    opened_at: pickField(obj, 'opened_at', 'openedAt', 'OpenedAt') ?? new Date().toISOString(),
+    description: pickField(obj, 'description', 'Description') ?? '',
+    booking_ref: pickField(obj, 'booking_ref', 'bookingRef', 'BookingRef') ?? null,
   };
 }
 
@@ -76,4 +84,9 @@ export function mapSubjectToCategory(subject: string): TicketCategory {
   }
   if (normalized.includes('technical') || normalized.includes('glitch')) return 'Technical';
   return 'General';
+}
+
+export function extractCategoryFromDescription(description: string): string {
+  const match = description?.match(/Category:\s*(.+)/i);
+  return match?.[1]?.trim() || 'General';
 }

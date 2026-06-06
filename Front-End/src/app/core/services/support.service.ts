@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   CreateTicketRequest,
@@ -17,6 +17,8 @@ import {
 import {
   TicketSubmitterType,
   normalizeTicketResponse,
+  extractCategoryFromDescription,
+  pickField,
 } from '../../shared/utils/support-ticket.utils';
 
 export interface SubmittedTicketRecord {
@@ -29,8 +31,6 @@ export interface SubmittedTicketRecord {
   booking_ref?: string | null;
   submitter_type: TicketSubmitterType;
 }
-
-const SUBMITTED_TICKETS_KEY = 'epichub_submitted_tickets';
 
 @Injectable({ providedIn: 'root' })
 export class SupportService {
@@ -46,19 +46,34 @@ export class SupportService {
 
   /** GET /admin/support/tickets - List all tickets with filters */
   listTickets(filters: TicketFilters): Observable<{ total: number; page: number; limit: number; data: SupportTicket[] }> {
-    let params = new HttpParams();
-    if (filters.status) params = params.set('status', filters.status);
-    if (filters.priority) params = params.set('priority', filters.priority);
-    if (filters.type) params = params.set('type', filters.type);
-    if (filters.page) params = params.set('page', filters.page.toString());
-    if (filters.limit) params = params.set('limit', filters.limit.toString());
+    return this.http.get<unknown>(this.adminBaseUrl, { params: this.buildTicketParams(filters) }).pipe(
+      map((raw) => this.mapPagedTickets(raw)),
+    );
+  }
 
-    return this.http.get<any>(this.adminBaseUrl, { params });
+  /** GET /support/tickets - List tickets for the signed-in user or vendor */
+  listMyTickets(
+    filters: TicketFilters,
+    submitterType: TicketSubmitterType,
+  ): Observable<SubmittedTicketRecord[]> {
+    const params = this.buildTicketParams({ ...filters, type: submitterType });
+    return this.http.get<unknown>(this.userTicketsUrl, { params }).pipe(
+      map((raw) => this.mapPagedTickets(raw).data.map((ticket) => this.toSubmittedRecord(ticket, submitterType))),
+    );
   }
 
   /** GET /admin/support/tickets/{ticket_id} - Get single ticket */
   getTicket(ticketId: string): Observable<SupportTicket> {
-    return this.http.get<SupportTicket>(`${this.adminBaseUrl}/${ticketId}`);
+    return this.http.get<unknown>(`${this.adminBaseUrl}/${ticketId}`).pipe(
+      map((raw) => this.toSupportTicket(raw)),
+    );
+  }
+
+  /** GET /support/tickets/{ticket_id} - Get own ticket */
+  getMyTicket(ticketId: string): Observable<SupportTicket> {
+    return this.http.get<unknown>(`${this.userTicketsUrl}/${ticketId}`).pipe(
+      map((raw) => this.toSupportTicket(raw)),
+    );
   }
 
   /** POST /admin/support/tickets/{ticket_id}/reply - Reply to ticket */
@@ -82,21 +97,37 @@ export class SupportService {
   }
 
   /** POST /support/tickets - Open a support ticket (Vendor, Customer) */
-  openTicket(payload: CreateTicketRequest, category = 'General'): Observable<SupportTicket> {
+  openTicket(payload: CreateTicketRequest): Observable<SupportTicket> {
     return this.http.post<unknown>(this.userTicketsUrl, payload).pipe(
       map((raw) => this.toSupportTicket(raw)),
-      tap((ticket) => this.cacheSubmittedTicket(ticket, category, payload.type as TicketSubmitterType)),
     );
   }
 
-  getSubmittedTickets(submitterType?: TicketSubmitterType): SubmittedTicketRecord[] {
-    const all = this.readSubmittedTickets();
-    if (!submitterType) return all;
-    return all.filter((t) => t.submitter_type === submitterType);
+  private buildTicketParams(filters: TicketFilters): HttpParams {
+    let params = new HttpParams();
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.priority) params = params.set('priority', filters.priority);
+    if (filters.type) params = params.set('type', filters.type);
+    if (filters.page) params = params.set('page', filters.page.toString());
+    if (filters.limit) params = params.set('limit', filters.limit.toString());
+    return params;
+  }
+
+  private mapPagedTickets(raw: unknown): { total: number; page: number; limit: number; data: SupportTicket[] } {
+    const body = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+    const items = pickField<unknown[]>(body, 'data', 'Data') ?? [];
+    return {
+      total: Number(pickField<number>(body, 'total', 'Total') ?? items.length),
+      page: Number(pickField<number>(body, 'page', 'Page') ?? 1),
+      limit: Number(pickField<number>(body, 'limit', 'Limit') ?? items.length),
+      data: items.map((item) => this.toSupportTicket(item)),
+    };
   }
 
   private toSupportTicket(raw: unknown): SupportTicket {
-    const normalized = normalizeTicketResponse(raw);
+    const normalized = normalizeTicketResponse(
+      raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {},
+    );
     return {
       ticket_id: String(normalized['ticket_id'] ?? ''),
       title: String(normalized['title'] ?? ''),
@@ -110,37 +141,16 @@ export class SupportService {
     };
   }
 
-  private cacheSubmittedTicket(
-    ticket: SupportTicket,
-    category: string,
-    submitterType: TicketSubmitterType,
-  ): void {
-    if (!ticket.ticket_id) return;
-
-    const record: SubmittedTicketRecord = {
+  private toSubmittedRecord(ticket: SupportTicket, submitterType: TicketSubmitterType): SubmittedTicketRecord {
+    return {
       ticket_id: ticket.ticket_id,
       title: ticket.title,
-      category,
+      category: extractCategoryFromDescription(ticket.description),
       priority: ticket.priority,
       status: ticket.status,
       opened_at: ticket.opened_at,
       booking_ref: ticket.booking_ref,
       submitter_type: submitterType,
     };
-
-    const existing = this.readSubmittedTickets().filter((t) => t.ticket_id !== record.ticket_id);
-    existing.unshift(record);
-    localStorage.setItem(SUBMITTED_TICKETS_KEY, JSON.stringify(existing.slice(0, 50)));
-  }
-
-  private readSubmittedTickets(): SubmittedTicketRecord[] {
-    try {
-      const raw = localStorage.getItem(SUBMITTED_TICKETS_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
   }
 }
