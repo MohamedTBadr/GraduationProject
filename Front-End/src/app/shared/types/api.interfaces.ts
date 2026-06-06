@@ -225,6 +225,7 @@ export interface ApiProduct {
   imageUrl?: string;
   imageUrls?: string[]; // Multiple images for slider
   status?: 'active' | 'paused';
+  isHidden?: boolean;
   duration?: string;
   leadTime?: string;
   classification?: 'Personal' | 'Corporate';

@@ -29,7 +29,7 @@
           <div class="vd-tgl-track"></div>
           <div class="vd-tgl-thumb"></div>
         </label>
-        <span class="vd-tab-bar-toggle-label">Show hidden</span>
+        <span class="vd-tab-bar-toggle-label">Include hidden</span>
       </div>
     </div>
 
@@ -44,7 +44,7 @@
         </app-service-card>
         <div class="p-[40px] text-center text-[#94a3b8] text-[0.95rem] bg-[white] rounded-[12px] [border:1px_dashed_#cbd5e1]" *ngIf="currentServices.length === 0">
           <ng-container *ngIf="activeTab === 'paused' && !includeHidden; else defaultEmpty">
-            Turn on <strong>Show hidden</strong> to load paused services.
+            Turn on <strong>Include hidden</strong> to load paused services.
           </ng-container>
           <ng-template #defaultEmpty>No services found.</ng-template>
         </div>

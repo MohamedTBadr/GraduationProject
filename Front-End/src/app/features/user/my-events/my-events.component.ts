@@ -39,36 +39,58 @@ export class MyEventsComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['id']) {
-        this.activeEventId = params['id'];
+        this.activeEventId = this.normalizeId(params['id']);
       }
     });
     this.loadEvents();
   }
 
+  private normalizeId(id: string | null | undefined): string | null {
+    return id ? String(id).trim().toLowerCase() : null;
+  }
+
+  isActiveEvent(id: string | null | undefined): boolean {
+    return this.sameId(id, this.activeEventId);
+  }
+
+  private sameId(a: string | null | undefined, b: string | null | undefined): boolean {
+    const left = this.normalizeId(a);
+    const right = this.normalizeId(b);
+    return !!left && !!right && left === right;
+  }
+
   loadEvents() {
-    const user = this.authService.user();
-    if (!user || (user.role !== 'User' && (user.role as any) !== 'Customer')) {
+    if (!this.authService.isLoggedIn()) {
       this.loading = false;
       return;
     }
+
+    const user = this.authService.user();
+    this.loading = true;
 
     this.eventService.getByUser().subscribe({
       next: (data: EventResponseDto[]) => {
         this.events = data.map(ev => this.mapEvent(ev));
         if (this.events.length > 0) {
-          if (!this.activeEventId || !this.events.find(e => e.id === this.activeEventId)) {
-            this.activeEventId = this.events[0].id;
-          }
+          const requestedId = this.normalizeId(this.activeEventId);
+          const match = requestedId
+            ? this.events.find(e => this.sameId(e.id, requestedId))
+            : null;
+
+          this.activeEventId = match?.id ?? this.events[0].id;
           this.loadActiveEventDetails(this.activeEventId);
           if (this.activeEventId) this.loadCollaborators(this.activeEventId);
+        } else {
+          this.activeEventId = null;
         }
         this.loading = false;
 
-        // Load user orders in parallel for pending-order detection
-        this.orderService.getOrdersByUser(user.id).subscribe({
-          next: orders => { this.userOrders = orders; },
-          error: () => this.toastService.show('Failed to load your order history.', 'error')
-        });
+        if (user?.id) {
+          this.orderService.getOrdersByUser(user.id).subscribe({
+            next: orders => { this.userOrders = orders; },
+            error: () => this.toastService.show('Failed to load your order history.', 'error')
+          });
+        }
       },
       error: (err) => {
         console.error('Failed to load events:', err);
@@ -79,11 +101,13 @@ export class MyEventsComponent implements OnInit {
   }
 
   loadActiveEventDetails(id: string | null) {
-    if (!id) return;
-    this.eventService.getById(id).subscribe({
+    const eventId = this.normalizeId(id);
+    if (!eventId) return;
+
+    this.eventService.getById(eventId).subscribe({
       next: (fullEvent) => {
         const mapped = this.mapEvent(fullEvent);
-        const index = this.events.findIndex(e => e.id === id);
+        const index = this.events.findIndex(e => this.sameId(e.id, eventId));
         if (index !== -1) {
           this.events = [
             ...this.events.slice(0, index),
@@ -92,6 +116,9 @@ export class MyEventsComponent implements OnInit {
           ];
         } else {
           this.events = [...this.events, mapped];
+        }
+        if (!this.activeEventId || !this.events.some(e => this.sameId(e.id, this.activeEventId))) {
+          this.activeEventId = mapped.id;
         }
       },
       error: (err) => {
@@ -132,7 +159,7 @@ export class MyEventsComponent implements OnInit {
   }
 
   get activeEvent() {
-    return this.events.find(e => e.id === this.activeEventId);
+    return this.events.find(e => this.sameId(e.id, this.activeEventId));
   }
 
   get displayedEventItems(): EventItemResponseDto[] {
@@ -173,7 +200,7 @@ export class MyEventsComponent implements OnInit {
   get existingPendingOrder(): OrderResponse | null {
     if (!this.activeEventId) return null;
     return this.userOrders.find(
-      o => o.eventId === this.activeEventId && o.paymentStatus === 'Pending'
+      o => this.sameId(o.eventId, this.activeEventId) && o.paymentStatus === 'Pending'
     ) ?? null;
   }
 
@@ -215,10 +242,10 @@ export class MyEventsComponent implements OnInit {
   }
 
   switchEvent(id: string) {
-    this.activeEventId = id;
+    this.activeEventId = this.normalizeId(id);
     this.eventServicesTab = 'all';
-    this.loadActiveEventDetails(id);
-    this.loadCollaborators(id);
+    this.loadActiveEventDetails(this.activeEventId);
+    if (this.activeEventId) this.loadCollaborators(this.activeEventId);
   }
 
   toggleCheck(index: number) {

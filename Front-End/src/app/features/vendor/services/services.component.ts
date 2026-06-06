@@ -38,7 +38,7 @@ export class ServicesComponent implements OnInit {
   services: ApiProduct[] = [];
   loading = false;
   activeTab: 'active' | 'paused' = 'active';
-  includeHidden = false;
+  includeHidden = true;
 
   isAddServiceModalOpen = false;
   editingId: string | null = null;
@@ -87,11 +87,17 @@ export class ServicesComponent implements OnInit {
     });
   }
 
-  get activeServices(): ApiProduct[] { return this.services.filter(s => s.status !== 'paused'); }
-  get pausedServices(): ApiProduct[] { return this.services.filter(s => s.status === 'paused'); }
+  get activeServices(): ApiProduct[] { return this.services.filter(s => !s.isHidden && s.status !== 'paused'); }
+  get pausedServices(): ApiProduct[] { return this.services.filter(s => s.isHidden || s.status === 'paused'); }
   get currentServices(): ApiProduct[] { return this.activeTab === 'active' ? this.activeServices : this.pausedServices; }
 
-  setTab(tab: 'active' | 'paused') { this.activeTab = tab; }
+  setTab(tab: 'active' | 'paused'): void {
+    this.activeTab = tab;
+    if (tab === 'paused' && !this.includeHidden) {
+      this.includeHidden = true;
+      this.loadProducts();
+    }
+  }
 
   onIncludeHiddenChange(checked: boolean): void {
     this.includeHidden = checked;
@@ -231,10 +237,12 @@ export class ServicesComponent implements OnInit {
   }
 
   toggleServiceStatus(service: ApiProduct) {
+    const willPause = !service.isHidden && service.status !== 'paused';
     this.productService.toggleStatus(service.id).subscribe({
       next: () => {
-        service.status = service.status === 'paused' ? 'active' : 'paused';
-        this.toastService.show(service.status === 'paused' ? 'Service paused.' : 'Service activated!', 'info');
+        if (willPause) this.includeHidden = true;
+        this.toastService.show(willPause ? 'Service paused.' : 'Service activated!', 'info');
+        this.loadProducts();
       },
       error: (err) => { console.error('Failed to update service status', err); this.toastService.show('Failed to update service status', 'error'); }
     });

@@ -40,11 +40,29 @@ export class AuthService {
       const savedSession = localStorage.getItem('eventora_session');
       if (savedSession) {
         this.currentUser.set(JSON.parse(savedSession));
+        this.rehydrateSessionFromToken();
       }
     } catch {
       localStorage.removeItem('eventora_session');
       localStorage.removeItem('eventora_token');
       localStorage.removeItem('eventora_refresh_token');
+    }
+  }
+
+  /** Repair id/role on reload when localStorage session is stale (common after deploy). */
+  private rehydrateSessionFromToken(): void {
+    const token = this.getToken();
+    const session = this.currentUser();
+    if (!token || !session) return;
+
+    const claims = this.extractClaimsFromToken(token);
+    const id = claims.id ? claims.id.trim().toLowerCase() : session.id;
+    const role = (claims.role || session.role || 'User') as UserRole;
+
+    if (session.id !== id || session.role !== role) {
+      const repaired = { ...session, id, role };
+      this.currentUser.set(repaired);
+      localStorage.setItem('eventora_session', JSON.stringify(repaired));
     }
   }
 
@@ -329,9 +347,9 @@ export class AuthService {
   }
 
   private setSession(response: AuthResponse) {
-    const refreshToken = localStorage.getItem('eventora_refresh_token'); // preserve if already set
     this.currentUser.set(response.value.user);
-    localStorage.setItem('eventora_session', JSON.stringify(response.value.user));
+    this.rehydrateSessionFromToken();
+    localStorage.setItem('eventora_session', JSON.stringify(this.currentUser()));
     localStorage.setItem('eventora_token', response.value.token);
     // The interceptor will capture the refresh token from the raw API response separately
   }

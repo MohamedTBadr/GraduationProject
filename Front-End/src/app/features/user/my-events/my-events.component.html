@@ -1,17 +1,23 @@
+<div *ngIf="loading" class="empty-services-hint">Loading your events…</div>
+
 <!-- Event Tabs -->
-<div class="event-tabs-bar">
+<div class="event-tabs-bar" *ngIf="!loading">
     <div *ngFor="let ev of events" 
         class="event-tab-item"
-        [class.active]="ev.id === activeEventId"
+        [class.active]="isActiveEvent(ev.id)"
         (click)="switchEvent(ev.id)">
-        {{ev.name}}
-        <div class="event-tab-indicator" *ngIf="ev.id === activeEventId"></div>
+        {{ ev.name }}
+        <div class="event-tab-indicator" *ngIf="isActiveEvent(ev.id)"></div>
     </div>
     
     <div class="event-tab-add" (click)="openAddEvent()">
         + Add Event
     </div>
 </div>
+
+<p *ngIf="!loading && events.length === 0" class="empty-services-hint">
+    You have no events yet. Create one to start planning.
+</p>
 
 <div *ngIf="activeEvent" class="event-detail-container">
     <!-- Event Hero Details -->

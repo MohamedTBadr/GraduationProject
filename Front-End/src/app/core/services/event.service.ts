@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   EventResponseDto,
@@ -102,28 +102,49 @@ export class EventService {
     );
   }
 
-  /** GET /Event/my-events - Get events for the authenticated user */
+  /**
+   * Load events for the signed-in user.
+   * Prefer GET /Event — it scopes by token user id without the strict Customer-role gate on /my-events.
+   */
   getByUser(): Observable<EventResponseDto[]> {
-    return this.http.get<any>(`${this.apiUrl}/my-events`).pipe(
-      map(res => this.extractEventList(res).map(e => this.normalizeEvent(e)))
+    return this.http.get<any>(this.apiUrl).pipe(
+      map(res => this.mapEventList(res)),
+      catchError(err => {
+        if (err?.status === 403 || err?.status === 404) {
+          return this.http.get<any>(`${this.apiUrl}/my-events`).pipe(
+            map(res => this.mapEventList(res))
+          );
+        }
+        return throwError(() => err);
+      })
     );
+  }
+
+  private mapEventList(res: any): EventResponseDto[] {
+    return this.extractEventList(res)
+      .map(e => this.normalizeEvent(e))
+      .filter(e => !!e.id);
   }
 
   private extractEventList(res: any): any[] {
     if (!res) return [];
     if (Array.isArray(res)) return res;
 
-    const inner = res.value ?? res.Value;
+    const inner = res.value ?? res.Value ?? res.data ?? res.Data;
     if (inner != null) {
-      const items = inner.items ?? inner.Items;
-      if (Array.isArray(items)) return items;
       if (Array.isArray(inner)) return inner;
+      const nested = inner.items ?? inner.Items ?? inner.$values ?? inner.$Values;
+      if (Array.isArray(nested)) return nested;
     }
 
-    const top = res.items ?? res.Items;
+    const top = res.items ?? res.Items ?? res.$values ?? res.$Values;
     if (Array.isArray(top)) return top;
 
     return [];
+  }
+
+  private normalizeEventId(id: unknown): string {
+    return id == null ? '' : String(id).trim().toLowerCase();
   }
 
   private unwrapEventBody(o: any): any {
@@ -176,8 +197,8 @@ export class EventService {
     const eventItems = raw.eventItems ?? raw.EventItems ?? [];
 
     return {
-      id: String(this.pickField(raw, 'id', 'Id') ?? ''),
-      userId: String(this.pickField(raw, 'userId', 'UserId') ?? ''),
+      id: this.normalizeEventId(this.pickField(raw, 'id', 'Id')),
+      userId: this.normalizeEventId(this.pickField(raw, 'userId', 'UserId')),
       userName: String(this.pickField(raw, 'userName', 'UserName') ?? ''),
       title: String(this.pickField(raw, 'title', 'Title') ?? ''),
       eventTypeName: String(this.pickField(raw, 'eventTypeName', 'EventTypeName') ?? ''),
@@ -191,8 +212,8 @@ export class EventService {
       cancelledAt: this.pickField(raw, 'cancelledAt', 'CancelledAt'),
       location: raw.location ?? raw.Location,
       eventItems: (Array.isArray(eventItems) ? eventItems : []).map((item: any) => ({
-        id: String(this.pickField(item, 'id', 'Id') ?? ''),
-        eventId: String(this.pickField(item, 'eventId', 'EventId') ?? ''),
+        id: this.normalizeEventId(this.pickField(item, 'id', 'Id')),
+        eventId: this.normalizeEventId(this.pickField(item, 'eventId', 'EventId')),
         serviceId: this.pickField(item, 'serviceId', 'ServiceId'),
         serviceImage: this.pickField(item, 'serviceImage', 'ServiceImage'),
         serviceName: String(this.pickField(item, 'serviceName', 'ServiceName') ?? ''),
