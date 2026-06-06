@@ -47,6 +47,7 @@ namespace Infrastructure
             Services.AddScoped<IReportingService, ReportingService>();
             Services.AddScoped<IAnalyticsService, AnalyticsQueryService>();
             Services.AddScoped<IAiInsightService, GroqAiInsightService>();
+            Services.AddScoped<IPdfReportService, PdfReportService>();
             Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             Services.AddScoped<ICompanyInquiryRepository, CompanyInquiryRepository>();
             // 1. Configure DbContext with SQL Server
