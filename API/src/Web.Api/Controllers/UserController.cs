@@ -1,4 +1,5 @@
 using Application;
+using Application.DTOs.AuthenticationDTOs;
 using Application.DTOs.UserDTOs;
 using Application.Interfaces;
 using Application.Services.Helpers;
@@ -183,7 +184,6 @@ namespace Web.Api.Controllers
             return NoContent();
         }
         [Authorize(Roles = "Admin")]
-
         [HttpPost]
         [SuccessStatusCode(201)]
         [HybridCache(1800, "GetAllUsers", Variance = CacheVariance.Adaptive)]
@@ -218,6 +218,28 @@ namespace Web.Api.Controllers
             });
         }
 
+        [HttpPost("create-admin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateAdmin([FromBody] SignUpRequest request)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = request.firstName,
+                Email = request.email,
+                FirstName = request.firstName,
+                LastName = request.lastName,
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(user, request.password);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            await userManager.AddToRoleAsync(user, "Admin");
+
+            return Ok(new { message = "Admin created successfully", userId = user.Id });
+        }
         private static (ErrorType, string) ToError(IdentityResult result)
         {
             var description = string.Join("; ", result.Errors.Select(e => e.Description));
