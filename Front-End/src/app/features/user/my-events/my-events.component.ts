@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
-import { EventCollaboratorDto, EventItemResponseDto, EventResponseDto } from '../../../shared/types/api.interfaces';
+import { EventItemResponseDto, EventResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrderService, OrderResponse } from '../../../core/services/order.service';
@@ -79,7 +79,7 @@ export class MyEventsComponent implements OnInit {
 
           this.activeEventId = match?.id ?? this.events[0].id;
           this.loadActiveEventDetails(this.activeEventId);
-          if (this.activeEventId) this.loadCollaborators(this.activeEventId);
+          // if (this.activeEventId) this.loadCollaborators(this.activeEventId);
         } else {
           this.activeEventId = null;
         }
@@ -245,7 +245,7 @@ export class MyEventsComponent implements OnInit {
     this.activeEventId = this.normalizeId(id);
     this.eventServicesTab = 'all';
     this.loadActiveEventDetails(this.activeEventId);
-    if (this.activeEventId) this.loadCollaborators(this.activeEventId);
+    // if (this.activeEventId) this.loadCollaborators(this.activeEventId);
   }
 
   toggleCheck(index: number) {
@@ -321,53 +321,16 @@ export class MyEventsComponent implements OnInit {
     this.router.navigate(['/checkout', order.id]);
   }
 
-  // ── Collaborators ─────────────────────────────────────────────────────────
-
-  collaborators: EventCollaboratorDto[] = [];
-  collaboratorInput = '';
-  collaboratorRole: 0 | 1 = 0;
-  collaboratorsLoading = false;
-
-  loadCollaborators(eventId: string): void {
-    this.eventService.getCollaborators(eventId).subscribe({
-      next: (list) => { this.collaborators = list; },
-      error: () => this.toastService.show('Failed to load collaborators.', 'error')
-    });
-  }
-
-  addCollaborator(): void {
-    const input = this.collaboratorInput.trim();
-    if (!input || !this.activeEventId) return;
-    this.collaboratorsLoading = true;
-    this.eventService.addCollaborator(this.activeEventId, input, this.collaboratorRole).subscribe({
-      next: () => {
-        this.toastService.show('Collaborator added.', 'success');
-        this.collaboratorInput = '';
-        this.loadCollaborators(this.activeEventId!);
-        this.collaboratorsLoading = false;
-      },
-      error: (err) => {
-        this.toastService.show(err?.error?.error ?? 'User not found or already a collaborator.', 'error');
-        this.collaboratorsLoading = false;
-      }
-    });
-  }
-
-  removeCollaborator(userId: string): void {
-    if (!this.activeEventId) return;
-    this.eventService.removeCollaborator(this.activeEventId, userId).subscribe({
-      next: () => {
-        this.collaborators = this.collaborators.filter(c => c.userId !== userId);
-        this.toastService.show('Collaborator removed.', 'success');
-      },
-      error: () => this.toastService.show('Failed to remove collaborator.', 'error')
-    });
-  }
-
-  collaboratorRoleLabel(role: 0 | 1): string {
-    return role === 1 ? 'Editor' : 'Viewer';
-  }
-
+  // ── Collaborators (on hold) ───────────────────────────────────────────────
+  // collaborators: EventCollaboratorDto[] = [];
+  // collaboratorInput = '';
+  // collaboratorRole: 0 | 1 = 0;
+  // collaboratorsLoading = false;
+  //
+  // loadCollaborators(eventId: string): void { ... }
+  // addCollaborator(): void { ... }
+  // removeCollaborator(userId: string): void { ... }
+  // collaboratorRoleLabel(role: 0 | 1): string { ... }
   // ──────────────────────────────────────────────────────────────────────────
 
   onAiPlanAccepted(plan: any) {

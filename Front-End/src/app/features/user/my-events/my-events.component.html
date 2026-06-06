@@ -179,14 +179,12 @@
     </div>
 </div>
 
-<!-- Collaborators -->
- 
+<!-- Collaborators — on hold
 <div class="dash-card" *ngIf="activeEvent">
     <div class="dash-card-header">
         <h3>Collaborators</h3>
     </div>
 
-    <!-- Add collaborator form -->
     <div class="flex gap-[8px] mb-[16px] flex-wrap">
         <input
             class="flex-1 min-w-[180px] rounded-[8px] py-[8px] px-[12px] text-[.85rem] [border:1.5px_solid_var(--lgray)] bg-transparent text-[var(--white)]"
@@ -208,7 +206,6 @@
         </button>
     </div>
 
-    <!-- Collaborator list -->
     <div *ngIf="collaborators.length > 0" class="vendors-list">
         <div *ngFor="let c of collaborators" class="vendor-row">
             <div class="vendor-emoji"><i class="bi bi-person-circle"></i></div>
@@ -226,6 +223,7 @@
         No collaborators yet. Invite someone by email or name.
     </p>
 </div>
+-->
 
 
 <app-event-studio

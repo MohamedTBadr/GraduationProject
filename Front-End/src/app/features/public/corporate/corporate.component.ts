@@ -69,17 +69,34 @@ export class CorporateComponent implements OnInit {
       return;
     }
 
-    this.isSubmitting = true;
-    const formValue = this.corpForm.value;
+    if (this.isSubmitting) return;
 
-    this.companyInquiryService.submitInquiry(formValue).subscribe({
+    this.isSubmitting = true;
+    const raw = this.corpForm.getRawValue();
+    const payload = {
+      companyName: raw.companyName,
+      contactPerson: raw.contactPerson,
+      phoneNumber: raw.phoneNumber,
+      email: raw.email,
+      eventTypeId: raw.eventTypeId,
+      expectedDate: raw.expectedDate,
+      estimatedAttendees: Number(raw.estimatedAttendees) || 0,
+      approximateBudget: Number(raw.approximateBudget) || 0,
+      additionalRequirements: raw.additionalRequirements ?? ''
+    };
+
+    this.companyInquiryService.submitInquiry(payload).subscribe({
       next: (res) => {
-        this.toastService.show(res.message || 'Corporate request submitted successfully.', 'success');
+        this.toastService.show(res.message, 'success');
         this.corpForm.reset();
         this.isSubmitting = false;
       },
       error: (err) => {
-        this.toastService.show(err.error?.message || 'Failed to submit request. Please try again.', 'error');
+        const msg = err.error?.message ?? err.error?.Message
+          ?? err.error?.errorDescription ?? err.error?.ErrorDescription
+          ?? err.message
+          ?? 'Failed to submit request. Please try again.';
+        this.toastService.show(msg, 'error');
         this.isSubmitting = false;
       }
     });

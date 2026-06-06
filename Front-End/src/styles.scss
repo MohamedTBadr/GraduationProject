@@ -435,6 +435,10 @@ select {
   transition: border-color 0.2s;
 }
 
+section{
+  padding: 40px 0;
+}
+
 input:focus,
 textarea:focus,
 select:focus {

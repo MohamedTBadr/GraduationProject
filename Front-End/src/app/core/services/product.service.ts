@@ -76,6 +76,19 @@ export class ProductService {
     const priceRaw = this.pickField(raw, 'price', 'Price') ?? 0;
     const price = typeof priceRaw === 'number' ? priceRaw : parseFloat(String(priceRaw));
     const areas = raw.serviceAreas ?? raw.ServiceAreas ?? [];
+    const ratings = raw.serviceRatings ?? raw.ServiceRatings ?? [];
+    const explicitRating = this.pickField(raw, 'rating', 'Rating');
+    let rating: number | undefined;
+    if (explicitRating != null && explicitRating !== '') {
+      const n = Number(explicitRating);
+      rating = Number.isFinite(n) ? n : undefined;
+    } else if (Array.isArray(ratings) && ratings.length > 0) {
+      const sum = ratings.reduce(
+        (acc: number, r: any) => acc + Number(r?.rating ?? r?.Rating ?? 0),
+        0
+      );
+      rating = sum / ratings.length;
+    }
     const isHidden = this.isHiddenFlag(raw?.isHidden ?? raw?.IsHidden);
 
     return {
@@ -99,7 +112,15 @@ export class ProductService {
       classification: this.pickField(raw, 'classification', 'Classification'),
       allowedEventTypes: raw.allowedEventTypes ?? raw.AllowedEventTypes,
       createdAt: this.pickField(raw, 'createdAt', 'CreatedAt'),
-      serviceAreas: Array.isArray(areas) ? areas : [],
+      serviceAreas: (Array.isArray(areas) ? areas : []).map((sa: any) => ({
+        id: sa.id ?? sa.Id,
+        city: String(sa.city ?? sa.City ?? ''),
+        region: String(sa.region ?? sa.Region ?? ''),
+        latitude: Number(sa.latitude ?? sa.Latitude ?? 0),
+        longitude: Number(sa.longitude ?? sa.Longitude ?? 0)
+      })),
+      rating,
+      reviewCount: Array.isArray(ratings) ? ratings.length : undefined,
       isHidden
     };
   }

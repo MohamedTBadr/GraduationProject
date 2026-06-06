@@ -17,6 +17,7 @@ import {
 import { environment } from '../../../environments/environment';
 
 export const SKIP_AUTH = new HttpContextToken<boolean>(() => false);
+export const SKIP_ERROR_TOAST = new HttpContextToken<boolean>(() => false);
 
 @Injectable({
   providedIn: 'root'

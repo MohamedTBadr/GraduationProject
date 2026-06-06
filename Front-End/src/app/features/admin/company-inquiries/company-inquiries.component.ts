@@ -99,7 +99,7 @@ export class CompanyInquiriesComponent implements OnInit {
           this.selectedInquiry.status = status as CompanyInquiryResponse['status'];
         }
       },
-      error: () => this.toastService.show('Failed to update status.', 'error')
+      error: (err) => this.toastService.show(err?.message ?? 'Failed to update status.', 'error')
     });
   }
 
