@@ -144,11 +144,24 @@ export class EventService {
     }))
   });
 
-  /** GET /Event/status/{status} - Get events by status */
+  /** GET /Event/status/{status} - Get events by status (e.g. Completed) */
   getByStatus(status: string): Observable<EventResponseDto[]> {
     return this.http.get<any>(`${this.apiUrl}/status/${status}`).pipe(
-      map(res => res.value || res)
+      map(res => {
+        const arr = res?.value ?? res;
+        if (!Array.isArray(arr)) return [];
+        return arr.map(this.normalizeEvent);
+      })
     );
+  }
+
+  /** PATCH /Event/{eventId}/items/{itemId}/status — Done (vendor) or Completed (customer) */
+  updateItemStatus(
+    eventId: string,
+    itemId: string,
+    status: 'Done' | 'Completed'
+  ): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${eventId}/items/${itemId}/status`, { status });
   }
 
   /** PATCH /Event/{eventId}/items/{itemId}/approve - Vendor approve/reject an item */

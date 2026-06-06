@@ -212,6 +212,7 @@ export class BookingsComponent implements OnInit {
               pending.push(booking);
               break;
             case 'Approved':
+            case 'Paid':
               confirmed.push(booking);
               break;
             case 'Rejected':
@@ -364,8 +365,19 @@ export class BookingsComponent implements OnInit {
   }
 
   markAsDone(booking: Booking) {
-    booking.status = 'Done';
-    this.toastService.show('Service marked as Done.', 'success');
+    this.loading.set(true);
+    this.eventService.updateItemStatus(booking.eventId, booking.id, 'Done').subscribe({
+      next: () => {
+        this.toastService.show('Service marked as Done.', 'success');
+        this.loadBookings();
+        this.closeDetails();
+      },
+      error: (err) => {
+        console.error('Error marking booking as done', err);
+        this.toastService.show('Failed to mark service as done.', 'error');
+        this.loading.set(false);
+      }
+    });
   }
 
   switchTab(tab: 'pending' | 'confirmed' | 'calendar' | 'history') {

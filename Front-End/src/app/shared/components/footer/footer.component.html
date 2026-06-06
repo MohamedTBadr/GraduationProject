@@ -80,7 +80,7 @@
       <div>
         <div class="footer-col-title">Platform</div>
         <ul class="footer-links">
-          <li><a routerLink="/explore">Explore Vendors</a></li>
+          <li><a routerLink="/explore" [queryParams]="{ tab: 'vendors' }">Explore Vendors</a></li>
           <li><a routerLink="/corporate">Corporate</a></li>
           <li><a routerLink="/user/dashboard">Dashboard</a></li>
         </ul>

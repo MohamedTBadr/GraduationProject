@@ -60,7 +60,7 @@
               <div class="flex flex-col items-center gap-[4px]">
                 <div class="w-[22px] bg-[var(--primary)] rounded-[4px]"
                      [style.height.%]="getBarHeight(point.revenue)"></div>
-                <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ point.month | slice:0:3 }}</span>
+                <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ (point.label ?? point.month ?? '') | slice:0:3 }}</span>
               </div>
             </ng-container>
           </div>

@@ -14,6 +14,9 @@ export class VendorTypeService {
 
   /** GET /api/VendorType */
   getAll(): Observable<VendorType[]> {
+    if (this.cachedVendorTypes?.some(t => !t.id || t.name == null)) {
+      this.cachedVendorTypes = null;
+    }
     if (this.cachedVendorTypes) {
       return of(this.cachedVendorTypes);
     }
@@ -24,8 +27,8 @@ export class VendorTypeService {
         const data = res.value ?? res.Value ?? res;
         const arr = Array.isArray(data) ? data : (data?.items ?? data?.Items ?? []);
         return arr.map((item: any) => ({
-          id: item.Id ?? item.id,
-          name: item.Name ?? item.name
+          id: String(item.Id ?? item.id ?? ''),
+          name: String(item.Name ?? item.name ?? item.typeName ?? item.TypeName ?? '')
         }));
       }),
       tap(data => this.cachedVendorTypes = data)

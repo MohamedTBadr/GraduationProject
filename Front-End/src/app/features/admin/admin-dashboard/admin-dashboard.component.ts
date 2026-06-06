@@ -4,8 +4,9 @@ import { RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ModalService } from '../../../shared/services/modal.service';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
-interface RevenuePoint { month: string; revenue: number; }
+interface RevenuePoint { month?: string; label?: string; revenue: number; }
 interface RecentOrder { id: string; vendorName?: string; amount: number; paymentStatus: string; createdAt: string; }
 
 @Component({
@@ -18,6 +19,7 @@ interface RecentOrder { id: string; vendorName?: string; amount: number; payment
 export class AdminDashboardComponent implements OnInit {
   modalService = inject(ModalService);
   private http = inject(HttpClient);
+  private toastService = inject(ToastService);
 
   loading = true;
 
@@ -50,7 +52,10 @@ export class AdminDashboardComponent implements OnInit {
         this.recentOrders       = Array.isArray(orders) ? orders : [];
         this.loading = false;
       },
-      error: () => { this.loading = false; }
+      error: () => {
+        this.loading = false;
+        this.toastService.show('Failed to load dashboard data.', 'error');
+      }
     });
   }
 

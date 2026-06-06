@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 
-interface RevenuePoint { month: string; revenue: number; }
+interface RevenuePoint { month?: string; label?: string; revenue: number; }
 
 @Component({
   selector: 'app-financials',
@@ -18,6 +18,7 @@ export class FinancialsComponent implements OnInit {
   private toastService = inject(ToastService);
 
   loading = true;
+  isDownloadingPdf = false;
   report: any = null;
 
   lifetimeRevenue       = 0;
@@ -71,8 +72,37 @@ export class FinancialsComponent implements OnInit {
     return n.toString();
   }
 
+  get executiveSummary(): string {
+    const r = this.report;
+    if (!r) return '';
+    return r.executiveSummary ?? r.ExecutiveSummary ?? r.aiSummary ?? r.AiSummary ?? '';
+  }
+
   downloadPdf() {
-    window.open(`${environment.apiUrl}/reports/executive/pdf`, '_blank');
+    this.isDownloadingPdf = true;
+    this.toastService.show('Generating report PDF...', 'info');
+
+    this.http.get(`${environment.apiUrl}/reports/executive/pdf`, {
+      responseType: 'blob'
+    }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `executive-report-${new Date().toISOString().substring(0, 7)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.isDownloadingPdf = false;
+        this.toastService.show('PDF downloaded successfully.', 'success');
+      },
+      error: (err) => {
+        console.error('Failed to download PDF', err);
+        this.toastService.show('Failed to download PDF report.', 'error');
+        this.isDownloadingPdf = false;
+      }
+    });
   }
 
   sendEmail() {

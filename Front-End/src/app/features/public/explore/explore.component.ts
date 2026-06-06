@@ -199,6 +199,15 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     this.viewMode = 'grid';
     this.destroyMap();
     this.currentPage = 1;
+    if (tab === 'vendors') {
+      this.selectedServiceTypeId = null;
+      this.selectedEventTypeId = null;
+      this.selectedCity = '';
+      this.maxPrice = MAX_PRICE_ANY;
+    } else {
+      this.selectedVendorTypeId = null;
+      this.selectedLocation = '';
+    }
     this.syncUrl();
     this.loadData();
   }
@@ -435,13 +444,18 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.eventTypes.find(t => t.id === id)?.name ?? '';
   }
 
+  private normalizeTaxonomyName(name?: string | null): string {
+    return (name ?? '').toLowerCase();
+  }
+
   private resolveVendorTypeId(value: string): string | null {
     if (!value) return null;
     if (this.isGuid(value)) return value;
-    const match = this.vendorTypes.find(t =>
-      t.name.toLowerCase() === value.toLowerCase() ||
-      t.name.toLowerCase().includes(value.toLowerCase())
-    );
+    const needle = value.toLowerCase();
+    const match = this.vendorTypes.find(t => {
+      const name = this.normalizeTaxonomyName(t.name);
+      return name === needle || name.includes(needle);
+    });
     return match?.id ?? null;
   }
 
@@ -449,22 +463,21 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!value) return null;
     if (this.isGuid(value)) return value;
     const normalized = value.toLowerCase() === 'decor' ? 'decoration' : value.toLowerCase();
-    const match = this.serviceCategories.find(t =>
-      t.name.toLowerCase() === normalized ||
-      t.name.toLowerCase().includes(normalized) ||
-      normalized.includes(t.name.toLowerCase())
-    );
+    const match = this.serviceCategories.find(t => {
+      const name = this.normalizeTaxonomyName(t.name);
+      return name === normalized || name.includes(normalized) || normalized.includes(name);
+    });
     return match?.id ?? null;
   }
 
   private resolveEventTypeId(value: string): string | null {
     if (!value) return null;
     if (this.isGuid(value)) return value;
-    const match = this.eventTypes.find(t =>
-      t.name.toLowerCase() === value.toLowerCase() ||
-      t.name.toLowerCase().includes(value.toLowerCase()) ||
-      value.toLowerCase().includes(t.name.toLowerCase())
-    );
+    const needle = value.toLowerCase();
+    const match = this.eventTypes.find(t => {
+      const name = this.normalizeTaxonomyName(t.name);
+      return name === needle || name.includes(needle) || needle.includes(name);
+    });
     return match?.id ?? null;
   }
 

@@ -33,6 +33,7 @@ export class PackagesComponent implements OnInit {
   vendorServices: ApiProduct[] = [];
   vendorId = '';
   loading = false;
+  togglingPackageId: string | null = null;
 
   activeTab: 'Active' | 'Paused' = 'Active';
 
@@ -102,12 +103,16 @@ export class PackagesComponent implements OnInit {
     });
   }
 
-  private mapToDisplay(p: ApiPackage): DisplayPackage {
+  private mapToDisplay(p: ApiPackage & { status?: string; isActive?: boolean }): DisplayPackage {
+    const rawStatus = (p as any).status ?? ((p as any).isActive === false ? 'Paused' : 'Active');
+    const status: 'Active' | 'Paused' =
+      String(rawStatus).toLowerCase() === 'paused' ? 'Paused' : 'Active';
+
     return {
       id: p.id,
       icon: '📦',
       name: p.name,
-      status: 'Active',
+      status,
       pricePrefix: '',
       price: p.price,
       description: p.description ?? '',
@@ -190,8 +195,28 @@ export class PackagesComponent implements OnInit {
   }
 
   togglePackageStatus(pkg: DisplayPackage): void {
-    pkg.status = pkg.status === 'Active' ? 'Paused' : 'Active';
-    this.activeTab = pkg.status;
+    if (this.togglingPackageId) return;
+    this.togglingPackageId = pkg.id;
+    const nextStatus: 'Active' | 'Paused' = pkg.status === 'Active' ? 'Paused' : 'Active';
+
+    this.packageService.toggleStatus(pkg.id).subscribe({
+      next: () => {
+        pkg.status = nextStatus;
+        this.activeTab = pkg.status;
+        this.toastService.show(
+          pkg.status === 'Paused' ? 'Package paused.' : 'Package activated!',
+          'info'
+        );
+        this.togglingPackageId = null;
+      },
+      error: () => {
+        this.togglingPackageId = null;
+        this.toastService.show(
+          'Package status could not be updated. Awaiting backend PATCH /Package/{id}/status.',
+          'error'
+        );
+      }
+    });
   }
 
   deletePackage(id: string): void {
