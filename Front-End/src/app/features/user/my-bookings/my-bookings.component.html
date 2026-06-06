@@ -87,19 +87,15 @@
 
     <div class="bk-actions-bar">
       <div class="bk-actions">
-        <ng-container *ngIf="bk.status !== 'Done' && bk.status !== 'Completed'">
+        <ng-container *ngIf="bk.status !== 'Paid' && bk.status !== 'Done' && bk.status !== 'Completed'">
           <button class="btn" (click)="messageVendor(bk)"><i class="bi bi-chat-dots"></i> Message</button>
           <button class="btn cancel" *ngIf="bk.status === 'Pending' || bk.status === 'Confirmed'" (click)="cancelBooking(bk)"><i class="bi bi-x-circle"></i> Cancel</button>
         </ng-container>
 
-        <ng-container *ngIf="bk.status === 'Done'">
-          <button class="btn btn-confirm-completion" (click)="confirmCompletion(bk)"><i class="bi bi-check-circle"></i> Confirm Service Completion</button>
+        <ng-container *ngIf="bk.status === 'Paid' || bk.status === 'Done' || bk.status === 'Completed'">
+          <button class="btn btn-leave-review" (click)="openReviewModal(bk)"><i class="bi bi-star"></i> Leave Review</button>
           <button class="btn" (click)="messageVendor(bk)"><i class="bi bi-chat-dots"></i> Message</button>
           <button class="btn cancel" (click)="reportIssue(bk)"><i class="bi bi-exclamation-triangle"></i> Report an Issue</button>
-        </ng-container>
-
-        <ng-container *ngIf="bk.status === 'Completed'">
-          <button class="btn btn-leave-review" (click)="openReviewModal(bk)"><i class="bi bi-star"></i> Leave Review</button>
         </ng-container>
       </div>
       <div class="bk-id">{{bk.id}}</div>

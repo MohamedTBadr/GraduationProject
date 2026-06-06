@@ -140,33 +140,6 @@ export class MyBookingsComponent implements OnInit {
     this.stats.cancelled = allBookings.filter(b => b.status === 'Cancelled').length;
   }
 
-  confirmCompletion(bk: Booking) {
-    this.eventService.updateItemStatus(bk.eventId, bk.id, 'Completed').subscribe({
-      next: () => {
-        this.eventService.getByStatus('Completed').subscribe({
-          next: (completedEvents) => {
-            const fromCompleted = this.mapEventsToBookings(completedEvents);
-            const merged = this.mergeBookings(this.bookings, fromCompleted);
-            this.applyBookings(merged);
-            this.toastService.show('Service marked as completed. You can now leave a review!', 'success');
-            this.openReviewModal(bk);
-          },
-          error: () => {
-            this.loadBookings();
-            this.toastService.show('Service marked as completed. You can now leave a review!', 'success');
-            this.openReviewModal(bk);
-          }
-        });
-      },
-      error: () => this.toastService.show('Failed to confirm completion. Please try again.', 'error')
-    });
-  }
-
-  private mergeBookings(primary: Booking[], fromStatus: Booking[]): Booking[] {
-    const byId = new Map(primary.map(b => [b.id, b]));
-    fromStatus.forEach(b => byId.set(b.id, b));
-    return Array.from(byId.values());
-  }
 
   loadOrders() {
     this.orderService.getOrdersByUser(this.userId).subscribe({

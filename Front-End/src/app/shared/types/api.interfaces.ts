@@ -37,11 +37,6 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
-export interface ChangePasswordRequest {
-  currentPassword?: string;
-  newPassword?: string;
-}
-
 // ─────────────────────────────────────────────
 // Pagination & Filtering
 // ─────────────────────────────────────────────
@@ -150,6 +145,23 @@ export interface ApiVendor {
   serviceAreas?: ServiceAreaDTO[];
 }
 
+/** Service ratings aggregated on GET /Vendor/{id} (VendorDetailsDTO.VendorRating). */
+export interface VendorRatingDto {
+  id: string;
+  vendorName?: string;
+  userName: string;
+  rating: number;
+  review: string;
+  createdAt: string;
+  serviceName?: string;
+}
+
+export interface VendorDetails extends ApiVendor {
+  vendorRatings: VendorRatingDto[];
+  startingPrice?: number;
+  yearsInBusiness?: number;
+}
+
 export interface ServiceAreaDTO {
   id?: string; // Guid
   city: string;
@@ -213,6 +225,7 @@ export interface ApiProduct {
   imageUrl?: string;
   imageUrls?: string[]; // Multiple images for slider
   status?: 'active' | 'paused';
+  isHidden?: boolean;
   duration?: string;
   leadTime?: string;
   classification?: 'Personal' | 'Corporate';

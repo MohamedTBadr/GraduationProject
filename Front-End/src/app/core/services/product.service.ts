@@ -37,6 +37,23 @@ export class ProductService {
     return [];
   }
 
+  private mapServiceStatus(raw: any): 'active' | 'paused' {
+    if (this.isHiddenFlag(raw?.isHidden ?? raw?.IsHidden)) return 'paused';
+
+    const status = this.pickField(raw, 'status', 'Status');
+    if (status === 'paused' || status === 'Paused') return 'paused';
+    return 'active';
+  }
+
+  private isHiddenFlag(value: unknown): boolean {
+    if (value === true || value === 1) return true;
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      return normalized === 'true' || normalized === '1';
+    }
+    return false;
+  }
+
   private pickField(obj: any, ...keys: string[]): any {
     if (!obj) return undefined;
     for (const key of keys) {
@@ -59,6 +76,7 @@ export class ProductService {
     const priceRaw = this.pickField(raw, 'price', 'Price') ?? 0;
     const price = typeof priceRaw === 'number' ? priceRaw : parseFloat(String(priceRaw));
     const areas = raw.serviceAreas ?? raw.ServiceAreas ?? [];
+    const isHidden = this.isHiddenFlag(raw?.isHidden ?? raw?.IsHidden);
 
     return {
       id: String(this.pickField(raw, 'id', 'Id') ?? ''),
@@ -73,7 +91,7 @@ export class ProductService {
       serviceTypeName: this.pickField(raw, 'serviceTypeName', 'ServiceTypeName'),
       imageUrl: firstImage,
       imageUrls: Array.isArray(images) ? images : (firstImage ? [firstImage] : []),
-      status: this.pickField(raw, 'status', 'Status') ?? 'active',
+      status: isHidden ? 'paused' : this.mapServiceStatus(raw),
       duration: this.pickField(raw, 'duration', 'Duration')
         ?? (raw.setupDuration != null ? String(raw.setupDuration) : raw.SetupDuration != null ? String(raw.SetupDuration) : undefined),
       leadTime: this.pickField(raw, 'leadTime', 'LeadTime')
@@ -81,7 +99,8 @@ export class ProductService {
       classification: this.pickField(raw, 'classification', 'Classification'),
       allowedEventTypes: raw.allowedEventTypes ?? raw.AllowedEventTypes,
       createdAt: this.pickField(raw, 'createdAt', 'CreatedAt'),
-      serviceAreas: Array.isArray(areas) ? areas : []
+      serviceAreas: Array.isArray(areas) ? areas : [],
+      isHidden
     };
   }
 
@@ -108,6 +127,7 @@ export class ProductService {
     if (filters.serviceTypeId) params = params.set('serviceTypeId', filters.serviceTypeId);
     if (filters.minPrice != null) params = params.set('minPrice', filters.minPrice.toString());
     if (filters.maxPrice != null) params = params.set('maxPrice', filters.maxPrice.toString());
+    if (filters.includeHidden === true) params = params.set('includeHidden', 'true');
 
     return params;
   }
@@ -161,8 +181,14 @@ export class ProductService {
 
 
   /** GET /Service/by-vendor/{vendorId} */
-  getByVendor(vendorId: string): Observable<ApiProduct[]> {
-    return this.http.get<any>(`${this.apiUrl}/Service/by-vendor/${vendorId}`).pipe(
+  getByVendor(vendorId: string, filters?: PaginatedRequest): Observable<ApiProduct[]> {
+    return this.http.get<any>(`${this.apiUrl}/Service/by-vendor/${vendorId}`, {
+      params: this.buildParams({
+        pageIndex: 1,
+        pageSize: 200,
+        ...filters
+      })
+    }).pipe(
       map(res => this.mapProductList(res))
     );
   }

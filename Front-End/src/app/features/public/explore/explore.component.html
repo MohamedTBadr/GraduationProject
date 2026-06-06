@@ -273,15 +273,15 @@
     </app-pagination>
   </div>
 
-  <div class="compare-bar" [class.show]="showCompareBar">
-    <div class="cb-title"><i class="bi bi-arrow-left-right"></i> Compare ({{ compareList.length }}/3)</div>
+  <div class="compare-bar" [class.show]="compareService.serviceCompareCount() > 0">
+    <div class="cb-title"><i class="bi bi-arrow-left-right"></i> Compare ({{ compareService.serviceCompareCount() }}/3)</div>
     <div class="cb-slots">
-      <div class="cb-slot" *ngFor="let s of compareList" class="cb-slot filled">{{ s.name }}</div>
-      <div class="cb-slot" *ngIf="compareList.length < 3">+ Add service</div>
+      <div class="cb-slot filled" *ngFor="let s of compareService.serviceCompareItems()">{{ s.name }}</div>
+      <div class="cb-slot" *ngIf="compareService.serviceCompareCount() < 3">+ Add service</div>
     </div>
     <div class="cb-actions">
-      <button class="btn btn-ghost btn-sm" style="color:white;background:transparent;border-color:rgba(255,255,255,0.2)" (click)="clearCompare()">Clear</button>
-      <button class="btn btn-gold btn-sm" routerLink="/compare">Compare Now →</button>
+      <button class="btn btn-ghost btn-sm" style="color:white;background:transparent;border-color:rgba(255,255,255,0.2)" (click)="clearServiceCompare()">Clear</button>
+      <button class="btn btn-gold btn-sm" routerLink="/compare" [queryParams]="{ tab: 'services' }" [disabled]="compareService.serviceCompareCount() < 2">Compare Now →</button>
     </div>
   </div>
 

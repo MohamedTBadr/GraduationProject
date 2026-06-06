@@ -97,7 +97,7 @@ export class PackagesComponent implements OnInit {
   }
 
   loadVendorServices(): void {
-    this.productService.getByVendor(this.vendorId).subscribe({
+    this.productService.getByVendor(this.vendorId, { includeHidden: true }).subscribe({
       next: (services) => { this.vendorServices = services; },
       error: () => this.toastService.show('Failed to load services for packages.', 'error')
     });

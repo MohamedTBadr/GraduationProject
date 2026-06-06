@@ -31,7 +31,7 @@ import { CompareService } from '../../services/compare.service';
 
         <div class="bar-actions">
           <button class="btn btn-ghost btn-sm" (click)="compareService.clearCompare()">Clear All</button>
-          <button class="btn btn-gold btn-sm" routerLink="/compare" [disabled]="compareService.compareCount() < 2">
+          <button class="btn btn-gold btn-sm" routerLink="/compare" [queryParams]="{ tab: 'vendors' }" [disabled]="compareService.compareCount() < 2">
             Compare Now →
           </button>
         </div>

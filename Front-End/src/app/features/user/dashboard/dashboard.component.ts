@@ -37,8 +37,7 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboardData() {
-    const user = this.authService.user();
-    if (!user || user.role !== 'User') {
+    if (!this.authService.isLoggedIn()) {
       this.loading = false;
       return;
     }

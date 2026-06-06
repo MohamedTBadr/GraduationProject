@@ -5,6 +5,8 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   ApiVendor,
+  VendorDetails,
+  VendorRatingDto,
   CreateVendorRequest,
   UpdateVendorRequest,
   PaginatedRequest,
@@ -67,10 +69,48 @@ export class VendorService {
   }
 
   getById(vendorId: string): Observable<ApiVendor> {
+    return this.getDetailsById(vendorId).pipe(map(d => d));
+  }
+
+  /** GET /Vendor/{id} — vendor profile plus service ratings (VendorDetailsDTO). */
+  getDetailsById(vendorId: string): Observable<VendorDetails> {
     if (!vendorId) throw new Error('Vendor ID is required');
     return this.http.get<any>(`${this.apiUrl}/Vendor/${vendorId}`).pipe(
-      map((res: any) => this.normalizeVendor(res?.value ?? res?.Value ?? res, vendorId))
+      map((res: any) => {
+        const raw = res?.value ?? res?.Value ?? res;
+        const vendor = this.normalizeVendor(raw, vendorId);
+        return {
+          ...vendor,
+          vendorRatings: this.parseVendorRatings(raw),
+          startingPrice: Number(this.pickField(raw, 'startingPrice', 'StartingPrice') ?? 0) || undefined,
+          yearsInBusiness: Number(this.pickField(raw, 'yearsInBusiness', 'YearsInBusiness') ?? 0) || undefined
+        };
+      })
     );
+  }
+
+  private parseVendorRatings(raw: any): VendorRatingDto[] {
+    const explicit = raw?.vendorRating ?? raw?.VendorRating;
+    const fromExplicit = Array.isArray(explicit) ? explicit : [];
+
+    const services = raw?.services ?? raw?.Services ?? [];
+    const fromServices = (Array.isArray(services) ? services : []).flatMap((service: any) => {
+      const serviceName = this.pickField(service, 'name', 'Name') ?? '';
+      const ratings = service?.serviceRatings ?? service?.ServiceRatings ?? [];
+      return (Array.isArray(ratings) ? ratings : []).map((r: any) => ({ ...r, serviceName }));
+    });
+
+    const combined = fromExplicit.length ? fromExplicit : fromServices;
+
+    return combined.map((r: any) => ({
+      id: String(this.pickField(r, 'id', 'Id') ?? crypto.randomUUID()),
+      vendorName: this.pickField(r, 'vendorName', 'VendorName'),
+      userName: String(this.pickField(r, 'userName', 'UserName') ?? 'Anonymous'),
+      rating: Number(this.pickField(r, 'rating', 'Rating') ?? 0),
+      review: String(this.pickField(r, 'review', 'Review') ?? ''),
+      createdAt: String(this.pickField(r, 'createdAt', 'CreatedAt') ?? ''),
+      serviceName: this.pickField(r, 'serviceName', 'ServiceName')
+    }));
   }
 
   /** Reads camelCase or PascalCase API fields (backend responses are inconsistent). */

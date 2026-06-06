@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, NgZone, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
@@ -12,6 +12,7 @@ import { ServiceTypeService } from '../../../core/services/service-type.service'
 import { VendorTypeService } from '../../../core/services/vendor-type.service';
 import { EventTypeService } from '../../../core/services/event-type.service';
 import { ModalService } from '../../../shared/services/modal.service';
+import { CompareService } from '../../../shared/services/compare.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -74,9 +75,9 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   previewImages: string[] = [];
   activeImageIndex = 0;
 
-  compareList: ApiProduct[] = [];
   wishlist: string[] = [];
-  showCompareBar = false;
+
+  compareService = inject(CompareService);
 
   constructor(
     private route: ActivatedRoute,
@@ -586,14 +587,17 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
   addToCompare(svc: ApiProduct, e: Event) {
     e.stopPropagation();
-    if (this.compareList.find(s => s.id === svc.id)) {
-      this.compareList = this.compareList.filter(s => s.id !== svc.id);
-    } else if (this.compareList.length < 3) {
-      this.compareList.push(svc);
+    const result = this.compareService.toggleServiceCompare(svc);
+    if (result.success) {
+      this.toastService.show(
+        result.added ? 'Added to comparison!' : 'Removed from comparison',
+        'success'
+      );
+    } else {
+      this.toastService.show(result.message || 'Cannot add more services', 'error');
     }
-    this.showCompareBar = this.compareList.length > 0;
   }
 
-  isInCompare(id: string) { return !!this.compareList.find(s => s.id === id); }
-  clearCompare() { this.compareList = []; this.showCompareBar = false; }
+  isInCompare(id: string) { return this.compareService.isServiceInCompare(id); }
+  clearServiceCompare() { this.compareService.clearServiceCompare(); }
 }

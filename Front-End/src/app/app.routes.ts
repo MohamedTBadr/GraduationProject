@@ -31,13 +31,6 @@ export const routes: Routes = [
         path: 'payment/failed',
         loadComponent: () => import('./features/user/payment-failed/payment-failed.component').then(m => m.PaymentFailedComponent)
     },
-    {
-        path: 'change-password',
-        canActivate: [authGuard],
-        loadComponent: () => import('./features/auth/change-password/change-password.component').then(m => m.ChangePasswordComponent)
-    },
-
-
     // Admin Portal (Protected)
     {
         path: 'admin',
