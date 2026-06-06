@@ -173,8 +173,14 @@ namespace Application.Services
             if (item == null || item.EventId != eventId)
                 return Result<EventItemResponseDto>.NotFound(404, "Item not found in this event.");
 
-            if (item.Service.VendorId != vendorId)
+            var itemVendorId = item.Service?.VendorId ?? item.Package?.VendorId;
+
+            if (itemVendorId == null)
+                return Result<EventItemResponseDto>.InvalidOperation(400, "Item has no associated service or package.");
+
+            if (itemVendorId != vendorId)
                 return Result<EventItemResponseDto>.Unauthorized(401, "You do not own this item.");
+
 
             if (item.ItemStatus != "Pending")
                 return Result<EventItemResponseDto>.InvalidOperation(400, $"Item is already '{item.ItemStatus}'.");

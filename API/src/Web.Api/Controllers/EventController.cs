@@ -376,7 +376,7 @@ Only return JSON. No markdown. No explanation.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [InvalidateCache("events", "events/{eventId}", "vendors/{UserId}/bookings", "dashboard-stats")]
+        [InvalidateCache("events", "events/{eventId}", "vendors/{UserId}/bookings","vendors/bookings", "dashboard-stats")]
         public async Task<IActionResult> ApproveItem(
             Guid eventId,
             Guid itemId,
@@ -390,7 +390,10 @@ Only return JSON. No markdown. No explanation.
             var eventDto = await serviceManager.EventService.GetByIdAsync(eventId, cancellationToken);
             if (result.IsSuccess)
             {
-                await serviceManager.NotificationService.SendAsync(eventDto.Value.UserId, "ITEM_APPROVAL_UPDATE", "Item Approval Update", $"Your event item '{result.Value.ServiceName}' has been approved");
+                if(request.Approve)
+                    await serviceManager.NotificationService.SendAsync(eventDto.Value.UserId, "EVENT_ITEM_APPROVED", "Item Approval Update", $"Your event item '{result.Value.ServiceName ?? result.Value.PackageName}' has been approved");
+                if(!request.Approve)
+                    await serviceManager.NotificationService.SendAsync(eventDto.Value.UserId, "EVENT_ITEM_REJECTED", "Item Approval Update", $"Your event item '{result.Value.ServiceName ?? result.Value.PackageName}' has been rejected. Reason: {request.Reason}");
             }
             return result.IsSuccess ? NoContent() : result.ToActionResult();
         }

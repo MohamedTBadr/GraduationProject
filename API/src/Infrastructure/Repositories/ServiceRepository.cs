@@ -43,7 +43,7 @@ namespace Infrastructure.Repositories
             if (request.VendorId.HasValue)
                     query = query.Where(p => p.VendorId == request.VendorId.Value);
                 if (request.VendorTypeId.HasValue)
-                   query= query.Where(p => p.Vendor.VendorTypeId == request.VendorTypeId.Value);
+                   query= query.Where(p => p.Vendor.VendorTypeId == request.VendorTypeId.Value || p.ServiceType.VendorTypeId == request.VendorTypeId.Value);
                 if (request.ServiceTypeId.HasValue)
                     query = query.Where(p => p.ServiceTypeId == request.ServiceTypeId.Value);
 

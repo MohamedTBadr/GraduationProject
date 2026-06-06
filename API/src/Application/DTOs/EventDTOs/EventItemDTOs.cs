@@ -37,7 +37,8 @@ namespace Application.DTOs
         public Guid ServiceId { get; set; }
         public string ServiceName { get; set; } = string.Empty;
         public string ServiceImage { get; set; } = string.Empty;
-         public Guid VendorId { get; set; }                  // ← was missing
+        public string PackageName { get; set; } = string.Empty;
+        public Guid VendorId { get; set; }                  // ← was missing
         public string VendorName { get; set; } = string.Empty; // ← was missing
         public decimal Price { get; set; }
         public int Quantity { get; set; }
