@@ -2676,8 +2676,27 @@ table.ad-tbl {
 .vd-tab-bar {
   display: flex;
   gap: 0;
+  align-items: flex-end;
   border-bottom: 2px solid var(--lgray);
   margin-bottom: 18px;
+}
+
+.vd-tab-bar-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 0 0 7px;
+  margin-bottom: -2px;
+  flex-shrink: 0;
+}
+
+.vd-tab-bar-toggle-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--navy);
+  white-space: nowrap;
+  user-select: none;
 }
 
 .vd-tab {

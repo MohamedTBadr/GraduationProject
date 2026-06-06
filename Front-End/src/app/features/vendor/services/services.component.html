@@ -23,6 +23,14 @@
     <div class="vd-tab-bar">
       <button class="vd-tab" [class.active]="activeTab === 'active'" (click)="setTab('active')">Active ({{ activeServices.length }})</button>
       <button class="vd-tab" [class.active]="activeTab === 'paused'" (click)="setTab('paused')">Paused ({{ pausedServices.length }})</button>
+      <div class="vd-tab-bar-end">
+        <label class="vd-toggle">
+          <input type="checkbox" [checked]="includeHidden" (change)="onIncludeHiddenChange($any($event.target).checked)" />
+          <div class="vd-tgl-track"></div>
+          <div class="vd-tgl-thumb"></div>
+        </label>
+        <span class="vd-tab-bar-toggle-label">Show hidden</span>
+      </div>
     </div>
 
     <div class="p-[40px] text-center text-[#94a3b8]" *ngIf="loading">Loading services...</div>
@@ -35,7 +43,10 @@
           (actionClick)="handleAction($event, service)">
         </app-service-card>
         <div class="p-[40px] text-center text-[#94a3b8] text-[0.95rem] bg-[white] rounded-[12px] [border:1px_dashed_#cbd5e1]" *ngIf="currentServices.length === 0">
-          No services found.
+          <ng-container *ngIf="activeTab === 'paused' && !includeHidden; else defaultEmpty">
+            Turn on <strong>Show hidden</strong> to load paused services.
+          </ng-container>
+          <ng-template #defaultEmpty>No services found.</ng-template>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { catchError, of } from 'rxjs';
 import { ServiceCardComponent } from '../../../shared/components/service-card/service-card.component';
 import { ApiProduct } from '../../../shared/types/api.interfaces';
 import { ImageUploadComponent } from '../../../shared/components/image-upload/image-upload.component';
@@ -37,6 +38,7 @@ export class ServicesComponent implements OnInit {
   services: ApiProduct[] = [];
   loading = false;
   activeTab: 'active' | 'paused' = 'active';
+  includeHidden = false;
 
   isAddServiceModalOpen = false;
   editingId: string | null = null;
@@ -91,6 +93,11 @@ export class ServicesComponent implements OnInit {
 
   setTab(tab: 'active' | 'paused') { this.activeTab = tab; }
 
+  onIncludeHiddenChange(checked: boolean): void {
+    this.includeHidden = checked;
+    this.loadProducts();
+  }
+
   initForm(): void {
     this.serviceForm = this.fb.group({
       name: ['', Validators.required],
@@ -107,9 +114,14 @@ export class ServicesComponent implements OnInit {
     const user = this.authService.user();
     if (!user) return;
     this.loading = true;
-    this.productService.getByVendor(user.id).subscribe({
+    this.productService.getByVendor(user.id, { includeHidden: this.includeHidden }).pipe(
+      catchError((err) => {
+        if (err?.status === 404) return of([]);
+        throw err;
+      })
+    ).subscribe({
       next: (data) => {
-        this.services = data.map(d => ({ ...d, status: d.status || 'active' }));
+        this.services = data;
         this.loading = false;
       },
       error: (err) => {

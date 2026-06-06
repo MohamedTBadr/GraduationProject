@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   EventResponseDto,
+  EventItemResponseDto,
   EventSummaryDto,
   PagedResult,
   PaginatedRequest,
@@ -55,7 +56,9 @@ export class EventService {
 
   /** GET /Event/{id} - Get event details */
   getById(id: string): Observable<EventResponseDto> {
-    return this.http.get<EventResponseDto>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      map(res => this.normalizeEvent(this.unwrapEventBody(res)))
+    );
   }
   getForVendor(vendorUserId: string): Observable<EventResponseDto[]> {
     return this.http.get<any>(`${environment.apiUrl}/Vendor/bookings`).pipe(
@@ -90,7 +93,7 @@ export class EventService {
             serviceName: b.serviceName,
             price: b.price,
             quantity: 1,
-            itemStatus: b.bookingStatus
+            itemStatus: this.mapItemStatus(b.bookingStatus)
           });
         });
 
@@ -102,56 +105,111 @@ export class EventService {
   /** GET /Event/my-events - Get events for the authenticated user */
   getByUser(): Observable<EventResponseDto[]> {
     return this.http.get<any>(`${this.apiUrl}/my-events`).pipe(
-      map(res => {
-        if (!res) return [];
-        if (Array.isArray(res)) return res.map(this.normalizeEvent);
-        const arr = res.value;
-        if (arr && Array.isArray(arr)) return arr.map(this.normalizeEvent);
-        const items = res.value?.items ?? res.items;
-        if (items && Array.isArray(items)) return items.map(this.normalizeEvent);
-        return [];
-      })
+      map(res => this.extractEventList(res).map(e => this.normalizeEvent(e)))
     );
   }
 
-  private normalizeEvent = (e: any): EventResponseDto => ({
-    id: e.id,
-    userId: e.userId,
-    userName: e.userName,
-    title: e.title,
-    eventTypeName: e.eventTypeName,
-    eventDate: e.eventDate,
-    totalBudget: e.totalBudget ?? 0,
-    guestCount: e.guestCount ?? 0,
-    notes: e.notes,
-    eventStatus: e.eventStatus,
-    cancellationReason: e.cancellationReason,
-    additionalNotes: e.additionalNotes,
-    cancelledAt: e.cancelledAt,
-    location: e.location,
-    eventItems: (e.eventItems ?? []).map((item: any) => ({
-      id: item.id,
-      eventId: item.eventId,
-      serviceId: item.serviceId,
-      serviceImage: item.serviceImage,
-      serviceName: item.serviceName,
-      price: item.price ?? 0,
-      vendorId: item.vendorId,
-      vendorName: item.vendorName,
-      quantity: item.quantity ?? 1,
-      itemStatus: item.itemStatus,
-      rejectionReason: item.rejectionReason
-    }))
-  });
+  private extractEventList(res: any): any[] {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+
+    const inner = res.value ?? res.Value;
+    if (inner != null) {
+      const items = inner.items ?? inner.Items;
+      if (Array.isArray(items)) return items;
+      if (Array.isArray(inner)) return inner;
+    }
+
+    const top = res.items ?? res.Items;
+    if (Array.isArray(top)) return top;
+
+    return [];
+  }
+
+  private unwrapEventBody(o: any): any {
+    if (!o || typeof o !== 'object') return o;
+    const nested = o.value ?? o.Value;
+    if (nested && typeof nested === 'object' && (nested.id ?? nested.Id)) {
+      return nested;
+    }
+    return o;
+  }
+
+  private pickField(obj: any, ...keys: string[]): any {
+    if (!obj) return undefined;
+    for (const key of keys) {
+      const val = obj[key];
+      if (val !== undefined && val !== null && val !== '') return val;
+    }
+    return undefined;
+  }
+
+  private mapItemStatus(value: unknown): EventItemResponseDto['itemStatus'] {
+    switch (String(value ?? 'Pending').toLowerCase()) {
+      case 'approved': return 'Approved';
+      case 'paid': return 'Paid';
+      case 'rejected': return 'Rejected';
+      case 'done': return 'Done';
+      case 'completed': return 'Completed';
+      default: return 'Pending';
+    }
+  }
+
+  private normalizeEvent = (e: any): EventResponseDto => {
+    const raw = this.unwrapEventBody(e);
+    if (!raw || typeof raw !== 'object') {
+      return {
+        id: '',
+        userId: '',
+        userName: '',
+        title: '',
+        eventTypeName: '',
+        eventDate: '',
+        totalBudget: 0,
+        guestCount: 0,
+        notes: undefined,
+        eventStatus: 'Pending',
+        eventItems: []
+      };
+    }
+
+    const eventItems = raw.eventItems ?? raw.EventItems ?? [];
+
+    return {
+      id: String(this.pickField(raw, 'id', 'Id') ?? ''),
+      userId: String(this.pickField(raw, 'userId', 'UserId') ?? ''),
+      userName: String(this.pickField(raw, 'userName', 'UserName') ?? ''),
+      title: String(this.pickField(raw, 'title', 'Title') ?? ''),
+      eventTypeName: String(this.pickField(raw, 'eventTypeName', 'EventTypeName') ?? ''),
+      eventDate: String(this.pickField(raw, 'eventDate', 'EventDate') ?? ''),
+      totalBudget: Number(this.pickField(raw, 'totalBudget', 'TotalBudget') ?? 0),
+      guestCount: Number(this.pickField(raw, 'guestCount', 'GuestCount') ?? 0),
+      notes: this.pickField(raw, 'notes', 'Notes'),
+      eventStatus: String(this.pickField(raw, 'eventStatus', 'EventStatus') ?? 'Pending'),
+      cancellationReason: this.pickField(raw, 'cancellationReason', 'CancellationReason'),
+      additionalNotes: this.pickField(raw, 'additionalNotes', 'AdditionalNotes'),
+      cancelledAt: this.pickField(raw, 'cancelledAt', 'CancelledAt'),
+      location: raw.location ?? raw.Location,
+      eventItems: (Array.isArray(eventItems) ? eventItems : []).map((item: any) => ({
+        id: String(this.pickField(item, 'id', 'Id') ?? ''),
+        eventId: String(this.pickField(item, 'eventId', 'EventId') ?? ''),
+        serviceId: this.pickField(item, 'serviceId', 'ServiceId'),
+        serviceImage: this.pickField(item, 'serviceImage', 'ServiceImage'),
+        serviceName: String(this.pickField(item, 'serviceName', 'ServiceName') ?? ''),
+        price: Number(this.pickField(item, 'price', 'Price') ?? 0),
+        vendorId: String(this.pickField(item, 'vendorId', 'VendorId') ?? ''),
+        vendorName: String(this.pickField(item, 'vendorName', 'VendorName') ?? ''),
+        quantity: Number(this.pickField(item, 'quantity', 'Quantity') ?? 1),
+        itemStatus: this.mapItemStatus(this.pickField(item, 'itemStatus', 'ItemStatus')),
+        rejectionReason: this.pickField(item, 'rejectionReason', 'RejectionReason')
+      }))
+    };
+  };
 
   /** GET /Event/status/{status} - Get events by status (e.g. Completed) */
   getByStatus(status: string): Observable<EventResponseDto[]> {
     return this.http.get<any>(`${this.apiUrl}/status/${status}`).pipe(
-      map(res => {
-        const arr = res?.value ?? res;
-        if (!Array.isArray(arr)) return [];
-        return arr.map(this.normalizeEvent);
-      })
+      map(res => this.extractEventList(res).map(e => this.normalizeEvent(e)))
     );
   }
 

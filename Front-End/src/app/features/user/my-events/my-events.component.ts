@@ -40,7 +40,6 @@ export class MyEventsComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['id']) {
         this.activeEventId = params['id'];
-        this.loadActiveEventDetails(this.activeEventId);
       }
     });
     this.loadEvents();
@@ -82,40 +81,23 @@ export class MyEventsComponent implements OnInit {
   loadActiveEventDetails(id: string | null) {
     if (!id) return;
     this.eventService.getById(id).subscribe({
-      next: (res: any) => {
-        const raw = res?.value ?? res;
-        const fullEvent = {
-          id: raw.id,
-          userId: raw.userId,
-          userName: raw.userName,
-          title: raw.title,
-          eventTypeName: raw.eventTypeName,
-          eventDate: raw.eventDate,
-          totalBudget: raw.totalBudget ?? 0,
-          guestCount: raw.guestCount ?? 0,
-          notes: raw.notes,
-          eventStatus: raw.eventStatus,
-          location: raw.location,
-          eventItems: (raw.eventItems ?? []).map((item: any) => ({
-            id: item.id,
-            eventId: item.eventId,
-            serviceId: item.serviceId,
-            serviceImage: item.serviceImage,
-            serviceName: item.serviceName,
-            price: item.price ?? 0,
-            vendorId: item.vendorId,
-            vendorName: item.vendorName,
-            quantity: item.quantity ?? 1,
-            itemStatus: item.itemStatus,
-            rejectionReason: item.rejectionReason
-          }))
-        };
+      next: (fullEvent) => {
+        const mapped = this.mapEvent(fullEvent);
         const index = this.events.findIndex(e => e.id === id);
         if (index !== -1) {
-          this.events[index] = this.mapEvent(fullEvent);
+          this.events = [
+            ...this.events.slice(0, index),
+            mapped,
+            ...this.events.slice(index + 1)
+          ];
+        } else {
+          this.events = [...this.events, mapped];
         }
       },
-      error: (err) => console.error('Failed to load event details:', err)
+      error: (err) => {
+        console.error('Failed to load event details:', err);
+        this.toastService.show('Failed to load event details.', 'error');
+      }
     });
   }
 

@@ -37,6 +37,15 @@ export class ProductService {
     return [];
   }
 
+  private mapServiceStatus(raw: any): 'active' | 'paused' {
+    const isHidden = raw?.isHidden ?? raw?.IsHidden;
+    if (isHidden === true) return 'paused';
+
+    const status = this.pickField(raw, 'status', 'Status');
+    if (status === 'paused' || status === 'Paused') return 'paused';
+    return 'active';
+  }
+
   private pickField(obj: any, ...keys: string[]): any {
     if (!obj) return undefined;
     for (const key of keys) {
@@ -73,7 +82,7 @@ export class ProductService {
       serviceTypeName: this.pickField(raw, 'serviceTypeName', 'ServiceTypeName'),
       imageUrl: firstImage,
       imageUrls: Array.isArray(images) ? images : (firstImage ? [firstImage] : []),
-      status: this.pickField(raw, 'status', 'Status') ?? 'active',
+      status: this.mapServiceStatus(raw),
       duration: this.pickField(raw, 'duration', 'Duration')
         ?? (raw.setupDuration != null ? String(raw.setupDuration) : raw.SetupDuration != null ? String(raw.SetupDuration) : undefined),
       leadTime: this.pickField(raw, 'leadTime', 'LeadTime')
@@ -108,6 +117,7 @@ export class ProductService {
     if (filters.serviceTypeId) params = params.set('serviceTypeId', filters.serviceTypeId);
     if (filters.minPrice != null) params = params.set('minPrice', filters.minPrice.toString());
     if (filters.maxPrice != null) params = params.set('maxPrice', filters.maxPrice.toString());
+    if (filters.includeHidden === true) params = params.set('includeHidden', 'true');
 
     return params;
   }
@@ -161,8 +171,10 @@ export class ProductService {
 
 
   /** GET /Service/by-vendor/{vendorId} */
-  getByVendor(vendorId: string): Observable<ApiProduct[]> {
-    return this.http.get<any>(`${this.apiUrl}/Service/by-vendor/${vendorId}`).pipe(
+  getByVendor(vendorId: string, filters?: PaginatedRequest): Observable<ApiProduct[]> {
+    return this.http.get<any>(`${this.apiUrl}/Service/by-vendor/${vendorId}`, {
+      params: this.buildParams(filters)
+    }).pipe(
       map(res => this.mapProductList(res))
     );
   }

@@ -16,14 +16,14 @@
                 <div class="flex gap-[16px] items-start">
                     <div class="w-[44px] h-[44px] bg-[rgba(201,168,76,.1)] rounded-[50%] flex items-center justify-center text-[1.2rem] text-[var(--gold)]">
                         <i class="bi bi-envelope"></i></div>
-                    <div><strong class="block text-[var(--navy)] mb-[4px]">Email Support</strong><a class="text-[var(--gray)] no-underline" href="mailto:epichub&#64;gmail.com">epichub&#64;gmail.com</a></div>
+                    <div><strong class="block text-[var(--navy)] mb-[4px]">Email Support</strong><a class="text-[var(--gray)] no-underline" [href]="'mailto:' + supportEmail">{{ supportEmail }}</a></div>
                 </div>
 
                 <div class="flex gap-[16px] items-start">
                     <div class="w-[44px] h-[44px] bg-[rgba(201,168,76,.1)] rounded-[50%] flex items-center justify-center text-[1.2rem] text-[var(--gold)]">
                       <i class="bi bi-telephone"></i>  </div>
                     <div><strong class="block text-[var(--navy)] mb-[4px]">WhatsApp /
-                            Phone</strong><span class="text-[var(--gray)]">+20 102 730 6909</span></div>
+                            Phone</strong><a class="text-[var(--gray)] no-underline" href="https://wa.me/201027306909" target="_blank" rel="noopener noreferrer">+20 102 730 6909</a></div>
                 </div>
 
                 <div class="flex gap-[16px] items-start">
@@ -35,24 +35,33 @@
             </div>
         </div>
 
-        <div class="bg-[var(--white)] p-[40px] rounded-[var(--r2)] [box-shadow:var(--sh)]">
-            <h3 class="text-[1.4rem] text-[var(--navy)] mb-[24px] font-[var(--ff-d)]">Send a Message
-            </h3>
+        <form class="bg-[var(--white)] p-[40px] rounded-[var(--r2)] [box-shadow:var(--sh)]" [formGroup]="contactForm" (ngSubmit)="sendMessage()">
+            <h3 class="text-[1.4rem] text-[var(--navy)] mb-[8px] font-[var(--ff-d)]">Send a Message</h3>
+            <p class="text-[var(--gray)] text-[.85rem] mb-[24px]">Opens your email app with your message pre-filled to {{ supportEmail }}.</p>
+
             <div class="form-row">
-                <div class="form-group"><label>Name</label><input type="text" placeholder="Your name" /></div>
-                <div class="form-group"><label>Email</label><input type="email" placeholder="your@email.com" /></div>
+                <div class="form-group">
+                    <label for="contact-name">Name</label>
+                    <input id="contact-name" type="text" formControlName="name" placeholder="Your name" />
+                </div>
+                <div class="form-group">
+                    <label for="contact-email">Email</label>
+                    <input id="contact-email" type="email" formControlName="email" placeholder="your@email.com" />
+                </div>
             </div>
             <div class="form-group">
-                <label>Subject</label>
-                <select>
-                    <option>General Inquiry</option>
-                    <option>Booking Issue</option>
-                    <option>Payment Question</option>
-                    <option>Vendor Support</option>
+                <label for="contact-subject">Subject</label>
+                <select id="contact-subject" formControlName="subject">
+                    <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
                 </select>
             </div>
-            <div class="form-group"><label>Message</label><textarea class="h-[120px]" placeholder="How can we help?"></textarea></div>
-            <button class="btn btn-navy w-[100%] justify-center p-[12px]" (click)="sendMessage()">Send Message</button>
-        </div>
+            <div class="form-group">
+                <label for="contact-message">Message</label>
+                <textarea id="contact-message" class="h-[120px]" formControlName="message" placeholder="How can we help?"></textarea>
+            </div>
+            <button type="submit" class="btn btn-navy w-[100%] justify-center p-[12px]">
+                <i class="bi bi-envelope-open"></i> Open in Email App
+            </button>
+        </form>
     </div>
 </div>
