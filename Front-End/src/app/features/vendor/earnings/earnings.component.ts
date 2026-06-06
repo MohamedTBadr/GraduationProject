@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 
-interface RevenuePoint { month: string; revenue: number; }
+interface RevenuePoint { month?: string; label?: string; revenue: number; }
 
 @Component({
   selector: 'app-earnings',

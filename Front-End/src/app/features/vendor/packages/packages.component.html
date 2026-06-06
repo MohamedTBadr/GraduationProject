@@ -58,7 +58,7 @@
       <div class="card-actions">
         <div>
           <button class="btn-edit mb-[8px] block" (click)="openCreateModal(pkg)">Edit</button>
-          <button class="btn-pause mb-[8px] block" (click)="togglePackageStatus(pkg)">
+          <button class="btn-pause mb-[8px] block" (click)="togglePackageStatus(pkg)" [disabled]="togglingPackageId === pkg.id">
             {{ pkg.status === 'Active' ? 'Pause' : 'Activate' }}
           </button>
         </div>

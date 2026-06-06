@@ -94,6 +94,7 @@
 
         <ng-container *ngIf="bk.status === 'Done'">
           <button class="btn btn-confirm-completion" (click)="confirmCompletion(bk)"><i class="bi bi-check-circle"></i> Confirm Service Completion</button>
+          <button class="btn" (click)="messageVendor(bk)"><i class="bi bi-chat-dots"></i> Message</button>
           <button class="btn cancel" (click)="reportIssue(bk)"><i class="bi bi-exclamation-triangle"></i> Report an Issue</button>
         </ng-container>
 

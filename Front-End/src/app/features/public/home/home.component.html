@@ -59,7 +59,7 @@
                     <div class="cat-name">Photography</div>
                     <div class="cat-count">89 studios</div>
                 </div>
-                <div class="cat-card" routerLink="/explore" [queryParams]="{type: 'Entertainment'}">
+                <div class="cat-card" routerLink="/explore" [queryParams]="{ tab: 'vendors', type: 'Entertainment' }">
                     <div class="cat-icon"><i class="bi bi-music-note-beamed"></i></div>       
                     <div class="cat-name">Entertainment</div>
                     <div class="cat-count">41 acts</div>        
@@ -189,7 +189,7 @@
             <h2 class="section-title">Ready to Plan Your Perfect Event?</h2>
             <p>Join over 1,200 happy clients who trusted Epic Hub.</p>
             <div class="cta-btns">
-                <button class="start-btn" routerLink="/dashboard">Start Planning Free</button>
+                <button class="start-btn" routerLink="/add-event">Start Planning Free</button>
                 <button class="btn btn-outline" routerLink="/explore">Explore Vendors</button>
             </div>
         </div>

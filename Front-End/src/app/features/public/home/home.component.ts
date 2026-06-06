@@ -6,6 +6,7 @@ import { ApiVendor } from '../../../shared/types/api.interfaces';
 import { VendorService } from '../../../core/services/vendor.service';
 import { EventTypeService } from '../../../core/services/event-type.service';
 import { EventType } from '../../../core/models/taxonomy.models';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-home',
@@ -22,13 +23,15 @@ export class HomeComponent implements OnInit {
   constructor(
     private router: Router,
     private vendorService: VendorService,
-    private eventTypeService: EventTypeService
+    private eventTypeService: EventTypeService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit() {
     this.loading = true;
     this.eventTypeService.getAll().subscribe({
-      next: (types) => { this.eventTypes = Array.isArray(types) ? types : []; }
+      next: (types) => { this.eventTypes = Array.isArray(types) ? types : []; },
+      error: () => this.toastService.show('Failed to load event categories.', 'error')
     });
     this.vendorService.getAll({ pageSize: 20, pageIndex: 1, sortBy: 'rating', isDescending: true }).subscribe({
       next: (data) => {
@@ -37,6 +40,7 @@ export class HomeComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
+        this.toastService.show('Failed to load featured vendors.', 'error');
       }
     });
   }
@@ -48,10 +52,11 @@ export class HomeComponent implements OnInit {
   }
 
   filterByEventType(slug: string) {
-    const match = this.eventTypes.find(t =>
-      t.name.toLowerCase() === slug.toLowerCase() ||
-      t.name.toLowerCase().includes(slug.toLowerCase())
-    );
+    const needle = slug.toLowerCase();
+    const match = this.eventTypes.find(t => {
+      const name = (t.name ?? '').toLowerCase();
+      return name === needle || name.includes(needle);
+    });
     this.router.navigate(['/explore'], {
       queryParams: {
         tab: 'services',

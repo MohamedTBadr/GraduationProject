@@ -3,7 +3,9 @@
     <div><div class="ad-page-title">Financials</div><div class="ad-page-sub">Platform-wide revenue, commission breakdown, and financial health.</div></div>
     <div class="flex gap-[8px]">
       <button class="ad-btn ad-btn-ghost" (click)="sendEmail()">Email Report</button>
-      <button class="ad-btn ad-btn-ghost" (click)="downloadPdf()">Download PDF</button>
+      <button class="ad-btn ad-btn-ghost" (click)="downloadPdf()" [disabled]="loading || isDownloadingPdf">
+        {{ isDownloadingPdf ? 'Generating...' : 'Download PDF' }}
+      </button>
     </div>
   </div>
 
@@ -42,7 +44,7 @@
             <div *ngFor="let point of revenueHistory" class="flex flex-col items-center gap-[4px]">
               <div class="w-[22px] bg-[var(--gold)] rounded-[4px_4px_0_0]"
                    [style.height.%]="getBarHeight(point.revenue)"></div>
-              <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ point.month | slice:0:3 }}</span>
+              <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ (point.label ?? point.month ?? '') | slice:0:3 }}</span>
             </div>
           </div>
         </ng-container>
@@ -68,9 +70,9 @@
     </div>
 
     <!-- AI summary if present -->
-    <div class="ad-card" *ngIf="report?.aiSummary ?? report?.AiSummary">
+    <div class="ad-card" *ngIf="executiveSummary">
       <div class="ad-card-title">AI Executive Summary</div>
-      <p style="font-size:.88rem;line-height:1.6;color:rgba(255,255,255,.7)">{{ report?.aiSummary ?? report?.AiSummary }}</p>
+      <p style="font-size:.88rem;line-height:1.6;color:rgba(255,255,255,.7)">{{ executiveSummary }}</p>
     </div>
 
   </ng-container>

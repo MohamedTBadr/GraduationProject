@@ -85,26 +85,33 @@ export class MyBookingsComponent implements OnInit {
 
     this.eventService.getByUser().subscribe({
       next: (events: EventResponseDto[]) => {
-        let allBookings: Booking[] = [];
-        
-        events.forEach(ev => {
-          if (ev.eventItems && ev.eventItems.length > 0) {
-            ev.eventItems.forEach(item => {
-              let localStatus: 'Confirmed' | 'Pending' | 'Completed' | 'Cancelled' | 'Done' | 'Paid' = 'Pending';
-              if (item.itemStatus === 'Approved')   localStatus = 'Confirmed';
-              if (item.itemStatus === 'Paid')        localStatus = 'Paid';
-              if (item.itemStatus === 'Rejected')    localStatus = 'Cancelled';
-              if (item.itemStatus === 'Done')        localStatus = 'Done';
-              if (item.itemStatus === 'Completed')   localStatus = 'Completed';
-              
-              const evDate = new Date(ev.eventDate);
-              const isPast = evDate.getTime() < new Date().getTime();
-              // Auto-complete confirmed past events if not manually done
-              if (localStatus === 'Confirmed' && isPast) {
-                localStatus = 'Completed';
-              }
+        const allBookings = this.mapEventsToBookings(events);
+        this.applyBookings(allBookings);
+        this.loadOrders();
+      },
+      error: (err) => {
+        console.error('Failed to load bookings', err);
+        this.toastService.show('Failed to load your bookings.', 'error');
+        this.loading = false;
+      }
+    });
+  }
 
-              allBookings.push({
+  private mapEventsToBookings(events: EventResponseDto[]): Booking[] {
+    const allBookings: Booking[] = [];
+    events.forEach(ev => {
+      if (ev.eventItems && ev.eventItems.length > 0) {
+        ev.eventItems.forEach(item => {
+          let localStatus: Booking['status'] = 'Pending';
+          if (item.itemStatus === 'Approved') localStatus = 'Confirmed';
+          if (item.itemStatus === 'Paid') localStatus = 'Paid';
+          if (item.itemStatus === 'Rejected') localStatus = 'Cancelled';
+          if (item.itemStatus === 'Done') localStatus = 'Done';
+          if (item.itemStatus === 'Completed' || ev.eventStatus === 'Completed') {
+            localStatus = 'Completed';
+          }
+
+          allBookings.push({
                 id: item.id || `BK-${Math.floor(Math.random() * 10000)}`,
                 eventId: ev.id,
                 serviceId: item.serviceId,
@@ -117,26 +124,48 @@ export class MyBookingsComponent implements OnInit {
                   ? (item.price > 0 ? `${item.price.toLocaleString()} EGP` : 'TBD')
                   : `${item.price.toLocaleString()} EGP`,
                 icon: 'shop'
-              });
-            });
-          }
+          });
         });
-
-        this.bookings = allBookings;
-        this.stats.all = allBookings.length;
-        this.stats.confirmed = allBookings.filter(b => b.status === 'Confirmed').length;
-        this.stats.pending = allBookings.filter(b => b.status === 'Pending').length;
-        this.stats.completed = allBookings.filter(b => b.status === 'Completed').length;
-        this.stats.cancelled = allBookings.filter(b => b.status === 'Cancelled').length;
-        
-        this.loadOrders();
-      },
-      error: (err) => {
-        console.error('Failed to load bookings', err);
-        this.toastService.show('Failed to load your bookings.', 'error');
-        this.loading = false;
       }
     });
+    return allBookings;
+  }
+
+  private applyBookings(allBookings: Booking[]) {
+    this.bookings = allBookings;
+    this.stats.all = allBookings.length;
+    this.stats.confirmed = allBookings.filter(b => b.status === 'Confirmed').length;
+    this.stats.pending = allBookings.filter(b => b.status === 'Pending').length;
+    this.stats.completed = allBookings.filter(b => b.status === 'Completed').length;
+    this.stats.cancelled = allBookings.filter(b => b.status === 'Cancelled').length;
+  }
+
+  confirmCompletion(bk: Booking) {
+    this.eventService.updateItemStatus(bk.eventId, bk.id, 'Completed').subscribe({
+      next: () => {
+        this.eventService.getByStatus('Completed').subscribe({
+          next: (completedEvents) => {
+            const fromCompleted = this.mapEventsToBookings(completedEvents);
+            const merged = this.mergeBookings(this.bookings, fromCompleted);
+            this.applyBookings(merged);
+            this.toastService.show('Service marked as completed. You can now leave a review!', 'success');
+            this.openReviewModal(bk);
+          },
+          error: () => {
+            this.loadBookings();
+            this.toastService.show('Service marked as completed. You can now leave a review!', 'success');
+            this.openReviewModal(bk);
+          }
+        });
+      },
+      error: () => this.toastService.show('Failed to confirm completion. Please try again.', 'error')
+    });
+  }
+
+  private mergeBookings(primary: Booking[], fromStatus: Booking[]): Booking[] {
+    const byId = new Map(primary.map(b => [b.id, b]));
+    fromStatus.forEach(b => byId.set(b.id, b));
+    return Array.from(byId.values());
   }
 
   loadOrders() {
@@ -197,12 +226,6 @@ export class MyBookingsComponent implements OnInit {
 
   onOrdersPageChange(page: number) {
     this.ordersPageNumber = page;
-  }
-
-  confirmCompletion(bk: Booking) {
-    this.toastService.show('Service marked as completed. You can now leave a review!', 'success');
-    const booking = this.bookings.find(b => b.id === bk.id);
-    if (booking) booking.status = 'Completed';
   }
 
   openReviewModal(bk: Booking) {

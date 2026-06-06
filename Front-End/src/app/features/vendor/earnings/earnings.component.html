@@ -35,7 +35,7 @@
             <div *ngFor="let point of revenueHistory" class="flex flex-col items-center gap-[4px]">
               <div class="w-[22px] bg-[var(--gold)] rounded-[4px_4px_0_0]"
                    [style.height.%]="getBarHeight(point.revenue)"></div>
-              <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ point.month | slice:0:3 }}</span>
+              <span style="font-size:.68rem;color:rgba(255,255,255,.4)">{{ (point.label ?? point.month ?? '') | slice:0:3 }}</span>
             </div>
           </div>
         </ng-container>
@@ -51,7 +51,7 @@
           <div *ngFor="let o of recentOrders | slice:0:5"
                class="flex justify-between items-center py-[12px] px-[0] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
             <div>
-              <div class="font-semibold text-[0.9rem]">Order #{{ (o.id ?? o.Id ?? '').slice(0,8).toUpperCase() }}</div>
+              <div class="font-semibold text-[0.9rem]">Order #{{ (o.orderId ?? o.id ?? o.Id ?? '').slice(0,8).toUpperCase() }}</div>
               <div class="text-[0.8rem] text-[var(--gray)]">{{ (o.createdAt ?? o.CreatedAt) | date:'mediumDate' }}</div>
             </div>
             <div class="font-semibold text-[var(--green)]">+ {{ (o.amount ?? o.Amount ?? 0) | number }} EGP</div>

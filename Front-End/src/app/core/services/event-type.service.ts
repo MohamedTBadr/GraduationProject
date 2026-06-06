@@ -14,6 +14,9 @@ export class EventTypeService {
 
   /** GET /api/EventTypes */
   getAll(): Observable<EventType[]> {
+    if (this.cachedEventTypes?.some(t => !t.id || t.name == null)) {
+      this.cachedEventTypes = null;
+    }
     if (this.cachedEventTypes) {
       return of(this.cachedEventTypes);
     }
@@ -23,7 +26,10 @@ export class EventTypeService {
         if (!res) return [];
         const data = res.value ?? res;
         const arr = Array.isArray(data) ? data : (data.items ?? []);
-        return arr.map((item: any) => ({ id: item.id, name: item.name }));
+        return arr.map((item: any) => ({
+          id: String(item.Id ?? item.id ?? ''),
+          name: String(item.Name ?? item.name ?? '')
+        }));
       }),
       tap(data => this.cachedEventTypes = data)
     );
