@@ -13,7 +13,6 @@ namespace Domain.Contracts
         Task<PaginatedResponse<Service>> GetAllAsync(
             PaginatedRequest request,
             Expression<Func<Service, bool>> visibilityFilter,
-            List<Guid>? luceneIds,
             CancellationToken ct);
 
         //Task<PaginatedResponse<Service>> GetByCategoryIdAsync(

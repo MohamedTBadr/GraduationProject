@@ -7,29 +7,29 @@ namespace Shared
     public record PaginatedRequest
     {
         // 📍 Location filters (flattened for query string)
-        public string? City { get; init; }
-        public string? Region { get; init; }
-        public decimal? Latitude { get; init; }
-        public decimal? Longitude { get; init; }
-        public double RadiusKm { get; init; } = 50;
+        public string? City { get; set; }
+        public string? Region { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
+        public double RadiusKm { get; set; } = 50;
 
         // 📄 Pagination
-        public int PageIndex { get; init; } = 1;
-        public int PageSize { get; init; } = 10;
+        public int PageIndex { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
 
         // 🔍 Search & Sort
-        public string? SearchTerm { get; init; }
-        public string? SortBy { get; init; }
-        public bool IsDescending { get; init; } = false;
-        public bool IncludeHidden { get; init; } = false;
+        public string? SearchTerm { get; set; }
+        public string? SortBy { get; set; }
+        public bool IsDescending { get; set; } = false;
+        public bool IncludeHidden { get; set; } = false;
 
         // 🎯 Advanced Filters
        
-        public Guid? ServiceTypeId { get; init; }
-        public Guid? VendorId { get; init; }
-        public Guid? VendorTypeId { get; init; }
-        public decimal? MinPrice { get; init; }
-        public decimal? MaxPrice { get; init; }
+        public Guid? ServiceTypeId { get; set; }
+        public Guid? VendorId { get; set; }
+        public Guid? VendorTypeId { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
 
         // 🔄 Map to LocationFilter for the helper
         public LocationFilter? LocationFilter =>
@@ -53,8 +53,8 @@ namespace Shared
     // ✅ Change to class or non-positional record
     public record AIRequest
     {
-        public decimal Budget { get; init; }
-        public int GuestCount { get; init; }
-        public string EventTypeName { get; init; }
+        public decimal Budget { get; set; }
+        public int GuestCount { get; set; }
+        public string EventTypeName { get; set; }
     }
 }

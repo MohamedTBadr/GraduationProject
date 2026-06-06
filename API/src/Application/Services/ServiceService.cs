@@ -19,19 +19,10 @@ namespace Application.Services
         public async Task<Result<PaginatedResponse<ServiceDTO>>> GetAllAsync(
            PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken ct)
         {
-            List<Guid>? luceneIds = null;
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-            {
-                var serviceIds = await _searchService.SearchServicesAsync(request.SearchTerm);
-                luceneIds = serviceIds.ToList();
-
-                if (luceneIds.Count == 0)
-                    return Result<PaginatedResponse<ServiceDTO>>.NotFound(404, "No services found matching the criteria.");
-            }
 
             Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
 
-            var result = await _ServiceRepository.GetAllAsync(request, visibilityFilter, luceneIds, ct);
+            var result = await _ServiceRepository.GetAllAsync(request, visibilityFilter, ct);
             var mappedItems = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
             if (!mappedItems.Any())
                 return Result<PaginatedResponse<ServiceDTO>>.NotFound(404, "No services found matching the criteria.");
@@ -221,7 +212,6 @@ namespace Application.Services
                 var result = await _ServiceRepository.GetAllAsync(
                     new PaginatedRequest { PageIndex = pageIndex, PageSize = pageSize },
                     s => true,
-                    null,
                     CancellationToken.None);
 
                 foreach (var service in result.Items)
