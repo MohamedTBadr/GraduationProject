@@ -31,7 +31,16 @@ namespace Infrastructure.Repositories
                     (v.User != null && (v.User.FirstName ?? "").ToLower().Contains(search)) ||
                     (v.User != null && (v.User.LastName ?? "").ToLower().Contains(search)));
             }
-
+            if(request?.ServiceTypeId != null)
+            {
+                var serviceTypeId = request.ServiceTypeId.Value;
+                query = query.Where(v => v.Services.Any(s => s.ServiceTypeId == serviceTypeId));
+            }
+            if(request?.VendorTypeId != null)
+            {
+                var vendorTypeId = request.VendorTypeId.Value;
+                query = query.Where(v => v.VendorTypeId == vendorTypeId);
+            }
             // ✅ Phase 1 — SQL only, stays IQueryable
             query = ApplyLocationSqlFilter(request, query);
 

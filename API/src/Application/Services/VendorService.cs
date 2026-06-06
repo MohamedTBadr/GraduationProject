@@ -28,25 +28,25 @@ namespace Application.Services
             bool isAdmin,
             CancellationToken cancellationToken)
         {
-            // If there's a search term or advanced filters, use Lucene
-            if (!string.IsNullOrWhiteSpace(paginatedRequest.SearchTerm) || 
-                !string.IsNullOrWhiteSpace(paginatedRequest.City))
-            {
-                var vendorIds = await searchService.SearchVendorsAsync(
-                    paginatedRequest.SearchTerm ?? "", 
-                    paginatedRequest.City, 
-                    includeUnverified: isAdmin);
-                var idList = vendorIds.ToList();
+            //// If there's a search term or advanced filters, use Lucene
+            //if (!string.IsNullOrWhiteSpace(paginatedRequest.SearchTerm) || 
+            //    !string.IsNullOrWhiteSpace(paginatedRequest.City))
+            //{
+            //    var vendorIds = await searchService.SearchVendorsAsync(
+            //        paginatedRequest.SearchTerm ?? "", 
+            //        paginatedRequest.City, 
+            //        includeUnverified: isAdmin);
+            //    var idList = vendorIds.ToList();
                 
-                // Fetch from DB to get full details and ensure status is correct
-                var vendorsFromDb = await vendorRepository.GetByIdsAsync(idList, cancellationToken);
+            //    // Fetch from DB to get full details and ensure status is correct
+            //    var vendorsFromDb = await vendorRepository.GetByIdsAsync(idList, cancellationToken);
                 
-                // Maintain Lucene order or re-apply pagination if needed
-                var items = mapper.Map<List<VendorListDTO>>(vendorsFromDb);
+            //    // Maintain Lucene order or re-apply pagination if needed
+            //    var items = mapper.Map<List<VendorListDTO>>(vendorsFromDb);
                 
-                return Result<PaginatedResponse<VendorListDTO>>.Success(new PaginatedResponse<VendorListDTO>(
-                    items, items.Count, paginatedRequest.PageIndex, paginatedRequest.PageSize));
-            }
+            //    return Result<PaginatedResponse<VendorListDTO>>.Success(new PaginatedResponse<VendorListDTO>(
+            //        items, items.Count, paginatedRequest.PageIndex, paginatedRequest.PageSize));
+            //}
 
             // Fallback to standard DB pagination
             Expression<Func<Vendor, bool>> visibilityFilter = isAdmin
