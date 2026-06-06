@@ -155,9 +155,13 @@ namespace Infrastructure.Repositories
 
         public async Task<EventItem?> GetItemByIdAsync(Guid itemId, CancellationToken cancellationToken)
         {
-            return 
-                await _context.EventItems
-                    .FirstOrDefaultAsync(i => i.Id == itemId, cancellationToken);
+            // In your repo
+            return await _context.EventItems
+                .Include(i => i.Service)
+                    .ThenInclude(s => s.Vendor)
+                .Include(i => i.Package)
+                    .ThenInclude(p => p.Vendor)
+                .FirstOrDefaultAsync(i => i.Id == itemId, cancellationToken);
         }
 
         public async Task<EventItem> UpdateItemAsync(EventItem item, CancellationToken cancellationToken)
