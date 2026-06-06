@@ -159,6 +159,8 @@ export interface VendorRatingDto {
 
 export interface VendorDetails extends ApiVendor {
   vendorRatings: VendorRatingDto[];
+  /** Services embedded in GET /Vendor/{id} (includes ServiceImages before separate product fetch). */
+  embeddedServices?: any[];
   startingPrice?: number;
   yearsInBusiness?: number;
 }

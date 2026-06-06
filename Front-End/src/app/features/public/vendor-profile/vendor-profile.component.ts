@@ -15,7 +15,8 @@ import { EventTypeService } from '../../../core/services/event-type.service';
 import { EventType } from '../../../core/models/taxonomy.models';
 import { ModalService } from '../../../shared/services/modal.service';
 import { formatVendorLocation } from '../../../shared/utils/location.utils';
-import { getProductImageUrls } from '../../../shared/utils/image.utils';
+import { cssBackgroundImage, getProductImageUrls, getServiceImagesFromRaw } from '../../../shared/utils/image.utils';
+import { VendorDetails } from '../../../shared/types/api.interfaces';
 
 @Component({
   selector: 'app-vendor-profile',
@@ -39,6 +40,7 @@ export class VendorProfileComponent implements OnInit {
 
   carouselImages: string[] = [];
   activeImageIndex = 0;
+  private embeddedServices: any[] = [];
 
   eventDate = '';
   eventType = '';
@@ -104,15 +106,17 @@ export class VendorProfileComponent implements OnInit {
     this.similarVendors = [];
     this.carouselImages = [];
     this.activeImageIndex = 0;
+    this.embeddedServices = [];
   }
 
   // ── Vendor info + packages (GET /Vendor/{id} returns both) ──────
   loadVendorProfile() {
     if (!this.vendorId) return;
     this.vendorService.getDetailsById(this.vendorId).subscribe({
-      next: (data) => {
+      next: (data: VendorDetails) => {
         this.vendor = data;
         this.vendorReviews = data.vendorRatings ?? [];
+        this.embeddedServices = data.embeddedServices ?? [];
         this.loading = false;
 
         this.loadVendorPackages();
@@ -184,20 +188,31 @@ export class VendorProfileComponent implements OnInit {
   private buildCarousel() {
     const images: string[] = [];
     if (this.vendor?.profilePictureUrl) images.push(this.vendor.profilePictureUrl);
-    this.products.forEach(p => {
-      images.push(...getProductImageUrls(p));
-    });
+    this.embeddedServices.forEach(s => images.push(...getServiceImagesFromRaw(s)));
+    this.products.forEach(p => images.push(...getProductImageUrls(p)));
     this.carouselImages = [...new Set(images)].filter(Boolean);
+    if (this.activeImageIndex >= this.carouselImages.length) {
+      this.activeImageIndex = 0;
+    }
+  }
+
+  heroBackground(url: string): string {
+    return cssBackgroundImage(url);
+  }
+
+  goToImage(index: number) {
+    if (index < 0 || index >= this.carouselImages.length) return;
+    this.activeImageIndex = index;
   }
 
   prevImage() {
     if (this.carouselImages.length < 2) return;
-    this.activeImageIndex = (this.activeImageIndex - 1 + this.carouselImages.length) % this.carouselImages.length;
+    this.goToImage((this.activeImageIndex - 1 + this.carouselImages.length) % this.carouselImages.length);
   }
 
   nextImage() {
     if (this.carouselImages.length < 2) return;
-    this.activeImageIndex = (this.activeImageIndex + 1) % this.carouselImages.length;
+    this.goToImage((this.activeImageIndex + 1) % this.carouselImages.length);
   }
 
   isFavorite(): boolean {

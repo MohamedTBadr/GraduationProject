@@ -37,7 +37,7 @@
 
         <form class="bg-[var(--white)] p-[40px] rounded-[var(--r2)] [box-shadow:var(--sh)]" [formGroup]="contactForm" (ngSubmit)="sendMessage()">
             <h3 class="text-[1.4rem] text-[var(--navy)] mb-[8px] font-[var(--ff-d)]">Send a Message</h3>
-            <p class="text-[var(--gray)] text-[.85rem] mb-[24px]">Opens your email app with your message pre-filled to {{ supportEmail }}.</p>
+            <p class="text-[var(--gray)] text-[.85rem] mb-[24px]">{{ submitHint }}</p>
 
             <div class="form-row">
                 <div class="form-group">
@@ -59,8 +59,9 @@
                 <label for="contact-message">Message</label>
                 <textarea id="contact-message" class="h-[120px]" formControlName="message" placeholder="How can we help?"></textarea>
             </div>
-            <button type="submit" class="btn btn-navy w-[100%] justify-center p-[12px]">
-                <i class="bi bi-envelope-open"></i> Open in Email App
+            <button type="submit" class="btn btn-navy w-[100%] justify-center p-[12px]" [disabled]="isSubmitting">
+                <i class="bi" [ngClass]="isLoggedIn ? 'bi-headset' : 'bi-envelope-open'"></i>
+                {{ isSubmitting ? 'Submitting...' : submitLabel }}
             </button>
         </form>
     </div>

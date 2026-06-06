@@ -6,6 +6,7 @@ import { EventService } from '../../../core/services/event.service';
 import { EventResponseDto, EventItemResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { SupportTicketModalComponent } from '../../../shared/components/support-ticket-modal/support-ticket-modal.component';
 import { formatEventLocation } from '../../../shared/utils/location.utils';
 
 export interface Booking {
@@ -34,7 +35,7 @@ interface CalendarDay {
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, SupportTicketModalComponent],
   templateUrl: './bookings.component.html',
   styleUrls: ['./bookings.component.scss']
 })
@@ -52,6 +53,9 @@ export class BookingsComponent implements OnInit {
   historyStatusFilter: 'All' | 'Rejected' | 'Done' | 'Completed' = 'All';
   historyPageNumber = 1;
   historyPageSize = 10;
+
+  isReportModalOpen = false;
+  selectedBookingRef = '';
 
   get filteredHistory(): Booking[] {
     let result = this.historyBookings;
@@ -436,6 +440,16 @@ export class BookingsComponent implements OnInit {
 
   switchTab(tab: 'pending' | 'confirmed' | 'calendar' | 'history') {
     this.currentTab = tab;
+  }
+
+  reportIssue(booking: Booking): void {
+    this.selectedBookingRef = booking.id;
+    this.isReportModalOpen = true;
+  }
+
+  closeReportModal(): void {
+    this.isReportModalOpen = false;
+    this.selectedBookingRef = '';
   }
 
   // ── Utility ──────────────────────────────────────────────────

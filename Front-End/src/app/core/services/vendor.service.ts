@@ -83,9 +83,11 @@ export class VendorService {
       map((res: any) => {
         const raw = res?.value ?? res?.Value ?? res;
         const vendor = this.normalizeVendor(raw, vendorId);
+        const embeddedServices = raw?.services ?? raw?.Services ?? [];
         return {
           ...vendor,
           vendorRatings: this.parseVendorRatings(raw),
+          embeddedServices: Array.isArray(embeddedServices) ? embeddedServices : [],
           startingPrice: Number(this.pickField(raw, 'startingPrice', 'StartingPrice') ?? 0) || undefined,
           yearsInBusiness: Number(this.pickField(raw, 'yearsInBusiness', 'YearsInBusiness') ?? 0) || undefined
         };

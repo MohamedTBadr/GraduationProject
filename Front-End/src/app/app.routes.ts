@@ -88,6 +88,10 @@ export const routes: Routes = [
             {
                 path: 'profile',
                 loadComponent: () => import('./features/vendor/profile/profile.component').then(m => m.ProfileComponent)
+            },
+            {
+                path: 'support',
+                loadComponent: () => import('./features/vendor/support/support.component').then(m => m.VendorSupportComponent)
             }
         ]
     },
@@ -121,6 +125,10 @@ export const routes: Routes = [
             {
                 path: 'notifications',
                 loadComponent: () => import('./features/user/notifications/notifications.component').then(m => m.UserNotificationsComponent)
+            },
+            {
+                path: 'support',
+                loadComponent: () => import('./features/user/support/support.component').then(m => m.UserSupportComponent)
             },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
         ]
