@@ -21,6 +21,7 @@ namespace Application.DTOs.ServiceDTOs
         public List<string> ServiceImages { get; set; }
         public decimal SetupDuration { get; set; } // in hours
         public decimal LeadTimeRequired { get; set; } // in weeks
+        public bool IsHidden { get; set; }
 
         public List<ServiceAreaDTO> ServiceAreas { get; set; } = new List<ServiceAreaDTO>();
     }

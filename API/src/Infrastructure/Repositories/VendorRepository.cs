@@ -41,6 +41,7 @@ namespace Infrastructure.Repositories
                 var vendorTypeId = request.VendorTypeId.Value;
                 query = query.Where(v => v.VendorTypeId == vendorTypeId);
             }
+
             // ✅ Phase 1 — SQL only, stays IQueryable
             query = ApplyLocationSqlFilter(request, query);
 

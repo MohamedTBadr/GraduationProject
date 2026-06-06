@@ -32,14 +32,14 @@ namespace Application.Services
         }
         private static Expression<Func<Service, bool>> ShowVisibility(PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId)
         {
-            Expression<Func<Service, bool>> visibilityFilter = s => !s.IsHidden; // Default
             if (isAdmin && request.IncludeHidden)
-            {
-                visibilityFilter = s => true; // See everything
-            }
-            return visibilityFilter;
-        }
+                return s => true; // Admin sees everything
 
+            if (isVendor && request.IncludeHidden && userId.HasValue)
+                return s => !s.IsHidden || s.VendorId == userId.Value; // Vendor sees public + own hidden
+
+            return s => !s.IsHidden; // Default: public only
+        }
 
         public async Task<Result<ServiceDTO>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
