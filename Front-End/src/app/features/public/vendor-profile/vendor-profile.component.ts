@@ -15,6 +15,7 @@ import { EventTypeService } from '../../../core/services/event-type.service';
 import { EventType } from '../../../core/models/taxonomy.models';
 import { ModalService } from '../../../shared/services/modal.service';
 import { formatVendorLocation } from '../../../shared/utils/location.utils';
+import { getProductImageUrls } from '../../../shared/utils/image.utils';
 
 @Component({
   selector: 'app-vendor-profile',
@@ -184,8 +185,7 @@ export class VendorProfileComponent implements OnInit {
     const images: string[] = [];
     if (this.vendor?.profilePictureUrl) images.push(this.vendor.profilePictureUrl);
     this.products.forEach(p => {
-      if (p.imageUrls?.length) images.push(...p.imageUrls);
-      else if (p.imageUrl) images.push(p.imageUrl);
+      images.push(...getProductImageUrls(p));
     });
     this.carouselImages = [...new Set(images)].filter(Boolean);
   }

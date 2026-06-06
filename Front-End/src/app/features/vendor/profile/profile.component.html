@@ -10,12 +10,37 @@
     </div>
     <button class="vd-btn vd-btn-ghost" [routerLink]="['/vendor', vendor.id]">View Public Profile →</button>
   </div>
-  <div class="vd-cover"><div class="vd-cover-avatar"></div><div class="absolute top-[11px] right-[11px]"><button class="vd-btn vd-btn-ghost vd-btn-sm bg-[rgba(255,255,255,.1)] text-[white] border-[rgba(255,255,255,.2)]">Change Cover</button></div></div>
+
+  <div class="vd-cover" [style.backgroundImage]="displayProfilePicture ? 'url(' + displayProfilePicture + ')' : ''">
+    <div class="vd-cover-avatar" *ngIf="displayProfilePicture">
+      <img [src]="displayProfilePicture" alt="Profile picture" />
+    </div>
+  </div>
+
   <div class="vd-tab-bar">
     <button class="vd-tab active">Business Info</button>
   </div>
   <div class="vd-tab-pane active" id="prf-info">
     <div class="vd-card">
+      <div class="vd-form-section">
+        <div class="vd-form-section-lbl">Profile Picture</div>
+        <div class="vd-profile-photo-row">
+          <div class="vd-profile-photo-preview">
+            <img *ngIf="displayProfilePicture; else profilePlaceholder" [src]="displayProfilePicture" alt="Profile preview" />
+            <ng-template #profilePlaceholder>
+              <i class="bi bi-person"></i>
+            </ng-template>
+          </div>
+          <div>
+            <input type="file" #avatarInput class="hidden" accept="image/jpeg,image/png,image/webp" (change)="onProfilePictureSelected($event)" />
+            <button type="button" class="vd-btn vd-btn-ghost vd-btn-sm" (click)="avatarInput.click()">
+              {{ displayProfilePicture ? 'Change Photo' : 'Upload Photo' }}
+            </button>
+            <p class="text-[#94a3b8] text-[.8rem] mt-[6px]">JPG, PNG, or WebP up to {{ maxProfileMb }}MB.</p>
+          </div>
+        </div>
+      </div>
+
       <div class="vd-form-row">
         <div class="vd-form-group">
           <label>Business Name</label>
@@ -80,7 +105,7 @@
       </div>
       <div class="vd-submit-bar">
         <button class="vd-btn vd-btn-ghost" (click)="loadProfile()">Discard</button>
-        <button class="vd-btn vd-btn-gold" (click)="saveChanges()">Save Changes</button>
+        <button class="vd-btn vd-btn-gold" (click)="saveChanges()" [disabled]="saving">{{ saving ? 'Saving...' : 'Save Changes' }}</button>
       </div>
     </div>
   </div>

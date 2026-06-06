@@ -460,6 +460,44 @@
   }
 }
 
+.vj-doc-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vj-doc-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--lgray);
+  border-radius: 8px;
+  background: var(--cream);
+}
+
+.vj-doc-name {
+  font-size: 0.85rem;
+  color: var(--navy);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vj-doc-remove {
+  border: none;
+  background: transparent;
+  color: #ef4444;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
 /* COMPACT PROFILE UPLOADER */
 .compact-profile-uploader {
   margin-bottom: 30px;

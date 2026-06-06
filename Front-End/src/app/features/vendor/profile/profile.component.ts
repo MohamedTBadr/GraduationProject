@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { ApiVendor, UpdateVendorRequest } from '../../../shared/types/api.interfaces';
+import { ApiVendor } from '../../../shared/types/api.interfaces';
 import { VendorService } from '../../../core/services/vendor.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
@@ -15,6 +15,7 @@ import {
   citiesToServiceAreas,
   normalizeAddressFields
 } from '../../../shared/utils/location.utils';
+import { appendVendorUpdateFormData } from '../../../shared/utils/vendor-form.utils';
 
 @Component({
   selector: 'app-profile',
@@ -27,14 +28,18 @@ export class ProfileComponent implements OnInit {
   vendor: ApiVendor | null = null;
   activeTab = 'info';
   loading = false;
+  saving = false;
 
   readonly cityOptions = EGYPT_CITY_OPTIONS;
   readonly governorateOptions = EGYPT_GOVERNORATE_OPTIONS;
+  readonly maxProfileMb = 5;
 
   addressStreet = '';
   addressCity = '';
   addressState = '';
   coverageCities: string[] = [];
+  selectedProfilePicture: File | null = null;
+  profilePreviewUrl: string | null = null;
 
   constructor(
     private vendorService: VendorService,
@@ -47,11 +52,17 @@ export class ProfileComponent implements OnInit {
     this.loadProfile();
   }
 
+  get displayProfilePicture(): string | null {
+    return this.profilePreviewUrl || this.vendor?.profilePictureUrl || null;
+  }
+
   loadProfile() {
     const user = this.authService.user();
     if (!user) return;
 
     this.loading = true;
+    this.selectedProfilePicture = null;
+    this.profilePreviewUrl = null;
     this.vendorService.getById(user.id).subscribe({
       next: (data) => {
         this.vendor = { ...data };
@@ -110,17 +121,41 @@ export class ProfileComponent implements OnInit {
     return this.coverageCities.includes(city);
   }
 
+  onProfilePictureSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/') && !/\.(jpe?g|png|webp)$/i.test(file.name)) {
+      this.toastService.show('Profile picture must be JPG, PNG, or WebP', 'error');
+      input.value = '';
+      return;
+    }
+    if (file.size > this.maxProfileMb * 1024 * 1024) {
+      this.toastService.show(`Profile picture must be under ${this.maxProfileMb}MB`, 'error');
+      input.value = '';
+      return;
+    }
+    this.selectedProfilePicture = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.profilePreviewUrl = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
   saveChanges() {
-    if (!this.vendor) return;
+    if (!this.vendor || this.saving) return;
 
     const { city, state } = normalizeAddressFields(this.addressCity, this.addressState);
     const serviceAreas = citiesToServiceAreas(
       this.coverageCities.length ? this.coverageCities : [city]
     );
 
-    const payload: UpdateVendorRequest = {
+    const formData = new FormData();
+    appendVendorUpdateFormData(formData, {
       name: this.vendor.name,
       businessName: this.vendor.name,
+      ownerName: this.vendor.name,
       phone: this.vendor.phone,
       description: this.vendor.about,
       address: {
@@ -129,17 +164,24 @@ export class ProfileComponent implements OnInit {
         state,
         postalCode: ''
       },
-      serviceAreas
-    };
+      serviceAreas,
+      profilePicture: this.selectedProfilePicture
+    });
 
     const vendorId = this.vendor.id;
+    this.saving = true;
 
-    this.vendorService.update(vendorId, payload).subscribe({
-      next: () => {
+    this.vendorService.update(vendorId, formData).subscribe({
+      next: (updated) => {
+        this.saving = false;
+        this.vendor = { ...this.vendor!, ...updated };
+        this.selectedProfilePicture = null;
+        this.profilePreviewUrl = null;
         this.toastService.show('Profile updated successfully!', 'success');
         this.router.navigate(['/vendor', vendorId]);
       },
       error: () => {
+        this.saving = false;
         this.toastService.show('Failed to update profile', 'error');
       }
     });

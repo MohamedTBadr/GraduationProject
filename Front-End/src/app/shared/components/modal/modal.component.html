@@ -91,27 +91,29 @@
                         </button>
 
                         <!-- Image Carousel -->
-                        <div class="sdm-slider" *ngIf="getModalImages(product).length > 0; else noImages">
-                            <div class="sdm-slide" *ngFor="let img of getModalImages(product); let idx = index" [class.active]="currentSlideIndex === idx">
-                                <img [src]="img" [alt]="product.name" />
+                        <ng-container *ngIf="getModalImages(product) as modalImages">
+                        <div class="sdm-slider" *ngIf="modalImages.length > 0; else noImages">
+                            <div class="sdm-slide" *ngFor="let img of modalImages; let idx = index" [class.active]="currentSlideIndex === idx">
+                                <img [src]="img" [alt]="product.name" loading="lazy" (error)="$any($event.target).style.display='none'" />
                             </div>
                             
                             <!-- Slider Arrows -->
-                            <button class="sdm-slider-arrow left" *ngIf="getModalImages(product).length > 1" (click)="prevSlide(getModalImages(product))">
+                            <button class="sdm-slider-arrow left" *ngIf="modalImages.length > 1" (click)="prevSlide(modalImages)">
                                 <i class="fa-solid fa-chevron-left"></i>
                             </button>
-                            <button class="sdm-slider-arrow right" *ngIf="getModalImages(product).length > 1" (click)="nextSlide(getModalImages(product))">
+                            <button class="sdm-slider-arrow right" *ngIf="modalImages.length > 1" (click)="nextSlide(modalImages)">
                                 <i class="fa-solid fa-chevron-right"></i>
                             </button>
 
                             <!-- Slider Dots -->
-                            <div class="sdm-slider-dots" *ngIf="getModalImages(product).length > 1">
-                                <span *ngFor="let img of getModalImages(product); let idx = index" 
+                            <div class="sdm-slider-dots" *ngIf="modalImages.length > 1">
+                                <span *ngFor="let img of modalImages; let idx = index" 
                                       [class.active]="currentSlideIndex === idx" 
                                       (click)="goToSlide(idx)">
                                 </span>
                             </div>
                         </div>
+                        </ng-container>
 
                         <!-- No Images Fallback -->
                         <ng-template #noImages>

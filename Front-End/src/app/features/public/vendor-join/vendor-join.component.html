@@ -166,14 +166,17 @@
             <div class="form-group mt-6">
               <label>Upload Portfolio / Documents (Optional)</label>
               <div class="file-drop-zone" (click)="docInput.click()">
-                <input type="file" (change)="onDocumentSelected($event)" accept=".pdf,.doc,.docx,.jpg,.png" class="hidden" #docInput />
+                <input type="file" multiple (change)="onDocumentsSelected($event)" [accept]="acceptedDocTypes" class="hidden" #docInput />
                 <span class="drop-icon"><i class="bi bi-folder2-open"></i></span>
-                <span class="drop-text">{{ selectedDocument ? 'Change Documents' : 'Drop files here or click to upload' }}</span>
-                <span class="drop-subtext">PDF, JPG, PNG up to 10MB each. Portfolio photos, commercial register, etc.</span>
-                <div class="file-selected-name" *ngIf="selectedDocument">
-                  Selected: {{ selectedDocument.name }}
-                </div>
+                <span class="drop-text">{{ selectedDocuments.length ? 'Add more documents' : 'Drop files here or click to upload' }}</span>
+                <span class="drop-subtext">PDF, JPG, PNG up to 10MB each. Up to {{ maxDocuments }} files.</span>
               </div>
+              <ul class="vj-doc-list" *ngIf="selectedDocuments.length">
+                <li class="vj-doc-item" *ngFor="let doc of selectedDocuments; let i = index">
+                  <span class="vj-doc-name">{{ doc.name }}</span>
+                  <button type="button" class="vj-doc-remove" (click)="removeDocument(i)" aria-label="Remove file">&times;</button>
+                </li>
+              </ul>
             </div>
           </div>
 

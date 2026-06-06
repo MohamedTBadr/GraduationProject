@@ -13,10 +13,9 @@ import {
 } from '../../../shared/constants/egypt-locations';
 import {
   addressToServiceArea,
-  appendServiceAreasToFormData,
   normalizeAddressFields
 } from '../../../shared/utils/location.utils';
-import { appendFormFile } from '../../../shared/utils/form-data.utils';
+import { appendVendorCreateFormData } from '../../../shared/utils/vendor-form.utils';
 
 @Component({
   selector: 'app-vendor-join',
@@ -32,11 +31,15 @@ export class VendorJoinComponent implements OnInit {
   isSuccess = false;
   currentStep = 1;
   totalSteps = 3;
-  selectedDocument: File | null = null;
+  selectedDocuments: File[] = [];
   selectedProfilePicture: File | null = null;
   profilePreviewUrl: string | null = null;
   readonly cityOptions = EGYPT_CITY_OPTIONS;
   readonly governorateOptions = EGYPT_GOVERNORATE_OPTIONS;
+  readonly maxDocuments = 5;
+  readonly maxProfileMb = 5;
+  readonly maxDocumentMb = 10;
+  readonly acceptedDocTypes = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp';
 
   constructor(
     private fb: FormBuilder,
@@ -58,7 +61,7 @@ export class VendorJoinComponent implements OnInit {
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9]{10,14}$/)]],
-      name: ['', [Validators.required, Validators.minLength(3)]], // This maps to Username
+      name: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       businessName: ['', [Validators.required]],
       ownerName: ['', [Validators.required]],
@@ -82,19 +85,39 @@ export class VendorJoinComponent implements OnInit {
     });
   }
 
-  private readonly maxProfileMb = 5;
-  private readonly maxDocumentMb = 10;
-
-  onDocumentSelected(event: Event) {
+  onDocumentsSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    if (file.size > this.maxDocumentMb * 1024 * 1024) {
-      this.toastService.show(`Document must be under ${this.maxDocumentMb}MB`, 'error');
+    const files = input.files ? Array.from(input.files) : [];
+    if (!files.length) return;
+
+    const valid: File[] = [];
+    for (const file of files) {
+      if (file.size > this.maxDocumentMb * 1024 * 1024) {
+        this.toastService.show(`${file.name} exceeds ${this.maxDocumentMb}MB and was skipped`, 'error');
+        continue;
+      }
+      valid.push(file);
+    }
+
+    const slotsLeft = this.maxDocuments - this.selectedDocuments.length;
+    if (slotsLeft <= 0) {
+      this.toastService.show(`You can upload up to ${this.maxDocuments} documents`, 'error');
       input.value = '';
       return;
     }
-    this.selectedDocument = file;
+
+    const toAdd = valid.slice(0, slotsLeft);
+    this.selectedDocuments = [...this.selectedDocuments, ...toAdd];
+
+    if (valid.length > toAdd.length) {
+      this.toastService.show(`Only ${toAdd.length} file(s) added (max ${this.maxDocuments} total)`, 'info');
+    }
+
+    input.value = '';
+  }
+
+  removeDocument(index: number) {
+    this.selectedDocuments.splice(index, 1);
   }
 
   onProfilePictureSelected(event: Event) {
@@ -127,35 +150,37 @@ export class VendorJoinComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    
-    // Create FormData for file upload support
-    const formData = new FormData();
     const formValue = this.vendorForm.getRawValue();
+    const { city, state } = normalizeAddressFields(
+      formValue.address?.city || '',
+      formValue.address?.state || ''
+    );
 
-    // Append standard fields (files and nested objects handled separately)
-    Object.keys(formValue).forEach(key => {
-      if (key !== 'address' && key !== 'serviceAreas' && key !== 'portfolioLink') {
-        formData.append(key, formValue[key]);
-      }
+    const formData = new FormData();
+    appendVendorCreateFormData(formData, {
+      firstName: formValue.firstName,
+      lastName: formValue.lastName,
+      email: formValue.email,
+      password: formValue.password,
+      phone: formValue.phone,
+      name: formValue.name,
+      businessName: formValue.businessName,
+      ownerName: formValue.ownerName,
+      vendorTypeId: formValue.vendorTypeId,
+      yearsInBusiness: formValue.yearsInBusiness,
+      description: formValue.description,
+      address: {
+        street: formValue.address?.street,
+        city,
+        state,
+        postalCode: formValue.address?.postalCode
+      },
+      serviceAreas: [
+        addressToServiceArea({ city, state, street: formValue.address?.street })
+      ],
+      profilePicture: this.selectedProfilePicture,
+      documents: this.selectedDocuments
     });
-
-    // Append Address fields (canonical city/governorate)
-    if (formValue.address) {
-      const { city, state } = normalizeAddressFields(
-        formValue.address.city || '',
-        formValue.address.state || ''
-      );
-      formData.append('Address.Street', formValue.address.street || '');
-      formData.append('Address.City', city);
-      formData.append('Address.State', state);
-      formData.append('Address.PostalCode', formValue.address.postalCode || '');
-      appendServiceAreasToFormData(formData, [
-        addressToServiceArea({ city, state, street: formValue.address.street })
-      ]);
-    }
-
-    appendFormFile(formData, 'Document', this.selectedDocument);
-    appendFormFile(formData, 'ProfilePicture', this.selectedProfilePicture);
 
     this.vendorService.create(formData).subscribe({
       next: () => {
@@ -165,7 +190,7 @@ export class VendorJoinComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting = false;
-        const msg = err.error?.message || 'Failed to submit application. Please try again.';
+        const msg = err.error?.message || err.error?.detail || 'Failed to submit application. Please try again.';
         this.toastService.show(msg, 'error');
       }
     });
@@ -211,18 +236,18 @@ export class VendorJoinComponent implements OnInit {
   private canGoNext(): boolean {
     const controls = this.vendorForm.controls;
     if (this.currentStep === 1) {
-      return controls['name'].valid && 
-             controls['password'].valid && 
-             controls['firstName'].valid && 
-             controls['lastName'].valid && 
-             controls['email'].valid && 
+      return controls['name'].valid &&
+             controls['password'].valid &&
+             controls['firstName'].valid &&
+             controls['lastName'].valid &&
+             controls['email'].valid &&
              controls['phone'].valid;
     }
     if (this.currentStep === 2) {
-      return controls['businessName'].valid && 
-             controls['ownerName'].valid && 
-             controls['vendorTypeId'].valid && 
-             controls['yearsInBusiness'].valid && 
+      return controls['businessName'].valid &&
+             controls['ownerName'].valid &&
+             controls['vendorTypeId'].valid &&
+             controls['yearsInBusiness'].valid &&
              controls['description'].valid;
     }
     return true;

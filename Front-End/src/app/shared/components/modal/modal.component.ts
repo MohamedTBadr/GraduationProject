@@ -20,6 +20,7 @@ import {
   normalizeAddressFields,
   serviceAreasToLabel
 } from '../../utils/location.utils';
+import { getProductImageUrls } from '../../utils/image.utils';
 
 @Component({
   selector: 'app-modal',
@@ -200,18 +201,7 @@ export class ModalComponent implements OnInit {
 
   // ── Image Slider Helpers ──────────────────────────────
   getModalImages(product: any): string[] {
-    if (!product) return [];
-    const images: string[] = [];
-    // Support imageUrls array first
-    if (product.imageUrls && Array.isArray(product.imageUrls) && product.imageUrls.length > 0) {
-      return product.imageUrls.filter((u: string) => !!u);
-    }
-    // Fallback: imageUrl can be comma-separated URLs
-    if (product.imageUrl) {
-      const parts = product.imageUrl.split(',').map((s: string) => s.trim()).filter((s: string) => !!s);
-      if (parts.length > 0) return parts;
-    }
-    return [];
+    return getProductImageUrls(product);
   }
 
   prevSlide(images: string[]) {

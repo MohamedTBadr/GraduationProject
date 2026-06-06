@@ -191,9 +191,11 @@ export class VendorService {
     return this.http.patch<void>(`${this.apiUrl}/Vendor/${vendorId}/approve`, {});
   }
 
-  /** PATCH /Vendor/{vendorId} – update vendor info */
-  update(vendorId: string, payload: UpdateVendorRequest): Observable<ApiVendor> {
-    return this.http.patch<ApiVendor>(`${this.apiUrl}/Vendor/${vendorId}`, payload);
+  /** PATCH /Vendor/{vendorId} – update vendor info (JSON or multipart FormData) */
+  update(vendorId: string, payload: UpdateVendorRequest | FormData): Observable<ApiVendor> {
+    return this.http.patch<any>(`${this.apiUrl}/Vendor/${vendorId}`, payload).pipe(
+      map(res => this.normalizeVendor(res?.value ?? res?.Value ?? res))
+    );
   }
 
   /** DELETE /Vendor/{vendorId} */

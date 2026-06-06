@@ -206,6 +206,8 @@ export interface UpdateVendorRequest {
   yearsInBusiness?: number;
   description?: string;
   portfolioLink?: string;
+  profilePicture?: File;
+  document?: File;
   address?: AddressDto;
   serviceAreas?: ServiceAreaDTO[];
 }
