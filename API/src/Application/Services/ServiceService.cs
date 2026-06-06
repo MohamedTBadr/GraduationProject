@@ -221,6 +221,7 @@ namespace Application.Services
                 var result = await _ServiceRepository.GetAllAsync(
                     new PaginatedRequest { PageIndex = pageIndex, PageSize = pageSize },
                     s => true,
+                    null,
                     CancellationToken.None);
 
                 foreach (var service in result.Items)
