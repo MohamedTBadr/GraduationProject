@@ -23,12 +23,12 @@ namespace Application.Services
             _logger = logger;
         }
 
-        public async Task<MessageDto> SendMessageAsync(Guid senderId, Guid receiverId, string content, CancellationToken cancellationToken)
+        public async Task<MessageDto> SendMessageAsync(Guid senderId, Guid receiverId, string content)
         {
-            await _repo.GetOrCreateConversationAsync(senderId, receiverId, cancellationToken);
-            var message = Message.Create(senderId, receiverId, content);
-            await _repo.AddMessageAsync(message, cancellationToken);
-            await _repo.SaveChangesAsync(cancellationToken);
+            var conversation = await _repo.GetOrCreateConversationAsync(senderId, receiverId);
+            var message = Message.Create(conversation.Id, senderId, receiverId, content);
+            await _repo.AddMessageAsync(message);
+            await _repo.SaveChangesAsync();
 
             var dto = MapToDto(message);
             await _notifications.SendMessageAsync(receiverId.ToString(), dto);
@@ -38,18 +38,18 @@ namespace Application.Services
         }
 
         public async Task<IEnumerable<MessageDto>> GetMessagesAsync(
-            Guid userId, Guid otherUserId, int page, int pageSize, CancellationToken cancellationToken)
+            Guid userId, Guid otherUserId, int page, int pageSize)
         {
-            var conversation = await _repo.GetConversationAsync(userId, otherUserId, cancellationToken);
+            var conversation = await _repo.GetConversationAsync(userId, otherUserId);
             if (conversation == null) return Enumerable.Empty<MessageDto>();
 
-            var messages = await _repo.GetMessagesAsync(conversation.Id, page, pageSize, cancellationToken);
+            var messages = await _repo.GetMessagesAsync(conversation.Id, page, pageSize);
             return messages.Select(MapToDto);
         }
 
-        public async Task<IEnumerable<ConversationDto>> GetConversationsAsync(Guid userId, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ConversationDto>> GetConversationsAsync(Guid userId)
         {
-            var conversations = await _repo.GetUserConversationsAsync(userId, cancellationToken);
+            var conversations = await _repo.GetUserConversationsAsync(userId);
 
             return conversations.Select(c =>
             {
@@ -67,13 +67,13 @@ namespace Application.Services
             });
         }
 
-        public async Task MarkAsReadAsync(Guid messageId, Guid readerId, CancellationToken cancellationToken)
+        public async Task MarkAsReadAsync(Guid messageId, Guid readerId)
         {
-            var message = await _repo.GetMessageByIdAsync(messageId, cancellationToken);
+            var message = await _repo.GetMessageByIdAsync(messageId);
             if (message == null || message.ReceiverId != readerId) return;
 
             message.MarkAsRead();
-            await _repo.SaveChangesAsync(cancellationToken);
+            await _repo.SaveChangesAsync();
             await _notifications.NotifyMessageReadAsync(message.SenderId.ToString(), messageId);
         }
 
