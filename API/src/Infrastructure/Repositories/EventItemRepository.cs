@@ -27,11 +27,19 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(i => i.Id == id,cancellationToken);
         }
         public async Task<IEnumerable<EventItem>> GetVendorBookingsAsync(
-          Guid vendorId,
-          CancellationToken cancellationToken)
+           Guid vendorId,
+           CancellationToken cancellationToken)
         {
             return await _context.EventItems
-                .Where(ei => (ei.Service != null ? ei.Service.VendorId : ei.Package != null ? ei.Package.VendorId : Guid.Empty) == vendorId && ei.Event.Order != null) // ✅ one combined filter
+                .Where(ei =>
+                    (ei.Service != null
+                        ? ei.Service.VendorId
+                        : ei.Package != null
+                            ? ei.Package.VendorId
+                            : Guid.Empty) == vendorId)
+                // removed: && ei.Event.Order != null
+                .Include(ei => ei.Service)
+                .Include(ei => ei.Package)
                 .Include(ei => ei.Event)
                     .ThenInclude(e => e.EventType)
                 .Include(ei => ei.Event)
