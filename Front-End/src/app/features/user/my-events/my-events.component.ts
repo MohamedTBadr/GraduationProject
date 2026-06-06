@@ -68,7 +68,7 @@ export class MyEventsComponent implements OnInit {
         // Load user orders in parallel for pending-order detection
         this.orderService.getOrdersByUser(user.id).subscribe({
           next: orders => { this.userOrders = orders; },
-          error: () => {}
+          error: () => this.toastService.show('Failed to load your order history.', 'error')
         });
       },
       error: (err) => {
@@ -322,7 +322,7 @@ export class MyEventsComponent implements OnInit {
   loadCollaborators(eventId: string): void {
     this.eventService.getCollaborators(eventId).subscribe({
       next: (list) => { this.collaborators = list; },
-      error: () => {}
+      error: () => this.toastService.show('Failed to load collaborators.', 'error')
     });
   }
 

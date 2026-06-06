@@ -25,15 +25,43 @@ export class ChatService implements OnDestroy {
   /** GET /Chat/messages/{otherUserId} */
   getMessages(otherUserId: string): Observable<ChatMessage[]> {
     return this.http.get<any>(`${this.apiUrl}/Chat/messages/${otherUserId}`).pipe(
-      map(res => res.value || res)
+      map(res => (res.value || res) as ChatMessage[])
     );
   }
 
   /** GET /Chat/conversations */
   getConversations(): Observable<Conversation[]> {
     return this.http.get<any>(`${this.apiUrl}/Chat/conversations`).pipe(
-      map(res => res.value || res)
+      map(res => {
+        const list = (res.value || res) as unknown[];
+        return (list || []).map(item =>
+          this.normalizeConversation(item as Record<string, unknown>)
+        );
+      })
     );
+  }
+
+  /** Maps API ConversationDto (otherUserId, nested lastMessage) to UI Conversation */
+  private normalizeConversation(raw: Record<string, unknown>): Conversation {
+    if (raw['userId']) {
+      return raw as unknown as Conversation;
+    }
+
+    const lastMsg = raw['lastMessage'] as Record<string, unknown> | string | null | undefined;
+    const lastMessageText =
+      typeof lastMsg === 'string' ? lastMsg : (lastMsg?.['content'] as string | undefined);
+    const lastMessageAt =
+      typeof lastMsg === 'object' && lastMsg?.['sentAt']
+        ? String(lastMsg['sentAt'])
+        : (raw['lastMessageAt'] as string | undefined);
+
+    return {
+      userId: String(raw['otherUserId'] ?? raw['userId'] ?? ''),
+      userName: (raw['otherUserName'] ?? raw['userName']) as string | undefined,
+      lastMessage: lastMessageText,
+      lastMessageAt,
+      unreadCount: (raw['unreadCount'] as number | undefined) ?? 0,
+    };
   }
 
   // ─────────────────────────────────────────────
@@ -74,6 +102,23 @@ export class ChatService implements OnDestroy {
       return Promise.reject(new Error('SignalR not connected. Call startConnection() first.'));
     }
     return this.hubConnection.invoke('SendMessage', receiverId, content);
+  }
+
+  /** Marks a message as read via the SignalR hub */
+  markAsRead(messageId: string): Promise<void> {
+    if (!this.hubConnection) {
+      return Promise.reject(new Error('SignalR not connected. Call startConnection() first.'));
+    }
+    return this.hubConnection.invoke('MarkAsRead', messageId);
+  }
+
+  /** Marks all unread messages in a thread as read for the current user */
+  markConversationAsRead(messages: ChatMessage[], currentUserId: string): void {
+    messages
+      .filter(m => m.id && m.receiverId === currentUserId && !m.isRead)
+      .forEach(m => {
+        this.markAsRead(m.id!).catch(() => {});
+      });
   }
 
   /** Stops the SignalR connection and cleans up */

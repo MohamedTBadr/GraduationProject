@@ -213,18 +213,16 @@ export class ServicesComponent implements OnInit {
     } else if (action === 'detail') {
       this.selectedService = service;
       this.isDetailModalOpen = true;
-    } else if (action === 'pause') {
-      this.updateServiceStatus(service, 'paused');
-    } else if (action === 'activate') {
-      this.updateServiceStatus(service, 'active');
+    } else if (action === 'pause' || action === 'activate') {
+      this.toggleServiceStatus(service);
     }
   }
 
-  updateServiceStatus(service: ApiProduct, newStatus: 'active' | 'paused') {
+  toggleServiceStatus(service: ApiProduct) {
     this.productService.toggleStatus(service.id).subscribe({
       next: () => {
-        service.status = newStatus;
-        this.toastService.show(newStatus === 'paused' ? 'Service paused.' : 'Service activated!', 'info');
+        service.status = service.status === 'paused' ? 'active' : 'paused';
+        this.toastService.show(service.status === 'paused' ? 'Service paused.' : 'Service activated!', 'info');
       },
       error: (err) => { console.error('Failed to update service status', err); this.toastService.show('Failed to update service status', 'error'); }
     });

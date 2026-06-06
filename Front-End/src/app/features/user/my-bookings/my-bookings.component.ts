@@ -231,7 +231,9 @@ export class MyBookingsComponent implements OnInit {
       this.toastService.show('Vendor contact information is not available.', 'error');
       return;
     }
-    this.router.navigate(['/user/messages'], { queryParams: { vendorId: bk.vendorId } });
+    this.router.navigate(['/user/messages'], {
+      queryParams: { vendorId: bk.vendorId, vendorName: bk.vendorName },
+    });
   }
 
   cancelBooking(bk: Booking) {

@@ -12,6 +12,7 @@ import { ServiceTypeService } from '../../../core/services/service-type.service'
 import { VendorTypeService } from '../../../core/services/vendor-type.service';
 import { EventTypeService } from '../../../core/services/event-type.service';
 import { ModalService } from '../../../shared/services/modal.service';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import * as L from 'leaflet';
@@ -86,6 +87,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     private vendorTypeService: VendorTypeService,
     private eventTypeService: EventTypeService,
     private modalService: ModalService,
+    private toastService: ToastService,
     private ngZone: NgZone
   ) {}
 
@@ -132,7 +134,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
           this.eventTypes = Array.isArray(eventTypes) ? eventTypes : [];
           resolve();
         },
-        error: () => resolve()
+        error: () => {
+          this.toastService.show('Failed to load filter options.', 'error');
+          resolve();
+        }
       });
     });
   }
@@ -252,6 +257,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
         this.vendorCount = 0;
         this.totalPages = 1;
         this.loading = false;
+        this.toastService.show('Failed to load vendors. Please try again.', 'error');
       }
     });
   }
@@ -301,6 +307,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
         this.serviceCount = 0;
         this.totalPages = 1;
         this.loading = false;
+        this.toastService.show('Failed to load services. Please try again.', 'error');
       }
     });
   }

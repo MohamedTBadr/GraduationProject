@@ -49,7 +49,7 @@
         <i class="fa-solid fa-message"></i>
       </span>
       Messages
-      <span class="uss-nav-badge red">2</span>
+      <span *ngIf="unreadMessagesCount > 0" class="uss-nav-badge red">{{ unreadMessagesCount }}</span>
     </a>
 
     <a class="uss-nav-link"
