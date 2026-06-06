@@ -32,7 +32,7 @@ export class HomeComponent implements OnInit {
     });
     this.vendorService.getAll({ pageSize: 20, pageIndex: 1, sortBy: 'rating', isDescending: true }).subscribe({
       next: (data) => {
-        this.featuredVendors = data.filter(v => v.status === 'active' || v.isApproved).slice(0, 4);
+        this.featuredVendors = data.filter(v => v.status === 'active' || v.isApproved).slice(0, 6);
         this.loading = false;
       },
       error: () => {

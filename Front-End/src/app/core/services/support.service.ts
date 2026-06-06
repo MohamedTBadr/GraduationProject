@@ -16,13 +16,14 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class SupportService {
-  private readonly baseUrl = `${environment.apiUrl}/admin/support/tickets`;
+  private readonly adminBaseUrl = `${environment.apiUrl}/admin/support/tickets`;
+  private readonly userTicketsUrl = `${environment.apiUrl}/support/tickets`;
 
   constructor(private http: HttpClient) {}
 
   /** GET /admin/support/tickets/stats - Get ticket stats */
   getStats(): Observable<TicketStats> {
-    return this.http.get<TicketStats>(`${this.baseUrl}/stats`);
+    return this.http.get<TicketStats>(`${this.adminBaseUrl}/stats`);
   }
 
   /** GET /admin/support/tickets - List all tickets with filters */
@@ -34,36 +35,36 @@ export class SupportService {
     if (filters.page) params = params.set('page', filters.page.toString());
     if (filters.limit) params = params.set('limit', filters.limit.toString());
 
-    return this.http.get<any>(this.baseUrl, { params });
+    return this.http.get<any>(this.adminBaseUrl, { params });
   }
 
   /** GET /admin/support/tickets/{ticket_id} - Get single ticket */
   getTicket(ticketId: string): Observable<SupportTicket> {
-    return this.http.get<SupportTicket>(`${this.baseUrl}/${ticketId}`);
+    return this.http.get<SupportTicket>(`${this.adminBaseUrl}/${ticketId}`);
   }
 
   /** POST /admin/support/tickets/{ticket_id}/reply - Reply to ticket */
   reply(ticketId: string, payload: ReplyTicketRequest): Observable<TicketReply> {
-    return this.http.post<TicketReply>(`${this.baseUrl}/${ticketId}/reply`, payload);
+    return this.http.post<TicketReply>(`${this.adminBaseUrl}/${ticketId}/reply`, payload);
   }
 
   /** POST /admin/support/tickets/{ticket_id}/assign - Assign ticket to agent */
   assign(ticketId: string, payload: AssignTicketRequest): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/${ticketId}/assign`, payload);
+    return this.http.post<any>(`${this.adminBaseUrl}/${ticketId}/assign`, payload);
   }
 
   /** PATCH /admin/support/tickets/{ticket_id}/resolve - Mark ticket as resolved */
   resolve(ticketId: string, payload: ResolveTicketRequest): Observable<any> {
-    return this.http.patch<any>(`${this.baseUrl}/${ticketId}/resolve`, payload);
+    return this.http.patch<any>(`${this.adminBaseUrl}/${ticketId}/resolve`, payload);
   }
 
-  /** POST /admin/support/tickets/{ticket_id}/escalate - Escalate ticket */
+  /** POST /support/tickets/{ticketId}/escalate — user/vendor route (not under /admin) */
   escalate(ticketId: string, payload: EscalateTicketRequest): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/${ticketId}/escalate`, payload);
+    return this.http.post<any>(`${this.userTicketsUrl}/${ticketId}/escalate`, payload);
   }
 
-  /** POST /api/support/tickets - Open a support ticket (Vendor, Customer) */
+  /** POST /support/tickets - Open a support ticket (Vendor, Customer) */
   openTicket(payload: CreateTicketRequest): Observable<SupportTicket> {
-    return this.http.post<SupportTicket>(`${environment.apiUrl}/support/tickets`, payload);
+    return this.http.post<SupportTicket>(this.userTicketsUrl, payload);
   }
 }

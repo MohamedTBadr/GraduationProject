@@ -26,15 +26,15 @@
       </a>
       <a routerLink="/vendor-dashboard/bookings" routerLinkActive="active">
         <i class="bi bi-calendar3 icon"></i>Bookings
-        <span class="badge badge-gold">8</span>
+        <span *ngIf="pendingBookingsCount > 0" class="badge badge-gold">{{ pendingBookingsCount }}</span>
       </a>
       <a routerLink="/vendor-dashboard/messages" routerLinkActive="active">
         <i class="bi bi-chat icon"></i>Messages
-        <span class="badge badge-red">3</span>
+        <span *ngIf="unreadMessagesCount > 0" class="badge badge-red">{{ unreadMessagesCount }}</span>
       </a>
       <a routerLink="/vendor-dashboard/notifications" routerLinkActive="active">
         <i class="bi bi-bell icon"></i>Notifications
-        <span class="badge badge-red">5</span>
+        <span *ngIf="unreadNotificationsCount > 0" class="badge badge-red">{{ unreadNotificationsCount }}</span>
       </a>
     </div>
 

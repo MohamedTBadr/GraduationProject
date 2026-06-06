@@ -16,14 +16,14 @@
     <a class="ad-item" routerLink="/admin/activity" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-activity"></i></span>Activity Log<span class="ad-badge blue">Live</span></a>
 
     <div class="ad-section-lbl">Platform</div>
-    <a class="ad-item" routerLink="/admin/vendors" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-shop"></i></span>Vendors<span class="ad-badge gold">14</span></a>
+    <a class="ad-item" routerLink="/admin/vendors" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-shop"></i></span>Vendors<span *ngIf="pendingVendorCount > 0" class="ad-badge gold">{{ pendingVendorCount }}</span></a>
     <a class="ad-item" routerLink="/admin/users" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-people"></i></span>Users</a>
     <a class="ad-item" routerLink="/admin/bookings" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-calendar3"></i></span>All Bookings</a>
     <a class="ad-item" routerLink="/admin/packages" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-gift"></i></span>Packages</a>
 
     <div class="ad-section-lbl">Finance</div>
     <a class="ad-item" routerLink="/admin/financials" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-graph-up"></i></span>Financials</a>
-    <a class="ad-item" routerLink="/admin/payouts" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-cash-coin"></i></span>Payouts<span class="ad-badge red">5</span></a>
+    <a class="ad-item" routerLink="/admin/payouts" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-cash-coin"></i></span>Payouts</a>
     <a class="ad-item" routerLink="/admin/reports" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-file-bar-graph"></i></span>Reports</a>
 
     <div class="ad-section-lbl">CMS</div>
@@ -31,7 +31,7 @@
     <a class="ad-item" routerLink="/admin/categories" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-grid-3x3-gap"></i></span>Categories</a>
 
     <div class="ad-section-lbl">Support</div>
-    <a class="ad-item" routerLink="/admin/support" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-headset"></i></span>Support Tickets<span class="ad-badge red">7</span></a>
+    <a class="ad-item" routerLink="/admin/support" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-headset"></i></span>Support Tickets<span *ngIf="openTicketCount > 0" class="ad-badge red">{{ openTicketCount }}</span></a>
     <a class="ad-item" routerLink="/admin/company-inquiries" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-building"></i></span>Company Inquiries</a>
     <a class="ad-item" routerLink="/admin/notifications" routerLinkActive="active"><span class="ad-icon"><i class="bi bi-bell"></i></span>Notifications</a>
 

@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SupportService } from '../../../../core/services/support.service';
 import { SupportTicket, TicketReply } from '../../../../shared/types/api.interfaces';
+import { ToastService } from '../../../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -18,23 +19,23 @@ export class TicketDetailComponent implements OnInit {
   loading: boolean = true;
   error: string | null = null;
 
-  // Form states
   replyMessage: string = '';
   sendEmail: boolean = true;
   sendSms: boolean = false;
-  
+
   agentId: string = '';
   assignNote: string = '';
-  
+
   resolutionNote: string = '';
-  
+
   escalateReason: string = '';
   escalateTo: 'senior_management' | 'legal_team' | 'cto' = 'senior_management';
   notifyFinance: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
-    private supportService: SupportService
+    private supportService: SupportService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -51,10 +52,10 @@ export class TicketDetailComponent implements OnInit {
         this.ticket = data;
         this.loading = false;
       },
-      error: (err) => {
+      error: () => {
         this.error = 'Failed to load ticket details.';
         this.loading = false;
-        console.error(err);
+        this.toastService.show('Failed to load ticket details.', 'error');
       }
     });
   }
@@ -70,8 +71,9 @@ export class TicketDetailComponent implements OnInit {
         if (this.ticket && !this.ticket.replies) this.ticket.replies = [];
         this.ticket?.replies?.push(reply);
         this.replyMessage = '';
+        this.toastService.show('Reply sent.', 'success');
       },
-      error: (err) => alert('Failed to send reply.')
+      error: () => this.toastService.show('Failed to send reply.', 'error')
     });
   }
 
@@ -88,8 +90,9 @@ export class TicketDetailComponent implements OnInit {
         }
         this.agentId = '';
         this.assignNote = '';
+        this.toastService.show('Ticket assigned.', 'success');
       },
-      error: (err) => alert('Failed to assign ticket.')
+      error: () => this.toastService.show('Failed to assign ticket.', 'error')
     });
   }
 
@@ -104,8 +107,9 @@ export class TicketDetailComponent implements OnInit {
           this.ticket.resolved_at = res.resolved_at;
         }
         this.resolutionNote = '';
+        this.toastService.show('Ticket resolved.', 'success');
       },
-      error: (err) => alert('Failed to resolve ticket.')
+      error: () => this.toastService.show('Failed to resolve ticket.', 'error')
     });
   }
 
@@ -116,11 +120,21 @@ export class TicketDetailComponent implements OnInit {
       escalate_to: this.escalateTo,
       notify_finance: this.notifyFinance
     }).subscribe({
-      next: (res) => {
-        alert(`Ticket escalated to ${this.escalateTo}`);
+      next: () => {
+        this.toastService.show(`Ticket escalated to ${this.escalateTo.replace('_', ' ')}.`, 'success');
         this.escalateReason = '';
       },
-      error: (err) => alert('Failed to escalate ticket.')
+      error: (err) => {
+        const status = err?.status;
+        if (status === 403) {
+          this.toastService.show(
+            'Escalation is not permitted for this account. Backend may need to allow Admin on this endpoint.',
+            'error'
+          );
+        } else {
+          this.toastService.show('Failed to escalate ticket.', 'error');
+        }
+      }
     });
   }
 }

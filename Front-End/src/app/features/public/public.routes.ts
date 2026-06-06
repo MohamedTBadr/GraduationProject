@@ -28,7 +28,7 @@ export const PUBLIC_ROUTES: Routes = [
     },
     {
         path: 'favorites',
-        loadComponent: () => import('./favorites/favorites.component').then(m => m.FavoritesComponent)
+        loadComponent: () => import('../user/favorites.component').then(m => m.FavoritesComponent)
     },
     {
         path: 'compare',

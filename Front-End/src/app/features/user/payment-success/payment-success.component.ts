@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { OrderService, OrderResponse } from '../../../core/services/order.service';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-payment-success',
@@ -21,7 +22,8 @@ export class PaymentSuccessComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -46,6 +48,7 @@ export class PaymentSuccessComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
+        this.toastService.show('Could not load order details. Your payment may still have succeeded.', 'info');
       }
     });
   }

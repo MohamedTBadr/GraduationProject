@@ -30,6 +30,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   private messageSub?: Subscription;
 
   private pendingVendorId: string | null = null;
+  private pendingVendorName: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -54,6 +55,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.route.queryParams.subscribe(params => {
       if (params['vendorId']) {
         this.pendingVendorId = params['vendorId'];
+        this.pendingVendorName = params['vendorName'] || null;
       }
     });
 
@@ -90,14 +92,27 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.conversations = data || [];
         this.loadingConversations = false;
 
-        // Auto-select vendor if navigated from My Bookings
+        // Auto-select vendor if navigated from My Bookings (existing or new thread)
         if (this.pendingVendorId) {
-          const match = this.conversations.find(c => c.userId === this.pendingVendorId);
+          const vendorId = this.pendingVendorId;
+          const vendorName = this.pendingVendorName;
+          this.pendingVendorId = null;
+          this.pendingVendorName = null;
+
+          const match = this.conversations.find(c => c.userId === vendorId);
           if (match) {
             this.selectChat(match);
-            this.pendingVendorId = null;
             return;
           }
+
+          const newConversation: Conversation = {
+            userId: vendorId,
+            userName: vendorName || 'Vendor',
+            unreadCount: 0,
+          };
+          this.conversations.unshift(newConversation);
+          this.selectChat(newConversation);
+          return;
         }
 
         // Auto-select first conversation if none selected
@@ -121,6 +136,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       next: (msgs) => {
         this.messages = msgs || [];
         chat.unreadCount = 0;
+        this.chatService.markConversationAsRead(this.messages, this.currentUserId);
         this.loadingMessages = false;
         this.scrollToBottom();
       },

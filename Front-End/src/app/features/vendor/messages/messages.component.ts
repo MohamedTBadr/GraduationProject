@@ -93,6 +93,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       next: (msgs) => {
         this.messages = msgs || [];
         chat.unreadCount = 0;
+        this.chatService.markConversationAsRead(this.messages, this.currentUserId);
         this.loadingMessages = false;
         this.scrollToBottom();
       },

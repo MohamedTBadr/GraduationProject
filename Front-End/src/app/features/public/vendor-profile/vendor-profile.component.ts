@@ -126,7 +126,7 @@ export class VendorProfileComponent implements OnInit {
       next: (data) => {
         this.packages = data || [];
       },
-      error: () => {}
+      error: () => this.toastService.show('Failed to load vendor packages.', 'error')
     });
   }
 
@@ -138,7 +138,7 @@ export class VendorProfileComponent implements OnInit {
           this.eventType = this.eventTypes[0].name;
         }
       },
-      error: () => {}
+      error: () => this.toastService.show('Failed to load event types.', 'error')
     });
   }
 
@@ -152,7 +152,7 @@ export class VendorProfileComponent implements OnInit {
           .filter(v => v.id !== this.vendorId && v.id !== this.vendor?.id)
           .slice(0, 4);
       },
-      error: () => {}
+      error: () => this.toastService.show('Failed to load similar vendors.', 'error')
     });
   }
 
@@ -164,8 +164,11 @@ export class VendorProfileComponent implements OnInit {
         this.products = data || [];
         this.buildCarousel();
       },
-      // 404 when vendor has no services — correct empty state
-      error: () => {}
+      error: (err) => {
+        if (err?.status !== 404) {
+          this.toastService.show('Failed to load vendor services.', 'error');
+        }
+      }
     });
   }
 

@@ -1,5 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 
+/**
+ * Client-side favorites (localStorage). No server favorites API exists yet —
+ * see Front-End/ON_HOLD.md for backend handoff when sync is needed.
+ */
 @Injectable({
   providedIn: 'root'
 })
