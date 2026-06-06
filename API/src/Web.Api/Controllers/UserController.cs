@@ -111,10 +111,10 @@ namespace Web.Api.Controllers
             user.SuspensionReason = reason;
 
             // We still set LockoutEnd so the built-in Login system blocks them automatically
-            user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
-
+            user.LockoutEnd = DateTimeOffset.UtcNow.AddDays(7);
+            var until = DateTime.UtcNow.AddDays(7);
             await userManager.UpdateAsync(user);
-            await emailSenderService.SendEmailAsync(user.Email, "Account Suspended", $"Your account has been suspended for the following reason: {reason}");
+            await emailSenderService.SendAccountSuspensionEmailAsync(user.Email, user.UserName, reason, until);
             return NoContent();
         }
 

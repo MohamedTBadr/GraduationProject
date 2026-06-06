@@ -26,7 +26,16 @@ namespace Application.Services.Helpers
             backgroundJobClient.Enqueue<EmailSenderService>(x => x.SendCongratulatoryEmailAsync(userEmail, userFirstName, eventTitle));
             return Task.CompletedTask;
         }
-
+        public Task SendAccountSuspensionEmailAsync(
+            string userEmail,
+            string userFirstName,
+            string reason,
+            DateTime? suspendedUntil = null)
+        {
+            backgroundJobClient.Enqueue<EmailSenderService>(x =>
+                x.SendAccountSuspensionEmailAsync(userEmail, userFirstName, reason, suspendedUntil));
+            return Task.CompletedTask;
+        }
         public Task SendReportEmailAsync(
             string toEmail,
             string recipientName,
