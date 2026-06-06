@@ -11,7 +11,6 @@ interface DisplayPackage {
   id: string;
   icon: string;
   name: string;
-  status: 'Active' | 'Paused';
   pricePrefix: string;
   price: number;
   description: string;
@@ -33,21 +32,6 @@ export class PackagesComponent implements OnInit {
   vendorServices: ApiProduct[] = [];
   vendorId = '';
   loading = false;
-  togglingPackageId: string | null = null;
-
-  activeTab: 'Active' | 'Paused' = 'Active';
-
-  get filteredPackages() {
-    return this.packages.filter(p => p.status === this.activeTab);
-  }
-
-  getActiveCount(): number {
-    return this.packages.filter(p => p.status === 'Active').length;
-  }
-
-  getPausedCount(): number {
-    return this.packages.filter(p => p.status === 'Paused').length;
-  }
 
   selectedServicesIds: string[] = [];
 
@@ -103,16 +87,11 @@ export class PackagesComponent implements OnInit {
     });
   }
 
-  private mapToDisplay(p: ApiPackage & { status?: string; isActive?: boolean }): DisplayPackage {
-    const rawStatus = (p as any).status ?? ((p as any).isActive === false ? 'Paused' : 'Active');
-    const status: 'Active' | 'Paused' =
-      String(rawStatus).toLowerCase() === 'paused' ? 'Paused' : 'Active';
-
+  private mapToDisplay(p: ApiPackage): DisplayPackage {
     return {
       id: p.id,
       icon: '📦',
       name: p.name,
-      status,
       pricePrefix: '',
       price: p.price,
       description: p.description ?? '',
@@ -192,31 +171,6 @@ export class PackagesComponent implements OnInit {
         error: () => this.toastService.show('Failed to create package.', 'error')
       });
     }
-  }
-
-  togglePackageStatus(pkg: DisplayPackage): void {
-    if (this.togglingPackageId) return;
-    this.togglingPackageId = pkg.id;
-    const nextStatus: 'Active' | 'Paused' = pkg.status === 'Active' ? 'Paused' : 'Active';
-
-    this.packageService.toggleStatus(pkg.id).subscribe({
-      next: () => {
-        pkg.status = nextStatus;
-        this.activeTab = pkg.status;
-        this.toastService.show(
-          pkg.status === 'Paused' ? 'Package paused.' : 'Package activated!',
-          'info'
-        );
-        this.togglingPackageId = null;
-      },
-      error: () => {
-        this.togglingPackageId = null;
-        this.toastService.show(
-          'Package status could not be updated. Awaiting backend PATCH /Package/{id}/status.',
-          'error'
-        );
-      }
-    });
   }
 
   deletePackage(id: string): void {

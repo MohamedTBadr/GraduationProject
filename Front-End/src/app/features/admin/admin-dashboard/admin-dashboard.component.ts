@@ -49,7 +49,13 @@ export class AdminDashboardComponent implements OnInit {
         const hist = d?.revenueHistory ?? d?.RevenueHistory ?? [];
         this.revenueHistory     = Array.isArray(hist) ? hist : [];
         const orders = d?.recentOrders ?? d?.RecentOrders ?? [];
-        this.recentOrders       = Array.isArray(orders) ? orders : [];
+        this.recentOrders = (Array.isArray(orders) ? orders : []).map((o: any) => ({
+          id: o.orderId ?? o.OrderId ?? o.id ?? o.Id ?? '',
+          vendorName: o.vendorName ?? o.VendorName ?? o.vendor ?? o.Vendor ?? 'Order',
+          amount: o.amount ?? o.Amount ?? 0,
+          paymentStatus: o.paymentStatus ?? o.PaymentStatus ?? 'Paid',
+          createdAt: o.createdAt ?? o.CreatedAt ?? ''
+        }));
         this.loading = false;
       },
       error: () => {

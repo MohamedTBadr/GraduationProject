@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
+import { normalizeVendorReport, VendorReportView } from '../../../shared/utils/vendor-report.normalizer';
 
 @Component({
   selector: 'app-analytics',
@@ -13,7 +14,26 @@ import { environment } from '../../../../environments/environment';
   styleUrls: ['./analytics.component.scss']
 })
 export class AnalyticsComponent implements OnInit {
-  report: any = null;
+  report: VendorReportView | null = null;
+
+  private emptyReport(): VendorReportView {
+    return {
+      kpis: {
+        lifetimeRevenue: 0,
+        currentMonthRevenue: 0,
+        lastMonthRevenue: 0,
+        growthPercentage: 0,
+        totalOrders: 0,
+        averageOrderValue: 0,
+        averageMonthlyRevenue: 0
+      },
+      insights: { bestMonth: null, worstMonth: null },
+      topServices: [],
+      revenueHistory: [],
+      recentOrders: [],
+      recommendations: []
+    };
+  }
   loading = true;
 
   constructor(
@@ -31,8 +51,7 @@ export class AnalyticsComponent implements OnInit {
     const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
     this.http.post<any>(`${environment.apiUrl}/Dashboard/vendor-report`, {}, { headers }).subscribe({
       next: (data) => {
-        // Normalize kpIs -> kpis so the template can use report.kpis.*
-        this.report = { ...data, kpis: data?.kpIs ?? data?.KPIs ?? data?.kpis ?? {} };
+        this.report = normalizeVendorReport(data) ?? this.emptyReport();
         this.loading = false;
       },
       error: (err) => {

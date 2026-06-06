@@ -136,6 +136,20 @@ export class BookingsComponent implements OnInit {
     });
   }
 
+  // Confirmed bookings on or after today, sorted soonest first
+  get upcomingBookings(): Booking[] {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return this.confirmedBookings
+      .filter(b => {
+        const bd = new Date(b.dateStr);
+        bd.setHours(0, 0, 0, 0);
+        return bd >= today;
+      })
+      .sort((a, b) => new Date(a.dateStr).getTime() - new Date(b.dateStr).getTime());
+  }
+
   // ── Modal state ─────────────────────────────────────────────
   isDetailsModalOpen = false;
   isDeclineModalOpen = false;

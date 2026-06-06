@@ -284,6 +284,75 @@
 
       </div>
     </div>
+
+    <!-- Upcoming events table -->
+    <div class="vd-table-wrap bk-cal-upcoming">
+      <div class="vd-table-head">
+        <div class="vd-table-head-title">
+          <i class="bi bi-calendar-event" style="margin-right:6px; color:var(--gold)"></i>
+          Upcoming Events
+        </div>
+        <span class="bk-count-chip">{{upcomingBookings.length}} events</span>
+      </div>
+
+      <div class="bk-empty bk-empty-table" *ngIf="upcomingBookings.length === 0 && !loading()">
+        <div class="bk-empty-icon"><i class="bi bi-calendar-x"></i></div>
+        <div class="bk-empty-title">No Upcoming Events</div>
+        <div class="bk-empty-sub">Confirmed bookings with future dates will appear here.</div>
+      </div>
+
+      <table class="vd-tbl" *ngIf="upcomingBookings.length > 0">
+        <thead>
+          <tr>
+            <th>CLIENT</th>
+            <th>EVENT</th>
+            <th>SERVICE</th>
+            <th>DATE</th>
+            <th>VALUE</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ub of upcomingBookings; trackBy: trackByBookingId" class="bk-tbl-row">
+            <td>
+              <div class="bk-client-cell">
+                <div class="bk-client-avatar">{{ub.client.charAt(0).toUpperCase()}}</div>
+                <span class="font-semibold" style="color:var(--navy)">{{ub.client}}</span>
+              </div>
+            </td>
+            <td style="color:var(--gray); font-size:0.8rem">{{ub.event || '—'}}</td>
+            <td>
+              <span class="bk-service-pill"><i class="bi bi-tools"></i> {{ub.service}}</span>
+            </td>
+            <td style="color:var(--navy)">
+              <div class="bk-date-cell">
+                <i class="bi bi-calendar3" style="color:var(--gold)"></i>
+                {{ub.dateStr | date:'MMM d, y'}}
+              </div>
+            </td>
+            <td>
+              <span class="bk-value-cell">{{ub.value | number:'1.0-0'}} EGP</span>
+            </td>
+            <td>
+              <div class="vd-badge-pill vdb-green">
+                <i class="bi bi-check-circle-fill" style="margin-right:3px;"></i> Confirmed
+              </div>
+            </td>
+            <td>
+              <div class="bk-action-btns">
+                <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="openDetails(ub)" title="View details">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="vd-btn vd-btn-green vd-btn-sm" (click)="markAsDone(ub)" title="Mark as Done">
+                  <i class="bi bi-check2-all"></i> Done
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════
