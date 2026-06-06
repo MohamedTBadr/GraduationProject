@@ -60,7 +60,8 @@ export const ADMIN_ROUTES: Routes = [
     },
     {
         path: 'reports',
-        loadComponent: () => import('./reports/reports.component').then(m => m.ReportsComponent)
+        redirectTo: '',
+        pathMatch: 'full'
     },
     {
         path: 'categories',

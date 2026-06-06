@@ -2,9 +2,15 @@
   <div class="vd-page-header">
     <div>
       <div class="vd-page-title">Welcome back, {{ vendorName }}</div>
-      <div class="vd-page-sub">Your business at a glance &middot; Live data</div>
+      <div class="vd-page-sub">Bookings, revenue analytics, and business insights in one place</div>
     </div>
-    <button class="vd-btn vd-btn-gold" routerLink="/vendor-dashboard/services">+ Add Service</button>
+    <div class="flex items-center gap-[10px]">
+      <div class="text-[0.8rem] text-[var(--gray)] bg-[var(--cream2)] py-[4px] px-[12px] rounded-[50px] border border-[var(--lgray)]"
+           *ngIf="report?.generatedAt">
+        Updated {{ report.generatedAt | date:'medium' }}
+      </div>
+      <button class="vd-btn vd-btn-gold" routerLink="/vendor-dashboard/services">+ Add Service</button>
+    </div>
   </div>
 
   <!-- Loading State -->
@@ -14,8 +20,8 @@
   </div>
 
   <ng-container *ngIf="!loading">
-    <!-- KPI Stats (from analytics report) -->
-    <div class="vd-stats mb-[24px]">
+    <!-- KPI Stats -->
+    <div class="vd-stats [grid-template-columns:repeat(5,1fr)] mb-[24px]">
       <div class="vd-stat vds-gold">
         <div class="vd-stat-bg text-[1.8rem]"><i class="bi bi-currency-dollar"></i></div>
         <div class="vd-stat-val">{{ (report?.kpis?.lifetimeRevenue ?? 0) | number:'1.0-0' }}</div>
@@ -44,6 +50,12 @@
         <div class="vd-stat-val">{{ pendingRequests() }}</div>
         <div class="vd-stat-lbl">Pending Requests</div>
         <div class="vd-stat-trend flat text-[#f59e0b]">Waiting for approval</div>
+      </div>
+      <div class="vd-stat vds-red">
+        <div class="vd-stat-bg text-[1.8rem]"><i class="bi bi-receipt"></i></div>
+        <div class="vd-stat-val">{{ (report?.kpis?.averageOrderValue ?? 0) | number:'1.0-0' }}</div>
+        <div class="vd-stat-lbl">Avg Order Value (EGP)</div>
+        <div class="vd-stat-trend">Per transaction</div>
       </div>
     </div>
 

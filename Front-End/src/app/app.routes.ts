@@ -75,7 +75,8 @@ export const routes: Routes = [
             },
             {
                 path: 'analytics',
-                loadComponent: () => import('./features/vendor/analytics/analytics.component').then(m => m.AnalyticsComponent)
+                redirectTo: '',
+                pathMatch: 'full'
             },
             {
                 path: 'earnings',
