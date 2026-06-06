@@ -9,8 +9,8 @@ import { SupportTicketsHubComponent } from '../../../shared/components/support-t
     <app-support-tickets-hub
       submitterType="Vendor"
       pageTitle="Vendor Support"
-      pageSubtitle="Report platform issues, payout questions, or booking disputes."
-      emptyHint="No support tickets yet. Open one if you need help from the EpicHub team.">
+      pageSubtitle="Report platform issues, payout questions, or booking disputes. We typically respond within 1–2 business days."
+      emptyHint="No tickets yet. Open one above if you need help from our team.">
     </app-support-tickets-hub>
   `,
 })

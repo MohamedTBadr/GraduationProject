@@ -589,23 +589,23 @@ export interface TicketFilters {
 
 export interface ReplyTicketRequest {
   message: string;
-  send_email?: boolean;
-  send_sms?: boolean;
+  sendEmail?: boolean;
+  sendSms?: boolean;
 }
 
 export interface AssignTicketRequest {
-  agent_id: string;
+  agentId: string;
   note?: string;
 }
 
 export interface ResolveTicketRequest {
-  resolution_note: string;
+  resolutionNote: string;
 }
 
 export interface EscalateTicketRequest {
   reason: string;
-  escalate_to: 'senior_management' | 'legal_team' | 'cto';
-  notify_finance?: boolean;
+  escalateTo: 'senior_management' | 'legal_team' | 'cto';
+  notifyFinance?: boolean;
 }
 
 // ─────────────────────────────────────────────

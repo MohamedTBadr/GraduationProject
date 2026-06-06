@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SupportService } from '../../../../core/services/support.service';
-import { SupportTicket, TicketReply } from '../../../../shared/types/api.interfaces';
+import { SupportTicket } from '../../../../shared/types/api.interfaces';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 
 @Component({
@@ -47,6 +47,7 @@ export class TicketDetailComponent implements OnInit {
 
   loadTicket(): void {
     this.loading = true;
+    this.error = null;
     this.supportService.getTicket(this.ticketId).subscribe({
       next: (data) => {
         this.ticket = data;
@@ -63,51 +64,44 @@ export class TicketDetailComponent implements OnInit {
   onReply(): void {
     if (!this.replyMessage.trim()) return;
     this.supportService.reply(this.ticketId, {
-      message: this.replyMessage,
-      send_email: this.sendEmail,
-      send_sms: this.sendSms
+      message: this.replyMessage.trim(),
+      sendEmail: this.sendEmail,
+      sendSms: this.sendSms,
     }).subscribe({
-      next: (reply) => {
-        if (this.ticket && !this.ticket.replies) this.ticket.replies = [];
-        this.ticket?.replies?.push(reply);
+      next: () => {
         this.replyMessage = '';
         this.toastService.show('Reply sent.', 'success');
+        this.loadTicket();
       },
       error: () => this.toastService.show('Failed to send reply.', 'error')
     });
   }
 
   onAssign(): void {
-    if (!this.agentId) return;
+    if (!this.agentId.trim()) return;
     this.supportService.assign(this.ticketId, {
-      agent_id: this.agentId,
-      note: this.assignNote
+      agentId: this.agentId.trim(),
+      note: this.assignNote.trim() || undefined,
     }).subscribe({
-      next: (res) => {
-        if (this.ticket) {
-          this.ticket.status = res.status;
-          this.ticket.assigned_to = res.assigned_to;
-        }
+      next: () => {
         this.agentId = '';
         this.assignNote = '';
         this.toastService.show('Ticket assigned.', 'success');
+        this.loadTicket();
       },
-      error: () => this.toastService.show('Failed to assign ticket.', 'error')
+      error: () => this.toastService.show('Failed to assign ticket. Check the agent ID and try again.', 'error')
     });
   }
 
   onResolve(): void {
     if (!this.resolutionNote.trim()) return;
     this.supportService.resolve(this.ticketId, {
-      resolution_note: this.resolutionNote
+      resolutionNote: this.resolutionNote.trim(),
     }).subscribe({
-      next: (res) => {
-        if (this.ticket) {
-          this.ticket.status = 'resolved';
-          this.ticket.resolved_at = res.resolved_at;
-        }
+      next: () => {
         this.resolutionNote = '';
         this.toastService.show('Ticket resolved.', 'success');
+        this.loadTicket();
       },
       error: () => this.toastService.show('Failed to resolve ticket.', 'error')
     });
@@ -115,25 +109,18 @@ export class TicketDetailComponent implements OnInit {
 
   onEscalate(): void {
     if (!this.escalateReason.trim()) return;
-    this.supportService.escalate(this.ticketId, {
-      reason: this.escalateReason,
-      escalate_to: this.escalateTo,
-      notify_finance: this.notifyFinance
+    this.supportService.adminEscalate(this.ticketId, {
+      reason: this.escalateReason.trim(),
+      escalateTo: this.escalateTo,
+      notifyFinance: this.notifyFinance,
     }).subscribe({
       next: () => {
         this.toastService.show(`Ticket escalated to ${this.escalateTo.replace('_', ' ')}.`, 'success');
         this.escalateReason = '';
+        this.loadTicket();
       },
-      error: (err) => {
-        const status = err?.status;
-        if (status === 403) {
-          this.toastService.show(
-            'Escalation is not permitted for this account. Backend may need to allow Admin on this endpoint.',
-            'error'
-          );
-        } else {
-          this.toastService.show('Failed to escalate ticket.', 'error');
-        }
+      error: () => {
+        this.toastService.show('Failed to escalate ticket. Please try again.', 'error');
       }
     });
   }

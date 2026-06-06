@@ -42,7 +42,7 @@ export class SupportComponent implements OnInit {
     this.supportService.getStats().subscribe({
       next: (data) => this.stats = data,
       error: () => {
-        this.errorMessage = 'Failed to load ticket statistics. Please check if the backend service is running correctly.';
+        this.errorMessage = 'Failed to load ticket statistics. Please try again later.';
       }
     });
   }
@@ -57,7 +57,7 @@ export class SupportComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.errorMessage = 'Failed to load tickets. Please check if the backend service is running correctly.';
+        this.errorMessage = 'Failed to load tickets. Please try again later.';
         this.loading = false;
       }
     });

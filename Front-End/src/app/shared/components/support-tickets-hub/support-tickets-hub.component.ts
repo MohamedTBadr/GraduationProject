@@ -14,21 +14,34 @@ import { TicketSubmitterType } from '../../utils/support-ticket.utils';
 export class SupportTicketsHubComponent implements OnInit {
   @Input() submitterType: TicketSubmitterType = 'Client';
   @Input() pageTitle = 'Support';
-  @Input() pageSubtitle = 'Open a ticket and track submissions from this device.';
-  @Input() emptyHint = 'No tickets submitted yet. Use the button above to contact support.';
+  @Input() pageSubtitle = 'Open a ticket anytime — we typically respond within 1–2 business days.';
+  @Input() emptyHint = 'No tickets yet. Use the button above if you need help from our team.';
 
   tickets: SubmittedTicketRecord[] = [];
   isModalOpen = false;
   selectedBookingRef = '';
+  loading = true;
+  loadError: string | null = null;
 
   constructor(private supportService: SupportService) {}
 
   ngOnInit(): void {
-    this.refreshTickets();
+    this.loadTickets();
   }
 
-  refreshTickets(): void {
-    this.tickets = this.supportService.getSubmittedTickets(this.submitterType);
+  loadTickets(): void {
+    this.loading = true;
+    this.loadError = null;
+    this.supportService.listMyTickets({ page: 1, limit: 50 }, this.submitterType).subscribe({
+      next: (tickets) => {
+        this.tickets = tickets;
+        this.loading = false;
+      },
+      error: () => {
+        this.loadError = 'Unable to load your tickets. Please try again.';
+        this.loading = false;
+      },
+    });
   }
 
   openNewTicket(bookingRef = ''): void {
@@ -42,6 +55,6 @@ export class SupportTicketsHubComponent implements OnInit {
   }
 
   onTicketSubmitted(): void {
-    this.refreshTickets();
+    this.loadTickets();
   }
 }

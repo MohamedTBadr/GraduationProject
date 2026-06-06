@@ -56,7 +56,7 @@ export class SupportTicketModalComponent {
       bookingRef: this.bookingRef || null,
     });
 
-    this.supportService.openTicket(payload, this.category).subscribe({
+    this.supportService.openTicket(payload).subscribe({
       next: (ticket) => {
         const ticketId = ticket.ticket_id;
         const suffix = ticketId ? ` Reference: ${ticketId}` : '';
