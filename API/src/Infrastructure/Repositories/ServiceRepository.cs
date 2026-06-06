@@ -25,6 +25,7 @@ namespace Infrastructure.Repositories
         public async Task<PaginatedResponse<Service>> GetAllAsync(
     PaginatedRequest request,
     Expression<Func<Service, bool>> visibilityFilter,
+    List<Guid>? luceneIds,
     CancellationToken ct)
         {
            
@@ -39,8 +40,10 @@ namespace Infrastructure.Repositories
                         p.Vendor.BusinessName.Contains(search) ||
                         p.ServiceType.Name.Contains(search));
                 }
+            if (luceneIds != null)
+                query = query.Where(p => luceneIds.Contains(p.Id));  // <-- add this
 
-                if (request.VendorId.HasValue)
+            if (request.VendorId.HasValue)
                     query = query.Where(p => p.VendorId == request.VendorId.Value);
                 if (request.VendorTypeId.HasValue)
                    query= query.Where(p => p.Vendor.VendorTypeId == request.VendorTypeId.Value);

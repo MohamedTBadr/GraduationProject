@@ -17,42 +17,28 @@ namespace Application.Services
         ISearchService _searchService) : IServiceService
     {
         public async Task<Result<PaginatedResponse<ServiceDTO>>> GetAllAsync(
-         PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken ct)
+           PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken ct)
         {
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm) || 
-                request.ServiceTypeId.HasValue || 
-                request.MinPrice.HasValue || 
-                request.MaxPrice.HasValue || 
-                request.VendorTypeId.HasValue
-                )
+            List<Guid>? luceneIds = null;
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
-                var serviceIds = await _searchService.SearchServicesAsync(
-                    request.SearchTerm ?? "", 
-                    request.ServiceTypeId, 
-                    request.VendorTypeId,
-                    request.MinPrice, 
-                    request.MaxPrice);
-                var idList = serviceIds.ToList();
-                
-                var servicesFromDb = await _ServiceRepository.GetByIdsAsync(idList, ct);
-                var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(servicesFromDb);
-                
-                return Result<PaginatedResponse<ServiceDTO>>.Success(
-                    new PaginatedResponse<ServiceDTO>(mapped, mapped.Count(), request.PageIndex, request.PageSize));
+                var serviceIds = await _searchService.SearchServicesAsync(request.SearchTerm);
+                luceneIds = serviceIds.ToList();
+
+                if (luceneIds.Count == 0)
+                    return Result<PaginatedResponse<ServiceDTO>>.NotFound(404, "No services found matching the criteria.");
             }
 
             Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
 
-            var result = await _ServiceRepository.GetAllAsync(request, visibilityFilter, ct);
+            var result = await _ServiceRepository.GetAllAsync(request, visibilityFilter, luceneIds, ct);
             var mappedItems = _mapper.Map<IEnumerable<ServiceDTO>>(result.Items);
             if (!mappedItems.Any())
-            {
                 return Result<PaginatedResponse<ServiceDTO>>.NotFound(404, "No services found matching the criteria.");
-            }
+
             return Result<PaginatedResponse<ServiceDTO>>.Success(
                 new PaginatedResponse<ServiceDTO>(mappedItems, result.TotalCount, result.PageNumber, result.PageSize));
         }
-
         private static Expression<Func<Service, bool>> ShowVisibility(PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId)
         {
             Expression<Func<Service, bool>> visibilityFilter = s => !s.IsHidden; // Default
