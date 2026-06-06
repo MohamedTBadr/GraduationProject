@@ -1,15 +1,47 @@
 <div class="vd-section active block">
   <div class="vd-page-header">
-    <div><div class="vd-page-title">Reviews</div><div class="vd-page-sub">Monitor client feedback and manage your public reputation.</div></div>
-  </div>
-
-  <div class="vd-card" style="text-align:center;padding:56px 24px">
-    <div style="font-size:2.4rem;margin-bottom:14px">⭐</div>
-    <div style="font-weight:700;font-size:1.05rem;margin-bottom:10px">Reviews coming soon</div>
-    <div style="font-size:.85rem;color:rgba(255,255,255,.4);max-width:380px;margin:0 auto;line-height:1.6">
-      The review retrieval endpoint is pending backend implementation. Once
-      <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">GET /api/vendor/&#123;id&#125;/ratings</code>
-      is available, your reviews will appear here automatically.
+    <div>
+      <div class="vd-page-title">Reviews</div>
+      <div class="vd-page-sub">Client feedback from ratings on your services.</div>
     </div>
   </div>
+
+  <div class="vd-card" *ngIf="loading" style="text-align:center;padding:48px 24px">
+    Loading reviews…
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <div class="vd-card review-summary" *ngIf="reviews.length > 0">
+      <div class="review-score">{{ averageRating | number:'1.1-1' }}</div>
+      <div class="review-stars">
+        <i class="bi bi-star-fill" *ngFor="let s of [1,2,3,4,5]"
+           [style.opacity]="s <= (averageRating || 0) ? 1 : 0.25"></i>
+      </div>
+      <p class="review-count">{{ reviews.length }} review{{ reviews.length === 1 ? '' : 's' }}</p>
+    </div>
+
+    <div class="vd-card review-list" *ngIf="reviews.length > 0">
+      <div class="review-item" *ngFor="let r of reviews">
+        <div class="review-item-head">
+          <strong>{{ r.userName }}</strong>
+          <span class="review-date" *ngIf="r.createdAt">{{ r.createdAt | date:'mediumDate' }}</span>
+        </div>
+        <div class="review-item-stars">
+          <i class="bi bi-star-fill" *ngFor="let s of [1,2,3,4,5]"
+             [style.opacity]="s <= r.rating ? 1 : 0.25"></i>
+        </div>
+        <p class="review-service" *ngIf="r.serviceName">{{ r.serviceName }}</p>
+        <p class="review-text">{{ r.review }}</p>
+      </div>
+    </div>
+
+    <div class="vd-card" *ngIf="reviews.length === 0" style="text-align:center;padding:56px 24px">
+      <div style="font-size:2.4rem;margin-bottom:14px">⭐</div>
+      <div style="font-weight:700;font-size:1.05rem;margin-bottom:10px">No reviews yet</div>
+      <div style="font-size:.85rem;color:rgba(255,255,255,.4);max-width:380px;margin:0 auto;line-height:1.6">
+        Reviews appear here when customers rate your services via
+        <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px">POST /api/Service/&#123;id&#125;/ratings</code>.
+      </div>
+    </div>
+  </ng-container>
 </div>

@@ -1,3 +1,25 @@
+.compare-tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.compare-tab {
+    border: 1px solid var(--lgray);
+    background: var(--white);
+    color: var(--navy);
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+
+    &.active {
+        background: var(--navy);
+        color: var(--white);
+        border-color: var(--navy);
+    }
+}
+
 .compare-grid {
     display: flex;
     min-width: 800px;

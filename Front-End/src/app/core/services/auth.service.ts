@@ -12,8 +12,7 @@ import {
   LoginRequest,
   RegisterRequest,
   AuthApiResponse,
-  ResetPasswordRequest,
-  ChangePasswordRequest
+  ResetPasswordRequest
 } from '../../shared/types/api.interfaces';
 import { environment } from '../../../environments/environment';
 
@@ -265,11 +264,6 @@ export class AuthService {
         return throwError(() => new Error(msg));
       })
     );
-  }
-
-  /** POST /Authentication/ChangePassword */
-  changePassword(payload: ChangePasswordRequest): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/Authentication/ChangePassword`, payload);
   }
 
   logout() {

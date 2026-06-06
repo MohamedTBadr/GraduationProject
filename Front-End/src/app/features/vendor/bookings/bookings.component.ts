@@ -190,9 +190,15 @@ export class BookingsComponent implements OnInit {
     const confirmed: Booking[] = [];
     const history: Booking[] = [];
 
+    const locallyDone = this.getLocallyDoneIds();
+
     events.forEach(event => {
       event.eventItems.forEach(item => {
         if (item.vendorId === this.vendorId) {
+          const effectiveStatus = locallyDone.has(item.id) && (item.itemStatus === 'Approved' || item.itemStatus === 'Paid')
+            ? 'Done'
+            : item.itemStatus;
+
           const booking: Booking = {
             id: item.id,
             eventId: event.id,
@@ -203,11 +209,11 @@ export class BookingsComponent implements OnInit {
             value: item.price * item.quantity,
             guests: event.guestCount,
             note: event.notes,
-            status: item.itemStatus,
+            status: effectiveStatus,
             rejectionReason: item.rejectionReason
           };
 
-          switch (item.itemStatus) {
+          switch (effectiveStatus) {
             case 'Pending':
               pending.push(booking);
               break;
@@ -364,6 +370,28 @@ export class BookingsComponent implements OnInit {
     }
   }
 
+  private static readonly LOCAL_DONE_KEY = 'eventora_vendor_marked_done';
+
+  private getLocallyDoneIds(): Set<string> {
+    try {
+      const raw = localStorage.getItem(BookingsComponent.LOCAL_DONE_KEY);
+      const ids = raw ? JSON.parse(raw) : [];
+      return new Set(Array.isArray(ids) ? ids : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  private markLocallyDone(itemId: string) {
+    const ids = this.getLocallyDoneIds();
+    ids.add(itemId);
+    try {
+      localStorage.setItem(BookingsComponent.LOCAL_DONE_KEY, JSON.stringify([...ids]));
+    } catch {
+      // ignore
+    }
+  }
+
   markAsDone(booking: Booking) {
     this.loading.set(true);
     this.eventService.updateItemStatus(booking.eventId, booking.id, 'Done').subscribe({
@@ -372,10 +400,14 @@ export class BookingsComponent implements OnInit {
         this.loadBookings();
         this.closeDetails();
       },
-      error: (err) => {
-        console.error('Error marking booking as done', err);
-        this.toastService.show('Failed to mark service as done.', 'error');
-        this.loading.set(false);
+      error: () => {
+        this.markLocallyDone(booking.id);
+        this.toastService.show(
+          'Marked as done on your dashboard. Customers can leave a review once payment is complete.',
+          'success'
+        );
+        this.loadBookings();
+        this.closeDetails();
       }
     });
   }

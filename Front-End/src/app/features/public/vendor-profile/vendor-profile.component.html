@@ -174,19 +174,25 @@
             <p class="vp-rating-label">Overall Rating</p>
           </div>
 
-          <!-- Per-service ratings -->
-          <div class="vp-product-ratings" *ngIf="products.length > 0">
-            <h3 class="vp-section-title">Service Ratings</h3>
-            <div class="vp-prod-row" *ngFor="let p of products">
-              <span class="vp-prod-row-name">{{ p.name }}</span>
-              <div class="vp-prod-row-stars">
-                <i class="bi bi-star-fill" *ngFor="let s of [1,2,3,4,5]"
-                   [style.color]="s <= (p.rating || 0) ? 'var(--gold)' : 'var(--lgray)'"></i>
-                <span class="vp-prod-row-val" *ngIf="p.rating">{{ p.rating }}</span>
-                <span class="vp-prod-row-new" *ngIf="!p.rating">New</span>
+          <!-- Customer reviews (from service ratings) -->
+          <div class="vp-review-list" *ngIf="vendorReviews.length > 0">
+            <h3 class="vp-section-title">Customer Reviews</h3>
+            <div class="vp-review-card" *ngFor="let r of vendorReviews">
+              <div class="vp-review-card-head">
+                <strong>{{ r.userName }}</strong>
+                <span *ngIf="r.createdAt">{{ r.createdAt | date:'mediumDate' }}</span>
               </div>
+              <div class="vp-rating-stars mb-[8px]">
+                <i class="bi bi-star-fill" *ngFor="let s of [1,2,3,4,5]"
+                   [class.bi-star-fill]="s <= r.rating"
+                   [class.bi-star]="s > r.rating"></i>
+              </div>
+              <p class="vp-review-service" *ngIf="r.serviceName">{{ r.serviceName }}</p>
+              <p class="vp-review-body">{{ r.review }}</p>
             </div>
           </div>
+
+          <p class="vp-no-reviews" *ngIf="vendorReviews.length === 0">No reviews yet — be the first to share your experience.</p>
 
           <!-- Submit review form -->
           <div class="vp-review-form">

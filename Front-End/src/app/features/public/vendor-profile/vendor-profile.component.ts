@@ -4,7 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { FavoriteService } from '../../../shared/services/favorite.service';
-import { ApiVendor, ApiProduct, CreateReviewDto } from '../../../shared/types/api.interfaces';
+import { ApiVendor, ApiProduct, CreateReviewDto, VendorRatingDto } from '../../../shared/types/api.interfaces';
 import { VendorService } from '../../../core/services/vendor.service';
 import { ProductService } from '../../../core/services/product.service';
 import { ApiPackage, PackageService } from '../../../core/services/package.service';
@@ -47,6 +47,7 @@ export class VendorProfileComponent implements OnInit {
   reviewText = '';
   selectedServiceId = '';
   submittingReview = false;
+  vendorReviews: VendorRatingDto[] = [];
 
   contactName = '';
   contactEmail = '';
@@ -103,11 +104,12 @@ export class VendorProfileComponent implements OnInit {
   // ── Vendor info + packages (GET /Vendor/{id} returns both) ──────
   loadVendorProfile() {
     if (!this.vendorId) return;
-    this.vendorService.getById(this.vendorId).subscribe({
+    this.vendorService.getDetailsById(this.vendorId).subscribe({
       next: (data) => {
         this.vendor = data;
+        this.vendorReviews = data.vendorRatings ?? [];
         this.loading = false;
-        
+
         this.loadVendorPackages();
         this.buildCarousel();
         this.loadSimilarVendors();
@@ -250,6 +252,14 @@ export class VendorProfileComponent implements OnInit {
         this.reviewRating = 5;
         this.selectedServiceId = '';
         this.submittingReview = false;
+        if (this.vendorId) {
+          this.vendorService.getDetailsById(this.vendorId).subscribe({
+            next: (details) => {
+              this.vendor = details;
+              this.vendorReviews = details.vendorRatings ?? [];
+            }
+          });
+        }
       },
       error: () => {
         this.toastService.show('Failed to submit review. Please try again.', 'error');
