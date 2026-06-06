@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Text;
 using Application.Contracts;
 using Infrastructure.Reporting;
+using Infrastructure.Persistence.Analytics;
 
 namespace Infrastructure
 {
@@ -43,6 +44,7 @@ namespace Infrastructure
 
 
             Services.AddScoped<IReportingService, ReportingService>();
+            Services.AddScoped<IAnalyticsService, AnalyticsQueryService>();
             Services.AddSingleton<IConnectionMultiplexer>(s => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
             Services.AddScoped<ICompanyInquiryRepository, CompanyInquiryRepository>();
             // 1. Configure DbContext with SQL Server
