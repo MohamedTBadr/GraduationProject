@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { HttpClient, HttpContext, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { SKIP_ERROR_TOAST } from './auth.service';
 import {
   EventResponseDto,
   EventItemResponseDto,
@@ -60,46 +61,96 @@ export class EventService {
       map(res => this.normalizeEvent(this.unwrapEventBody(res)))
     );
   }
+  /** GET /Vendor/bookings — scoped to the signed-in vendor via auth token */
   getForVendor(vendorUserId: string): Observable<EventResponseDto[]> {
-    return this.http.get<any>(`${environment.apiUrl}/Vendor/bookings`).pipe(
-      map(res => {
-        const bookings = res?.value ?? (Array.isArray(res) ? res : []);
-        if (!Array.isArray(bookings)) return [];
-
-        const eventsMap = new Map<string, EventResponseDto>();
-
-        bookings.forEach((b: any) => {
-          if (!eventsMap.has(b.eventId)) {
-            eventsMap.set(b.eventId, {
-              id: b.eventId,
-              userId: '',
-              userName: 'Client',
-              title: b.eventTitle,
-              eventTypeName: b.eventType,
-              eventDate: b.eventDate,
-              totalBudget: 0,
-              guestCount: b.guestCount,
-              notes: b.notes,
-              eventStatus: b.eventStatus,
-              eventItems: []
-            });
-          }
-
-          eventsMap.get(b.eventId)!.eventItems.push({
-            id: b.eventItemId,
-            eventId: b.eventId,
-            vendorId: vendorUserId,
-            vendorName: '',
-            serviceName: b.serviceName,
-            price: b.price,
-            quantity: 1,
-            itemStatus: this.mapItemStatus(b.bookingStatus)
-          });
-        });
-
-        return Array.from(eventsMap.values());
+    const context = new HttpContext().set(SKIP_ERROR_TOAST, true);
+    return this.http.get<any>(`${environment.apiUrl}/Vendor/bookings`, { context }).pipe(
+      map(res => this.mapVendorBookingsToEvents(res, vendorUserId)),
+      catchError(err => {
+        // Backend returns 404 when the vendor has no bookings yet.
+        if (err?.status === 404 || err?.status === 204) {
+          return of([]);
+        }
+        return throwError(() => err);
       })
     );
+  }
+
+  private extractBookingList(res: any): any[] {
+    if (res == null) return [];
+    if (Array.isArray(res)) return res;
+
+    const inner = res.value ?? res.Value ?? res.data ?? res.Data;
+    if (Array.isArray(inner)) return inner;
+    if (inner != null && typeof inner === 'object') {
+      const nested = inner.items ?? inner.Items ?? inner.$values ?? inner.$Values;
+      if (Array.isArray(nested)) return nested;
+    }
+
+    const top = res.items ?? res.Items ?? res.$values ?? res.$Values;
+    if (Array.isArray(top)) return top;
+
+    return [];
+  }
+
+  private mapVendorBookingsToEvents(res: any, vendorUserId: string): EventResponseDto[] {
+    const bookings = this.extractBookingList(res);
+    if (!bookings.length) return [];
+
+    const eventsMap = new Map<string, EventResponseDto>();
+    const normalizedVendorId = this.normalizeEventId(vendorUserId);
+
+    for (const b of bookings) {
+      const eventId = this.normalizeEventId(this.pickField(b, 'eventId', 'EventId'));
+      if (!eventId) continue;
+
+      if (!eventsMap.has(eventId)) {
+        eventsMap.set(eventId, {
+          id: eventId,
+          userId: this.normalizeEventId(this.pickField(b, 'userId', 'UserId')),
+          userName: String(
+            this.pickField(
+              b,
+              'clientName',
+              'ClientName',
+              'userName',
+              'UserName',
+              'customerName',
+              'CustomerName'
+            ) ?? 'Client'
+          ),
+          title: String(this.pickField(b, 'eventTitle', 'EventTitle') ?? ''),
+          eventTypeName: String(this.pickField(b, 'eventType', 'EventType') ?? ''),
+          eventDate: String(this.pickField(b, 'eventDate', 'EventDate') ?? ''),
+          totalBudget: Number(this.pickField(b, 'totalBudget', 'TotalBudget') ?? 0),
+          guestCount: Number(this.pickField(b, 'guestCount', 'GuestCount') ?? 0),
+          notes: this.pickField(b, 'notes', 'Notes'),
+          eventStatus: String(this.pickField(b, 'eventStatus', 'EventStatus') ?? 'Pending'),
+          eventItems: []
+        });
+      }
+
+      const itemId = this.normalizeEventId(
+        this.pickField(b, 'eventItemId', 'EventItemId', 'id', 'Id')
+      );
+      if (!itemId) continue;
+
+      eventsMap.get(eventId)!.eventItems.push({
+        id: itemId,
+        eventId,
+        vendorId: normalizedVendorId,
+        vendorName: String(this.pickField(b, 'vendorName', 'VendorName') ?? ''),
+        serviceName: String(this.pickField(b, 'serviceName', 'ServiceName') ?? ''),
+        price: Number(this.pickField(b, 'price', 'Price') ?? 0),
+        quantity: Number(this.pickField(b, 'quantity', 'Quantity') ?? 1),
+        itemStatus: this.mapItemStatus(
+          this.pickField(b, 'bookingStatus', 'BookingStatus', 'itemStatus', 'ItemStatus')
+        ),
+        rejectionReason: this.pickField(b, 'rejectionReason', 'RejectionReason')
+      });
+    }
+
+    return Array.from(eventsMap.values());
   }
 
   /**

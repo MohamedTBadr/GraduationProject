@@ -103,7 +103,7 @@
         <!-- Services ─────────────────────────────────────────── -->
         <section *ngIf="activeTab === 'services'">
           <div class="vp-svc-grid" *ngIf="products.length > 0">
-            <div class="vp-svc-card" *ngFor="let p of products" (click)="selectedProduct = p">
+            <div class="vp-svc-card" *ngFor="let p of products" (click)="openServiceBooking(p)">
               <div class="vp-svc-top">
                 <i class="bi bi-stars vp-svc-icon"></i>
                 <span class="vp-svc-link">View details</span>
@@ -361,39 +361,5 @@
     </section>
 
   </ng-container>
-
-  <!-- ═══ SERVICE DETAIL MODAL ══════════════════════════════════ -->
-  <div class="vp-modal-overlay" *ngIf="selectedProduct" (click)="selectedProduct = null">
-    <div class="vp-modal" (click)="$event.stopPropagation()">
-      <button class="vp-modal-close" (click)="selectedProduct = null" aria-label="Close">
-        <i class="bi bi-x-lg"></i>
-      </button>
-      <div class="vp-modal-img" *ngIf="selectedProduct.imageUrl"
-           [style.backgroundImage]="'url(' + selectedProduct.imageUrl + ')'"></div>
-      <div class="vp-modal-body">
-        <div class="vp-modal-badge" *ngIf="selectedProduct.serviceTypeName">
-          {{ selectedProduct.serviceTypeName }}
-        </div>
-        <h2 class="vp-modal-name">{{ selectedProduct.name }}</h2>
-        <div class="vp-modal-price" *ngIf="selectedProduct.price > 0">
-          {{ selectedProduct.price | currency:'EGP':'symbol':'1.0-0' }}
-        </div>
-        <div class="vp-modal-price vp-price-request" *ngIf="selectedProduct.price === 0">
-          Price on request
-        </div>
-        <p class="vp-modal-desc">{{ selectedProduct.description }}</p>
-        <div class="vp-modal-meta-row" *ngIf="selectedProduct.duration">
-          <i class="bi bi-clock"></i> Duration: {{ selectedProduct.duration }}
-        </div>
-        <div class="vp-modal-meta-row" *ngIf="selectedProduct.classification">
-          <i class="bi bi-tag"></i> {{ selectedProduct.classification }}
-        </div>
-        <button class="btn btn-gold" style="margin-top: 20px;"
-                (click)="activeTab = 'contact'; selectedProduct = null">
-          Inquire About This Service
-        </button>
-      </div>
-    </div>
-  </div>
 
 </div>

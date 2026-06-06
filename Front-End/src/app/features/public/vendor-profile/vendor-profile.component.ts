@@ -13,6 +13,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { VendorCardComponent } from '../../../shared/components/vendor-card/vendor-card.component';
 import { EventTypeService } from '../../../core/services/event-type.service';
 import { EventType } from '../../../core/models/taxonomy.models';
+import { ModalService } from '../../../shared/services/modal.service';
 
 @Component({
   selector: 'app-vendor-profile',
@@ -37,8 +38,6 @@ export class VendorProfileComponent implements OnInit {
   carouselImages: string[] = [];
   activeImageIndex = 0;
 
-  selectedProduct: ApiProduct | null = null;
-
   eventDate = '';
   eventType = '';
   eventTypes: EventType[] = [];
@@ -55,6 +54,7 @@ export class VendorProfileComponent implements OnInit {
 
   favoriteService = inject(FavoriteService);
   authService = inject(AuthService);
+  private modalService = inject(ModalService);
 
   get today(): string {
     return new Date().toISOString().split('T')[0];
@@ -98,7 +98,6 @@ export class VendorProfileComponent implements OnInit {
     this.similarVendors = [];
     this.carouselImages = [];
     this.activeImageIndex = 0;
-    this.selectedProduct = null;
   }
 
   // ── Vendor info + packages (GET /Vendor/{id} returns both) ──────
@@ -281,5 +280,13 @@ export class VendorProfileComponent implements OnInit {
 
   getRatingLabel(r: number): string {
     return ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][r] || '';
+  }
+
+  openServiceBooking(product: ApiProduct) {
+    this.modalService.open('service-detail', {
+      ...product,
+      vendorId: product.vendorId || this.vendorId || this.vendor?.id,
+      vendorName: product.vendorName || this.vendor?.name
+    });
   }
 }

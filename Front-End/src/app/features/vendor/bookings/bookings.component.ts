@@ -185,16 +185,21 @@ export class BookingsComponent implements OnInit {
     });
   }
 
+  private normalizeId(id: string | null | undefined): string {
+    return id == null ? '' : String(id).trim().toLowerCase();
+  }
+
   private processBookings(events: EventResponseDto[]) {
     const pending: Booking[] = [];
     const confirmed: Booking[] = [];
     const history: Booking[] = [];
 
     const locallyDone = this.getLocallyDoneIds();
+    const vendorIdNorm = this.normalizeId(this.vendorId);
 
     events.forEach(event => {
       event.eventItems.forEach(item => {
-        if (item.vendorId === this.vendorId) {
+        if (!vendorIdNorm || this.normalizeId(item.vendorId) === vendorIdNorm) {
           const effectiveStatus = locallyDone.has(item.id) && (item.itemStatus === 'Approved' || item.itemStatus === 'Paid')
             ? 'Done'
             : item.itemStatus;

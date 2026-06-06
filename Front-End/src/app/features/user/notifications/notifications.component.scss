@@ -1,3 +1,64 @@
+.mb-header {
+  margin-bottom: 24px;
+}
+
+.mb-title {
+  font-family: var(--ff-d);
+  font-size: 2.2rem;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.mb-subtitle {
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+.mb-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1.5px solid var(--lgray);
+  padding-bottom: 2px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.mb-tab {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  padding-bottom: 12px;
+  border-bottom: 3px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+
+  &.active {
+    color: var(--navy);
+    border-bottom-color: var(--gold);
+  }
+
+  &:hover:not(.active) {
+    color: var(--navy);
+  }
+}
+
+.mb-tab-badge {
+  background: var(--gold);
+  color: var(--navy);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 50px;
+
+  &.inactive {
+    background: var(--lgray);
+    color: var(--gray);
+  }
+}
+
 .notif-list {
   display: flex;
   flex-direction: column;

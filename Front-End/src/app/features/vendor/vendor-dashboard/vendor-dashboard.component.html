@@ -122,27 +122,27 @@
         <div class="vd-card-title">Business Insights</div>
         <ng-container *ngIf="report?.insights; else noInsights">
           <div class="flex flex-col gap-[12px] mt-[16px]">
-            <div class="flex justify-between items-center py-[8px] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+            <div class="flex justify-between items-center py-[8px] border-b border-[var(--lgray)]">
               <span class="text-[var(--gray)] text-[0.85rem]">Best Performing Month</span>
-              <span class="font-bold text-white text-[0.9rem]" *ngIf="report.insights.bestMonth">
+              <span class="font-bold text-[var(--navy)] text-[0.9rem]" *ngIf="report.insights.bestMonth">
                 {{ report.insights.bestMonth.label }} ({{ report.insights.bestMonth.revenue | number }} EGP)
               </span>
               <span class="text-[var(--gray)] italic" *ngIf="!report.insights.bestMonth">N/A</span>
             </div>
-            <div class="flex justify-between items-center py-[8px] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+            <div class="flex justify-between items-center py-[8px] border-b border-[var(--lgray)]">
               <span class="text-[var(--gray)] text-[0.85rem]">Lowest Performing Month</span>
-              <span class="font-bold text-white text-[0.9rem]" *ngIf="report.insights.worstMonth">
+              <span class="font-bold text-[var(--navy)] text-[0.9rem]" *ngIf="report.insights.worstMonth">
                 {{ report.insights.worstMonth.label }} ({{ report.insights.worstMonth.revenue | number }} EGP)
               </span>
               <span class="text-[var(--gray)] italic" *ngIf="!report.insights.worstMonth">N/A</span>
             </div>
-            <div class="flex justify-between items-center py-[8px] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+            <div class="flex justify-between items-center py-[8px] border-b border-[var(--lgray)]">
               <span class="text-[var(--gray)] text-[0.85rem]">Avg Monthly Revenue</span>
               <span class="font-bold text-[var(--gold)] text-[0.95rem]">{{ (report.kpis?.averageMonthlyRevenue ?? 0) | number }} EGP</span>
             </div>
-            <div class="flex justify-between items-center py-[8px] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+            <div class="flex justify-between items-center py-[8px] border-b border-[var(--lgray)]">
               <span class="text-[var(--gray)] text-[0.85rem]">Avg Order Value</span>
-              <span class="font-bold text-white text-[0.9rem]">{{ (report.kpis?.averageOrderValue ?? 0) | number }} EGP</span>
+              <span class="font-bold text-[var(--navy)] text-[0.9rem]">{{ (report.kpis?.averageOrderValue ?? 0) | number }} EGP</span>
             </div>
             <div class="flex justify-between items-center py-[8px]">
               <span class="text-[var(--gray)] text-[0.85rem]">Average Rating</span>
@@ -163,9 +163,9 @@
         <div class="vd-card-title">Top Performing Services</div>
         <div class="flex flex-col mt-[12px]">
           <ng-container *ngIf="report?.topServices?.length; else noServices">
-            <div *ngFor="let s of report.topServices" class="flex justify-between items-center py-[12px] [border-bottom:1px_solid_rgba(255,255,255,.05)]">
+            <div *ngFor="let s of report.topServices" class="flex justify-between items-center py-[12px] border-b border-[var(--lgray)]">
               <div>
-                <div class="font-semibold text-[0.9rem] text-white">{{ s.serviceName }}</div>
+                <div class="font-semibold text-[0.9rem] text-[var(--navy)]">{{ s.serviceName }}</div>
                 <div class="text-[0.8rem] text-[var(--gray)]">{{ s.orders }} bookings · {{ s.quantitySold || 0 }} units sold</div>
               </div>
               <div class="text-right">
@@ -190,7 +190,7 @@
           <ng-container *ngIf="report?.recommendations?.length; else noRecs">
             <div *ngFor="let rec of report.recommendations" class="flex gap-[10px] items-start p-[12px] bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.15)] rounded-[8px]">
               <i class="bi bi-star-fill text-[var(--gold)] text-[1.1rem]"></i>
-              <p class="text-[0.85rem] text-[#f7e1b9] m-0 leading-[1.4]">{{ rec }}</p>
+              <p class="text-[0.85rem] text-[var(--navy)] m-0 leading-[1.4]">{{ rec }}</p>
             </div>
           </ng-container>
           <ng-template #noRecs>
@@ -206,7 +206,7 @@
       <div class="overflow-x-auto">
         <table class="ad-table w-[100%] text-left border-collapse">
           <thead>
-            <tr class="[border-bottom:1px_solid_rgba(255,255,255,.1)] text-[var(--gray)] text-[0.8rem] font-bold">
+            <tr class="border-b border-[var(--lgray)] text-[var(--gray)] text-[0.8rem] font-bold">
               <th class="py-[12px] px-[8px]">Order ID</th>
               <th class="py-[12px] px-[8px]">Customer Name</th>
               <th class="py-[12px] px-[8px]">Service / Product</th>
@@ -214,13 +214,13 @@
               <th class="py-[12px] px-[8px] text-right">Date</th>
             </tr>
           </thead>
-          <tbody class="text-[0.85rem] text-[#e2e8f0]">
+          <tbody class="text-[0.85rem] text-[var(--navy)]">
             <ng-container *ngIf="report?.recentOrders?.length; else noOrders">
-              <tr *ngFor="let o of report.recentOrders" class="[border-bottom:1px_solid_rgba(255,255,255,.05)] hover:bg-[rgba(255,255,255,.02)] transition-colors">
+              <tr *ngFor="let o of report.recentOrders" class="border-b border-[var(--lgray)] hover:bg-[var(--cream2)] transition-colors">
                 <td class="py-[12px] px-[8px] font-mono text-[0.75rem] text-[var(--gold)]">#{{ o.orderId.substring(0, 8) }}</td>
                 <td class="py-[12px] px-[8px] font-semibold">{{ o.customerName }}</td>
                 <td class="py-[12px] px-[8px] text-[var(--gray)]">{{ o.serviceName }}</td>
-                <td class="py-[12px] px-[8px] text-right font-bold text-white">{{ o.amount | number }} EGP</td>
+                <td class="py-[12px] px-[8px] text-right font-bold text-[var(--navy)]">{{ o.amount | number }} EGP</td>
                 <td class="py-[12px] px-[8px] text-right text-[var(--gray)]">{{ o.createdAt | date:'mediumDate' }}</td>
               </tr>
             </ng-container>

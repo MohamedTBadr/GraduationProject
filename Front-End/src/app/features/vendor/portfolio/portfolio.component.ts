@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { ProductService } from '../../../core/services/product.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
@@ -12,7 +13,7 @@ interface PortfolioImage {
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './portfolio.component.html',
   styleUrls: ['./portfolio.component.scss']
 })
@@ -24,12 +25,13 @@ export class PortfolioComponent implements OnInit {
   loading = true;
   images: PortfolioImage[] = [];
   selectedImage: PortfolioImage | null = null;
+  vendorId = '';
 
   ngOnInit() {
-    const vendorId = this.authService.user()?.id ?? '';
-    if (!vendorId) { this.loading = false; return; }
+    this.vendorId = this.authService.user()?.id ?? '';
+    if (!this.vendorId) { this.loading = false; return; }
 
-    this.productService.getByVendor(vendorId).subscribe({
+    this.productService.getByVendor(this.vendorId).subscribe({
       next: services => {
         this.images = services.flatMap(s =>
           (s.imageUrls ?? (s.imageUrl ? [s.imageUrl] : [])).map(url => ({

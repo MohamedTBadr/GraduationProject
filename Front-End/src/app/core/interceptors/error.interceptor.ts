@@ -2,13 +2,18 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { ToastService } from '../../shared/components/toast/toast.service';
+import { SKIP_ERROR_TOAST } from '../services/auth.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     const toastService = inject(ToastService);
+    const skipToast = req.context.get(SKIP_ERROR_TOAST);
 
     return next(req).pipe(
         catchError((error) => {
             if (error && (error as any).handled) {
+                return throwError(() => error);
+            }
+            if (skipToast) {
                 return throwError(() => error);
             }
             let errorMessage = 'An unexpected error occurred';

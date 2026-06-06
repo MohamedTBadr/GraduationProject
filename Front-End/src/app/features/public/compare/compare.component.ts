@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CompareService } from '../../../shared/services/compare.service';
 import { ApiVendor, ApiProduct } from '../../../shared/types/api.interfaces';
 
@@ -14,6 +14,7 @@ import { ApiVendor, ApiProduct } from '../../../shared/types/api.interfaces';
 export class CompareComponent implements OnInit {
   compareService = inject(CompareService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   activeTab: 'vendors' | 'services' = 'vendors';
 
@@ -30,6 +31,32 @@ export class CompareComponent implements OnInit {
         this.activeTab = 'vendors';
       }
     });
+  }
+
+  switchTab(tab: 'vendors' | 'services') {
+    this.activeTab = tab;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  formatVendorValue(vendor: ApiVendor, key: keyof ApiVendor): string {
+    const value = vendor[key];
+    if (value === null || value === undefined || value === '') {
+      return '—';
+    }
+    return String(value);
+  }
+
+  formatServiceValue(service: ApiProduct, key: keyof ApiProduct): string {
+    const value = service[key];
+    if (value === null || value === undefined || value === '') {
+      return '—';
+    }
+    return String(value);
   }
 
   getVendorFeatures(): { key: keyof ApiVendor; label: string }[] {

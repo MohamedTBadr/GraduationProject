@@ -14,8 +14,9 @@ import { EventTypeService } from '../../../core/services/event-type.service';
 import { ModalService } from '../../../shared/services/modal.service';
 import { CompareService } from '../../../shared/services/compare.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
-import { Subject, forkJoin, takeUntil } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject, forkJoin, of, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
+import { ServiceAreaDTO } from '../../../shared/types/api.interfaces';
 import * as L from 'leaflet';
 
 const EGYPT_CITIES = ['Cairo', 'New Cairo', 'Giza', 'Alexandria', 'North Coast', 'Mansoura'];
@@ -76,6 +77,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   activeImageIndex = 0;
 
   wishlist: string[] = [];
+  private vendorRatingsById = new Map<string, number>();
 
   compareService = inject(CompareService);
 
@@ -218,8 +220,60 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     else this.loadServices();
   }
 
-  private needsBulkFetchForRating(): boolean {
-    return this.minRating > 0;
+  /** Backend city filter 500s when Region is null — filter service areas client-side instead. */
+  private needsClientSideVendorFiltering(): boolean {
+    return !!this.selectedLocation || this.minRating > 0;
+  }
+
+  private needsClientSideServiceFiltering(): boolean {
+    return !!this.selectedCity
+      || this.minRating > 0
+      || (!!this.selectedEventTypeId && this.maxPrice < MAX_PRICE_ANY);
+  }
+
+  private matchesCity(areas: ServiceAreaDTO[] | undefined, city: string): boolean {
+    if (!city) return true;
+    const needle = city.trim().toLowerCase();
+    if (!areas?.length) return false;
+    return areas.some((area) => {
+      const c = (area.city ?? '').trim().toLowerCase();
+      const r = (area.region ?? '').trim().toLowerCase();
+      return c === needle || r === needle || c.includes(needle) || r.includes(needle);
+    });
+  }
+
+  private loadVendorRatingsForServices() {
+    if (!this.minRating && this.sortOption !== 'rating') {
+      return of(null);
+    }
+    return this.vendorService.getAll({ pageIndex: 1, pageSize: 500 }).pipe(
+      tap((vendors) => {
+        this.vendorRatingsById.clear();
+        vendors.forEach((v) => this.vendorRatingsById.set(v.id, v.rating ?? 0));
+      })
+    );
+  }
+
+  private getServiceRating(svc: ApiProduct): number {
+    if (svc.rating != null && svc.rating > 0) return svc.rating;
+    if (svc.vendorId && this.vendorRatingsById.has(svc.vendorId)) {
+      return this.vendorRatingsById.get(svc.vendorId)!;
+    }
+    return 0;
+  }
+
+  private applyServiceFilters(items: ApiProduct[]): ApiProduct[] {
+    let result = items;
+    if (this.selectedCity) {
+      result = result.filter((s) => this.matchesCity(s.serviceAreas, this.selectedCity));
+    }
+    if (this.maxPrice < MAX_PRICE_ANY) {
+      result = result.filter((s) => (s.price ?? 0) <= this.maxPrice);
+    }
+    if (this.minRating > 0) {
+      result = result.filter((s) => this.getServiceRating(s) >= this.minRating);
+    }
+    return result;
   }
 
   private getSortParams(): { sortBy?: string; isDescending?: boolean } {
@@ -232,14 +286,13 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     const seq = ++this.fetchSeq;
     this.loading = true;
 
-    const bulk = this.needsBulkFetchForRating();
+    const bulk = this.needsClientSideVendorFiltering();
     const sort = this.getSortParams();
 
     this.vendorService.getAllPaged({
       pageIndex: bulk ? 1 : this.currentPage,
       pageSize: bulk ? 500 : this.pageSize,
       searchTerm: this.searchQuery || undefined,
-      city: this.selectedLocation || undefined,
       vendorTypeId: this.selectedVendorTypeId || undefined,
       sortBy: sort.sortBy,
       isDescending: sort.isDescending
@@ -247,8 +300,13 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (result) => {
         if (seq !== this.fetchSeq) return;
         let items = result.items;
+        if (this.selectedLocation) {
+          items = items.filter((v) => this.matchesCity(v.serviceAreas, this.selectedLocation));
+        }
         if (this.minRating > 0) {
-          items = items.filter(v => (v.rating || 0) >= this.minRating);
+          items = items.filter((v) => (v.rating || 0) >= this.minRating);
+        }
+        if (bulk) {
           this.vendorCount = items.length;
           this.totalPages = Math.max(1, Math.ceil(items.length / this.pageSize));
           const start = (this.currentPage - 1) * this.pageSize;
@@ -276,34 +334,49 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     const seq = ++this.fetchSeq;
     this.loading = true;
 
-    const bulk = this.needsBulkFetchForRating();
+    const bulk = this.needsClientSideServiceFiltering();
     const sort = this.getSortParams();
+    const useEventTypeEndpoint = !!this.selectedEventTypeId;
     const baseReq = {
       pageIndex: bulk ? 1 : this.currentPage,
       pageSize: bulk ? 500 : this.pageSize,
       searchTerm: this.searchQuery || undefined,
-      city: this.selectedCity || undefined,
       serviceTypeId: this.selectedServiceTypeId || undefined,
-      maxPrice: this.maxPrice < MAX_PRICE_ANY ? this.maxPrice : undefined,
+      maxPrice: (!useEventTypeEndpoint && this.maxPrice < MAX_PRICE_ANY) ? this.maxPrice : undefined,
+      // Rating sort is applied client-side; omit sort params so authenticated
+      // customers don't hit a backend bug with isDescending-only requests.
       sortBy: sort.sortBy === 'rating' ? undefined : sort.sortBy,
-      isDescending: sort.isDescending
+      isDescending: sort.sortBy === 'rating' ? undefined : sort.isDescending
     };
 
-    const request$ = this.selectedEventTypeId
-      ? this.productService.getByEventTypePaged(this.selectedEventTypeId, baseReq)
+    const request$ = useEventTypeEndpoint
+      ? this.productService.getByEventTypePaged(this.selectedEventTypeId!, baseReq)
       : this.productService.getAllPaged(baseReq);
 
-    request$.subscribe({
-      next: (result) => {
+    forkJoin({
+      ratings: this.loadVendorRatingsForServices(),
+      result: request$
+    }).subscribe({
+      next: ({ result }) => {
         if (seq !== this.fetchSeq) return;
-        let items = result.items;
-        if (this.minRating > 0) {
-          items = items.filter(s => ((s as any).rating ?? 5) >= this.minRating);
+        let items: ApiProduct[] = result.items.map((s) => ({
+          ...s,
+          rating: this.getServiceRating(s)
+        }));
+
+        if (bulk) {
+          items = this.applyServiceFilters(items);
+          if (sort.sortBy === 'rating') {
+            items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+          }
           this.serviceCount = items.length;
           this.totalPages = Math.max(1, Math.ceil(items.length / this.pageSize));
           const start = (this.currentPage - 1) * this.pageSize;
           this.filteredServices = items.slice(start, start + this.pageSize);
         } else {
+          if (sort.sortBy === 'rating') {
+            items.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+          }
           this.filteredServices = items;
           this.serviceCount = result.totalCount;
           this.totalPages = result.totalPages;
