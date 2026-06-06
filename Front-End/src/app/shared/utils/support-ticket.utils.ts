@@ -1,4 +1,4 @@
-import { CreateTicketRequest } from '../types/api.interfaces';
+import { CreateTicketRequest, SupportTicket, TicketReply } from '../types/api.interfaces';
 
 export type TicketSubmitterType = 'Client' | 'Vendor';
 export type TicketCategory = 'Booking' | 'Payment' | 'Technical' | 'General';
@@ -60,20 +60,90 @@ export function normalizeTicketId(raw: Record<string, unknown> | null | undefine
   return typeof id === 'string' ? id : '';
 }
 
-export function normalizeTicketResponse(raw: unknown): Record<string, unknown> {
-  if (!raw || typeof raw !== 'object') return {};
-  const obj = raw as Record<string, unknown>;
+export function normalizeTicketStatus(status: unknown): SupportTicket['status'] {
+  const raw = String(status ?? 'open').toLowerCase().replace(/[\s_-]+/g, '');
+  if (raw === 'inprogress') return 'in_progress';
+  if (raw === 'resolved') return 'resolved';
+  return 'open';
+}
+
+export function mapTicketReply(raw: unknown, ticketId = ''): TicketReply {
+  const obj = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const notified = pickField<string[]>(obj, 'notifiedVia', 'NotifiedVia') ?? [];
   return {
-    ticket_id: normalizeTicketId(obj),
-    title: pickField(obj, 'title', 'Title') ?? '',
-    from: pickField(obj, 'from', 'From') ?? '',
-    type: pickField(obj, 'type', 'Type') ?? '',
-    priority: pickField(obj, 'priority', 'Priority') ?? '',
-    status: pickField(obj, 'status', 'Status') ?? 'open',
-    opened_at: pickField(obj, 'opened_at', 'openedAt', 'OpenedAt') ?? new Date().toISOString(),
-    description: pickField(obj, 'description', 'Description') ?? '',
-    booking_ref: pickField(obj, 'booking_ref', 'bookingRef', 'BookingRef') ?? null,
+    reply_id: String(pickField(obj, 'replyId', 'ReplyId', 'reply_id') ?? ''),
+    ticket_id: String(pickField(obj, 'ticketId', 'TicketId', 'ticket_id') ?? ticketId),
+    message: String(pickField(obj, 'message', 'Message') ?? ''),
+    replied_by: String(pickField(obj, 'repliedBy', 'RepliedBy', 'replied_by') ?? ''),
+    replied_at: String(pickField(obj, 'repliedAt', 'RepliedAt', 'replied_at') ?? new Date().toISOString()),
+    notified_via: Array.isArray(notified) ? notified : [],
   };
+}
+
+function mapAssignedTo(raw: Record<string, unknown>): SupportTicket['assigned_to'] {
+  const nested = pickField<Record<string, unknown>>(raw, 'assignedTo', 'AssignedTo');
+  if (nested && typeof nested === 'object') {
+    const name = pickField<string>(nested, 'name', 'Name');
+    const agentId = pickField<string>(nested, 'agentId', 'AgentId', 'agent_id');
+    if (name || agentId) {
+      return { name: String(name ?? ''), agent_id: String(agentId ?? '') };
+    }
+  }
+
+  const assignedName = pickField<string>(raw, 'assignedTo', 'AssignedTo');
+  if (typeof assignedName === 'string' && assignedName.trim()) {
+    return { name: assignedName, agent_id: '' };
+  }
+
+  return null;
+}
+
+function mapTicketReplies(raw: Record<string, unknown>, ticketId: string): TicketReply[] {
+  const replies = pickField<unknown[]>(raw, 'replies', 'Replies') ?? [];
+  return replies.map((item) => mapTicketReply(item, ticketId));
+}
+
+export function mapSupportTicket(raw: unknown): SupportTicket {
+  if (!raw || typeof raw !== 'object') {
+    return {
+      ticket_id: '',
+      title: '',
+      from: '',
+      type: 'Client',
+      priority: 'medium',
+      status: 'open',
+      opened_at: new Date().toISOString(),
+      description: '',
+    };
+  }
+
+  const obj = raw as Record<string, unknown>;
+  const ticketId = normalizeTicketId(obj);
+  const type = String(pickField(obj, 'type', 'Type') ?? 'Client');
+  const priority = String(pickField(obj, 'priority', 'Priority') ?? 'medium').toLowerCase();
+
+  return {
+    ticket_id: ticketId,
+    title: String(pickField(obj, 'title', 'Title') ?? ''),
+    from: String(pickField(obj, 'from', 'From') ?? ''),
+    type: (type === 'Vendor' ? 'Vendor' : 'Client'),
+    priority: (['critical', 'high', 'medium', 'low'].includes(priority)
+      ? priority
+      : 'medium') as SupportTicket['priority'],
+    status: normalizeTicketStatus(pickField(obj, 'status', 'Status')),
+    opened_at: String(pickField(obj, 'opened_at', 'openedAt', 'OpenedAt') ?? new Date().toISOString()),
+    description: String(pickField(obj, 'description', 'Description') ?? ''),
+    booking_ref: (pickField<string | null>(obj, 'booking_ref', 'bookingRef', 'BookingRef') ?? null),
+    assigned_to: mapAssignedTo(obj),
+    resolved_at: pickField<string | null>(obj, 'resolved_at', 'resolvedAt', 'ResolvedAt') ?? null,
+    replies: mapTicketReplies(obj, ticketId),
+  };
+}
+
+/** @deprecated use mapSupportTicket */
+export function normalizeTicketResponse(raw: unknown): Record<string, unknown> {
+  const ticket = mapSupportTicket(raw);
+  return { ...ticket };
 }
 
 export function mapSubjectToCategory(subject: string): TicketCategory {

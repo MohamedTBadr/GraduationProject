@@ -16,9 +16,11 @@ import {
 } from '../../shared/types/api.interfaces';
 import {
   TicketSubmitterType,
-  normalizeTicketResponse,
   extractCategoryFromDescription,
   pickField,
+  mapSupportTicket,
+  mapTicketReply,
+  normalizeTicketStatus,
 } from '../../shared/utils/support-ticket.utils';
 
 export interface SubmittedTicketRecord {
@@ -41,7 +43,9 @@ export class SupportService {
 
   /** GET /admin/support/tickets/stats - Get ticket stats */
   getStats(): Observable<TicketStats> {
-    return this.http.get<TicketStats>(`${this.adminBaseUrl}/stats`);
+    return this.http.get<unknown>(`${this.adminBaseUrl}/stats`).pipe(
+      map((raw) => this.mapTicketStats(raw)),
+    );
   }
 
   /** GET /admin/support/tickets - List all tickets with filters */
@@ -65,52 +69,95 @@ export class SupportService {
   /** GET /admin/support/tickets/{ticket_id} - Get single ticket */
   getTicket(ticketId: string): Observable<SupportTicket> {
     return this.http.get<unknown>(`${this.adminBaseUrl}/${ticketId}`).pipe(
-      map((raw) => this.toSupportTicket(raw)),
+      map((raw) => mapSupportTicket(raw)),
     );
   }
 
   /** GET /support/tickets/{ticket_id} - Get own ticket */
   getMyTicket(ticketId: string): Observable<SupportTicket> {
     return this.http.get<unknown>(`${this.userTicketsUrl}/${ticketId}`).pipe(
-      map((raw) => this.toSupportTicket(raw)),
+      map((raw) => mapSupportTicket(raw)),
     );
   }
 
   /** POST /admin/support/tickets/{ticket_id}/reply - Reply to ticket */
   reply(ticketId: string, payload: ReplyTicketRequest): Observable<TicketReply> {
-    return this.http.post<TicketReply>(`${this.adminBaseUrl}/${ticketId}/reply`, payload);
+    return this.http.post<unknown>(`${this.adminBaseUrl}/${ticketId}/reply`, {
+      message: payload.message,
+      sendEmail: payload.sendEmail ?? true,
+      sendSms: payload.sendSms ?? false,
+    }).pipe(map((raw) => mapTicketReply(raw, ticketId)));
   }
 
   /** POST /admin/support/tickets/{ticket_id}/assign - Assign ticket to agent */
-  assign(ticketId: string, payload: AssignTicketRequest): Observable<any> {
-    return this.http.post<any>(`${this.adminBaseUrl}/${ticketId}/assign`, payload);
+  assign(ticketId: string, payload: AssignTicketRequest): Observable<{
+    status: SupportTicket['status'];
+    assigned_to: SupportTicket['assigned_to'];
+  }> {
+    return this.http.post<unknown>(`${this.adminBaseUrl}/${ticketId}/assign`, {
+      agentId: payload.agentId,
+      note: payload.note ?? null,
+    }).pipe(map((raw) => this.mapAssignResponse(raw)));
   }
 
   /** PATCH /admin/support/tickets/{ticket_id}/resolve - Mark ticket as resolved */
-  resolve(ticketId: string, payload: ResolveTicketRequest): Observable<any> {
-    return this.http.patch<any>(`${this.adminBaseUrl}/${ticketId}/resolve`, payload);
+  resolve(ticketId: string, payload: ResolveTicketRequest): Observable<{ resolved_at: string }> {
+    return this.http.patch<unknown>(`${this.adminBaseUrl}/${ticketId}/resolve`, {
+      resolutionNote: payload.resolutionNote,
+    }).pipe(map((raw) => ({
+      resolved_at: String(pickField<string>(raw as Record<string, unknown>, 'resolvedAt', 'ResolvedAt') ?? new Date().toISOString()),
+    })));
   }
 
-  /** POST /support/tickets/{ticketId}/escalate — user/vendor route (not under /admin) */
-  escalate(ticketId: string, payload: EscalateTicketRequest): Observable<any> {
-    return this.http.post<any>(`${this.userTicketsUrl}/${ticketId}/escalate`, payload);
+  /** POST /admin/support/tickets/{ticketId}/escalate — admin escalation */
+  adminEscalate(ticketId: string, payload: EscalateTicketRequest): Observable<unknown> {
+    return this.http.post<unknown>(`${this.adminBaseUrl}/${ticketId}/escalate`, {
+      reason: payload.reason,
+      escalateTo: payload.escalateTo,
+      notifyFinance: payload.notifyFinance ?? false,
+    });
+  }
+
+  /** POST /support/tickets/{ticketId}/escalate — user/vendor escalation */
+  escalate(ticketId: string, payload: EscalateTicketRequest): Observable<unknown> {
+    return this.http.post<unknown>(`${this.userTicketsUrl}/${ticketId}/escalate`, {
+      reason: payload.reason,
+      escalateTo: payload.escalateTo,
+      notifyFinance: payload.notifyFinance ?? false,
+    });
   }
 
   /** POST /support/tickets - Open a support ticket (Vendor, Customer) */
   openTicket(payload: CreateTicketRequest): Observable<SupportTicket> {
     return this.http.post<unknown>(this.userTicketsUrl, payload).pipe(
-      map((raw) => this.toSupportTicket(raw)),
+      map((raw) => mapSupportTicket(raw)),
     );
   }
 
   private buildTicketParams(filters: TicketFilters): HttpParams {
     let params = new HttpParams();
-    if (filters.status) params = params.set('status', filters.status);
+    if (filters.status) params = params.set('status', this.toApiStatus(filters.status));
     if (filters.priority) params = params.set('priority', filters.priority);
     if (filters.type) params = params.set('type', filters.type);
     if (filters.page) params = params.set('page', filters.page.toString());
     if (filters.limit) params = params.set('limit', filters.limit.toString());
     return params;
+  }
+
+  /** Backend enum serializes as InProgress → "inprogress" after ToLower(). */
+  private toApiStatus(status: TicketFilters['status']): string {
+    if (status === 'in_progress') return 'inprogress';
+    return status ?? 'open';
+  }
+
+  private mapTicketStats(raw: unknown): TicketStats {
+    const obj = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+    return {
+      critical: Number(pickField(obj, 'critical', 'Critical') ?? 0),
+      open: Number(pickField(obj, 'open', 'Open') ?? 0),
+      in_progress: Number(pickField(obj, 'in_progress', 'inProgress', 'InProgress') ?? 0),
+      resolution_rate: Number(pickField(obj, 'resolution_rate', 'resolutionRate', 'ResolutionRate') ?? 0),
+    };
   }
 
   private mapPagedTickets(raw: unknown): { total: number; page: number; limit: number; data: SupportTicket[] } {
@@ -120,24 +167,26 @@ export class SupportService {
       total: Number(pickField<number>(body, 'total', 'Total') ?? items.length),
       page: Number(pickField<number>(body, 'page', 'Page') ?? 1),
       limit: Number(pickField<number>(body, 'limit', 'Limit') ?? items.length),
-      data: items.map((item) => this.toSupportTicket(item)),
+      data: items.map((item) => mapSupportTicket(item)),
     };
   }
 
-  private toSupportTicket(raw: unknown): SupportTicket {
-    const normalized = normalizeTicketResponse(
-      raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {},
-    );
+  private mapAssignResponse(raw: unknown): {
+    status: SupportTicket['status'];
+    assigned_to: SupportTicket['assigned_to'];
+  } {
+    const obj = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+    const assignedRaw = pickField<Record<string, unknown>>(obj, 'assignedTo', 'AssignedTo');
+    const assigned_to = assignedRaw
+      ? {
+          agent_id: String(pickField(assignedRaw, 'agentId', 'AgentId') ?? ''),
+          name: String(pickField(assignedRaw, 'name', 'Name') ?? ''),
+        }
+      : null;
+
     return {
-      ticket_id: String(normalized['ticket_id'] ?? ''),
-      title: String(normalized['title'] ?? ''),
-      from: String(normalized['from'] ?? ''),
-      type: (normalized['type'] as SupportTicket['type']) || 'Client',
-      priority: (normalized['priority'] as SupportTicket['priority']) || 'medium',
-      status: (normalized['status'] as SupportTicket['status']) || 'open',
-      opened_at: String(normalized['opened_at'] ?? new Date().toISOString()),
-      description: String(normalized['description'] ?? ''),
-      booking_ref: (normalized['booking_ref'] as string | null) ?? null,
+      status: normalizeTicketStatus(pickField(obj, 'status', 'Status')),
+      assigned_to,
     };
   }
 

@@ -52,16 +52,13 @@
       <div class="ad-card p-6">
         <h3 class="text-lg font-semibold mb-4">Replies</h3>
         <div class="space-y-4">
-          <div *ngFor="let reply of ticket.replies" class="p-4 rounded-lg border" [ngClass]="{
-            'bg-[rgba(59,130,246,0.05)] border-[rgba(59,130,246,0.2)] ml-8': reply.replied_by === 'Super Admin',
-            'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.1)] mr-8': reply.replied_by !== 'Super Admin'
-          }">
+          <div *ngFor="let reply of ticket.replies" class="p-4 rounded-lg border bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.1)]">
             <div class="flex justify-between items-center mb-2">
               <span class="font-bold text-sm">{{reply.replied_by}}</span>
               <span class="text-xs text-[rgba(255,255,255,0.5)]">{{reply.replied_at | date:'short'}}</span>
             </div>
             <p class="text-sm">{{reply.message}}</p>
-            <div class="mt-2 flex gap-2">
+            <div class="mt-2 flex gap-2" *ngIf="reply.notified_via?.length">
               <span *ngFor="let via of reply.notified_via" class="text-[10px] uppercase tracking-wider bg-[rgba(255,255,255,0.1)] px-2 py-0.5 rounded">
                 {{via}}
               </span>
@@ -112,13 +109,14 @@
           </div>
           
           <div class="space-y-3">
-            <select [(ngModel)]="agentId" class="ad-input w-full">
-              <option value="">Select Agent...</option>
-              <option value="AGT-012">Sara Hassan</option>
-              <option value="AGT-005">Ahmed Ali</option>
-            </select>
+            <input
+              type="text"
+              [(ngModel)]="agentId"
+              class="ad-input w-full"
+              placeholder="Agent ID (e.g. AGT-001)"
+              autocomplete="off">
             <textarea [(ngModel)]="assignNote" placeholder="Internal assignment note..." class="ad-input w-full text-sm" rows="2"></textarea>
-            <button (click)="onAssign()" [disabled]="!agentId" class="ad-btn ad-btn-ghost w-full">Assign Ticket</button>
+            <button (click)="onAssign()" [disabled]="!agentId.trim()" class="ad-btn ad-btn-ghost w-full">Assign Ticket</button>
           </div>
         </div>
 
