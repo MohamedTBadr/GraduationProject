@@ -5,6 +5,7 @@ using Infrastructure;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
+using QuestPDF.Infrastructure;
 using Serilog;
 using Web.Api;
 using Web.Api.Middlewares;
@@ -15,6 +16,8 @@ namespace Web
     {
         public static async Task Main(string[] args)
         {
+            QuestPDF.Settings.License = LicenseType.Community;
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers()
