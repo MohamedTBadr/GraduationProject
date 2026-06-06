@@ -1,0 +1,51 @@
+<div class="sth-page">
+  <div class="sth-header">
+    <div>
+      <h1 class="sth-title">{{ pageTitle }}</h1>
+      <p class="sth-sub">{{ pageSubtitle }}</p>
+    </div>
+    <button type="button" class="sth-btn-primary" (click)="openNewTicket()">
+      <i class="bi bi-headset"></i> Open Support Ticket
+    </button>
+  </div>
+
+  <div class="sth-note">
+    <i class="bi bi-info-circle"></i>
+    Tickets you submit here are saved on this device until the backend adds a “my tickets” API.
+    Our team will respond via email for urgent issues.
+  </div>
+
+  <div class="sth-list" *ngIf="tickets.length > 0; else emptyState">
+    <div class="sth-card" *ngFor="let t of tickets">
+      <div class="sth-card-top">
+        <span class="sth-id">{{ t.ticket_id }}</span>
+        <span class="sth-pill" [class]="'sth-pill-' + t.priority">{{ t.priority }}</span>
+      </div>
+      <div class="sth-card-title">{{ t.title }}</div>
+      <div class="sth-card-meta">
+        <span>{{ t.category }}</span>
+        <span>·</span>
+        <span>{{ t.opened_at | date:'medium' }}</span>
+        <span *ngIf="t.booking_ref">· Ref {{ t.booking_ref }}</span>
+      </div>
+      <div class="sth-card-status">
+        <i class="bi bi-circle-fill"></i> {{ t.status | titlecase }}
+      </div>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="sth-empty">
+      <i class="bi bi-inbox"></i>
+      <p>{{ emptyHint }}</p>
+    </div>
+  </ng-template>
+</div>
+
+<app-support-ticket-modal
+  [isOpen]="isModalOpen"
+  [submitterType]="submitterType"
+  [bookingRef]="selectedBookingRef"
+  (close)="closeModal()"
+  (submitted)="onTicketSubmitted()">
+</app-support-ticket-modal>

@@ -6,6 +6,16 @@ import { VendorService } from '../../../../core/services/vendor.service';
 import { VendorTypeService } from '../../../../core/services/vendor-type.service';
 import { VendorType } from '../../../../core/models/taxonomy.models';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import {
+  EGYPT_CITY_OPTIONS,
+  EGYPT_GOVERNORATE_OPTIONS,
+  getLocationByCity
+} from '../../../../shared/constants/egypt-locations';
+import {
+  addressToServiceArea,
+  appendServiceAreasToFormData,
+  normalizeAddressFields
+} from '../../../../shared/utils/location.utils';
 
 @Component({
   selector: 'app-vendor-create',
@@ -19,6 +29,8 @@ export class VendorCreateComponent implements OnInit {
   vendorTypes: VendorType[] = [];
   loading = false;
   submitting = false;
+  readonly cityOptions = EGYPT_CITY_OPTIONS;
+  readonly governorateOptions = EGYPT_GOVERNORATE_OPTIONS;
 
   constructor(
     private fb: FormBuilder,
@@ -61,6 +73,13 @@ export class VendorCreateComponent implements OnInit {
     });
   }
 
+  onCityChange(city: string): void {
+    const loc = getLocationByCity(city);
+    if (loc) {
+      this.form.get('state')?.setValue(loc.governorate);
+    }
+  }
+
   onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -78,11 +97,14 @@ export class VendorCreateComponent implements OnInit {
       }
     });
 
-    // Append Address fields
+    const { city, state } = normalizeAddressFields(val.city || '', val.state || '');
     formData.append('Address.Street', val.street || '');
-    formData.append('Address.City', val.city || '');
-    formData.append('Address.State', val.state || '');
+    formData.append('Address.City', city);
+    formData.append('Address.State', state);
     formData.append('Address.PostalCode', val.postalCode || '');
+    appendServiceAreasToFormData(formData, [
+      addressToServiceArea({ city, state, street: val.street })
+    ]);
 
     this.vendorService.create(formData).subscribe({
       next: (res) => {

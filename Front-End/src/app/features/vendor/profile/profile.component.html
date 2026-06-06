@@ -10,12 +10,37 @@
     </div>
     <button class="vd-btn vd-btn-ghost" [routerLink]="['/vendor', vendor.id]">View Public Profile →</button>
   </div>
-  <div class="vd-cover"><div class="vd-cover-avatar"></div><div class="absolute top-[11px] right-[11px]"><button class="vd-btn vd-btn-ghost vd-btn-sm bg-[rgba(255,255,255,.1)] text-[white] border-[rgba(255,255,255,.2)]">Change Cover</button></div></div>
+
+  <div class="vd-cover" [style.backgroundImage]="displayProfilePicture ? 'url(' + displayProfilePicture + ')' : ''">
+    <div class="vd-cover-avatar" *ngIf="displayProfilePicture">
+      <img [src]="displayProfilePicture" alt="Profile picture" />
+    </div>
+  </div>
+
   <div class="vd-tab-bar">
     <button class="vd-tab active">Business Info</button>
   </div>
   <div class="vd-tab-pane active" id="prf-info">
     <div class="vd-card">
+      <div class="vd-form-section">
+        <div class="vd-form-section-lbl">Profile Picture</div>
+        <div class="vd-profile-photo-row">
+          <div class="vd-profile-photo-preview">
+            <img *ngIf="displayProfilePicture; else profilePlaceholder" [src]="displayProfilePicture" alt="Profile preview" />
+            <ng-template #profilePlaceholder>
+              <i class="bi bi-person"></i>
+            </ng-template>
+          </div>
+          <div>
+            <input type="file" #avatarInput class="hidden" accept="image/jpeg,image/png,image/webp" (change)="onProfilePictureSelected($event)" />
+            <button type="button" class="vd-btn vd-btn-ghost vd-btn-sm" (click)="avatarInput.click()">
+              {{ displayProfilePicture ? 'Change Photo' : 'Upload Photo' }}
+            </button>
+            <p class="text-[#94a3b8] text-[.8rem] mt-[6px]">JPG, PNG, or WebP up to {{ maxProfileMb }}MB.</p>
+          </div>
+        </div>
+      </div>
+
       <div class="vd-form-row">
         <div class="vd-form-group">
           <label>Business Name</label>
@@ -30,11 +55,43 @@
         <label>Description (About)</label>
         <textarea [(ngModel)]="vendor.about" rows="4"></textarea>
       </div>
-      <div class="vd-form-row">
+      <div class="vd-form-section">
+        <div class="vd-form-section-lbl">Business Address</div>
         <div class="vd-form-group">
-          <label>Main Location</label>
-          <input type="text" [(ngModel)]="vendor.location" />
+          <label>Street Address</label>
+          <input type="text" [(ngModel)]="addressStreet" placeholder="Building, street..." />
         </div>
+        <div class="vd-form-row">
+          <div class="vd-form-group">
+            <label>City</label>
+            <select [(ngModel)]="addressCity" (ngModelChange)="onCityChange($event)">
+              <option value="" disabled>Select city</option>
+              <option *ngFor="let c of cityOptions" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+          <div class="vd-form-group">
+            <label>Governorate</label>
+            <select [(ngModel)]="addressState">
+              <option value="" disabled>Select governorate</option>
+              <option *ngFor="let g of governorateOptions" [value]="g">{{ g }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="vd-form-section">
+        <div class="vd-form-section-lbl">Service Coverage</div>
+        <p class="text-[#94a3b8] text-[.85rem] mb-[10px]">Cities where you provide services (used in Explore filters).</p>
+        <div class="flex flex-wrap gap-[8px]">
+          <button type="button" *ngFor="let c of cityOptions"
+                  class="vd-btn vd-btn-sm"
+                  [class.vd-btn-gold]="isCoverageSelected(c)"
+                  [class.vd-btn-ghost]="!isCoverageSelected(c)"
+                  (click)="toggleCoverageCity(c)">
+            {{ c }}
+          </button>
+        </div>
+      </div>
+      <div class="vd-form-row">
         <div class="vd-form-group">
           <label>Status</label>
           <input class="bg-[#f1f5f9] font-bold cursor-not-allowed" [value]="vendor.isApproved ? 'Approved' : 'Pending Approval'" disabled [ngClass]="vendor.isApproved ? 'text-[#16a34a]' : 'text-[#d97706]'" />
@@ -48,7 +105,7 @@
       </div>
       <div class="vd-submit-bar">
         <button class="vd-btn vd-btn-ghost" (click)="loadProfile()">Discard</button>
-        <button class="vd-btn vd-btn-gold" (click)="saveChanges()">Save Changes</button>
+        <button class="vd-btn vd-btn-gold" (click)="saveChanges()" [disabled]="saving">{{ saving ? 'Saving...' : 'Save Changes' }}</button>
       </div>
     </div>
   </div>

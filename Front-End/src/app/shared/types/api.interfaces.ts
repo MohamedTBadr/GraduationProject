@@ -142,6 +142,7 @@ export interface ApiVendor {
   about?: string;
   documentUrl?: string;
   profilePictureUrl?: string;
+  address?: AddressDto;
   serviceAreas?: ServiceAreaDTO[];
 }
 
@@ -158,6 +159,8 @@ export interface VendorRatingDto {
 
 export interface VendorDetails extends ApiVendor {
   vendorRatings: VendorRatingDto[];
+  /** Services embedded in GET /Vendor/{id} (includes ServiceImages before separate product fetch). */
+  embeddedServices?: any[];
   startingPrice?: number;
   yearsInBusiness?: number;
 }
@@ -205,7 +208,10 @@ export interface UpdateVendorRequest {
   yearsInBusiness?: number;
   description?: string;
   portfolioLink?: string;
+  profilePicture?: File;
+  document?: File;
   address?: AddressDto;
+  serviceAreas?: ServiceAreaDTO[];
 }
 
 // ─────────────────────────────────────────────

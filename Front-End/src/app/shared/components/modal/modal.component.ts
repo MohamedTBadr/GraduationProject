@@ -11,6 +11,16 @@ import { LoginComponent } from '../../../features/auth/login/login.component';
 import { RegisterComponent } from '../../../features/auth/register/register.component';
 import { CreateEventItemDto, CreateEventDto, EventResponseDto } from '../../types/api.interfaces';
 import { EventType } from '../../../core/models/taxonomy.models';
+import {
+  EGYPT_CITY_OPTIONS,
+  EGYPT_GOVERNORATE_OPTIONS,
+  getLocationByCity
+} from '../../constants/egypt-locations';
+import {
+  normalizeAddressFields,
+  serviceAreasToLabel
+} from '../../utils/location.utils';
+import { getProductImageUrls } from '../../utils/image.utils';
 
 @Component({
   selector: 'app-modal',
@@ -43,7 +53,9 @@ export class ModalComponent implements OnInit {
     eventDate: '',
     guests: null,
     budget: null,
-    location: '',
+    street: '',
+    city: '',
+    state: '',
     notes: ''
   };
   eventTypes: EventType[] = [];
@@ -98,7 +110,7 @@ export class ModalComponent implements OnInit {
   }
 
   submitNewEventAndAdd() {
-    if (!this.eventData.title || !this.eventData.eventTypeId || !this.eventData.eventDate) {
+    if (!this.eventData.title || !this.eventData.eventTypeId || !this.eventData.eventDate || !this.eventData.city) {
       this.toastService.show('Please fill required fields', 'error');
       return;
     }
@@ -112,7 +124,16 @@ export class ModalComponent implements OnInit {
       totalBudget: Number(this.eventData.budget) || 0,
       guestCount: Number(this.eventData.guests) || 0,
       notes: this.eventData.notes,
-      location: this.eventData.location ? { street: 'Unknown', city: this.eventData.location, state: this.eventData.location } : undefined
+      location: this.eventData.city
+        ? (() => {
+            const { city, state } = normalizeAddressFields(this.eventData.city, this.eventData.state);
+            return {
+              street: this.eventData.street || '',
+              city,
+              state
+            };
+          })()
+        : undefined
     };
 
     this.eventService.create(createDto).subscribe({
@@ -180,18 +201,7 @@ export class ModalComponent implements OnInit {
 
   // ── Image Slider Helpers ──────────────────────────────
   getModalImages(product: any): string[] {
-    if (!product) return [];
-    const images: string[] = [];
-    // Support imageUrls array first
-    if (product.imageUrls && Array.isArray(product.imageUrls) && product.imageUrls.length > 0) {
-      return product.imageUrls.filter((u: string) => !!u);
-    }
-    // Fallback: imageUrl can be comma-separated URLs
-    if (product.imageUrl) {
-      const parts = product.imageUrl.split(',').map((s: string) => s.trim()).filter((s: string) => !!s);
-      if (parts.length > 0) return parts;
-    }
-    return [];
+    return getProductImageUrls(product);
   }
 
   prevSlide(images: string[]) {
@@ -239,14 +249,20 @@ export class ModalComponent implements OnInit {
     this.router.navigate(['/vendor', vendorId]);
   }
 
-  // Get first service area location string
-  getLocation(product: any): string {
-    if (!product) return '';
-    if (product.serviceAreas && product.serviceAreas.length > 0) {
-      const area = product.serviceAreas[0];
-      return [area.region, area.city].filter(Boolean).join(', ');
+  readonly cityOptions = EGYPT_CITY_OPTIONS;
+  readonly governorateOptions = EGYPT_GOVERNORATE_OPTIONS;
+
+  onEventCityChange(city: string): void {
+    const loc = getLocationByCity(city);
+    if (loc) {
+      this.eventData.state = loc.governorate;
     }
-    return '';
+  }
+
+  // Get service area location label
+  getLocation(product: any): string {
+    if (!product?.serviceAreas?.length) return '';
+    return serviceAreasToLabel(product.serviceAreas);
   }
 
   // Get star rating as array for rendering

@@ -21,28 +21,38 @@
     <section class="vp-hero">
       <div class="vp-hero-stage">
 
-        <!-- Main image -->
-        <div class="vp-hero-img"
-             [style.backgroundImage]="carouselImages.length ? 'url(' + carouselImages[activeImageIndex] + ')' : ''">
-          <div class="vp-hero-placeholder" *ngIf="!carouselImages.length">
-            <div class="vp-placeholder-avatar">{{ (vendor.name || 'U').charAt(0) }}</div>
-            <p class="vp-placeholder-vendor-name">{{ vendor.name }}</p>
-            <span class="vp-placeholder-tag">{{ vendor.vendorTypeName || 'Vendor' }}</span>
-          </div>
+        <!-- Main image carousel -->
+        <div class="vp-hero-img">
+          <ng-container *ngIf="carouselImages.length; else heroPlaceholder">
+            <img *ngFor="let img of carouselImages; let i = index"
+                 class="vp-hero-slide"
+                 [class.active]="i === activeImageIndex"
+                 [src]="img"
+                 [alt]="vendor.name + ' photo ' + (i + 1)"
+                 loading="lazy" />
+          </ng-container>
+          <ng-template #heroPlaceholder>
+            <div class="vp-hero-placeholder">
+              <div class="vp-placeholder-avatar">{{ (vendor.name || 'U').charAt(0) }}</div>
+              <p class="vp-placeholder-vendor-name">{{ vendor.name }}</p>
+              <span class="vp-placeholder-tag">{{ vendor.vendorTypeName || 'Vendor' }}</span>
+            </div>
+          </ng-template>
 
           <!-- Arrows -->
-          <button class="vp-arr vp-arr-prev" (click)="prevImage()" *ngIf="carouselImages.length > 1" aria-label="Previous">
+          <button type="button" class="vp-arr vp-arr-prev" (click)="prevImage(); $event.stopPropagation()" *ngIf="carouselImages.length > 1" aria-label="Previous">
             <i class="bi bi-chevron-left"></i>
           </button>
-          <button class="vp-arr vp-arr-next" (click)="nextImage()" *ngIf="carouselImages.length > 1" aria-label="Next">
+          <button type="button" class="vp-arr vp-arr-next" (click)="nextImage(); $event.stopPropagation()" *ngIf="carouselImages.length > 1" aria-label="Next">
             <i class="bi bi-chevron-right"></i>
           </button>
 
           <!-- Dots -->
           <div class="vp-dots" *ngIf="carouselImages.length > 1">
-            <span class="vp-dot" *ngFor="let img of carouselImages; let i = index"
+            <button type="button" class="vp-dot" *ngFor="let img of carouselImages; let i = index"
                   [class.active]="i === activeImageIndex"
-                  (click)="activeImageIndex = i"></span>
+                  (click)="goToImage(i)"
+                  [attr.aria-label]="'Show image ' + (i + 1)"></button>
           </div>
 
           <!-- Vendor info overlay -->
@@ -54,8 +64,8 @@
                   <span class="vp-rating-badge" *ngIf="vendor.rating">
                     <i class="bi bi-star-fill"></i> {{ vendor.rating }}
                   </span>
-                  <span class="vp-meta-chip" *ngIf="vendor.location">
-                    <i class="bi bi-geo-alt-fill"></i> {{ vendor.location }}
+                  <span class="vp-meta-chip" *ngIf="locationLabel">
+                    <i class="bi bi-geo-alt-fill"></i> {{ locationLabel }}
                   </span>
                   <span class="vp-meta-chip vp-meta-type">
                     <i class="bi bi-tag-fill"></i> {{ vendor.vendorTypeName || 'Vendor' }}
@@ -72,10 +82,11 @@
 
         <!-- Thumbnails strip -->
         <div class="vp-thumbs" *ngIf="carouselImages.length > 1">
-          <button class="vp-thumb" *ngFor="let img of carouselImages.slice(0, 5); let i = index"
+          <button type="button" class="vp-thumb" *ngFor="let img of carouselImages; let i = index"
                   [class.active]="i === activeImageIndex"
-                  (click)="activeImageIndex = i"
-                  [style.backgroundImage]="'url(' + img + ')'">
+                  (click)="goToImage(i)"
+                  [style.backgroundImage]="heroBackground(img)"
+                  [attr.aria-label]="'Thumbnail ' + (i + 1)">
           </button>
         </div>
       </div>
@@ -248,9 +259,9 @@
                 <i class="bi bi-telephone"></i>
                 <a [href]="'tel:' + vendor.phone">{{ vendor.phone }}</a>
               </div>
-              <div class="vp-contact-row" *ngIf="vendor.location">
+              <div class="vp-contact-row" *ngIf="locationLabel">
                 <i class="bi bi-geo-alt"></i>
-                <span>{{ vendor.location }}</span>
+                <span>{{ locationLabel }}</span>
               </div>
               <div class="vp-contact-note">
                 <i class="bi bi-clock"></i>

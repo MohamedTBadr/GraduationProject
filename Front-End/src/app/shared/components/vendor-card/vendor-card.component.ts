@@ -2,6 +2,7 @@ import { Component, Input, inject } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiVendor } from '../../types/api.interfaces';
+import { formatVendorLocation } from '../../utils/location.utils';
 import { FavoriteService } from '../../services/favorite.service';
 import { CompareService } from '../../services/compare.service';
 import { ToastService } from '../toast/toast.service';
@@ -34,6 +35,10 @@ export class VendorCardComponent {
     this.favoriteService.toggleFavorite(this.vendor.id);
     const isFav = this.isFavorite();
     this.toastService.show(isFav ? 'Saved to favorites!' : 'Removed from favorites', isFav ? 'success' : 'info');
+  }
+
+  get locationLabel(): string {
+    return formatVendorLocation(this.vendor);
   }
 
   onToggleCompare(event: Event) {

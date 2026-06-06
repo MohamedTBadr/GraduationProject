@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { ProductService } from '../../../core/services/product.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
+import { getProductImageUrls } from '../../../shared/utils/image.utils';
 
 interface PortfolioImage {
   url: string;
@@ -34,7 +35,7 @@ export class PortfolioComponent implements OnInit {
     this.productService.getByVendor(this.vendorId).subscribe({
       next: services => {
         this.images = services.flatMap(s =>
-          (s.imageUrls ?? (s.imageUrl ? [s.imageUrl] : [])).map(url => ({
+          getProductImageUrls(s).map(url => ({
             url,
             serviceName: s.name
           }))

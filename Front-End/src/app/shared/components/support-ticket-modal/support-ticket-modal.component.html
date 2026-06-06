@@ -1,0 +1,62 @@
+<div class="stm-overlay" [class.open]="isOpen">
+  <div class="stm-modal">
+    <button type="button" class="stm-close" (click)="closeModal()" aria-label="Close">✕</button>
+    <div class="stm-title">{{ modalTitle }}</div>
+    <div class="stm-sub">{{ modalSubtitle }}</div>
+
+    <div class="stm-field" *ngIf="showBookingRef">
+      <label>Booking Reference</label>
+      <input type="text" [value]="bookingRef" readonly class="stm-input stm-readonly">
+    </div>
+
+    <div class="stm-field">
+      <label>Issue Title <span class="stm-required">*</span></label>
+      <input
+        type="text"
+        class="stm-input"
+        placeholder="Brief summary of the issue"
+        [(ngModel)]="title"
+        required>
+    </div>
+
+    <div class="stm-row">
+      <div class="stm-field">
+        <label>Category <span class="stm-required">*</span></label>
+        <select class="stm-input" [(ngModel)]="category">
+          <option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</option>
+        </select>
+      </div>
+
+      <div class="stm-field">
+        <label>Priority <span class="stm-required">*</span></label>
+        <select class="stm-input" [(ngModel)]="priority">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="stm-field">
+      <label>Description <span class="stm-required">*</span></label>
+      <textarea
+        class="stm-input stm-textarea"
+        rows="4"
+        placeholder="Provide details so we can help you faster..."
+        [(ngModel)]="description"
+        required></textarea>
+    </div>
+
+    <div class="stm-actions">
+      <button type="button" class="stm-btn stm-btn-ghost" (click)="closeModal()">Cancel</button>
+      <button
+        type="button"
+        class="stm-btn stm-btn-submit"
+        (click)="submitTicket()"
+        [disabled]="isSubmitting || !title.trim() || !description.trim()">
+        {{ isSubmitting ? 'Submitting...' : 'Submit Ticket' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -17,9 +17,10 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 import { Subject, forkJoin, of, takeUntil } from 'rxjs';
 import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
 import { ServiceAreaDTO } from '../../../shared/types/api.interfaces';
+import { EGYPT_CITY_OPTIONS } from '../../../shared/constants/egypt-locations';
+import { matchesLocation } from '../../../shared/utils/location.utils';
+import { getProductCoverImage } from '../../../shared/utils/image.utils';
 import * as L from 'leaflet';
-
-const EGYPT_CITIES = ['Cairo', 'New Cairo', 'Giza', 'Alexandria', 'North Coast', 'Mansoura'];
 const MAX_PRICE_ANY = 100000;
 
 @Component({
@@ -47,7 +48,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   vendorTypes: VendorType[] = [];
   serviceCategories: ServiceType[] = [];
   eventTypes: EventType[] = [];
-  readonly cities = EGYPT_CITIES;
+  readonly cities = EGYPT_CITY_OPTIONS;
   readonly priceOptions = [5000, 15000, 30000, 50000, MAX_PRICE_ANY];
   readonly ratingOptions = [3, 4, 4.5, 4.8];
 
@@ -78,6 +79,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
 
   wishlist: string[] = [];
   private vendorRatingsById = new Map<string, number>();
+  private vendorServiceAreasById = new Map<string, ServiceAreaDTO[]>();
 
   compareService = inject(CompareService);
 
@@ -176,6 +178,12 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.selectedEventTypeId) this.activeTab = 'services';
     }
 
+    const cityParam = params['city'] || '';
+    if (cityParam) {
+      this.selectedCity = cityParam;
+      this.selectedLocation = cityParam;
+    }
+
     const openServiceId = params['openServiceId'];
     if (openServiceId) {
       this.productService.getById(openServiceId).subscribe({
@@ -231,25 +239,33 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       || (!!this.selectedEventTypeId && this.maxPrice < MAX_PRICE_ANY);
   }
 
-  private matchesCity(areas: ServiceAreaDTO[] | undefined, city: string): boolean {
-    if (!city) return true;
-    const needle = city.trim().toLowerCase();
-    if (!areas?.length) return false;
-    return areas.some((area) => {
-      const c = (area.city ?? '').trim().toLowerCase();
-      const r = (area.region ?? '').trim().toLowerCase();
-      return c === needle || r === needle || c.includes(needle) || r.includes(needle);
-    });
+  private getServiceAreasForProduct(svc: ApiProduct): ServiceAreaDTO[] | undefined {
+    if (svc.serviceAreas?.length) return svc.serviceAreas;
+    if (svc.vendorId && this.vendorServiceAreasById.has(svc.vendorId)) {
+      const areas = this.vendorServiceAreasById.get(svc.vendorId)!;
+      return areas.length ? areas : undefined;
+    }
+    return svc.serviceAreas;
   }
 
-  private loadVendorRatingsForServices() {
-    if (!this.minRating && this.sortOption !== 'rating') {
+  private loadVendorCacheForServices() {
+    const needsVendorData =
+      !!this.selectedCity ||
+      this.minRating > 0 ||
+      this.sortOption === 'rating';
+
+    if (!needsVendorData) {
       return of(null);
     }
+
     return this.vendorService.getAll({ pageIndex: 1, pageSize: 500 }).pipe(
       tap((vendors) => {
         this.vendorRatingsById.clear();
-        vendors.forEach((v) => this.vendorRatingsById.set(v.id, v.rating ?? 0));
+        this.vendorServiceAreasById.clear();
+        vendors.forEach((v) => {
+          this.vendorRatingsById.set(v.id, v.rating ?? 0);
+          this.vendorServiceAreasById.set(v.id, v.serviceAreas ?? []);
+        });
       })
     );
   }
@@ -265,7 +281,9 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   private applyServiceFilters(items: ApiProduct[]): ApiProduct[] {
     let result = items;
     if (this.selectedCity) {
-      result = result.filter((s) => this.matchesCity(s.serviceAreas, this.selectedCity));
+      result = result.filter((s) =>
+        matchesLocation(this.getServiceAreasForProduct(s), this.selectedCity)
+      );
     }
     if (this.maxPrice < MAX_PRICE_ANY) {
       result = result.filter((s) => (s.price ?? 0) <= this.maxPrice);
@@ -301,7 +319,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
         if (seq !== this.fetchSeq) return;
         let items = result.items;
         if (this.selectedLocation) {
-          items = items.filter((v) => this.matchesCity(v.serviceAreas, this.selectedLocation));
+          items = items.filter((v) => matchesLocation(v.serviceAreas, this.selectedLocation));
         }
         if (this.minRating > 0) {
           items = items.filter((v) => (v.rating || 0) >= this.minRating);
@@ -354,7 +372,7 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       : this.productService.getAllPaged(baseReq);
 
     forkJoin({
-      ratings: this.loadVendorRatingsForServices(),
+      ratings: this.loadVendorCacheForServices(),
       result: request$
     }).subscribe({
       next: ({ result }) => {
@@ -481,8 +499,14 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
       category: null,
       serviceCategory: null,
       eventType: null,
-      eventTypeId: null
+      eventTypeId: null,
+      city: null
     };
+
+    const activeCity = this.activeTab === 'vendors' ? this.selectedLocation : this.selectedCity;
+    if (activeCity) {
+      queryParams['city'] = activeCity;
+    }
 
     if (this.activeTab === 'vendors' && this.selectedVendorTypeId) {
       queryParams['type'] = this.vendorTypeName(this.selectedVendorTypeId);
@@ -642,6 +666,10 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   bookService(svc: ApiProduct) {
     this.closePreview();
     this.modalService.open('service-detail', svc);
+  }
+
+  getServiceCover(svc: ApiProduct): string | null {
+    return getProductCoverImage(svc);
   }
 
   private getPreviewImages(svc: ApiProduct): string[] {

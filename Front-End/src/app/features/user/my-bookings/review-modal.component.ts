@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReviewService } from '../../../core/services/review.service';
+import { FileService } from '../../../core/services/file.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 
 @Component({
@@ -38,7 +39,9 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 
         <div class="vd-form-group mt-[20px]">
           <label class="mb-[8px]">Upload Event Photo (Optional)</label>
-          <input type="file" class="w-[100%] text-[0.9rem]" (change)="onFileSelected($event)">
+          <input type="file" class="w-[100%] text-[0.9rem]" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" [disabled]="uploadingPhoto">
+          <div class="text-[0.8rem] text-[#64748b] mt-[6px]" *ngIf="uploadingPhoto">Uploading photo…</div>
+          <img *ngIf="photoPreviewUrl" [src]="photoPreviewUrl" alt="Review photo preview" class="mt-[8px] max-h-[120px] rounded-[8px] object-cover">
         </div>
 
         <div class="vd-submit-bar pt-[20px] mt-[24px] justify-center gap-[14px] [border-top:1px_solid_var(--lgray)]">
@@ -46,7 +49,7 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
           <button class="vd-btn py-[10px] px-[24px] rounded-[50px]" 
                   style="background-color: #eba834; color: white;" 
                   (click)="submitReview()" 
-                  [disabled]="rating === 0 || !reviewText.trim()">
+                  [disabled]="rating === 0 || !reviewText.trim() || uploadingPhoto">
             Submit Review
           </button>
         </div>
@@ -89,41 +92,88 @@ export class ReviewModalComponent {
 
   rating = 0;
   reviewText = '';
-  photoUrl = ''; // Mock photo handling
+  photoUrl = '';
+  photoPreviewUrl = '';
+  uploadingPhoto = false;
+  selectedPhoto: File | null = null;
 
-  constructor(private reviewService: ReviewService, private toastService: ToastService) {}
+  constructor(
+    private reviewService: ReviewService,
+    private fileService: FileService,
+    private toastService: ToastService
+  ) {}
 
-  onFileSelected(event: any) {
-    // File upload to storage not yet implemented; photoUrl stays empty
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/') && !/\.(jpe?g|png|webp)$/i.test(file.name)) {
+      this.toastService.show('Photo must be JPG, PNG, or WebP', 'error');
+      input.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.toastService.show('Photo must be under 5MB', 'error');
+      input.value = '';
+      return;
+    }
+    this.selectedPhoto = file;
     this.photoUrl = '';
+    const reader = new FileReader();
+    reader.onload = () => { this.photoPreviewUrl = reader.result as string; };
+    reader.readAsDataURL(file);
   }
 
   submitReview() {
     if (this.rating === 0 || !this.reviewText.trim()) return;
+    if (this.uploadingPhoto) return;
 
-    this.reviewService.submitReview({
+    const submit = (photoUrl?: string) => {
+      this.reviewService.submitReview({
       userId: this.userId,
       serviceId: this.serviceId,
       rating: this.rating,
       review: this.reviewText,
-      photoUrl: this.photoUrl || undefined
-    }).subscribe({
-      next: () => {
-        this.toastService.show('Review submitted successfully!', 'success');
-        this.closeModal();
-      },
-      error: (err: any) => {
-        console.error('Error submitting review', err);
-        const msg = err?.error?.detail || err?.error?.message || 'Failed to submit review. Please try again.';
-        this.toastService.show(msg, 'error');
-      }
-    });
+        photoUrl
+      }).subscribe({
+        next: () => {
+          this.toastService.show('Review submitted successfully!', 'success');
+          this.closeModal();
+        },
+        error: (err: any) => {
+          console.error('Error submitting review', err);
+          const msg = err?.error?.detail || err?.error?.message || 'Failed to submit review. Please try again.';
+          this.toastService.show(msg, 'error');
+        }
+      });
+    };
+
+    if (this.selectedPhoto) {
+      this.uploadingPhoto = true;
+      this.fileService.upload(this.selectedPhoto).subscribe({
+        next: (res) => {
+          this.uploadingPhoto = false;
+          this.photoUrl = res.url || '';
+          submit(this.photoUrl || undefined);
+        },
+        error: () => {
+          this.uploadingPhoto = false;
+          this.toastService.show('Failed to upload photo. Submit without photo or try again.', 'error');
+        }
+      });
+      return;
+    }
+
+    submit(undefined);
   }
 
   closeModal() {
     this.rating = 0;
     this.reviewText = '';
     this.photoUrl = '';
+    this.photoPreviewUrl = '';
+    this.selectedPhoto = null;
+    this.uploadingPhoto = false;
     this.close.emit();
   }
 }

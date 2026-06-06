@@ -18,6 +18,7 @@ import {
   AiEventPlanResponse,
   EventCollaboratorDto
 } from '../../shared/types/api.interfaces';
+import { normalizeAddressDto } from '../../shared/utils/location.utils';
 
 @Injectable({ providedIn: 'root' })
 export class EventService {
@@ -126,6 +127,13 @@ export class EventService {
           guestCount: Number(this.pickField(b, 'guestCount', 'GuestCount') ?? 0),
           notes: this.pickField(b, 'notes', 'Notes'),
           eventStatus: String(this.pickField(b, 'eventStatus', 'EventStatus') ?? 'Pending'),
+          location: normalizeAddressDto(
+            b.location ?? b.Location ?? {
+              street: this.pickField(b, 'eventStreet', 'EventStreet', 'street', 'Street'),
+              city: this.pickField(b, 'eventCity', 'EventCity', 'city', 'City'),
+              state: this.pickField(b, 'eventState', 'EventState', 'state', 'State')
+            }
+          ),
           eventItems: []
         });
       }
@@ -261,7 +269,7 @@ export class EventService {
       cancellationReason: this.pickField(raw, 'cancellationReason', 'CancellationReason'),
       additionalNotes: this.pickField(raw, 'additionalNotes', 'AdditionalNotes'),
       cancelledAt: this.pickField(raw, 'cancelledAt', 'CancelledAt'),
-      location: raw.location ?? raw.Location,
+      location: normalizeAddressDto(raw.location ?? raw.Location),
       eventItems: (Array.isArray(eventItems) ? eventItems : []).map((item: any) => ({
         id: this.normalizeEventId(this.pickField(item, 'id', 'Id')),
         eventId: this.normalizeEventId(this.pickField(item, 'eventId', 'EventId')),

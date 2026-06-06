@@ -3,6 +3,8 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CompareService } from '../../../shared/services/compare.service';
 import { ApiVendor, ApiProduct } from '../../../shared/types/api.interfaces';
+import { formatVendorLocation } from '../../../shared/utils/location.utils';
+import { getProductCoverImage } from '../../../shared/utils/image.utils';
 
 @Component({
   selector: 'app-compare',
@@ -44,11 +46,19 @@ export class CompareComponent implements OnInit {
   }
 
   formatVendorValue(vendor: ApiVendor, key: keyof ApiVendor): string {
+    if (key === 'location') {
+      const label = formatVendorLocation(vendor);
+      return label || '—';
+    }
     const value = vendor[key];
     if (value === null || value === undefined || value === '') {
       return '—';
     }
     return String(value);
+  }
+
+  getServiceCover(service: ApiProduct): string | null {
+    return getProductCoverImage(service);
   }
 
   formatServiceValue(service: ApiProduct, key: keyof ApiProduct): string {

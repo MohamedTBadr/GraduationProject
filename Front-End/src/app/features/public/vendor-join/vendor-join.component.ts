@@ -6,6 +6,16 @@ import { VendorService } from '../../../core/services/vendor.service';
 import { VendorTypeService } from '../../../core/services/vendor-type.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { VendorType } from '../../../core/models/taxonomy.models';
+import {
+  EGYPT_CITY_OPTIONS,
+  EGYPT_GOVERNORATE_OPTIONS,
+  getLocationByCity
+} from '../../../shared/constants/egypt-locations';
+import {
+  addressToServiceArea,
+  normalizeAddressFields
+} from '../../../shared/utils/location.utils';
+import { appendVendorCreateFormData } from '../../../shared/utils/vendor-form.utils';
 
 @Component({
   selector: 'app-vendor-join',
@@ -21,9 +31,15 @@ export class VendorJoinComponent implements OnInit {
   isSuccess = false;
   currentStep = 1;
   totalSteps = 3;
-  selectedDocument: File | null = null;
+  selectedDocuments: File[] = [];
   selectedProfilePicture: File | null = null;
   profilePreviewUrl: string | null = null;
+  readonly cityOptions = EGYPT_CITY_OPTIONS;
+  readonly governorateOptions = EGYPT_GOVERNORATE_OPTIONS;
+  readonly maxDocuments = 5;
+  readonly maxProfileMb = 5;
+  readonly maxDocumentMb = 10;
+  readonly acceptedDocTypes = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp';
 
   constructor(
     private fb: FormBuilder,
@@ -45,7 +61,7 @@ export class VendorJoinComponent implements OnInit {
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9]{10,14}$/)]],
-      name: ['', [Validators.required, Validators.minLength(3)]], // This maps to Username
+      name: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       businessName: ['', [Validators.required]],
       ownerName: ['', [Validators.required]],
@@ -69,25 +85,61 @@ export class VendorJoinComponent implements OnInit {
     });
   }
 
-  onDocumentSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedDocument = file;
+  onDocumentsSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = input.files ? Array.from(input.files) : [];
+    if (!files.length) return;
+
+    const valid: File[] = [];
+    for (const file of files) {
+      if (file.size > this.maxDocumentMb * 1024 * 1024) {
+        this.toastService.show(`${file.name} exceeds ${this.maxDocumentMb}MB and was skipped`, 'error');
+        continue;
+      }
+      valid.push(file);
     }
+
+    const slotsLeft = this.maxDocuments - this.selectedDocuments.length;
+    if (slotsLeft <= 0) {
+      this.toastService.show(`You can upload up to ${this.maxDocuments} documents`, 'error');
+      input.value = '';
+      return;
+    }
+
+    const toAdd = valid.slice(0, slotsLeft);
+    this.selectedDocuments = [...this.selectedDocuments, ...toAdd];
+
+    if (valid.length > toAdd.length) {
+      this.toastService.show(`Only ${toAdd.length} file(s) added (max ${this.maxDocuments} total)`, 'info');
+    }
+
+    input.value = '';
   }
 
-  onProfilePictureSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedProfilePicture = file;
-      
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.profilePreviewUrl = reader.result as string;
-      };
-      reader.readAsDataURL(file);
+  removeDocument(index: number) {
+    this.selectedDocuments.splice(index, 1);
+  }
+
+  onProfilePictureSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/') && !/\.(jpe?g|png|webp)$/i.test(file.name)) {
+      this.toastService.show('Profile picture must be JPG, PNG, or WebP', 'error');
+      input.value = '';
+      return;
     }
+    if (file.size > this.maxProfileMb * 1024 * 1024) {
+      this.toastService.show(`Profile picture must be under ${this.maxProfileMb}MB`, 'error');
+      input.value = '';
+      return;
+    }
+    this.selectedProfilePicture = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.profilePreviewUrl = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
   onSubmit() {
@@ -98,33 +150,37 @@ export class VendorJoinComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    
-    // Create FormData for file upload support
-    const formData = new FormData();
     const formValue = this.vendorForm.getRawValue();
+    const { city, state } = normalizeAddressFields(
+      formValue.address?.city || '',
+      formValue.address?.state || ''
+    );
 
-    // Append standard fields
-    Object.keys(formValue).forEach(key => {
-      if (key !== 'address' && key !== 'serviceAreas') {
-        formData.append(key, formValue[key]);
-      }
+    const formData = new FormData();
+    appendVendorCreateFormData(formData, {
+      firstName: formValue.firstName,
+      lastName: formValue.lastName,
+      email: formValue.email,
+      password: formValue.password,
+      phone: formValue.phone,
+      name: formValue.name,
+      businessName: formValue.businessName,
+      ownerName: formValue.ownerName,
+      vendorTypeId: formValue.vendorTypeId,
+      yearsInBusiness: formValue.yearsInBusiness,
+      description: formValue.description,
+      address: {
+        street: formValue.address?.street,
+        city,
+        state,
+        postalCode: formValue.address?.postalCode
+      },
+      serviceAreas: [
+        addressToServiceArea({ city, state, street: formValue.address?.street })
+      ],
+      profilePicture: this.selectedProfilePicture,
+      documents: this.selectedDocuments
     });
-
-    // Append Address fields
-    if (formValue.address) {
-      formData.append('Address.Street', formValue.address.street || '');
-      formData.append('Address.City', formValue.address.city || '');
-      formData.append('Address.State', formValue.address.state || '');
-      formData.append('Address.PostalCode', formValue.address.postalCode || '');
-    }
-
-    // Append Files
-    if (this.selectedDocument) {
-      formData.append('Document', this.selectedDocument);
-    }
-    if (this.selectedProfilePicture) {
-      formData.append('ProfilePicture', this.selectedProfilePicture);
-    }
 
     this.vendorService.create(formData).subscribe({
       next: () => {
@@ -134,7 +190,7 @@ export class VendorJoinComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting = false;
-        const msg = err.error?.message || 'Failed to submit application. Please try again.';
+        const msg = err.error?.message || err.error?.detail || 'Failed to submit application. Please try again.';
         this.toastService.show(msg, 'error');
       }
     });
@@ -180,18 +236,18 @@ export class VendorJoinComponent implements OnInit {
   private canGoNext(): boolean {
     const controls = this.vendorForm.controls;
     if (this.currentStep === 1) {
-      return controls['name'].valid && 
-             controls['password'].valid && 
-             controls['firstName'].valid && 
-             controls['lastName'].valid && 
-             controls['email'].valid && 
+      return controls['name'].valid &&
+             controls['password'].valid &&
+             controls['firstName'].valid &&
+             controls['lastName'].valid &&
+             controls['email'].valid &&
              controls['phone'].valid;
     }
     if (this.currentStep === 2) {
-      return controls['businessName'].valid && 
-             controls['ownerName'].valid && 
-             controls['vendorTypeId'].valid && 
-             controls['yearsInBusiness'].valid && 
+      return controls['businessName'].valid &&
+             controls['ownerName'].valid &&
+             controls['vendorTypeId'].valid &&
+             controls['yearsInBusiness'].valid &&
              controls['description'].valid;
     }
     return true;
@@ -208,6 +264,13 @@ export class VendorJoinComponent implements OnInit {
       currentFields.forEach(field => {
         this.vendorForm.get(field)?.markAsTouched();
       });
+    }
+  }
+
+  onCityChange(city: string): void {
+    const loc = getLocationByCity(city);
+    if (loc) {
+      this.vendorForm.get('address.state')?.setValue(loc.governorate);
     }
   }
 

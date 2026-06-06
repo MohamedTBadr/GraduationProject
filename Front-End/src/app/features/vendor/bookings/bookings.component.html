@@ -77,6 +77,7 @@
       <div class="vd-bk-meta">
         <span><i class="bi bi-tools"></i> {{b.service}}</span>
         <span *ngIf="b.guests"><i class="bi bi-people"></i> {{b.guests}} guests</span>
+        <span *ngIf="b.location"><i class="bi bi-geo-alt-fill"></i> {{ b.location }}</span>
         <span class="bk-value"><i class="bi bi-currency-dollar"></i> {{b.value | number:'1.0-0'}} EGP</span>
       </div>
 
@@ -91,6 +92,9 @@
         </button>
         <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="openDetails(b)">
           <i class="bi bi-eye"></i> View Details
+        </button>
+        <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="reportIssue(b)" title="Report an issue">
+          <i class="bi bi-exclamation-triangle"></i> Report Issue
         </button>
       </div>
     </div>
@@ -163,6 +167,9 @@
                 </button>
                 <button class="vd-btn vd-btn-green vd-btn-sm" (click)="markAsDone(cb)" title="Mark as Done">
                   <i class="bi bi-check2-all"></i> Done
+                </button>
+                <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="reportIssue(cb)" title="Report an issue">
+                  <i class="bi bi-exclamation-triangle"></i>
                 </button>
               </div>
             </td>
@@ -346,6 +353,9 @@
                 </button>
                 <button class="vd-btn vd-btn-green vd-btn-sm" (click)="markAsDone(ub)" title="Mark as Done">
                   <i class="bi bi-check2-all"></i> Done
+                </button>
+                <button class="vd-btn vd-btn-ghost vd-btn-sm" (click)="reportIssue(ub)" title="Report an issue">
+                  <i class="bi bi-exclamation-triangle"></i>
                 </button>
               </div>
             </td>
@@ -599,3 +609,12 @@
     </div>
   </div>
 </div>
+
+<app-support-ticket-modal
+  [isOpen]="isReportModalOpen"
+  submitterType="Vendor"
+  [bookingRef]="selectedBookingRef"
+  modalTitle="Report Booking Issue"
+  modalSubtitle="Tell our support team about a problem with this booking."
+  (close)="closeReportModal()">
+</app-support-ticket-modal>

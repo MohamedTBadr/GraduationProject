@@ -6,6 +6,8 @@ export interface UploadedImage {
   previewUrl: string | ArrayBuffer | null;
   progress?: number;
   status?: 'pending' | 'uploading' | 'done' | 'error';
+  /** True when loaded from server URL (no local File yet). */
+  existing?: boolean;
 }
 
 @Component({
@@ -21,14 +23,16 @@ export class ImageUploadComponent {
   @Input() maxSizeMB = 5;
   @Input() acceptFormats = ['image/jpeg', 'image/png', 'image/webp'];
   
-  // Existing initial images (URLs) to display
-  @Input() set initialImages(urls: string[]) {
-    if (urls && urls.length) {
-       this.images = urls.map(url => ({
-         previewUrl: url,
-         status: 'done'
-       }));
-    }
+  /** Existing server image URLs (e.g. when editing a service). */
+  @Input() set initialImages(urls: string[] | null | undefined) {
+    this.images = (urls ?? [])
+      .filter(url => !!url)
+      .map(url => ({
+        previewUrl: url,
+        status: 'done' as const,
+        existing: true
+      }));
+    this.emitChanges();
   }
 
   @Output() imagesChanged = new EventEmitter<UploadedImage[]>();
@@ -74,16 +78,26 @@ export class ImageUploadComponent {
     if (!this.multiple && newFiles.length > 0) {
       this.processFile(newFiles[0], true);
     } else {
-      if (this.images.length + newFiles.length > this.maxFiles) {
+      const slotsLeft = this.maxFiles - this.images.length;
+      if (slotsLeft <= 0) {
         this.errorMsg = `You can only upload up to ${this.maxFiles} images.`;
         return;
       }
-      newFiles.forEach(file => this.processFile(file, false));
+      const toAdd = newFiles.slice(0, slotsLeft);
+      if (toAdd.length < newFiles.length) {
+        this.errorMsg = `Only ${toAdd.length} of ${newFiles.length} files were added (max ${this.maxFiles} total).`;
+      }
+      toAdd.forEach(file => this.processFile(file, false));
     }
   }
 
+  private isAcceptedImage(file: File): boolean {
+    if (this.acceptFormats.includes(file.type)) return true;
+    return /\.(jpe?g|png|webp)$/i.test(file.name);
+  }
+
   processFile(file: File, clearExisting: boolean) {
-    if (!this.acceptFormats.includes(file.type)) {
+    if (!this.isAcceptedImage(file)) {
       this.errorMsg = `File ${file.name} is not a supported format. Max allowed formats: JPG, PNG, WebP.`;
       return;
     }
@@ -101,33 +115,20 @@ export class ImageUploadComponent {
     const newImg: UploadedImage = {
       file,
       previewUrl: null,
-      status: 'pending',
-      progress: 0
+      status: 'pending'
     };
-    
+
     this.images.push(newImg);
+    // Emit immediately so the parent has the File before form submit.
+    this.emitChanges();
 
     const reader = new FileReader();
     reader.onload = (e) => {
       newImg.previewUrl = e.target?.result || null;
-      this.simulateUpload(newImg);
+      newImg.status = 'done';
+      this.emitChanges();
     };
     reader.readAsDataURL(file);
-  }
-
-  simulateUpload(img: UploadedImage) {
-    img.status = 'uploading';
-    img.progress = 0;
-    
-    const interval = setInterval(() => {
-      if (img.progress! < 100) {
-        img.progress! += 20;
-      } else {
-        clearInterval(interval);
-        img.status = 'done';
-        this.emitChanges();
-      }
-    }, 150);
   }
 
   removeImage(index: number) {
@@ -136,6 +137,8 @@ export class ImageUploadComponent {
   }
 
   emitChanges() {
-    this.imagesChanged.emit(this.images.filter(img => img.status === 'done'));
+    this.imagesChanged.emit(
+      this.images.filter(img => !!img.file || !!img.previewUrl)
+    );
   }
 }

@@ -1,0 +1,137 @@
+.sth-page {
+  max-width: 900px;
+}
+
+.sth-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.sth-title {
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--navy, #1e293b);
+}
+
+.sth-sub {
+  margin: 6px 0 0;
+  color: var(--gray, #64748b);
+  font-size: 0.95rem;
+}
+
+.sth-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 20px;
+  background: var(--navy, #1e293b);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sth-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(59, 130, 246, 0.08);
+  color: #1d4ed8;
+  font-size: 0.88rem;
+  margin-bottom: 20px;
+}
+
+.sth-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sth-card {
+  background: #fff;
+  border: 1px solid var(--lgray, #e2e8f0);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.sth-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sth-id {
+  font-family: monospace;
+  font-size: 0.82rem;
+  color: var(--gray, #64748b);
+}
+
+.sth-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.sth-pill-low { background: #f1f5f9; color: #475569; }
+.sth-pill-medium { background: #dbeafe; color: #1d4ed8; }
+.sth-pill-high { background: #ffedd5; color: #c2410c; }
+.sth-pill-critical { background: #fee2e2; color: #b91c1c; }
+
+.sth-card-title {
+  font-weight: 700;
+  color: var(--navy, #1e293b);
+  margin-bottom: 6px;
+}
+
+.sth-card-meta {
+  font-size: 0.85rem;
+  color: var(--gray, #64748b);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sth-card-status {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .bi-circle-fill {
+    font-size: 0.45rem;
+  }
+}
+
+.sth-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--gray, #64748b);
+  border: 1px dashed var(--lgray, #e2e8f0);
+  border-radius: 12px;
+
+  i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 640px) {
+  .sth-header {
+    flex-direction: column;
+  }
+}

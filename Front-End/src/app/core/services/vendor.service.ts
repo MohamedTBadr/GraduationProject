@@ -12,6 +12,10 @@ import {
   PaginatedRequest,
   PagedResult
 } from '../../shared/types/api.interfaces';
+import {
+  formatVendorLocation,
+  normalizeServiceAreas
+} from '../../shared/utils/location.utils';
 
 @Injectable({ providedIn: 'root' })
 export class VendorService {
@@ -79,9 +83,11 @@ export class VendorService {
       map((res: any) => {
         const raw = res?.value ?? res?.Value ?? res;
         const vendor = this.normalizeVendor(raw, vendorId);
+        const embeddedServices = raw?.services ?? raw?.Services ?? [];
         return {
           ...vendor,
           vendorRatings: this.parseVendorRatings(raw),
+          embeddedServices: Array.isArray(embeddedServices) ? embeddedServices : [],
           startingPrice: Number(this.pickField(raw, 'startingPrice', 'StartingPrice') ?? 0) || undefined,
           yearsInBusiness: Number(this.pickField(raw, 'yearsInBusiness', 'YearsInBusiness') ?? 0) || undefined
         };
@@ -137,6 +143,17 @@ export class VendorService {
       ?? 'Vendor';
     const areas = v.serviceAreas ?? v.ServiceAreas ?? [];
 
+    const rawAddress = v.address ?? v.Address;
+    const serviceAreas = normalizeServiceAreas(
+      (Array.isArray(areas) ? areas : []).map((sa: any) => ({
+        id: sa.id ?? sa.Id,
+        city: sa.city ?? sa.City ?? '',
+        region: sa.region ?? sa.Region ?? '',
+        latitude: Number(sa.latitude ?? sa.Latitude ?? sa.lattitude ?? 0),
+        longitude: Number(sa.longitude ?? sa.Longitude ?? 0)
+      }))
+    );
+
     const normalized = {
       id,
       name,
@@ -147,18 +164,17 @@ export class VendorService {
       isApproved: !!(this.pickField(v, 'isVerified', 'IsVerified', 'isApproved', 'IsApproved') ?? false),
       createdAt: this.pickField(v, 'createdAt', 'CreatedAt') ?? new Date().toISOString(),
       rating: Number(this.pickField(v, 'rating', 'Rating') ?? 0),
-      location: this.pickField(v, 'location', 'Location', 'address', 'Address') ?? '',
       documentUrl: this.pickField(v, 'documentUrl', 'DocumentUrl', 'document', 'Document'),
       profilePictureUrl: this.pickField(v, 'profilePictureUrl', 'ProfilePictureUrl', 'profilePicture', 'ProfilePicture'),
-      serviceAreas: (Array.isArray(areas) ? areas : []).map((sa: any) => ({
-        ...sa,
-        id: sa.id ?? sa.Id,
-        city: sa.city ?? sa.City ?? '',
-        region: sa.region ?? sa.Region ?? '',
-        latitude: sa.latitude ?? sa.Latitude ?? sa.lattitude ?? 0,
-        longitude: sa.longitude ?? sa.Longitude ?? 0
-      }))
+      serviceAreas,
+      address: rawAddress && typeof rawAddress === 'object' ? rawAddress : undefined
     } as ApiVendor;
+
+    const locationString = this.pickField(v, 'location', 'Location');
+    normalized.location =
+      typeof locationString === 'string' && locationString.trim()
+        ? locationString.trim()
+        : formatVendorLocation(normalized);
 
     return normalized;
   }
@@ -177,9 +193,11 @@ export class VendorService {
     return this.http.patch<void>(`${this.apiUrl}/Vendor/${vendorId}/approve`, {});
   }
 
-  /** PATCH /Vendor/{vendorId} – update vendor info */
-  update(vendorId: string, payload: UpdateVendorRequest): Observable<ApiVendor> {
-    return this.http.patch<ApiVendor>(`${this.apiUrl}/Vendor/${vendorId}`, payload);
+  /** PATCH /Vendor/{vendorId} – update vendor info (JSON or multipart FormData) */
+  update(vendorId: string, payload: UpdateVendorRequest | FormData): Observable<ApiVendor> {
+    return this.http.patch<any>(`${this.apiUrl}/Vendor/${vendorId}`, payload).pipe(
+      map(res => this.normalizeVendor(res?.value ?? res?.Value ?? res))
+    );
   }
 
   /** DELETE /Vendor/{vendorId} */
