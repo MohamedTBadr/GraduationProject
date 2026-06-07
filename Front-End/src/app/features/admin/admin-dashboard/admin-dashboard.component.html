@@ -6,7 +6,9 @@
       <div class="ad-page-sub">Real-time pulse of the EpicHub platform</div>
     </div>
     <div class="flex gap-[8px]">
-      <button class="ad-btn ad-btn-ghost" (click)="openScheduleReport()">Export Report</button>
+      <button class="ad-btn ad-btn-ghost" (click)="openExecutiveReportPdf()" [disabled]="loading || isOpeningReport">
+        {{ isOpeningReport ? 'Generating...' : 'Export Report' }}
+      </button>
       <button class="ad-btn ad-btn-gold" (click)="openQuickActions()"><i class="bi bi-lightning-charge"></i> Quick Actions</button>
     </div>
   </div>

@@ -22,6 +22,7 @@ export class AdminDashboardComponent implements OnInit {
   private toastService = inject(ToastService);
 
   loading = true;
+  isOpeningReport = false;
 
   lifetimeRevenue = 0;
   currentMonthRevenue = 0;
@@ -90,4 +91,34 @@ export class AdminDashboardComponent implements OnInit {
   openAddVendor()    { this.modalService.open('add-vendor'); }
   openAddPackage()   { this.modalService.open('add-package'); }
   openScheduleReport(){ this.modalService.open('schedule-report'); }
+
+  openExecutiveReportPdf() {
+    const reportTab = window.open('about:blank', '_blank');
+    if (!reportTab) {
+      this.toastService.show('Please allow popups to open the PDF report.', 'error');
+      return;
+    }
+
+    reportTab.document.write('<p style="font-family:Arial,sans-serif;padding:24px">Generating report PDF...</p>');
+    this.isOpeningReport = true;
+    this.toastService.show('Generating report PDF...', 'info');
+
+    this.http.get(`${environment.apiUrl}/reports/executive/pdf`, {
+      responseType: 'blob'
+    }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        reportTab.location.href = url;
+        setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+        this.isOpeningReport = false;
+        this.toastService.show('PDF report opened in a new tab.', 'success');
+      },
+      error: (err) => {
+        console.error('Failed to open report PDF', err);
+        reportTab.close();
+        this.isOpeningReport = false;
+        this.toastService.show('Failed to open PDF report.', 'error');
+      }
+    });
+  }
 }

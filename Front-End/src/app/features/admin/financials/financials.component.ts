@@ -79,6 +79,13 @@ export class FinancialsComponent implements OnInit {
   }
 
   downloadPdf() {
+    const reportTab = window.open('about:blank', '_blank');
+    if (!reportTab) {
+      this.toastService.show('Please allow popups to open the PDF report.', 'error');
+      return;
+    }
+
+    reportTab.document.write('<p style="font-family:Arial,sans-serif;padding:24px">Generating report PDF...</p>');
     this.isDownloadingPdf = true;
     this.toastService.show('Generating report PDF...', 'info');
 
@@ -87,18 +94,14 @@ export class FinancialsComponent implements OnInit {
     }).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `executive-report-${new Date().toISOString().substring(0, 7)}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
+        reportTab.location.href = url;
+        setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
         this.isDownloadingPdf = false;
-        this.toastService.show('PDF downloaded successfully.', 'success');
+        this.toastService.show('PDF report opened in a new tab.', 'success');
       },
       error: (err) => {
         console.error('Failed to download PDF', err);
+        reportTab.close();
         this.toastService.show('Failed to download PDF report.', 'error');
         this.isDownloadingPdf = false;
       }
