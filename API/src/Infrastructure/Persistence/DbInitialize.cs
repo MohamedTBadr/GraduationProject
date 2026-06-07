@@ -13,8 +13,6 @@ namespace Infrastructure.Persistence
     {
         public async Task IntializeAsync()
         {
-            await context.Messages.ExecuteDeleteAsync();
-            await context.Conversations.ExecuteDeleteAsync();
             await context.Database.MigrateAsync();
 
             var strategy = context.Database.CreateExecutionStrategy();
