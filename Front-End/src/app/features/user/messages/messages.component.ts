@@ -5,8 +5,9 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { ChatMessage, Conversation } from '../../../shared/types/api.interfaces';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { ToastService } from '../../../shared/components/toast/toast.service';
+import { ChatLaunchService } from '../../../core/services/chat-launch.service';
 
 @Component({
   selector: 'app-messages',
@@ -31,10 +32,13 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   private pendingVendorId: string | null = null;
   private pendingVendorName: string | null = null;
+  private pendingInitialMessage: string | null = null;
+  private sendingInitialMessage = false;
 
   constructor(
     private authService: AuthService,
     private chatService: ChatService,
+    private chatLaunchService: ChatLaunchService,
     private toastService: ToastService,
     private route: ActivatedRoute
   ) {}
@@ -50,11 +54,12 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.currentUserId = this.authService.user()?.id || '';
+    this.applyPendingLaunch();
+    this.applyRouteQueryParams();
 
-    // Check for vendorId deep-link from My Bookings
     this.route.queryParams.subscribe(params => {
       if (params['vendorId']) {
-        this.pendingVendorId = params['vendorId'];
+        this.pendingVendorId = String(params['vendorId']);
         this.pendingVendorName = params['vendorName'] || null;
       }
     });
@@ -68,8 +73,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.messageSub = this.chatService.onMessageReceived$.subscribe((msg) => {
       if (
         this.selectedConversation &&
-        (msg.senderId === this.selectedConversation.userId ||
-          msg.receiverId === this.selectedConversation.userId)
+        this.isSameThread(msg, this.selectedConversation.userId)
       ) {
         if (!this.messages.some(m => m.id === msg.id)) {
           this.messages.push(msg);
@@ -79,6 +83,39 @@ export class MessagesComponent implements OnInit, OnDestroy {
       // Refresh sidebar to update last message preview
       this.loadConversations(false);
     });
+  }
+
+  private isSameThread(msg: ChatMessage, otherUserId: string): boolean {
+    const other = otherUserId.toLowerCase();
+    return (
+      msg.senderId.toLowerCase() === other ||
+      msg.receiverId.toLowerCase() === other
+    );
+  }
+
+  isOutgoing(msg: ChatMessage): boolean {
+    return msg.senderId.toLowerCase() === this.currentUserId.toLowerCase();
+  }
+
+  private applyPendingLaunch(): void {
+    const launch = this.chatLaunchService.consumePending();
+    if (!launch) return;
+
+    this.pendingVendorId = launch.vendorId;
+    this.pendingVendorName = launch.vendorName ?? null;
+    this.pendingInitialMessage = launch.initialMessage;
+  }
+
+  private applyRouteQueryParams(): void {
+    const params = this.route.snapshot.queryParams;
+    if (params['vendorId']) {
+      this.pendingVendorId = String(params['vendorId']);
+      this.pendingVendorName = params['vendorName'] || null;
+    }
+  }
+
+  private sameUserId(a: string, b: string): boolean {
+    return a.toLowerCase() === b.toLowerCase();
   }
 
   ngOnDestroy(): void {
@@ -99,7 +136,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
           this.pendingVendorId = null;
           this.pendingVendorName = null;
 
-          const match = this.conversations.find(c => c.userId === vendorId);
+          const match = this.conversations.find(c => this.sameUserId(c.userId, vendorId));
           if (match) {
             this.selectChat(match);
             return;
@@ -139,28 +176,70 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.chatService.markConversationAsRead(this.messages, this.currentUserId);
         this.loadingMessages = false;
         this.scrollToBottom();
+        this.sendPendingInitialMessage();
       },
       error: (err) => {
         this.loadingMessages = false;
         console.error('Failed to load messages', err);
         this.toastService.show('Failed to load messages', 'error');
+        this.sendPendingInitialMessage();
       }
     });
   }
 
+  private sendPendingInitialMessage(): void {
+    const text = this.pendingInitialMessage?.trim();
+    if (!text || !this.selectedConversation || this.sendingInitialMessage) return;
+
+    const receiverId = this.selectedConversation.userId;
+    this.pendingInitialMessage = null;
+    this.sendingInitialMessage = true;
+
+    void this.chatService.ensureConnected()
+      .then(() => this.chatService.sendMessage(receiverId, text))
+      .then(() => firstValueFrom(this.chatService.getMessages(receiverId)))
+      .then((msgs) => {
+        this.messages = msgs || [];
+        this.scrollToBottom();
+        this.loadConversations(false);
+      })
+      .catch((err) => {
+        console.error('Failed to send initial message', err);
+        this.pendingInitialMessage = text;
+        this.newMessageText = text;
+        this.toastService.show(
+          err?.message?.includes('timed out')
+            ? 'Chat connection is still starting — tap send to try again'
+            : 'Failed to send message — tap send to try again',
+          'error'
+        );
+      })
+      .finally(() => {
+        this.sendingInitialMessage = false;
+      });
+  }
+
   sendMessage() {
     const text = this.newMessageText.trim();
-    if (!text || !this.selectedConversation) return;
+    if (!text || !this.selectedConversation || this.sendingInitialMessage) return;
 
-    this.chatService.sendMessage(this.selectedConversation.userId, text)
-      .then(() => {
-        // Server echoes message back via 'ReceiveMessage' on hub
+    const receiverId = this.selectedConversation.userId;
+    this.chatService.sendMessage(receiverId, text)
+      .then(() => firstValueFrom(this.chatService.getMessages(receiverId)))
+      .then((msgs) => {
+        this.messages = msgs || [];
         this.newMessageText = '';
         this.scrollToBottom();
+        this.loadConversations(false);
       })
       .catch((err) => {
         console.error('Error sending message', err);
-        this.toastService.show('Failed to send message', 'error');
+        this.toastService.show(
+          err?.message?.includes('timed out')
+            ? 'Chat connection is still starting — please try again'
+            : 'Failed to send message',
+          'error'
+        );
       });
   }
 

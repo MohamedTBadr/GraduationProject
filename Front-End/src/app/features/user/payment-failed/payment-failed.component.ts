@@ -31,11 +31,11 @@ export class PaymentFailedComponent implements OnInit {
     if (this.orderId) {
       this.router.navigate(['/checkout', this.orderId]);
     } else {
-      this.router.navigate(['/user/bookings']);
+      this.router.navigate(['/user/my-events']);
     }
   }
 
   goToBookings() {
-    this.router.navigate(['/user/bookings']);
+    this.router.navigate(['/user/my-events']);
   }
 }

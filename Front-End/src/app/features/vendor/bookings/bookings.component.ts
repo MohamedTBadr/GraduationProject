@@ -8,6 +8,7 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { SupportTicketModalComponent } from '../../../shared/components/support-ticket-modal/support-ticket-modal.component';
 import { formatEventLocation } from '../../../shared/utils/location.utils';
+import { VendorBookingsRefreshService } from '../../../core/services/vendor-bookings-refresh.service';
 
 export interface Booking {
   id: string; // itemId
@@ -175,7 +176,8 @@ export class BookingsComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private eventService: EventService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private bookingsRefresh: VendorBookingsRefreshService
   ) {}
 
   ngOnInit() {
@@ -366,6 +368,7 @@ export class BookingsComponent implements OnInit {
         next: () => {
           this.toastService.show('Booking accepted successfully.', 'success');
           this.loadBookings();
+          this.bookingsRefresh.notifyRefresh();
           this.closeDetails();
         },
         error: (err) => {
@@ -385,6 +388,7 @@ export class BookingsComponent implements OnInit {
         next: () => {
           this.toastService.show('Booking declined.', 'info');
           this.loadBookings();
+          this.bookingsRefresh.notifyRefresh();
           this.closeDeclineForm();
         },
         error: (err) => {
@@ -426,14 +430,13 @@ export class BookingsComponent implements OnInit {
         this.loadBookings();
         this.closeDetails();
       },
-      error: () => {
-        this.markLocallyDone(booking.id);
+      error: (err) => {
+        console.error('Error marking booking as done', err);
         this.toastService.show(
-          'Marked as done on your dashboard. Customers can leave a review once payment is complete.',
-          'success'
+          'Could not mark this booking as done. The server may not support this yet — please try again later.',
+          'error'
         );
-        this.loadBookings();
-        this.closeDetails();
+        this.loading.set(false);
       }
     });
   }
@@ -457,6 +460,7 @@ export class BookingsComponent implements OnInit {
   getStatusClass(status: string): string {
     switch (status) {
       case 'Approved': return 'vdb-green';
+      case 'Paid':     return 'vdb-blue';
       case 'Pending':  return 'vdb-amber';
       case 'Done':     return 'vdb-blue';
       case 'Completed': return 'vdb-gold';
@@ -468,6 +472,7 @@ export class BookingsComponent implements OnInit {
   getStatusLabel(status: string): string {
     switch (status) {
       case 'Approved':  return 'Confirmed';
+      case 'Paid':      return 'Paid';
       case 'Done':      return 'Done';
       case 'Completed': return 'Completed';
       case 'Rejected':  return 'Declined';

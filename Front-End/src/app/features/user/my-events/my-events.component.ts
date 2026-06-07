@@ -7,9 +7,22 @@ import { EventItemResponseDto, EventResponseDto } from '../../../shared/types/ap
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrderService, OrderResponse } from '../../../core/services/order.service';
+import { ProductService } from '../../../core/services/product.service';
 import { EventStudioComponent } from '../event-studio/event-studio.component';
 import { formatEventLocation } from '../../../shared/utils/location.utils';
 import { AddressDto } from '../../../shared/types/api.interfaces';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import {
+  approvedAmount,
+  approvedItems,
+  budgetCommittedAmount,
+  itemBadgeClass,
+  itemLineTotal,
+  itemStatusLabel,
+  paidItems,
+  pendingApprovalItems
+} from '../../../shared/utils/event-item.utils';
 
 @Component({
   selector: 'app-my-events',
@@ -35,7 +48,8 @@ export class MyEventsComponent implements OnInit {
     private eventService: EventService,
     private authService: AuthService,
     private toastService: ToastService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private productService: ProductService
   ) {}
 
   ngOnInit() {
@@ -70,7 +84,9 @@ export class MyEventsComponent implements OnInit {
     const user = this.authService.user();
     this.loading = true;
 
-    this.eventService.getByUser().subscribe({
+    this.eventService.getByUser().pipe(
+      switchMap((data: EventResponseDto[]) => this.enrichEventsWithPrices(data))
+    ).subscribe({
       next: (data: EventResponseDto[]) => {
         this.events = data.map(ev => this.mapEvent(ev));
         if (this.events.length > 0) {
@@ -106,7 +122,11 @@ export class MyEventsComponent implements OnInit {
     const eventId = this.normalizeId(id);
     if (!eventId) return;
 
-    this.eventService.getById(eventId).subscribe({
+    this.eventService.getById(eventId).pipe(
+      switchMap(fullEvent => this.enrichEventsWithPrices([fullEvent]).pipe(
+        map(enriched => enriched[0] ?? fullEvent)
+      ))
+    ).subscribe({
       next: (fullEvent) => {
         const mapped = this.mapEvent(fullEvent);
         const index = this.events.findIndex(e => this.sameId(e.id, eventId));
@@ -130,18 +150,55 @@ export class MyEventsComponent implements OnInit {
     });
   }
 
+  private enrichEventsWithPrices(events: EventResponseDto[]) {
+    const itemsNeedingPrice = events.flatMap(ev =>
+      (ev.eventItems ?? []).filter(i => i.price <= 0 && i.serviceId)
+    );
+
+    if (itemsNeedingPrice.length === 0) {
+      return of(events);
+    }
+
+    const uniqueServiceIds = [...new Set(itemsNeedingPrice.map(i => i.serviceId!))];
+
+    return forkJoin(
+      uniqueServiceIds.map(serviceId =>
+        this.productService.getById(serviceId).pipe(
+          map(product => ({ serviceId, price: product.price ?? 0 })),
+          catchError(() => of({ serviceId, price: 0 }))
+        )
+      )
+    ).pipe(
+      map(priceRows => {
+        const priceByService = new Map(priceRows.map(r => [r.serviceId, r.price]));
+        return events.map(ev => ({
+          ...ev,
+          eventItems: (ev.eventItems ?? []).map(item => ({
+            ...item,
+            price: item.price > 0 ? item.price : (priceByService.get(item.serviceId ?? '') ?? item.price)
+          }))
+        }));
+      })
+    );
+  }
+
   mapEvent(ev: EventResponseDto): any {
-    const mappedVendors = (ev.eventItems || []).map(item => ({
-      emoji: '',
-      name: item.vendorName || 'Vendor',
-      type: item.serviceName || 'Service',
-      price: item.price || 0,
-      status: item.itemStatus?.toLowerCase() || 'pending'
-    }));
+    const mappedVendors = (ev.eventItems || [])
+      .filter(item => item.itemStatus !== 'Rejected')
+      .map(item => ({
+        emoji: '',
+        name: item.vendorName || 'Vendor',
+        type: item.serviceName || 'Service',
+        price: itemLineTotal(item),
+        status: item.itemStatus?.toLowerCase() || 'pending'
+      }));
+
+    const isBooked = (v: { type: string; status: string }) =>
+      ['approved', 'paid', 'done', 'completed'].includes(v.status);
 
     const defaultChecklist = [
-      { text: 'Book venue', done: mappedVendors.some(v => v.type.toLowerCase().includes('venue') && v.status === 'confirmed') },
-      { text: 'Choose decor vendor', done: mappedVendors.some(v => v.type.toLowerCase().includes('decor') && v.status === 'confirmed') },
+      { text: 'Book venue', done: mappedVendors.some(v => v.type.toLowerCase().includes('venue') && isBooked(v)) },
+      { text: 'Choose decor vendor', done: mappedVendors.some(v => v.type.toLowerCase().includes('decor') && isBooked(v)) },
       { text: 'Setup guest list', done: false },
       { text: 'Send invitations', done: false }
     ];
@@ -191,64 +248,73 @@ export class MyEventsComponent implements OnInit {
 
   /** Items the vendor has approved but the user hasn't paid yet. */
   get approvedItems(): EventItemResponseDto[] {
-    return (this.activeEvent?.eventItems as EventItemResponseDto[] ?? [])
-      .filter(i => i.itemStatus === 'Approved');
+    return approvedItems(this.activeEvent?.eventItems);
   }
 
   /** Items still waiting for vendor response. */
   get pendingItems(): EventItemResponseDto[] {
-    return (this.activeEvent?.eventItems as EventItemResponseDto[] ?? [])
-      .filter(i => i.itemStatus === 'Pending');
+    return pendingApprovalItems(this.activeEvent?.eventItems);
   }
 
   /** Items already paid in a previous payment round. */
   get paidItems(): EventItemResponseDto[] {
-    return (this.activeEvent?.eventItems as EventItemResponseDto[] ?? [])
-      .filter(i => i.itemStatus === 'Paid' || i.itemStatus === 'Done' || i.itemStatus === 'Completed');
+    return paidItems(this.activeEvent?.eventItems);
   }
 
   /** Total for the currently-approved (unpaid) items. */
   get approvedAmount(): number {
-    return this.approvedItems.reduce((sum, i) => sum + (i.price * (i.quantity ?? 1)), 0);
+    return approvedAmount(this.activeEvent?.eventItems);
+  }
+
+  itemLineTotal(item: EventItemResponseDto): number {
+    return itemLineTotal(item);
+  }
+
+  itemBadgeClass(item: EventItemResponseDto): string {
+    return itemBadgeClass(item);
+  }
+
+  itemStatusLabel(item: EventItemResponseDto): string {
+    return itemStatusLabel(item);
+  }
+
+  eventApprovedAmount(eventId: string): number {
+    const ev = this.events.find(e => this.sameId(e.id, eventId));
+    return approvedAmount(ev?.eventItems);
+  }
+
+  eventHasPayableItems(eventId: string): boolean {
+    const ev = this.events.find(e => this.sameId(e.id, eventId));
+    return approvedItems(ev?.eventItems).length > 0 || !!this.pendingOrderForEvent(eventId);
+  }
+
+  pendingOrderForEvent(eventId: string): OrderResponse | null {
+    return this.userOrders.find(
+      o => this.sameId(o.eventId, eventId) && o.paymentStatus === 'Pending'
+    ) ?? null;
+  }
+
+  payNowForEvent(eventId: string, event?: MouseEvent) {
+    event?.stopPropagation();
+    if (!this.sameId(this.activeEventId, eventId)) {
+      this.switchEvent(eventId);
+    }
+    setTimeout(() => this.payNow());
   }
 
   /** True when there is already an unpaid pending order for the active event. */
   get existingPendingOrder(): OrderResponse | null {
     if (!this.activeEventId) return null;
-    return this.userOrders.find(
-      o => this.sameId(o.eventId, this.activeEventId) && o.paymentStatus === 'Pending'
-    ) ?? null;
-  }
-
-  // ──────────────────────────────────────────────────────────────────────────
-
-  itemBadgeClass(item: EventItemResponseDto): string {
-    const s = (item.itemStatus || '').toLowerCase();
-    if (s === 'approved') return 'badge-confirmed';
-    if (s === 'paid' || s === 'done' || s === 'completed') return 'badge-paid';
-    if (s === 'rejected') return 'badge-rejected';
-    return 'badge-pending';
-  }
-
-  itemStatusLabel(item: EventItemResponseDto): string {
-    const s = item.itemStatus || '';
-    if (s === 'Approved') return 'Approved — Ready to Pay';
-    if (s === 'Paid') return 'Paid';
-    if (s === 'Done') return 'Done';
-    if (s === 'Completed') return 'Completed';
-    if (s === 'Rejected') return 'Rejected';
-    return 'Awaiting Confirmation';
-  }
-
-  get spent() {
-    return this.activeEvent?.vendors.reduce(
-      (sum: number, v: any) => sum + (v.status !== 'rejected' ? v.price : 0), 0
-    ) || 0;
+    return this.pendingOrderForEvent(this.activeEventId);
   }
 
   get budgetPct() {
     if (!this.activeEvent || this.activeEvent.budget === 0) return 0;
     return Math.min(100, Math.round((this.spent / this.activeEvent.budget) * 100));
+  }
+
+  get spent() {
+    return budgetCommittedAmount(this.activeEvent?.eventItems);
   }
 
   get daysLeft() {

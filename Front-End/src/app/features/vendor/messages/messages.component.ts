@@ -51,8 +51,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.messageSub = this.chatService.onMessageReceived$.subscribe((msg) => {
       if (
         this.selectedConversation &&
-        (msg.senderId === this.selectedConversation.userId ||
-          msg.receiverId === this.selectedConversation.userId)
+        this.isSameThread(msg, this.selectedConversation.userId)
       ) {
         if (!this.messages.some(m => m.id === msg.id)) {
           this.messages.push(msg);
@@ -61,6 +60,18 @@ export class MessagesComponent implements OnInit, OnDestroy {
       }
       this.loadConversations(false);
     });
+  }
+
+  private isSameThread(msg: ChatMessage, otherUserId: string): boolean {
+    const other = otherUserId.toLowerCase();
+    return (
+      msg.senderId.toLowerCase() === other ||
+      msg.receiverId.toLowerCase() === other
+    );
+  }
+
+  isOutgoing(msg: ChatMessage): boolean {
+    return msg.senderId.toLowerCase() === this.currentUserId.toLowerCase();
   }
 
   ngOnDestroy(): void {
@@ -116,7 +127,12 @@ export class MessagesComponent implements OnInit, OnDestroy {
       })
       .catch((err) => {
         console.error('Error sending message', err);
-        this.toastService.show('Failed to send message', 'error');
+        this.toastService.show(
+          err?.message?.includes('timed out')
+            ? 'Chat connection is still starting — please try again'
+            : 'Failed to send message',
+          'error'
+        );
       });
   }
 

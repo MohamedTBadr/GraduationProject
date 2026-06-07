@@ -117,9 +117,31 @@
         cursor: pointer;
         position: relative;
         color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 8px;
         
         &.active {
             color: var(--navy);
+        }
+
+        .event-tab-pay {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--gold);
+            background: rgba(234, 179, 8, 0.12);
+            color: var(--navy);
+            cursor: pointer;
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: wait;
+            }
         }
         
         .event-tab-indicator {
@@ -317,7 +339,21 @@
         font-size: .9rem;
         
         .bvl-type { color: var(--gray); }
-        .bvl-price { font-weight: 600; }
+        .bvl-price {
+            font-weight: 600;
+
+            &--pending {
+                color: var(--gray);
+            }
+
+            .bvl-pending-note {
+                margin-left: 6px;
+                font-size: 0.72rem;
+                font-weight: 500;
+                color: var(--gold);
+                text-transform: uppercase;
+            }
+        }
     }
     
     .bvl-remaining {

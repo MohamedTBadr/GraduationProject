@@ -13,6 +13,7 @@ import { VendorTypeService } from '../../../core/services/vendor-type.service';
 import { EventTypeService } from '../../../core/services/event-type.service';
 import { ModalService } from '../../../shared/services/modal.service';
 import { CompareService } from '../../../shared/services/compare.service';
+import { FavoriteService } from '../../../shared/services/favorite.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { Subject, forkJoin, of, takeUntil } from 'rxjs';
 import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
@@ -77,11 +78,11 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
   previewImages: string[] = [];
   activeImageIndex = 0;
 
-  wishlist: string[] = [];
   private vendorRatingsById = new Map<string, number>();
   private vendorServiceAreasById = new Map<string, ServiceAreaDTO[]>();
 
   compareService = inject(CompareService);
+  favoriteService = inject(FavoriteService);
 
   constructor(
     private route: ActivatedRoute,
@@ -678,13 +679,21 @@ export class ExploreComponent implements OnInit, OnDestroy, AfterViewInit {
     return [];
   }
 
-  toggleWishlist(svc: ApiProduct, e: Event) {
+  toggleServiceFavorite(svc: ApiProduct, e: Event) {
     e.stopPropagation();
-    const i = this.wishlist.indexOf(svc.id);
-    if (i > -1) this.wishlist.splice(i, 1); else this.wishlist.push(svc.id);
+    const vendorId = svc.vendorId;
+    if (!vendorId) {
+      this.toastService.show('Cannot save — vendor unavailable', 'error');
+      return;
+    }
+    this.favoriteService.toggleFavorite(vendorId);
+    const isFav = this.favoriteService.isFavorite(vendorId);
+    this.toastService.show(isFav ? 'Saved to favorites!' : 'Removed from favorites', isFav ? 'success' : 'info');
   }
 
-  isInWishlist(id: string) { return this.wishlist.includes(id); }
+  isServiceFavorite(svc: ApiProduct): boolean {
+    return !!svc.vendorId && this.favoriteService.isFavorite(svc.vendorId);
+  }
 
   addToCompare(svc: ApiProduct, e: Event) {
     e.stopPropagation();

@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { ModalService } from '../../../shared/services/modal.service';
+import { SignalRService } from '../../../core/services/signalr.service';
 
 @Component({
     selector: 'app-login',
@@ -20,6 +21,7 @@ export class LoginComponent {
     private router = inject(Router);
     private toastService = inject(ToastService);
     private modalService = inject(ModalService);
+    private signalRService = inject(SignalRService);
 
     loginForm: FormGroup = this.fb.group({
         email: ['', [Validators.required, Validators.email]],
@@ -53,6 +55,7 @@ export class LoginComponent {
                 this.isLoading = false;
 
                 this.toastService.show('Logged in successfully!', 'success');
+                this.signalRService.sessionBootstrap();
 
                 this.modalService.close();
 
@@ -63,7 +66,7 @@ export class LoginComponent {
                     this.router.navigate(['/vendor-dashboard']);
                 }
                 else if (response.value.role === 'User') {
-                    this.router.navigate(['/user/my-events']);
+                    this.router.navigate(['/user/dashboard']);
                 }
             },
 

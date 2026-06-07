@@ -34,7 +34,7 @@
       </a>
       <a routerLink="/vendor-dashboard/notifications" routerLinkActive="active">
         <i class="bi bi-bell icon"></i>Notifications
-        <span *ngIf="unreadNotificationsCount > 0" class="badge badge-red">{{ unreadNotificationsCount }}</span>
+        <span *ngIf="signalRService.unreadCount() > 0" class="badge badge-red">{{ signalRService.unreadCount() }}</span>
       </a>
     </div>
 
@@ -66,14 +66,14 @@
       <a routerLink="/vendor-dashboard/profile" routerLinkActive="active">
         <i class="bi bi-person icon"></i>Profile
       </a>
-      <a routerLink="/" class="exit-item">
-        <i class="bi bi-arrow-left icon"></i>Back to EpicHub
-      </a>
     </div>
   </nav>
 
   <!-- Footer -->
   <div class="sidebar-footer">
+    <a routerLink="/" class="exit-link">
+      <i class="bi bi-arrow-left icon"></i>Back to EpicHub
+    </a>
     <div class="system-status">
       <div class="status-dot"></div>
       Online · Accepting bookings

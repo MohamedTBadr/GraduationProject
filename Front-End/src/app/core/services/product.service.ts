@@ -88,7 +88,9 @@ export class ProductService {
       return { id: '', name: 'Unknown Service', description: '', price: 0 };
     }
 
-    const imageUrls = this.normalizeImageList(raw.serviceImages ?? raw.ServiceImages);
+    const imageUrls = this.normalizeImageList(
+      raw.serviceImages ?? raw.ServiceImages ?? raw.imageUrls ?? raw.ImageUrls ?? raw.images ?? raw.Images
+    );
     const firstImage = this.normalizeImageUrl(this.pickField(raw, 'imageUrl', 'ImageUrl'))
       ?? imageUrls[0];
 

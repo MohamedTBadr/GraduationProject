@@ -91,74 +91,19 @@
 
     <!-- Right Column: Actions -->
     <div class="space-y-6">
-      <!-- Status & Assignment -->
       <div class="ad-card p-6">
-        <h3 class="text-lg font-semibold mb-4">Management</h3>
-        
-        <!-- Assignment -->
-        <div class="mb-6">
-          <label class="block text-xs font-bold uppercase tracking-wider text-[rgba(255,255,255,0.5)] mb-2">Assigned Agent</label>
-          <div *ngIf="ticket.assigned_to" class="flex items-center gap-3 p-3 bg-[rgba(255,255,255,0.03)] rounded-lg mb-4">
-            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold">
-              {{ticket.assigned_to.name.charAt(0)}}
-            </div>
-            <div>
-              <div class="text-sm font-semibold">{{ticket.assigned_to.name}}</div>
-              <div class="text-[10px] text-[rgba(255,255,255,0.4)]">Agent ID: {{ticket.assigned_to.agent_id}}</div>
-            </div>
-          </div>
-          
-          <div class="space-y-3">
-            <input
-              type="text"
-              [(ngModel)]="agentId"
-              class="ad-input w-full"
-              placeholder="Agent ID (e.g. AGT-001)"
-              autocomplete="off">
-            <textarea [(ngModel)]="assignNote" placeholder="Internal assignment note..." class="ad-input w-full text-sm" rows="2"></textarea>
-            <button (click)="onAssign()" [disabled]="!agentId.trim()" class="ad-btn ad-btn-ghost w-full">Assign Ticket</button>
-          </div>
-        </div>
+        <h3 class="text-lg font-semibold mb-4">Resolve Ticket</h3>
 
-        <hr class="border-[rgba(255,255,255,0.1)] mb-6">
-
-        <!-- Resolution -->
         <div *ngIf="ticket.status !== 'resolved'">
-          <label class="block text-xs font-bold uppercase tracking-wider text-[rgba(255,255,255,0.5)] mb-2">Resolve Ticket</label>
           <textarea [(ngModel)]="resolutionNote" placeholder="Final resolution note..." class="ad-input w-full text-sm mb-3" rows="3"></textarea>
           <button (click)="onResolve()" [disabled]="!resolutionNote.trim()" class="ad-btn ad-btn-success w-full">
             Mark as Resolved
           </button>
         </div>
-        
+
         <div *ngIf="ticket.status === 'resolved'" class="p-4 bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)] rounded-lg">
           <div class="text-green-500 font-bold text-sm mb-1"><i class="fas fa-check-circle mr-1"></i> Resolved</div>
           <div class="text-xs text-[rgba(255,255,255,0.6)]">Resolved at: {{ticket.resolved_at | date:'medium'}}</div>
-        </div>
-      </div>
-
-      <!-- Escalation -->
-      <div class="ad-card p-6 border-red-900/30">
-        <h3 class="text-lg font-semibold mb-4 text-red-400">Escalation</h3>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs text-[rgba(255,255,255,0.5)] mb-1">Escalate To</label>
-            <select [(ngModel)]="escalateTo" class="ad-input w-full">
-              <option value="senior_management">Senior Management</option>
-              <option value="legal_team">Legal Team</option>
-              <option value="cto">CTO</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs text-[rgba(255,255,255,0.5)] mb-1">Reason</label>
-            <textarea [(ngModel)]="escalateReason" placeholder="Reason for escalation..." class="ad-input w-full text-sm" rows="3"></textarea>
-          </div>
-          <label class="flex items-center gap-2 cursor-pointer text-sm">
-            <input type="checkbox" [(ngModel)]="notifyFinance"> Notify Finance Team
-          </label>
-          <button (click)="onEscalate()" [disabled]="!escalateReason.trim()" class="ad-btn ad-btn-danger w-full">
-            Escalate Ticket
-          </button>
         </div>
       </div>
     </div>

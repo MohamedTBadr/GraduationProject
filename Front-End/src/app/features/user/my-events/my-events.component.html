@@ -6,7 +6,17 @@
         class="event-tab-item"
         [class.active]="isActiveEvent(ev.id)"
         (click)="switchEvent(ev.id)">
-        {{ ev.name }}
+        <span class="event-tab-name">{{ ev.name }}</span>
+        <button type="button"
+                class="event-tab-pay"
+                *ngIf="eventHasPayableItems(ev.id)"
+                [disabled]="isPaying && isActiveEvent(ev.id)"
+                (click)="payNowForEvent(ev.id, $event)"
+                title="Pay for approved services">
+            <i class="bi bi-credit-card"></i>
+            <span *ngIf="pendingOrderForEvent(ev.id)">Resume</span>
+            <span *ngIf="!pendingOrderForEvent(ev.id)">{{ eventApprovedAmount(ev.id) | number }}</span>
+        </button>
         <div class="event-tab-indicator" *ngIf="isActiveEvent(ev.id)"></div>
     </div>
     
@@ -71,14 +81,17 @@
                     </div>
                 </div>
                 <div class="budget-info-row sub">
-                    <span>Spent: {{spent | number}} EGP</span>
+                    <span>Committed: {{spent | number}} EGP</span>
                     <span>Left: {{(activeEvent.budget - spent) | number}} EGP</span>
                 </div>
             </div>
             <div class="budget-vendor-list">
                 <div *ngFor="let v of activeEvent.vendors" class="bvl-item">
                     <span class="bvl-type">{{v.emoji}} {{v.type}}</span>
-                    <span class="bvl-price">{{v.price | number}} EGP</span>
+                    <span class="bvl-price" [class.bvl-price--pending]="v.status === 'pending'">
+                        {{v.price | number}} EGP
+                        <span class="bvl-pending-note" *ngIf="v.status === 'pending'">pending</span>
+                    </span>
                 </div>
                 <div class="bvl-remaining">
                     <span>Remaining</span>
@@ -165,7 +178,7 @@
                     <div class="vi-name">{{ item.vendorName }}</div>
                     <div class="vi-type">
                         {{ item.serviceName }}
-                        {{ item.price > 0 ? '· ' + ((item.price * (item.quantity || 1)) | number) + ' EGP' : '' }}
+                        · {{ itemLineTotal(item) | number }} EGP
                     </div>
                 </div>
                 <span class="badge" [ngClass]="itemBadgeClass(item)">{{ itemStatusLabel(item) }}</span>

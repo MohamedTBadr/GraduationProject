@@ -30,7 +30,7 @@ export class AppComponent implements OnInit, OnDestroy {
     ).subscribe(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior }));
 
     if (this.authService.isLoggedIn()) {
-      this.signalRService.startConnections();
+      this.signalRService.sessionBootstrap();
     }
 
     this.theme.initTheme();

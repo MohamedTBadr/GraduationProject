@@ -22,8 +22,8 @@
         <i class="bi bi-chat"></i>
       </button>
 
-      <!-- Notifications -->
-      <div class="nav-notif-wrapper" *ngIf="authService.isLoggedIn()">
+      <!-- Notifications (personal inbox — not admin broadcast) -->
+      <div class="nav-notif-wrapper" *ngIf="authService.isLoggedIn() && authService.role() !== 'Admin'">
         <button
           class="nav-icon-btn"
           title="Notifications"
@@ -39,11 +39,15 @@
         <div class="notif-panel" *ngIf="showNotifPanel" (click)="$event.stopPropagation()">
           <div class="notif-panel-header">
             <span class="notif-panel-title">Notifications</span>
-            <button class="notif-clear-btn" *ngIf="signalRService.notifications().length > 0" (click)="clearNotifications()">Clear all</button>
+            <button class="notif-clear-btn" *ngIf="signalRService.notifications().length > 0" (click)="goToNotificationsPage()">View all</button>
           </div>
           <div class="notif-list" *ngIf="signalRService.notifications().length > 0">
-            <div class="notif-item" *ngFor="let n of signalRService.notifications().slice(0, 8)">
-              <div class="notif-dot"></div>
+            <div
+              class="notif-item"
+              *ngFor="let n of signalRService.notifications().slice(0, 8)"
+              [class.read]="n.isRead"
+              (click)="goToNotificationsPage()">
+              <div class="notif-dot" *ngIf="!n.isRead"></div>
               <div class="notif-content">
                 <strong class="notif-title">{{ n.title }}</strong>
                 <p class="notif-message">{{ n.message }}</p>
@@ -109,7 +113,7 @@
         <button
           *ngIf="authService.role() === 'User'"
           class="btn-nav-login"
-          routerLink="/user/my-events"
+          routerLink="/user/dashboard"
           title="My Events"
         >
           My Portal

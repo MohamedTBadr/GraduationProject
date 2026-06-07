@@ -2,10 +2,8 @@ import { ApiProduct } from '../types/api.interfaces';
 
 /** Primary cover image for a product/service card. */
 export function getProductCoverImage(product?: ApiProduct | null): string | null {
-  if (!product) return null;
-  if (product.imageUrl) return product.imageUrl;
-  if (product.imageUrls?.length) return product.imageUrls[0];
-  return null;
+  const urls = getProductImageUrls(product);
+  return urls[0] ?? null;
 }
 
 /** Extract image URL strings from a raw API service object. */
@@ -28,11 +26,17 @@ export function getServiceImagesFromRaw(service: any): string[] {
 /** All displayable image URLs for a product. */
 export function getProductImageUrls(product?: ApiProduct | null): string[] {
   if (!product) return [];
-  if (product.imageUrls?.length) return product.imageUrls.filter(u => !!u);
+
+  const fromList = (product.imageUrls ?? [])
+    .filter((u): u is string => typeof u === 'string' && !!u.trim());
+  if (fromList.length) return fromList;
+
   if (product.imageUrl) {
-    return product.imageUrl.split(',').map(s => s.trim()).filter(s => !!s);
+    const fromSingle = product.imageUrl.split(',').map(s => s.trim()).filter(s => !!s);
+    if (fromSingle.length) return fromSingle;
   }
-  return [];
+
+  return getServiceImagesFromRaw(product);
 }
 
 /** Safe value for CSS background-image (handles spaces, parentheses in S3 filenames). */

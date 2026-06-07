@@ -87,8 +87,8 @@
         <div
           class="msg-bubble-wrap"
           *ngFor="let msg of messages"
-          [class.outgoing]="msg.senderId === currentUserId"
-          [class.incoming]="msg.senderId !== currentUserId"
+          [class.outgoing]="isOutgoing(msg)"
+          [class.incoming]="!isOutgoing(msg)"
         >
           <div class="msg-bubble">
             <p class="bubble-text">{{ msg.content }}</p>

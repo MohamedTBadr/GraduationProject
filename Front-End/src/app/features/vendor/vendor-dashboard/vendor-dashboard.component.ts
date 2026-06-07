@@ -12,6 +12,7 @@ import { catchError } from 'rxjs/operators';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { environment } from '../../../../environments/environment';
 import { normalizeVendorReport, VendorReportView } from '../../../shared/utils/vendor-report.normalizer';
+import { VendorBookingsRefreshService } from '../../../core/services/vendor-bookings-refresh.service';
 
 @Component({
   selector: 'app-vendor-dashboard',
@@ -40,7 +41,8 @@ export class VendorDashboardComponent implements OnInit {
     private eventService: EventService,
     private vendorService: VendorService,
     private http: HttpClient,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private bookingsRefresh: VendorBookingsRefreshService
   ) {}
 
   ngOnInit() {
@@ -107,15 +109,15 @@ export class VendorDashboardComponent implements OnInit {
     this.averageRating.set(vendor?.rating || 0);
 
     let pendingCount = 0;
-    const upcoming: EventResponseDto[] = [];
+    const upcomingById = new Map<string, EventResponseDto>();
     const pending: any[] = [];
     const vendorIdNorm = this.normalizeId(this.vendorId);
 
     events.forEach(event => {
       event.eventItems?.forEach(item => {
         if (!vendorIdNorm || this.normalizeId(item.vendorId) === vendorIdNorm) {
-          if (item.itemStatus === 'Approved') {
-            upcoming.push(event);
+          if (item.itemStatus === 'Approved' || item.itemStatus === 'Paid') {
+            upcomingById.set(event.id, event);
           } else if (item.itemStatus === 'Pending') {
             pendingCount++;
             pending.push({
@@ -132,7 +134,7 @@ export class VendorDashboardComponent implements OnInit {
     });
 
     this.pendingRequests.set(pendingCount);
-    this.upcomingEvents.set(upcoming.slice(0, 5));
+    this.upcomingEvents.set([...upcomingById.values()].slice(0, 5));
     this.pendingEvents.set(pending.slice(0, 5));
   }
 
@@ -144,14 +146,30 @@ export class VendorDashboardComponent implements OnInit {
   }
 
   acceptRequest(request: any) {
-    this.eventService.approveItem(request.eventId, request.itemId, { approve: true }).subscribe(() => {
-      this.loadDashboardData();
+    this.eventService.approveItem(request.eventId, request.itemId, { approve: true }).subscribe({
+      next: () => {
+        this.toastService.show('Booking request accepted.', 'success');
+        this.loadDashboardData();
+        this.bookingsRefresh.notifyRefresh();
+      },
+      error: (err) => {
+        console.error('Error accepting booking request', err);
+        this.toastService.show('Failed to accept booking request.', 'error');
+      }
     });
   }
 
   declineRequest(request: any) {
-    this.eventService.approveItem(request.eventId, request.itemId, { approve: false, reason: 'Declined' }).subscribe(() => {
-      this.loadDashboardData();
+    this.eventService.approveItem(request.eventId, request.itemId, { approve: false, reason: 'Declined' }).subscribe({
+      next: () => {
+        this.toastService.show('Booking request declined.', 'info');
+        this.loadDashboardData();
+        this.bookingsRefresh.notifyRefresh();
+      },
+      error: (err) => {
+        console.error('Error declining booking request', err);
+        this.toastService.show('Failed to decline booking request.', 'error');
+      }
     });
   }
 }

@@ -23,7 +23,11 @@
 
   <div class="vd-tab-pane active">
     <div class="vd-card">
-      <div *ngIf="filteredNotifications.length > 0; else noNotifs">
+      <div *ngIf="loading" class="p-[40px] text-center text-[var(--gray)]">
+        Loading notifications…
+      </div>
+
+      <div *ngIf="!loading && filteredNotifications.length > 0; else noNotifs">
         <div
           class="notif-row"
           *ngFor="let notif of paginatedNotifications"
@@ -31,7 +35,7 @@
           (click)="markAsRead(notif)">
 
           <!-- Icon -->
-          <div class="notif-icon" [style]="getTypeColor(notif.type)">
+          <div class="notif-icon" [style.color]="getTypeColor(notif.type)">
             <i class="bi" [ngClass]="getTypeIcon(notif.type)"></i>
           </div>
 
@@ -51,13 +55,16 @@
       </div>
 
       <ng-template #noNotifs>
-        <div class="p-[40px] text-center text-[var(--gray)]">
-          No {{ activeTab === 'All' ? '' : activeTab.toLowerCase() + ' ' }}notifications found.
+        <div *ngIf="!loading" class="p-[40px] text-center text-[var(--gray)]">
+          <p class="m-0 mb-[8px]">No {{ activeTab === 'All' ? '' : activeTab.toLowerCase() + ' ' }}notifications yet.</p>
+          <p class="m-0 text-[0.82rem] opacity-80">
+            You'll see order, payment, and account updates here when they arrive.
+          </p>
         </div>
       </ng-template>
 
       <app-pagination
-        *ngIf="filteredNotifications.length > pageSize"
+        *ngIf="!loading && filteredNotifications.length > pageSize"
         [currentPage]="pageNumber"
         [totalPages]="totalPages"
         [totalCount]="filteredNotifications.length"

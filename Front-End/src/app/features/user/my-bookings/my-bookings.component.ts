@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../../core/services/event.service';
-import { EventResponseDto } from '../../../shared/types/api.interfaces';
+import { EventItemResponseDto, EventResponseDto } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReviewModalComponent } from './review-modal.component';
@@ -27,7 +27,7 @@ interface Booking {
 @Component({
   selector: 'app-my-bookings',
   standalone: true,
-  imports: [CommonModule, ReviewModalComponent, ReportIssueModalComponent, PaginationComponent],
+  imports: [CommonModule, ReviewModalComponent, ReportIssueModalComponent, PaginationComponent, RouterLink],
   templateUrl: './my-bookings.component.html',
   styleUrls: ['./my-bookings.component.scss']
 })
@@ -97,22 +97,30 @@ export class MyBookingsComponent implements OnInit {
     });
   }
 
+  private mapItemStatus(item: EventItemResponseDto, eventStatus?: string): Booking['status'] {
+    let status: Booking['status'] = 'Pending';
+    switch (item.itemStatus) {
+      case 'Approved': status = 'Confirmed'; break;
+      case 'Paid': status = 'Paid'; break;
+      case 'Rejected': status = 'Cancelled'; break;
+      case 'Done': status = 'Done'; break;
+      case 'Completed': status = 'Completed'; break;
+    }
+    if (eventStatus === 'Completed' && (status === 'Paid' || status === 'Done')) {
+      status = 'Completed';
+    }
+    return status;
+  }
+
   private mapEventsToBookings(events: EventResponseDto[]): Booking[] {
     const allBookings: Booking[] = [];
     events.forEach(ev => {
       if (ev.eventItems && ev.eventItems.length > 0) {
-        ev.eventItems.forEach(item => {
-          let localStatus: Booking['status'] = 'Pending';
-          if (item.itemStatus === 'Approved') localStatus = 'Confirmed';
-          if (item.itemStatus === 'Paid') localStatus = 'Paid';
-          if (item.itemStatus === 'Rejected') localStatus = 'Cancelled';
-          if (item.itemStatus === 'Done') localStatus = 'Done';
-          if (item.itemStatus === 'Completed' || ev.eventStatus === 'Completed') {
-            localStatus = 'Completed';
-          }
+        ev.eventItems.forEach((item, index) => {
+          const localStatus = this.mapItemStatus(item, ev.eventStatus);
 
           allBookings.push({
-                id: item.id || `BK-${Math.floor(Math.random() * 10000)}`,
+                id: item.id || `BK-${ev.id}-${index}`,
                 eventId: ev.id,
                 serviceId: item.serviceId,
                 vendorId: item.vendorId,
@@ -120,9 +128,10 @@ export class MyBookingsComponent implements OnInit {
                 serviceType: item.serviceName || 'Service',
                 eventRef: `${ev.title} · ${new Date(ev.eventDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`,
                 status: localStatus,
-                price: localStatus === 'Pending'
-                  ? (item.price > 0 ? `${item.price.toLocaleString()} EGP` : 'TBD')
-                  : `${item.price.toLocaleString()} EGP`,
+                price: (() => {
+                  const lineTotal = (item.price ?? 0) * (item.quantity ?? 1);
+                  return lineTotal > 0 ? `${lineTotal.toLocaleString()} EGP` : 'TBD';
+                })(),
                 icon: 'shop'
           });
         });
@@ -166,6 +175,9 @@ export class MyBookingsComponent implements OnInit {
 
   get filteredBookings() {
     if (this.activeTab === 'all') return this.bookings;
+    if (this.activeTab === 'confirmed') {
+      return this.bookings.filter(b => b.status === 'Confirmed' || b.status === 'Paid');
+    }
     return this.bookings.filter(b => b.status.toLowerCase() === this.activeTab);
   }
 
@@ -201,9 +213,22 @@ export class MyBookingsComponent implements OnInit {
     this.ordersPageNumber = page;
   }
 
+  private readonly reviewableStatuses: Booking['status'][] = ['Paid', 'Done', 'Completed'];
+
+  canLeaveReview(bk: Booking): boolean {
+    return this.reviewableStatuses.includes(bk.status);
+  }
+
   openReviewModal(bk: Booking) {
-    // Priority: serviceId from backend > item.id as fallback
-    this.selectedServiceId = bk.serviceId || bk.id; 
+    if (!this.canLeaveReview(bk)) {
+      this.toastService.show('You can leave a review after payment is complete.', 'error');
+      return;
+    }
+    if (!bk.serviceId) {
+      this.toastService.show('This booking is not linked to a service yet.', 'error');
+      return;
+    }
+    this.selectedServiceId = bk.serviceId;
     this.isReviewModalOpen = true;
   }
 
@@ -291,8 +316,15 @@ export class MyBookingsComponent implements OnInit {
 
   getBookingStatusLabel(status: string): string {
     if (status === 'Pending') return 'Awaiting Confirmation';
-    if (status === 'Paid')    return 'Paid';
+    if (status === 'Confirmed') return 'Confirmed — Ready to Pay';
+    if (status === 'Paid') return 'Paid';
+    if (status === 'Done') return 'Done';
+    if (status === 'Cancelled') return 'Cancelled';
     return status;
+  }
+
+  payForBooking(bk: Booking) {
+    this.router.navigate(['/user/my-events'], { queryParams: { id: bk.eventId } });
   }
 
   getPaymentStatusLabel(status: string): string {

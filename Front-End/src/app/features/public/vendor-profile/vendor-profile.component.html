@@ -161,7 +161,7 @@
                   </li>
                 </ul>
               </div>
-              <button class="vp-pkg-btn" (click)="activeTab = 'contact'">Inquire About This</button>
+              <button class="vp-pkg-btn" (click)="inquireAboutPackage(pkg)">Inquire About This</button>
             </div>
           </div>
 
@@ -203,96 +203,53 @@
             </div>
           </div>
 
-          <p class="vp-no-reviews" *ngIf="vendorReviews.length === 0">No reviews yet — be the first to share your experience.</p>
+          <p class="vp-no-reviews" *ngIf="vendorReviews.length === 0">No reviews yet.</p>
 
-          <!-- Submit review form -->
-          <div class="vp-review-form">
-            <h3 class="vp-section-title">Write a Review</h3>
-
-            <div class="vp-login-note" *ngIf="!authService.isLoggedIn()">
-              <i class="bi bi-lock"></i>
-              <span><a routerLink="/">Log in</a> to submit a review.</span>
-            </div>
-
-            <ng-container *ngIf="authService.isLoggedIn()">
-              <div class="vp-field">
-                <label>Select Service</label>
-                <select [(ngModel)]="selectedServiceId">
-                  <option value="">Select a service to review</option>
-                  <option *ngFor="let p of products" [value]="p.id">{{ p.name }}</option>
-                </select>
-              </div>
-              <div class="vp-field">
-                <label>Your Rating</label>
-                <div class="vp-star-picker">
-                  <button class="vp-star-btn" *ngFor="let s of [1,2,3,4,5]"
-                          [class.active]="s <= reviewRating"
-                          (click)="reviewRating = s">
-                    <i class="bi bi-star-fill"></i>
-                  </button>
-                  <span class="vp-star-label">{{ getRatingLabel(reviewRating) }}</span>
-                </div>
-              </div>
-              <div class="vp-field">
-                <label>Your Review</label>
-                <textarea [(ngModel)]="reviewText" rows="4"
-                          placeholder="Share your experience with this vendor..."></textarea>
-              </div>
-              <button class="btn btn-gold" (click)="submitReview()" [disabled]="submittingReview">
-                {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
-              </button>
-            </ng-container>
+          <div class="vp-login-note" *ngIf="authService.isLoggedIn()">
+            <i class="bi bi-info-circle"></i>
+            <span>Reviews can be submitted from <a routerLink="/user/my-bookings">My Bookings</a> after payment is complete.</span>
           </div>
         </section>
 
         <!-- Contact Vendor ────────────────────────────────────── -->
         <section *ngIf="activeTab === 'contact'">
-          <div class="vp-contact-grid">
+          <div class="vp-contact-form-wrap">
+            <h3 class="vp-section-title">Message {{ vendor.name }}</h3>
+            <p class="vp-contact-chat-hint" *ngIf="selectedPackage">
+              Inquiring about <strong>{{ selectedPackage.name }}</strong>
+            </p>
+            <p class="vp-contact-chat-hint" *ngIf="!selectedPackage">
+              Share a few event details and your message — we'll start a chat with the vendor. No event plan required.
+            </p>
 
-            <div class="vp-contact-info">
-              <h3 class="vp-section-title">Direct Contact</h3>
-              <div class="vp-contact-row" *ngIf="vendor.email">
-                <i class="bi bi-envelope"></i>
-                <a [href]="'mailto:' + vendor.email">{{ vendor.email }}</a>
+            <div class="vp-form-row">
+              <div class="vp-field">
+                <label>Event Date</label>
+                <input type="date" [(ngModel)]="inquiryEventDate" [min]="today" />
               </div>
-              <div class="vp-contact-row" *ngIf="vendor.phone">
-                <i class="bi bi-telephone"></i>
-                <a [href]="'tel:' + vendor.phone">{{ vendor.phone }}</a>
+              <div class="vp-field">
+                <label>Event Type</label>
+                <select [(ngModel)]="inquiryEventType">
+                  <option value="">Select type</option>
+                  <option *ngFor="let type of eventTypes" [value]="type.name">{{ type.name }}</option>
+                </select>
               </div>
-              <div class="vp-contact-row" *ngIf="locationLabel">
-                <i class="bi bi-geo-alt"></i>
-                <span>{{ locationLabel }}</span>
-              </div>
-              <div class="vp-contact-note">
-                <i class="bi bi-clock"></i>
-                <span>Available for consultations and site visits by appointment.</span>
-              </div>
-              <button class="vp-whatsapp-btn" *ngIf="vendor.phone" (click)="openWhatsApp()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.012l-.582 2.128 2.18-.571c.703.351 1.446.543 2.226.543h.001c3.181 0 5.766-2.586 5.767-5.766 0-3.18-2.585-5.766-5.766-5.766zm3.377 8.203c-.145-.072-.858-.423-.99-.471-.132-.048-.229-.072-.325.072-.096.144-.372.471-.456.567-.084.096-.168.108-.313.036-.145-.072-.611-.225-1.164-.718-.431-.384-.722-.859-.806-1.003-.084-.144-.009-.223.063-.294.065-.064.145-.168.217-.252.072-.084.096-.144.145-.24.048-.096.024-.18-.012-.252-.036-.072-.325-.783-.445-1.071-.117-.282-.236-.243-.325-.248-.084-.004-.18-.005-.276-.005s-.252.036-.384.18c-.132.144-.504.492-.504 1.2s.516 1.392.588 1.488c.072.096 1.015 1.55 2.459 2.173.344.149.611.238.819.304.346.11.66.095.909.058.277-.041.858-.351.978-.69s.12-.63.084-.69c-.036-.06-.132-.096-.277-.168z"/>
-                </svg>
-                Chat on WhatsApp
-              </button>
             </div>
 
-            <div class="vp-contact-form-wrap">
-              <h3 class="vp-section-title">Send a Message</h3>
-              <div class="vp-field">
-                <label>Your Name <span class="required">*</span></label>
-                <input type="text" [(ngModel)]="contactName" placeholder="Full name" />
-              </div>
-              <div class="vp-field">
-                <label>Email Address</label>
-                <input type="email" [(ngModel)]="contactEmail" placeholder="email@example.com" />
-              </div>
-              <div class="vp-field">
-                <label>Message <span class="required">*</span></label>
-                <textarea [(ngModel)]="contactMessage" rows="5"
-                          placeholder="Describe your event and what you need..."></textarea>
-              </div>
-              <button class="btn btn-gold" (click)="sendInquiry()">Send Message</button>
+            <div class="vp-field">
+              <label>Number of Guests</label>
+              <input type="number" [(ngModel)]="inquiryGuestCount" min="1" placeholder="e.g. 150" />
             </div>
 
+            <div class="vp-field">
+              <label>Message <span class="required">*</span></label>
+              <textarea [(ngModel)]="contactMessage" rows="5"
+                        [placeholder]="messagePlaceholder"></textarea>
+            </div>
+
+            <button class="btn btn-gold" [disabled]="startingChat" (click)="startVendorChat()">
+              {{ startingChat ? 'Opening chat...' : 'Start Chat' }}
+            </button>
           </div>
         </section>
 
@@ -325,35 +282,45 @@
 
       <!-- RIGHT: Booking sidebar ──────────────────────────────── -->
       <aside class="vp-sidebar">
-        <div class="vp-booking-card">
-          <div class="vp-price-from" *ngIf="startingPrice > 0">
-            From {{ startingPrice | currency:'EGP':'symbol':'1.0-0' }}
-          </div>
-          <div class="vp-price-from vp-price-request" *ngIf="startingPrice === 0">
-            Price on request
-          </div>
-          <p class="vp-price-note">Starting price · exact quote on request</p>
+        <div class="vp-sidebar-stack">
+          <div class="vp-booking-card">
+            <div class="vp-price-from" *ngIf="startingPrice > 0">
+              From {{ startingPrice | currency:'EGP':'symbol':'1.0-0' }}
+            </div>
+            <div class="vp-price-from vp-price-request" *ngIf="startingPrice === 0">
+              Price on request
+            </div>
+            <p class="vp-price-note">Starting price · exact quote on request</p>
 
-          <div class="vp-field">
-            <label>Event Date</label>
-            <input type="date" [(ngModel)]="eventDate" [min]="today" />
-          </div>
-          <div class="vp-field">
-            <label>Event Type</label>
-            <select [(ngModel)]="eventType">
-              <option *ngFor="let type of eventTypes" [value]="type.name">{{ type.name }}</option>
-            </select>
+            <button class="vp-book-btn" (click)="activeTab = 'contact'">
+              <i class="bi bi-chat-dots"></i> Message Vendor
+            </button>
           </div>
 
-          <button class="vp-book-btn" (click)="requestBooking()">
-            <i class="bi bi-calendar-check"></i> Request Booking
-          </button>
-          <button class="vp-whatsapp-btn" *ngIf="vendor.phone" (click)="openWhatsApp()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.012l-.582 2.128 2.18-.571c.703.351 1.446.543 2.226.543h.001c3.181 0 5.766-2.586 5.767-5.766 0-3.18-2.585-5.766-5.766-5.766zm3.377 8.203c-.145-.072-.858-.423-.99-.471-.132-.048-.229-.072-.325.072-.096.144-.372.471-.456.567-.084.096-.168.108-.313.036-.145-.072-.611-.225-1.164-.718-.431-.384-.722-.859-.806-1.003-.084-.144-.009-.223.063-.294.065-.064.145-.168.217-.252.072-.084.096-.144.145-.24.048-.096.024-.18-.012-.252-.036-.072-.325-.783-.445-1.071-.117-.282-.236-.243-.325-.248-.084-.004-.18-.005-.276-.005s-.252.036-.384.18c-.132.144-.504.492-.504 1.2s.516 1.392.588 1.488c.072.096 1.015 1.55 2.459 2.173.344.149.611.238.819.304.346.11.66.095.909.058.277-.041.858-.351.978-.69s.12-.63.084-.69c-.036-.06-.132-.096-.277-.168z"/>
-            </svg>
-            WhatsApp
-          </button>
+          <div class="vp-direct-contact-card">
+            <h4 class="vp-direct-contact-title">Direct Contact</h4>
+            <p class="vp-direct-contact-note">
+              <i class="bi bi-clock"></i>
+              Available for consultations and site visits by appointment.
+            </p>
+            <div class="vp-direct-contact-links">
+              <a *ngIf="vendor.email" [href]="'mailto:' + vendor.email" class="vp-direct-link">
+                <i class="bi bi-envelope"></i> {{ vendor.email }}
+              </a>
+              <a *ngIf="vendor.phone" [href]="'tel:' + vendor.phone" class="vp-direct-link">
+                <i class="bi bi-telephone"></i> {{ vendor.phone }}
+              </a>
+              <span *ngIf="locationLabel" class="vp-direct-link">
+                <i class="bi bi-geo-alt"></i> {{ locationLabel }}
+              </span>
+            </div>
+            <button class="vp-whatsapp-btn vp-whatsapp-btn--compact" *ngIf="vendor.phone" (click)="openWhatsApp()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.012l-.582 2.128 2.18-.571c.703.351 1.446.543 2.226.543h.001c3.181 0 5.766-2.586 5.767-5.766 0-3.18-2.585-5.766-5.766-5.766zm3.377 8.203c-.145-.072-.858-.423-.99-.471-.132-.048-.229-.072-.325.072-.096.144-.372.471-.456.567-.084.096-.168.108-.313.036-.145-.072-.611-.225-1.164-.718-.431-.384-.722-.859-.806-1.003-.084-.144-.009-.223.063-.294.065-.064.145-.168.217-.252.072-.084.096-.144.145-.24.048-.096.024-.18-.012-.252-.036-.072-.325-.783-.445-1.071-.117-.282-.236-.243-.325-.248-.084-.004-.18-.005-.276-.005s-.252.036-.384.18c-.132.144-.504.492-.504 1.2s.516 1.392.588 1.488c.072.096 1.015 1.55 2.459 2.173.344.149.611.238.819.304.346.11.66.095.909.058.277-.041.858-.351.978-.69s.12-.63.084-.69c-.036-.06-.132-.096-.277-.168z"/>
+              </svg>
+              WhatsApp
+            </button>
+          </div>
         </div>
       </aside>
     </div>

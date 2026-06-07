@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppNotification } from '../../../shared/types/api.interfaces';
 import { ToastService } from '../../../shared/components/toast/toast.service';
@@ -43,31 +43,40 @@ export class NotificationsComponent implements OnInit {
   tabs = ['All', 'Bookings', 'Events', 'Payments', 'Account'];
   pageNumber = 1;
   pageSize = 12;
+  loading = false;
+  /** Local list drives the template so HTTP loads always re-render. */
+  notifications: AppNotification[] = [];
 
   constructor(
     private notificationService: NotificationService,
     private toastService: ToastService,
     public signalRService: SignalRService
-  ) {}
-
-  ngOnInit(): void {
-    if (this.signalRService.notifications().length === 0) {
-      this.loadNotifications();
-    }
-  }
-
-  loadNotifications(): void {
-    this.notificationService.getNotifications().subscribe({
-      next: (data) => {
-        this.signalRService.notifications.set(data || []);
-        this.signalRService.unreadCount.set((data || []).filter(n => !n.isRead).length);
-      },
-      error: () => this.toastService.show('Failed to load notifications', 'error')
+  ) {
+    effect(() => {
+      const shared = this.signalRService.notifications();
+      if (shared.length === 0) return;
+      this.notifications = [...shared];
     });
   }
 
-  get notifications(): AppNotification[] {
-    return this.signalRService.notifications();
+  ngOnInit(): void {
+    this.loadNotifications();
+  }
+
+  loadNotifications(): void {
+    this.loading = true;
+    this.notificationService.getNotifications().subscribe({
+      next: (data) => {
+        this.notifications = data || [];
+        this.signalRService.notifications.set(this.notifications);
+        this.signalRService.unreadCount.set(this.notifications.filter(n => !n.isRead).length);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.toastService.show('Failed to load notifications', 'error');
+      }
+    });
   }
 
   get filteredNotifications(): AppNotification[] {
@@ -126,13 +135,13 @@ export class NotificationsComponent implements OnInit {
       case TYPE.PAYMENT_ACCEPTED:
       case TYPE.EVENT_ITEM_APPROVED:
       case TYPE.ORDER_COMPLETED:
-      case TYPE.ACCOUNT_ACCEPTED:    return 'color:var(--gold)';
+      case TYPE.ACCOUNT_ACCEPTED:    return 'var(--gold, #c9a84c)';
       case TYPE.PAYMENT_REJECTED:
       case TYPE.ORDER_REJECTED:
       case TYPE.ORDER_CANCELLED:
       case TYPE.ACCOUNT_SUSPENDED:
-      case TYPE.EVENT_ITEM_REJECTED: return 'color:#ef4444';
-      default:                       return '';
+      case TYPE.EVENT_ITEM_REJECTED: return '#ef4444';
+      default:                       return 'var(--gray, #64748b)';
     }
   }
 
@@ -141,8 +150,9 @@ export class NotificationsComponent implements OnInit {
     this.notificationService.markAsRead(notification.id).subscribe({
       next: () => {
         notification.isRead = true;
+        this.notifications = [...this.notifications];
         this.signalRService.unreadCount.update(c => Math.max(0, c - 1));
-        this.signalRService.notifications.update(n => [...n]);
+        this.signalRService.notifications.set(this.notifications);
       },
       error: () => this.toastService.show('Failed to mark as read', 'error')
     });

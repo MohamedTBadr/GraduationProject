@@ -235,8 +235,8 @@
             <div class="svc-card-top">
               <span class="svc-cat-badge">{{ svc.vendorTypeName || svc.serviceTypeName }}</span>
               <div class="svc-card-actions">
-                <button class="svc-action-btn" [class.active]="isInWishlist(svc.id)" (click)="toggleWishlist(svc, $event)" title="Save">
-                  <i class="bi bi-heart"></i>
+                <button class="svc-action-btn" [class.active]="isServiceFavorite(svc)" (click)="toggleServiceFavorite(svc, $event)" title="Save">
+                  <i class="bi" [class.bi-heart]="!isServiceFavorite(svc)" [class.bi-heart-fill]="isServiceFavorite(svc)"></i>
                 </button>
                 <button class="svc-action-btn" [class.compare-active]="isInCompare(svc.id)" (click)="addToCompare(svc, $event)" title="Compare">
                   <i class="bi bi-arrow-left-right"></i>

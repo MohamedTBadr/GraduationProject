@@ -29,7 +29,7 @@
 
     <!-- Back button -->
     <button class="btn-back" (click)="goBack()">
-      <i class="bi bi-arrow-left"></i> Back to Bookings
+      <i class="bi bi-arrow-left"></i> Back to My Events
     </button>
 
     <div class="checkout-grid">
@@ -37,6 +37,32 @@
       <!-- Order Summary Card -->
       <div class="summary-card">
         <h3 class="card-title"><i class="bi bi-receipt"></i> Order Summary</h3>
+
+        <div class="checkout-line-items" *ngIf="eventItems.length > 0">
+          <div class="checkout-line checkout-line--payable" *ngFor="let item of payableItems">
+            <div>
+              <strong>{{ item.serviceName }}</strong>
+              <span class="line-meta">{{ item.vendorName }}</span>
+            </div>
+            <div class="line-right">
+              <span>{{ itemLineTotal(item) | number }} EGP</span>
+              <span class="line-badge line-badge--included">Included in payment</span>
+            </div>
+          </div>
+
+          <div class="checkout-line checkout-line--pending" *ngFor="let item of pendingItems">
+            <div>
+              <strong>{{ item.serviceName }}</strong>
+              <span class="line-meta">{{ item.vendorName }}</span>
+            </div>
+            <div class="line-right">
+              <span>{{ itemLineTotal(item) | number }} EGP</span>
+              <span class="line-badge line-badge--pending">Pending approval — not charged</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-divider" *ngIf="eventItems.length > 0"></div>
 
         <div class="summary-row total-row">
           <span>Total Amount</span>

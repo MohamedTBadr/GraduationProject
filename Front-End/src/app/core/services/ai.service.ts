@@ -9,6 +9,7 @@ import {
   RecommendationResponse,
   ApiResult
 } from '../../shared/types/api.interfaces';
+import { unwrapApiValue } from '../../shared/utils/ai-response.utils';
 
 @Injectable({ providedIn: 'root' })
 export class AiService {
@@ -26,7 +27,7 @@ export class AiService {
       totalBudget,
       eventTypeName
     }, { headers }).pipe(
-      map(res => res?.value ?? res)
+      map(res => unwrapApiValue<BudgetAllocationResponse>(res)!)
     );
   }
 
@@ -37,7 +38,7 @@ export class AiService {
   getEventTimeline(eventId: string): Observable<EventTimelineResponse> {
     const headers = new HttpHeaders({ 'IdempotencyKey': crypto.randomUUID() });
     return this.http.post<ApiResult<EventTimelineResponse>>(`${this.apiUrl}/event-timeline/${eventId}`, {}, { headers }).pipe(
-      map(res => res?.value ?? res)
+      map(res => unwrapApiValue<EventTimelineResponse>(res)!)
     );
   }
 
@@ -47,7 +48,7 @@ export class AiService {
    */
   getClientsLikeYouRecommendations(eventId: string): Observable<RecommendationResponse> {
     return this.http.get<ApiResult<RecommendationResponse>>(`${this.apiUrl}/clients-like-you/${eventId}`).pipe(
-      map(res => res?.value ?? res)
+      map(res => unwrapApiValue<RecommendationResponse>(res)!)
     );
   }
 }

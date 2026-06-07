@@ -154,8 +154,9 @@
         <!-- Empty / Not Yet Loaded State -->
         <div class="ai-initial" *ngIf="!loadingBudget && !budgetAllocation && !budgetError">
           <h3>Smart Budget Breakdown</h3>
-          <p>Configure your target budget and event type above to get an AI-powered breakdown of how to allocate your funds across all key categories.</p>
-          <button class="btn btn-gold btn-lg mt-4" (click)="loadBudgetAllocation()">
+          <p *ngIf="selectedBudget > 0">Configure your target budget and event type above to get an AI-powered breakdown of how to allocate your funds across all key categories.</p>
+          <p *ngIf="selectedBudget <= 0">Enter a target budget above 0, then generate an AI-powered category breakdown.</p>
+          <button class="btn btn-gold btn-lg mt-4" (click)="loadBudgetAllocation()" [disabled]="selectedBudget <= 0">
             <i class="bi bi-pie-chart"></i> Generate Budget Plan
           </button>
         </div>

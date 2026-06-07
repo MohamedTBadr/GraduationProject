@@ -55,7 +55,12 @@
   </div>
 </div>
 
-<div class="mb-list" *ngIf="activeTab !== 'orders' && activeTab !== 'rewards'">
+<div class="mb-loading" *ngIf="loading">
+  <i class="bi bi-arrow-repeat mb-loading-icon"></i>
+  <span>Loading your bookings…</span>
+</div>
+
+<div class="mb-list" *ngIf="!loading && activeTab !== 'orders' && activeTab !== 'rewards'">
   <div class="mb-booking-card" *ngFor="let bk of paginatedBookings">
     <div class="bk-top">
       <div class="bk-info">
@@ -88,10 +93,11 @@
     <div class="bk-actions-bar">
       <div class="bk-actions">
         <ng-container *ngIf="bk.status !== 'Cancelled'">
+          <button class="btn btn-pay-now" *ngIf="bk.status === 'Confirmed'" (click)="payForBooking(bk)"><i class="bi bi-credit-card"></i> Pay Now</button>
           <button class="btn" (click)="messageVendor(bk)"><i class="bi bi-chat-dots"></i> Message</button>
           <button class="btn cancel" *ngIf="bk.status === 'Pending' || bk.status === 'Confirmed'" (click)="cancelBooking(bk)"><i class="bi bi-x-circle"></i> Cancel</button>
           <button class="btn cancel" (click)="reportIssue(bk)"><i class="bi bi-exclamation-triangle"></i> Report an Issue</button>
-          <button class="btn btn-leave-review" *ngIf="bk.status === 'Paid' || bk.status === 'Done' || bk.status === 'Completed'" (click)="openReviewModal(bk)"><i class="bi bi-star"></i> Leave Review</button>
+          <button class="btn btn-leave-review" *ngIf="canLeaveReview(bk)" (click)="openReviewModal(bk)"><i class="bi bi-star"></i> Leave Review</button>
         </ng-container>
       </div>
       <div class="bk-id">{{bk.id}}</div>
@@ -105,9 +111,19 @@
     [pageSize]="pageSize"
     (pageChange)="onPageChange($event)">
   </app-pagination>
+
+  <div class="empty-state" *ngIf="filteredBookings.length === 0">
+    <div class="empty-state-icon"><i class="bi bi-calendar-check"></i></div>
+    <h3>No bookings in this view</h3>
+    <p *ngIf="activeTab === 'pending'">Vendor confirmations will appear here once you book a service.</p>
+    <p *ngIf="activeTab === 'confirmed'">Approved services ready for payment will show here.</p>
+    <p *ngIf="activeTab === 'completed'">Completed services will appear here after your event.</p>
+    <p *ngIf="activeTab === 'all'">Book vendors from Explore or My Events to get started.</p>
+    <a class="btn btn-manage-event" routerLink="/explore">Browse Services</a>
+  </div>
 </div>
 
-<div class="mb-list" *ngIf="activeTab === 'orders'">
+<div class="mb-list" *ngIf="!loading && activeTab === 'orders'">
   <div class="mb-booking-card" *ngFor="let order of paginatedOrders">
     <div class="bk-top">
       <div class="bk-info">
@@ -137,36 +153,15 @@
     <div class="bk-actions-bar">
       <div class="bk-actions">
         <ng-container *ngIf="order.paymentStatus === 'Pending'">
-          <div class="pay-wrapper">
-            <button class="btn btn-pay-now"
-                    [disabled]="!hasApprovedItems(order.eventId)"
-                    (click)="navigateToCheckout(order.id)">
-              <i class="bi bi-lock-fill"></i>
-              <ng-container *ngIf="hasApprovedItems(order.eventId)">
-                Pay for {{ approvedItemCount(order.eventId) }} service(s)
-              </ng-container>
-              <ng-container *ngIf="!hasApprovedItems(order.eventId)">
-                Awaiting Approval
-              </ng-container>
-            </button>
-
-            <!-- Informational — never a hard blocker -->
-            <span class="pending-hint pending-hint--approved"
-                  *ngIf="hasApprovedItems(order.eventId) && pendingItemCount(order.eventId) > 0">
-              <i class="bi bi-info-circle"></i>
-              {{ pendingItemCount(order.eventId) }} more service(s) still awaiting vendor approval — pay for those later.
-            </span>
-            <span class="pending-hint"
-                  *ngIf="!hasApprovedItems(order.eventId)">
-              <i class="bi bi-hourglass-split"></i>
-              No services approved yet. Payment will unlock once vendors confirm.
-            </span>
-            <span class="pending-hint pending-hint--paid"
-                  *ngIf="paidItemCount(order.eventId) > 0">
-              <i class="bi bi-bag-check"></i>
-              {{ paidItemCount(order.eventId) }} service(s) already paid in a previous round.
-            </span>
-          </div>
+          <button class="btn btn-pay-now" (click)="navigateToCheckout(order.id)">
+            <i class="bi bi-credit-card"></i> Resume Checkout
+          </button>
+          <a class="btn btn-manage-event"
+             [routerLink]="['/user/my-events']"
+             [queryParams]="{ id: order.eventId }">
+            <i class="bi bi-calendar-star"></i>
+            View Event
+          </a>
         </ng-container>
         <div class="bk-order-items" *ngIf="order.paymentStatus !== 'Pending'">
           <span>Event booking payment</span>

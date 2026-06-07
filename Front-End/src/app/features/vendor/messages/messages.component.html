@@ -91,8 +91,8 @@
           <div
             class="vd-bubble-wrap"
             *ngFor="let msg of messages"
-            [class.me]="msg.senderId === currentUserId"
-            [class.them]="msg.senderId !== currentUserId"
+            [class.me]="isOutgoing(msg)"
+            [class.them]="!isOutgoing(msg)"
           >
             <div class="vd-bubble">
               <p class="vd-bubble-text">{{ msg.content }}</p>

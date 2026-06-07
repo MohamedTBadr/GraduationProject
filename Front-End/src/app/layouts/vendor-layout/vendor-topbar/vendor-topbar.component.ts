@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ThemeService } from '../../../services/theme.service';
+import { SignalRService } from '../../../core/services/signalr.service';
 
 @Component({
   selector: 'app-vendor-topbar',
@@ -11,5 +12,8 @@ import { ThemeService } from '../../../services/theme.service';
   styleUrl: './vendor-topbar.component.scss'
 })
 export class VendorTopbarComponent {
-  constructor(public theme: ThemeService) {}
+  constructor(
+    public theme: ThemeService,
+    public signalRService: SignalRService
+  ) {}
 }

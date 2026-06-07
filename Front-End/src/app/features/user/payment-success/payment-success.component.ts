@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { OrderService, OrderResponse } from '../../../core/services/order.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 
 @Component({
@@ -23,6 +24,7 @@ export class PaymentSuccessComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private orderService: OrderService,
+    private authService: AuthService,
     private toastService: ToastService
   ) {}
 
@@ -35,7 +37,7 @@ export class PaymentSuccessComponent implements OnInit {
       params.get('order_id') ??
       '';
 
-    if (!this.orderId) {
+    if (!this.orderId || !this.authService.isLoggedIn()) {
       this.loading = false;
       return;
     }
@@ -54,6 +56,6 @@ export class PaymentSuccessComponent implements OnInit {
   }
 
   goToBookings() {
-    this.router.navigate(['/user/bookings']);
+    this.router.navigate(['/user/my-events']);
   }
 }

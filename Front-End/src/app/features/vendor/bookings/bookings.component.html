@@ -156,8 +156,9 @@
               <span class="bk-value-cell">{{cb.value | number:'1.0-0'}} EGP</span>
             </td>
             <td>
-              <div class="vd-badge-pill vdb-green">
-                <i class="bi bi-check-circle-fill" style="margin-right:3px;"></i> Confirmed
+              <div class="vd-badge-pill" [ngClass]="getStatusClass(cb.status)">
+                <i class="bi" [ngClass]="cb.status === 'Paid' ? 'bi-bag-check-fill' : 'bi-check-circle-fill'" style="margin-right:3px;"></i>
+                {{ getStatusLabel(cb.status) }}
               </div>
             </td>
             <td>
@@ -342,8 +343,9 @@
               <span class="bk-value-cell">{{ub.value | number:'1.0-0'}} EGP</span>
             </td>
             <td>
-              <div class="vd-badge-pill vdb-green">
-                <i class="bi bi-check-circle-fill" style="margin-right:3px;"></i> Confirmed
+              <div class="vd-badge-pill" [ngClass]="getStatusClass(ub.status)">
+                <i class="bi" [ngClass]="ub.status === 'Paid' ? 'bi-bag-check-fill' : 'bi-check-circle-fill'" style="margin-right:3px;"></i>
+                {{ getStatusLabel(ub.status) }}
               </div>
             </td>
             <td>
@@ -544,16 +546,16 @@
         </button>
       </div>
 
-      <!-- Actions for confirmed bookings -->
-      <div class="vd-submit-bar gap-3" *ngIf="booking.status === 'Approved'">
+      <!-- Actions for confirmed / paid bookings -->
+      <div class="vd-submit-bar gap-3" *ngIf="booking.status === 'Approved' || booking.status === 'Paid'">
         <button class="vd-btn vd-btn-ghost" style="border-radius:50px; padding:10px 24px" (click)="closeDetails()">Close</button>
-        <button class="vd-btn vd-btn-green" style="border-radius:50px; padding:10px 24px" (click)="markAsDone(booking); closeDetails()">
+        <button class="vd-btn vd-btn-green" style="border-radius:50px; padding:10px 24px" (click)="markAsDone(booking)">
           <i class="bi bi-check2-all"></i> Mark as Done
         </button>
       </div>
 
       <!-- Close only for history -->
-      <div class="vd-submit-bar gap-3" *ngIf="booking.status !== 'Pending' && booking.status !== 'Approved'">
+      <div class="vd-submit-bar gap-3" *ngIf="booking.status !== 'Pending' && booking.status !== 'Approved' && booking.status !== 'Paid'">
         <button class="vd-btn vd-btn-ghost" style="border-radius:50px; padding:10px 24px; margin-left:auto" (click)="closeDetails()">Close</button>
       </div>
     </ng-container>

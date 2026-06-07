@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { ModalService } from '../../../shared/services/modal.service';
+import { SignalRService } from '../../../core/services/signalr.service';
 
 @Component({
   selector: 'app-register',
@@ -19,6 +20,7 @@ export class RegisterComponent {
   private router = inject(Router);
   private toastService = inject(ToastService);
   private modalService = inject(ModalService);
+  private signalRService = inject(SignalRService);
 
   registerForm: FormGroup = this.fb.group({
     name: ['', Validators.required],
@@ -50,6 +52,7 @@ export class RegisterComponent {
       next: (response) => {
         this.isLoading = false;
         this.toastService.show('Account created successfully!', 'success');
+        this.signalRService.sessionBootstrap();
         this.modalService.close(); // Close modal upon success
 
         // redirect based on role
@@ -58,7 +61,7 @@ export class RegisterComponent {
         } else if (response.value.role === 'Vendor') {
           this.router.navigate(['/vendor-dashboard']);
         } else {
-          this.router.navigate(['/user/my-events']);
+          this.router.navigate(['/user/dashboard']);
         }
       },
       error: (err: any) => {

@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { VendorService } from '../../../core/services/vendor.service';
 import { EventService } from '../../../core/services/event.service';
 import { ChatService } from '../../../core/services/chat.service';
-import { NotificationService } from '../../../core/services/notification.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 import { ApiVendor, EventResponseDto } from '../../../shared/types/api.interfaces';
 import { formatVendorLocation } from '../../../shared/utils/location.utils';
+import { VendorBookingsRefreshService } from '../../../core/services/vendor-bookings-refresh.service';
 
 @Component({
   selector: 'app-vendor-sidebar',
@@ -17,22 +18,23 @@ import { formatVendorLocation } from '../../../shared/utils/location.utils';
   templateUrl: './vendor-sidebar.component.html',
   styleUrl: './vendor-sidebar.component.scss'
 })
-export class VendorSidebarComponent implements OnInit {
+export class VendorSidebarComponent implements OnInit, OnDestroy {
   vendorName: string | null = null;
   vendorCategory: string | null = null;
   vendorLocation: string | null = null;
   pendingBookingsCount = 0;
   unreadMessagesCount = 0;
-  unreadNotificationsCount = 0;
 
   private vendorId: string | null = null;
+  private refreshSub?: Subscription;
 
   constructor(
     private authService: AuthService,
     private vendorService: VendorService,
     private eventService: EventService,
     private chatService: ChatService,
-    private notificationService: NotificationService,
+    private router: Router,
+    private bookingsRefresh: VendorBookingsRefreshService,
     public signalRService: SignalRService
   ) {}
 
@@ -56,7 +58,13 @@ export class VendorSidebarComponent implements OnInit {
 
     this.loadPendingBookings();
     this.loadUnreadMessages();
-    this.loadUnreadNotifications();
+
+    this.refreshSub = this.bookingsRefresh.refresh$.subscribe(() => this.loadPendingBookings());
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => this.loadPendingBookings());
+  }
+
+  ngOnDestroy(): void {
+    this.refreshSub?.unsubscribe();
   }
 
   private loadPendingBookings(): void {
@@ -69,11 +77,16 @@ export class VendorSidebarComponent implements OnInit {
     });
   }
 
+  private normalizeId(id: string | null | undefined): string {
+    return id == null ? '' : String(id).trim().toLowerCase();
+  }
+
   private countPendingBookings(events: EventResponseDto[]): number {
     let count = 0;
+    const vendorIdNorm = this.normalizeId(this.vendorId);
     events.forEach(event => {
       event.eventItems.forEach(item => {
-        if (item.vendorId === this.vendorId && item.itemStatus === 'Pending') {
+        if (this.normalizeId(item.vendorId) === vendorIdNorm && item.itemStatus === 'Pending') {
           count++;
         }
       });
@@ -90,16 +103,6 @@ export class VendorSidebarComponent implements OnInit {
         );
       },
       error: () => { this.unreadMessagesCount = 0; }
-    });
-  }
-
-  private loadUnreadNotifications(): void {
-    this.notificationService.getNotifications().subscribe({
-      next: (data) => {
-        this.unreadNotificationsCount = (data || []).filter(n => !n.isRead).length;
-        this.signalRService.unreadCount.set(this.unreadNotificationsCount);
-      },
-      error: () => { this.unreadNotificationsCount = 0; }
     });
   }
 }

@@ -23,14 +23,7 @@ export class TicketDetailComponent implements OnInit {
   sendEmail: boolean = true;
   sendSms: boolean = false;
 
-  agentId: string = '';
-  assignNote: string = '';
-
   resolutionNote: string = '';
-
-  escalateReason: string = '';
-  escalateTo: 'senior_management' | 'legal_team' | 'cto' = 'senior_management';
-  notifyFinance: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -77,22 +70,6 @@ export class TicketDetailComponent implements OnInit {
     });
   }
 
-  onAssign(): void {
-    if (!this.agentId.trim()) return;
-    this.supportService.assign(this.ticketId, {
-      agentId: this.agentId.trim(),
-      note: this.assignNote.trim() || undefined,
-    }).subscribe({
-      next: () => {
-        this.agentId = '';
-        this.assignNote = '';
-        this.toastService.show('Ticket assigned.', 'success');
-        this.loadTicket();
-      },
-      error: () => this.toastService.show('Failed to assign ticket. Check the agent ID and try again.', 'error')
-    });
-  }
-
   onResolve(): void {
     if (!this.resolutionNote.trim()) return;
     this.supportService.resolve(this.ticketId, {
@@ -104,24 +81,6 @@ export class TicketDetailComponent implements OnInit {
         this.loadTicket();
       },
       error: () => this.toastService.show('Failed to resolve ticket.', 'error')
-    });
-  }
-
-  onEscalate(): void {
-    if (!this.escalateReason.trim()) return;
-    this.supportService.adminEscalate(this.ticketId, {
-      reason: this.escalateReason.trim(),
-      escalateTo: this.escalateTo,
-      notifyFinance: this.notifyFinance,
-    }).subscribe({
-      next: () => {
-        this.toastService.show(`Ticket escalated to ${this.escalateTo.replace('_', ' ')}.`, 'success');
-        this.escalateReason = '';
-        this.loadTicket();
-      },
-      error: () => {
-        this.toastService.show('Failed to escalate ticket. Please try again.', 'error');
-      }
     });
   }
 }

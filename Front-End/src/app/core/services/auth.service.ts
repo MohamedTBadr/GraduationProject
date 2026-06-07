@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, Injector, signal, computed } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpContext, HttpContextToken } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError, map, shareReplay, finalize } from 'rxjs';
@@ -15,6 +15,7 @@ import {
   ResetPasswordRequest
 } from '../../shared/types/api.interfaces';
 import { environment } from '../../../environments/environment';
+import { SignalRService } from './signalr.service';
 
 export const SKIP_AUTH = new HttpContextToken<boolean>(() => false);
 export const SKIP_ERROR_TOAST = new HttpContextToken<boolean>(() => false);
@@ -35,7 +36,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private injector: Injector
   ) {
     try {
       const savedSession = localStorage.getItem('eventora_session');
@@ -286,6 +288,7 @@ export class AuthService {
   }
 
   logout() {
+    this.injector.get(SignalRService).stopConnections();
     this.currentUser.set(null);
     localStorage.removeItem('eventora_session');
     localStorage.removeItem('eventora_token');

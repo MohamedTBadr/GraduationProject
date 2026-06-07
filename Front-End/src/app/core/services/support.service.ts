@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 import {
   CreateTicketRequest,
   SupportTicket,
@@ -38,8 +39,12 @@ export interface SubmittedTicketRecord {
 export class SupportService {
   private readonly adminBaseUrl = `${environment.apiUrl}/admin/support/tickets`;
   private readonly userTicketsUrl = `${environment.apiUrl}/support/tickets`;
+  private readonly localTicketsPrefix = 'eventora_support_tickets';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+  ) {}
 
   /** GET /admin/support/tickets/stats - Get ticket stats */
   getStats(): Observable<TicketStats> {
@@ -63,6 +68,13 @@ export class SupportService {
     const params = this.buildTicketParams({ ...filters, type: submitterType });
     return this.http.get<unknown>(this.userTicketsUrl, { params }).pipe(
       map((raw) => this.mapPagedTickets(raw).data.map((ticket) => this.toSubmittedRecord(ticket, submitterType))),
+      catchError((err: HttpErrorResponse) => {
+        // Backend only exposes POST on /support/tickets today — fall back to local cache.
+        if (err.status === 405 || err.status === 404) {
+          return of(this.readLocalTickets(submitterType));
+        }
+        return throwError(() => err);
+      }),
     );
   }
 
@@ -129,8 +141,13 @@ export class SupportService {
 
   /** POST /support/tickets - Open a support ticket (Vendor, Customer) */
   openTicket(payload: CreateTicketRequest): Observable<SupportTicket> {
+    const submitterType = (payload.type === 'Vendor' ? 'Vendor' : 'Client') as TicketSubmitterType;
     return this.http.post<unknown>(this.userTicketsUrl, payload).pipe(
-      map((raw) => mapSupportTicket(raw)),
+      map((raw) => {
+        const ticket = mapSupportTicket(raw);
+        this.appendLocalTicket(ticket, submitterType);
+        return ticket;
+      }),
     );
   }
 
@@ -201,5 +218,38 @@ export class SupportService {
       booking_ref: ticket.booking_ref,
       submitter_type: submitterType,
     };
+  }
+
+  private localTicketsKey(submitterType: TicketSubmitterType): string {
+    const userId = this.authService.user()?.id ?? 'anonymous';
+    return `${this.localTicketsPrefix}_${userId}_${submitterType}`;
+  }
+
+  private readLocalTickets(submitterType: TicketSubmitterType): SubmittedTicketRecord[] {
+    try {
+      const raw = localStorage.getItem(this.localTicketsKey(submitterType));
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private appendLocalTicket(ticket: SupportTicket, submitterType: TicketSubmitterType): void {
+    const record = this.toSubmittedRecord(ticket, submitterType);
+    if (!record.ticket_id) return;
+
+    const existing = this.readLocalTickets(submitterType);
+    if (existing.some((item) => item.ticket_id === record.ticket_id)) return;
+
+    try {
+      localStorage.setItem(
+        this.localTicketsKey(submitterType),
+        JSON.stringify([record, ...existing]),
+      );
+    } catch {
+      // Ignore quota / private-mode storage errors.
+    }
   }
 }

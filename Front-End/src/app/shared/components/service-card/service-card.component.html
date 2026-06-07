@@ -1,6 +1,11 @@
 <div class="vd-svc-card cursor-pointer" [class.grid-mode]="viewMode === 'grid'" (click)="actionClick.emit('detail')">
   <!-- Image or Fallback Icon -->
-  <img class="svc-media w-[70px] h-[70px] rounded-[12px] object-cover shrink-0 [box-shadow:0_2px_8px_rgba(0,0,0,0.05)]" *ngIf="coverImage; else fallbackIcon" [src]="coverImage">
+  <img class="svc-media w-[70px] h-[70px] rounded-[12px] object-cover shrink-0 [box-shadow:0_2px_8px_rgba(0,0,0,0.05)]"
+       *ngIf="coverImage; else fallbackIcon"
+       [src]="coverImage"
+       [alt]="service.name"
+       loading="lazy"
+       (error)="onImageError()">
   <ng-template #fallbackIcon>
     <div class="vd-svc-icon bg-[#f8fafc] rounded-[12px] flex items-center justify-center w-[70px] h-[70px] shrink-0 [box-shadow:0_2px_8px_rgba(0,0,0,0.05)]">
       <i class="bi bi-tools" style="font-size:1.6rem;color:var(--gray)"></i>
@@ -20,6 +25,9 @@
     </div>
     
     <div class="vd-svc-meta text-[0.8rem] text-[#64748b] flex gap-[12px] items-center">
+      <span class="has-images" *ngIf="imageCount > 0">
+        <i class="bi bi-images me-1"></i>{{ imageCount }} photo{{ imageCount === 1 ? '' : 's' }}
+      </span>
       <span *ngIf="service.status === 'active'">0 bookings</span>
       <span *ngIf="service.status === 'paused'">Paused since today</span>
     </div>

@@ -6,6 +6,8 @@
   flex-direction: column;
   height: 100vh;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
   overflow: hidden;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -199,6 +201,33 @@
   padding: 14px 18px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
+}
+
+.ad-exit-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: rgba(239, 68, 68, 0.6);
+  text-decoration: none;
+  transition: var(--trans);
+  margin-bottom: 12px;
+
+  .ad-icon {
+    font-size: 0.95rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    color: inherit;
+  }
+
+  &:hover {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.07);
+  }
 }
 
 .ad-sys-status {

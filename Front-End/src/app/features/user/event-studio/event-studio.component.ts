@@ -14,6 +14,11 @@ import {
   EventTimelineResponse,
   RecommendationItem
 } from '../../../shared/types/api.interfaces';
+import {
+  extractApiErrorMessage,
+  normalizeBudgetAllocation,
+  normalizeEventTimeline
+} from '../../../shared/utils/ai-response.utils';
 
 @Component({
   selector: 'app-event-studio',
@@ -101,7 +106,9 @@ export class EventStudioComponent implements OnInit {
       if (!this.selectedEventType) {
         this.selectedEventType = this.eventTypeName;
       }
-      this.loadBudgetAllocation();
+      if (this.selectedBudget > 0) {
+        this.loadBudgetAllocation();
+      }
     }
     // Timeline is loaded only on explicit "Generate Timeline" button click
   }
@@ -164,6 +171,7 @@ export class EventStudioComponent implements OnInit {
   loadBudgetAllocation() {
     this.loadingBudget = true;
     this.budgetError = null;
+    this.budgetAllocation = null;
 
     if (!this.selectedBudget) {
       this.selectedBudget = this.eventBudget;
@@ -172,28 +180,30 @@ export class EventStudioComponent implements OnInit {
       this.selectedEventType = this.eventTypeName;
     }
 
+    if (this.selectedBudget <= 0) {
+      this.loadingBudget = false;
+      this.budgetError = 'Set a target budget above 0 before generating an allocation.';
+      return;
+    }
+
     this.aiService.getBudgetAllocation(this.selectedBudget, this.selectedEventType).subscribe({
-      next: (res: any) => {
+      next: (res) => {
         this.loadingBudget = false;
-        const raw = res?.value ?? res;
-        if (raw) {
-          this.budgetAllocation = {
-            totalBudget: raw.totalBudget ?? 0,
-            eventType: raw.eventType ?? '',
-            advice: raw.advice ?? '',
-            categories: (raw.categories ?? []).map((cat: any) => ({
-              name: cat.name ?? '',
-              amount: cat.amount ?? 0,
-              percentage: cat.percentage ?? 0,
-              description: cat.description ?? ''
-            }))
-          };
+        const normalized = normalizeBudgetAllocation(
+          res,
+          this.selectedBudget,
+          this.selectedEventType
+        );
+        if (normalized) {
+          this.budgetAllocation = normalized;
+        } else {
+          this.budgetError = 'The AI returned an empty or invalid budget breakdown. Please try again.';
         }
       },
       error: (err) => {
         this.loadingBudget = false;
-        this.budgetError = "Failed to retrieve smart budget allocation.";
-        console.error("Error loading budget allocation:", err);
+        this.budgetError = extractApiErrorMessage(err, 'Failed to retrieve smart budget allocation.');
+        console.error('Error loading budget allocation:', err);
       }
     });
   }
@@ -320,29 +330,20 @@ export class EventStudioComponent implements OnInit {
     this.editingIndex = null;
 
     this.aiService.getEventTimeline(this.eventId).subscribe({
-      next: (res: any) => {
+      next: (res) => {
         this.loadingTimeline = false;
-        const raw = res?.value ?? res;
-        if (raw) {
-          this.timelineData = {
-            eventId: raw.eventId ?? '',
-            eventTitle: raw.eventTitle ?? '',
-            planningNotes: raw.planningNotes ?? '',
-            timeline: (raw.timeline ?? []).map((item: any) => ({
-              time: item.time ?? '',
-              activity: item.activity ?? '',
-              duration: item.duration ?? '',
-              importance: item.importance ?? 'Low'
-            }))
-          };
-          // Seed local mutable copy
-          this.localTimeline = this.timelineData.timeline.map(i => ({ ...i }));
+        const normalized = normalizeEventTimeline(res);
+        if (normalized) {
+          this.timelineData = normalized;
+          this.localTimeline = normalized.timeline.map(i => ({ ...i }));
+        } else {
+          this.timelineError = 'The AI returned an empty or invalid timeline. Please try again.';
         }
       },
       error: (err) => {
         this.loadingTimeline = false;
-        this.timelineError = "Failed to generate AI day-of timeline.";
-        console.error("Error loading timeline:", err);
+        this.timelineError = extractApiErrorMessage(err, 'Failed to generate AI day-of timeline.');
+        console.error('Error loading timeline:', err);
       }
     });
   }

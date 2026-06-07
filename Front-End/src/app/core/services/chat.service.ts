@@ -1,22 +1,21 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import * as signalR from '@microsoft/signalr';
 import { environment } from '../../../environments/environment';
 import { ChatMessage, Conversation } from '../../shared/types/api.interfaces';
-import { AuthService } from './auth.service';
+import { SignalRService } from './signalr.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService implements OnDestroy {
   private readonly apiUrl = environment.apiUrl;
-  private hubConnection: signalR.HubConnection | null = null;
+  private readonly http = inject(HttpClient);
+  private readonly signalR = inject(SignalRService);
 
   /** Emits whenever a new real-time message arrives via SignalR */
   private messageReceived$ = new Subject<ChatMessage>();
   onMessageReceived$ = this.messageReceived$.asObservable();
-
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  private chatBridgeSub?: Subscription;
 
   // ─────────────────────────────────────────────
   // REST endpoints
@@ -25,7 +24,15 @@ export class ChatService implements OnDestroy {
   /** GET /Chat/messages/{otherUserId} */
   getMessages(otherUserId: string): Observable<ChatMessage[]> {
     return this.http.get<any>(`${this.apiUrl}/Chat/messages/${otherUserId}`).pipe(
-      map(res => (res.value || res) as ChatMessage[])
+      map(res => {
+        const list = (res.value || res) as unknown[];
+        return (list || [])
+          .map(item => this.normalizeMessage(item as Record<string, unknown>))
+          .sort(
+            (a, b) =>
+              new Date(a.sentAt || 0).getTime() - new Date(b.sentAt || 0).getTime()
+          );
+      })
     );
   }
 
@@ -49,7 +56,11 @@ export class ChatService implements OnDestroy {
 
     const lastMsg = raw['lastMessage'] as Record<string, unknown> | string | null | undefined;
     const lastMessageText =
-      typeof lastMsg === 'string' ? lastMsg : (lastMsg?.['content'] as string | undefined);
+      typeof lastMsg === 'string'
+        ? lastMsg
+        : lastMsg
+          ? this.normalizeMessage(lastMsg).content
+          : undefined;
     const lastMessageAt =
       typeof lastMsg === 'object' && lastMsg?.['sentAt']
         ? String(lastMsg['sentAt'])
@@ -64,75 +75,63 @@ export class ChatService implements OnDestroy {
     };
   }
 
+  private normalizeMessage(raw: Record<string, unknown>): ChatMessage {
+    return {
+      id: String(raw['id'] ?? raw['Id'] ?? ''),
+      senderId: String(raw['senderId'] ?? raw['SenderId'] ?? ''),
+      receiverId: String(raw['receiverId'] ?? raw['ReceiverId'] ?? ''),
+      content: String(raw['content'] ?? raw['Content'] ?? ''),
+      sentAt: (raw['sentAt'] ?? raw['SentAt']) as string | undefined,
+      isRead: (raw['isRead'] ?? raw['IsRead']) as boolean | undefined,
+    };
+  }
+
   // ─────────────────────────────────────────────
-  // SignalR real-time connection
+  // SignalR (shared hub via SignalRService)
   // ─────────────────────────────────────────────
 
-  /** Starts a persistent WebSocket connection to the messages hub */
+  /** Ensures the shared chat hub is connected and bridges incoming messages */
   startConnection(): void {
-    if (this.hubConnection) return; // already connected
+    this.signalR.startConnections();
 
-    this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(environment.signalRUrl, {
-        accessTokenFactory: () => this.authService.getToken() ?? ''
-      })
-      .withAutomaticReconnect()
-      .configureLogging(signalR.LogLevel.Warning)
-      .build();
-
-    // Listen for incoming messages
-    this.hubConnection.on('ReceiveMessage', (message: ChatMessage) => {
-      this.messageReceived$.next(message);
-    });
-
-    // Listen for presence events to suppress warnings
-    this.hubConnection.on('UserPresence', (presence: any) => {
-      // console.log('[ChatService] User presence updated:', presence);
-    });
-
-    this.hubConnection
-      .start()
-      .then(() => console.log('[ChatService] SignalR connected'))
-      .catch((err) => console.error('[ChatService] SignalR connection error:', err));
+    if (!this.chatBridgeSub) {
+      this.chatBridgeSub = this.signalR.chatMessageReceived.subscribe((msg) => {
+        this.messageReceived$.next(this.normalizeMessage(msg as Record<string, unknown>));
+      });
+    }
   }
 
   /** Sends a message through the SignalR hub */
-  sendMessage(receiverId: string, content: string): Promise<void> {
-    if (!this.hubConnection) {
-      return Promise.reject(new Error('SignalR not connected. Call startConnection() first.'));
-    }
-    return this.hubConnection.invoke('SendMessage', receiverId, content);
+  async sendMessage(receiverId: string, content: string): Promise<void> {
+    await this.signalR.ensureHubConnected();
+    await this.signalR.invokeHub('SendMessage', receiverId, content);
   }
 
   /** Marks a message as read via the SignalR hub */
-  markAsRead(messageId: string): Promise<void> {
-    if (!this.hubConnection) {
-      return Promise.reject(new Error('SignalR not connected. Call startConnection() first.'));
-    }
-    return this.hubConnection.invoke('MarkAsRead', messageId);
+  async markAsRead(messageId: string): Promise<void> {
+    if (!messageId) return;
+    await this.signalR.ensureHubConnected();
+    await this.signalR.invokeHub('MarkAsRead', messageId);
   }
 
   /** Marks all unread messages in a thread as read for the current user */
   markConversationAsRead(messages: ChatMessage[], currentUserId: string): void {
+    const readerId = currentUserId.toLowerCase();
     messages
-      .filter(m => m.id && m.receiverId === currentUserId && !m.isRead)
+      .filter(m => m.id && m.receiverId.toLowerCase() === readerId && !m.isRead)
       .forEach(m => {
         this.markAsRead(m.id!).catch(() => {});
       });
   }
 
-  /** Stops the SignalR connection and cleans up */
-  stopConnection(): void {
-    if (this.hubConnection) {
-      this.hubConnection.stop().then(() => {
-        console.log('[ChatService] SignalR disconnected');
-        this.hubConnection = null;
-      });
-    }
+  /** Waits until the shared hub is ready (for deep-link auto-send flows) */
+  ensureConnected(): Promise<void> {
+    this.startConnection();
+    return this.signalR.ensureHubConnected();
   }
 
   ngOnDestroy(): void {
-    this.stopConnection();
+    this.chatBridgeSub?.unsubscribe();
     this.messageReceived$.complete();
   }
 }

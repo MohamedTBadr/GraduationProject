@@ -22,7 +22,9 @@
 
 <!-- List -->
 <div class="notif-list">
-  <ng-container *ngIf="filteredNotifications.length > 0; else empty">
+  <div *ngIf="loading" class="notif-empty">Loading notifications…</div>
+
+  <ng-container *ngIf="!loading && filteredNotifications.length > 0; else empty">
     <div
       class="notif-card"
       *ngFor="let n of paginatedNotifications"
@@ -47,13 +49,14 @@
   </ng-container>
 
   <ng-template #empty>
-    <div class="notif-empty">
-      No {{ activeTab === 'All' ? '' : activeTab.toLowerCase() + ' ' }}notifications yet.
+    <div *ngIf="!loading" class="notif-empty">
+      <p class="m-0 mb-[6px]">No {{ activeTab === 'All' ? '' : activeTab.toLowerCase() + ' ' }}notifications yet.</p>
+      <p class="m-0 text-[0.85rem] opacity-75">Order, payment, and account updates will appear here.</p>
     </div>
   </ng-template>
 
   <app-pagination
-    *ngIf="filteredNotifications.length > pageSize"
+    *ngIf="!loading && filteredNotifications.length > pageSize"
     [currentPage]="pageNumber"
     [totalPages]="totalPages"
     [totalCount]="filteredNotifications.length"

@@ -345,6 +345,8 @@
     font-size: 0.92rem;
     margin: 0 0 6px 0;
     line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   .bubble-time {

@@ -535,36 +535,22 @@
 }
 
 /* ═══ CONTACT ═══════════════════════════════════════════════════ */
-.vp-contact-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 28px;
-}
-.vp-contact-info,
 .vp-contact-form-wrap {
   background: var(--surface);
   border: 1px solid var(--lgray);
   border-radius: var(--r2);
   padding: 28px;
 }
-.vp-contact-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  font-size: 0.9rem;
-  color: var(--navy);
-  i { color: var(--gold); font-size: 1rem; }
-  a { color: var(--navy); text-decoration: none; &:hover { color: var(--gold); } }
+.vp-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
-.vp-contact-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 0.85rem;
+.vp-contact-chat-hint {
+  font-size: 0.88rem;
   color: var(--gray);
-  margin-bottom: 20px;
-  i { color: var(--gold); margin-top: 2px; }
+  margin: -4px 0 16px;
+  line-height: 1.5;
 }
 
 /* ═══ ABOUT ═════════════════════════════════════════════════════ */
@@ -634,14 +620,62 @@
 
 /* ═══ BOOKING SIDEBAR ═══════════════════════════════════════════ */
 .vp-sidebar { }
+.vp-sidebar-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: sticky;
+  top: calc(var(--nav-h) + 72px);
+}
 .vp-booking-card {
   background: var(--surface);
   border: 1px solid var(--lgray);
   border-radius: var(--r2);
   padding: 28px;
-  position: sticky;
-  top: calc(var(--nav-h) + 72px);
   box-shadow: var(--sh);
+}
+.vp-direct-contact-card {
+  background: var(--surface);
+  border: 1px solid var(--lgray);
+  border-radius: var(--r2);
+  padding: 16px 18px;
+  box-shadow: var(--sh);
+}
+.vp-direct-contact-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--navy);
+  margin: 0 0 10px;
+}
+.vp-direct-contact-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--gray);
+  line-height: 1.5;
+  margin: 0 0 12px;
+  i { color: var(--gold); margin-top: 2px; flex-shrink: 0; }
+}
+.vp-direct-contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.vp-direct-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.76rem;
+  color: var(--navy);
+  text-decoration: none;
+  line-height: 1.4;
+  word-break: break-word;
+  i { color: var(--gold); flex-shrink: 0; }
+  &:hover { color: var(--gold); }
 }
 .vp-price-from {
   font-size: 1.7rem;
@@ -692,6 +726,11 @@
   transition: var(--trans);
   font-family: var(--ff-b);
   &:hover { background: #1ebe5d; transform: translateY(-1px); box-shadow: var(--sh); }
+  &--compact {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    border-radius: var(--r);
+  }
 }
 
 /* ═══ EMPTY STATE ═══════════════════════════════════════════════ */
@@ -835,8 +874,8 @@
     grid-template-columns: 1fr;
     .vp-sidebar { order: -1; }
   }
-  .vp-booking-card { position: static; }
-  .vp-contact-grid { grid-template-columns: 1fr; }
+  .vp-sidebar-stack { position: static; }
+  .vp-form-row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {

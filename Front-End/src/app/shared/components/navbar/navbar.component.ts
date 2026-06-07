@@ -40,7 +40,6 @@ export class NavbarComponent {
   }
 
   logout() {
-    this.signalRService.stopConnections();
     this.authService.logout();
   }
 
@@ -70,9 +69,8 @@ export class NavbarComponent {
   toggleNotificationPanel(event: Event) {
     event.stopPropagation();
     this.showNotifPanel = !this.showNotifPanel;
-    // Reset unread count when panel is opened
     if (this.showNotifPanel) {
-      this.signalRService.unreadCount.set(0);
+      this.signalRService.refreshNotifications();
     }
   }
 
@@ -80,9 +78,13 @@ export class NavbarComponent {
     this.showNotifPanel = false;
   }
 
-  clearNotifications() {
-    this.signalRService.notifications.set([]);
-    this.signalRService.unreadCount.set(0);
+  goToNotificationsPage(): void {
+    const role = this.authService.role();
+    const route =
+      role === 'Vendor' ? '/vendor-dashboard/notifications'
+      : role === 'Admin' ? '/admin/notifications'
+      : '/user/notifications';
+    this.router.navigate([route]);
     this.showNotifPanel = false;
   }
 

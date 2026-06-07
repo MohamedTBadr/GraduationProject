@@ -56,7 +56,7 @@
        routerLink="/user/favorites"
        routerLinkActive="active">
       <span class="uss-nav-icon">
-        <i class="bi bi-heart"></i>
+        <i class="bi bi-heart-fill"></i>
       </span>
       Favorites
     </a>
@@ -68,6 +68,7 @@
         <i class="bi bi-bell"></i>
       </span>
       Notifications
+      <span *ngIf="signalRService.unreadCount() > 0" class="uss-nav-badge red">{{ signalRService.unreadCount() }}</span>
     </a>
 
     <a class="uss-nav-link"

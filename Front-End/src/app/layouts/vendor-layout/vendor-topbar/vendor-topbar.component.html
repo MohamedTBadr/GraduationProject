@@ -6,7 +6,8 @@
   </div>
   <div class="vd-topbar-actions">
     <div class="vd-icon-btn" routerLink="/vendor-dashboard/notifications" title="Notifications">
-      <i class="bi bi-bell"></i><div class="vd-notif-dot"></div>
+      <i class="bi bi-bell"></i>
+      <div class="vd-notif-dot" *ngIf="signalRService.unreadCount() > 0"></div>
     </div>
     <div  class="vd-icon-btn" title="Theme Toggle">
       <button class="vd-icon-btn" (click)="theme.toggleTheme()" title="Toggle theme">

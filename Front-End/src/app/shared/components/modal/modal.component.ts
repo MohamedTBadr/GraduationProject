@@ -21,6 +21,7 @@ import {
   serviceAreasToLabel
 } from '../../utils/location.utils';
 import { getProductImageUrls } from '../../utils/image.utils';
+import { FavoriteService } from '../../services/favorite.service';
 
 @Component({
   selector: 'app-modal',
@@ -36,6 +37,7 @@ export class ModalComponent implements OnInit {
   eventService = inject(EventService);
   eventTypeService = inject(EventTypeService);
   toastService = inject(ToastService);
+  favoriteService = inject(FavoriteService);
 
   constructor() {
     effect(() => {
@@ -68,9 +70,6 @@ export class ModalComponent implements OnInit {
 
   // Image slider state
   currentSlideIndex = 0;
-
-  // Wishlist (service IDs)
-  wishlist: string[] = [];
 
   ngOnInit() {
     this.eventTypeService.getAll().subscribe({
@@ -225,21 +224,21 @@ export class ModalComponent implements OnInit {
     this.currentSlideIndex = 0;
   }
 
-  // ── Wishlist Helpers ─────────────────────────────────
-  toggleWishlist(productId: string, event?: Event) {
+  // ── Favorites Helpers ────────────────────────────────
+  toggleFavorite(product: { vendorId?: string }, event?: Event) {
     if (event) event.stopPropagation();
-    const idx = this.wishlist.indexOf(productId);
-    if (idx > -1) {
-      this.wishlist.splice(idx, 1);
-      this.toastService.show('Removed from wishlist', 'info');
-    } else {
-      this.wishlist.push(productId);
-      this.toastService.show('Added to wishlist ♥', 'success');
+    const vendorId = product.vendorId;
+    if (!vendorId) {
+      this.toastService.show('Cannot save — vendor unavailable', 'error');
+      return;
     }
+    this.favoriteService.toggleFavorite(vendorId);
+    const isFav = this.favoriteService.isFavorite(vendorId);
+    this.toastService.show(isFav ? 'Saved to favorites!' : 'Removed from favorites', isFav ? 'success' : 'info');
   }
 
-  isInWishlist(productId: string): boolean {
-    return this.wishlist.includes(productId);
+  isFavorite(product: { vendorId?: string }): boolean {
+    return !!product.vendorId && this.favoriteService.isFavorite(product.vendorId);
   }
 
   // ── Vendor Navigation ────────────────────────────────

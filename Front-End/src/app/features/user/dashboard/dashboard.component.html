@@ -1,64 +1,93 @@
 ﻿<div class="stats-row">
     <div class="stat-card" *ngFor="let s of stats">
-        <div class="stat-icon">{{s.icon}}</div>
-        <div class="stat-val">
-            {{s.value}}
-        </div>
-        <div class="stat-lbl">{{s.label}}</div>
+        <div class="stat-icon"><i class="bi bi-{{ s.icon }}"></i></div>
+        <div class="stat-val">{{ s.value }}</div>
+        <div class="stat-lbl">{{ s.label }}</div>
     </div>
 </div>
 
 <!-- Events List -->
 <h3 class="dashboard-section-title">Active Planning</h3>
 
-<div class="events-list">
-    <div class="dash-card event-card" *ngFor="let ev of events" (click)="goToEvent(ev.id)">
-        
-        <div class="dash-card-title">
-            {{ev.name}}
-            <span class="days-left">{{ev.daysLeft}} days left</span>
+<div *ngIf="loading" class="empty-hint">Loading your dashboard…</div>
+
+<div class="events-list" *ngIf="!loading">
+    <div class="dash-card event-card" *ngFor="let ev of events">
+        <div class="event-card-main" (click)="goToEvent(ev.id)">
+            <div class="dash-card-title">
+                {{ ev.name }}
+                <span class="days-left">{{ ev.daysLeft }} days left</span>
+            </div>
+
+            <div class="event-meta">
+                <span><i class="bi bi-calendar3"></i> {{ ev.date | date:'longDate' }}</span>
+                <span><i class="bi bi-stars"></i> {{ ev.type }}</span>
+                <span><i class="bi bi-people"></i> {{ ev.guests }} Guests</span>
+            </div>
+
+            <div class="event-progress-container">
+                <div>
+                    <div class="budget-row">
+                        <span>Vendors</span>
+                        <strong>{{ ev.vendorProgress }}</strong>
+                    </div>
+                    <div class="budget-bar">
+                        <div class="budget-fill"
+                             [style.width.%]="ev.totalVendors > 0 ? (ev.vendorsConfirmed / ev.totalVendors * 100) : 0">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="budget-row">
+                        <span>Tasks</span>
+                        <strong>{{ ev.tasksProgress }}</strong>
+                    </div>
+                    <div class="budget-bar">
+                        <div class="budget-fill fill-green"
+                             [style.width.%]="(ev.tasksDone / ev.totalTasks * 100)">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="budget-row">
+                        <span>Budget Used</span>
+                        <strong>{{ ev.budgetProgress }}</strong>
+                    </div>
+                    <div class="budget-bar">
+                        <div class="budget-fill fill-amber"
+                             [style.width.%]="(ev.budgetUsed / ev.totalBudget * 100)">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <div class="event-meta">
-            <span><i class="bi bi-calendar3"></i> {{ev.date | date:'longDate'}}</span>
-            <span><i class="bi bi-stars"></i> {{ev.type}}</span>
-            <span> {{ev.guests}} Guests</span>
-        </div>
 
-        <div class="event-progress-container">
-            <!-- Vendors -->
-            <div>
-                <div class="budget-row">
-                    <span>Vendors</span>
-                    <strong>{{ev.vendorProgress}}</strong>
-                </div>
-                <div class="budget-bar">
-                    <div class="budget-fill" [style.width]="(ev.vendorsConfirmed / ev.totalVendors * 100) + '%'"></div>
-                </div>
-            </div>
-
-            <!-- Tasks -->
-            <div>
-                <div class="budget-row">
-                    <span>Tasks</span>
-                    <strong>{{ev.tasksProgress}}</strong>
-                </div>
-                <div class="budget-bar">
-                    <div class="budget-fill fill-green" [style.width]="(ev.tasksDone / ev.totalTasks * 100) + '%'"></div>
-                </div>
-            </div>
-
-            <!-- Budget -->
-            <div>
-                <div class="budget-row">
-                    <span>Budget Used</span>
-                    <strong>{{ev.budgetProgress}}</strong>
-                </div>
-                <div class="budget-bar">
-                    <div class="budget-fill fill-amber" [style.width]="(ev.budgetUsed / ev.totalBudget * 100) + '%'"></div>
-                </div>
-            </div>
+        <div class="event-card-actions" *ngIf="ev.canPay || ev.pendingPayCount > 0">
+            <button type="button"
+                    class="btn btn-gold btn-sm event-pay-btn"
+                    [disabled]="isPaying(ev) || (!ev.hasPendingOrder && ev.approvedPayCount === 0)"
+                    (click)="payNow(ev, $event)">
+                <ng-container *ngIf="!isPaying(ev)">
+                    <i class="bi" [ngClass]="ev.hasPendingOrder ? 'bi-arrow-repeat' : 'bi-credit-card'"></i>
+                    <ng-container *ngIf="ev.hasPendingOrder">Resume Payment</ng-container>
+                    <ng-container *ngIf="!ev.hasPendingOrder && ev.approvedPayCount > 0">
+                        Pay Now — {{ ev.approvedPayAmount | number }} EGP
+                    </ng-container>
+                    <ng-container *ngIf="!ev.hasPendingOrder && ev.approvedPayCount === 0">
+                        Awaiting Approval
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="isPaying(ev)">Creating order…</ng-container>
+            </button>
+            <span class="event-pay-hint" *ngIf="ev.pendingPayCount > 0 && ev.approvedPayCount > 0">
+                {{ ev.pendingPayCount }} service(s) still pending vendor approval
+            </span>
         </div>
     </div>
 </div>
 
+<p *ngIf="!loading && events.length === 0" class="empty-hint">
+    You have no events yet. Create one to start planning.
+</p>

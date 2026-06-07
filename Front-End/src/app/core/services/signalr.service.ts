@@ -1,7 +1,8 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
+import { NotificationService } from './notification.service';
 import { ToastService } from '../../shared/components/toast/toast.service';
 import { AppNotification } from '../../shared/types/api.interfaces';
 import { Subject } from 'rxjs';
@@ -22,13 +23,49 @@ export class SignalRService {
   public unreadCount = signal<number>(0);
   public chatMessageReceived = new Subject<any>();
 
-  constructor(private authService: AuthService, private toastService: ToastService) {}
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private notificationService = inject(NotificationService);
+
+  /** Start realtime connections and load notification inbox from REST. */
+  sessionBootstrap(): void {
+    this.startConnections();
+    this.refreshNotifications();
+  }
+
+  /** GET /notifications → sync shared signals used by navbar, sidebars, and pages. */
+  refreshNotifications(): void {
+    if (!this.authService.getToken()) return;
+
+    this.notificationService.getNotifications().subscribe({
+      next: (data) => {
+        const list = data || [];
+        this.notifications.set(list);
+        this.unreadCount.set(list.filter(n => !n.isRead).length);
+      },
+      error: () => {
+        this.toastService.show('Could not load notifications', 'error');
+      }
+    });
+  }
 
   startConnections() {
     const token = this.authService.getToken();
     if (!token) return;
 
-    if (this.hubConnection) return;
+    const state = this.hubConnection?.state;
+    if (
+      state === signalR.HubConnectionState.Connected ||
+      state === signalR.HubConnectionState.Connecting ||
+      state === signalR.HubConnectionState.Reconnecting
+    ) {
+      return;
+    }
+
+    if (this.hubConnection) {
+      this.hubConnection.stop().catch(() => {});
+      this.hubConnection = null;
+    }
 
     const connectionUrl = environment.signalRUrl;
 
@@ -39,40 +76,65 @@ export class SignalRService {
       .withAutomaticReconnect()
       .build();
 
-    this.hubConnection.start()
-      .then(() => console.log('SignalR Hub connected via SignalRService'))
-      .catch(err => {
-        console.error('Error while starting Hub connection:', err);
-        // If 401 Unauthorized or negotiation fails, trigger token refresh & reconnect
-        if (err.statusCode === 401 || (err.message && err.message.includes('401'))) {
-          console.log('[SignalRService] SignalR negotiate 401, refreshing token...');
-          this.authService.refreshTokenOnce().subscribe({
-            next: () => {
-              this.hubConnection = null;
-              this.startConnections();
-            }
-          });
-        }
-      });
-
     this.hubConnection.on('ReceiveMessage', (message: any) => {
-      this.unreadCount.update(c => c + 1);
       this.chatMessageReceived.next(message);
     });
 
-    this.hubConnection.on('ReceiveNotification', (notification: AppNotification) => {
-      this.toastService.show(`New Notification: ${notification.title}`, 'info');
-      this.notifications.update(n => [{ ...notification, isLive: true }, ...n]);
-      this.unreadCount.update(c => c + 1);
+    this.hubConnection.on('ReceiveNotification', (notification: unknown) => {
+      this.pushNotification(notification);
     });
 
     this.hubConnection.on('UserPresence', (_presence: any) => {
       // Ignore
     });
 
+    this.hubConnection.start()
+      .then(() => console.log('SignalR Hub connected via SignalRService'))
+      .catch(err => {
+        console.error('Error while starting Hub connection:', err);
+        this.hubConnection = null;
+        // If 401 Unauthorized or negotiation fails, trigger token refresh & reconnect
+        if (err.statusCode === 401 || (err.message && err.message.includes('401'))) {
+          console.log('[SignalRService] SignalR negotiate 401, refreshing token...');
+          this.authService.refreshTokenOnce().subscribe({
+            next: () => this.startConnections()
+          });
+        }
+      });
+
     // Start SSE for Notifications (with circuit-breaker)
     this.sseRetryCount = 0;
     this.startSseNotifications();
+  }
+
+  /** Resolves when the hub is connected, or rejects after timeout */
+  ensureHubConnected(timeoutMs = 15000): Promise<void> {
+    this.startConnections();
+
+    return new Promise((resolve, reject) => {
+      const startedAt = Date.now();
+
+      const check = () => {
+        const hub = this.hubConnection;
+        if (hub?.state === signalR.HubConnectionState.Connected) {
+          resolve();
+          return;
+        }
+        if (Date.now() - startedAt >= timeoutMs) {
+          reject(new Error('SignalR hub connection timed out'));
+          return;
+        }
+        setTimeout(check, 100);
+      };
+
+      check();
+    });
+  }
+
+  /** Invokes a hub method on the shared connection */
+  async invokeHub(method: string, ...args: unknown[]): Promise<void> {
+    await this.ensureHubConnected();
+    await this.hubConnection!.invoke(method, ...args);
   }
 
   private startSseNotifications() {
@@ -107,10 +169,7 @@ export class SignalRService {
 
     this.eventSource.onmessage = (event) => {
       try {
-        const notification: AppNotification = JSON.parse(event.data);
-        this.toastService.show(`New Notification: ${notification.title}`, 'info');
-        this.notifications.update(n => [{ ...notification, isLive: true }, ...n]);
-        this.unreadCount.update(c => c + 1);
+        this.pushNotification(JSON.parse(event.data));
       } catch (err) {
         console.error('Error parsing SSE notification:', err);
       }
@@ -162,5 +221,21 @@ export class SignalRService {
     this.hubConnection = null;
     this.eventSource?.close();
     this.eventSource = null;
+    this.notifications.set([]);
+    this.unreadCount.set(0);
+  }
+
+  private pushNotification(raw: unknown): void {
+    const notification = this.notificationService.normalizeNotification(raw);
+    if (!notification) return;
+
+    const exists = this.notifications().some(n => n.id === notification.id);
+    if (exists) return;
+
+    this.toastService.show(`New Notification: ${notification.title}`, 'info');
+    this.notifications.update(list => [{ ...notification, isLive: true }, ...list]);
+    if (!notification.isRead) {
+      this.unreadCount.update(c => c + 1);
+    }
   }
 }

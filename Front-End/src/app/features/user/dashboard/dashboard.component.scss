@@ -32,7 +32,40 @@
 }
 
 .stat-icon {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
+    color: var(--gold);
+    margin-bottom: 8px;
+}
+
+.empty-hint {
+    color: var(--gray);
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+}
+
+.event-card-main {
+    cursor: pointer;
+}
+
+.event-card-actions {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--lgray);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.event-pay-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.event-pay-hint {
+    font-size: 0.8rem;
+    color: var(--gray);
 }
 
 .stat-lbl {

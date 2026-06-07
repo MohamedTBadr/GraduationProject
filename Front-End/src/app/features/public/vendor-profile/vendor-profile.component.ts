@@ -1,19 +1,19 @@
 import { Component, OnInit, Inject, PLATFORM_ID, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { FavoriteService } from '../../../shared/services/favorite.service';
-import { ApiVendor, ApiProduct, CreateReviewDto, VendorRatingDto } from '../../../shared/types/api.interfaces';
+import { ApiVendor, ApiProduct, VendorRatingDto } from '../../../shared/types/api.interfaces';
 import { VendorService } from '../../../core/services/vendor.service';
 import { ProductService } from '../../../core/services/product.service';
 import { ApiPackage, PackageService } from '../../../core/services/package.service';
-import { ReviewService } from '../../../core/services/review.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { VendorCardComponent } from '../../../shared/components/vendor-card/vendor-card.component';
 import { EventTypeService } from '../../../core/services/event-type.service';
 import { EventType } from '../../../core/models/taxonomy.models';
 import { ModalService } from '../../../shared/services/modal.service';
+import { ChatLaunchService } from '../../../core/services/chat-launch.service';
 import { formatVendorLocation } from '../../../shared/utils/location.utils';
 import { cssBackgroundImage, getProductImageUrls, getServiceImagesFromRaw } from '../../../shared/utils/image.utils';
 import { VendorDetails } from '../../../shared/types/api.interfaces';
@@ -42,23 +42,20 @@ export class VendorProfileComponent implements OnInit {
   activeImageIndex = 0;
   private embeddedServices: any[] = [];
 
-  eventDate = '';
-  eventType = '';
-  eventTypes: EventType[] = [];
-
-  reviewRating = 5;
-  reviewText = '';
-  selectedServiceId = '';
-  submittingReview = false;
   vendorReviews: VendorRatingDto[] = [];
 
-  contactName = '';
-  contactEmail = '';
   contactMessage = '';
+  inquiryEventDate = '';
+  inquiryEventType = '';
+  inquiryGuestCount: number | null = null;
+  eventTypes: EventType[] = [];
+  selectedPackage: ApiPackage | null = null;
+  startingChat = false;
 
   favoriteService = inject(FavoriteService);
   authService = inject(AuthService);
   private modalService = inject(ModalService);
+  private chatLaunchService = inject(ChatLaunchService);
 
   get today(): string {
     return new Date().toISOString().split('T')[0];
@@ -73,14 +70,21 @@ export class VendorProfileComponent implements OnInit {
     return formatVendorLocation(this.vendor);
   }
 
+  get messagePlaceholder(): string {
+    if (this.selectedPackage) {
+      return `Hi, I'm interested in the "${this.selectedPackage.name}" package. Tell us about your event...`;
+    }
+    return 'Describe your event and what you need...';
+  }
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private toastService: ToastService,
     private vendorService: VendorService,
     private productService: ProductService,
     private packageService: PackageService,
     private eventTypeService: EventTypeService,
-    private reviewService: ReviewService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -145,8 +149,8 @@ export class VendorProfileComponent implements OnInit {
     this.eventTypeService.getAll().subscribe({
       next: (types) => {
         this.eventTypes = types || [];
-        if (this.eventTypes.length > 0) {
-          this.eventType = this.eventTypes[0].name;
+        if (this.eventTypes.length > 0 && !this.inquiryEventType) {
+          this.inquiryEventType = this.eventTypes[0].name;
         }
       },
       error: () => this.toastService.show('Failed to load event types.', 'error')
@@ -228,78 +232,88 @@ export class VendorProfileComponent implements OnInit {
     this.toastService.show(isFav ? 'Added to favorites' : 'Removed from favorites', isFav ? 'success' : 'info');
   }
 
-  requestBooking() {
-    if (!this.eventDate) {
-      this.toastService.show('Please select an event date first.', 'error');
+  inquireAboutPackage(pkg: ApiPackage) {
+    this.selectedPackage = pkg;
+    this.contactMessage = '';
+    this.inquiryEventDate = '';
+    this.inquiryGuestCount = null;
+    this.activeTab = 'contact';
+  }
+
+  private buildChatMessage(): string {
+    const lines: string[] = [];
+    const title = this.selectedPackage ? 'Package Inquiry' : 'Event Inquiry';
+
+    lines.push(title);
+    lines.push('');
+
+    if (this.selectedPackage) {
+      lines.push(`Package: ${this.selectedPackage.name}`);
+    }
+    if (this.inquiryEventType) {
+      lines.push(`Event type: ${this.inquiryEventType}`);
+    }
+    if (this.inquiryEventDate) {
+      lines.push(`Event date: ${new Date(this.inquiryEventDate).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      })}`);
+    }
+    if (this.inquiryGuestCount && this.inquiryGuestCount > 0) {
+      lines.push(`Guests: ${this.inquiryGuestCount}`);
+    }
+
+    const message = this.contactMessage.trim();
+    if (message) {
+      lines.push('');
+      lines.push('Message:');
+      lines.push(message);
+    }
+
+    return lines.join('\n');
+  }
+
+  startVendorChat() {
+    const message = this.contactMessage.trim();
+    if (!message) {
+      this.toastService.show('Please enter a message.', 'error');
       return;
     }
-    this.activeTab = 'contact';
-    this.toastService.show('Please use the contact form to send your booking request.', 'info');
+
+    if (!this.authService.isLoggedIn()) {
+      this.modalService.open('login');
+      return;
+    }
+
+    const vendorId = this.vendor?.id || this.vendorId;
+    const vendorName = this.vendor?.name;
+    if (!vendorId) {
+      this.toastService.show('Vendor contact information is not available.', 'error');
+      return;
+    }
+
+    const fullMessage = this.buildChatMessage();
+
+    this.chatLaunchService.setPending(vendorId, vendorName, fullMessage);
+
+    this.startingChat = true;
+    this.router.navigate(['/user/messages'], {
+      queryParams: {
+        vendorId,
+        vendorName,
+      },
+    }).finally(() => {
+      this.startingChat = false;
+      this.contactMessage = '';
+      this.inquiryEventDate = '';
+      this.inquiryGuestCount = null;
+      this.selectedPackage = null;
+    });
   }
 
   openWhatsApp() {
     if (!this.vendor?.phone || !isPlatformBrowser(this.platformId)) return;
     const phone = this.vendor.phone.replace(/\D/g, '');
     window.open(`https://wa.me/${phone}`, '_blank');
-  }
-
-  submitReview() {
-    const user = this.authService.user();
-    if (!user) {
-      this.toastService.show('Please log in to submit a review.', 'error');
-      return;
-    }
-    if (!this.selectedServiceId) {
-      this.toastService.show('Please select a service to review.', 'error');
-      return;
-    }
-    if (!this.reviewText.trim()) {
-      this.toastService.show('Please write your review.', 'error');
-      return;
-    }
-    this.submittingReview = true;
-    const payload: CreateReviewDto = {
-      userId: user.id,
-      serviceId: this.selectedServiceId,
-      rating: this.reviewRating,
-      review: this.reviewText
-    };
-    this.reviewService.submitReview(payload).subscribe({
-      next: () => {
-        this.toastService.show('Review submitted successfully!', 'success');
-        this.reviewText = '';
-        this.reviewRating = 5;
-        this.selectedServiceId = '';
-        this.submittingReview = false;
-        if (this.vendorId) {
-          this.vendorService.getDetailsById(this.vendorId).subscribe({
-            next: (details) => {
-              this.vendor = details;
-              this.vendorReviews = details.vendorRatings ?? [];
-            }
-          });
-        }
-      },
-      error: () => {
-        this.toastService.show('Failed to submit review. Please try again.', 'error');
-        this.submittingReview = false;
-      }
-    });
-  }
-
-  sendInquiry() {
-    if (!this.contactName.trim() || !this.contactMessage.trim()) {
-      this.toastService.show('Please fill in your name and message.', 'error');
-      return;
-    }
-    this.toastService.show('Message sent! The vendor will get back to you soon.', 'success');
-    this.contactName = '';
-    this.contactEmail = '';
-    this.contactMessage = '';
-  }
-
-  getRatingLabel(r: number): string {
-    return ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][r] || '';
   }
 
   openServiceBooking(product: ApiProduct) {

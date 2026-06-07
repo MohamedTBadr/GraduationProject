@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
+import { SignalRService } from '../../../core/services/signalr.service';
 
 @Component({
   selector: 'app-user-sidebar',
@@ -16,7 +17,8 @@ export class UserSidebarComponent implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private chatService: ChatService
+    private chatService: ChatService,
+    public signalRService: SignalRService
   ) {}
 
   ngOnInit(): void {

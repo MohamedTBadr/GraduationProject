@@ -82,12 +82,12 @@
                 <div class="sdm-container" *ngIf="modalService.modalData() as product">
                     <!-- Image Slider Area -->
                     <div class="sdm-media-wrapper">
-                        <!-- Wishlist Heart Button -->
-                        <button class="sdm-wishlist-toggle" 
-                                [class.active]="isInWishlist(product.id)" 
-                                (click)="toggleWishlist(product.id, $event)"
-                                aria-label="Toggle Wishlist">
-                            <i class="fa-heart" [class.fa-solid]="isInWishlist(product.id)" [class.fa-regular]="!isInWishlist(product.id)"></i>
+                        <!-- Favorite Heart Button -->
+                        <button class="sdm-wishlist-toggle"
+                                [class.active]="isFavorite(product)"
+                                (click)="toggleFavorite(product, $event)"
+                                aria-label="Toggle Favorite">
+                            <i class="bi" [class.bi-heart]="!isFavorite(product)" [class.bi-heart-fill]="isFavorite(product)"></i>
                         </button>
 
                         <!-- Image Carousel -->
