@@ -2,6 +2,7 @@ using Application;
 using Domain.Contracts;
 using Hangfire;
 using Infrastructure;
+using Infrastructure.Search;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
@@ -59,10 +60,13 @@ namespace Web
             });
 
             var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
-            recurringJobManager.AddOrUpdate<Infrastructure.Search.LuceneSyncJob>(
-                "lucene-daily-sync",
-                job => job.SyncIndexAsync(),
-                Cron.Daily);
+            recurringJobManager.AddOrUpdate<LuceneSyncJob>(
+           "lucene-daily-sync",
+           job => job.SyncIndexAsync(),
+           Cron.Daily);
+
+            // Trigger immediately on startup
+            BackgroundJob.Enqueue<LuceneSyncJob>(job => job.SyncIndexAsync());
 
             recurringJobManager.AddOrUpdate<Infrastructure.Jobs.ScheduledReportJob>(
                 "monthly-vendor-reports",
