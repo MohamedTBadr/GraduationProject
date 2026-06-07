@@ -1,4 +1,4 @@
-import { Component, inject, HostListener } from '@angular/core';
+import { Component, inject, HostListener, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ModalService } from '../../services/modal.service';
@@ -14,7 +14,7 @@ import { FavoriteService } from '../../services/favorite.service';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
   isMenuOpen = false;
   isScrolled = false;
   showNotifPanel = false;
@@ -35,6 +35,17 @@ export class NavbarComponent {
     this.showNotifPanel = false;
   }
 
+  @HostListener('document:click')
+  onDocumentClick() {
+    this.showNotifPanel = false;
+  }
+
+  ngOnInit() {
+    if (this.authService.isLoggedIn() && this.authService.role() !== 'Admin') {
+      this.signalRService.refreshNotifications();
+    }
+  }
+
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
@@ -52,11 +63,7 @@ export class NavbarComponent {
   }
 
   goToFavorites() {
-    if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/user/favorites']);
-    } else {
-      this.modalService.open('login');
-    }
+    this.router.navigate(['/favorites']);
   }
 
   goToMessages() {
@@ -72,10 +79,6 @@ export class NavbarComponent {
     if (this.showNotifPanel) {
       this.signalRService.refreshNotifications();
     }
-  }
-
-  closeNotificationPanel(event?: Event) {
-    this.showNotifPanel = false;
   }
 
   goToNotificationsPage(): void {

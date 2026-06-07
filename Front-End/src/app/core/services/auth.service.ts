@@ -356,6 +356,7 @@ export class AuthService {
     localStorage.setItem('eventora_session', JSON.stringify(this.currentUser()));
     localStorage.setItem('eventora_token', response.value.token);
     // The interceptor will capture the refresh token from the raw API response separately
+    queueMicrotask(() => this.injector.get(SignalRService).sessionBootstrap());
   }
 
   private extractClaimsFromToken(token: string): {role: string, id: string} {

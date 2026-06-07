@@ -15,11 +15,15 @@ export class FavoriteService {
     this.loadFavorites();
   }
 
+  private normalizeId(id: string): string {
+    return String(id).trim().toLowerCase();
+  }
+
   private loadFavorites() {
     const saved = localStorage.getItem('eventora_favorites');
     if (saved) {
       const ids = JSON.parse(saved);
-      ids.forEach((id: string) => this.favorites.add(String(id)));
+      ids.forEach((id: string) => this.favorites.add(this.normalizeId(id)));
       this.favoritesCount.set(this.favorites.size);
     }
   }
@@ -30,16 +34,17 @@ export class FavoriteService {
   }
 
   toggleFavorite(id: string) {
-    if (this.favorites.has(id)) {
-      this.favorites.delete(id);
+    const key = this.normalizeId(id);
+    if (this.favorites.has(key)) {
+      this.favorites.delete(key);
     } else {
-      this.favorites.add(id);
+      this.favorites.add(key);
     }
     this.saveFavorites();
   }
 
   isFavorite(id: string): boolean {
-    return this.favorites.has(id);
+    return this.favorites.has(this.normalizeId(id));
   }
 
   getFavoriteIds(): string[] {

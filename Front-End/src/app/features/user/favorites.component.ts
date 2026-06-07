@@ -1,6 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ToastService } from '../../shared/components/toast/toast.service';
 import { FavoriteService } from '../../shared/services/favorite.service';
 import { VendorService } from '../../core/services/vendor.service';
@@ -49,9 +51,13 @@ export class FavoritesComponent implements OnInit {
     }
 
     this.loading = true;
-    this.vendorService.getAll({ pageSize: 500, pageIndex: 1 }).subscribe({
+    const requests = favoriteIds.map(id =>
+      this.vendorService.getById(id).pipe(catchError(() => of(null)))
+    );
+
+    forkJoin(requests).subscribe({
       next: (vendors) => {
-        this.favorites = vendors.filter(v => favoriteIds.includes(v.id));
+        this.favorites = vendors.filter((v): v is ApiVendor => v !== null);
         this.pageNumber = 1;
         this.loading = false;
       },
