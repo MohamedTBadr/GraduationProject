@@ -36,7 +36,8 @@ Return ONLY a JSON object with this structure:
 
             try
             {
-                var allocation = JsonSerializer.Deserialize<BudgetAllocationResponse>(result.Value, JsonOptions);
+                var raw = StripMarkdownFences(result.Value);
+                var allocation = JsonSerializer.Deserialize<BudgetAllocationResponse>(raw, JsonOptions);
                 return Result<BudgetAllocationResponse>.Success(allocation!);
             }
             catch (Exception ex)
@@ -81,7 +82,8 @@ Return ONLY a JSON object with this structure:
 
             try
             {
-                var timeline = JsonSerializer.Deserialize<EventTimelineResponse>(result.Value, JsonOptions);
+                var raw = StripMarkdownFences(result.Value);
+                var timeline = JsonSerializer.Deserialize<EventTimelineResponse>(raw, JsonOptions);
                 return Result<EventTimelineResponse>.Success(timeline!);
             }
             catch (Exception ex)
@@ -207,13 +209,7 @@ Return ONLY a JSON object with this structure:
 
             try
             {
-                // Strip markdown fences in case Llama wraps output in ```json ... ```
-                var raw = result.Value
-                    .Trim()
-                    .Replace("```json", "")
-                    .Replace("```", "")
-                    .Trim();
-
+                var raw = StripMarkdownFences(result.Value);
                 var responseObj = JsonSerializer.Deserialize<RecommendationResponse>(raw, JsonOptions);
                 return Result<RecommendationResponse>.Success(responseObj!);
             }
@@ -222,6 +218,17 @@ Return ONLY a JSON object with this structure:
                 return Result<RecommendationResponse>.Unexpected(5002, $"Failed to parse AI response: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Strips markdown code fences (```json ... ``` or ``` ... ```) that the model
+        /// may emit even when instructed to return plain JSON.
+        /// </summary>
+        private static string StripMarkdownFences(string text)
+            => text
+                .Trim()
+                .Replace("```json", "", StringComparison.OrdinalIgnoreCase)
+                .Replace("```", "")
+                .Trim();
 
         private static string SanitizeForPrompt(string? value)
         {
