@@ -5,7 +5,6 @@ using Infrastructure;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
-using QuestPDF.Infrastructure;
 using Serilog;
 using Web.Api;
 using Web.Api.Middlewares;
