@@ -19,6 +19,17 @@ namespace Application.Services
         public async Task<Result<PaginatedResponse<ServiceDTO>>> GetAllAsync(
            PaginatedRequest request, bool isAdmin, bool isVendor, Guid? userId, CancellationToken ct)
         {
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                var serviceIds = await _searchService.SearchServicesAsync(request.SearchTerm ?? "");
+                var idList = serviceIds.ToList();
+
+                var servicesFromDb = await _ServiceRepository.GetByIdsAsync(idList, ct);
+                var mapped = _mapper.Map<IEnumerable<ServiceDTO>>(servicesFromDb);
+
+                return Result<PaginatedResponse<ServiceDTO>>.Success(
+                    new PaginatedResponse<ServiceDTO>(mapped, mapped.Count(), request.PageIndex, request.PageSize));
+            }
 
             Expression<Func<Service, bool>> visibilityFilter = ShowVisibility(request, isAdmin, isVendor, userId);
 
