@@ -14,7 +14,7 @@ namespace Web.Api.Controllers
     [ApiController]
     [Route("api/reports")]
     [Authorize]
-    public sealed class ReportsController : ControllerBase
+    public sealed class ReportsController : APIController
     {
         private readonly IReportingService _reporting;
         private readonly IPdfReportService _pdf;
@@ -80,16 +80,13 @@ namespace Web.Api.Controllers
 
         private (Guid? vendorId, ReportScope? scope) ResolveContext()
         {
-            if (User.IsInRole("Admin"))
+            if (IsAdmin())
                 return (null, ReportScope.Admin);
 
-            if (User.IsInRole("Vendor"))
-            {
-                var id = Guid.TryParse(
-                    User.FindFirstValue(ClaimTypes.NameIdentifier), out var g) ? g : (Guid?)null;
-
-                return id.HasValue ? (id, ReportScope.Vendor) : (null, null);
-            }
+            if (IsVendor())
+                return TryGetUserId() is Guid vendorId
+                    ? (vendorId, ReportScope.Vendor)
+                    : (null, null);
 
             return (null, null);
         }
