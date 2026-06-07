@@ -16,7 +16,6 @@ namespace Web
     {
         public static async Task Main(string[] args)
         {
-            QuestPDF.Settings.License = LicenseType.Community;
 
             var builder = WebApplication.CreateBuilder(args);
 

@@ -1,0 +1,18 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\API",
+    "\\API\\src",
+    "\\API\\src\\Application",
+    "\\API\\src\\Application\\Services",
+    "\\API\\src\\Application\\Services\\Helpers",
+    "\\API\\src\\Web.Api",
+    "\\API\\src\\Web.Api\\Controllers",
+    "\\Front-End\\src",
+    "\\Front-End\\src\\app",
+    "\\Front-End\\src\\app\\core",
+    "\\Front-End\\src\\app\\core\\services"
+  ],
+  "SelectedNode": "\\API\\src\\Application\\Services\\ServiceService.cs",
+  "PreviewInSolutionExplorer": false
+}
