@@ -1,75 +1,115 @@
-# Comprehensive Frontend Integration Plan
+# Implementation Plan - EpicHub Graduation Project Demo Recording Suite
 
-This document outlines the strategy for completing the frontend integration with the .NET backend for the Graduation Project. It has been updated to reflect the current state of progress.
+This plan details the design and deployment of a suite of automated browser-recording scripts using Playwright. These scripts will run against the deployed staging website to capture video recordings of the primary user, vendor, and administrator workflows.
 
 ## User Review Required
 
-> [!WARNING]
-> Please review the "Open Questions" section carefully. We need clarification on the Event Creation flow (how users book services) because the `CreateEvent` interface and endpoint seem missing from the frontend API definitions.
-
-## Progress Summary So Far
-
-Based on a thorough system audit:
-
-### ✅ Completed & Integrated
-- **Shared Infrastructure**: Global Error Handler and HTTP Interceptors (Auth/Error) are active. API Interfaces are largely defined.
-- **Admin Portal**: 
-  - Categories & Event Types management is fully functional and responsive, integrated with real endpoints.
-  - User Management (`users.component`) is fully functional with paginated list and Suspend/Unsuspend flow.
-  - Vendor Management (`vendors.component`) is fully functional with Approve/Reject/Suspend flows.
-- **Vendor Portal**:
-  - Profile updates and loading.
-  - Services (Products) CRUD operations and Active/Paused logic.
-  - Bookings List logic (approving/rejecting requests via `EventItem` status).
-  - Dashboard Statistics (aggregated via `getByUser`).
-- **User Portal**:
-  - `my-bookings` is integrated with `EventService.getByUser`, displaying dynamic data and Post-Service Completion actions (Done, Completed, Review).
-- **Public Portal**: 
-  - Home page dynamically loads and filters top-rated active vendors.
-  - Search/Explore pages are implemented with taxonomy filtering.
-- **Post-Service Completion Flow**:
-  - Complete backend & frontend lifecycle: `Done` -> `Completed` -> `Review` rating submissions.
-
-### ⏳ Pending Implementation
-- **User Portal**:
-  - `dashboard`, `my-events`, `favorites` need finalized connection to `EventService`.
-- **Public Portal**:
-  - `Add Event` flow: The complete checkout/booking flow where a user selects vendor services and creates an event. (User must login first)
-
----
-
-## Proposed Execution Plan
-
-I will tackle the remaining work in the following prioritized phases:
-
-### Phase 1: Complete User Portal (Dashboard & Events)
-#### [MODIFY] `features/user/dashboard/dashboard.component.ts`
-- Create aggregate statistics (Total Spent, Total Events, Pending Requests).
-#### [MODIFY] `features/user/my-events/my-events.component.ts`
-- Connect event checklist and details to `EventService`.
-
-### Phase 2: Public Portal & Event Creation (The Booking Engine)
-#### [MODIFY] `features/user/add-event/add-event.component.ts` (or Public Booking Flow)
-- *Pending clarification from Open Questions.* Will assemble the cart of selected Vendor Services and submit the master Event payload to the backend.
-
-### Phase 3: Advanced Integrations
-- **AI Integration**: Implement `GeminiService` for AI-generated event suggestions.
-- **Payments**: Integrate Paymob for checkout processing.
-- **Real-Time**: Connect WebSockets for chat and Server-Sent Events (SSE) for Notifications.
-
----
-
-## Open Questions / Backend Status
-
 > [!IMPORTANT]
-> 1. **File Uploads [RESOLVED]**: The backend has a dedicated `POST /api/files/upload` endpoint (in `FileController.cs`) that uploads directly to AWS S3 and returns `{ key, url }`. 
-> 2. **Post-Service Backend APIs [RESOLVED]**: The backend now supports transitioning EventItems to `Done` and `Completed`, along with Review submission and User Suspension endpoints.
-> 3. **Event Creation Flow [ACTION REQUIRED]**: The complete checkout/booking flow where a user selects vendor services and creates an event still needs clarification. How should the frontend submit multiple services to a single Event in the current API schema?
+> - **Execution Context:** The scripts will run headlessly on your machine and record high-quality $1280 \times 900$ (or custom device sizes) videos of the browser.
+> - **Outputs:** Captured videos will be output to `verify-shots/videos/` as `.webm` files.
+> - **Flexible Base URL (Staging / Local Fallback):** All scripts will define their target URL using a configurable `BASE` variable:
+>   `const BASE = process.env.BASE_URL || 'https://epichubweb-g9h9a3a8bxafekdm.francecentral-01.azurewebsites.net';`
+>   This allows the suite to target the live Azure staging site by default. If the live site is down or unresponsive, we can start your local .NET API and Angular servers, and run the recording suite with `BASE_URL=http://localhost:4200` to capture everything locally.
 
-## Verification Plan
+---
 
-### Automated/Manual Testing
-- Log in as Admin to verify vendor approval flow correctly changes vendor status without page refreshes.
-- Log in as Vendor to verify new active status appearance.
-- Log in as User to verify that `my-bookings` accurately reflects backend event items.
-- Run UI cross-browser consistency checks on all newly built tabular layouts.
+## Proposed Demo Video Flows
+
+We will divide the demo into 10 separate scripts, one for each core flow. This keeps the videos focused, high-performing, and easy to watch.
+
+### 1. User: Explore, Find Vendor & Request Booking
+- **Script:** `record-01-explore-and-book.js`
+- **Actions:** 
+  1. Open homepage, browse features and slider sections.
+  2. Navigate to Explore Services/Vendors page.
+  3. Explore a few vendor cards, check details, reviews, ratings, and packages.
+  4. Perform login as `customer@example.com`.
+  5. Go to My Events, create a new Event.
+  6. Go back to the vendor service and send a booking request.
+
+### 2. User: AI Event fast-tracking & Smart Budgeting
+- **Script:** `record-02-ai-generation.js`
+- **Actions:**
+  1. Login as `customer@example.com`.
+  2. Open Event Studio and navigate to Package Planning / AI Event Generator.
+  3. Input event preferences (e.g., Wedding in Cairo, budget: 100,000 EGP).
+  4. Generate and watch the AI recommendations populate live.
+  5. Switch to the Smart Budget tab, customize values, and view the breakdown.
+  6. Switch to the Timeline tab to inspect the generated checklist.
+
+### 3. User: Booking Payment Flow
+- **Script:** `record-03-user-payment.js`
+- **Actions:**
+  1. Login as `customer@example.com`.
+  2. Go to My Bookings and find a booking with status `Approved`.
+  3. Click "Pay Now".
+  4. Tour the checkout page (billing detail summary, total amount).
+  5. Complete checkout (simulated redirect/success state).
+
+### 4. Vendor: Profile Setup & Service Creation
+- **Script:** `record-04-vendor-profile-setup.js`
+- **Actions:**
+  1. Login as a new/test vendor user (e.g., `vendor@example.com`).
+  2. Go to Vendor Profile, update address details, business description, and service areas.
+  3. Go to Services tab, click "Add Service", fill in service type, price, setup duration, and save.
+
+### 5. Vendor: Dashboard Tour & Booking Approval
+- **Script:** `record-05-vendor-bookings.js`
+- **Actions:**
+  1. Login as `catering.abouelsid@placeholder.com` (seeded vendor).
+  2. Tour the Vendor Dashboard (inspect revenue chart, booking status counters).
+  3. Check customer Reviews and rating summary.
+  4. Go to Booking Requests page.
+  5. Click on a pending booking request and click "Accept Booking".
+
+### 6. Vendor: Messaging, Real-time Chat & Earnings
+- **Script:** `record-06-vendor-chat-earnings.js`
+- **Actions:**
+  1. Login as `catering.abouelsid@placeholder.com`.
+  2. Open the Chat sidebar / Messenger page.
+  3. Select an active customer and send a reply message.
+  4. Navigate to Earnings/Wallet tab, inspect transaction history and pending payouts.
+
+### 7. Admin: Operations & Vendor Management
+- **Script:** `record-07-admin-dashboard.js`
+- **Actions:**
+  1. Login as `admin@example.com`.
+  2. Go to Admin Dashboard, view global stats (active users, total revenue, pending vendors).
+  3. Navigate to Vendor Approvals list, view pending applications, approve/suspend a vendor.
+  4. View Activity Log / System Audit Trail.
+  5. Open Payout Requests management, check vendor payout statuses.
+
+### 8. Admin: Taxonomy Page Tour (Very Important)
+- **Script:** `record-08-admin-taxonomy.js`
+- **Actions:**
+  1. Login as `admin@example.com`.
+  2. Navigate to Admin Taxonomy management page.
+  3. Tour the categories, subcategories, and service attributes structure.
+  4. Edit or add a mock taxonomy item to show how taxonomy defines the system's dynamic fields.
+
+### 9. Mobile Responsiveness Showcase
+- **Script:** `record-09-mobile-responsiveness.js`
+- **Actions:**
+  1. Set viewport to a mobile device (e.g., iPhone 14 Pro viewport: $393 \times 852$, with touch events enabled).
+  2. Open the homepage, navigate through the burger menu.
+  3. Browse vendors and services on mobile, demonstrating the responsive grid.
+  4. Open the Event Studio on mobile and verify the mobile layout.
+
+### 10. Real-time Split-Screen Chat & Notifications Demo
+- **Script:** `record-10-split-chat-notifications.js`
+- **Actions:**
+  1. Launch two separate browser contexts simultaneously:
+     - **Context A (Left Half):** Viewport $640 \times 900$, login as `customer@example.com`.
+     - **Context B (Right Half):** Viewport $640 \times 900$, login as `catering.abouelsid@placeholder.com`.
+  2. Lay the browser contexts next to each other (or run them and switch focus in the recording to show the live update).
+  3. Customer sends a booking request -> Vendor receives a real-time notification badge increment on their screen instantly.
+  4. Customer opens chat and sends a message -> Vendor's messenger window receives the message in real-time.
+  5. Vendor replies -> Customer's chat window shows the message instantly.
+
+---
+
+## Verification & Execution Plan
+
+- We will write these scripts in `C:\Users\KAITECH\Desktop\Amira Gabr\a\epichub\GraduationProject\verify-shots\scripts`.
+- We will install Playwright in the project root if it is not already installed.
+- We will provide a master script `run-recording-suite.js` to execute all scripts in sequence and save the resulting video recordings.
