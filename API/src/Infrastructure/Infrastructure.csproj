@@ -8,6 +8,8 @@
 
   <ItemGroup>
 
+    <PackageReference Include="itext" Version="8.0.5" />
+
     <PackageReference Include="Lucene.Net" Version="4.8.0-beta00016" />
 
     <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00016" />
@@ -38,8 +40,6 @@
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
 
     <PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
-
-    <PackageReference Include="QuestPDF" Version="2024.3.5" />
 
     <PackageReference Include="StackExchange.Redis" Version="2.9.17" />
   </ItemGroup>
