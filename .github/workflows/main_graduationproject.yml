@@ -45,6 +45,7 @@ jobs:
         with:
           name: dotnet-app
           path: ./publish
+          retention-days: 1
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -109,6 +110,7 @@ jobs:
         with:
           name: frontend-app
           path: ./Front-End/dist/eventora/browser
+          retention-days: 1
 
   deploy:
     runs-on: windows-latest
