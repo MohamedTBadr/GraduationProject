@@ -39,14 +39,6 @@ jobs:
       - name: Publish Gateway
         run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore -o ./publish/gateway
 
-      # ── Upload .NET artifacts ─────────────────────────────────
-      - name: Upload dotnet artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dotnet-app
-          path: ./publish
-          retention-days: 1
-
   build-frontend:
     runs-on: ubuntu-latest
     permissions:
@@ -111,10 +103,25 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download dotnet artifact
-        uses: actions/download-artifact@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
         with:
-          name: dotnet-app
+          dotnet-version: '9.0.x'
+
+      - name: Restore Web.API
+        run: dotnet restore ./API/src/Web.API/Web.API.csproj
+
+      - name: Publish Web.API
+        run: dotnet publish ./API/src/Web.API/Web.API.csproj --configuration Release --no-restore -o ./webapi
+
+      - name: Restore Gateway
+        run: dotnet restore ./API/src/Gateway.API/Gateway.API.csproj
+
+      - name: Publish Gateway
+        run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore -o ./gateway
 
       - name: Azure Login
         uses: azure/login@v2
