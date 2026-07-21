@@ -44,8 +44,7 @@ namespace Application
             Services.AddScoped<ISupportTicketService, SupportTicketService>();
             Services.AddScoped<IVoucherService, VoucherService>();
             Services.AddScoped<IPlanningAIService, PlanningAIService>();
-            Services.AddScoped<IPaymobService, PaymobService>();
-
+            Services.AddHttpClient<IPaymobService, PaymobService>();
             Services.AddScoped<Application.Contracts.IEmailService, HangfireEmailSender>();
             Services.AddScoped<IPackageService, PackageService>();
             Services.AddSingleton(sp =>
@@ -98,7 +97,7 @@ namespace Application
             Services.Configure<PaymobOptions>(
     configuration.GetSection("Paymob"));
 
-            Services.AddHttpClient<IPaymobService>();
+            //Services.AddHttpClient<IPaymobService>();
 
 
 
