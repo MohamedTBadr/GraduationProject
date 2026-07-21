@@ -104,14 +104,6 @@ jobs:
           </configuration>
           EOF
 
-      # ── Upload frontend artifact ──────────────────────────────
-      - name: Upload frontend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-app
-          path: ./Front-End/dist/eventora/browser
-          retention-days: 1
-
   deploy:
     runs-on: windows-latest
     needs: build
@@ -152,11 +144,56 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download frontend artifact
-        uses: actions/download-artifact@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          name: frontend-app
-          path: ./frontend
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./Front-End
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+        working-directory: ./Front-End
+
+      - name: Add web.config for Angular routing
+        run: |
+          cat > ./Front-End/dist/eventora/browser/web.config << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <rewrite>
+                <rules>
+                  <rule name="Angular Routes" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="/index.html" />
+                  </rule>
+                </rules>
+              </rewrite>
+
+              <staticContent>
+                <clientCache cacheControlMode="DisableCache" />
+              </staticContent>
+
+              <httpProtocol>
+                <customHeaders>
+                  <add name="Cache-Control" value="no-cache, no-store, must-revalidate" />
+                  <add name="Pragma" value="no-cache" />
+                  <add name="Expires" value="0" />
+                </customHeaders>
+              </httpProtocol>
+
+            </system.webServer>
+          </configuration>
+          EOF
 
       - name: Azure Login
         uses: azure/login@v2
@@ -169,4 +206,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'EpicHubWeb'
-          package: ./frontend
+          package: ./Front-End/dist/eventora/browser
