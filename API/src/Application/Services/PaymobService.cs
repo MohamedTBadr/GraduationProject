@@ -28,7 +28,7 @@ public class PaymobService(
         var paymobOrderId = await CreateOrderAsync(authToken, internalOrderId, amount, ct);
         var paymentKey = await GeneratePaymentKeyAsync(authToken, paymobOrderId, amount, billing, ct);
 
-        return $"{_options.BaseUrl}/acceptance/iframes/{_options.IframeId}?payment_token={paymentKey}";
+        return $"{_options.BaseUrl}acceptance/iframes/{_options.IframeId}?payment_token={paymentKey}";
     }
 
     public async Task HandleWebhookAsync(PaymobWebhookPayload payload, CancellationToken ct)
