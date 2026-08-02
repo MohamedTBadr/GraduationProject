@@ -44,7 +44,21 @@ namespace Application
             Services.AddScoped<ISupportTicketService, SupportTicketService>();
             Services.AddScoped<IVoucherService, VoucherService>();
             Services.AddScoped<IPlanningAIService, PlanningAIService>();
-            Services.AddHttpClient<IPaymobService, PaymobService>();
+
+            // ── Paymob: named HttpClient + normal service registration ──────────
+            Services.AddHttpClient("PaymobClient", (sp, client) =>
+            {
+                var paymobOptions = sp.GetRequiredService<IOptions<PaymobOptions>>().Value;
+
+                if (!string.IsNullOrWhiteSpace(paymobOptions.BaseUrl))
+                {
+                    client.BaseAddress = new Uri(paymobOptions.BaseUrl);
+                }
+            });
+
+            Services.AddScoped<IPaymobService, PaymobService>();
+            // ──────────────────────────────────────────────────────────────────
+
             Services.AddScoped<Application.Contracts.IEmailService, HangfireEmailSender>();
             Services.AddScoped<IPackageService, PackageService>();
             Services.AddSingleton(sp =>
@@ -63,24 +77,17 @@ namespace Application
                 return openAIClient.GetChatClient("llama-3.3-70b-versatile");
             });
 
-            //Services.AddScoped<IUs
-            //Services.AddScoped<Ime>
             Services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<AutoMapperService>();
-
             });
 
-
             Services.Configure<JWTOptions>(
-  configuration.GetSection("JWTOptions"));
+                configuration.GetSection("JWTOptions"));
             ConfigureJWT(Services, configuration);
 
-
-
-
             Services.Configure<AwsSettings>(
-    configuration.GetSection("AWS"));
+                configuration.GetSection("AWS"));
 
             Services.AddSingleton<IAmazonS3>(sp =>
             {
@@ -93,13 +100,8 @@ namespace Application
                 );
             });
 
-
             Services.Configure<PaymobOptions>(
-    configuration.GetSection("Paymob"));
-
-            //Services.AddHttpClient<IPaymobService>();
-
-
+                configuration.GetSection("Paymob"));
 
             return Services;
         }
@@ -136,7 +138,6 @@ namespace Application
                         var accessToken = context.Request.Query["access_token"];
                         var path = context.HttpContext.Request.Path.Value ?? "";
 
-                        // safer + case-insensitive + broader match
                         if (!string.IsNullOrEmpty(accessToken) &&
                             (path.Contains("chathub", StringComparison.OrdinalIgnoreCase) ||
                              path.Contains("notifications/stream", StringComparison.OrdinalIgnoreCase)))
@@ -161,6 +162,5 @@ namespace Application
                 };
             });
         }
-
     }
 }
