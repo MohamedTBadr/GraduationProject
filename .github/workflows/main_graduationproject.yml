@@ -39,13 +39,6 @@ jobs:
       - name: Publish Gateway
         run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore -o ./publish/gateway
 
-      # ── Upload .NET artifacts ─────────────────────────────────
-      - name: Upload dotnet artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dotnet-app
-          path: ./publish
-
   build-frontend:
     runs-on: ubuntu-latest
     permissions:
@@ -103,13 +96,6 @@ jobs:
           </configuration>
           EOF
 
-      # ── Upload frontend artifact ──────────────────────────────
-      - name: Upload frontend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-app
-          path: ./Front-End/dist/eventora/browser
-
   deploy:
     runs-on: windows-latest
     needs: build
@@ -117,10 +103,25 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download dotnet artifact
-        uses: actions/download-artifact@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
         with:
-          name: dotnet-app
+          dotnet-version: '9.0.x'
+
+      - name: Restore Web.API
+        run: dotnet restore ./API/src/Web.API/Web.API.csproj
+
+      - name: Publish Web.API
+        run: dotnet publish ./API/src/Web.API/Web.API.csproj --configuration Release --no-restore -o ./webapi
+
+      - name: Restore Gateway
+        run: dotnet restore ./API/src/Gateway.API/Gateway.API.csproj
+
+      - name: Publish Gateway
+        run: dotnet publish ./API/src/Gateway.API/Gateway.API.csproj --configuration Release --no-restore -o ./gateway
 
       - name: Azure Login
         uses: azure/login@v2
@@ -150,11 +151,56 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download frontend artifact
-        uses: actions/download-artifact@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          name: frontend-app
-          path: ./frontend
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./Front-End
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+        working-directory: ./Front-End
+
+      - name: Add web.config for Angular routing
+        run: |
+          cat > ./Front-End/dist/eventora/browser/web.config << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <rewrite>
+                <rules>
+                  <rule name="Angular Routes" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="/index.html" />
+                  </rule>
+                </rules>
+              </rewrite>
+
+              <staticContent>
+                <clientCache cacheControlMode="DisableCache" />
+              </staticContent>
+
+              <httpProtocol>
+                <customHeaders>
+                  <add name="Cache-Control" value="no-cache, no-store, must-revalidate" />
+                  <add name="Pragma" value="no-cache" />
+                  <add name="Expires" value="0" />
+                </customHeaders>
+              </httpProtocol>
+
+            </system.webServer>
+          </configuration>
+          EOF
 
       - name: Azure Login
         uses: azure/login@v2
@@ -167,4 +213,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'EpicHubWeb'
-          package: ./frontend
+          package: ./Front-End/dist/eventora/browser
